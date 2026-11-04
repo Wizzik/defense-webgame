@@ -1,0 +1,110 @@
+[
+  {
+    "id": "A001",
+    "base": "AEfk",
+    "levels": 3,
+    "name": "Test Nova",
+    "per_level": [
+      {
+        "level": 1,
+        "cooldown": 10,
+        "area": 200,
+        "DataA": { "field": "Tst1", "name": "Test Damage", "value": 100 },
+        "tip": "Export text: level 1"
+      },
+      {
+        "level": 2,
+        "area": 250,
+        "DataA": { "field": "Tst1", "name": "Test Damage", "value": null },
+        "tip": "Export text: level 2"
+      },
+      {
+        "level": 3,
+        "cooldown": 8,
+        "area": 300,
+        "DataA": { "field": "Tst1", "name": "Test Damage", "value": 300 },
+        "ubertip": "Export text: level 3"
+      }
+    ],
+    "learn_tip": "Export text: learn",
+    "jass_functions": ["Trig_Test_Nova_Actions"],
+    "implementation": "engine+script"
+  },
+  {
+    "id": "A002",
+    "base": "AEar",
+    "levels": 3,
+    "name": "Test Aura",
+    "per_level": [
+      {
+        "level": 1,
+        "area": 300,
+        "DataA": { "field": "Tst2", "name": "Test Bonus", "value": 0.1 },
+        "DataB": { "field": "Tst3", "name": "Test Buff", "value": "Btst" }
+      },
+      {
+        "level": 2,
+        "area": 300,
+        "DataA": { "field": "Tst2", "name": "Test Bonus", "value": 0.2 },
+        "DataB": { "field": "Tst3", "name": "Test Buff", "value": "Btst" }
+      },
+      {
+        "level": 3,
+        "area": 300,
+        "DataA": { "field": "Tst2", "name": "Test Bonus", "value": 0.3 },
+        "DataB": { "field": "Tst3", "name": "Test Buff", "value": "Btst" }
+      }
+    ],
+    "jass_functions": ["AI_Test_Setup"],
+    "implementation": "engine"
+  },
+  {
+    "id": "A003",
+    "base": "AUdc",
+    "levels": 3,
+    "name": "Test Bolt",
+    "per_level": [
+      {
+        "level": 1,
+        "cooldown": 6,
+        "range": 600,
+        "DataA": { "field": "Tst4", "name": "Test Damage", "value": 50 }
+      },
+      {
+        "level": 2,
+        "cooldown": 6,
+        "range": 700,
+        "DataA": { "field": "Tst4", "name": "Test Damage", "value": 75 }
+      },
+      {
+        "level": 3,
+        "cooldown": 6,
+        "range": 800,
+        "DataA": { "field": "Tst4", "name": "Test Damage", "value": 100 }
+      }
+    ],
+    "jass_functions": ["Trig_Test_Bolt_Actions"],
+    "implementation": "script"
+  },
+  {
+    "id": "A004",
+    "base": "AOmi",
+    "levels": 2,
+    "name": "Test Summon",
+    "per_level": [
+      {
+        "level": 1,
+        "cooldown": 60,
+        "duration": 20,
+        "DataA": { "field": "Tst5", "name": "Test Count", "value": 2 }
+      },
+      {
+        "level": 2,
+        "cooldown": 45,
+        "duration": 25,
+        "DataA": { "field": "Tst5", "name": "Test Count", "value": 3 }
+      }
+    ],
+    "jass_functions": []
+  }
+]

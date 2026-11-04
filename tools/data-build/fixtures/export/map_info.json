@@ -1,0 +1,9 @@
+{
+  "w3i": { "name": "Test Map", "author": "Nobody", "format_version": 31 },
+  "misc_constants": {
+    "MaxHeroLevel": "100",
+    "StrHitPointBonus": "20.0",
+    "AgiAttackSpeedBonus": "0.01",
+    "DefenseArmor": "0.05"
+  }
+}

@@ -1,0 +1,29 @@
+[
+  {
+    "id": "H001",
+    "base": "Hfix",
+    "name": "Test Hero",
+    "primary": "AGI",
+    "str": 18,
+    "agi": 22,
+    "int": 15,
+    "str_per_level": 1.5,
+    "agi_per_level": 2.5,
+    "int_per_level": 1.25,
+    "hp": 500,
+    "move_speed": 310,
+    "attack_type": "hero",
+    "weapon_type": "mbounce",
+    "cooldown": 1.4,
+    "damage_min": 3,
+    "damage_max": 9,
+    "range": 500,
+    "ubertip": "Export text: hero description",
+    "hero_abilities": [
+      { "id": "A001", "implementation": "engine+script" },
+      { "id": "A002", "implementation": "engine" },
+      { "id": "A003", "implementation": "script" },
+      { "id": "A004" }
+    ]
+  }
+]

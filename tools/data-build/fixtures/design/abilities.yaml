@@ -1,0 +1,38 @@
+# Synthetic design entries for the data-build tests.
+- id: pulse
+  source: A001
+  name: { en: Pulse, cs: Puls }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: DataA
+    radius: area
+  review:
+    notes: Fixture note.
+
+- id: focus
+  source: A002
+  name: { en: Focus, cs: Soustředění }
+  kind: aura
+  targeting: self
+  params:
+    damageBonus: DataA
+
+- id: spark
+  source: A003
+  name: { en: Spark, cs: Jiskra }
+  kind: projectile
+  targeting: nearest
+  params:
+    damage: DataA
+    range: range
+    slow: { design: [0.1, 0.2, 0.3] }
+
+- id: echo
+  source: A004
+  name: { en: Echo, cs: Ozvěna }
+  kind: summon
+  targeting: self
+  params:
+    count: DataA
+    duration: duration

@@ -1,0 +1,687 @@
+[
+  {
+    "id": "rock-rupture",
+    "source": "A0A7",
+    "name": {
+      "en": "Rock Rupture",
+      "cs": "Skalní zlom"
+    },
+    "kind": "line",
+    "targeting": "move_direction",
+    "levels": 5,
+    "cooldown": [
+      12,
+      12,
+      12,
+      12,
+      12
+    ],
+    "params": {
+      "damage": [
+        500,
+        1000,
+        2000,
+        3500,
+        5000
+      ],
+      "length": [
+        1500,
+        1500,
+        1500,
+        1500,
+        1500
+      ],
+      "width": [
+        350,
+        400,
+        450,
+        500,
+        550
+      ],
+      "stunSeconds": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "review": {
+      "reason": "engine+script",
+      "jassFunctions": [
+        "AI_Setup",
+        "LB_Init",
+        "Trig_AllStun_Func001Func002C",
+        "Trig_Shock_Rock_Conditions"
+      ]
+    }
+  },
+  {
+    "id": "enhanced-totem",
+    "source": "A0A8",
+    "name": {
+      "en": "Enhanced Totem",
+      "cs": "Posílený totem"
+    },
+    "kind": "on_hit",
+    "targeting": "on_attack",
+    "levels": 5,
+    "cooldown": [
+      7,
+      7,
+      7,
+      7,
+      7
+    ],
+    "params": {
+      "splashRadius": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "splashPercent": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "review": {
+      "reason": "engine+script",
+      "jassFunctions": [
+        "AI_Setup",
+        "Trig_AllStun_Func001Func002C"
+      ],
+      "notes": "splashRadius and splashPercent are 0: no trigger code holds a splash radius or percentage. Trig_AllStun_Func001Func002C belongs to the Trig_AllStun_* trigger (war3map.j v20.75, lines 27704-27739), which answers casts of A0A7, A0AA or A0A8 by O00C with the seismic-echo stun (see seismic-echo). A0A8 is the only ability that applies buff B00U. Trig_Attacked_Entotem_Conditions/Actions (27664-27676) and Trig_DealDamage_Conditions/Actions (27678-27690) remove B00U from the attacker after the attacked unit takes damage from it, so the buff lasts for one hit and has no radius. The size of that hit is object data, not script: DataA damage increase 3, 5, 7, 9, 10. AI_Setup (33277-33279) only stores AI hints."
+    }
+  },
+  {
+    "id": "seismic-echo",
+    "source": "A00M",
+    "name": {
+      "en": "Seismic Echo",
+      "cs": "Seizmická ozvěna"
+    },
+    "kind": "on_hit",
+    "targeting": "on_attack",
+    "levels": 5,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "chance": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "stunSeconds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "bonusDamage": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "review": {
+      "reason": "engine+script",
+      "jassFunctions": [
+        "AI_Setup",
+        "Trig_AllStun_Actions",
+        "Trig_Learn_Allstun_Conditions"
+      ],
+      "notes": "chance, stunSeconds and bonusDamage are 0: no trigger code holds these values. Trig_Learn_Allstun_Conditions/Actions (war3map.j v20.75, lines 27692-27702) enable the Trig_AllStun_* trigger once A00M is learned. Trig_AllStun_Func001Func002C, Trig_AllStun_Func001C and Trig_AllStun_Conditions (27704-27732) let it fire on every cast of A0A7, A0AA or A0A8 by O00C, with no chance roll. Trig_AllStun_Actions (27734-27739) then creates one dummy unit (e012, timed life 1 s) that casts A0A9 at the caster's A00M level. Stun length and damage are A0A9's object data, not script: duration 1, 1.5, 2, 2.5, 3; DataA damage 150, 300, 450, 600, 750; area 350. AI_Setup (32758) only lists A00M as hero slot 2 of O00C."
+    }
+  },
+  {
+    "id": "earthquake",
+    "source": "A0AA",
+    "name": {
+      "en": "Earthquake",
+      "cs": "Zemětřesení"
+    },
+    "kind": "nova",
+    "targeting": "around_self",
+    "levels": 2,
+    "cooldown": [
+      40,
+      20
+    ],
+    "params": {
+      "damage": [
+        4000,
+        8000
+      ],
+      "radius": [
+        500,
+        600
+      ]
+    },
+    "review": {
+      "reason": "engine+script",
+      "jassFunctions": [
+        "AI_Setup",
+        "LB_Init",
+        "Trig_AllStun_Func001Func002C",
+        "Trig_Echo_Slam_Conditions",
+        "Trig_Echo_Slam_Func002A"
+      ]
+    }
+  },
+  {
+    "id": "hunters-focus",
+    "source": "A01A",
+    "name": {
+      "en": "Hunter's Focus",
+      "cs": "Soustředění lovce"
+    },
+    "kind": "aura",
+    "targeting": "self",
+    "levels": 5,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "damageBonus": [
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25
+      ]
+    }
+  },
+  {
+    "id": "falling-stars",
+    "source": "A01B",
+    "name": {
+      "en": "Falling Stars",
+      "cs": "Padající hvězdy"
+    },
+    "kind": "nova",
+    "targeting": "around_self",
+    "levels": 5,
+    "cooldown": [
+      8,
+      8,
+      8,
+      8,
+      8
+    ],
+    "params": {
+      "damage": [
+        400,
+        800,
+        1600,
+        3200,
+        6400
+      ],
+      "radius": [
+        400,
+        450,
+        500,
+        550,
+        600
+      ],
+      "slow": [
+        0.5,
+        0.6,
+        0.72,
+        0.8,
+        0.9
+      ],
+      "slowSeconds": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "review": {
+      "reason": "engine+script",
+      "jassFunctions": [
+        "AI_Setup",
+        "LB_Init"
+      ]
+    }
+  },
+  {
+    "id": "swift-pace",
+    "source": "A007",
+    "name": {
+      "en": "Swift Pace",
+      "cs": "Rychlý krok"
+    },
+    "kind": "aura",
+    "targeting": "self",
+    "levels": 5,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "moveSpeedBonus": [
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3
+      ],
+      "attackSpeedBonus": [
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "shadow-sisters",
+    "source": "A019",
+    "name": {
+      "en": "Shadow Sisters",
+      "cs": "Stínové sestry"
+    },
+    "kind": "summon",
+    "targeting": "self",
+    "levels": 2,
+    "cooldown": [
+      80,
+      60
+    ],
+    "params": {
+      "count": [
+        3,
+        3
+      ],
+      "duration": [
+        60,
+        60
+      ],
+      "damageDealt": [
+        0.6,
+        0.75
+      ],
+      "damageTaken": [
+        1.5,
+        1.5
+      ]
+    }
+  },
+  {
+    "id": "grave-grasp",
+    "source": "A02H",
+    "name": {
+      "en": "Grave Grasp",
+      "cs": "Hrobový stisk"
+    },
+    "kind": "area",
+    "targeting": "densest_cluster",
+    "levels": 5,
+    "cooldown": [
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "params": {
+      "radius": [
+        250,
+        300,
+        350,
+        400,
+        500
+      ],
+      "range": [
+        800,
+        800,
+        800,
+        800,
+        800
+      ],
+      "damage": [
+        400,
+        800,
+        1600,
+        3200,
+        6400
+      ]
+    },
+    "review": {
+      "reason": "engine+script",
+      "jassFunctions": [
+        "AI_Setup",
+        "Trig_Catch_Func004C",
+        "Trig_Catch_Func004Func001C",
+        "Trig_Catch_Func004Func001Func001C",
+        "Trig_Catch_Func004Func001Func001Func001C",
+        "Trig_Catch_Func004Func001Func001Func001Func001C",
+        "Trig_Dead_Catch_Conditions",
+        "Trig_Dead_Catch_Func003C",
+        "Trig_Dead_Catch_Func003Func001C",
+        "Trig_Dead_Catch_Func003Func001Func001C",
+        "Trig_Dead_Catch_Func003Func001Func001Func001C",
+        "Trig_Dead_Catch_Func003Func001Func001Func001Func001C",
+        "Trig_Dead_Catch_Func003Func002A",
+        "Trig_Dead_Catch_Func003Func001Func002A",
+        "Trig_Dead_Catch_Func003Func001Func001Func002A",
+        "Trig_Dead_Catch_Func003Func001Func001Func001Func002A",
+        "Trig_Dead_Catch_Func003Func001Func001Func001Func001Func002A"
+      ],
+      "notes": "damage per level is the UnitDamageTargetBJ amount in the group callbacks that Trig_Dead_Catch_Actions runs for each A02H level (war3map.j v20.75): 400 (Trig_Dead_Catch_Func003Func002A, line 18020), 800 (Trig_Dead_Catch_Func003Func001Func002A, 17992), 1600 (Trig_Dead_Catch_Func003Func001Func001Func002A, 17964), 3200 (Trig_Dead_Catch_Func003Func001Func001Func001Func002A, 17936), 6400 (Trig_Dead_Catch_Func003Func001Func001Func001Func001Func002A, 17908). Each living enemy within the group radius of the target point takes it once. That radius in Trig_Dead_Catch_Actions (lines 18036-18052: 250, 300, 350, 400, 500) equals the object data area used for radius; range is object data. Not mapped: each hit also creates a dummy unit (h00J, timed life 3 s) ordered to attack the caster, and Trig_Catch_Actions heals the caster by 50, 100, 150, 200, 300 per level when it attacks (lines 18113-18125). AI_Setup (33067-33069) only stores AI hints."
+    }
+  },
+  {
+    "id": "skull-ring",
+    "source": "A02K",
+    "name": {
+      "en": "Skull Ring",
+      "cs": "Kruh lebek"
+    },
+    "kind": "nova",
+    "targeting": "around_self",
+    "levels": 5,
+    "cooldown": [
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "params": {
+      "damage": [
+        500,
+        1000,
+        2000,
+        3000,
+        6000
+      ],
+      "radius": [
+        350,
+        400,
+        400,
+        450,
+        550
+      ]
+    },
+    "review": {
+      "reason": "engine+script",
+      "jassFunctions": [
+        "AI_Setup",
+        "LB_Init"
+      ]
+    }
+  },
+  {
+    "id": "soul-bolt",
+    "source": "A036",
+    "name": {
+      "en": "Soul Bolt",
+      "cs": "Střela duše"
+    },
+    "kind": "projectile",
+    "targeting": "nearest_elite_first",
+    "levels": 5,
+    "cooldown": [
+      10,
+      10,
+      10,
+      10,
+      10
+    ],
+    "params": {
+      "damage": [
+        1000,
+        2000,
+        5000,
+        10000,
+        20000
+      ],
+      "range": [
+        99999,
+        99999,
+        99999,
+        99999,
+        99999
+      ]
+    },
+    "review": {
+      "reason": "engine+script",
+      "jassFunctions": [
+        "AI_Setup",
+        "LB_Init"
+      ]
+    }
+  },
+  {
+    "id": "bone-stampede",
+    "source": "A037",
+    "name": {
+      "en": "Bone Stampede",
+      "cs": "Kostěné stádo"
+    },
+    "kind": "ticking_area",
+    "targeting": "densest_cluster",
+    "levels": 2,
+    "cooldown": [
+      60,
+      40
+    ],
+    "params": {
+      "tickDamage": [
+        100,
+        500
+      ],
+      "ticksPerSecond": [
+        20,
+        30
+      ],
+      "radius": [
+        1000,
+        1500
+      ],
+      "duration": [
+        10,
+        10
+      ],
+      "hitRadius": [
+        275,
+        350
+      ]
+    },
+    "review": {
+      "reason": "engine+script",
+      "jassFunctions": [
+        "AI_Setup",
+        "LB_Init"
+      ]
+    }
+  },
+  {
+    "id": "serpent-totem",
+    "source": "A062",
+    "name": {
+      "en": "Serpent Totem",
+      "cs": "Hadí totem"
+    },
+    "kind": "summon",
+    "targeting": "densest_cluster",
+    "levels": 5,
+    "cooldown": [
+      5,
+      7,
+      9,
+      12,
+      15
+    ],
+    "params": {
+      "count": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "duration": [
+        60,
+        60,
+        60,
+        60,
+        60
+      ],
+      "range": [
+        500,
+        500,
+        500,
+        800,
+        800
+      ]
+    }
+  },
+  {
+    "id": "forked-bolt",
+    "source": "A064",
+    "name": {
+      "en": "Forked Bolt",
+      "cs": "Rozvětvený blesk"
+    },
+    "kind": "cone",
+    "targeting": "nearest",
+    "levels": 5,
+    "cooldown": [
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "params": {
+      "damage": [
+        300,
+        600,
+        1200,
+        2500,
+        5000
+      ],
+      "maxTargets": [
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "length": [
+        900,
+        1100,
+        1300,
+        1500,
+        2000
+      ],
+      "endWidth": [
+        300,
+        300,
+        300,
+        300,
+        300
+      ]
+    },
+    "review": {
+      "reason": "engine+script",
+      "jassFunctions": [
+        "AI_Setup",
+        "LB_Init"
+      ]
+    }
+  },
+  {
+    "id": "mending-tide",
+    "source": "A063",
+    "name": {
+      "en": "Mending Tide",
+      "cs": "Hojivý příliv"
+    },
+    "kind": "heal",
+    "targeting": "low_hp_ally",
+    "levels": 5,
+    "cooldown": [
+      15,
+      15,
+      15,
+      15,
+      15
+    ],
+    "params": {
+      "amount": [
+        500,
+        1000,
+        2000,
+        5000,
+        10000
+      ],
+      "maxTargets": [
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "range": [
+        700,
+        700,
+        700,
+        700,
+        700
+      ]
+    }
+  },
+  {
+    "id": "spirit-ward",
+    "source": "A065",
+    "name": {
+      "en": "Spirit Ward",
+      "cs": "Duchovní ochrana"
+    },
+    "kind": "shield",
+    "targeting": "self",
+    "levels": 2,
+    "cooldown": [
+      100,
+      80
+    ],
+    "params": {
+      "duration": [
+        10,
+        20
+      ],
+      "radius": [
+        99999,
+        99999
+      ]
+    }
+  }
+]

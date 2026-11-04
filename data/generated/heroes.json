@@ -1,0 +1,150 @@
+[
+  {
+    "id": "stonehorn",
+    "source": "O00C",
+    "name": {
+      "en": "Stonehorn",
+      "cs": "Kamenorohý"
+    },
+    "primary": "str",
+    "moveSpeed": 300,
+    "attributes": {
+      "str": {
+        "base": 35,
+        "perLevel": 3.2
+      },
+      "agi": {
+        "base": 20,
+        "perLevel": 2.5
+      },
+      "int": {
+        "base": 24,
+        "perLevel": 2.3
+      }
+    },
+    "baseAttack": {
+      "kind": "melee",
+      "range": 128,
+      "cooldown": 1.5,
+      "damageMin": 2,
+      "damageMax": 12
+    },
+    "signatureAbilities": [
+      "rock-rupture",
+      "enhanced-totem",
+      "seismic-echo"
+    ],
+    "ultimate": "earthquake"
+  },
+  {
+    "id": "nightglaive",
+    "source": "O008",
+    "name": {
+      "en": "Nightglaive",
+      "cs": "Noční čepel"
+    },
+    "primary": "agi",
+    "moveSpeed": 320,
+    "attributes": {
+      "str": {
+        "base": 28,
+        "perLevel": 2
+      },
+      "agi": {
+        "base": 33,
+        "perLevel": 3.3
+      },
+      "int": {
+        "base": 26,
+        "perLevel": 2.25
+      }
+    },
+    "baseAttack": {
+      "kind": "bounce",
+      "range": 350,
+      "cooldown": 1.5,
+      "damageMin": 2,
+      "damageMax": 24
+    },
+    "signatureAbilities": [
+      "hunters-focus",
+      "falling-stars",
+      "swift-pace"
+    ],
+    "ultimate": "shadow-sisters"
+  },
+  {
+    "id": "gravecaller",
+    "source": "O00F",
+    "name": {
+      "en": "Gravecaller",
+      "cs": "Hrobník"
+    },
+    "primary": "int",
+    "moveSpeed": 320,
+    "attributes": {
+      "str": {
+        "base": 21,
+        "perLevel": 2
+      },
+      "agi": {
+        "base": 30,
+        "perLevel": 2.5
+      },
+      "int": {
+        "base": 37,
+        "perLevel": 3.5
+      }
+    },
+    "baseAttack": {
+      "kind": "bounce",
+      "range": 600,
+      "cooldown": 1.5,
+      "damageMin": 2,
+      "damageMax": 8
+    },
+    "signatureAbilities": [
+      "grave-grasp",
+      "skull-ring",
+      "soul-bolt"
+    ],
+    "ultimate": "bone-stampede"
+  },
+  {
+    "id": "serpent-shaman",
+    "source": "O00X",
+    "name": {
+      "en": "Serpent Shaman",
+      "cs": "Hadí šaman"
+    },
+    "primary": "int",
+    "moveSpeed": 320,
+    "attributes": {
+      "str": {
+        "base": 25,
+        "perLevel": 2
+      },
+      "agi": {
+        "base": 30,
+        "perLevel": 3.1
+      },
+      "int": {
+        "base": 37,
+        "perLevel": 3
+      }
+    },
+    "baseAttack": {
+      "kind": "melee",
+      "range": 125,
+      "cooldown": 1.5,
+      "damageMin": 2,
+      "damageMax": 8
+    },
+    "signatureAbilities": [
+      "serpent-totem",
+      "forked-bolt",
+      "mending-tide"
+    ],
+    "ultimate": "spirit-ward"
+  }
+]

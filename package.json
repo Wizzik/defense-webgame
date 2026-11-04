@@ -1,0 +1,34 @@
+{
+  "name": "defense-webgame",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc -p sim/tsconfig.json && tsc -p tsconfig.json",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm test && npm run test:py",
+    "build": "vite build",
+    "dev": "vite",
+    "map:extract": "bash tools/map-extract/run.sh",
+    "data:build": "tsx tools/data-build/build.ts",
+    "test:py": "python3 -I -m unittest discover -s tools/map-extract/tests -v",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "22.19.1",
+    "@types/three": "0.187.0",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "vitest": "5.1.0",
+    "yaml": "2.9.1"
+  },
+  "dependencies": {
+    "three": "0.187.0",
+    "zod": "4.6.7"
+  }
+}

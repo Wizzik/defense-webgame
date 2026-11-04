@@ -1,0 +1,7 @@
+# Synthetic design entries for the data-build tests.
+- id: fixture-hero
+  source: H001
+  mapName: Test Hero
+  name: { en: Fixture Hero, cs: Testovací hrdina }
+  signatureAbilities: [pulse, focus, spark]
+  ultimate: echo

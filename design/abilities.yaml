@@ -1,0 +1,214 @@
+# MVP abilities. The names are working names and may change.
+# source: ability code in the map export (abilities.json). cooldown always comes from the export.
+# Each param names where its per-level numbers come from:
+#   DataA ... DataI                      object data field of the ability
+#   cooldown | area | range | duration   per-level field of the ability
+#   { design: [...] }                    one value per level, written here
+# A missing export value takes the value of the level before; on level 1 it gives 0.
+# review is allowed only on script-backed abilities. data-build adds reason and the export's
+#   jass_functions; review.jassFunctions here are appended after them (the functions that design
+#   values come from), and review.notes says where each value comes from.
+
+# Stonehorn
+
+- id: rock-rupture
+  source: A0A7
+  name: { en: Rock Rupture, cs: Skalní zlom }
+  kind: line
+  targeting: move_direction
+  params:
+    damage: DataC
+    length: DataA
+    width: area
+    stunSeconds: duration
+
+- id: enhanced-totem
+  source: A0A8
+  name: { en: Enhanced Totem, cs: Posílený totem }
+  kind: on_hit
+  targeting: on_attack
+  params:
+    splashRadius: { design: [0, 0, 0, 0, 0] }
+    splashPercent: { design: [0, 0, 0, 0, 0] }
+  review:
+    notes: >-
+      splashRadius and splashPercent are 0: no trigger code holds a splash radius or percentage.
+      Trig_AllStun_Func001Func002C belongs to the Trig_AllStun_* trigger (war3map.j v20.75, lines 27704-27739),
+      which answers casts of A0A7, A0AA or A0A8 by O00C with the seismic-echo stun (see seismic-echo).
+      A0A8 is the only ability that applies buff B00U. Trig_Attacked_Entotem_Conditions/Actions (27664-27676)
+      and Trig_DealDamage_Conditions/Actions (27678-27690) remove B00U from the attacker after the attacked unit
+      takes damage from it, so the buff lasts for one hit and has no radius.
+      The size of that hit is object data, not script: DataA damage increase 3, 5, 7, 9, 10.
+      AI_Setup (33277-33279) only stores AI hints.
+
+- id: seismic-echo
+  source: A00M
+  name: { en: Seismic Echo, cs: Seizmická ozvěna }
+  kind: on_hit
+  targeting: on_attack
+  params:
+    chance: { design: [0, 0, 0, 0, 0] }
+    stunSeconds: { design: [0, 0, 0, 0, 0] }
+    bonusDamage: { design: [0, 0, 0, 0, 0] }
+  review:
+    notes: >-
+      chance, stunSeconds and bonusDamage are 0: no trigger code holds these values.
+      Trig_Learn_Allstun_Conditions/Actions (war3map.j v20.75, lines 27692-27702) enable the Trig_AllStun_* trigger
+      once A00M is learned. Trig_AllStun_Func001Func002C, Trig_AllStun_Func001C and Trig_AllStun_Conditions
+      (27704-27732) let it fire on every cast of A0A7, A0AA or A0A8 by O00C, with no chance roll.
+      Trig_AllStun_Actions (27734-27739) then creates one dummy unit (e012, timed life 1 s) that casts A0A9
+      at the caster's A00M level. Stun length and damage are A0A9's object data, not script:
+      duration 1, 1.5, 2, 2.5, 3; DataA damage 150, 300, 450, 600, 750; area 350.
+      AI_Setup (32758) only lists A00M as hero slot 2 of O00C.
+
+- id: earthquake
+  source: A0AA
+  name: { en: Earthquake, cs: Zemětřesení }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: DataA
+    radius: area
+
+# Nightglaive
+
+- id: hunters-focus
+  source: A01A
+  name: { en: Hunter's Focus, cs: Soustředění lovce }
+  kind: aura
+  targeting: self
+  params:
+    damageBonus: DataA
+
+- id: falling-stars
+  source: A01B
+  name: { en: Falling Stars, cs: Padající hvězdy }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: DataA
+    radius: area
+    slow: DataC
+    slowSeconds: duration
+
+- id: swift-pace
+  source: A007
+  name: { en: Swift Pace, cs: Rychlý krok }
+  kind: aura
+  targeting: self
+  params:
+    moveSpeedBonus: DataA
+    attackSpeedBonus: DataB
+
+- id: shadow-sisters
+  source: A019
+  name: { en: Shadow Sisters, cs: Stínové sestry }
+  kind: summon
+  targeting: self
+  params:
+    count: DataA
+    duration: duration
+    damageDealt: DataB
+    damageTaken: DataC
+
+# Gravecaller
+
+- id: grave-grasp
+  source: A02H
+  name: { en: Grave Grasp, cs: Hrobový stisk }
+  kind: area
+  targeting: densest_cluster
+  params:
+    radius: area
+    range: range
+    damage: { design: [400, 800, 1600, 3200, 6400] }
+  review:
+    jassFunctions:
+      - Trig_Dead_Catch_Func003Func002A
+      - Trig_Dead_Catch_Func003Func001Func002A
+      - Trig_Dead_Catch_Func003Func001Func001Func002A
+      - Trig_Dead_Catch_Func003Func001Func001Func001Func002A
+      - Trig_Dead_Catch_Func003Func001Func001Func001Func001Func002A
+    notes: >-
+      damage per level is the UnitDamageTargetBJ amount in the group callbacks that Trig_Dead_Catch_Actions runs
+      for each A02H level (war3map.j v20.75): 400 (Trig_Dead_Catch_Func003Func002A, line 18020),
+      800 (Trig_Dead_Catch_Func003Func001Func002A, 17992), 1600 (Trig_Dead_Catch_Func003Func001Func001Func002A, 17964),
+      3200 (Trig_Dead_Catch_Func003Func001Func001Func001Func002A, 17936),
+      6400 (Trig_Dead_Catch_Func003Func001Func001Func001Func001Func002A, 17908).
+      Each living enemy within the group radius of the target point takes it once. That radius in
+      Trig_Dead_Catch_Actions (lines 18036-18052: 250, 300, 350, 400, 500) equals the object data area used for
+      radius; range is object data. Not mapped: each hit also creates a dummy unit (h00J, timed life 3 s) ordered
+      to attack the caster, and Trig_Catch_Actions heals the caster by 50, 100, 150, 200, 300 per level when it
+      attacks (lines 18113-18125). AI_Setup (33067-33069) only stores AI hints.
+
+- id: skull-ring
+  source: A02K
+  name: { en: Skull Ring, cs: Kruh lebek }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: DataA
+    radius: area
+
+- id: soul-bolt
+  source: A036
+  name: { en: Soul Bolt, cs: Střela duše }
+  kind: projectile
+  targeting: nearest_elite_first
+  params:
+    damage: DataA
+    range: range
+
+- id: bone-stampede
+  source: A037
+  name: { en: Bone Stampede, cs: Kostěné stádo }
+  kind: ticking_area
+  targeting: densest_cluster
+  params:
+    tickDamage: DataC
+    ticksPerSecond: DataA
+    radius: area
+    duration: duration
+    hitRadius: DataD
+
+# Serpent Shaman
+
+- id: serpent-totem
+  source: A062
+  name: { en: Serpent Totem, cs: Hadí totem }
+  kind: summon
+  targeting: densest_cluster
+  params:
+    count: DataA
+    duration: duration
+    range: range
+
+- id: forked-bolt
+  source: A064
+  name: { en: Forked Bolt, cs: Rozvětvený blesk }
+  kind: cone
+  targeting: nearest
+  params:
+    damage: DataA
+    maxTargets: DataB
+    length: DataC
+    endWidth: DataD
+
+- id: mending-tide
+  source: A063
+  name: { en: Mending Tide, cs: Hojivý příliv }
+  kind: heal
+  targeting: low_hp_ally
+  params:
+    amount: DataA
+    maxTargets: DataB
+    range: range
+
+- id: spirit-ward
+  source: A065
+  name: { en: Spirit Ward, cs: Duchovní ochrana }
+  kind: shield
+  targeting: self
+  params:
+    duration: duration
+    radius: area
