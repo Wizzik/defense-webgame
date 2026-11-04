@@ -11,6 +11,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, "client/index.html"),
+        spike: resolve(import.meta.dirname, "client/spike/index.html"),
       },
     },
   },

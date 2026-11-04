@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crowd spike</title>
+    <!-- no favicon request, so the console stays free of 404 errors -->
+    <link rel="icon" href="data:," />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #1d2228;
+      }
+      canvas {
+        display: block;
+      }
+      #overlay {
+        position: fixed;
+        top: 8px;
+        right: 8px;
+        padding: 6px 10px;
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.6);
+        color: #e8edf2;
+        font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace;
+        white-space: pre;
+        pointer-events: none;
+      }
+      #overlay.error {
+        max-width: 60ch;
+        color: #ff8a80;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="overlay">…</div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
