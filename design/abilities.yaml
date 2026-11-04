@@ -1,0 +1,196 @@
+# MVP abilities. The names are working names and may change.
+# source: ability code in the map export (abilities.json). cooldown always comes from the export.
+# Each param names where its per-level numbers come from:
+#   DataA ... DataI                      object data field of the ability
+#   cooldown | area | range | duration   per-level field of the ability
+#   { design: [...] }                    one value per level, written here
+# A missing export value takes the value of the level before; on level 1 it gives 0.
+# review.notes is allowed only on script-backed abilities; data-build adds reason and jassFunctions.
+
+# Stonehorn
+
+- id: rock-rupture
+  source: A0A7
+  name: { en: Rock Rupture, cs: Skalní zlom }
+  kind: line
+  targeting: move_direction
+  params:
+    damage: DataC
+    length: DataA
+    width: area
+    stunSeconds: duration
+
+- id: cleaving-blows
+  source: A0A8
+  name: { en: Cleaving Blows, cs: Drtivé údery }
+  kind: on_hit
+  targeting: on_attack
+  params:
+    splashRadius: { design: [0, 0, 0, 0, 0] }
+    splashPercent: { design: [0, 0, 0, 0, 0] }
+  review:
+    notes: >-
+      splashRadius and splashPercent are 0 because no listed function holds a splash value.
+      Trig_AllStun_Func001Func002C only checks whether the cast ability is A0A7, A0AA or A0A8.
+      AI_Setup only stores AI hints for A0A8 in udg_AIHT (slot 1 of hero O00C; an order id, 4 and 700),
+      as it does for every hero ability.
+
+- id: concussion
+  source: A00M
+  name: { en: Concussion, cs: Otřes }
+  kind: on_hit
+  targeting: on_attack
+  params:
+    chance: { design: [0, 0, 0, 0, 0] }
+    stunSeconds: { design: [0, 0, 0, 0, 0] }
+    bonusDamage: { design: [0, 0, 0, 0, 0] }
+  review:
+    notes: >-
+      chance, stunSeconds and bonusDamage are 0 because no listed function holds these values.
+      Trig_Learn_Allstun_Conditions only checks that A00M was learned.
+      Trig_AllStun_Actions creates one dummy unit with a timed life of 1 s and has it cast ability A0A9
+      at the caster's A00M level, so the effect comes from A0A9 and the trigger has no chance, stun or damage number.
+      AI_Setup only lists A00M as slot 2 of hero O00C.
+
+- id: earthquake
+  source: A0AA
+  name: { en: Earthquake, cs: Zemětřesení }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: DataA
+    radius: area
+
+# Nightglaive
+
+- id: hunters-focus
+  source: A01A
+  name: { en: Hunter's Focus, cs: Soustředění lovce }
+  kind: aura
+  targeting: self
+  params:
+    damageBonus: DataA
+
+- id: falling-stars
+  source: A01B
+  name: { en: Falling Stars, cs: Padající hvězdy }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: DataA
+    radius: area
+    slow: DataC
+    slowSeconds: duration
+
+- id: swift-pace
+  source: A007
+  name: { en: Swift Pace, cs: Rychlý krok }
+  kind: aura
+  targeting: self
+  params:
+    moveSpeedBonus: DataA
+    attackSpeedBonus: DataB
+
+- id: shadow-sisters
+  source: A019
+  name: { en: Shadow Sisters, cs: Stínové sestry }
+  kind: summon
+  targeting: self
+  params:
+    count: DataA
+    duration: duration
+    damageDealt: DataB
+    damageTaken: DataC
+
+# Gravecaller
+
+- id: grave-grasp
+  source: A02H
+  name: { en: Grave Grasp, cs: Hrobový stisk }
+  kind: area
+  targeting: densest_cluster
+  params:
+    radius: area
+    range: range
+    damage: { design: [0, 0, 0, 0, 0] }
+  review:
+    notes: >-
+      damage is 0 because no listed function holds a damage value (the object data field is a placeholder 1).
+      Trig_Dead_Catch_Conditions only checks that the cast ability is A02H.
+      Trig_Dead_Catch_Func003C and its Func001...C variants, and Trig_Catch_Func004C and its Func001...C variants,
+      only check the A02H level (1 to 5).
+      AI_Setup only stores AI hints for A02H in udg_AIHT (slot 0 of hero O00F; an order id, 9 and 800).
+      The per-level damage is dealt in group callbacks of the same trigger (Trig_Dead_Catch_Func003Func002A and its
+      Func001 variants), which are not in jassFunctions. radius and range come from the object data (area, range).
+
+- id: skull-ring
+  source: A02K
+  name: { en: Skull Ring, cs: Kruh lebek }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: DataA
+    radius: area
+
+- id: soul-bolt
+  source: A036
+  name: { en: Soul Bolt, cs: Střela duše }
+  kind: projectile
+  targeting: nearest_elite_first
+  params:
+    damage: DataA
+    range: range
+
+- id: bone-stampede
+  source: A037
+  name: { en: Bone Stampede, cs: Kostěné stádo }
+  kind: ticking_area
+  targeting: densest_cluster
+  params:
+    tickDamage: DataC
+    ticksPerSecond: DataA
+    radius: area
+    duration: duration
+    hitRadius: DataD
+
+# Serpent Shaman
+
+- id: serpent-totem
+  source: A062
+  name: { en: Serpent Totem, cs: Hadí totem }
+  kind: summon
+  targeting: densest_cluster
+  params:
+    count: DataA
+    duration: duration
+    range: range
+
+- id: forked-bolt
+  source: A064
+  name: { en: Forked Bolt, cs: Rozvětvený blesk }
+  kind: cone
+  targeting: nearest
+  params:
+    damage: DataA
+    maxTargets: DataB
+    length: DataC
+    endWidth: DataD
+
+- id: mending-tide
+  source: A063
+  name: { en: Mending Tide, cs: Hojivý příliv }
+  kind: heal
+  targeting: low_hp_ally
+  params:
+    amount: DataA
+    maxTargets: DataB
+    range: range
+
+- id: spirit-ward
+  source: A065
+  name: { en: Spirit Ward, cs: Duchovní ochrana }
+  kind: shield
+  targeting: self
+  params:
+    duration: duration
+    radius: area
