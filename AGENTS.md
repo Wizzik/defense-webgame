@@ -5,7 +5,12 @@ Defense Webgame is a browser survivors-like game (TypeScript + Three.js + Vite),
 ## Clean room
 - Never commit `data-source/`, `xhero/`, `*.w3x` or extracted map files (`war3map.*`).
 - Never copy tooltips, texts or other content from the map. Write original content.
-- `tests/repo-guard.test.ts` enforces the file rules.
+- `tests/repo-guard.test.ts` and `data/generated.test.ts` enforce the file and data rules.
+
+## Data pipeline
+- `data/generated/*.json` is generated - never edit it by hand.
+- To change game data, edit `design/*.yaml`, then run `npm run map:extract -- <map.w3x> <label>` (local, output untracked) and `npm run data:build -- --source data-source/<label>/out --out data/generated`, and commit the regenerated files.
+- `data:build` cannot run in CI (no map data there).
 
 ## Commands
 - `npm run check` - typecheck + tests (must pass before every commit)

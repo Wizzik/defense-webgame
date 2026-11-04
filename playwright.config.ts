@@ -22,7 +22,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
-  use: { baseURL: "http://localhost:4173" },
+  use: { baseURL: "http://localhost:4173", screenshot: "only-on-failure" },
   projects: [
     {
       name: "webgl2-fallback",

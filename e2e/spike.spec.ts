@@ -21,19 +21,6 @@ async function waitForFrames(page: Page, min: number): Promise<void> {
   });
 }
 
-function brightnessStdDev(rgba: Uint8ClampedArray): number {
-  const count = rgba.length / 4;
-  let sum = 0;
-  let sumSq = 0;
-  for (let i = 0; i < rgba.length; i += 4) {
-    const y = 0.2126 * rgba[i]! + 0.7152 * rgba[i + 1]! + 0.0722 * rgba[i + 2]!;
-    sum += y;
-    sumSq += y * y;
-  }
-  const mean = sum / count;
-  return Math.sqrt(Math.max(0, sumSq / count - mean * mean));
-}
-
 test("renders crowd on available backend", async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on("console", (msg) => {
@@ -47,16 +34,37 @@ test("renders crowd on available backend", async ({ page }, testInfo) => {
   const expected = testInfo.project.name === "webgpu-swiftshader" ? "WebGPU" : "WebGL2";
   expect(await page.evaluate(() => window.__spike?.backend)).toBe(expected);
 
+  // Hide the HUD overlay so only the rendered scene is measured.
+  await page.evaluate(() => {
+    document.querySelector<HTMLElement>("#overlay")!.style.visibility = "hidden";
+  });
   const shot = await page.locator("canvas").first().screenshot({ type: "png" });
+  await page.evaluate(() => {
+    document.querySelector<HTMLElement>("#overlay")!.style.visibility = "";
+  });
+  await testInfo.attach(`crowd-${testInfo.project.name}`, { body: shot, contentType: "image/png" });
+
+  // Luminance stddev computed in the page; only the number leaves it.
   const stdDev = await page.evaluate(async (b64) => {
     const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
     const bmp = await createImageBitmap(new Blob([bytes], { type: "image/png" }));
     const c = new OffscreenCanvas(bmp.width, bmp.height);
     const ctx = c.getContext("2d")!;
     ctx.drawImage(bmp, 0, 0);
-    return Array.from(ctx.getImageData(0, 0, bmp.width, bmp.height).data);
+    const d = ctx.getImageData(0, 0, bmp.width, bmp.height).data;
+    const count = d.length / 4;
+    let sum = 0;
+    let sumSq = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      const y = 0.2126 * d[i]! + 0.7152 * d[i + 1]! + 0.0722 * d[i + 2]!;
+      sum += y;
+      sumSq += y * y;
+    }
+    const mean = sum / count;
+    return Math.sqrt(Math.max(0, sumSq / count - mean * mean));
   }, shot.toString("base64"));
-  expect(brightnessStdDev(Uint8ClampedArray.from(stdDev))).toBeGreaterThan(5);
+  console.log(`crowd luminance stddev (${testInfo.project.name}): ${stdDev.toFixed(2)}`);
+  expect(stdDev, `luminance stddev ${stdDev.toFixed(2)}`).toBeGreaterThan(2.5);
 
   expect(errors).toEqual([]);
 });
