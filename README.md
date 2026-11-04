@@ -8,7 +8,7 @@ Design specification: [docs/superpowers/specs/2026-11-04-defense-webgame-design.
 - `npm run dev` - dev server
 - `npm run check` - typecheck and tests
 - `npm run build` - production build
-- `npm run e2e` - end-to-end tests
+- `npm run e2e` - Playwright end-to-end tests (builds and serves the app; set `PW_CHROMIUM_PATH` to use a pre-installed Chromium instead of the Playwright-managed one)
 - `npm run map:extract` - local map extraction (untracked output)
 - `npm run data:build` - build game data
 

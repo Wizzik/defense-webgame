@@ -14,7 +14,8 @@
     "dev": "vite",
     "map:extract": "bash tools/map-extract/run.sh",
     "data:build": "tsx tools/data-build/build.ts",
-    "test:py": "python3 -I -m unittest discover -s tools/map-extract/tests -v"
+    "test:py": "python3 -I -m unittest discover -s tools/map-extract/tests -v",
+    "e2e": "playwright test"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
