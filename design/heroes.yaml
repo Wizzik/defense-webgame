@@ -8,7 +8,7 @@
   source: O00C
   mapName: Tauren
   name: { en: Stonehorn, cs: Kamenorohý }
-  signatureAbilities: [rock-rupture, cleaving-blows, concussion]
+  signatureAbilities: [rock-rupture, enhanced-totem, seismic-echo]
   ultimate: earthquake
 
 - id: nightglaive

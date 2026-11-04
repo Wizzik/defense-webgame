@@ -31,8 +31,8 @@
     },
     "signatureAbilities": [
       "rock-rupture",
-      "cleaving-blows",
-      "concussion"
+      "enhanced-totem",
+      "seismic-echo"
     ],
     "ultimate": "earthquake"
   },

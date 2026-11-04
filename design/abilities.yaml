@@ -22,9 +22,9 @@
     width: area
     stunSeconds: duration
 
-- id: cleaving-blows
+- id: enhanced-totem
   source: A0A8
-  name: { en: Cleaving Blows, cs: Drtivé údery }
+  name: { en: Enhanced Totem, cs: Posílený totem }
   kind: on_hit
   targeting: on_attack
   params:
@@ -34,16 +34,16 @@
     notes: >-
       splashRadius and splashPercent are 0: no trigger code holds a splash radius or percentage.
       Trig_AllStun_Func001Func002C belongs to the Trig_AllStun_* trigger (war3map.j v20.75, lines 27704-27739),
-      which answers casts of A0A7, A0AA or A0A8 by O00C with the concussion stun (see concussion).
+      which answers casts of A0A7, A0AA or A0A8 by O00C with the seismic-echo stun (see seismic-echo).
       A0A8 is the only ability that applies buff B00U. Trig_Attacked_Entotem_Conditions/Actions (27664-27676)
       and Trig_DealDamage_Conditions/Actions (27678-27690) remove B00U from the attacker after the attacked unit
       takes damage from it, so the buff lasts for one hit and has no radius.
       The size of that hit is object data, not script: DataA damage increase 3, 5, 7, 9, 10.
       AI_Setup (33277-33279) only stores AI hints.
 
-- id: concussion
+- id: seismic-echo
   source: A00M
-  name: { en: Concussion, cs: Otřes }
+  name: { en: Seismic Echo, cs: Seizmická ozvěna }
   kind: on_hit
   targeting: on_attack
   params:
