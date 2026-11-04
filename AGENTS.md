@@ -3,8 +3,11 @@
 Defense Webgame is a browser survivors-like game (TypeScript + Three.js + Vite), a clean-room remake of a Warcraft III map.
 
 ## Clean room
+The repository is public (decided 2026-11-04): never commit anything that must not be published.
 - Never commit `data-source/`, `xhero/`, `*.w3x` or extracted map files (`war3map.*`).
-- Never copy tooltips, texts or other content from the map. Write original content.
+- Never copy tooltips, texts or other content from the map into the game. Write original content.
+- Map identifiers and names (rawcodes, hero, ability and trigger names) are allowed only in `tools/`, `design/` and `docs/`, for traceability. They never appear in anything shipped to players: `client/`, `sim/`, UI texts, or data the client bundles.
+- Known exception, scheduled as the first phase-1 task: the `review` notes in `data/generated/abilities.json` cite map trigger names; they move to a separate review file before the client imports game data.
 - `tests/repo-guard.test.ts` and `data/generated.test.ts` enforce the file and data rules.
 
 ## Data pipeline

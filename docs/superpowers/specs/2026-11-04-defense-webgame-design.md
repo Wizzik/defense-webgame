@@ -187,7 +187,7 @@ Vlastní druhy se přidávají jen pro kouzla, která do této tabulky nezapadno
 
 ## 4. Architektura
 
-Jeden repozitář na GitHubu, do vydání soukromý:
+Jeden veřejný repozitář na GitHubu (`Wizzik/defense-webgame`; veřejný podle rozhodnutí autora ze 4. 11. 2026, původně plánovaný jako soukromý do vydání):
 
 ```
 sim/      herní logika v čistém TypeScriptu, bez závislosti na prohlížeči
@@ -229,7 +229,8 @@ assets/   modely a textury + LICENSES.md
 
 **Právní hranice:**
 - `data-source/` (exporty mapy s texty a jmény Blizzardu) a surové soubory mapy jsou v `.gitignore`;
-- do repozitáře jdou jen převedená čísla, vlastní texty a licencované assety.
+- do repozitáře jdou jen převedená čísla, vlastní texty a licencované assety;
+- kódy a jména z mapy (hrdinové, kouzla, triggery) smí být jen v `tools/`, `design/` a `docs/` kvůli dohledatelnosti, nikdy v tom, co dostane hráč (`client/`, `sim/`, texty rozhraní, data, která klient zabalí).
 
 ## 5. Data a převod obsahu z mapy
 
