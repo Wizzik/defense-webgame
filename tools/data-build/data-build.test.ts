@@ -140,6 +140,16 @@ describe("data-build", () => {
     expect(message).toContain("artillery");
   });
 
+  it("appends design jassFunctions after the export ones", () => {
+    const entry = abilityEntry("pulse");
+    entry.review = { ...entry.review, jassFunctions: ["Trig_Test_Nova_Func002A", "Trig_Test_Nova_Actions"] };
+    expect(mapAbility(exportAbility("A001"), entry).review).toStrictEqual({
+      reason: "engine+script",
+      jassFunctions: ["Trig_Test_Nova_Actions", "Trig_Test_Nova_Func002A"],
+      notes: "Fixture note.",
+    });
+  });
+
   it("rejects review notes on an ability that is not script-backed", () => {
     const entry = { ...abilityEntry("focus"), review: { notes: "x" } };
     const message = errorMessage(() => mapAbility(exportAbility("A002"), entry));

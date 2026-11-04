@@ -95,7 +95,7 @@
         "AI_Setup",
         "Trig_AllStun_Func001Func002C"
       ],
-      "notes": "splashRadius and splashPercent are 0 because no listed function holds a splash value. Trig_AllStun_Func001Func002C only checks whether the cast ability is A0A7, A0AA or A0A8. AI_Setup only stores AI hints for A0A8 in udg_AIHT (slot 1 of hero O00C; an order id, 4 and 700), as it does for every hero ability."
+      "notes": "splashRadius and splashPercent are 0: no trigger code holds a splash radius or percentage. Trig_AllStun_Func001Func002C belongs to the Trig_AllStun_* trigger (war3map.j v20.75, lines 27704-27739), which answers casts of A0A7, A0AA or A0A8 by O00C with the concussion stun (see concussion). A0A8 is the only ability that applies buff B00U. Trig_Attacked_Entotem_Conditions/Actions (27664-27676) and Trig_DealDamage_Conditions/Actions (27678-27690) remove B00U from the attacker after the attacked unit takes damage from it, so the buff lasts for one hit and has no radius. The size of that hit is object data, not script: DataA damage increase 3, 5, 7, 9, 10. AI_Setup (33277-33279) only stores AI hints."
     }
   },
   {
@@ -145,7 +145,7 @@
         "Trig_AllStun_Actions",
         "Trig_Learn_Allstun_Conditions"
       ],
-      "notes": "chance, stunSeconds and bonusDamage are 0 because no listed function holds these values. Trig_Learn_Allstun_Conditions only checks that A00M was learned. Trig_AllStun_Actions creates one dummy unit with a timed life of 1 s and has it cast ability A0A9 at the caster's A00M level, so the effect comes from A0A9 and the trigger has no chance, stun or damage number. AI_Setup only lists A00M as slot 2 of hero O00C."
+      "notes": "chance, stunSeconds and bonusDamage are 0: no trigger code holds these values. Trig_Learn_Allstun_Conditions/Actions (war3map.j v20.75, lines 27692-27702) enable the Trig_AllStun_* trigger once A00M is learned. Trig_AllStun_Func001Func002C, Trig_AllStun_Func001C and Trig_AllStun_Conditions (27704-27732) let it fire on every cast of A0A7, A0AA or A0A8 by O00C, with no chance roll. Trig_AllStun_Actions (27734-27739) then creates one dummy unit (e012, timed life 1 s) that casts A0A9 at the caster's A00M level. Stun length and damage are A0A9's object data, not script: duration 1, 1.5, 2, 2.5, 3; DataA damage 150, 300, 450, 600, 750; area 350. AI_Setup (32758) only lists A00M as hero slot 2 of O00C."
     }
   },
   {
@@ -365,11 +365,11 @@
         800
       ],
       "damage": [
-        0,
-        0,
-        0,
-        0,
-        0
+        400,
+        800,
+        1600,
+        3200,
+        6400
       ]
     },
     "review": {
@@ -386,9 +386,14 @@
         "Trig_Dead_Catch_Func003Func001C",
         "Trig_Dead_Catch_Func003Func001Func001C",
         "Trig_Dead_Catch_Func003Func001Func001Func001C",
-        "Trig_Dead_Catch_Func003Func001Func001Func001Func001C"
+        "Trig_Dead_Catch_Func003Func001Func001Func001Func001C",
+        "Trig_Dead_Catch_Func003Func002A",
+        "Trig_Dead_Catch_Func003Func001Func002A",
+        "Trig_Dead_Catch_Func003Func001Func001Func002A",
+        "Trig_Dead_Catch_Func003Func001Func001Func001Func002A",
+        "Trig_Dead_Catch_Func003Func001Func001Func001Func001Func002A"
       ],
-      "notes": "damage is 0 because no listed function holds a damage value (the object data field is a placeholder 1). Trig_Dead_Catch_Conditions only checks that the cast ability is A02H. Trig_Dead_Catch_Func003C and its Func001...C variants, and Trig_Catch_Func004C and its Func001...C variants, only check the A02H level (1 to 5). AI_Setup only stores AI hints for A02H in udg_AIHT (slot 0 of hero O00F; an order id, 9 and 800). The per-level damage is dealt in group callbacks of the same trigger (Trig_Dead_Catch_Func003Func002A and its Func001 variants), which are not in jassFunctions. radius and range come from the object data (area, range)."
+      "notes": "damage per level is the UnitDamageTargetBJ amount in the group callbacks that Trig_Dead_Catch_Actions runs for each A02H level (war3map.j v20.75): 400 (Trig_Dead_Catch_Func003Func002A, line 18020), 800 (Trig_Dead_Catch_Func003Func001Func002A, 17992), 1600 (Trig_Dead_Catch_Func003Func001Func001Func002A, 17964), 3200 (Trig_Dead_Catch_Func003Func001Func001Func001Func002A, 17936), 6400 (Trig_Dead_Catch_Func003Func001Func001Func001Func001Func002A, 17908). Each living enemy within the group radius of the target point takes it once. That radius in Trig_Dead_Catch_Actions (lines 18036-18052: 250, 300, 350, 400, 500) equals the object data area used for radius; range is object data. Not mapped: each hit also creates a dummy unit (h00J, timed life 3 s) ordered to attack the caster, and Trig_Catch_Actions heals the caster by 50, 100, 150, 200, 300 per level when it attacks (lines 18113-18125). AI_Setup (33067-33069) only stores AI hints."
     }
   },
   {

@@ -67,7 +67,8 @@ export interface AbilityEntry {
   kind: Ability["kind"];
   targeting: Ability["targeting"];
   params: Record<string, ParamSpec>;
-  review?: { notes: string };
+  /** jassFunctions here are added after the export's jass_functions (e.g. where design values come from). */
+  review?: { notes?: string; jassFunctions?: string[] };
 }
 
 /** One entry of design/heroes.yaml. */

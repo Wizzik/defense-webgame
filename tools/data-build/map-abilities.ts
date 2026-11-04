@@ -34,9 +34,8 @@ function review(exp: ExportAbility, entry: AbilityEntry, where: string): Pick<Ab
   const reason = exp.implementation;
   if (reason === "script" || reason === "engine+script") {
     const notes = entry.review?.notes;
-    return {
-      review: { reason, jassFunctions: exp.jass_functions ?? [], ...(notes === undefined ? {} : { notes }) },
-    };
+    const jassFunctions = [...new Set([...(exp.jass_functions ?? []), ...(entry.review?.jassFunctions ?? [])])];
+    return { review: { reason, jassFunctions, ...(notes === undefined ? {} : { notes }) } };
   }
   if (entry.review !== undefined) {
     throw new Error(`${where}: review: ${exp.id} is not script-backed (implementation ${reason ?? "none"})`);
