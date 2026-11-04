@@ -1,0 +1,7 @@
+node_modules/
+dist/
+data-source/
+xhero/
+*.w3x
+test-results/
+playwright-report/
