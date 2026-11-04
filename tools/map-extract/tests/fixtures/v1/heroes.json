@@ -1,0 +1,15 @@
+[
+ {
+  "id": "H001",
+  "name": "Test Hero",
+  "primary": "STR",
+  "str": 10,
+  "hero_abilities": [
+   {
+    "id": "A001",
+    "implementation": "native",
+    "autocast_class": "nova"
+   }
+  ]
+ }
+]

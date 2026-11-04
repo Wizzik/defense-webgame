@@ -9,9 +9,11 @@
   "scripts": {
     "typecheck": "tsc -p sim/tsconfig.json && tsc -p tsconfig.json",
     "test": "vitest run",
-    "check": "npm run typecheck && npm test",
+    "check": "npm run typecheck && npm test && npm run test:py",
     "build": "vite build",
-    "dev": "vite"
+    "dev": "vite",
+    "map:extract": "bash tools/map-extract/run.sh",
+    "test:py": "python3 -I -m unittest discover -s tools/map-extract/tests -v"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

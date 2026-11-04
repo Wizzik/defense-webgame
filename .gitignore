@@ -5,3 +5,4 @@ xhero/
 *.w3x
 test-results/
 playwright-report/
+__pycache__/
