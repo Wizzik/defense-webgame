@@ -66,6 +66,9 @@ export function stateHash(run: Run): number {
     mixInt(e.stunTicks[i]);
     mixInt(e.aggro[i]);
     mixInt(e.action[i]);
+    mixFloat(e.knockVX[i]);
+    mixFloat(e.knockVY[i]);
+    mixInt(e.knockTicks[i]);
   }
   const c = run.crystals;
   for (let i = 0; i < c.capacity; i++) {

@@ -49,7 +49,12 @@
   "enemies": {
     "maxAlive": 150,
     "siegerAggroRange": 250,
-    "leashRange": 900
+    "leashRange": 900,
+    "knockback": {
+      "attack": 40,
+      "ability": 90,
+      "seconds": 0.15
+    }
   },
   "phases": [
     {
