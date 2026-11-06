@@ -6,6 +6,7 @@ import type { Scene } from "three/webgpu";
 import { FixedStepLoop } from "./loop";
 import type { Keyboard } from "./keyboard";
 import type { GameParams } from "./params";
+import { viewTiming } from "./view-timing";
 
 /** Most simulation steps one frame may run at speed 1; a longer backlog is dropped. */
 const MAX_STEPS_PER_FRAME = 4;
@@ -68,8 +69,9 @@ export class Session {
       run.step(input);
       for (const view of this.views) view.onEvents?.(run);
     }
-    const alpha = this.loop.alpha;
-    for (const view of this.views) view.update(run, alpha, dtSeconds);
+    // Frozen while a card is chosen or the run is over: no interpolation, no animation time.
+    const { alpha, dt } = viewTiming(run.state, this.loop.alpha, dtSeconds);
+    for (const view of this.views) view.update(run, alpha, dt);
     const { hero } = run;
     this.camera.follow(
       (hero.prevX + (hero.x - hero.prevX) * alpha) * SCENE_SCALE,

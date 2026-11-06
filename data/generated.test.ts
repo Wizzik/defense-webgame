@@ -84,6 +84,13 @@ describe("generated game data", () => {
     }
   });
 
+  it("matches design rules and enemy xp", () => {
+    const rules = parse(readFileSync(join(import.meta.dirname, "..", "design", "rules.yaml"), "utf8"));
+    expect(JSON.parse(read("rules.json")), "rules.json differs from design/rules.yaml: run npm run data:build").toEqual(rules);
+    const xp = (list: { id: string; xp?: number }[]) => list.map(({ id, xp }) => ({ id, xp }));
+    expect(xp(JSON.parse(read("enemies.json")))).toEqual(xp(designEntries("enemies.yaml") as { id: string; xp?: number }[]));
+  });
+
   it("carries no map texts", () => {
     for (const file of FILES) {
       const text = read(file);

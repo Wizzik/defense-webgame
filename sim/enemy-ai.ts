@@ -113,8 +113,9 @@ export function updateEnemies(run: Run): void {
     e.x[i] = nx;
     e.y[i] = ny;
 
+    // Only a moving enemy faces its velocity; attacking and stunned ones keep facing their target.
     const speed = Math.sqrt(vx * vx + vy * vy);
-    if (speed > 1e-6) {
+    if (e.action[i] === Action.Move && speed > 1e-6) {
       e.facingX[i] = vx / speed;
       e.facingY[i] = vy / speed;
     }

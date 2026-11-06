@@ -95,6 +95,19 @@ describe("enemy AI", () => {
     expect(run.enemies.action[h]).toBe(Action.Move);
   });
 
+  it("an attacking enemy with a touching neighbour faces its target", () => {
+    const run = newRun();
+    run.hero.x = 2500;
+    run.hero.y = 2000;
+    // directly south of the castle, in reach; the neighbour pushes it sideways
+    const s = add(run, Role.Sieger, 0, -2000 - 180 - 31 - 40);
+    add(run, Role.Sieger, 40, -2000 - 180 - 31 - 40);
+    tickAI(run);
+    expect(run.enemies.action[s]).toBe(Action.Attack);
+    expect(run.enemies.facingX[s]).toBeCloseTo(0, 5);
+    expect(run.enemies.facingY[s]).toBeCloseTo(1, 5);
+  });
+
   it("stunned enemies neither move nor attack", () => {
     const run = newRun();
     const h = add(run, Role.Hunter, 0, 0);

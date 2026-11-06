@@ -18,7 +18,7 @@ function listTs(dir: string): string[] {
   return listFiles(dir, /\.ts$/);
 }
 
-/** Collects every `source` and `mapName` string value anywhere in a parsed design file. */
+/** Collects every `source` and `mapName` string value and every `jassFunctions` entry anywhere in a parsed design file. */
 function collectMapNames(node: unknown, out: Set<string>): void {
   if (Array.isArray(node)) {
     for (const item of node) collectMapNames(item, out);
@@ -26,6 +26,8 @@ function collectMapNames(node: unknown, out: Set<string>): void {
     for (const [key, value] of Object.entries(node)) {
       if ((key === "source" || key === "mapName") && typeof value === "string" && value !== "") {
         out.add(value);
+      } else if (key === "jassFunctions" && Array.isArray(value)) {
+        for (const fn of value) if (typeof fn === "string" && fn !== "") out.add(fn);
       } else {
         collectMapNames(value, out);
       }

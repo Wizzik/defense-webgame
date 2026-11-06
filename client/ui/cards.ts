@@ -9,6 +9,9 @@ const ATTRIBUTE_KEYS: Record<"str" | "agi" | "int", MessageKey> = {
   int: "cards.int",
 };
 
+/** Real time after an offer appears during which picks are ignored. */
+const PICK_DELAY_MS = 300;
+
 /** Three upgrade cards side by side; a click or the keys 1 to 3 pick one. */
 export class Cards {
   private readonly root: HTMLElement;
@@ -18,6 +21,8 @@ export class Cards {
   private shown: CardOffer | null = null;
   private shownLang: Lang | null = null;
   private readonly onPick: (index: number) => void;
+  /** Picks before this real time (ms) are ignored: the player has not seen the offer yet. */
+  private acceptAt = 0;
 
   constructor(parent: HTMLElement, onPick: (index: number) => void) {
     this.onPick = onPick;
@@ -30,7 +35,7 @@ export class Cards {
     addEventListener("keydown", (event) => {
       if (this.root.hidden || event.repeat) return;
       const match = /^(?:Digit|Numpad)([123])$/.exec(event.code);
-      if (match) this.onPick(Number(match[1]) - 1);
+      if (match) this.pick(Number(match[1]) - 1);
     });
   }
 
@@ -39,12 +44,18 @@ export class Cards {
     const offer = run.state === "levelUp" ? run.offer : null;
     this.root.hidden = !offer;
     if (!offer || (offer === this.shown && lang === this.shownLang)) return;
+    if (offer !== this.shown) this.acceptAt = performance.now() + PICK_DELAY_MS;
     this.shown = offer;
     this.shownLang = lang;
     this.title.textContent = t(lang, "cards.title");
     this.hint.textContent = t(lang, "cards.keys");
     this.row.replaceChildren();
     offer.cards.forEach((card, i) => this.row.appendChild(this.render(run, card, i, lang)));
+  }
+
+  private pick(index: number): void {
+    if (performance.now() < this.acceptAt) return;
+    this.onPick(index);
   }
 
   hide(): void {
@@ -64,7 +75,7 @@ export class Cards {
       el("span", "card-stat", row, t(lang, line.label));
       el("span", "card-change", row, `${line.from} → ${line.to}`);
     }
-    button.addEventListener("click", () => this.onPick(index));
+    button.addEventListener("click", () => this.pick(index));
     return button;
   }
 }

@@ -60,7 +60,7 @@ export class Hud {
 
   update(run: Run, lang: Lang): void {
     const { hero, castle, data } = run;
-    setText(this.heroHp.label, `${Math.ceil(hero.hp)} / ${Math.round(hero.stats.maxHp)}`);
+    setText(this.heroHp.label, `${Math.max(0, Math.ceil(hero.hp))} / ${Math.round(hero.stats.maxHp)}`);
     this.heroHp.fill.style.width = fraction(hero.hp, hero.stats.maxHp);
     const next = xpToNext(data.rules, hero.level);
     setText(this.heroXp.label, `${t(lang, "hud.level", { n: hero.level })}  ${Math.floor(hero.xp)} / ${next}`);
@@ -73,7 +73,7 @@ export class Hud {
     setText(this.banner, attacked ? t(lang, "hud.castleAttacked") : "");
     this.banner.hidden = !attacked;
 
-    setText(this.castle.label, `${t(lang, "hud.castle")} ${Math.ceil(castle.hp)} / ${castle.maxHp}`);
+    setText(this.castle.label, `${t(lang, "hud.castle")} ${Math.max(0, Math.ceil(castle.hp))} / ${castle.maxHp}`);
     this.castle.fill.style.width = fraction(castle.hp, castle.maxHp);
     setText(this.kills, t(lang, "hud.kills", { n: run.stats.kills }));
 

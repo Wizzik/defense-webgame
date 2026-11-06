@@ -38,7 +38,7 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 
 ## Simulation
 
-- `createRun(data, { seed })` returns a `Run`. `run.step(input: TickInput)` advances one fixed step (30 per second). Systems run in a fixed order: hero movement, spawning, enemy AI, hero combat, abilities, crystals, castle regeneration, end check, level-up offer.
+- `createRun(data, { seed })` returns a `Run`. `run.step(input: TickInput)` advances one fixed step (30 per second). `savePrevious` runs first, then systems in a fixed order: hero movement, spawning, enemy AI, hero combat, abilities, crystals, castle regeneration, end check, level-up offer. In the `levelUp` state only `chooseCard` runs.
 - State lives in stores of typed arrays with a fixed capacity (`EnemyStore`, `CrystalStore`) and in hero and castle structs. Each step writes an `EventLog` (hits, deaths, casts, pickups, level-ups, run end) that the client turns into effects.
 - Determinism: a seeded `Rng` (mulberry32), no transcendental `Math` functions, no allocation per step. `stateHash(run)` (FNV-1a) backs the determinism and replay tests.
 - Units are the map's world units with `y` pointing north. The client scales by `1/64` and draws north as `-z`.
@@ -47,12 +47,12 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 ## Client
 
 - Renderer: Three.js `WebGPURenderer`, WebGPU with an automatic WebGL2 fallback (`?renderer=webgl2` forces it). The overlay shows the backend in use.
-- Crowd: one `InstancedMesh` per enemy type with the animation baked into a texture (VAT) at load time; `SpatialHash` finds neighbours.
-- `client/main.ts` wires the pieces; `client/game/` holds the session (menu, run, restart), the fixed-step loop with interpolation (`loop.ts`), URL parameters (`params.ts`), keyboard input and the debug snapshot (`debug.ts`).
+- Crowd: one `InstancedMesh` for all enemies (sized per instance by type) with the animation baked into a texture (VAT) at load time. `SpatialHash` lives in `sim/spatial-grid.ts` and serves the sim's separation and the spike, not the game client.
+- `client/main.ts` wires the pieces, including the menu and restart wiring (`createUi`); `client/game/` holds the session (run, frames, input), the fixed-step loop with interpolation (`loop.ts`), URL parameters (`params.ts`), keyboard input and the debug snapshot (`debug.ts`).
 - `client/render/` draws the arena, hero, castle, enemies, crystals and spell effects from the simulation state and its `EventLog`.
 - `client/ui/` is an HTML/CSS layer: menu, HUD, upgrade cards, end screen and castle pointer. Texts come from `messages-en.ts` and `messages-cs.ts` through `t(lang, key)`.
 - `client/perf/` has the frame-rate overlay (`?fps=1`, bottom-left so it does not cover the HUD).
-- Debug: `window.__game` (game page) and `window.__spike` (benchmark). Game URL params: `seed`, `speed`, `duration`, `debug`, `fps`, `lang`, `renderer`; the spike takes `n` and `renderer`.
+- Debug: `window.__game` (game page) and `window.__spike` (benchmark). Game URL params: `seed`, `speed`, `duration`, `debug`, `fps`, `lang`, `renderer`; the spike takes `n`, `renderer` and `seed`.
 
 ## Tests and delivery
 

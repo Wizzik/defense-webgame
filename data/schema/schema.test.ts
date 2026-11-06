@@ -181,6 +181,12 @@ describe("game data schemas", () => {
     expect(errorMessage(d)).toContain("abilities.0 (pulse).cooldown.1");
   });
 
+  it("rejects enemy attack cooldown 0", () => {
+    const d = fixture();
+    d.enemies[0].attack.cooldown = 0;
+    expect(errorMessage(d)).toContain("enemies.0 (grunt).attack.cooldown");
+  });
+
   it("rejects phase with unknown enemy", () => {
     const d = fixture();
     d.rules.phases[2].enemy = "ghost";

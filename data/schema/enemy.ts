@@ -12,10 +12,10 @@ export const EnemySchema = z.object({
   collision: z.number().positive(),
   acquireRange: z.number().positive(),
   attack: z.object({
-    range: z.number(),
-    cooldown: z.number(),
-    damageMin: z.number(),
-    damageMax: z.number(),
+    range: z.number().min(0),
+    cooldown: z.number().positive(),
+    damageMin: z.number().min(0),
+    damageMax: z.number().min(0),
   }).strict(),
   xp: z.number().int().positive(),
 }).strict();
