@@ -31,7 +31,16 @@ describe("spawner", () => {
     const run = newRun();
     run.abilities[0].cooldown = 1_000_000;
     for (let i = 0; i < 610; i++) run.step(NO_INPUT);
-    expect(run.enemies.aliveCount).toBe(9);
+    // The hero may kill some of them, so count the spawns.
+    expect(run.stats.spawned).toBe(9);
+  });
+
+  it("counts every spawned enemy in the run stats", () => {
+    const run = newRun();
+    expect(run.stats.spawned).toBe(0);
+    spawnOnly(run, 200);
+    expect(run.stats.spawned).toBe(run.enemies.aliveCount);
+    expect(run.stats.spawned).toBeGreaterThan(0);
   });
 
   it("alternates gates", () => {
@@ -87,7 +96,7 @@ describe("spawner", () => {
     run.tick = 600 * 30;
     run.spawnCredit = 0;
     spawnEnemies(run);
-    expect(run.enemies.hp[0]).toBeCloseTo(630, 6);
+    expect(run.enemies.hp[0]).toBeCloseTo(run.data.enemies[0].hp * 1.5, 6);
     expect(run.enemies.damageScale[0]).toBeCloseTo(1.5, 6);
   });
 

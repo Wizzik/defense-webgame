@@ -38,7 +38,7 @@ export class Run {
   offer: CardOffer | null = null;
   spawnCredit = 0;
   nextGate = 0;
-  readonly stats: RunStats = { kills: 0, damageDealt: 0 };
+  readonly stats: RunStats = { kills: 0, spawned: 0, damageDealt: 0 };
   readonly durationTicks: number;
   tick = 0;
   state: RunState = "playing";

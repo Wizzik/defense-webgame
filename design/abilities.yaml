@@ -1,5 +1,6 @@
 # MVP abilities. The names are working names and may change.
-# source: ability code in the map export (abilities.json). cooldown always comes from the export.
+# source: ability code in the map export (abilities.json). cooldown comes from the export
+#   times abilities.cooldown in design/scaling.yaml (data-build applies it to every level).
 # Each param names where its per-level numbers come from:
 #   DataA ... DataI                      object data field of the ability
 #   cooldown | area | range | duration   per-level field of the ability
@@ -22,7 +23,7 @@
     width: area
     stunSeconds: duration
     # The map's Wave Time is 0, so the speed is a design value.
-    waveSpeed: { design: [1000, 1000, 1000, 1000, 1000] }
+    waveSpeed: { design: [2000, 2000, 2000, 2000, 2000] }
 
 - id: enhanced-totem
   source: A0A8

@@ -4,7 +4,7 @@ import { PerspectiveCamera } from "three/webgpu";
 const TILT_DEG = 55;
 const FOV_DEG = 35;
 /** Distance from the camera to the point it looks at, in scene units. */
-const DISTANCE = 38;
+const DISTANCE = 46;
 /** How fast the camera closes the gap to the hero, per second (exponential smoothing). */
 const FOLLOW_RATE = 8;
 

@@ -10,6 +10,15 @@ import { resolveParam } from "./resolve";
 const fixtures = join(import.meta.dirname, "fixtures");
 const mapExport = () => loadMapExport(join(fixtures, "export"));
 const design = () => loadDesign(join(fixtures, "design"));
+/** The fixture design with every multiplier 1, so the expectations show the export's numbers. */
+const unscaledDesign = () => ({
+  ...design(),
+  scaling: {
+    heroes: { moveSpeed: 1, attackCooldown: 1 },
+    abilities: { cooldown: 1 },
+    enemies: { hp: 1, moveSpeed: 1 },
+  },
+});
 
 function exportAbility(id: string): ExportAbility {
   const found = mapExport().abilities.find((a) => a.id === id);
@@ -83,7 +92,7 @@ describe("data-build", () => {
   });
 
   it("builds validated game data from the fixture files", () => {
-    const data = buildGameData(mapExport(), design(), "test");
+    const data = buildGameData(mapExport(), unscaledDesign(), "test");
     expect(data.heroes).toStrictEqual([
       {
         id: "fixture-hero",

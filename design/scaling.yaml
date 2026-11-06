@@ -1,0 +1,5 @@
+# Uniform multipliers from the map's numbers to the survivors pace (spec 5).
+# data-build applies them to every hero, ability and enemy, so the map's ratios stay.
+heroes: { moveSpeed: 1.4, attackCooldown: 0.5 }
+abilities: { cooldown: 0.33 }
+enemies: { hp: 0.3, moveSpeed: 1.22 }
