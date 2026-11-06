@@ -11,6 +11,6 @@
     "isolatedModules": true,
     "resolveJsonModule": true
   },
-  "include": ["client", "tests", "data", "tools", "e2e", "*.ts"],
+  "include": ["tests", "data", "tools", "e2e", "*.ts"],
   "exclude": ["node_modules", "dist", "sim"]
 }

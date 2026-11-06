@@ -7,7 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "typecheck": "tsc -p sim/tsconfig.json && tsc -p tsconfig.json",
+    "typecheck": "tsc -p sim/tsconfig.json && tsc -p client/tsconfig.json && tsc -p tsconfig.json",
     "test": "vitest run",
     "check": "npm run typecheck && npm test && npm run test:py",
     "build": "vite build",

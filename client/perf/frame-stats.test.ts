@@ -8,7 +8,7 @@ function expectNear(actual: number, expected: number, tolerance: number): void {
 describe("frameStats", () => {
   it("frameStats of constant 16.667 ms is 60/60", () => {
     const durations = new Float32Array(120).fill(16.667);
-    const stats = frameStats(durations, 120);
+    const stats = frameStats(durations, 120, new Float32Array(120));
     expectNear(stats.avgFps, 60, 0.1);
     expectNear(stats.low1Fps, 60, 0.1);
   });
@@ -18,7 +18,7 @@ describe("frameStats", () => {
     const durations = new Float32Array(120).fill(500);
     durations.fill(10, 0, 100);
     durations[37] = 100;
-    const stats = frameStats(durations, 100);
+    const stats = frameStats(durations, 100, new Float32Array(120));
     expectNear(stats.low1Fps, 10, 0.1);
     expectNear(stats.avgFps, 1000 / 10.9, 0.1);
   });
