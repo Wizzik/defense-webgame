@@ -2,7 +2,10 @@ import type { GameData } from "../data/schema";
 import { createAbilitySlots, updateAbilities } from "./abilities/slots";
 import type { AbilitySlot } from "./abilities/slots";
 import { TICKS_PER_SECOND } from "./constants";
+import { chooseCard, openOffer } from "./cards";
+import type { CardOffer } from "./cards";
 import { regenCastle } from "./castle";
+import { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
 import { updateEnemies } from "./enemy-ai";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
@@ -31,6 +34,8 @@ export class Run {
   readonly enemies: EnemyStore;
   readonly grid: SpatialHash;
   readonly abilities: AbilitySlot[];
+  readonly crystals = new CrystalStore(CRYSTAL_CAPACITY);
+  offer: CardOffer | null = null;
   spawnCredit = 0;
   nextGate = 0;
   readonly stats: RunStats = { kills: 0, damageDealt: 0 };
@@ -105,22 +110,33 @@ export class Run {
   step(input: TickInput): void {
     if (this.state === "won" || this.state === "lost") return;
     this.events.clear();
+    if (this.state === "levelUp") {
+      chooseCard(this, input.card);
+      return;
+    }
     savePrevious(this);
     moveHero(this, input);
     spawnEnemies(this);
     updateEnemies(this);
     updateHeroCombat(this);
     updateAbilities(this);
+    updateCrystals(this);
     regenCastle(this);
     this.tick++;
     checkEnd(this);
+    if (this.state === "playing" && this.hero.pendingLevelUps > 0) openOffer(this);
   }
 }
 
 function savePrevious(run: Run): void {
-  const { hero, enemies } = run;
+  const { hero, enemies, crystals } = run;
   hero.prevX = hero.x;
   hero.prevY = hero.y;
+  for (let i = 0; i < crystals.capacity; i++) {
+    if (crystals.alive[i] === 0) continue;
+    crystals.prevX[i] = crystals.x[i];
+    crystals.prevY[i] = crystals.y[i];
+  }
   for (let i = 0; i < enemies.capacity; i++) {
     if (enemies.alive[i] === 0) continue;
     enemies.prevX[i] = enemies.x[i];

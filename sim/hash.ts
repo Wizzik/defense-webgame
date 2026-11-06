@@ -37,6 +37,7 @@ export function stateHash(run: Run): number {
   mixFloat(hero.int);
   mixFloat(hero.hp);
   mixInt(hero.attackCooldown);
+  mixInt(hero.pendingLevelUps);
   mixInt(run.stats.kills);
   mixFloat(run.castle.hp);
   mixFloat(run.spawnCredit);
@@ -64,6 +65,27 @@ export function stateHash(run: Run): number {
     mixInt(e.stunTicks[i]);
     mixInt(e.aggro[i]);
     mixInt(e.action[i]);
+  }
+  const c = run.crystals;
+  for (let i = 0; i < c.capacity; i++) {
+    if (c.alive[i] === 0) continue;
+    mixInt(i);
+    mixInt(c.attracted[i]);
+    mixInt(c.value[i]);
+    mixFloat(c.x[i]);
+    mixFloat(c.y[i]);
+  }
+  if (run.offer) {
+    for (const card of run.offer.cards) {
+      if (card.kind === "ability") {
+        mixInt(1);
+        mixInt(card.slot);
+        mixInt(card.toLevel);
+      } else {
+        mixInt(card.attribute === "str" ? 2 : card.attribute === "agi" ? 3 : 4);
+        mixFloat(card.amount);
+      }
+    }
   }
   return h;
 }

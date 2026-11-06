@@ -1,5 +1,6 @@
 import { Role } from "./enemies";
 import { EventKind } from "./events";
+import { gainXp } from "./level-up";
 import type { Rng } from "./rng";
 import type { Run } from "./run";
 
@@ -51,11 +52,15 @@ export function damageEnemy(run: Run, slot: number, amount: number, source: 0 | 
   if (e.hp[slot] <= 0) killEnemy(run, slot);
 }
 
-/** Emits Death, counts the kill and frees the slot. Task 7 adds the crystal drop here. */
+/** Emits Death, counts the kill, frees the slot and drops an XP crystal (XP goes straight to the hero when the store is full). */
 export function killEnemy(run: Run, slot: number): void {
   const e = run.enemies;
   if (e.alive[slot] === 0) return;
   run.events.push(EventKind.Death, slot, 0, e.x[slot], e.y[slot], 0, 0);
   run.stats.kills++;
+  const xp = run.data.enemies[e.type[slot]].xp;
+  const x = e.x[slot];
+  const y = e.y[slot];
   e.kill(slot);
+  if (run.crystals.drop(x, y, xp) < 0) gainXp(run, xp);
 }
