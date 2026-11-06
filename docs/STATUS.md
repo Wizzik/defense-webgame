@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-06 (tempo pass). Read this first when you resume work.
+Updated 2026-11-06 (phase 2a plan). Read this first when you resume work.
 
 ## Now
 
@@ -20,10 +20,11 @@ Updated 2026-11-06 (tempo pass). Read this first when you resume work.
 
 ## Next
 
-1. Petr plays the slice and measures fps with `?fps=1` in a full run, on both renderers (`&renderer=webgl2`).
-2. Tune the numbers from his feedback.
-3. Propose the second skill (project development rules).
-4. Plan phase 2 (MVP), spec section 8. Real mechanics for `enhanced-totem` and `seismic-echo` belong there, along with the items in "Odloženo mimo fázi 1" of the phase 1 plan.
+1. Petr merges PR #4 (it includes the tempo pass of PR #3; close #3 after that).
+2. **Phase 2 (MVP) is split into five plans:** 2a heroes and abilities, 2b run structure (20 phases, factions, elites, bosses, difficulties), 2c economy (gold, wood, shop, items, towers), 2d shared abilities, passives and evolutions, 2e meta progression and saves. See the table at the top of the 2a plan.
+3. **Phase 2a plan waits for Petr's review:** `docs/superpowers/plans/2026-11-06-phase-2a-heroes-and-abilities.md` on branch `phase-2a` (based on `effects`). He starts with the table "Co plán rozhoduje". Execution: subagent-driven, task by task (13 tasks).
+4. Petr plays the slice and measures fps with `?fps=1` in a full run, on both renderers (`&renderer=webgl2`).
+5. Propose the second skill (project development rules).
 
 ## Open questions for Petr
 
