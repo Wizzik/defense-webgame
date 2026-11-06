@@ -31,6 +31,9 @@ The repository is public (decided 2026-11-04): never commit anything that must n
 - `npm run data:build` - build game data from validated sources
 - `npm run sim:run` - autopilot run summaries for balance tuning
 
+## Debugging in the browser
+URL parameters of the game page: `seed`, `speed` (1-16), `duration` (5-600 s), `debug=1` (`window.__game.debug.grantXp(n)`), `fps=1` (overlay), `lang` (`en`|`cs`), `renderer=webgl2`. `window.__game` exposes `backend`, `frames`, `screen`, `tick`, `level`, `kills`, `heroHp`, `castleHp`, `enemies`; the e2e tests read it. Run balance tuning headless with `npm run sim:run -- --runs 5`.
+
 ## Code rules
 - `sim/` is pure: no `three`, no imports from `client/`, no DOM globals (`window`, `document`, `navigator`, `globalThis`).
 - `sim/` is deterministic: same seed and same inputs give the same state in any browser. Fixed step of 30 ticks per second, time counted in ticks. Randomness only from the seeded `Rng`. No `Math.random`, `Date`, `performance`, `setTimeout`, `setInterval` or `requestAnimationFrame`. No `Math.sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|exp|expm1|log|log1p|log2|log10|pow|cbrt|hypot` and no `**` (engines may differ); compute directions with vectors and `Math.sqrt`.

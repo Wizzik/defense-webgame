@@ -1,6 +1,6 @@
 # Architecture
 
-A map of the code for people and agents. The full design is the spec in `docs/superpowers/specs/2026-11-04-defense-webgame-design.md` (Czech); read only the section your task needs. Parts marked *planned (phase 1)* do not exist yet.
+A map of the code for people and agents. The full design is the spec in `docs/superpowers/specs/2026-11-04-defense-webgame-design.md` (Czech); read only the section your task needs.
 
 ## Data flow
 
@@ -22,7 +22,7 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 | `data/schema/` | zod schemas and `validateGameData`, shared by the game and the tools | |
 | `data/generated/` | game data the client bundles | generated only; carries no map codes (from phase 1 Task 1) |
 | `sim/` | simulation | pure and deterministic (AGENTS.md) |
-| `client/` | browser code; `client/spike/` is the crowd benchmark | texts only via message files (phase 1) |
+| `client/` | browser code; `client/spike/` is the crowd benchmark | texts only via `client/ui/messages-*.ts` |
 | `e2e/` | Playwright, projects `webgl2-fallback` and `webgpu-swiftshader` | |
 | `tests/` | repository guards (map files, `sim/` purity) | |
 | `assets/` | CC0 assets, each listed in `assets/LICENSES.md` | |
@@ -32,11 +32,11 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 
 - A design entry names its map object by `source`. data-build looks it up in the export and fills params from `DataA`–`DataI`, `cooldown`, `area`, `range`, `duration` or `{ design: [...] }` (one value per level). A missing value takes the value of the level before.
 - `validateGameData(data: unknown): GameData` throws `GameDataError` with `path: message` lines.
-- Files: `heroes.json`, `abilities.json`, `constants.json`; phase 1 adds `enemies.json` and `rules.json`.
+- Files: `heroes.json`, `abilities.json`, `constants.json`, `enemies.json`, `rules.json`.
 - `data/generated.test.ts` guards the content, because data-build cannot run in CI.
 - Ability kinds (13) and targeting rules (8) are listed in `data/schema/ability.ts`.
 
-## Simulation (planned, phase 1)
+## Simulation
 
 - `createRun(data, { seed })` returns a `Run`. `run.step(input: TickInput)` advances one fixed step (30 per second). Systems run in a fixed order: hero movement, spawning, enemy AI, hero combat, abilities, crystals, castle regeneration, end check, level-up offer.
 - State lives in stores of typed arrays with a fixed capacity (`EnemyStore`, `CrystalStore`) and in hero and castle structs. Each step writes an `EventLog` (hits, deaths, casts, pickups, level-ups, run end) that the client turns into effects.
@@ -48,14 +48,17 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 
 - Renderer: Three.js `WebGPURenderer`, WebGPU with an automatic WebGL2 fallback (`?renderer=webgl2` forces it). The overlay shows the backend in use.
 - Crowd: one `InstancedMesh` per enemy type with the animation baked into a texture (VAT) at load time; `SpatialHash` finds neighbours.
-- *Planned (phase 1):* a fixed-step loop with interpolation; `RunView`s for the hero, enemies, crystals and effects; an HTML/CSS UI (menu, HUD, cards, end screen) with EN and CS messages.
-- Debug: `window.__spike`, and `window.__game` in phase 1; URL params `n`, `renderer`, plus `seed`, `speed`, `duration`, `debug`, `fps` and `lang` in phase 1.
+- `client/main.ts` wires the pieces; `client/game/` holds the session (menu, run, restart), the fixed-step loop with interpolation (`loop.ts`), URL parameters (`params.ts`), keyboard input and the debug snapshot (`debug.ts`).
+- `client/render/` draws the arena, hero, castle, enemies, crystals and spell effects from the simulation state and its `EventLog`.
+- `client/ui/` is an HTML/CSS layer: menu, HUD, upgrade cards, end screen and castle pointer. Texts come from `messages-en.ts` and `messages-cs.ts` through `t(lang, key)`.
+- `client/perf/` has the frame-rate overlay (`?fps=1`, bottom-left so it does not cover the HUD).
+- Debug: `window.__game` (game page) and `window.__spike` (benchmark). Game URL params: `seed`, `speed`, `duration`, `debug`, `fps`, `lang`, `renderer`; the spike takes `n` and `renderer`.
 
 ## Tests and delivery
 
 - `npm run check`: typecheck, Vitest and Python tests. Required before every commit.
-- `npm run e2e`: builds, serves the preview and runs Playwright in both projects. The render check hides the overlay and needs a luminance stddev above 2.5.
-- CI runs `.github/workflows/ci.yml`. `pages.yml` deploys `main` to https://wizzik.github.io/defense-webgame/ (the spike lives at `/spike/`).
+- `npm run e2e`: builds, serves the preview and runs Playwright in both projects. `e2e/fixtures.ts` makes every test fail on console or page errors. The game spec covers the menu, a level-up pick and the end screen; the render check hides the UI and needs a luminance stddev above 2.5.
+- CI runs `.github/workflows/ci.yml` on pushes to `main` and on pull requests (one run per ref, 25 minutes at most). `pages.yml` deploys `main` to https://wizzik.github.io/defense-webgame/ (the spike lives at `/spike/`).
 
 ## Glossary
 

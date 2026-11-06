@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { luminanceStdDev } from "./luminance";
 
 interface SpikeState {
@@ -23,12 +24,6 @@ async function waitForFrames(page: Page, min: number): Promise<void> {
 }
 
 test("renders crowd on available backend", async ({ page }, testInfo) => {
-  const errors: string[] = [];
-  page.on("console", (msg) => {
-    if (msg.type() === "error") errors.push(msg.text());
-  });
-  page.on("pageerror", (err) => errors.push(err.message));
-
   await page.goto("/spike/");
   await waitForFrames(page, 30);
 
@@ -48,8 +43,6 @@ test("renders crowd on available backend", async ({ page }, testInfo) => {
   const stdDev = await luminanceStdDev(page, shot);
   console.log(`crowd luminance stddev (${testInfo.project.name}): ${stdDev.toFixed(2)}`);
   expect(stdDev, `luminance stddev ${stdDev.toFixed(2)}`).toBeGreaterThan(2.5);
-
-  expect(errors).toEqual([]);
 });
 
 test("forced webgl2 uses WebGL2", async ({ page }) => {

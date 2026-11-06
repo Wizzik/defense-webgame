@@ -12,7 +12,7 @@ const swiftshaderArgs = [
 
 export default defineConfig({
   testDir: "e2e",
-  timeout: 120_000,
+  timeout: 180_000,
   workers: 1,
   fullyParallel: false,
   reporter: process.env.CI ? [["line"], ["html", { open: "never" }]] : [["line"]],

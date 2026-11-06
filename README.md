@@ -4,6 +4,22 @@ A browser survivors-like game built with TypeScript, Three.js and Vite. It is a 
 
 Design specification: [docs/superpowers/specs/2026-11-04-defense-webgame-design.md](docs/superpowers/specs/2026-11-04-defense-webgame-design.md). Architecture: [ARCHITECTURE.md](ARCHITECTURE.md). Current status: [docs/STATUS.md](docs/STATUS.md).
 
+## Play
+
+The game runs at https://wizzik.github.io/defense-webgame/ (the crowd benchmark is at `/spike/`). A run lasts 3 minutes. Move with WASD or the arrow keys, the spells cast themselves, pick an upgrade card with a click or the keys 1 to 3 when you level up.
+
+URL parameters (all optional):
+
+| Parameter | Values | Effect |
+|---|---|---|
+| `seed` | integer | Seed of the run; the same seed gives the same run. Default: random. |
+| `speed` | 1 to 16 | Simulation speed multiplier. Default 1. |
+| `duration` | 5 to 600 | Run length in seconds. Default: the full run. |
+| `debug` | `1` | Adds `window.__game.debug` (for example `grantXp(n)`). |
+| `fps` | `1` | Shows the frame-rate overlay (bottom-left). |
+| `lang` | `en`, `cs` | Interface language. Default: the browser language. |
+| `renderer` | `webgl2` | Forces the WebGL2 backend instead of WebGPU. |
+
 ## Commands
 - `npm run dev` - dev server
 - `npm run check` - typecheck and tests
