@@ -16,6 +16,7 @@ test("renders the arena and the hero", async ({ page }, testInfo) => {
   page.on("pageerror", (err) => errors.push(err.message));
 
   await page.goto("/?fps=1&seed=1");
+  await page.locator("#start").click();
   await page.waitForFunction(() => (window.__game?.frames ?? 0) > 30, undefined, {
     timeout: 90_000,
     polling: 250,

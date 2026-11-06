@@ -1,4 +1,4 @@
-import type { Run } from "../../sim";
+import { debugGrantXp, type Run } from "../../sim";
 import type { Backend } from "../render/gpu";
 
 /** Read by the e2e tests; refreshed every frame. */
@@ -12,6 +12,8 @@ export interface GameSnapshot {
   heroHp: number;
   castleHp: number;
   enemies: number;
+  /** Only with ?debug=1. */
+  debug?: { grantXp(amount: number): void };
 }
 
 declare global {
@@ -29,11 +31,21 @@ export function publishSnapshot(backend: Backend): GameSnapshot {
   return snapshot;
 }
 
-/** Counts a rendered frame and copies the run state. */
-export function updateSnapshot(snapshot: GameSnapshot, run: Run | null): void {
+/** Adds `window.__game.debug`; `getRun` is read at call time because the run is replaced on every start. */
+export function addDebugHooks(snapshot: GameSnapshot, getRun: () => Run | null): void {
+  snapshot.debug = {
+    grantXp(amount: number): void {
+      const run = getRun();
+      if (run) debugGrantXp(run, amount);
+    },
+  };
+}
+
+/** Counts a rendered frame and copies the run state; `menuOpen` shows "menu" in place of the run state. */
+export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen: boolean): void {
   snapshot.frames++;
   if (!run) return;
-  snapshot.screen = run.state;
+  snapshot.screen = menuOpen ? "menu" : run.state;
   snapshot.tick = run.tick;
   snapshot.level = run.hero.level;
   snapshot.kills = run.stats.kills;

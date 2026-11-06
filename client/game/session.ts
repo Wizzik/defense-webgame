@@ -24,6 +24,10 @@ export class Session {
   readonly views: RunView[] = [];
   readonly scene: Scene;
   run: Run | null = null;
+  /** Seed of the current run. */
+  seed = 0;
+  /** A paused session shows its run but does not step it (the menu backdrop). */
+  paused = false;
   private readonly data: GameData;
   private readonly params: GameParams;
   private readonly camera: FollowCamera;
@@ -40,8 +44,10 @@ export class Session {
     this.keyboard = deps.keyboard;
   }
 
-  start(seed: number): void {
+  start(seed: number, paused = false): void {
     this.run = createRun(this.data, { seed, durationSeconds: this.params.durationSeconds });
+    this.seed = seed;
+    this.paused = paused;
     this.pendingCard = -1;
   }
 
@@ -54,7 +60,7 @@ export class Session {
   frame(dtSeconds: number): void {
     const { run, input } = this;
     if (!run) return;
-    const steps = this.loop.advance(dtSeconds, this.params.speed);
+    const steps = this.paused ? 0 : this.loop.advance(dtSeconds, this.params.speed);
     for (let i = 0; i < steps; i++) {
       this.keyboard.read(input);
       input.card = this.pendingCard;

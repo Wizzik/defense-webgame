@@ -1,9 +1,10 @@
 /// <reference types="vite/client" />
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { Color, Scene, type WebGPURenderer } from "three/webgpu";
+import type { GameData } from "../data/schema";
 import { CRYSTAL_CAPACITY } from "../sim";
 import { loadGameData } from "./game/data";
-import { publishSnapshot, updateSnapshot } from "./game/debug";
+import { addDebugHooks, publishSnapshot, updateSnapshot } from "./game/debug";
 import { Keyboard } from "./game/keyboard";
 import { readGameParams } from "./game/params";
 import { Session } from "./game/session";
@@ -16,11 +17,36 @@ import { EnemyCrowd, IDLE_CLIP, PUNCH_CLIP, VAT_FPS, WALK_CLIP } from "./render/
 import { HeroView } from "./render/hero-view";
 import { createArena } from "./render/scene";
 import { bakeVat } from "./render/vat";
-import { pickLang, setLang, t } from "./ui/i18n";
+import { Cards } from "./ui/cards";
+import { CastlePointer } from "./ui/castle-pointer";
+import { EndScreen } from "./ui/end-screen";
+import { Hud } from "./ui/hud";
+import { type Lang, pickLang, t } from "./ui/i18n";
+import { Menu } from "./ui/menu";
+import "./ui/style.css";
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/robot-expressive/RobotExpressive.glb`;
 
 const ENEMY_TINT = 0x771111;
+const LANG_KEY = "defense-webgame.lang";
+
+let lang: Lang = "en";
+
+function readStoredLang(): string | null {
+  try {
+    return localStorage.getItem(LANG_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function storeLang(value: Lang): void {
+  try {
+    localStorage.setItem(LANG_KEY, value);
+  } catch {
+    // storage may be blocked; the choice then lasts until reload
+  }
+}
 
 function randomSeed(): number {
   return Math.floor(Math.random() * 0x1_0000_0000);
@@ -40,13 +66,17 @@ async function loadModel(): Promise<GLTF> {
 function showError(error: unknown): void {
   console.error(error);
   const element = document.getElementById("error")!;
-  element.textContent = error instanceof NoGpuError ? t("error.noGpu") : t("error.generic");
+  element.textContent =
+    error instanceof NoGpuError
+      ? t(lang, "error.noGpu")
+      : t(lang, "error.generic", { message: error instanceof Error ? error.message : String(error) });
   element.hidden = false;
 }
 
 async function start(): Promise<void> {
   const params = readGameParams(location.search, randomSeed);
-  setLang(pickLang(params.lang, navigator.language));
+  lang = pickLang(params.lang, readStoredLang(), navigator.language);
+  document.documentElement.lang = lang;
 
   const data = loadGameData();
   const { renderer, backend } = await createRenderer(params.renderer, document.body);
@@ -69,7 +99,8 @@ async function start(): Promise<void> {
   const effects = new Effects(data);
   scene.add(crowd.mesh, crystals.mesh, effects.object);
   session.views.push(heroView, crowd, crystals, effects);
-  session.start(params.seed);
+  // the menu shows a fresh, paused run behind it
+  session.start(params.seed, true);
 
   addEventListener("resize", () => {
     renderer.setSize(innerWidth, innerHeight);
@@ -77,6 +108,8 @@ async function start(): Promise<void> {
   });
 
   const snapshot = publishSnapshot(backend);
+  if (params.debug) addDebugHooks(snapshot, () => session.run);
+  const ui = createUi(data, session, followCamera, randomSeed);
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
   if (overlay) {
     document.getElementById("overlay")!.hidden = false;
@@ -88,7 +121,71 @@ async function start(): Promise<void> {
   session.frame(0);
   await renderer.compileAsync(scene, followCamera.camera);
 
-  runLoop(renderer, scene, followCamera, session, snapshot, overlay);
+  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui);
+}
+
+interface Ui {
+  update(width: number, height: number): void;
+  readonly menuOpen: boolean;
+}
+
+/** Builds the menu, HUD, cards, end screen and castle pointer, and wires them to the session. */
+function createUi(data: GameData, session: Session, followCamera: FollowCamera, nextSeed: () => number): Ui {
+  const root = document.getElementById("ui")!;
+  const heroDef = data.heroes.find((h) => h.id === data.rules.slice.hero)!;
+  let menuOpen = true;
+  const showMenu = (): void => {
+    menuOpen = true;
+    menu.setVisible(true);
+    end.hide();
+  };
+  const applyLang = (next: Lang): void => {
+    lang = next;
+    document.documentElement.lang = next;
+    storeLang(next);
+    menu.setLang(next, heroDef.name[next]);
+  };
+  const menu = new Menu(root, {
+    onStart: () => {
+      menuOpen = false;
+      session.paused = false;
+      menu.setVisible(false);
+    },
+    onLang: applyLang,
+  });
+  const hud = new Hud(root);
+  const pointer = new CastlePointer(root);
+  const cards = new Cards(root, (index) => session.setCard(index));
+  const end = new EndScreen(root, () => {
+    session.start(nextSeed(), true);
+    showMenu();
+  });
+  menu.setLang(lang, heroDef.name[lang]);
+  let ended = false;
+
+  return {
+    get menuOpen() {
+      return menuOpen;
+    },
+    update(width, height) {
+      const run = session.run;
+      if (!run) return;
+      hud.setVisible(!menuOpen);
+      if (menuOpen) {
+        ended = false;
+        cards.hide();
+        pointer.hide();
+        return;
+      }
+      hud.update(run, lang);
+      cards.update(run, lang);
+      pointer.update(run, followCamera.camera, width, height);
+      if ((run.state === "won" || run.state === "lost") && !ended) {
+        ended = true;
+        end.show(run, session.seed, lang);
+      }
+    },
+  };
 }
 
 function runLoop(
@@ -98,6 +195,7 @@ function runLoop(
   session: Session,
   snapshot: ReturnType<typeof publishSnapshot>,
   overlay: Overlay | null,
+  ui: Ui,
 ): void {
   let last = -1;
   renderer.setAnimationLoop((now) => {
@@ -107,7 +205,8 @@ function runLoop(
         overlay?.frame(now - last, now, session.run?.enemies.aliveCount ?? 0);
       }
       last = now;
-      updateSnapshot(snapshot, session.run);
+      ui.update(innerWidth, innerHeight);
+      updateSnapshot(snapshot, session.run, ui.menuOpen);
       renderer.render(scene, followCamera.camera);
     } catch (error) {
       renderer.setAnimationLoop(null);

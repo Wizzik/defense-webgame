@@ -6,19 +6,20 @@ export type MessageKey = keyof typeof messagesEn;
 
 const tables: Record<Lang, Record<MessageKey, string>> = { en: messagesEn, cs: messagesCs };
 
-let current: Lang = "en";
-
-/** `?lang` wins; otherwise Czech browsers get Czech and everyone else English. */
-export function pickLang(requested: Lang | undefined, browserLanguage: string): Lang {
-  if (requested) return requested;
-  return browserLanguage.toLowerCase().startsWith("cs") ? "cs" : "en";
+export function isLang(value: unknown): value is Lang {
+  return value === "en" || value === "cs";
 }
 
-export function setLang(lang: Lang): void {
-  current = lang;
-  document.documentElement.lang = lang;
+/** The URL wins, then the stored choice, then the browser (Czech gets Czech), then English. */
+export function pickLang(param: Lang | undefined, stored: string | null, browser: string): Lang {
+  if (param) return param;
+  if (isLang(stored)) return stored;
+  return browser.toLowerCase().startsWith("cs") ? "cs" : "en";
 }
 
-export function t(key: MessageKey): string {
-  return tables[current][key];
+/** Replaces every `{name}` with the value of the same name in `vars`. */
+export function t(lang: Lang, key: MessageKey, vars?: Record<string, string | number>): string {
+  const text = tables[lang][key];
+  if (!vars) return text;
+  return text.replace(/\{(\w+)\}/g, (match, name: string) => (name in vars ? String(vars[name]) : match));
 }
