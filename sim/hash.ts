@@ -35,5 +35,21 @@ export function stateHash(run: Run): number {
   mixFloat(hero.str);
   mixFloat(hero.agi);
   mixFloat(hero.int);
+  mixFloat(run.spawnCredit);
+  mixInt(run.nextGate);
+  const e = run.enemies;
+  for (let i = 0; i < e.capacity; i++) {
+    if (e.alive[i] === 0) continue;
+    mixInt(i);
+    mixInt(e.type[i]);
+    mixInt(e.role[i]);
+    mixFloat(e.x[i]);
+    mixFloat(e.y[i]);
+    mixFloat(e.hp[i]);
+    mixInt(e.attackCooldown[i]);
+    mixInt(e.stunTicks[i]);
+    mixInt(e.aggro[i]);
+    mixInt(e.action[i]);
+  }
   return h;
 }

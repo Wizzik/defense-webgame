@@ -25,4 +25,8 @@ describe("stateHash", () => {
   it("different inputs give a different hash", () => {
     expect(play(5, 99, 600)).not.toBe(play(5, 100, 600));
   });
+
+  it("different seed gives a different hash", () => {
+    expect(play(5, 99, 900)).not.toBe(play(6, 99, 900));
+  });
 });

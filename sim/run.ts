@@ -1,10 +1,14 @@
 import type { GameData } from "../data/schema";
 import { TICKS_PER_SECOND } from "./constants";
+import { regenCastle } from "./castle";
+import { updateEnemies } from "./enemy-ai";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
 import { heroStats, moveHero } from "./hero";
 import type { TickInput } from "./input";
 import { Rng } from "./rng";
+import { spawnEnemies } from "./spawner";
+import { SpatialHash } from "./spatial-grid";
 import type { CastleState, HeroState, HeroStats, RunStats } from "./world";
 
 export type RunState = "playing" | "levelUp" | "won" | "lost";
@@ -23,6 +27,9 @@ export class Run {
   readonly hero: HeroState;
   readonly castle: CastleState;
   readonly enemies: EnemyStore;
+  readonly grid: SpatialHash;
+  spawnCredit = 0;
+  nextGate = 0;
   readonly stats: RunStats = { kills: 0, damageDealt: 0 };
   readonly durationTicks: number;
   tick = 0;
@@ -34,6 +41,7 @@ export class Run {
     this.data = data;
     this.rng = new Rng(options.seed);
     this.enemies = new EnemyStore(rules.enemies.maxAlive);
+    this.grid = new SpatialHash(128, rules.enemies.maxAlive);
     this.durationTicks = Math.round(
       (options.durationSeconds ?? rules.run.durationSeconds) * TICKS_PER_SECOND,
     );
@@ -94,6 +102,9 @@ export class Run {
     this.events.clear();
     savePrevious(this);
     moveHero(this, input);
+    spawnEnemies(this);
+    updateEnemies(this);
+    regenCastle(this);
     this.tick++;
     checkEnd(this);
   }
@@ -111,6 +122,12 @@ function savePrevious(run: Run): void {
 }
 
 function checkEnd(run: Run): void {
+  if (run.castle.hp <= 0) {
+    run.state = "lost";
+    run.result = "castle";
+    run.events.push(EventKind.RunEnd, 1, 0, 0, 0, 0, 0);
+    return;
+  }
   if (run.tick >= run.durationTicks) {
     run.state = "won";
     run.result = "won";
