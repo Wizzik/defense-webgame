@@ -4,7 +4,7 @@ import { regenCastle } from "./castle";
 import { updateEnemies } from "./enemy-ai";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
-import { heroStats, moveHero } from "./hero";
+import { heroStats, moveHero, updateHeroCombat } from "./hero";
 import type { TickInput } from "./input";
 import { Rng } from "./rng";
 import { spawnEnemies } from "./spawner";
@@ -104,6 +104,7 @@ export class Run {
     moveHero(this, input);
     spawnEnemies(this);
     updateEnemies(this);
+    updateHeroCombat(this);
     regenCastle(this);
     this.tick++;
     checkEnd(this);
@@ -126,6 +127,12 @@ function checkEnd(run: Run): void {
     run.state = "lost";
     run.result = "castle";
     run.events.push(EventKind.RunEnd, 1, 0, 0, 0, 0, 0);
+    return;
+  }
+  if (run.hero.hp <= 0) {
+    run.state = "lost";
+    run.result = "hero";
+    run.events.push(EventKind.RunEnd, 2, 0, 0, 0, 0, 0);
     return;
   }
   if (run.tick >= run.durationTicks) {

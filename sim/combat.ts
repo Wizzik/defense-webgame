@@ -1,3 +1,4 @@
+import { Role } from "./enemies";
 import { EventKind } from "./events";
 import type { Rng } from "./rng";
 import type { Run } from "./run";
@@ -32,4 +33,29 @@ export function damageCastle(run: Run, amount: number, attacker: number): void {
   const ax = attacker >= 0 ? e.x[attacker] : castle.x;
   const ay = attacker >= 0 ? e.y[attacker] : castle.y;
   run.events.push(EventKind.CastleHit, attacker, amount, ax, ay, 0, 0);
+}
+
+/**
+ * Subtracts `amount` from an enemy, wakes a sieger and kills it at 0 hp.
+ * `source` is 0 for the base attack and 1 for an ability.
+ */
+export function damageEnemy(run: Run, slot: number, amount: number, source: 0 | 1): void {
+  const e = run.enemies;
+  if (e.alive[slot] === 0) return;
+  const before = e.hp[slot];
+  e.hp[slot] = before - amount;
+  e.lastHitTick[slot] = run.tick;
+  if (e.role[slot] === Role.Sieger) e.aggro[slot] = 1;
+  run.stats.damageDealt += Math.min(amount, before);
+  run.events.push(EventKind.Hit, slot, amount, e.x[slot], e.y[slot], source, 0);
+  if (e.hp[slot] <= 0) killEnemy(run, slot);
+}
+
+/** Emits Death, counts the kill and frees the slot. Task 7 adds the crystal drop here. */
+export function killEnemy(run: Run, slot: number): void {
+  const e = run.enemies;
+  if (e.alive[slot] === 0) return;
+  run.events.push(EventKind.Death, slot, 0, e.x[slot], e.y[slot], 0, 0);
+  run.stats.kills++;
+  e.kill(slot);
 }

@@ -1,5 +1,6 @@
 import type { GameData } from "../data/schema";
-import { TICK_SECONDS } from "./constants";
+import { armorReduction, damageEnemy, rollDamage } from "./combat";
+import { TICKS_PER_SECOND, TICK_SECONDS } from "./constants";
 import type { TickInput } from "./input";
 import type { Run } from "./run";
 import type { HeroState, HeroStats } from "./world";
@@ -47,4 +48,44 @@ export function moveHero(run: Run, input: TickInput): void {
   hero.facingX = dx;
   hero.facingY = dy;
   hero.moving = true;
+}
+
+/** Regenerates the hero, counts the attack cooldown down and attacks the nearest enemy in reach. */
+export function updateHeroCombat(run: Run): void {
+  const { hero, enemies: e, data } = run;
+  const stats = hero.stats;
+  if (hero.hp > 0) hero.hp = Math.min(stats.maxHp, hero.hp + stats.regenPerSecond * TICK_SECONDS);
+  if (hero.attackCooldown > 0) hero.attackCooldown--;
+  if (hero.attackCooldown > 0 || hero.hp <= 0) return;
+
+  const range = hero.def.baseAttack.range;
+  let best = -1;
+  let bestSq = 0;
+  let bestDx = 0;
+  let bestDy = 0;
+  for (let i = 0; i < e.capacity; i++) {
+    if (e.alive[i] === 0) continue;
+    const reach = stats.collision + data.enemies[e.type[i]].collision + range;
+    const dx = e.x[i] - hero.x;
+    const dy = e.y[i] - hero.y;
+    const sq = dx * dx + dy * dy;
+    if (sq > reach * reach) continue;
+    if (best < 0 || sq < bestSq) {
+      best = i;
+      bestSq = sq;
+      bestDx = dx;
+      bestDy = dy;
+    }
+  }
+  if (best < 0) return;
+
+  const reduction = armorReduction(data.enemies[e.type[best]].armor, data.constants.defenseArmor);
+  const amount = rollDamage(run.rng, stats.damageMin, stats.damageMax) * (1 - reduction);
+  if (!hero.moving && bestSq > 0) {
+    const len = Math.sqrt(bestSq);
+    hero.facingX = bestDx / len;
+    hero.facingY = bestDy / len;
+  }
+  hero.attackCooldown = Math.round(stats.attackIntervalSeconds * TICKS_PER_SECOND);
+  damageEnemy(run, best, amount, 0);
 }
