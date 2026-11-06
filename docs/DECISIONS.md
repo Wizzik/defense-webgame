@@ -4,6 +4,9 @@ Decisions that still apply. Check here before you change a rule. Newest first in
 
 ## Product (Petr)
 
+- 2026-11-06: Petr approved the phase 1 plan and gave blanket permission ("vše povoluji"). Work inside an approved plan, including the merge after a clean final review and green CI, goes ahead without asking.
+- 2026-11-06 (phase 1, Task 8): the first balance is a tuning result, not Petr's choice. To make the autopilot win most seeds and an idle run lose, castle HP went from 3000 to 10000 and the spawn rate to 0.18/0.22/0.26/0.30 per second (×0.4). Only `castle` and `phases` may be tuned without touching tests; the `hero`, `progression`, `run` and `arena` values are quoted by tests.
+
 - 2026-11-04: Two Stonehorn abilities were renamed: `cleaving-blows` → `enhanced-totem` and `concussion` → `seismic-echo`. Only the names changed. Their real map mechanics wait for phase 2: an empowered next attack every 7 s, and the hero's spells stunning and dealing bonus damage.
 - 2026-11-04: Phase 0 was accepted on fps measured on Petr's laptop (see `docs/STATUS.md`).
 - 2026-11-04: The repository is public. Map identifiers and names appear only in `tools/`, `design/` and `docs/`, never in anything shipped to players.
@@ -31,3 +34,7 @@ Decisions that still apply. Check here before you change a rule. Newest first in
 - E2E render check: the overlay is hidden and the luminance stddev must exceed 2.5 (an empty scene gives 0.39). At n=600 the test compares frame counts over 10 s.
 - Final whole-branch reviews run on the most capable model available. Fable needs usage credits, so they ran on Opus.
 - Phase 1 plan: the revised version (2026-11-06) replaced the first draft in commit f193a3f.
+- Simulation determinism: no transcendental `Math` functions or `**` in `sim/`, because their results may differ between JS engines and co-op needs identical runs. The repo guard enforces it.
+- Simulation tests set every rule value they assert on, so balance tuning cannot break them.
+- Event fields are fixed by the table in the phase 1 plan (Task 3). The client depends on them.
+- Commits use `Claude <noreply@anthropic.com>`, because the environment's signing check requires it (2026-11-06).
