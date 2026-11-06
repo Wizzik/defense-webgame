@@ -46,18 +46,14 @@ describe("data-build", () => {
     const ability = mapAbility(exportAbility("A001"), abilityEntry("pulse"));
     expect(ability).toStrictEqual({
       id: "pulse",
-      source: "A001",
       name: { en: "Pulse", cs: "Puls" },
       kind: "nova",
       targeting: "around_self",
       levels: 3,
       cooldown: [10, 10, 8],
       params: { damage: [100, 100, 300], radius: [200, 250, 300] },
-      review: { reason: "engine+script", jassFunctions: ["Trig_Test_Nova_Actions"], notes: "Fixture note." },
     });
-    expect(Object.keys(ability)).toEqual([
-      "id", "source", "name", "kind", "targeting", "levels", "cooldown", "params", "review",
-    ]);
+    expect(Object.keys(ability)).toEqual(["id", "name", "kind", "targeting", "levels", "cooldown", "params"]);
   });
 
   it("maps weapon_type mbounce to bounce", () => {
@@ -90,7 +86,6 @@ describe("data-build", () => {
     expect(data.heroes).toStrictEqual([
       {
         id: "fixture-hero",
-        source: "H001",
         name: { en: "Fixture Hero", cs: "Testovací hrdina" },
         primary: "agi",
         moveSpeed: 310,
@@ -107,16 +102,13 @@ describe("data-build", () => {
     expect(data.abilities.map((a) => a.id)).toEqual(["pulse", "focus", "spark", "echo"]);
     expect(data.abilities[2]).toStrictEqual({
       id: "spark",
-      source: "A003",
       name: { en: "Spark", cs: "Jiskra" },
       kind: "projectile",
       targeting: "nearest",
       levels: 3,
       cooldown: [6, 6, 6],
-      params: { damage: [50, 75, 100], range: [600, 700, 800], slow: [0.1, 0.2, 0.3] },
-      review: { reason: "script", jassFunctions: ["Trig_Test_Bolt_Actions"] },
+      params: { damage: [50, 75, 100], range: [600, 700, 800] },
     });
-    expect(data.abilities.filter((a) => a.review).map((a) => a.id)).toEqual(["pulse", "spark"]);
     expect(data.constants).toStrictEqual({
       strHitPointBonus: 20,
       agiAttackSpeedBonus: 0.01,
@@ -140,14 +132,13 @@ describe("data-build", () => {
     expect(message).toContain("artillery");
   });
 
-  it("appends design jassFunctions after the export ones", () => {
-    const entry = abilityEntry("pulse");
-    entry.review = { ...entry.review, jassFunctions: ["Trig_Test_Nova_Func002A", "Trig_Test_Nova_Actions"] };
-    expect(mapAbility(exportAbility("A001"), entry).review).toStrictEqual({
-      reason: "engine+script",
-      jassFunctions: ["Trig_Test_Nova_Actions", "Trig_Test_Nova_Func002A"],
-      notes: "Fixture note.",
-    });
+  it("writes no source or review", () => {
+    const data = buildGameData(mapExport(), design(), "test");
+    for (const item of [...data.heroes, ...data.abilities]) {
+      expect(Object.keys(item)).not.toContain("source");
+      expect(Object.keys(item)).not.toContain("review");
+    }
+    expect(JSON.stringify(data)).not.toMatch(/Trig_|A00\d|H001/);
   });
 
   it("rejects review notes on an ability that is not script-backed", () => {

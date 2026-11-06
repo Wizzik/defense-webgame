@@ -1,7 +1,6 @@
 [
   {
     "id": "rock-rupture",
-    "source": "A0A7",
     "name": {
       "en": "Rock Rupture",
       "cs": "Skalní zlom"
@@ -45,20 +44,10 @@
         2,
         2
       ]
-    },
-    "review": {
-      "reason": "engine+script",
-      "jassFunctions": [
-        "AI_Setup",
-        "LB_Init",
-        "Trig_AllStun_Func001Func002C",
-        "Trig_Shock_Rock_Conditions"
-      ]
     }
   },
   {
     "id": "enhanced-totem",
-    "source": "A0A8",
     "name": {
       "en": "Enhanced Totem",
       "cs": "Posílený totem"
@@ -88,19 +77,10 @@
         0,
         0
       ]
-    },
-    "review": {
-      "reason": "engine+script",
-      "jassFunctions": [
-        "AI_Setup",
-        "Trig_AllStun_Func001Func002C"
-      ],
-      "notes": "splashRadius and splashPercent are 0: no trigger code holds a splash radius or percentage. Trig_AllStun_Func001Func002C belongs to the Trig_AllStun_* trigger (war3map.j v20.75, lines 27704-27739), which answers casts of A0A7, A0AA or A0A8 by O00C with the seismic-echo stun (see seismic-echo). A0A8 is the only ability that applies buff B00U. Trig_Attacked_Entotem_Conditions/Actions (27664-27676) and Trig_DealDamage_Conditions/Actions (27678-27690) remove B00U from the attacker after the attacked unit takes damage from it, so the buff lasts for one hit and has no radius. The size of that hit is object data, not script: DataA damage increase 3, 5, 7, 9, 10. AI_Setup (33277-33279) only stores AI hints."
     }
   },
   {
     "id": "seismic-echo",
-    "source": "A00M",
     "name": {
       "en": "Seismic Echo",
       "cs": "Seizmická ozvěna"
@@ -137,20 +117,10 @@
         0,
         0
       ]
-    },
-    "review": {
-      "reason": "engine+script",
-      "jassFunctions": [
-        "AI_Setup",
-        "Trig_AllStun_Actions",
-        "Trig_Learn_Allstun_Conditions"
-      ],
-      "notes": "chance, stunSeconds and bonusDamage are 0: no trigger code holds these values. Trig_Learn_Allstun_Conditions/Actions (war3map.j v20.75, lines 27692-27702) enable the Trig_AllStun_* trigger once A00M is learned. Trig_AllStun_Func001Func002C, Trig_AllStun_Func001C and Trig_AllStun_Conditions (27704-27732) let it fire on every cast of A0A7, A0AA or A0A8 by O00C, with no chance roll. Trig_AllStun_Actions (27734-27739) then creates one dummy unit (e012, timed life 1 s) that casts A0A9 at the caster's A00M level. Stun length and damage are A0A9's object data, not script: duration 1, 1.5, 2, 2.5, 3; DataA damage 150, 300, 450, 600, 750; area 350. AI_Setup (32758) only lists A00M as hero slot 2 of O00C."
     }
   },
   {
     "id": "earthquake",
-    "source": "A0AA",
     "name": {
       "en": "Earthquake",
       "cs": "Zemětřesení"
@@ -171,21 +141,10 @@
         500,
         600
       ]
-    },
-    "review": {
-      "reason": "engine+script",
-      "jassFunctions": [
-        "AI_Setup",
-        "LB_Init",
-        "Trig_AllStun_Func001Func002C",
-        "Trig_Echo_Slam_Conditions",
-        "Trig_Echo_Slam_Func002A"
-      ]
     }
   },
   {
     "id": "hunters-focus",
-    "source": "A01A",
     "name": {
       "en": "Hunter's Focus",
       "cs": "Soustředění lovce"
@@ -212,7 +171,6 @@
   },
   {
     "id": "falling-stars",
-    "source": "A01B",
     "name": {
       "en": "Falling Stars",
       "cs": "Padající hvězdy"
@@ -256,18 +214,10 @@
         1,
         1
       ]
-    },
-    "review": {
-      "reason": "engine+script",
-      "jassFunctions": [
-        "AI_Setup",
-        "LB_Init"
-      ]
     }
   },
   {
     "id": "swift-pace",
-    "source": "A007",
     "name": {
       "en": "Swift Pace",
       "cs": "Rychlý krok"
@@ -301,7 +251,6 @@
   },
   {
     "id": "shadow-sisters",
-    "source": "A019",
     "name": {
       "en": "Shadow Sisters",
       "cs": "Stínové sestry"
@@ -334,7 +283,6 @@
   },
   {
     "id": "grave-grasp",
-    "source": "A02H",
     "name": {
       "en": "Grave Grasp",
       "cs": "Hrobový stisk"
@@ -371,34 +319,10 @@
         3200,
         6400
       ]
-    },
-    "review": {
-      "reason": "engine+script",
-      "jassFunctions": [
-        "AI_Setup",
-        "Trig_Catch_Func004C",
-        "Trig_Catch_Func004Func001C",
-        "Trig_Catch_Func004Func001Func001C",
-        "Trig_Catch_Func004Func001Func001Func001C",
-        "Trig_Catch_Func004Func001Func001Func001Func001C",
-        "Trig_Dead_Catch_Conditions",
-        "Trig_Dead_Catch_Func003C",
-        "Trig_Dead_Catch_Func003Func001C",
-        "Trig_Dead_Catch_Func003Func001Func001C",
-        "Trig_Dead_Catch_Func003Func001Func001Func001C",
-        "Trig_Dead_Catch_Func003Func001Func001Func001Func001C",
-        "Trig_Dead_Catch_Func003Func002A",
-        "Trig_Dead_Catch_Func003Func001Func002A",
-        "Trig_Dead_Catch_Func003Func001Func001Func002A",
-        "Trig_Dead_Catch_Func003Func001Func001Func001Func002A",
-        "Trig_Dead_Catch_Func003Func001Func001Func001Func001Func002A"
-      ],
-      "notes": "damage per level is the UnitDamageTargetBJ amount in the group callbacks that Trig_Dead_Catch_Actions runs for each A02H level (war3map.j v20.75): 400 (Trig_Dead_Catch_Func003Func002A, line 18020), 800 (Trig_Dead_Catch_Func003Func001Func002A, 17992), 1600 (Trig_Dead_Catch_Func003Func001Func001Func002A, 17964), 3200 (Trig_Dead_Catch_Func003Func001Func001Func001Func002A, 17936), 6400 (Trig_Dead_Catch_Func003Func001Func001Func001Func001Func002A, 17908). Each living enemy within the group radius of the target point takes it once. That radius in Trig_Dead_Catch_Actions (lines 18036-18052: 250, 300, 350, 400, 500) equals the object data area used for radius; range is object data. Not mapped: each hit also creates a dummy unit (h00J, timed life 3 s) ordered to attack the caster, and Trig_Catch_Actions heals the caster by 50, 100, 150, 200, 300 per level when it attacks (lines 18113-18125). AI_Setup (33067-33069) only stores AI hints."
     }
   },
   {
     "id": "skull-ring",
-    "source": "A02K",
     "name": {
       "en": "Skull Ring",
       "cs": "Kruh lebek"
@@ -428,18 +352,10 @@
         450,
         550
       ]
-    },
-    "review": {
-      "reason": "engine+script",
-      "jassFunctions": [
-        "AI_Setup",
-        "LB_Init"
-      ]
     }
   },
   {
     "id": "soul-bolt",
-    "source": "A036",
     "name": {
       "en": "Soul Bolt",
       "cs": "Střela duše"
@@ -469,18 +385,10 @@
         99999,
         99999
       ]
-    },
-    "review": {
-      "reason": "engine+script",
-      "jassFunctions": [
-        "AI_Setup",
-        "LB_Init"
-      ]
     }
   },
   {
     "id": "bone-stampede",
-    "source": "A037",
     "name": {
       "en": "Bone Stampede",
       "cs": "Kostěné stádo"
@@ -513,18 +421,10 @@
         275,
         350
       ]
-    },
-    "review": {
-      "reason": "engine+script",
-      "jassFunctions": [
-        "AI_Setup",
-        "LB_Init"
-      ]
     }
   },
   {
     "id": "serpent-totem",
-    "source": "A062",
     "name": {
       "en": "Serpent Totem",
       "cs": "Hadí totem"
@@ -565,7 +465,6 @@
   },
   {
     "id": "forked-bolt",
-    "source": "A064",
     "name": {
       "en": "Forked Bolt",
       "cs": "Rozvětvený blesk"
@@ -609,18 +508,10 @@
         300,
         300
       ]
-    },
-    "review": {
-      "reason": "engine+script",
-      "jassFunctions": [
-        "AI_Setup",
-        "LB_Init"
-      ]
     }
   },
   {
     "id": "mending-tide",
-    "source": "A063",
     "name": {
       "en": "Mending Tide",
       "cs": "Hojivý příliv"
@@ -661,7 +552,6 @@
   },
   {
     "id": "spirit-ward",
-    "source": "A065",
     "name": {
       "en": "Spirit Ward",
       "cs": "Duchovní ochrana"

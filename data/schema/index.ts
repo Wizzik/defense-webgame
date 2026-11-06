@@ -5,7 +5,7 @@ import { HeroSchema } from "./hero";
 
 export { AbilityKind, AbilitySchema, Targeting } from "./ability";
 export type { Ability } from "./ability";
-export { LocalizedText, Slug, SourceId } from "./common";
+export { LocalizedText, Slug } from "./common";
 export { ConstantsSchema } from "./constants";
 export type { Constants } from "./constants";
 export { HeroSchema } from "./hero";
@@ -15,7 +15,7 @@ export const GameDataSchema = z.object({
   heroes: z.array(HeroSchema),
   abilities: z.array(AbilitySchema),
   constants: ConstantsSchema,
-});
+}).strict();
 
 export type GameData = z.infer<typeof GameDataSchema>;
 
@@ -26,12 +26,24 @@ export class GameDataError extends Error {
   }
 }
 
+/** Joins an issue path; items of the top-level arrays get their id: `abilities.3 (soul-bolt).targeting`. */
+function describePath(data: unknown, path: PropertyKey[]): string {
+  if (path.length === 0) return "(root)";
+  const parts = path.map(String);
+  if (path.length >= 2 && typeof path[1] === "number") {
+    const list = (data as Record<string, unknown> | null)?.[String(path[0])];
+    const id = Array.isArray(list) ? (list[path[1]] as { id?: unknown } | undefined)?.id : undefined;
+    if (typeof id === "string") parts[1] = `${parts[1]} (${id})`;
+  }
+  return parts.join(".");
+}
+
 /** Validates raw data against the schemas plus cross-reference and uniqueness rules. */
 export function validateGameData(data: unknown): GameData {
   const parsed = GameDataSchema.safeParse(data);
   if (!parsed.success) {
     throw new GameDataError(
-      parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`),
+      parsed.error.issues.map((i) => `${describePath(data, i.path)}: ${i.message}`),
     );
   }
   const { heroes, abilities } = parsed.data;

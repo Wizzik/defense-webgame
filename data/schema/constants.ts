@@ -6,6 +6,6 @@ export const ConstantsSchema = z.object({
   defenseArmor: z.number(),
   attackSpeedCap: z.number(),
   mapVersion: z.string(),
-});
+}).strict();
 
 export type Constants = z.infer<typeof ConstantsSchema>;

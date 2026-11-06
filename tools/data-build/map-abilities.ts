@@ -15,30 +15,23 @@ export function mapAbility(exp: ExportAbility, entry: AbilityEntry): Ability {
   const params = Object.fromEntries(
     Object.entries(entry.params ?? {}).map(([key, spec]) => [key, resolve(`params.${key}`, spec)]),
   );
+  checkReview(exp, entry, where);
   // The key order here is the order in data/generated. validateGameData (build.ts) checks the shape.
   return {
     id: entry.id,
-    source: exp.id,
     name: entry.name,
     kind: entry.kind,
     targeting: entry.targeting,
     levels: exp.levels,
     cooldown: resolve("cooldown", "cooldown"),
     params,
-    ...review(exp, entry, where),
   } as Ability;
 }
 
-/** Script-backed abilities list the JASS functions to read when they are ported. */
-function review(exp: ExportAbility, entry: AbilityEntry, where: string): Pick<Ability, "review"> {
+/** The review notes stay in design/abilities.yaml; they may only sit on script-backed abilities. */
+function checkReview(exp: ExportAbility, entry: AbilityEntry, where: string): void {
   const reason = exp.implementation;
-  if (reason === "script" || reason === "engine+script") {
-    const notes = entry.review?.notes;
-    const jassFunctions = [...new Set([...(exp.jass_functions ?? []), ...(entry.review?.jassFunctions ?? [])])];
-    return { review: { reason, jassFunctions, ...(notes === undefined ? {} : { notes }) } };
-  }
-  if (entry.review !== undefined) {
+  if (entry.review !== undefined && reason !== "script" && reason !== "engine+script") {
     throw new Error(`${where}: review: ${exp.id} is not script-backed (implementation ${reason ?? "none"})`);
   }
-  return {};
 }

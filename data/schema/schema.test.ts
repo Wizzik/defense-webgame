@@ -3,12 +3,11 @@ import { GameDataError, validateGameData } from "./index";
 
 function fixture(): any {
   const names = (n: string) => ({ en: n, cs: n });
-  const base = { source: "A000", levels: 3, cooldown: [5, 4, 3] };
+  const base = { levels: 3, cooldown: [5, 4, 3] };
   return {
     heroes: [
       {
         id: "hero-one",
-        source: "H000",
         name: names("Hero"),
         primary: "str",
         moveSpeed: 300,
@@ -30,7 +29,7 @@ function fixture(): any {
       { ...base, id: "rend", name: names("Rend"), kind: "on_hit", targeting: "on_attack",
         params: { chance: [0.1, 0.2, 0.3] } },
       { ...base, id: "swarm", name: names("Swarm"), kind: "summon", targeting: "self",
-        params: { count: [1, 2, 3], duration: [10, 10, 10], stunSeconds: [1, 1, 1] } },
+        params: { count: [1, 2, 3], duration: [10, 10, 10], range: [1, 1, 1] } },
     ],
     constants: {
       strHitPointBonus: 19,
@@ -62,7 +61,7 @@ describe("game data schemas", () => {
   it("reports path of invalid kind", () => {
     const d = fixture();
     d.abilities[0].kind = "bogus";
-    expect(errorMessage(d)).toContain("abilities.0.kind");
+    expect(errorMessage(d)).toContain("abilities.0 (pulse).kind");
   });
 
   it("rejects per-level length mismatch", () => {
@@ -71,26 +70,26 @@ describe("game data schemas", () => {
     d.abilities[0].params = { damage: [1, 2, 3, 4, 5], radius: [1, 2, 3, 4, 5] };
     d.abilities[0].cooldown = [1, 2, 3];
     const msg = errorMessage(d);
-    expect(msg).toContain("abilities.0.cooldown");
-    expect(msg).not.toContain("abilities.0.params");
+    expect(msg).toContain("abilities.0 (pulse).cooldown");
+    expect(msg).not.toContain("abilities.0 (pulse).params");
   });
 
   it("rejects params length mismatch", () => {
     const d = fixture();
     d.abilities[0].params.radius = [1];
-    expect(errorMessage(d)).toContain("abilities.0.params.radius");
+    expect(errorMessage(d)).toContain("abilities.0 (pulse).params.radius");
   });
 
   it("rejects missing required param", () => {
     const d = fixture();
     delete d.abilities[0].params.radius;
-    expect(errorMessage(d)).toContain("abilities.0.params.radius");
+    expect(errorMessage(d)).toContain("abilities.0 (pulse).params.radius");
   });
 
   it("rejects aura without any bonus param", () => {
     const d = fixture();
     d.abilities[1].params = { other: [1, 1, 1] };
-    expect(errorMessage(d)).toContain("abilities.1.params");
+    expect(errorMessage(d)).toContain("abilities.1 (might).params");
   });
 
   it("rejects dangling ability reference", () => {
@@ -103,5 +102,54 @@ describe("game data schemas", () => {
     const d = fixture();
     d.abilities[1].id = "pulse";
     expect(errorMessage(d)).toContain("pulse");
+  });
+
+  it("rejects unknown top-level key", () => {
+    const d = fixture();
+    d.heroes[0].source = "H000";
+    expect(errorMessage(d)).toContain("heroes.0 (hero-one)");
+  });
+
+  it("rejects unknown param key for the kind", () => {
+    const d = fixture();
+    d.abilities.push({
+      levels: 3, cooldown: [5, 4, 3], id: "wave", name: { en: "W", cs: "W" }, kind: "line",
+      targeting: "move_direction",
+      params: { damage: [1, 2, 3], length: [1, 2, 3], width: [1, 2, 3], stunSecond: [1, 1, 1] },
+    });
+    const msg = errorMessage(d);
+    expect(msg).toContain("abilities.4 (wave).params");
+    expect(msg).toContain("stunSecond");
+  });
+
+  it("accepts optional params of the kind", () => {
+    const d = fixture();
+    d.abilities.push({
+      levels: 3, cooldown: [5, 4, 3], id: "wave", name: { en: "W", cs: "W" }, kind: "line",
+      targeting: "move_direction",
+      params: {
+        damage: [1, 2, 3], length: [1, 2, 3], width: [1, 2, 3],
+        stunSeconds: [1, 1, 1], waveSpeed: [1, 1, 1],
+      },
+    });
+    expect(() => validateGameData(d)).not.toThrow();
+  });
+
+  it("rejects levels 0 and 6", () => {
+    for (const levels of [0, 6]) {
+      const d = fixture();
+      d.abilities[0].levels = levels;
+      expect(errorMessage(d)).toContain("abilities.0 (pulse).levels");
+    }
+  });
+
+  it("rejects negative cooldown", () => {
+    const d = fixture();
+    d.abilities[0].cooldown = [5, -1, 3];
+    expect(errorMessage(d)).toContain("abilities.0 (pulse).cooldown.1");
+  });
+
+  it("renders root issues as (root)", () => {
+    expect(errorMessage(42)).toMatch(/^\(root\): /);
   });
 });

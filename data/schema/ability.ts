@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LocalizedText, Slug, SourceId } from "./common";
+import { LocalizedText, Slug } from "./common";
 
 export const AbilityKind = z.enum([
   "projectile", "instant", "chain", "area", "line", "nova", "cone",
@@ -13,39 +13,35 @@ export const Targeting = z.enum([
 
 const PerLevel = z.array(z.number());
 
-/** Params object with required keys (number arrays) and optional extra number-array keys. */
-function params<K extends string>(required: readonly K[]) {
-  const shape = Object.fromEntries(required.map((k) => [k, PerLevel])) as Record<K, typeof PerLevel>;
-  return z.object(shape).catchall(PerLevel);
+/** Params of a kind: required keys, optional keys, and nothing else. */
+function params<R extends string, O extends string>(required: readonly R[], optional: readonly O[] = []) {
+  const shape = {
+    ...Object.fromEntries(required.map((k) => [k, PerLevel])),
+    ...Object.fromEntries(optional.map((k) => [k, PerLevel.optional()])),
+  } as Record<R, typeof PerLevel> & Record<O, z.ZodOptional<typeof PerLevel>>;
+  return z.object(shape).strict();
 }
 
-/** Params where at least one of the listed keys must be present. */
-function paramsAnyOf(keys: readonly string[]) {
-  return z.object({}).catchall(PerLevel).superRefine((p, ctx) => {
-    if (!keys.some((k) => k in p)) {
-      ctx.addIssue({ code: "custom", message: `needs at least one of: ${keys.join(", ")}` });
+/** Params where at least one of the listed keys must be present; the optional keys may follow. */
+function paramsAnyOf(anyOf: readonly string[], optional: readonly string[] = []) {
+  const shape = Object.fromEntries([...anyOf, ...optional].map((k) => [k, PerLevel.optional()]));
+  return z.object(shape).strict().superRefine((p, ctx) => {
+    if (!anyOf.some((k) => k in p)) {
+      ctx.addIssue({ code: "custom", message: `needs at least one of: ${anyOf.join(", ")}` });
     }
   });
 }
 
 const common = {
   id: Slug,
-  source: SourceId,
   name: LocalizedText,
   targeting: Targeting,
   levels: z.number().int().min(1).max(5),
   cooldown: z.array(z.number().min(0)),
-  review: z
-    .object({
-      reason: z.enum(["script", "engine+script"]),
-      jassFunctions: z.array(z.string()),
-      notes: z.string().optional(),
-    })
-    .optional(),
 };
 
 function variant<K extends string, P extends z.ZodType>(kind: K, p: P) {
-  return z.object({ ...common, kind: z.literal(kind), params: p });
+  return z.object({ ...common, kind: z.literal(kind), params: p }).strict();
 }
 
 export const AbilitySchema = z
@@ -54,13 +50,13 @@ export const AbilitySchema = z
     variant("instant", params(["damage", "range"])),
     variant("chain", params(["damage", "range", "bounces"])),
     variant("area", params(["damage", "radius", "range"])),
-    variant("line", params(["damage", "length", "width"])),
-    variant("nova", params(["damage", "radius"])),
+    variant("line", params(["damage", "length", "width"], ["stunSeconds", "waveSpeed"])),
+    variant("nova", params(["damage", "radius"], ["slow", "slowSeconds"])),
     variant("cone", params(["damage", "length", "endWidth", "maxTargets"])),
-    variant("ticking_area", params(["tickDamage", "ticksPerSecond", "radius", "duration"])),
+    variant("ticking_area", params(["tickDamage", "ticksPerSecond", "radius", "duration"], ["hitRadius"])),
     variant("aura", paramsAnyOf(["damageBonus", "moveSpeedBonus", "attackSpeedBonus"])),
-    variant("summon", params(["count", "duration"])),
-    variant("on_hit", paramsAnyOf(["chance", "splashRadius", "bonusDamage"])),
+    variant("summon", params(["count", "duration"], ["range", "damageDealt", "damageTaken"])),
+    variant("on_hit", paramsAnyOf(["chance", "splashRadius", "bonusDamage"], ["splashPercent", "stunSeconds"])),
     variant("heal", params(["amount", "maxTargets", "range"])),
     variant("shield", params(["duration", "radius"])),
   ])

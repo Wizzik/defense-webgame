@@ -1,7 +1,6 @@
 [
   {
     "id": "stonehorn",
-    "source": "O00C",
     "name": {
       "en": "Stonehorn",
       "cs": "Kamenorohý"
@@ -38,7 +37,6 @@
   },
   {
     "id": "nightglaive",
-    "source": "O008",
     "name": {
       "en": "Nightglaive",
       "cs": "Noční čepel"
@@ -75,7 +73,6 @@
   },
   {
     "id": "gravecaller",
-    "source": "O00F",
     "name": {
       "en": "Gravecaller",
       "cs": "Hrobník"
@@ -112,7 +109,6 @@
   },
   {
     "id": "serpent-shaman",
-    "source": "O00X",
     "name": {
       "en": "Serpent Shaman",
       "cs": "Hadí šaman"

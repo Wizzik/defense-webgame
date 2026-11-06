@@ -22,7 +22,6 @@ export function mapHero(exp: ExportHero, entry: HeroEntry): Hero {
   // The key order here is the order in data/generated. validateGameData (build.ts) checks the shape.
   return {
     id: entry.id,
-    source: exp.id,
     name: entry.name,
     primary: String(exp.primary).toLowerCase() as Hero["primary"],
     moveSpeed: exp.move_speed,
