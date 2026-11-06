@@ -76,7 +76,7 @@ export class Session {
     }
     // Frozen while a card is chosen or the run is over: no interpolation, no animation time.
     const { alpha, dt } = viewTiming(run.state, this.loop.alpha, dtSeconds);
-    for (const view of this.views) view.update(run, alpha, dt);
+    // The camera moves first so views that project to the screen use this frame's camera.
     const { hero } = run;
     this.camera.follow(
       (hero.prevX + (hero.x - hero.prevX) * alpha) * SCENE_SCALE,
@@ -84,6 +84,7 @@ export class Session {
       dtSeconds,
       dt,
     );
+    for (const view of this.views) view.update(run, alpha, dt);
   }
 
   private shakeForEvents(run: Run): void {

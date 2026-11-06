@@ -70,11 +70,12 @@ describe("knockback", () => {
     for (let i = 0; i < 10; i++) step(run);
     expect(run.enemies.x[a]).toBeLessThanOrEqual(edge + 1e-9);
 
-    // hero between the enemy and the castle's far side: push the enemy into the castle
+    // enemy just north of the castle, hero further north: the knock pushes it south into the castle
     run.hero.x = 0;
-    run.hero.y = -2600;
+    run.hero.y = -1500;
     const c = spawn(run, 0, -2000 + 180 + 31 + 5);
     damageEnemy(run, c, 10, 1);
+    expect(run.enemies.knockVY[c]).toBeLessThan(0);
     for (let i = 0; i < 10; i++) step(run);
     const dx = run.enemies.x[c] - run.castle.x;
     const dy = run.enemies.y[c] - run.castle.y;
