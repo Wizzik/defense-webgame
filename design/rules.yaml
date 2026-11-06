@@ -2,6 +2,7 @@
 # Comments may name the origin in the map; they never reach data/generated/rules.json.
 # The map's castle (hcas) has 155 000 HP and regenerates 200 HP/s.
 # The spawn flow starts from 7 units per gate per 30 s on Normal.
+# Tuned with `npm run sim:run -- --runs 5` (castle hp, hunterShare, xpStep) for the survivors pace.
 slice: { hero: stonehorn, ability: rock-rupture }
 run:
   durationSeconds: 180
@@ -9,17 +10,17 @@ run:
   timeScaling: { seconds: 1200, cap: 2 }   # enemy HP and damage x min(cap, 1 + t / seconds), spec 3.2
 arena:
   width: 6000
-  height: 5000
-  castle: { x: 0, y: -2000 }
-  heroStart: { x: 0, y: -1500 }
-  gates: [{ x: -1800, y: 2200 }, { x: 1800, y: 2200 }]
+  height: 4400
+  castle: { x: 0, y: -1700 }
+  heroStart: { x: 0, y: -1200 }
+  gates: [{ x: -1600, y: 1500 }, { x: 1600, y: 1500 }]
   gateRadius: 150
-castle: { hp: 10000, radius: 180, regenPercentPerMinute: 2 }
+castle: { hp: 12000, radius: 180, regenPercentPerMinute: 2 }
 hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01 }
-enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900 }
+enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 } }
 phases:
-  - { enemy: shieldbearer, spawnPerSecond: 0.18, hunterShare: 0.2 }
-  - { enemy: shieldbearer, spawnPerSecond: 0.22, hunterShare: 0.25 }
-  - { enemy: shieldbearer, spawnPerSecond: 0.26, hunterShare: 0.3 }
-  - { enemy: shieldbearer, spawnPerSecond: 0.30, hunterShare: 0.35 }
-progression: { xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3 }
+  - { enemy: shieldbearer, spawnPerSecond: 1.2, hunterShare: 0.2 }
+  - { enemy: shieldbearer, spawnPerSecond: 1.8, hunterShare: 0.2 }
+  - { enemy: shieldbearer, spawnPerSecond: 2.4, hunterShare: 0.2 }
+  - { enemy: shieldbearer, spawnPerSecond: 3.0, hunterShare: 0.2 }
+progression: { xpFirst: 5, xpStep: 3, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3 }

@@ -31,6 +31,7 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 ## Game data
 
 - A design entry names its map object by `source`. data-build looks it up in the export and fills params from `DataA`–`DataI`, `cooldown`, `area`, `range`, `duration` or `{ design: [...] }` (one value per level). A missing value takes the value of the level before.
+- `design/scaling.yaml` holds uniform multipliers from the map's numbers to the survivors pace (hero `moveSpeed` and attack cooldown, ability cooldown, enemy `hp` and `moveSpeed`). `tools/data-build/scaling.ts` applies them after mapping; speeds and hp are rounded to integers, cooldowns to 2 decimals. The map's ratios stay; retune the pace there, not in the generated JSON.
 - `validateGameData(data: unknown): GameData` throws `GameDataError` with `path: message` lines.
 - Files: `heroes.json`, `abilities.json`, `constants.json`, `enemies.json`, `rules.json`.
 - `data/generated.test.ts` guards the content, because data-build cannot run in CI.
@@ -49,7 +50,8 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 - Renderer: Three.js `WebGPURenderer`, WebGPU with an automatic WebGL2 fallback (`?renderer=webgl2` forces it). The overlay shows the backend in use.
 - Crowd: one `InstancedMesh` for all enemies (sized per instance by type) with the animation baked into a texture (VAT) at load time. `SpatialHash` lives in `sim/spatial-grid.ts` and serves the sim's separation and the spike, not the game client.
 - `client/main.ts` wires the pieces, including the menu and restart wiring (`createUi`); `client/game/` holds the session (run, frames, input), the fixed-step loop with interpolation (`loop.ts`), URL parameters (`params.ts`), keyboard input and the debug snapshot (`debug.ts`).
-- `client/render/` draws the arena, hero, castle, enemies, crystals and spell effects from the simulation state and its `EventLog`.
+- `client/render/` draws the arena, hero, castle, enemies, crystals and spell effects from the simulation state and its `EventLog`. It also handles the death pop, the pooled DOM damage numbers (`damage-numbers.ts`, pure pool logic in `damage-number-pool.ts`) and the camera shake (`FollowCamera.shake`). Effects freeze while the run is paused.
+- `client/audio/` synthesizes the sound effects with Web Audio, with no audio assets. `Sfx` makes the sounds, `SoundView` turns events into sounds, and `Throttle` allows each sound at most 4 times per 50 ms. The `AudioContext` is created on the Start click. M or the menu toggle mutes, and the choice is stored in `localStorage`.
 - `client/ui/` is an HTML/CSS layer: menu, HUD, upgrade cards, end screen and castle pointer. Texts come from `messages-en.ts` and `messages-cs.ts` through `t(lang, key)`.
 - `client/perf/` has the frame-rate overlay (`?fps=1`, bottom-left so it does not cover the HUD).
 - Debug: `window.__game` (game page) and `window.__spike` (benchmark). Game URL params: `seed`, `speed`, `duration`, `debug`, `fps`, `lang`, `renderer`; the spike takes `n`, `renderer` and `seed`.

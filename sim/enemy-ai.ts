@@ -17,6 +17,8 @@ export function updateEnemies(run: Run): void {
   const arenaX = rules.arena.width / 2;
   const arenaY = rules.arena.height / 2;
 
+  const knockTotal = Math.max(1, Math.round(rules.enemies.knockback.seconds * TICKS_PER_SECOND));
+
   grid.clear();
   for (let i = 0; i < e.capacity; i++) {
     if (e.alive[i] === 1) grid.insert(i, e.x[i], e.y[i]);
@@ -102,6 +104,14 @@ export function updateEnemies(run: Run): void {
 
     let nx = x + vx * TICK_SECONDS;
     let ny = y + vy * TICK_SECONDS;
+
+    // Knockback fades linearly over its ticks; it moves the enemy but never turns it.
+    if (e.knockTicks[i] > 0) {
+      const fade = e.knockTicks[i] / knockTotal;
+      nx += e.knockVX[i] * fade * TICK_SECONDS;
+      ny += e.knockVY[i] * fade * TICK_SECONDS;
+      e.knockTicks[i]--;
+    }
 
     // Keep out of the hero and the castle.
     nx = pushOut(nx, ny, hero.x, hero.y, hero.stats.collision + def.collision);

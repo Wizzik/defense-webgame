@@ -49,7 +49,7 @@ function fixture(): any {
       },
       castle: { hp: 3000, radius: 180, regenPercentPerMinute: 2 },
       hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01 },
-      enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900 },
+      enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 } },
       phases: [
         { enemy: "grunt", spawnPerSecond: 0.45, hunterShare: 0.2 },
         { enemy: "grunt", spawnPerSecond: 0.55, hunterShare: 0.25 },

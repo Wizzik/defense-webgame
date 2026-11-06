@@ -35,6 +35,7 @@ export function spawnEnemies(run: Run): void {
     const x = gates[gate].x + (run.rng.next() * 2 - 1) * radius;
     const y = gates[gate].y + (run.rng.next() * 2 - 1) * radius;
     store.spawn(type, role, gate, x, y, def.hp * scale, scale, run.tick);
+    run.stats.spawned++;
   }
   // At the cap, keep at most one spawn banked so freed slots do not get a burst.
   if (store.aliveCount >= store.capacity) run.spawnCredit = Math.min(run.spawnCredit, 1);

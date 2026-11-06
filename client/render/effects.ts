@@ -1,10 +1,12 @@
 import {
+  AdditiveBlending,
+  Color,
   ConeGeometry,
   DynamicDrawUsage,
   Group,
   InstancedMesh,
   MeshBasicNodeMaterial,
-  RingGeometry,
+  SphereGeometry,
 } from "three/webgpu";
 import type { GameData } from "../../data/schema";
 import { EventKind, type Run, TICKS_PER_SECOND } from "../../sim";
@@ -12,7 +14,7 @@ import type { RunView } from "../game/session";
 import { SCENE_SCALE } from "./coords";
 
 const SPIKE_POOL = 160;
-const RING_POOL = 64;
+const POP_POOL = 64;
 /** Distance between two spikes along a cast line, in world units. */
 const SPIKE_SPACING = 75;
 const SPIKE_LIFE = 0.6;
@@ -20,8 +22,9 @@ const SPIKE_GROW = 0.1;
 const SPIKE_FADE = 0.2;
 const SPIKE_RADIUS = 0.22;
 const SPIKE_HEIGHT = 0.9;
-const RING_LIFE = 0.3;
-const RING_RADIUS = 0.9;
+const POP_LIFE = 0.25;
+/** Final diameter of the pop sphere, relative to the enemy's diameter. */
+const POP_SIZE = 1.4;
 
 /** Matrix with uniform xz scale, y scale and a translation; scale 0 hides the instance. */
 function writeMatrix(m: Float32Array, i: number, x: number, y: number, z: number, scaleXz: number, scaleY: number): void {
@@ -37,23 +40,24 @@ function writeMatrix(m: Float32Array, i: number, x: number, y: number, z: number
 }
 
 /**
- * Spell spikes along each cast line and a ring where an enemy dies. Both live in fixed pools
+ * Spell spikes along each cast line and a pop sphere where an enemy dies. Both live in fixed pools
  * of instances; the oldest entry is overwritten. Times are simulation seconds.
  */
 export class Effects implements RunView {
   readonly object = new Group();
   private readonly data: GameData;
   private readonly spikes: InstancedMesh;
-  private readonly rings: InstancedMesh;
-  // spike: scene position and the time it appears; ring: scene position and its birth time
+  private readonly pops: InstancedMesh;
+  // spike: scene position and the time it appears; pop: scene position, birth time and final diameter
   private readonly spikeX = new Float32Array(SPIKE_POOL);
   private readonly spikeZ = new Float32Array(SPIKE_POOL);
   private readonly spikeStart = new Float32Array(SPIKE_POOL).fill(-1000);
-  private readonly ringX = new Float32Array(RING_POOL);
-  private readonly ringZ = new Float32Array(RING_POOL);
-  private readonly ringStart = new Float32Array(RING_POOL).fill(-1000);
+  private readonly popX = new Float32Array(POP_POOL);
+  private readonly popZ = new Float32Array(POP_POOL);
+  private readonly popSize = new Float32Array(POP_POOL);
+  private readonly popStart = new Float32Array(POP_POOL).fill(-1000);
   private nextSpike = 0;
-  private nextRing = 0;
+  private nextPop = 0;
   private lastTick = 0;
 
   constructor(data: GameData) {
@@ -61,10 +65,14 @@ export class Effects implements RunView {
     const cone = new ConeGeometry(SPIKE_RADIUS, 1, 8);
     cone.translate(0, 0.5, 0);
     this.spikes = new InstancedMesh(cone, new MeshBasicNodeMaterial({ color: 0xffa233 }), SPIKE_POOL);
-    const ring = new RingGeometry(0.8, 1, 24);
-    ring.rotateX(-Math.PI / 2);
-    this.rings = new InstancedMesh(ring, new MeshBasicNodeMaterial({ color: 0xffffff }), RING_POOL);
-    for (const mesh of [this.spikes, this.rings]) {
+    // additive blending: fading the instance colour to black fades the sphere out
+    const popMaterial = new MeshBasicNodeMaterial({ color: 0xffffff });
+    popMaterial.transparent = true;
+    popMaterial.depthWrite = false;
+    popMaterial.blending = AdditiveBlending;
+    this.pops = new InstancedMesh(new SphereGeometry(0.5, 12, 8), popMaterial, POP_POOL);
+    this.pops.setColorAt(0, new Color(0));
+    for (const mesh of [this.spikes, this.pops]) {
       mesh.instanceMatrix.setUsage(DynamicDrawUsage);
       mesh.frustumCulled = false;
       this.object.add(mesh);
@@ -80,11 +88,13 @@ export class Effects implements RunView {
     for (let i = 0; i < events.count; i++) {
       if (events.kind[i] === EventKind.Cast) this.addSpikes(run, i, now);
       else if (events.kind[i] === EventKind.Death) {
-        const p = this.nextRing;
-        this.nextRing = (p + 1) % RING_POOL;
-        this.ringX[p] = events.x[i] * SCENE_SCALE;
-        this.ringZ[p] = -events.y[i] * SCENE_SCALE;
-        this.ringStart[p] = now;
+        const p = this.nextPop;
+        this.nextPop = (p + 1) % POP_POOL;
+        const def = this.data.enemies[run.enemies.type[events.a[i]]];
+        this.popX[p] = events.x[i] * SCENE_SCALE;
+        this.popZ[p] = -events.y[i] * SCENE_SCALE;
+        this.popSize[p] = 2 * def.collision * SCENE_SCALE * POP_SIZE;
+        this.popStart[p] = now;
       }
     }
   }
@@ -105,21 +115,28 @@ export class Effects implements RunView {
       const fade = Math.min(1, (SPIKE_LIFE - age) / SPIKE_FADE);
       writeMatrix(sm, p, this.spikeX[p], 0, this.spikeZ[p], 1, SPIKE_HEIGHT * grow * fade);
     }
-    const rm = this.rings.instanceMatrix.array as Float32Array;
-    for (let p = 0; p < RING_POOL; p++) {
-      const age = now - this.ringStart[p];
-      if (age < 0 || age > RING_LIFE) {
-        writeMatrix(rm, p, 0, 0, 0, 0, 0);
+    const pm = this.pops.instanceMatrix.array as Float32Array;
+    const pc = this.pops.instanceColor!.array as Float32Array;
+    for (let p = 0; p < POP_POOL; p++) {
+      const age = now - this.popStart[p];
+      if (age < 0 || age > POP_LIFE) {
+        writeMatrix(pm, p, 0, 0, 0, 0, 0);
+        pc[p * 3] = pc[p * 3 + 1] = pc[p * 3 + 2] = 0;
         continue;
       }
-      writeMatrix(rm, p, this.ringX[p], 0.05, this.ringZ[p], RING_RADIUS * (age / RING_LIFE), 1);
+      const t = age / POP_LIFE;
+      const size = this.popSize[p] * t;
+      writeMatrix(pm, p, this.popX[p], size * 0.5, this.popZ[p], size, size);
+      const brightness = (1 - t) * 0.6;
+      pc[p * 3] = pc[p * 3 + 1] = pc[p * 3 + 2] = brightness;
     }
     this.spikes.instanceMatrix.needsUpdate = true;
-    this.rings.instanceMatrix.needsUpdate = true;
+    this.pops.instanceMatrix.needsUpdate = true;
+    this.pops.instanceColor!.needsUpdate = true;
   }
 
   dispose(): void {
-    for (const mesh of [this.spikes, this.rings]) {
+    for (const mesh of [this.spikes, this.pops]) {
       mesh.geometry.dispose();
       (mesh.material as MeshBasicNodeMaterial).dispose();
       mesh.dispose();
@@ -143,9 +160,9 @@ export class Effects implements RunView {
 
   private reset(): void {
     this.spikeStart.fill(-1000);
-    this.ringStart.fill(-1000);
+    this.popStart.fill(-1000);
     this.nextSpike = 0;
-    this.nextRing = 0;
+    this.nextPop = 0;
   }
 
   private hideAll(): void {

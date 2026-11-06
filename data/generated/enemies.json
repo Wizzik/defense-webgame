@@ -6,10 +6,10 @@
       "cs": "Štítonoš"
     },
     "level": 1,
-    "hp": 420,
+    "hp": 126,
     "hpRegen": 0.25,
     "armor": 3,
-    "moveSpeed": 270,
+    "moveSpeed": 329,
     "collision": 31,
     "acquireRange": 500,
     "attack": {
