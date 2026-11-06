@@ -2,6 +2,14 @@
 
 Defense Webgame is a browser survivors-like game (TypeScript + Three.js + Vite), a clean-room remake of a Warcraft III map.
 
+## Start here
+- `docs/STATUS.md`: where the project is and what comes next. Read it first.
+- `ARCHITECTURE.md`: map of the code and the data flow.
+- `docs/DECISIONS.md`: decisions already made. Check it before you change a rule.
+- The spec and plans are long and in Czech: read only the section your task needs.
+- Do not read `data/generated/*.json` or map exports whole; query them (`node -e`, `python3 -I -c`).
+- Update `docs/STATUS.md` when a task or phase finishes.
+
 ## Clean room
 The repository is public (decided 2026-11-04): never commit anything that must not be published.
 - Never commit `data-source/`, `xhero/`, `*.w3x` or extracted map files (`war3map.*`).
