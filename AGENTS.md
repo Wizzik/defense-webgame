@@ -31,7 +31,10 @@ The repository is public (decided 2026-11-04): never commit anything that must n
 - `npm run data:build` - build game data from validated sources
 
 ## Code rules
-- `sim/` is pure: no `three`, no imports from `client/`, no DOM globals (`window`, `document`, `navigator`).
+- `sim/` is pure: no `three`, no imports from `client/`, no DOM globals (`window`, `document`, `navigator`, `globalThis`).
+- `sim/` is deterministic: same seed and same inputs give the same state in any browser. Fixed step of 30 ticks per second, time counted in ticks. Randomness only from the seeded `Rng`. No `Math.random`, `Date`, `performance`, `setTimeout`, `setInterval` or `requestAnimationFrame`. No `Math.sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|exp|expm1|log|log1p|log2|log10|pow|cbrt|hypot` and no `**` (engines may differ); compute directions with vectors and `Math.sqrt`.
+- `Run.step()` does not allocate in a normal step: entities live in typed arrays of fixed capacity. Only a rare event (the card offer) may allocate.
+- Systems run in the fixed order of `Run.step` in `sim/run.ts`.
 - Code, identifiers and comments are in English; player-facing texts exist in EN and CS.
 - Every asset must be listed in `assets/LICENSES.md`.
 - Keep files small, one role per file.

@@ -8,7 +8,8 @@ import {
   type UniformNode,
 } from "three/webgpu";
 import type { BakedVat, VatClip } from "./bake-vat";
-import { SpatialHash } from "./spatial-hash";
+import { Rng } from "../../sim/rng";
+import { SpatialHash } from "../../sim/spatial-grid";
 
 export const WALK_CLIP = "Walking";
 export const RUN_CLIP = "Running";
@@ -35,17 +36,6 @@ export interface CrowdOptions {
   fps: number;
 }
 
-/** mulberry32: small seeded RNG, enough for a repeatable crowd. */
-function createRandom(seed: number): () => number {
-  let state = seed >>> 0;
-  return () => {
-    state = (state + 0x6d2b79f5) >>> 0;
-    let t = Math.imul(state ^ (state >>> 15), state | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
 /**
  * Instanced crowd that walks to the arena centre, then to random targets, kept apart by a
  * spatial hash. Takes ownership of `vat.geometry`. `update` does not allocate.
@@ -53,7 +43,7 @@ function createRandom(seed: number): () => number {
 export class Crowd {
   readonly mesh: InstancedMesh;
   private readonly count: number;
-  private readonly random: () => number;
+  private readonly rng: Rng;
   private readonly time: UniformNode<"float"> = uniform(0);
   private readonly scale: number;
   private readonly lift: number;
@@ -73,7 +63,7 @@ export class Crowd {
   constructor(vat: BakedVat, options: CrowdOptions) {
     const { count } = options;
     this.count = count;
-    this.random = createRandom(options.seed);
+    this.rng = new Rng(options.seed);
     this.x = new Float32Array(count);
     this.z = new Float32Array(count);
     this.targetX = new Float32Array(count);
@@ -96,18 +86,18 @@ export class Crowd {
     const phase = new Float32Array(count);
     const clip = new Float32Array(count * 2);
     for (let i = 0; i < count; i++) {
-      const radius = ARENA_RADIUS * Math.sqrt(this.random());
-      const angle = 2 * Math.PI * this.random();
+      const radius = ARENA_RADIUS * Math.sqrt(this.rng.next());
+      const angle = 2 * Math.PI * this.rng.next();
       this.x[i] = radius * Math.cos(angle);
       this.z[i] = radius * Math.sin(angle);
       // first target is the arena centre, so face it (+Z for a unit spawned on it)
       this.headingX[i] = radius > 1e-6 ? -this.x[i] / radius : 0;
       this.headingZ[i] = radius > 1e-6 ? -this.z[i] / radius : 1;
-      const runs = this.random() < RUN_SHARE;
+      const runs = this.rng.next() < RUN_SHARE;
       this.speed[i] = runs ? RUN_SPEED : WALK_SPEED;
       clip[i * 2] = (runs ? run : walk).startRow;
       clip[i * 2 + 1] = (runs ? run : walk).rows;
-      phase[i] = this.random();
+      phase[i] = this.rng.next();
     }
     geometry.setAttribute("phase", new InstancedBufferAttribute(phase, 1));
     geometry.setAttribute("clip", new InstancedBufferAttribute(clip, 2));
@@ -184,8 +174,8 @@ export class Crowd {
   }
 
   private pickTarget(i: number): void {
-    const radius = ARENA_RADIUS * Math.sqrt(this.random());
-    const angle = 2 * Math.PI * this.random();
+    const radius = ARENA_RADIUS * Math.sqrt(this.rng.next());
+    const angle = 2 * Math.PI * this.rng.next();
     this.targetX[i] = radius * Math.cos(angle);
     this.targetZ[i] = radius * Math.sin(angle);
   }
