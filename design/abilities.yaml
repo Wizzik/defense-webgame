@@ -5,9 +5,9 @@
 #   cooldown | area | range | duration   per-level field of the ability
 #   { design: [...] }                    one value per level, written here
 # A missing export value takes the value of the level before; on level 1 it gives 0.
-# review is allowed only on script-backed abilities. data-build adds reason and the export's
-#   jass_functions; review.jassFunctions here are appended after them (the functions that design
-#   values come from), and review.notes says where each value comes from.
+# review is allowed only on script-backed abilities. It holds notes for the port (jassFunctions: the
+#   functions that design values come from; notes: where each value comes from). data-build checks
+#   it but never writes it to data/generated.
 
 # Stonehorn
 
@@ -21,6 +21,8 @@
     length: DataA
     width: area
     stunSeconds: duration
+    # The map's Wave Time is 0, so the speed is a design value.
+    waveSpeed: { design: [1000, 1000, 1000, 1000, 1000] }
 
 - id: enhanced-totem
   source: A0A8

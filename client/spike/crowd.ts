@@ -1,14 +1,14 @@
-import { attribute, floor, int, ivec2, mod, referenceAttribute, textureLoad, uniform, vec4 } from "three/tsl";
+import { attribute, uniform } from "three/tsl";
 import {
   DynamicDrawUsage,
   InstancedBufferAttribute,
   InstancedMesh,
   MeshStandardNodeMaterial,
-  type Node,
   type UniformNode,
 } from "three/webgpu";
-import type { BakedVat, VatClip } from "./bake-vat";
-import { SpatialHash } from "./spatial-hash";
+import { type BakedVat, type VatClip, vatPositionNode } from "../render/vat";
+import { Rng } from "../../sim/rng";
+import { SpatialHash } from "../../sim/spatial-grid";
 
 export const WALK_CLIP = "Walking";
 export const RUN_CLIP = "Running";
@@ -35,17 +35,6 @@ export interface CrowdOptions {
   fps: number;
 }
 
-/** mulberry32: small seeded RNG, enough for a repeatable crowd. */
-function createRandom(seed: number): () => number {
-  let state = seed >>> 0;
-  return () => {
-    state = (state + 0x6d2b79f5) >>> 0;
-    let t = Math.imul(state ^ (state >>> 15), state | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
 /**
  * Instanced crowd that walks to the arena centre, then to random targets, kept apart by a
  * spatial hash. Takes ownership of `vat.geometry`. `update` does not allocate.
@@ -53,7 +42,7 @@ function createRandom(seed: number): () => number {
 export class Crowd {
   readonly mesh: InstancedMesh;
   private readonly count: number;
-  private readonly random: () => number;
+  private readonly rng: Rng;
   private readonly time: UniformNode<"float"> = uniform(0);
   private readonly scale: number;
   private readonly lift: number;
@@ -73,7 +62,7 @@ export class Crowd {
   constructor(vat: BakedVat, options: CrowdOptions) {
     const { count } = options;
     this.count = count;
-    this.random = createRandom(options.seed);
+    this.rng = new Rng(options.seed);
     this.x = new Float32Array(count);
     this.z = new Float32Array(count);
     this.targetX = new Float32Array(count);
@@ -93,27 +82,27 @@ export class Crowd {
 
     const walk = requireClip(vat, WALK_CLIP);
     const run = requireClip(vat, RUN_CLIP);
-    const phase = new Float32Array(count);
-    const clip = new Float32Array(count * 2);
+    const anim = new Float32Array(count * 4);
     for (let i = 0; i < count; i++) {
-      const radius = ARENA_RADIUS * Math.sqrt(this.random());
-      const angle = 2 * Math.PI * this.random();
+      const radius = ARENA_RADIUS * Math.sqrt(this.rng.next());
+      const angle = 2 * Math.PI * this.rng.next();
       this.x[i] = radius * Math.cos(angle);
       this.z[i] = radius * Math.sin(angle);
       // first target is the arena centre, so face it (+Z for a unit spawned on it)
       this.headingX[i] = radius > 1e-6 ? -this.x[i] / radius : 0;
       this.headingZ[i] = radius > 1e-6 ? -this.z[i] / radius : 1;
-      const runs = this.random() < RUN_SHARE;
+      const runs = this.rng.next() < RUN_SHARE;
       this.speed[i] = runs ? RUN_SPEED : WALK_SPEED;
-      clip[i * 2] = (runs ? run : walk).startRow;
-      clip[i * 2 + 1] = (runs ? run : walk).rows;
-      phase[i] = this.random();
+      const picked = runs ? run : walk;
+      anim[i * 4] = picked.startFrame;
+      anim[i * 4 + 1] = picked.frames;
+      // a start time before 0 offsets the loop by a random phase
+      anim[i * 4 + 2] = (-this.rng.next() * picked.frames) / options.fps;
     }
-    geometry.setAttribute("phase", new InstancedBufferAttribute(phase, 1));
-    geometry.setAttribute("clip", new InstancedBufferAttribute(clip, 2));
+    geometry.setAttribute("anim", new InstancedBufferAttribute(anim, 4));
 
     const material = new MeshStandardNodeMaterial({ vertexColors: true, roughness: 0.9, metalness: 0.1 });
-    material.positionNode = vatPosition(vat, this.time, options.fps);
+    material.positionNode = vatPositionNode(vat, attribute("anim", "vec4"), this.time, options.fps);
     this.mesh = new InstancedMesh(geometry, material, count);
     this.mesh.instanceMatrix.setUsage(DynamicDrawUsage);
     // instances move every frame, so a bounding sphere computed once would cull them wrongly
@@ -184,8 +173,8 @@ export class Crowd {
   }
 
   private pickTarget(i: number): void {
-    const radius = ARENA_RADIUS * Math.sqrt(this.random());
-    const angle = 2 * Math.PI * this.random();
+    const radius = ARENA_RADIUS * Math.sqrt(this.rng.next());
+    const angle = 2 * Math.PI * this.rng.next();
     this.targetX[i] = radius * Math.cos(angle);
     this.targetZ[i] = radius * Math.sin(angle);
   }
@@ -222,21 +211,4 @@ function requireClip(vat: BakedVat, name: string): VatClip {
   const clip = vat.clips[name];
   if (!clip) throw new Error(`Crowd: clip "${name}" was not baked`);
   return clip;
-}
-
-/**
- * Model-space position read from the VAT (column = vertex, row = clip start + frame), moved by
- * the instance matrix. positionNode runs after three.js has applied the instance matrix to the
- * geometry position, so it has to apply the matrix to the baked position itself; normals keep
- * the default pose and get the instance rotation from three.js.
- */
-function vatPosition(vat: BakedVat, time: UniformNode<"float">, fps: number) {
-  const phase = attribute("phase", "float");
-  const clip = attribute("clip", "vec2"); // x = start row, y = row count
-  const frame = mod(floor(time.mul(fps).add(phase.mul(clip.y))), clip.y);
-  const texel = ivec2(int(attribute("vatIndex", "float")), int(clip.x.add(frame)));
-  const local = textureLoad(vat.texture, texel).xyz;
-  // every node has the chaining methods at runtime; the referenceAttribute typings lack them
-  const instanceMatrix = referenceAttribute("instanceMatrix", "mat4") as unknown as Node<"mat4">;
-  return instanceMatrix.mul(vec4(local, 1)).xyz;
 }

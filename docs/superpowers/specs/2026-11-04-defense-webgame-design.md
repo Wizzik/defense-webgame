@@ -219,7 +219,7 @@ assets/   modely a textury + LICENSES.md
 
 **Data (`data/`):**
 - schémata v zod, která sdílí hra i nástroje;
-- každý objekt nese původní kód z mapy (`source`).
+- každý záznam v `design/*.yaml` nese původní kód z mapy (`source`); herní data v `data/generated/` ho nenesou.
 
 **Ukládání:** IndexedDB, bez serveru.
 

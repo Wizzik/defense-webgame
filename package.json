@@ -7,13 +7,14 @@
     "node": ">=22"
   },
   "scripts": {
-    "typecheck": "tsc -p sim/tsconfig.json && tsc -p tsconfig.json",
+    "typecheck": "tsc -p sim/tsconfig.json && tsc -p client/tsconfig.json && tsc -p tsconfig.json",
     "test": "vitest run",
     "check": "npm run typecheck && npm test && npm run test:py",
     "build": "vite build",
     "dev": "vite",
     "map:extract": "bash tools/map-extract/run.sh",
     "data:build": "tsx tools/data-build/build.ts",
+    "sim:run": "tsx tools/sim-run/run.ts",
     "test:py": "python3 -I -m unittest discover -s tools/map-extract/tests -v",
     "e2e": "playwright test"
   },

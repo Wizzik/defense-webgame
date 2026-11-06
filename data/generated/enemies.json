@@ -1,0 +1,23 @@
+[
+  {
+    "id": "shieldbearer",
+    "name": {
+      "en": "Shieldbearer",
+      "cs": "Štítonoš"
+    },
+    "level": 1,
+    "hp": 420,
+    "hpRegen": 0.25,
+    "armor": 3,
+    "moveSpeed": 270,
+    "collision": 31,
+    "acquireRange": 500,
+    "attack": {
+      "range": 90,
+      "cooldown": 1.35,
+      "damageMin": 14,
+      "damageMax": 15
+    },
+    "xp": 1
+  }
+]

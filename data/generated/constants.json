@@ -2,6 +2,8 @@
   "strHitPointBonus": 15,
   "agiAttackSpeedBonus": 0.002,
   "defenseArmor": 0.02,
+  "agiDefenseBonus": 0.1,
+  "primaryAttackBonus": 1,
   "attackSpeedCap": 6,
   "mapVersion": "v20.75"
 }

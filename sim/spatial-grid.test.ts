@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SpatialHash } from "./spatial-hash";
+import { SpatialHash } from "./spatial-grid";
 
 const POINTS = 1000;
 const QUERIES = 50;

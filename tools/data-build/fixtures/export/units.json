@@ -1,0 +1,19 @@
+[
+  {
+    "id": "U001",
+    "name": "Test Unit",
+    "tip": "Export text: unit tip",
+    "ubertip": "Export text: unit description",
+    "level": 1,
+    "hp": 420,
+    "hp_regen": 0.25,
+    "armor": 3,
+    "move_speed": 270,
+    "collision": 31,
+    "acquire_range": 500,
+    "cooldown": 1.35,
+    "range": 90,
+    "damage_min": 14,
+    "damage_max": 15
+  }
+]

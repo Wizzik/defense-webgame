@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { buildGameData } from "./build";
 import { type AbilityEntry, type ExportAbility, loadDesign, loadMapExport, type ParamSpec } from "./load";
 import { mapAbility } from "./map-abilities";
+import { mapEnemy } from "./map-enemies";
 import { mapHero } from "./map-heroes";
 import { resolveParam } from "./resolve";
 
@@ -46,18 +47,14 @@ describe("data-build", () => {
     const ability = mapAbility(exportAbility("A001"), abilityEntry("pulse"));
     expect(ability).toStrictEqual({
       id: "pulse",
-      source: "A001",
       name: { en: "Pulse", cs: "Puls" },
       kind: "nova",
       targeting: "around_self",
       levels: 3,
       cooldown: [10, 10, 8],
       params: { damage: [100, 100, 300], radius: [200, 250, 300] },
-      review: { reason: "engine+script", jassFunctions: ["Trig_Test_Nova_Actions"], notes: "Fixture note." },
     });
-    expect(Object.keys(ability)).toEqual([
-      "id", "source", "name", "kind", "targeting", "levels", "cooldown", "params", "review",
-    ]);
+    expect(Object.keys(ability)).toEqual(["id", "name", "kind", "targeting", "levels", "cooldown", "params"]);
   });
 
   it("maps weapon_type mbounce to bounce", () => {
@@ -90,9 +87,10 @@ describe("data-build", () => {
     expect(data.heroes).toStrictEqual([
       {
         id: "fixture-hero",
-        source: "H001",
         name: { en: "Fixture Hero", cs: "Testovací hrdina" },
         primary: "agi",
+        hp: 500,
+        armor: 2,
         moveSpeed: 310,
         attributes: {
           str: { base: 18, perLevel: 1.5 },
@@ -105,22 +103,22 @@ describe("data-build", () => {
       },
     ]);
     expect(data.abilities.map((a) => a.id)).toEqual(["pulse", "focus", "spark", "echo"]);
+    expect(data.enemies.map((e) => e.id)).toEqual(["grunt"]);
     expect(data.abilities[2]).toStrictEqual({
       id: "spark",
-      source: "A003",
       name: { en: "Spark", cs: "Jiskra" },
       kind: "projectile",
       targeting: "nearest",
       levels: 3,
       cooldown: [6, 6, 6],
-      params: { damage: [50, 75, 100], range: [600, 700, 800], slow: [0.1, 0.2, 0.3] },
-      review: { reason: "script", jassFunctions: ["Trig_Test_Bolt_Actions"] },
+      params: { damage: [50, 75, 100], range: [600, 700, 800] },
     });
-    expect(data.abilities.filter((a) => a.review).map((a) => a.id)).toEqual(["pulse", "spark"]);
     expect(data.constants).toStrictEqual({
       strHitPointBonus: 20,
       agiAttackSpeedBonus: 0.01,
       defenseArmor: 0.05,
+      agiDefenseBonus: 0.1,
+      primaryAttackBonus: 1,
       attackSpeedCap: 6,
       mapVersion: "test",
     });
@@ -140,14 +138,84 @@ describe("data-build", () => {
     expect(message).toContain("artillery");
   });
 
-  it("appends design jassFunctions after the export ones", () => {
-    const entry = abilityEntry("pulse");
-    entry.review = { ...entry.review, jassFunctions: ["Trig_Test_Nova_Func002A", "Trig_Test_Nova_Actions"] };
-    expect(mapAbility(exportAbility("A001"), entry).review).toStrictEqual({
-      reason: "engine+script",
-      jassFunctions: ["Trig_Test_Nova_Actions", "Trig_Test_Nova_Func002A"],
-      notes: "Fixture note.",
+  it("maps enemy stats from the units export", () => {
+    const enemy = mapEnemy(mapExport().units[0], design().enemies[0]);
+    expect(enemy).toStrictEqual({
+      id: "grunt",
+      name: { en: "Grunt", cs: "Pěšák" },
+      level: 1,
+      hp: 420,
+      hpRegen: 0.25,
+      armor: 3,
+      moveSpeed: 270,
+      collision: 31,
+      acquireRange: 500,
+      attack: { range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 },
+      xp: 1,
     });
+  });
+
+  it("fails with readable error when enemy source is missing", () => {
+    const d = design();
+    d.enemies[0].source = "U404";
+    const message = errorMessage(() => buildGameData(mapExport(), d, "test"));
+    expect(message).toContain("design/enemies.yaml");
+    expect(message).toContain("grunt");
+    expect(message).toContain("units.json");
+  });
+
+  it("fails when an enemy stat is missing in the export", () => {
+    const unit = { ...mapExport().units[0], hp: undefined };
+    expect(errorMessage(() => mapEnemy(unit, design().enemies[0]))).toBe(
+      "design/enemies.yaml: grunt: units.json U001 has no hp",
+    );
+  });
+
+  it("copies rules", () => {
+    const data = buildGameData(mapExport(), design(), "test");
+    expect(data.rules).toStrictEqual(design().rules);
+    expect(data.rules.arena.gates).toHaveLength(2);
+  });
+
+  it("maps hero hp and armor", () => {
+    const hero = mapHero(mapExport().heroes[0], design().heroes[0]);
+    expect(hero.hp).toBe(500);
+    expect(hero.armor).toBe(2);
+  });
+
+  it("maps new constants", () => {
+    const { constants } = buildGameData(mapExport(), design(), "test");
+    expect(constants.agiDefenseBonus).toBe(0.1);
+    expect(constants.primaryAttackBonus).toBe(1);
+  });
+
+  it("reports the slug when a design array has the wrong length", () => {
+    const d = design();
+    const pulse = d.abilities.find((a) => a.id === "pulse");
+    if (!pulse) throw new Error("fixture ability pulse is missing");
+    pulse.params.damage = { design: [1, 2] };
+    const message = errorMessage(() => buildGameData(mapExport(), d, "test"));
+    expect(message).toContain("pulse");
+    expect(message).toContain("params.damage");
+  });
+
+  it("keeps key order of heroes and enemies", () => {
+    const data = buildGameData(mapExport(), design(), "test");
+    expect(Object.keys(data.heroes[0])).toEqual([
+      "id", "name", "primary", "hp", "armor", "moveSpeed", "attributes", "baseAttack", "signatureAbilities", "ultimate",
+    ]);
+    expect(Object.keys(data.enemies[0])).toEqual([
+      "id", "name", "level", "hp", "hpRegen", "armor", "moveSpeed", "collision", "acquireRange", "attack", "xp",
+    ]);
+  });
+
+  it("writes no source or review", () => {
+    const data = buildGameData(mapExport(), design(), "test");
+    for (const item of [...data.heroes, ...data.abilities, ...data.enemies]) {
+      expect(Object.keys(item)).not.toContain("source");
+      expect(Object.keys(item)).not.toContain("review");
+    }
+    expect(JSON.stringify(data)).not.toMatch(/Trig_|A00\d|H001|U001|Test Unit/);
   });
 
   it("rejects review notes on an ability that is not script-backed", () => {

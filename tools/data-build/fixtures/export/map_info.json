@@ -4,6 +4,8 @@
     "MaxHeroLevel": "100",
     "StrHitPointBonus": "20.0",
     "AgiAttackSpeedBonus": "0.01",
-    "DefenseArmor": "0.05"
+    "DefenseArmor": "0.05",
+    "AgiDefenseBonus": "0.1",
+    "StrAttackBonus": "1.0"
   }
 }

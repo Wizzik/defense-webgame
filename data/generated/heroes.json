@@ -1,12 +1,13 @@
 [
   {
     "id": "stonehorn",
-    "source": "O00C",
     "name": {
       "en": "Stonehorn",
       "cs": "Kamenorohý"
     },
     "primary": "str",
+    "hp": 800,
+    "armor": 5,
     "moveSpeed": 300,
     "attributes": {
       "str": {
@@ -38,12 +39,13 @@
   },
   {
     "id": "nightglaive",
-    "source": "O008",
     "name": {
       "en": "Nightglaive",
       "cs": "Noční čepel"
     },
     "primary": "agi",
+    "hp": 800,
+    "armor": 5,
     "moveSpeed": 320,
     "attributes": {
       "str": {
@@ -75,12 +77,13 @@
   },
   {
     "id": "gravecaller",
-    "source": "O00F",
     "name": {
       "en": "Gravecaller",
       "cs": "Hrobník"
     },
     "primary": "int",
+    "hp": 900,
+    "armor": 5,
     "moveSpeed": 320,
     "attributes": {
       "str": {
@@ -112,12 +115,13 @@
   },
   {
     "id": "serpent-shaman",
-    "source": "O00X",
     "name": {
       "en": "Serpent Shaman",
       "cs": "Hadí šaman"
     },
     "primary": "int",
+    "hp": 1000,
+    "armor": 5,
     "moveSpeed": 320,
     "attributes": {
       "str": {

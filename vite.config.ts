@@ -8,6 +8,8 @@ export default defineConfig({
   build: {
     outDir: "../dist",
     emptyOutDir: true,
+    // three.js is bundled on purpose, so the size warning is noise.
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, "client/index.html"),

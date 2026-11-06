@@ -1,4 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
+import { luminanceStdDev } from "./luminance";
 
 interface SpikeState {
   backend: "WebGPU" | "WebGL2";
@@ -22,12 +24,6 @@ async function waitForFrames(page: Page, min: number): Promise<void> {
 }
 
 test("renders crowd on available backend", async ({ page }, testInfo) => {
-  const errors: string[] = [];
-  page.on("console", (msg) => {
-    if (msg.type() === "error") errors.push(msg.text());
-  });
-  page.on("pageerror", (err) => errors.push(err.message));
-
   await page.goto("/spike/");
   await waitForFrames(page, 30);
 
@@ -44,29 +40,9 @@ test("renders crowd on available backend", async ({ page }, testInfo) => {
   });
   await testInfo.attach(`crowd-${testInfo.project.name}`, { body: shot, contentType: "image/png" });
 
-  // Luminance stddev computed in the page; only the number leaves it.
-  const stdDev = await page.evaluate(async (b64) => {
-    const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-    const bmp = await createImageBitmap(new Blob([bytes], { type: "image/png" }));
-    const c = new OffscreenCanvas(bmp.width, bmp.height);
-    const ctx = c.getContext("2d")!;
-    ctx.drawImage(bmp, 0, 0);
-    const d = ctx.getImageData(0, 0, bmp.width, bmp.height).data;
-    const count = d.length / 4;
-    let sum = 0;
-    let sumSq = 0;
-    for (let i = 0; i < d.length; i += 4) {
-      const y = 0.2126 * d[i]! + 0.7152 * d[i + 1]! + 0.0722 * d[i + 2]!;
-      sum += y;
-      sumSq += y * y;
-    }
-    const mean = sum / count;
-    return Math.sqrt(Math.max(0, sumSq / count - mean * mean));
-  }, shot.toString("base64"));
+  const stdDev = await luminanceStdDev(page, shot);
   console.log(`crowd luminance stddev (${testInfo.project.name}): ${stdDev.toFixed(2)}`);
   expect(stdDev, `luminance stddev ${stdDev.toFixed(2)}`).toBeGreaterThan(2.5);
-
-  expect(errors).toEqual([]);
 });
 
 test("forced webgl2 uses WebGL2", async ({ page }) => {

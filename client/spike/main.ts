@@ -11,9 +11,9 @@ import {
   Scene,
   WebGPURenderer,
 } from "three/webgpu";
-import { bakeVat } from "./bake-vat";
+import { bakeVat } from "../render/vat";
 import { Crowd, RUN_CLIP, WALK_CLIP } from "./crowd";
-import { type Backend, Overlay } from "./overlay";
+import { type Backend, Overlay } from "../perf/overlay";
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/robot-expressive/RobotExpressive.glb`;
 const VAT_FPS = 30;
@@ -101,7 +101,7 @@ async function start(overlay: Overlay): Promise<void> {
   });
 }
 
-const overlay = new Overlay(document.getElementById("overlay")!);
+const overlay = new Overlay(document.getElementById("overlay")!, true);
 start(overlay).catch((error: unknown) => {
   overlay.showError(error);
   console.error(error);

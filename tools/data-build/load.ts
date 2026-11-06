@@ -1,11 +1,13 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
-import type { Ability, Hero } from "../../data/schema";
+import type { Ability, Hero, Rules } from "../../data/schema";
 
 /** Design files as they are named in error messages. */
 export const HEROES_YAML = "design/heroes.yaml";
 export const ABILITIES_YAML = "design/abilities.yaml";
+export const ENEMIES_YAML = "design/enemies.yaml";
+export const RULES_YAML = "design/rules.yaml";
 
 /** Object data fields of one export ability level. */
 export const DATA_FIELDS = [
@@ -42,6 +44,8 @@ export interface ExportHero {
   str_per_level: number;
   agi_per_level: number;
   int_per_level: number;
+  hp: number;
+  armor: number;
   move_speed: number;
   weapon_type: string;
   range: number;
@@ -50,8 +54,25 @@ export interface ExportHero {
   damage_max: number;
 }
 
+/** The fields data-build reads from a units.json record. Any of them may be missing. */
+export interface ExportUnit {
+  id: string;
+  level?: number;
+  hp?: number;
+  hp_regen?: number;
+  armor?: number;
+  move_speed?: number;
+  collision?: number;
+  acquire_range?: number;
+  range?: number;
+  cooldown?: number;
+  damage_min?: number;
+  damage_max?: number;
+}
+
 export interface MapExport {
   heroes: ExportHero[];
+  units: ExportUnit[];
   abilities: ExportAbility[];
   mapInfo: { misc_constants: Record<string, unknown> };
 }
@@ -67,7 +88,7 @@ export interface AbilityEntry {
   kind: Ability["kind"];
   targeting: Ability["targeting"];
   params: Record<string, ParamSpec>;
-  /** jassFunctions here are added after the export's jass_functions (e.g. where design values come from). */
+  /** Porting notes. data-build only checks where they are allowed and never writes them. */
   review?: { notes?: string; jassFunctions?: string[] };
 }
 
@@ -82,8 +103,20 @@ export interface HeroEntry {
   ultimate: string;
 }
 
+/** One entry of design/enemies.yaml. */
+export interface EnemyEntry {
+  id: string;
+  source: string;
+  /** Name of the unit in the map, only for looking it up. Never written to data/generated. */
+  mapName?: string;
+  name: Hero["name"];
+  xp: number;
+}
+
 export interface Design {
   heroes: HeroEntry[];
+  enemies: EnemyEntry[];
+  rules: Rules;
   abilities: AbilityEntry[];
 }
 
@@ -93,15 +126,18 @@ export function loadMapExport(dir: string): MapExport {
   return {
     heroes: list(readJson(join(dir, "heroes.json")), "heroes.json") as ExportHero[],
     abilities: list(readJson(join(dir, "abilities.json")), "abilities.json") as ExportAbility[],
+    units: list(readJson(join(dir, "units.json")), "units.json") as ExportUnit[],
     mapInfo: { misc_constants: mapInfo.misc_constants ?? {} },
   };
 }
 
-/** Reads heroes.yaml and abilities.yaml from a design folder. */
+/** Reads heroes.yaml, abilities.yaml, enemies.yaml and rules.yaml from a design folder. */
 export function loadDesign(dir: string): Design {
   return {
     heroes: list(readYaml(join(dir, "heroes.yaml")), HEROES_YAML) as HeroEntry[],
     abilities: list(readYaml(join(dir, "abilities.yaml")), ABILITIES_YAML) as AbilityEntry[],
+    enemies: list(readYaml(join(dir, "enemies.yaml")), ENEMIES_YAML) as EnemyEntry[],
+    rules: readYaml(join(dir, "rules.yaml")) as Rules,
   };
 }
 
