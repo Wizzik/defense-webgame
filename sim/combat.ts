@@ -20,10 +20,7 @@ export function rollDamage(rng: Rng, min: number, max: number): number {
 export function damageHero(run: Run, amount: number, attacker: number): void {
   const hero = run.hero;
   hero.hp -= amount;
-  const e = run.enemies;
-  const ax = attacker >= 0 ? e.x[attacker] : hero.x;
-  const ay = attacker >= 0 ? e.y[attacker] : hero.y;
-  run.events.push(EventKind.HeroHit, attacker, amount, hero.x, hero.y, ax, ay);
+  run.events.push(EventKind.HeroHit, attacker, amount, hero.x, hero.y, 0, 0);
 }
 
 /** Subtracts `amount` from the castle and records the hit tick. */
@@ -34,5 +31,5 @@ export function damageCastle(run: Run, amount: number, attacker: number): void {
   const e = run.enemies;
   const ax = attacker >= 0 ? e.x[attacker] : castle.x;
   const ay = attacker >= 0 ? e.y[attacker] : castle.y;
-  run.events.push(EventKind.CastleHit, attacker, amount, castle.x, castle.y, ax, ay);
+  run.events.push(EventKind.CastleHit, attacker, amount, ax, ay, 0, 0);
 }

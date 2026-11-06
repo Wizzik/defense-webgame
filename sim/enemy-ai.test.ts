@@ -44,13 +44,20 @@ describe("enemy AI", () => {
     run.hero.x = 2500;
     run.hero.y = 2000;
     let first = -1;
+    let hitIndex = -1;
     for (let i = 0; i < 120 && first < 0; i++) {
       tickAI(run);
       for (let k = 0; k < run.events.count; k++) {
-        if (run.events.kind[k] === EventKind.CastleHit) first = run.events.value[k];
+        if (run.events.kind[k] === EventKind.CastleHit) {
+          first = run.events.value[k];
+          hitIndex = k;
+        }
       }
       run.events.clear();
     }
+    expect(run.events.a[hitIndex]).toBe(s);
+    expect(run.events.x[hitIndex]).toBe(run.enemies.x[s]);
+    expect(run.events.y[hitIndex]).toBe(run.enemies.y[s]);
     expect(first === 14 || first === 15).toBe(true);
     expect(run.enemies.action[s]).toBe(Action.Attack);
     expect(run.castle.hp).toBe(run.castle.maxHp - first);
@@ -138,6 +145,10 @@ describe("enemy AI", () => {
     const before = run.hero.hp;
     tickAI(run);
     expect(run.events.kind[0]).toBe(EventKind.HeroHit);
+    expect(run.events.a[0]).toBe(0);
+    expect(run.events.value[0]).toBeCloseTo(before - run.hero.hp, 9);
+    expect(run.events.x[0]).toBe(50);
+    expect(run.events.y[0]).toBe(0);
     const dealt = before - run.hero.hp;
     const f = 1 - 0.14 / 1.14;
     expect(dealt).toBeGreaterThanOrEqual(14 * f - 1e-9);

@@ -15,7 +15,13 @@ export function spawnEnemies(run: Run): void {
   const phase = rules.phases[run.phaseIndex];
   const store = run.enemies;
   run.spawnCredit += phase.spawnPerSecond * TICK_SECONDS;
-  const type = defs.findIndex((e) => e.id === phase.enemy);
+  let type = -1;
+  for (let i = 0; i < defs.length; i++) {
+    if (defs[i].id === phase.enemy) {
+      type = i;
+      break;
+    }
+  }
   if (type < 0) throw new Error(`spawnEnemies: unknown enemy "${phase.enemy}"`);
   const def = defs[type];
   const scale = timeScale(rules, run.tick);

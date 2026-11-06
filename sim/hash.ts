@@ -35,6 +35,7 @@ export function stateHash(run: Run): number {
   mixFloat(hero.str);
   mixFloat(hero.agi);
   mixFloat(hero.int);
+  mixFloat(run.castle.hp);
   mixFloat(run.spawnCredit);
   mixInt(run.nextGate);
   const e = run.enemies;
