@@ -29,6 +29,7 @@ The repository is public (decided 2026-11-04): never commit anything that must n
 - `npm run e2e` - Playwright end-to-end tests
 - `npm run map:extract` - local map extraction toolkit (output stays untracked)
 - `npm run data:build` - build game data from validated sources
+- `npm run sim:run` - autopilot run summaries for balance tuning
 
 ## Code rules
 - `sim/` is pure: no `three`, no imports from `client/`, no DOM globals (`window`, `document`, `navigator`, `globalThis`).

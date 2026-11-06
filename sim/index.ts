@@ -1,5 +1,6 @@
 export { abilityCooldownTicks, createAbilitySlots, updateAbilities } from "./abilities/slots";
 export type { AbilitySlot } from "./abilities/slots";
+export { botInput } from "./bot";
 export { chooseCard, openOffer } from "./cards";
 export type { Card, CardOffer } from "./cards";
 export { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
