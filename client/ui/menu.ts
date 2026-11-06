@@ -12,9 +12,12 @@ export class Menu {
   private readonly start: HTMLButtonElement;
   private readonly controls: HTMLElement;
   private readonly languageLabel: HTMLElement;
+  private readonly sound: HTMLButtonElement;
+  private soundOn = true;
+  private lang: Lang = "en";
   private readonly langButtons = new Map<Lang, HTMLButtonElement>();
 
-  constructor(parent: HTMLElement, handlers: { onStart(): void; onLang(lang: Lang): void }) {
+  constructor(parent: HTMLElement, handlers: { onStart(): void; onLang(lang: Lang): void; onSound(): void }) {
     this.root = el("div", "screen menu", parent);
     this.root.id = "menu";
     const panel = el("div", "panel", this.root);
@@ -25,6 +28,8 @@ export class Menu {
     this.start.id = "start";
     this.start.addEventListener("click", handlers.onStart);
     this.controls = el("p", "menu-controls", panel);
+    this.sound = el("button", "button small", panel);
+    this.sound.addEventListener("click", handlers.onSound);
     const row = el("div", "menu-lang", panel);
     this.languageLabel = el("span", "", row);
     for (const lang of LANGS) {
@@ -41,7 +46,19 @@ export class Menu {
     this.start.textContent = t(lang, "menu.start");
     this.controls.textContent = t(lang, "menu.controls");
     this.languageLabel.textContent = t(lang, "menu.language");
+    this.lang = lang;
+    this.renderSound();
     for (const [code, button] of this.langButtons) button.setAttribute("aria-pressed", String(code === lang));
+  }
+
+  setSound(on: boolean): void {
+    this.soundOn = on;
+    this.renderSound();
+  }
+
+  private renderSound(): void {
+    this.sound.textContent = t(this.lang, this.soundOn ? "menu.soundOn" : "menu.soundOff");
+    this.sound.setAttribute("aria-pressed", String(this.soundOn));
   }
 
   setVisible(visible: boolean): void {

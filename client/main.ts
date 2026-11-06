@@ -3,6 +3,8 @@ import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { Color, Scene, type WebGPURenderer } from "three/webgpu";
 import type { GameData } from "../data/schema";
 import { CRYSTAL_CAPACITY } from "../sim";
+import { Sfx } from "./audio/sfx";
+import { SoundView } from "./audio/sound-view";
 import { loadGameData } from "./game/data";
 import { addDebugHooks, publishSnapshot, updateSnapshot } from "./game/debug";
 import { Keyboard } from "./game/keyboard";
@@ -30,6 +32,7 @@ const MODEL_URL = `${import.meta.env.BASE_URL}models/robot-expressive/RobotExpre
 
 const ENEMY_TINT = 0x771111;
 const LANG_KEY = "defense-webgame.lang";
+const MUTE_KEY = "defense-webgame.muted";
 
 let lang: Lang = "en";
 
@@ -44,6 +47,22 @@ function readStoredLang(): string | null {
 function storeLang(value: Lang): void {
   try {
     localStorage.setItem(LANG_KEY, value);
+  } catch {
+    // storage may be blocked; the choice then lasts until reload
+  }
+}
+
+function readStoredMuted(): boolean {
+  try {
+    return localStorage.getItem(MUTE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function storeMuted(value: boolean): void {
+  try {
+    localStorage.setItem(MUTE_KEY, value ? "1" : "0");
   } catch {
     // storage may be blocked; the choice then lasts until reload
   }
@@ -100,7 +119,9 @@ async function start(): Promise<void> {
   const effects = new Effects(data);
   scene.add(crowd.mesh, crystals.mesh, effects.object);
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
-  session.views.push(heroView, crowd, crystals, effects, numbers);
+  const sfx = new Sfx();
+  sfx.setMuted(readStoredMuted());
+  session.views.push(heroView, crowd, crystals, effects, numbers, new SoundView(sfx));
   // the menu shows a fresh, paused run behind it
   session.start(params.seed, true);
 
@@ -111,7 +132,7 @@ async function start(): Promise<void> {
 
   const snapshot = publishSnapshot(backend);
   if (params.debug) addDebugHooks(snapshot, () => session.run);
-  const ui = createUi(data, session, followCamera, randomSeed);
+  const ui = createUi(data, session, followCamera, sfx, randomSeed);
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
   if (overlay) {
     document.getElementById("overlay")!.hidden = false;
@@ -132,7 +153,7 @@ interface Ui {
 }
 
 /** Builds the menu, HUD, cards, end screen and castle pointer, and wires them to the session. */
-function createUi(data: GameData, session: Session, followCamera: FollowCamera, nextSeed: () => number): Ui {
+function createUi(data: GameData, session: Session, followCamera: FollowCamera, sfx: Sfx, nextSeed: () => number): Ui {
   const root = document.getElementById("ui")!;
   const heroDef = data.heroes.find((h) => h.id === data.rules.slice.hero)!;
   let menuOpen = true;
@@ -149,11 +170,26 @@ function createUi(data: GameData, session: Session, followCamera: FollowCamera, 
   };
   const menu = new Menu(root, {
     onStart: () => {
+      sfx.enable();
       menuOpen = false;
       session.paused = false;
       menu.setVisible(false);
     },
     onLang: applyLang,
+    onSound: () => setMuted(!muted),
+  });
+  let muted = readStoredMuted();
+  const setMuted = (value: boolean): void => {
+    muted = value;
+    sfx.setMuted(value);
+    storeMuted(value);
+    menu.setSound(!value);
+  };
+  menu.setSound(!muted);
+  addEventListener("keydown", (event) => {
+    if (event.code === "KeyM" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      setMuted(!muted);
+    }
   });
   const hud = new Hud(root);
   const pointer = new CastlePointer(root);
