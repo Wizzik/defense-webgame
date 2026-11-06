@@ -25,6 +25,12 @@ test("renders the arena and the hero", async ({ page }, testInfo) => {
   expect(await page.evaluate(() => window.__game?.backend)).toBe(expected);
   expect(await page.evaluate(() => window.__game?.screen)).toBe("playing");
 
+  // enemies spawn a few seconds into the run
+  await page.waitForFunction(() => (window.__game?.enemies ?? 0) > 0, undefined, {
+    timeout: 90_000,
+    polling: 250,
+  });
+
   // Hide the overlay so only the rendered scene is measured.
   await page.evaluate(() => {
     document.querySelector<HTMLElement>("#overlay")!.style.visibility = "hidden";

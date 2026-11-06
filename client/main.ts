@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { Color, Scene, type WebGPURenderer } from "three/webgpu";
+import { CRYSTAL_CAPACITY } from "../sim";
 import { loadGameData } from "./game/data";
 import { publishSnapshot, updateSnapshot } from "./game/debug";
 import { Keyboard } from "./game/keyboard";
@@ -9,11 +10,17 @@ import { Session } from "./game/session";
 import { Overlay } from "./perf/overlay";
 import { FollowCamera } from "./render/camera";
 import { createRenderer, NoGpuError } from "./render/gpu";
+import { CrystalView } from "./render/crystal-view";
+import { Effects } from "./render/effects";
+import { EnemyCrowd, IDLE_CLIP, PUNCH_CLIP, VAT_FPS, WALK_CLIP } from "./render/enemy-crowd";
 import { HeroView } from "./render/hero-view";
 import { createArena } from "./render/scene";
+import { bakeVat } from "./render/vat";
 import { pickLang, setLang, t } from "./ui/i18n";
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/robot-expressive/RobotExpressive.glb`;
+
+const ENEMY_TINT = 0x771111;
 
 function randomSeed(): number {
   return Math.floor(Math.random() * 0x1_0000_0000);
@@ -53,7 +60,15 @@ async function start(): Promise<void> {
   const session = new Session({ data, params, scene, camera: followCamera, keyboard });
   const heroView = new HeroView(gltf);
   scene.add(heroView.object);
-  session.views.push(heroView);
+  const crowd = new EnemyCrowd(
+    bakeVat(gltf, [WALK_CLIP, PUNCH_CLIP, IDLE_CLIP], VAT_FPS),
+    data.rules.enemies.maxAlive,
+    ENEMY_TINT,
+  );
+  const crystals = new CrystalView(CRYSTAL_CAPACITY);
+  const effects = new Effects(data);
+  scene.add(crowd.mesh, crystals.mesh, effects.object);
+  session.views.push(heroView, crowd, crystals, effects);
   session.start(params.seed);
 
   addEventListener("resize", () => {

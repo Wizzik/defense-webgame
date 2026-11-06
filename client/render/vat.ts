@@ -1,4 +1,5 @@
 import type { GLTF } from "three/addons/loaders/GLTFLoader.js";
+import { floor, int, ivec2, max, mod, referenceAttribute, textureLoad, vec4, vertexIndex } from "three/tsl";
 import {
   AnimationClip,
   AnimationMixer,
@@ -10,30 +11,49 @@ import {
   type Mesh,
   type MeshStandardMaterial,
   NearestFilter,
+  type Node,
   RGBAFormat,
   type SkinnedMesh,
+  type UniformNode,
   Vector3,
 } from "three/webgpu";
 
-/** Rows of one baked clip inside the VAT texture. */
+/** Widest texture WebGL2 guarantees; a mesh with more vertices wraps into more rows. */
+export const VAT_MAX_WIDTH = 2048;
+
+/** Texture tiling of one baked frame: vertex `v` sits at column `v % width`, row `floor(v / width)`. */
+export interface VatLayout {
+  width: number;
+  rowsPerFrame: number;
+}
+
+export function vatLayout(vertexCount: number, maxWidth: number = VAT_MAX_WIDTH): VatLayout {
+  const width = Math.min(vertexCount, maxWidth);
+  return { width, rowsPerFrame: Math.ceil(vertexCount / width) };
+}
+
+/** Texel `[column, row]` of a vertex in a frame. */
+export function vatTexel(layout: VatLayout, vertex: number, frame: number): [number, number] {
+  return [vertex % layout.width, frame * layout.rowsPerFrame + Math.floor(vertex / layout.width)];
+}
+
+/** Frames of one baked clip; frame `f` of the clip is frame `startFrame + f` of the texture. */
 export interface VatClip {
-  startRow: number;
-  rows: number;
+  startFrame: number;
+  frames: number;
 }
 
 export interface BakedVat {
-  /**
-   * All meshes of the model merged in the default pose (positions, normals, material colour as
-   * vertex colour) plus `vatIndex`, the column of each vertex in the texture.
-   */
+  /** All meshes of the model merged in the default pose (positions, normals, material colour as vertex colour). */
   geometry: BufferGeometry;
-  /** RGBA float texture: column = vertex, row = sampled frame, rgb = model-space position. */
+  /** RGBA float texture tiled by `layout`; rgb = model-space position. */
   texture: DataTexture;
   clips: Record<string, VatClip>;
+  layout: VatLayout;
 }
 
-// WebGPU guarantees 2D textures up to 8192 texels wide; a bigger model needs another layout
-const MAX_TEXTURE_WIDTH = 8192;
+// the texture height (rowsPerFrame * total frames) has to stay within this
+const MAX_TEXTURE_HEIGHT = 8192;
 
 /**
  * Bakes vertex animation of the given clips, sampled `fps` times per second, into a texture.
@@ -48,19 +68,16 @@ export function bakeVat(gltf: GLTF, clipNames: string[], fps: number): BakedVat 
     if ((object as Mesh).isMesh) meshes.push(object as Mesh);
   });
   const vertexCount = meshes.reduce((sum, mesh) => sum + mesh.geometry.attributes.position.count, 0);
-  if (vertexCount > MAX_TEXTURE_WIDTH) {
-    throw new Error(`bakeVat: ${vertexCount} vertices do not fit a ${MAX_TEXTURE_WIDTH} texel wide texture`);
-  }
+  const layout = vatLayout(vertexCount);
   const geometry = mergeDefaultPose(meshes, vertexCount);
-  const { texture, clips } = bakeClips(gltf, meshes, vertexCount, clipNames, fps);
-  return { geometry, texture, clips };
+  const { texture, clips } = bakeClips(gltf, meshes, layout, clipNames, fps);
+  return { geometry, texture, clips, layout };
 }
 
 function mergeDefaultPose(meshes: Mesh[], vertexCount: number): BufferGeometry {
   const positions = new Float32Array(vertexCount * 3);
   const normals = new Float32Array(vertexCount * 3);
   const colors = new Float32Array(vertexCount * 3);
-  const vatIndex = new Float32Array(vertexCount);
   const indices: number[] = [];
   const vector = new Vector3();
   const tip = new Vector3();
@@ -83,7 +100,6 @@ function mergeDefaultPose(meshes: Mesh[], vertexCount: number): BufferGeometry {
       }
       tip.applyMatrix3(normalMatrix).normalize().toArray(normals, vertex * 3);
       color.toArray(colors, vertex * 3);
-      vatIndex[vertex] = vertex;
     }
     const index = mesh.geometry.index;
     const count = index ? index.count : position.count;
@@ -94,7 +110,6 @@ function mergeDefaultPose(meshes: Mesh[], vertexCount: number): BufferGeometry {
   geometry.setAttribute("position", new BufferAttribute(positions, 3));
   geometry.setAttribute("normal", new BufferAttribute(normals, 3));
   geometry.setAttribute("color", new BufferAttribute(colors, 3));
-  geometry.setAttribute("vatIndex", new BufferAttribute(vatIndex, 1));
   geometry.setIndex(indices);
   return geometry;
 }
@@ -102,29 +117,35 @@ function mergeDefaultPose(meshes: Mesh[], vertexCount: number): BufferGeometry {
 function bakeClips(
   gltf: GLTF,
   meshes: Mesh[],
-  vertexCount: number,
+  layout: VatLayout,
   clipNames: string[],
   fps: number,
 ): { texture: DataTexture; clips: Record<string, VatClip> } {
   const clips: Record<string, VatClip> = {};
-  let rows = 0;
+  let totalFrames = 0;
   const sources = clipNames.map((name) => {
     const clip = AnimationClip.findByName(gltf.animations, name);
     if (!clip) throw new Error(`bakeVat: clip "${name}" not found in the model`);
-    clips[name] = { startRow: rows, rows: Math.max(1, Math.round(clip.duration * fps)) };
-    rows += clips[name].rows;
+    clips[name] = { startFrame: totalFrames, frames: Math.max(1, Math.round(clip.duration * fps)) };
+    totalFrames += clips[name].frames;
     return clip;
   });
-  const data = new Float32Array(vertexCount * rows * 4);
+  const height = totalFrames * layout.rowsPerFrame;
+  if (height > MAX_TEXTURE_HEIGHT) {
+    throw new Error(`bakeVat: ${height} texture rows exceed ${MAX_TEXTURE_HEIGHT}`);
+  }
+  const data = new Float32Array(layout.width * height * 4);
+  const frameTexels = layout.width * layout.rowsPerFrame;
   const mixer = new AnimationMixer(gltf.scene);
   const vector = new Vector3();
   sources.forEach((clip, c) => {
     const action = mixer.clipAction(clip).play();
-    const { startRow, rows: frames } = clips[clipNames[c]];
+    const { startFrame, frames } = clips[clipNames[c]];
     for (let frame = 0; frame < frames; frame++) {
       mixer.setTime(frame / fps);
       gltf.scene.updateMatrixWorld(true);
-      let texel = (startRow + frame) * vertexCount * 4;
+      // vertex v of the merged geometry is texel v of the frame, so a running index tiles it
+      let texel = (startFrame + frame) * frameTexels * 4;
       for (const mesh of meshes) {
         for (let i = 0; i < mesh.geometry.attributes.position.count; i++) {
           mesh.getVertexPosition(i, vector).applyMatrix4(mesh.matrixWorld);
@@ -139,9 +160,35 @@ function bakeClips(
     action.stop();
   });
   gltf.scene.updateMatrixWorld(true);
-  const texture = new DataTexture(data, vertexCount, rows, RGBAFormat, FloatType);
+  const texture = new DataTexture(data, layout.width, height, RGBAFormat, FloatType);
   texture.minFilter = NearestFilter;
   texture.magFilter = NearestFilter;
   texture.needsUpdate = true;
   return { texture, clips };
+}
+
+/**
+ * Shader position for the crowd. `anim` = (clip startFrame, clip frames, start time s, last hit
+ * time s); the frame is `floor((time - start) * fps)` looped over the clip. The texel follows
+ * `vatTexel` with the `vertexIndex` builtin. The instance matrix is applied here: positionNode
+ * runs after three.js has applied it to the geometry position, so it has to apply the matrix to
+ * the baked position itself; normals keep the default pose and get the instance rotation from
+ * three.js.
+ */
+export function vatPositionNode(
+  vat: BakedVat,
+  anim: Node<"vec4">,
+  time: UniformNode<"float">,
+  fps: number,
+): Node<"vec3"> {
+  const { width, rowsPerFrame } = vat.layout;
+  const age = max(time.sub(anim.z), 0);
+  const frame = int(anim.x.add(mod(floor(age.mul(fps)), anim.y)));
+  const vertex = int(vertexIndex);
+  const column = vertex.mod(int(width));
+  const row = frame.mul(int(rowsPerFrame)).add(vertex.div(int(width)));
+  const local = textureLoad(vat.texture, ivec2(column, row)).xyz;
+  // every node has the chaining methods at runtime; the referenceAttribute typings lack them
+  const instanceMatrix = referenceAttribute("instanceMatrix", "mat4") as unknown as Node<"mat4">;
+  return instanceMatrix.mul(vec4(local, 1)).xyz;
 }

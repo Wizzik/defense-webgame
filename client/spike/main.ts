@@ -11,7 +11,7 @@ import {
   Scene,
   WebGPURenderer,
 } from "three/webgpu";
-import { bakeVat } from "./bake-vat";
+import { bakeVat } from "../render/vat";
 import { Crowd, RUN_CLIP, WALK_CLIP } from "./crowd";
 import { type Backend, Overlay } from "../perf/overlay";
 
