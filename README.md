@@ -6,7 +6,7 @@ Design specification: [docs/superpowers/specs/2026-11-04-defense-webgame-design.
 
 ## Play
 
-The game runs at https://wizzik.github.io/defense-webgame/ (the crowd benchmark is at `/spike/`). A run lasts 3 minutes. Move with WASD or the arrow keys, the spells cast themselves, pick an upgrade card with a click or the keys 1 to 3 when you level up.
+The game runs at https://wizzik.github.io/defense-webgame/ (the crowd benchmark is at `/spike/`). A run lasts 3 minutes. Move with WASD or the arrow keys, the spells cast themselves, pick an upgrade card with a click or the keys 1 to 3 when you level up. M (or the menu toggle) mutes the sound.
 
 URL parameters (all optional):
 

@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-06. Read this first when you resume work.
+Updated 2026-11-06 (tempo pass). Read this first when you resume work.
 
 ## Now
 
@@ -11,8 +11,12 @@ Updated 2026-11-06. Read this first when you resume work.
   - the run ends in a win, or in a loss when the castle or the hero falls;
   - the UI is in EN and CS;
   - the simulation is deterministic and replayable;
-  - there are 158 unit tests and 12 e2e tests, and CI is green.
-- **Balance is a first guess** (see `docs/DECISIONS.md`). The autopilot wins 4 of 5 seeds. A run has about 40–55 enemies and reaches level 4. Tune it in `design/rules.yaml`, run `npm run data:build`, and check with `npm run sim:run -- --runs 5`.
+  - there are 176 unit tests and 12 e2e tests, and CI is green.
+- **Tempo and effects pass (2026-11-06, PR #3 tempo and PR #4 effects + sounds)** after Petr's first playtest:
+  - survivors pace through `design/scaling.yaml`: about 360 enemies a run, level about 11, Rock Rupture every 4 s;
+  - knockback, damage numbers, death pop, camera shake and synthesized sounds (M mutes).
+  - The pace is tuned in `design/scaling.yaml` (multipliers on map numbers) and `design/rules.yaml` (castle, spawns, XP). After a change run `npm run data:build` and `npm run sim:run -- --runs 5`.
+  - The hero is rarely in danger, because hunters are 20 % in every phase. Raise `hunterShare` if the run feels too easy.
 
 ## Next
 
