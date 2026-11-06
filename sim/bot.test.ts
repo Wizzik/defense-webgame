@@ -80,4 +80,10 @@ describe("balance", () => {
     for (let seed = 1; seed <= 5; seed++) if (play(seed).result === "won") wins++;
     expect(wins).toBeGreaterThanOrEqual(3);
   });
+
+  it("a run sees between 250 and 400 enemies", () => {
+    const spawned = play(1).stats.spawned;
+    expect(spawned).toBeGreaterThanOrEqual(250);
+    expect(spawned).toBeLessThanOrEqual(400);
+  });
 });

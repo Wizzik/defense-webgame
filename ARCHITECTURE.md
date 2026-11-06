@@ -31,6 +31,7 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 ## Game data
 
 - A design entry names its map object by `source`. data-build looks it up in the export and fills params from `DataA`–`DataI`, `cooldown`, `area`, `range`, `duration` or `{ design: [...] }` (one value per level). A missing value takes the value of the level before.
+- `design/scaling.yaml` holds uniform multipliers from the map's numbers to the survivors pace (hero `moveSpeed` and attack cooldown, ability cooldown, enemy `hp` and `moveSpeed`). `tools/data-build/scaling.ts` applies them after mapping; speeds and hp are rounded to integers, cooldowns to 2 decimals. The map's ratios stay; retune the pace there, not in the generated JSON.
 - `validateGameData(data: unknown): GameData` throws `GameDataError` with `path: message` lines.
 - Files: `heroes.json`, `abilities.json`, `constants.json`, `enemies.json`, `rules.json`.
 - `data/generated.test.ts` guards the content, because data-build cannot run in CI.

@@ -1,0 +1,4 @@
+# Synthetic multipliers for the data-build tests.
+heroes: { moveSpeed: 1.5, attackCooldown: 0.5 }
+abilities: { cooldown: 0.33 }
+enemies: { hp: 0.3, moveSpeed: 1.22 }

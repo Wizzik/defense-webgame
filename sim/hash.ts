@@ -39,6 +39,7 @@ export function stateHash(run: Run): number {
   mixInt(hero.attackCooldown);
   mixInt(hero.pendingLevelUps);
   mixInt(run.stats.kills);
+  mixInt(run.stats.spawned);
   mixFloat(run.castle.hp);
   mixFloat(run.spawnCredit);
   mixInt(run.nextGate);

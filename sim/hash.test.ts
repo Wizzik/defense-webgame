@@ -29,4 +29,11 @@ describe("stateHash", () => {
   it("different seed gives a different hash", () => {
     expect(play(5, 99, 900)).not.toBe(play(6, 99, 900));
   });
+
+  it("covers the spawned count", () => {
+    const run = createRun(gameData(), { seed: 5 });
+    const before = stateHash(run);
+    run.stats.spawned++;
+    expect(stateHash(run)).not.toBe(before);
+  });
 });
