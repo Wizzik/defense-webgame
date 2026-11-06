@@ -41,6 +41,16 @@ export function stateHash(run: Run): number {
   mixFloat(run.castle.hp);
   mixFloat(run.spawnCredit);
   mixInt(run.nextGate);
+  for (const slot of run.abilities) {
+    mixInt(slot.level);
+    mixInt(slot.cooldown);
+    mixInt(slot.active ? 1 : 0);
+    mixFloat(slot.front);
+    mixFloat(slot.originX);
+    mixFloat(slot.originY);
+    mixFloat(slot.dirX);
+    mixFloat(slot.dirY);
+  }
   const e = run.enemies;
   for (let i = 0; i < e.capacity; i++) {
     if (e.alive[i] === 0) continue;

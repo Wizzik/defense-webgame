@@ -1,3 +1,5 @@
+export { abilityCooldownTicks, createAbilitySlots, updateAbilities } from "./abilities/slots";
+export type { AbilitySlot } from "./abilities/slots";
 export { TICKS_PER_SECOND, TICK_SECONDS } from "./constants";
 export { Action, EnemyStore, Role } from "./enemies";
 export { EventKind, EventLog } from "./events";

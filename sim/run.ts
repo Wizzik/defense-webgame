@@ -1,4 +1,6 @@
 import type { GameData } from "../data/schema";
+import { createAbilitySlots, updateAbilities } from "./abilities/slots";
+import type { AbilitySlot } from "./abilities/slots";
 import { TICKS_PER_SECOND } from "./constants";
 import { regenCastle } from "./castle";
 import { updateEnemies } from "./enemy-ai";
@@ -28,6 +30,7 @@ export class Run {
   readonly castle: CastleState;
   readonly enemies: EnemyStore;
   readonly grid: SpatialHash;
+  readonly abilities: AbilitySlot[];
   spawnCredit = 0;
   nextGate = 0;
   readonly stats: RunStats = { kills: 0, damageDealt: 0 };
@@ -63,6 +66,8 @@ export class Run {
     heroStats(data, hero, stats);
     hero.hp = stats.maxHp;
     this.hero = hero;
+
+    this.abilities = createAbilitySlots(this);
 
     this.castle = {
       x: rules.arena.castle.x, y: rules.arena.castle.y, radius: rules.castle.radius,
@@ -105,6 +110,7 @@ export class Run {
     spawnEnemies(this);
     updateEnemies(this);
     updateHeroCombat(this);
+    updateAbilities(this);
     regenCastle(this);
     this.tick++;
     checkEnd(this);

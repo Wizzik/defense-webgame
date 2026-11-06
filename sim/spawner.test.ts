@@ -29,6 +29,7 @@ function spawnOnly(run: ReturnType<typeof newRun>, steps: number): void {
 describe("spawner", () => {
   it("spawns at the phase rate", () => {
     const run = newRun();
+    run.abilities[0].cooldown = 1_000_000;
     for (let i = 0; i < 610; i++) run.step(NO_INPUT);
     expect(run.enemies.aliveCount).toBe(9);
   });
