@@ -1,3 +1,4 @@
+import { pathToFileURL } from "node:url";
 import { botInput } from "../../sim/bot";
 import { TICKS_PER_SECOND } from "../../sim/constants";
 import { createRun } from "../../sim/index";
@@ -78,4 +79,4 @@ function main(): void {
   );
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+if (import.meta.url === pathToFileURL(process.argv[1]).href) main();

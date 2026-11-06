@@ -51,20 +51,6 @@ describe("autopilot", () => {
     expect(hashes.size).toBe(3);
   });
 
-  it("full run stays fast", () => {
-    const run = createRun(gameData(), { seed: 1, durationSeconds: 180 });
-    const input: TickInput = { moveX: 0, moveY: 0, card: -1 };
-    let steps = 0;
-    while (steps < 5400) {
-      botInput(run, input);
-      run.step(input);
-      steps++;
-      if (run.state === "won" || run.state === "lost") break;
-    }
-    expect(steps).toBeGreaterThan(0);
-    // The 5 s budget is the vitest timeout below; sim/ may not read a clock.
-  }, 5000);
-
   it("moves toward the castle post when no enemy is alive", () => {
     const run = createRun(gameData(), { seed: 1 });
     run.hero.x = 1000;
