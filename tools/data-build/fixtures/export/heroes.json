@@ -11,6 +11,7 @@
     "agi_per_level": 2.5,
     "int_per_level": 1.25,
     "hp": 500,
+    "armor": 2,
     "move_speed": 310,
     "attack_type": "hero",
     "weapon_type": "mbounce",

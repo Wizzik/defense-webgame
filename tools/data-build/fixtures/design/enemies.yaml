@@ -1,0 +1,6 @@
+# Synthetic design entries for the data-build tests.
+- id: grunt
+  source: U001
+  mapName: Test Unit
+  name: { en: Grunt, cs: Pěšák }
+  xp: 1

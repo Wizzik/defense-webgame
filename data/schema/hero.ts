@@ -7,6 +7,8 @@ export const HeroSchema = z.object({
   id: Slug,
   name: LocalizedText,
   primary: z.enum(["str", "agi", "int"]),
+  hp: z.number().positive(),
+  armor: z.number(),
   moveSpeed: z.number().positive(),
   attributes: z.object({ str: Attribute, agi: Attribute, int: Attribute }).strict(),
   baseAttack: z.object({

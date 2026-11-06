@@ -1,19 +1,27 @@
 import { z } from "zod";
 import { AbilitySchema } from "./ability";
 import { ConstantsSchema } from "./constants";
+import { EnemySchema } from "./enemy";
 import { HeroSchema } from "./hero";
+import { RulesSchema } from "./rules";
 
 export { AbilityKind, AbilitySchema, Targeting } from "./ability";
 export type { Ability } from "./ability";
 export { LocalizedText, Slug } from "./common";
 export { ConstantsSchema } from "./constants";
 export type { Constants } from "./constants";
+export { EnemySchema } from "./enemy";
+export type { Enemy } from "./enemy";
+export { PointSchema, RulesSchema } from "./rules";
+export type { Point, Rules } from "./rules";
 export { HeroSchema } from "./hero";
 export type { Hero } from "./hero";
 
 export const GameDataSchema = z.object({
   heroes: z.array(HeroSchema),
   abilities: z.array(AbilitySchema),
+  enemies: z.array(EnemySchema),
+  rules: RulesSchema,
   constants: ConstantsSchema,
 }).strict();
 
@@ -46,7 +54,7 @@ export function validateGameData(data: unknown): GameData {
       parsed.error.issues.map((i) => `${describePath(data, i.path)}: ${i.message}`),
     );
   }
-  const { heroes, abilities } = parsed.data;
+  const { heroes, abilities, enemies, rules } = parsed.data;
   const errors: string[] = [];
 
   const abilityIds = new Set<string>();
@@ -67,6 +75,39 @@ export function validateGameData(data: unknown): GameData {
     if (!abilityIds.has(h.ultimate)) {
       errors.push(`heroes.${i}.ultimate: unknown ability "${h.ultimate}"`);
     }
+  });
+
+  const enemyIds = new Set<string>();
+  enemies.forEach((e, i) => {
+    if (enemyIds.has(e.id)) errors.push(`enemies.${i}.id: duplicate enemy id "${e.id}"`);
+    enemyIds.add(e.id);
+    if (e.attack.damageMax < e.attack.damageMin) {
+      errors.push(`enemies.${i} (${e.id}).attack.damageMax: below damageMin`);
+    }
+  });
+
+  const sliceHero = heroes.find((h) => h.id === rules.slice.hero);
+  if (!sliceHero) {
+    errors.push(`rules.slice.hero: unknown hero "${rules.slice.hero}"`);
+  } else if (!sliceHero.signatureAbilities.includes(rules.slice.ability)) {
+    errors.push(`rules.slice.ability: hero "${sliceHero.id}" has no ability "${rules.slice.ability}"`);
+  }
+
+  rules.phases.forEach((p, i) => {
+    if (!enemyIds.has(p.enemy)) errors.push(`rules.phases.${i}.enemy: unknown enemy "${p.enemy}"`);
+  });
+  const covered = rules.phases.length * rules.run.phaseSeconds;
+  if (covered < rules.run.durationSeconds) {
+    errors.push(`rules.phases: phases cover ${covered} s, the run lasts ${rules.run.durationSeconds} s`);
+  }
+
+  const { arena } = rules;
+  const inside = (p: { x: number; y: number }) =>
+    Math.abs(p.x) <= arena.width / 2 && Math.abs(p.y) <= arena.height / 2;
+  if (!inside(arena.castle)) errors.push("rules.arena.castle: outside the arena");
+  if (!inside(arena.heroStart)) errors.push("rules.arena.heroStart: outside the arena");
+  arena.gates.forEach((g, i) => {
+    if (!inside(g)) errors.push(`rules.arena.gates.${i}: outside the arena`);
   });
 
   if (errors.length > 0) throw new GameDataError(errors);

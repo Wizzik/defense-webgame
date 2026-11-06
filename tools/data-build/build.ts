@@ -3,8 +3,9 @@ import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { type Constants, type GameData, validateGameData } from "../../data/schema";
-import { ABILITIES_YAML, type Design, HEROES_YAML, loadDesign, loadMapExport, type MapExport } from "./load";
+import { ABILITIES_YAML, type Design, ENEMIES_YAML, HEROES_YAML, loadDesign, loadMapExport, type MapExport } from "./load";
 import { mapAbility } from "./map-abilities";
+import { mapEnemy } from "./map-enemies";
 import { mapHero } from "./map-heroes";
 
 const DESIGN_DIR = join(import.meta.dirname, "..", "..", "design");
@@ -20,18 +21,29 @@ export function buildGameData(src: MapExport, design: Design, mapVersion: string
   const abilities = design.abilities.map((entry) =>
     mapAbility(findSource(src.abilities, entry, ABILITIES_YAML, "abilities.json"), entry),
   );
-  const data: GameData = { heroes, abilities, constants: mapConstants(src.mapInfo.misc_constants, mapVersion) };
+  const enemies = design.enemies.map((entry) =>
+    mapEnemy(findSource(src.units, entry, ENEMIES_YAML, "units.json"), entry),
+  );
+  const data: GameData = {
+    heroes,
+    abilities,
+    enemies,
+    rules: design.rules,
+    constants: mapConstants(src.mapInfo.misc_constants, mapVersion),
+  };
   // Throws GameDataError. The parsed copy is not kept because zod reorders the keys.
   validateGameData(data);
   return data;
 }
 
-/** Writes heroes.json, abilities.json and constants.json: indent 2, keys in mapping order. */
+/** Writes heroes, abilities, enemies, rules and constants as JSON: indent 2, keys in mapping order. */
 export function writeGameData(data: GameData, outDir: string): void {
   mkdirSync(outDir, { recursive: true });
   const files: [string, unknown][] = [
     ["heroes.json", data.heroes],
     ["abilities.json", data.abilities],
+    ["enemies.json", data.enemies],
+    ["rules.json", data.rules],
     ["constants.json", data.constants],
   ];
   for (const [file, value] of files) {
@@ -55,6 +67,8 @@ function mapConstants(misc: Record<string, unknown>, mapVersion: string): Consta
     strHitPointBonus: miscNumber(misc, "StrHitPointBonus"),
     agiAttackSpeedBonus: miscNumber(misc, "AgiAttackSpeedBonus"),
     defenseArmor: miscNumber(misc, "DefenseArmor"),
+    agiDefenseBonus: miscNumber(misc, "AgiDefenseBonus"),
+    primaryAttackBonus: miscNumber(misc, "StrAttackBonus"),
     attackSpeedCap: ATTACK_SPEED_CAP,
     mapVersion,
   };
@@ -84,7 +98,7 @@ function main(): void {
   const data = buildGameData(loadMapExport(values.source), loadDesign(DESIGN_DIR), mapVersion);
   writeGameData(data, values.out);
   console.log(
-    `data:build: ${data.heroes.length} heroes, ${data.abilities.length} abilities (${mapVersion}) -> ${values.out}`,
+    `data:build: ${data.heroes.length} heroes, ${data.abilities.length} abilities, ${data.enemies.length} enemies (${mapVersion}) -> ${values.out}`,
   );
 }
 

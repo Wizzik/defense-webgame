@@ -21,6 +21,8 @@
     length: DataA
     width: area
     stunSeconds: duration
+    # The map's Wave Time is 0, so the speed is a design value.
+    waveSpeed: { design: [1000, 1000, 1000, 1000, 1000] }
 
 - id: enhanced-totem
   source: A0A8

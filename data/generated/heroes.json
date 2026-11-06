@@ -6,6 +6,8 @@
       "cs": "Kamenorohý"
     },
     "primary": "str",
+    "hp": 800,
+    "armor": 5,
     "moveSpeed": 300,
     "attributes": {
       "str": {
@@ -42,6 +44,8 @@
       "cs": "Noční čepel"
     },
     "primary": "agi",
+    "hp": 800,
+    "armor": 5,
     "moveSpeed": 320,
     "attributes": {
       "str": {
@@ -78,6 +82,8 @@
       "cs": "Hrobník"
     },
     "primary": "int",
+    "hp": 900,
+    "armor": 5,
     "moveSpeed": 320,
     "attributes": {
       "str": {
@@ -114,6 +120,8 @@
       "cs": "Hadí šaman"
     },
     "primary": "int",
+    "hp": 1000,
+    "armor": 5,
     "moveSpeed": 320,
     "attributes": {
       "str": {

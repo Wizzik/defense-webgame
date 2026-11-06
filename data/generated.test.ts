@@ -1,15 +1,28 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
 import { describe, expect, it } from "vitest";
 import { validateGameData } from "./schema";
 
-const FILES = ["heroes.json", "abilities.json", "constants.json"] as const;
+const FILES = ["heroes.json", "abilities.json", "enemies.json", "rules.json", "constants.json"] as const;
 /** Keys that carry map texts (tooltips, descriptions) or design-only lookups (mapName). */
 const FORBIDDEN_KEYS = new Set(["tooltip", "ubertip", "tip", "description", "mapName", "source", "review", "jassFunctions"]);
 
 function read(file: (typeof FILES)[number]): string {
   return readFileSync(join(import.meta.dirname, "generated", file), "utf8");
+}
+
+/** The entry lists of every design/*.yaml that is a list (rules.yaml is a mapping and has none). */
+function designLists(): Record<string, unknown>[][] {
+  const dir = join(import.meta.dirname, "..", "design");
+  return readdirSync(dir)
+    .filter((f) => f.endsWith(".yaml"))
+    .map((f) => parse(readFileSync(join(dir, f), "utf8")) as unknown)
+    .filter((v): v is Record<string, unknown>[] => Array.isArray(v));
+}
+
+function designEntries(file: string): { id: string; name: unknown }[] {
+  return parse(readFileSync(join(import.meta.dirname, "..", "design", file), "utf8")) as { id: string; name: unknown }[];
 }
 
 function forbiddenKeyPaths(value: unknown, path: string): string[] {
@@ -34,6 +47,8 @@ describe("generated game data", () => {
       validateGameData({
         heroes: JSON.parse(read("heroes.json")),
         abilities: JSON.parse(read("abilities.json")),
+        enemies: JSON.parse(read("enemies.json")),
+        rules: JSON.parse(read("rules.json")),
         constants: JSON.parse(read("constants.json")),
       }),
     ).not.toThrow();
@@ -41,8 +56,7 @@ describe("generated game data", () => {
 
   it("carries no map identifiers", () => {
     const forbidden = new Set<string>();
-    for (const file of ["heroes.yaml", "abilities.yaml"]) {
-      const entries = parse(readFileSync(join(import.meta.dirname, "..", "design", file), "utf8")) as Record<string, unknown>[];
+    for (const entries of designLists()) {
       for (const e of entries) {
         for (const key of ["source", "mapName"]) if (typeof e[key] === "string") forbidden.add(e[key]);
       }
@@ -53,6 +67,20 @@ describe("generated game data", () => {
         expect(text, file).not.toMatch(/\b(Init)?Trig_|war3map/);
         expect(forbidden.has(text), `${file}: ${text}`).toBe(false);
       }
+    }
+  });
+
+  it("matches design ids and names", () => {
+    // data-build cannot run in CI, so this catches a design change that was not regenerated.
+    const pairs = [
+      ["heroes.json", "heroes.yaml"],
+      ["abilities.json", "abilities.yaml"],
+      ["enemies.json", "enemies.yaml"],
+    ] as const;
+    for (const [json, yaml] of pairs) {
+      const generated = (JSON.parse(read(json)) as { id: string; name: unknown }[]).map(({ id, name }) => ({ id, name }));
+      const design = designEntries(yaml).map(({ id, name }) => ({ id, name }));
+      expect(generated, `${json} differs from design/${yaml}: run npm run data:build`).toEqual(design);
     }
   });
 

@@ -1,0 +1,11 @@
+# Enemies of the vertical slice.
+# source: unit code in the map export (units.json).
+# mapName: the unit's name in the map, kept here only to look it up.
+#   data-build never writes it to data/generated.
+# xp: crystal value (design value).
+
+- id: shieldbearer
+  source: hfoo
+  mapName: Footman
+  name: { en: Shieldbearer, cs: Štítonoš }
+  xp: 1
