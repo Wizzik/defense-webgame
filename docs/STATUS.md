@@ -20,7 +20,7 @@ Updated 2026-11-10 (phase 2a implemented). Read this first when you resume work.
 
 ## Next
 
-1. **Phase 2a (heroes and abilities): implemented** on branch `phase-2a` (PR #5, built on PR #4 `effects`, which is still open). It waits for Petr to play and merge: 4 heroes (Stonehorn, Nightglaive, Gravecaller, Serpent Shaman), 16 abilities in 11 kinds, hero choice in the menu, R (ultimate), T (auto switch) and Space (dash), ability HUD, effects, wards and copies, learn and ultimate cards, `sim:run --hero`.
+1. **Phase 2a (heroes and abilities): implemented** on branch `phase-2a` (PR #5, built on PR #4 `effects`, which is still open). It waits for Petr to play and merge: 4 heroes (Stonehorn, Nightglaive, Gravecaller, Serpent Shaman), 16 abilities in 12 kinds, hero choice in the menu, R (ultimate), T (auto switch) and Space (dash), ability HUD, effects, wards and copies, learn and ultimate cards, `sim:run --hero`.
 2. Next is the plan for **phase 2b (run structure)**: 20 phases, factions, elites, bosses, difficulties. It also replaces the run, enemies and phases, which closes the known 2a gaps (idle runs win with 3 heroes, Gravecaller averages level 7.2).
 3. Phase 2c economy, 2d shared abilities, passives and evolutions, 2e meta progression and saves follow.
 4. Propose the second skill (project development rules).

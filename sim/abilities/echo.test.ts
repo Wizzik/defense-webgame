@@ -29,7 +29,18 @@ describe("seismic echo", () => {
     expect(spell.length).toBe(1);
     expect(run.events.a[spell[0]]).toBe(e);
     expect(run.events.value[spell[0]]).toBeCloseTo(echo.damage[0] * run.hero.stats.spellPower, 9);
-    expect(run.enemies.stunTicks[e]).toBeGreaterThanOrEqual(Math.round(echo.stunSeconds[0] * 30) - 1);
+  });
+
+  it("stuns for the length in the data", () => {
+    // the nova ultimate has no stun, so any stun on the enemy comes from the echo
+    const data = quietData();
+    const { echo } = params(data);
+    const run = abilityRun("stonehorn", { 2: 1, 3: 1 }, data);
+    const e = addEnemy(run, 0, -200);
+    run.enemies.stunTicks[e] = 0;
+    run.step(NO_INPUT);
+    expect(castSlots(run).sort()).toEqual([2, 3]);
+    expect(run.enemies.stunTicks[e]).toBe(Math.round(echo.stunSeconds[0] * 30));
   });
 
   it("does not trigger itself", () => {

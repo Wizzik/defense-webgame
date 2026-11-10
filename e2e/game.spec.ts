@@ -134,6 +134,11 @@ test("every hero plays without errors", async ({ page }, testInfo) => {
       undefined,
       { timeout: 60_000, polling: 100 },
     );
+    // no screenshot of the level-up overlay: pick a card first
+    while ((await page.evaluate(() => window.__game?.screen)) === "levelUp") {
+      await page.locator("button.card").first().click();
+      await page.waitForTimeout(100);
+    }
     await testInfo.attach(`hero-${hero}-${testInfo.project.name}`, {
       body: await page.screenshot({ type: "png" }),
       contentType: "image/png",
@@ -154,11 +159,12 @@ test("R casts the ultimate and T switches auto", async ({ page }) => {
   await page.goto("/?seed=1&hero=stonehorn&debug=1&lang=en");
   await page.locator("#start").click();
   await waitForScreen(page, "playing");
-  await page.evaluate(() => window.__game!.debug!.setAbilityLevel(3, 1));
   expect(await page.evaluate(() => window.__game?.ultimateAuto)).toBe(true);
 
+  // auto off first, then learn the ultimate: nothing can cast it before R
   await page.keyboard.press("t");
   await page.waitForFunction(() => window.__game?.ultimateAuto === false, undefined, { timeout: 10_000 });
+  await page.evaluate(() => window.__game!.debug!.setAbilityLevel(3, 1));
   expect(await page.evaluate(() => window.__game?.abilityCooldowns[3])).toBe(0);
 
   await page.keyboard.press("r");
@@ -167,7 +173,7 @@ test("R casts the ultimate and T switches auto", async ({ page }) => {
 
 test("Space dashes", async ({ page }) => {
   await page.goto("/?seed=1&lang=en");
-  await page.locator("#start").click(); // the mouse click leaves the hidden Start button focused
+  await page.locator("#start").click(); // the Start button hides; keyboard focus then falls back to the page, so Space reaches the game
   await waitForScreen(page, "playing");
   await page.waitForFunction(() => (window.__game?.tick ?? 0) > 5, undefined, { timeout: 30_000 });
   const before = await page.evaluate(() => ({ x: window.__game!.heroX, y: window.__game!.heroY }));

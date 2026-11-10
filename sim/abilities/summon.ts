@@ -76,8 +76,8 @@ function castImages(run: Run, slot: AbilitySlot, index: number, mode: number): v
   const count = Math.min(def.params.count[L], IMAGE_OFFSETS.length);
   const expires = run.tick + Math.round(def.params.duration[L] * TICKS_PER_SECOND);
   for (let k = 0; k < count; k++) {
-    const [ox, oy] = IMAGE_OFFSETS[k];
-    if (allies.spawn(AllyKind.Image, index, k, hero.x + ox, hero.y + oy, run.tick, expires) < 0) break;
+    const offset = IMAGE_OFFSETS[k];
+    if (allies.spawn(AllyKind.Image, index, k, hero.x + offset[0], hero.y + offset[1], run.tick, expires) < 0) break;
   }
   startCast(run, index, count, hero.x, hero.y, 0, 0);
 }

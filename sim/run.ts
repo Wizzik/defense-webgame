@@ -11,6 +11,7 @@ import { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
 import { updateEnemies } from "./enemy-ai";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
+import { refreshHeroStats } from "./level-up";
 import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import type { TickInput } from "./input";
 import { Rng } from "./rng";
@@ -90,6 +91,7 @@ export class Run {
     this.hero = hero;
 
     this.abilities = createAbilitySlots(this);
+    refreshHeroStats(this); // the same path as every later refresh, so a starting aura counts
 
     this.castle = {
       x: rules.arena.castle.x, y: rules.arena.castle.y, radius: rules.castle.radius,

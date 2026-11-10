@@ -35,7 +35,7 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 - `validateGameData(data: unknown): GameData` throws `GameDataError` with `path: message` lines.
 - Files: `heroes.json`, `abilities.json`, `constants.json`, `enemies.json`, `rules.json`.
 - `data/generated.test.ts` guards the content, because data-build cannot run in CI.
-- Ability kinds (13) and targeting rules (8) are listed in `data/schema/ability.ts`. Eleven kinds are implemented; `instant` and `chain` wait for a spell that needs them (phase 2d).
+- Ability kinds (14) and targeting rules (9) are listed in `data/schema/ability.ts`. Twelve kinds are implemented; `instant` and `chain` wait for a spell that needs them (phase 2d).
 
 ## Simulation
 

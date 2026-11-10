@@ -63,6 +63,7 @@ export function stateHash(run: Run): number {
     mixFloat(slot.originY);
     mixFloat(slot.dirX);
     mixFloat(slot.dirY);
+    for (let i = 0; i < slot.hit.length; i++) mixInt(slot.hit[i]);
   }
   const e = run.enemies;
   for (let i = 0; i < e.capacity; i++) {
@@ -98,6 +99,9 @@ export function stateHash(run: Run): number {
     mixInt(i);
     mixInt(pr.ability[i]);
     mixInt(pr.target[i]);
+    mixInt(pr.targetSpawnTick[i]);
+    mixFloat(pr.damage[i]);
+    mixFloat(pr.speed[i]);
     mixFloat(pr.x[i]);
     mixFloat(pr.y[i]);
   }
@@ -111,6 +115,12 @@ export function stateHash(run: Run): number {
     mixFloat(al.y[i]);
     mixInt(al.expiresTick[i]);
     mixInt(al.attackCooldown[i]);
+    mixInt(al.spawnTick[i]);
+    mixInt(al.lastAttackTick[i]);
+    mixInt(al.formation[i]);
+    mixInt(al.moving[i]);
+    mixFloat(al.facingX[i]);
+    mixFloat(al.facingY[i]);
   }
   if (run.offer) {
     for (const card of run.offer.cards) {

@@ -93,4 +93,15 @@ describe("level-up", () => {
     run.step(NO_INPUT);
     expect(run.state).toBe("won");
   });
+
+  it("a level-up does not revive a dead hero", () => {
+    const run = progressionRun();
+    run.hero.hp = -5;
+    run.crystals.drop(run.hero.x, run.hero.y, 50);
+    run.step(NO_INPUT);
+    expect(run.hero.level).toBeGreaterThan(1);
+    expect(run.hero.hp).toBeLessThanOrEqual(0);
+    expect(run.result).toBe("hero");
+    expect(run.state).toBe("lost");
+  });
 });

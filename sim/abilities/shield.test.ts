@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { damageCastle, damageHero } from "../combat";
 import { EventKind } from "../events";
 import { NO_INPUT } from "../input";
+import { abilityCooldownTicks, debugSetAbilityLevel } from "./slots";
+import { refreshHeroStats } from "../level-up";
 import { abilityRun, eventsOf, quietData } from "../testing/ability-run";
 
 function setup() {
@@ -77,5 +79,55 @@ describe("shield", () => {
     run.step(NO_INPUT);
     expect(eventsOf(run, EventKind.Cast).length).toBe(1);
     expect(run.result).toBe("castle");
+  });
+
+  it("forced cast is refused while a shield runs", () => {
+    const { p, run } = setup();
+    run.ultimateAuto = false;
+    run.ultimateRequested = true;
+    run.step(NO_INPUT);
+    const ticks = run.shieldTicks;
+    expect(ticks).toBe(Math.round(p.duration[0] * 30));
+    run.abilities[3].cooldown = 0;
+    run.ultimateRequested = true;
+    run.events.clear();
+    run.step(NO_INPUT);
+    expect(eventsOf(run, EventKind.Cast).length).toBe(0);
+    expect(run.shieldTicks).toBe(ticks - 1);
+  });
+
+  it("the cooldown starts when the shield ends", () => {
+    const { p, run } = setup();
+    run.ultimateAuto = false;
+    run.ultimateRequested = true;
+    run.step(NO_INPUT);
+    const slot = run.abilities[3];
+    expect(slot.cooldown).toBe(Math.round(p.duration[0] * 30) + abilityCooldownTicks(run, slot));
+  });
+
+  it("the shield cannot be kept up permanently", () => {
+    const { p, run } = setup();
+    run.hero.int = 5000; // the scaled cooldown is far below the duration
+    refreshHeroStats(run);
+    debugSetAbilityLevel(run, 3, 2);
+    run.ultimateAuto = false;
+    const cooldown = abilityCooldownTicks(run, run.abilities[3]);
+    expect(cooldown).toBeLessThan(Math.round(p.duration[1] * 30));
+    let unshieldedRun = 0;
+    let minGap = Infinity;
+    let seenShield = false;
+    for (let i = 0; i < 4000; i++) {
+      run.ultimateRequested = true;
+      run.step(NO_INPUT);
+      if (run.shieldTicks > 0) {
+        if (seenShield && unshieldedRun > 0) minGap = Math.min(minGap, unshieldedRun);
+        unshieldedRun = 0;
+        seenShield = true;
+      } else {
+        unshieldedRun++;
+      }
+    }
+    expect(Number.isFinite(minGap)).toBe(true); // there are gaps between shields
+    expect(minGap).toBeGreaterThanOrEqual(cooldown);
   });
 });

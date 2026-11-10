@@ -125,7 +125,7 @@ const HEROES = gameData().heroes.map((h) => h.id);
 // Met: the bot wins 3 of 5 with every hero. Gap, kept at the level that is met: an idle run loses only with
 // stonehorn; the other heroes hold the post alone with their level-1 ability (ranged attack, totems), so an idle run
 // wins. Phase 2b replaces the 3-minute run, the enemies and the phases, which is where this gets fixed
-// (see .superpowers/sdd/2026-11-06-phase-2a-heroes-and-abilities/task-8-report.md).
+// (see docs/DECISIONS.md).
 const MIN_BOT_WINS: Record<string, number> = { stonehorn: 3, "serpent-shaman": 3, nightglaive: 3, gravecaller: 3 };
 const IDLE_LOSES: Record<string, boolean> = { stonehorn: true, "serpent-shaman": false, nightglaive: false, gravecaller: false };
 

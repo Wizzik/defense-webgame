@@ -129,9 +129,9 @@ function updateImage(run: Run, i: number): void {
   const stats = hero.stats;
 
   // Walk to the formation point; stand still within IMAGE_STAND_DISTANCE.
-  const [ox, oy] = IMAGE_OFFSETS[a.formation[i]];
-  const dx = hero.x + ox - a.x[i];
-  const dy = hero.y + oy - a.y[i];
+  const offset = IMAGE_OFFSETS[a.formation[i]];
+  const dx = hero.x + offset[0] - a.x[i];
+  const dy = hero.y + offset[1] - a.y[i];
   const d = Math.sqrt(dx * dx + dy * dy);
   if (d <= IMAGE_STAND_DISTANCE) {
     a.moving[i] = 0;
