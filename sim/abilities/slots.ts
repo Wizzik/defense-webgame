@@ -83,9 +83,10 @@ export function startCast(
   onHeroCast(run, index);
 }
 
-/** Lowers the cooldown of learned slots by 1, then runs their updaters in slot order. */
+/** Counts the shield down, lowers the cooldown of learned slots by 1, then runs their updaters in slot order. */
 export function updateAbilities(run: Run): void {
   const slots = run.abilities;
+  if (run.shieldTicks > 0) run.shieldTicks--;
   for (let i = 0; i < slots.length; i++) {
     if (slots[i].level >= 1 && slots[i].cooldown > 0) slots[i].cooldown--;
   }

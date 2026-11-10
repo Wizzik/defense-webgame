@@ -31,6 +31,8 @@ export interface HeroState {
   int: number;
   hp: number;
   stats: HeroStats;
+  /** Sum of the learned auras (fractions, 0 = none); filled by auraBonuses before every stat recomputation. */
+  bonus: { damage: number; moveSpeed: number; attackSpeed: number };
   /** Steps until the next basic attack (Task 5). */
   attackCooldown: number;
   /** Level-ups waiting for a card choice (Task 7). */

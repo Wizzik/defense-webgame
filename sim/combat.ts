@@ -19,15 +19,17 @@ export function rollDamage(rng: Rng, min: number, max: number): number {
   return lo + Math.floor(rng.next() * (hi - lo + 1));
 }
 
-/** Subtracts `amount` from the hero. `attacker` is the enemy slot (-1 for none). */
+/** Subtracts `amount` from the hero (nothing while the shield runs). `attacker` is the enemy slot (-1 for none). */
 export function damageHero(run: Run, amount: number, attacker: number): void {
+  if (run.shieldTicks > 0) return;
   const hero = run.hero;
   hero.hp -= amount;
   run.events.push(EventKind.HeroHit, attacker, amount, hero.x, hero.y, 0, 0);
 }
 
-/** Subtracts `amount` from the castle and records the hit tick. */
+/** Subtracts `amount` from the castle (nothing while the shield runs) and records the hit tick. */
 export function damageCastle(run: Run, amount: number, attacker: number): void {
+  if (run.shieldTicks > 0) return;
   const castle = run.castle;
   castle.hp -= amount;
   castle.lastHitTick = run.tick;

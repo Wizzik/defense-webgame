@@ -1,4 +1,5 @@
 import type { GameData } from "../data/schema";
+import { consumeEmpower } from "./abilities/on-hit";
 import { armorReduction, damageEnemy, rollDamage } from "./combat";
 import { TICKS_PER_SECOND, TICK_SECONDS } from "./constants";
 import type { TickInput } from "./input";
@@ -15,12 +16,13 @@ export function heroStats(data: GameData, hero: HeroState, out: HeroStats): Hero
   out.regenPerSecond = rules.hero.baseRegen + hero.str * rules.hero.regenPerStr;
   out.armor = def.armor + hero.agi * c.agiDefenseBonus;
   out.attackIntervalSeconds =
-    def.baseAttack.cooldown / Math.min(1 + hero.agi * c.agiAttackSpeedBonus, 1 + c.attackSpeedCap);
-  out.damageMin = def.baseAttack.damageMin + bonus;
-  out.damageMax = def.baseAttack.damageMax + bonus;
+    def.baseAttack.cooldown
+    / Math.min(1 + hero.agi * c.agiAttackSpeedBonus + hero.bonus.attackSpeed, 1 + c.attackSpeedCap);
+  out.damageMin = (def.baseAttack.damageMin + bonus) * (1 + hero.bonus.damage);
+  out.damageMax = (def.baseAttack.damageMax + bonus) * (1 + hero.bonus.damage);
   out.spellPower = 1 + hero.int * rules.hero.spellPowerPerInt;
   out.cooldownScale = 1 / (1 + hero.int * rules.hero.cooldownSpeedPerInt);
-  out.moveSpeed = def.moveSpeed;
+  out.moveSpeed = def.moveSpeed * (1 + hero.bonus.moveSpeed);
   out.collision = rules.hero.collision;
   return out;
 }
@@ -80,7 +82,8 @@ export function updateHeroCombat(run: Run): void {
   if (best < 0) return;
 
   const reduction = armorReduction(data.enemies[e.type[best]].armor, data.constants.defenseArmor);
-  const amount = rollDamage(run.rng, stats.damageMin, stats.damageMax) * (1 - reduction);
+  const empower = consumeEmpower(run, e.x[best], e.y[best]);
+  const amount = rollDamage(run.rng, stats.damageMin, stats.damageMax) * empower * (1 - reduction);
   if (!hero.moving && bestSq > 0) {
     const len = Math.sqrt(bestSq);
     hero.facingX = bestDx / len;

@@ -177,8 +177,8 @@ describe("line ability", () => {
   it("an unsupported ability kind throws when stepped", () => {
     const data = gameData();
     const hero = data.heroes.find((h) => h.id === data.rules.start.hero)!;
-    hero.signatureAbilities[0] = "enhanced-totem";
+    hero.signatureAbilities[0] = "serpent-totem";
     const run = createRun(data, { seed: 1 });
-    expect(() => run.step(NO_INPUT)).toThrow("sim: ability kind on_hit is not implemented");
+    expect(() => run.step(NO_INPUT)).toThrow("sim: ability kind summon is not implemented");
   });
 });

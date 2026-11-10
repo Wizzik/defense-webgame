@@ -49,6 +49,8 @@ export class Run {
   ultimateAuto = true;
   /** R was pressed in this step; cleared by updateAbilities. */
   ultimateRequested = false;
+  /** Steps left of the spirit shield: hero and castle take no damage while > 0. */
+  shieldTicks = 0;
   tick = 0;
   state: RunState = "playing";
   result: RunResult | null = null;
@@ -78,7 +80,7 @@ export class Run {
       facingX: 0, facingY: 1, moving: false,
       level: 1, xp: 0,
       str: def.attributes.str.base, agi: def.attributes.agi.base, int: def.attributes.int.base,
-      hp: 0, stats, attackCooldown: 0, pendingLevelUps: 0,
+      hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, attackCooldown: 0, pendingLevelUps: 0,
     };
     heroStats(data, hero, stats);
     hero.hp = stats.maxHp;
