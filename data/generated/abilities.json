@@ -9,11 +9,11 @@
     "targeting": "move_direction",
     "levels": 5,
     "cooldown": [
-      12,
-      12,
-      12,
-      12,
-      12
+      3.96,
+      3.96,
+      3.96,
+      3.96,
+      3.96
     ],
     "params": {
       "damage": [
@@ -45,11 +45,11 @@
         2
       ],
       "waveSpeed": [
-        1000,
-        1000,
-        1000,
-        1000,
-        1000
+        2000,
+        2000,
+        2000,
+        2000,
+        2000
       ]
     }
   },
@@ -63,11 +63,11 @@
     "targeting": "on_attack",
     "levels": 5,
     "cooldown": [
-      7,
-      7,
-      7,
-      7,
-      7
+      2.31,
+      2.31,
+      2.31,
+      2.31,
+      2.31
     ],
     "params": {
       "splashRadius": [
@@ -136,8 +136,8 @@
     "targeting": "around_self",
     "levels": 2,
     "cooldown": [
-      40,
-      20
+      13.2,
+      6.6
     ],
     "params": {
       "damage": [
@@ -186,11 +186,11 @@
     "targeting": "around_self",
     "levels": 5,
     "cooldown": [
-      8,
-      8,
-      8,
-      8,
-      8
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64
     ],
     "params": {
       "damage": [
@@ -266,8 +266,8 @@
     "targeting": "self",
     "levels": 2,
     "cooldown": [
-      80,
-      60
+      26.4,
+      19.8
     ],
     "params": {
       "count": [
@@ -298,11 +298,11 @@
     "targeting": "densest_cluster",
     "levels": 5,
     "cooldown": [
-      6,
-      6,
-      6,
-      6,
-      6
+      1.98,
+      1.98,
+      1.98,
+      1.98,
+      1.98
     ],
     "params": {
       "radius": [
@@ -338,11 +338,11 @@
     "targeting": "around_self",
     "levels": 5,
     "cooldown": [
-      6,
-      6,
-      6,
-      6,
-      6
+      1.98,
+      1.98,
+      1.98,
+      1.98,
+      1.98
     ],
     "params": {
       "damage": [
@@ -371,11 +371,11 @@
     "targeting": "nearest_elite_first",
     "levels": 5,
     "cooldown": [
-      10,
-      10,
-      10,
-      10,
-      10
+      3.3,
+      3.3,
+      3.3,
+      3.3,
+      3.3
     ],
     "params": {
       "damage": [
@@ -404,8 +404,8 @@
     "targeting": "densest_cluster",
     "levels": 2,
     "cooldown": [
-      60,
-      40
+      19.8,
+      13.2
     ],
     "params": {
       "tickDamage": [
@@ -440,11 +440,11 @@
     "targeting": "densest_cluster",
     "levels": 5,
     "cooldown": [
-      5,
-      7,
-      9,
-      12,
-      15
+      1.65,
+      2.31,
+      2.97,
+      3.96,
+      4.95
     ],
     "params": {
       "count": [
@@ -480,11 +480,11 @@
     "targeting": "nearest",
     "levels": 5,
     "cooldown": [
-      6,
-      6,
-      6,
-      6,
-      6
+      1.98,
+      1.98,
+      1.98,
+      1.98,
+      1.98
     ],
     "params": {
       "damage": [
@@ -527,11 +527,11 @@
     "targeting": "low_hp_ally",
     "levels": 5,
     "cooldown": [
-      15,
-      15,
-      15,
-      15,
-      15
+      4.95,
+      4.95,
+      4.95,
+      4.95,
+      4.95
     ],
     "params": {
       "amount": [
@@ -567,8 +567,8 @@
     "targeting": "self",
     "levels": 2,
     "cooldown": [
-      100,
-      80
+      33,
+      26.4
     ],
     "params": {
       "duration": [

@@ -7,6 +7,7 @@ import { ABILITIES_YAML, type Design, ENEMIES_YAML, HEROES_YAML, loadDesign, loa
 import { mapAbility } from "./map-abilities";
 import { mapEnemy } from "./map-enemies";
 import { mapHero } from "./map-heroes";
+import { scaleAbility, scaleEnemy, scaleHero } from "./scaling";
 
 const DESIGN_DIR = join(import.meta.dirname, "..", "..", "design");
 /** Attack speed cap of the map's ASP_ system (+600 %). */
@@ -16,13 +17,13 @@ const USAGE = "usage: npm run data:build -- --source data-source/<label>/out --o
 /** Pairs design entries with export records by source id, maps them and validates the result. */
 export function buildGameData(src: MapExport, design: Design, mapVersion: string): GameData {
   const heroes = design.heroes.map((entry) =>
-    mapHero(findSource(src.heroes, entry, HEROES_YAML, "heroes.json"), entry),
+    scaleHero(mapHero(findSource(src.heroes, entry, HEROES_YAML, "heroes.json"), entry), design.scaling),
   );
   const abilities = design.abilities.map((entry) =>
-    mapAbility(findSource(src.abilities, entry, ABILITIES_YAML, "abilities.json"), entry),
+    scaleAbility(mapAbility(findSource(src.abilities, entry, ABILITIES_YAML, "abilities.json"), entry), design.scaling),
   );
   const enemies = design.enemies.map((entry) =>
-    mapEnemy(findSource(src.units, entry, ENEMIES_YAML, "units.json"), entry),
+    scaleEnemy(mapEnemy(findSource(src.units, entry, ENEMIES_YAML, "units.json"), entry), design.scaling),
   );
   const data: GameData = {
     heroes,

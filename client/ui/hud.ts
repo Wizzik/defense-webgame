@@ -34,6 +34,7 @@ export class Hud {
   private readonly spellState: HTMLElement;
   private readonly spellFill: HTMLElement;
   private readonly banner: HTMLElement;
+  private readonly muteKey: HTMLElement;
 
   constructor(parent: HTMLElement) {
     this.root = el("div", "hud", parent);
@@ -47,6 +48,7 @@ export class Hud {
     const right = el("div", "hud-corner hud-right", this.root);
     this.castle = bar(right, "castle");
     this.kills = el("div", "hud-kills", right);
+    this.muteKey = el("div", "hud-mute", right);
     const spell = el("div", "hud-spell", this.root);
     this.spellName = el("div", "hud-spell-name", spell);
     const track = el("div", "bar cooldown", spell);
@@ -75,6 +77,7 @@ export class Hud {
 
     setText(this.castle.label, `${t(lang, "hud.castle")} ${Math.max(0, Math.ceil(castle.hp))} / ${castle.maxHp}`);
     this.castle.fill.style.width = fraction(castle.hp, castle.maxHp);
+    setText(this.muteKey, t(lang, "hud.muteKey"));
     setText(this.kills, t(lang, "hud.kills", { n: run.stats.kills }));
 
     const slot = run.abilities[0];

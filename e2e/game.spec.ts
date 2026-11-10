@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { Page } from "@playwright/test";
 import type { GameSnapshot } from "../client/game/debug";
 import { expect, test } from "./fixtures";
@@ -8,6 +10,13 @@ declare global {
     __game?: GameSnapshot;
   }
 }
+
+/** XP of the first level-up, read from the generated rules so a retune does not break the test. */
+const xpFirst = (
+  JSON.parse(readFileSync(join(import.meta.dirname, "..", "data", "generated", "rules.json"), "utf8")) as {
+    progression: { xpFirst: number };
+  }
+).progression.xpFirst;
 
 type Screen = GameSnapshot["screen"];
 
@@ -54,7 +63,7 @@ test("level-up shows three cards and a pick resumes the run", async ({ page }, t
   await page.goto("/?seed=1&debug=1&lang=cs");
   await page.locator("#start").click();
   await waitForScreen(page, "playing");
-  await page.evaluate(() => window.__game!.debug!.grantXp(4));
+  await page.evaluate((n) => window.__game!.debug!.grantXp(n), xpFirst);
   await waitForScreen(page, "levelUp");
 
   await expect(page.locator("button.card")).toHaveCount(3);

@@ -48,5 +48,7 @@ export interface CastleState {
 
 export interface RunStats {
   kills: number;
+  /** Enemies created by the spawner. */
+  spawned: number;
   damageDealt: number;
 }

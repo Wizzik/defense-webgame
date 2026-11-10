@@ -1,7 +1,8 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
 import type { Ability, Hero, Rules } from "../../data/schema";
+import { parseScaling, SCALING_YAML, type Scaling } from "./scaling";
 
 /** Design files as they are named in error messages. */
 export const HEROES_YAML = "design/heroes.yaml";
@@ -118,6 +119,7 @@ export interface Design {
   enemies: EnemyEntry[];
   rules: Rules;
   abilities: AbilityEntry[];
+  scaling: Scaling;
 }
 
 /** Reads one map export (data-source/<label>/out). */
@@ -138,7 +140,15 @@ export function loadDesign(dir: string): Design {
     abilities: list(readYaml(join(dir, "abilities.yaml")), ABILITIES_YAML) as AbilityEntry[],
     enemies: list(readYaml(join(dir, "enemies.yaml")), ENEMIES_YAML) as EnemyEntry[],
     rules: readYaml(join(dir, "rules.yaml")) as Rules,
+    scaling: loadScaling(dir),
   };
+}
+
+/** Reads and checks scaling.yaml from a design folder. */
+export function loadScaling(dir: string): Scaling {
+  const path = join(dir, "scaling.yaml");
+  if (!existsSync(path)) throw new Error(`${SCALING_YAML}: file is missing (looked in ${dir})`);
+  return parseScaling(readYaml(path));
 }
 
 function readJson(path: string): unknown {

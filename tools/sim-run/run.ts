@@ -12,6 +12,7 @@ export interface RunSummary {
   result: RunResult;
   seconds: number;
   kills: number;
+  spawned: number;
   level: number;
   castleHp: number;
   castleMaxHp: number;
@@ -31,6 +32,7 @@ export function playBot(data: GameData, seed: number, durationSeconds?: number):
     result: run.result ?? "won",
     seconds: Math.floor(run.tick / TICKS_PER_SECOND),
     kills: run.stats.kills,
+    spawned: run.stats.spawned,
     level: run.hero.level,
     castleHp: Math.max(0, Math.round(run.castle.hp)),
     castleMaxHp: Math.round(run.castle.maxHp),
@@ -44,7 +46,7 @@ export function formatSummary(s: RunSummary): string {
   const sec = String(s.seconds % 60).padStart(2, "0");
   const outcome = s.result === "won" ? "won" : `lost (${s.result})`;
   return (
-    `seed ${s.seed}: ${outcome} at ${m}:${sec}, kills ${s.kills}, level ${s.level}, ` +
+    `seed ${s.seed}: ${outcome} at ${m}:${sec}, kills ${s.kills}, spawned ${s.spawned}, level ${s.level}, ` +
     `castle ${s.castleHp}/${s.castleMaxHp}, hero ${s.heroHp}/${s.heroMaxHp}`
   );
 }
@@ -75,7 +77,7 @@ function main(): void {
     summaries.reduce((a, s) => a + f(s), 0) / summaries.length;
   console.log(
     `${summaries.length} runs: ${won} won, ${summaries.length - won} lost; ` +
-      `kills avg ${Math.round(avg((s) => s.kills))}; level avg ${avg((s) => s.level).toFixed(1)}`,
+      `kills avg ${Math.round(avg((s) => s.kills))}, spawned avg ${Math.round(avg((s) => s.spawned))}; level avg ${avg((s) => s.level).toFixed(1)}`,
   );
 }
 

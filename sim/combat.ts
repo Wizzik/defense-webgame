@@ -1,3 +1,4 @@
+import { TICKS_PER_SECOND } from "./constants";
 import { Role } from "./enemies";
 import { EventKind } from "./events";
 import { gainXp } from "./level-up";
@@ -50,6 +51,22 @@ export function damageEnemy(run: Run, slot: number, amount: number, source: 0 | 
   run.stats.damageDealt += Math.min(amount, before);
   run.events.push(EventKind.Hit, slot, amount, e.x[slot], e.y[slot], source, 0);
   if (e.hp[slot] <= 0) killEnemy(run, slot);
+  else knockBack(run, slot, source);
+}
+
+/** Pushes a surviving enemy away from the hero; a newer knockback replaces an older one. */
+function knockBack(run: Run, slot: number, source: 0 | 1): void {
+  const e = run.enemies;
+  const { knockback } = run.data.rules.enemies;
+  const dx = e.x[slot] - run.hero.x;
+  const dy = e.y[slot] - run.hero.y;
+  const d = Math.sqrt(dx * dx + dy * dy);
+  const ux = d > 1e-6 ? dx / d : 1;
+  const uy = d > 1e-6 ? dy / d : 0;
+  const speed = (source === 1 ? knockback.ability : knockback.attack) / knockback.seconds;
+  e.knockVX[slot] = ux * speed;
+  e.knockVY[slot] = uy * speed;
+  e.knockTicks[slot] = Math.round(knockback.seconds * TICKS_PER_SECOND);
 }
 
 /** Emits Death, counts the kill, frees the slot and drops an XP crystal (XP goes straight to the hero when the store is full). */

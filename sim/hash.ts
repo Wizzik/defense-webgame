@@ -39,6 +39,7 @@ export function stateHash(run: Run): number {
   mixInt(hero.attackCooldown);
   mixInt(hero.pendingLevelUps);
   mixInt(run.stats.kills);
+  mixInt(run.stats.spawned);
   mixFloat(run.castle.hp);
   mixFloat(run.spawnCredit);
   mixInt(run.nextGate);
@@ -65,6 +66,9 @@ export function stateHash(run: Run): number {
     mixInt(e.stunTicks[i]);
     mixInt(e.aggro[i]);
     mixInt(e.action[i]);
+    mixFloat(e.knockVX[i]);
+    mixFloat(e.knockVY[i]);
+    mixInt(e.knockTicks[i]);
   }
   const c = run.crystals;
   for (let i = 0; i < c.capacity; i++) {

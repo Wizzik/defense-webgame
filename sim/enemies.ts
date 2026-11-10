@@ -25,6 +25,10 @@ export class EnemyStore {
   readonly spawnTick: Int32Array;
   readonly lastHitTick: Int32Array;
   readonly lastAttackTick: Int32Array;
+  /** Knockback velocity (world units per second) at its start, and the ticks left; it fades linearly. */
+  readonly knockVX: Float64Array;
+  readonly knockVY: Float64Array;
+  readonly knockTicks: Int32Array;
 
   constructor(capacity: number) {
     this.capacity = capacity;
@@ -48,6 +52,9 @@ export class EnemyStore {
     this.spawnTick = new Int32Array(capacity);
     this.lastHitTick = new Int32Array(capacity);
     this.lastAttackTick = new Int32Array(capacity);
+    this.knockVX = new Float64Array(capacity);
+    this.knockVY = new Float64Array(capacity);
+    this.knockTicks = new Int32Array(capacity);
   }
 
   /** Takes the lowest free slot; returns -1 when the store is full. */
@@ -84,6 +91,9 @@ export class EnemyStore {
     this.spawnTick[slot] = tick;
     this.lastHitTick[slot] = -1;
     this.lastAttackTick[slot] = -1;
+    this.knockVX[slot] = 0;
+    this.knockVY[slot] = 0;
+    this.knockTicks[slot] = 0;
     return slot;
   }
 

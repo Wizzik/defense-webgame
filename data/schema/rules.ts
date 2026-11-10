@@ -34,6 +34,9 @@ export const RulesSchema = z.object({
     maxAlive: z.number().int().positive(),
     siegerAggroRange: positive,
     leashRange: positive,
+    /** Knockback for the base attack and for an ability: initial speed = value / `seconds` (world units),
+     *  fading linearly to zero over `seconds`, so the enemy travels about 0.67 × value. */
+    knockback: z.object({ attack: nonNegative, ability: nonNegative, seconds: positive }).strict(),
   }).strict(),
   phases: z.array(z.object({
     enemy: Slug,

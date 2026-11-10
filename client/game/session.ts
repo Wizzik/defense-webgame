@@ -1,5 +1,5 @@
 import type { GameData } from "../../data/schema";
-import { createRun, NO_INPUT, type Run, TICK_SECONDS, type TickInput } from "../../sim";
+import { createRun, EventKind, NO_INPUT, type Run, TICK_SECONDS, type TickInput } from "../../sim";
 import { SCENE_SCALE } from "../render/coords";
 import type { FollowCamera } from "../render/camera";
 import type { Scene } from "three/webgpu";
@@ -10,6 +10,10 @@ import { viewTiming } from "./view-timing";
 
 /** Most simulation steps one frame may run at speed 1; a longer backlog is dropped. */
 const MAX_STEPS_PER_FRAME = 4;
+
+/** Camera shake in scene units for a cast and for a hit on the hero. */
+const SHAKE_CAST = 0.25;
+const SHAKE_HERO_HIT = 0.1;
 
 /** One visual layer of a run (hero, enemies, crystals, effects). */
 export interface RunView {
@@ -68,15 +72,26 @@ export class Session {
       this.pendingCard = -1;
       run.step(input);
       for (const view of this.views) view.onEvents?.(run);
+      this.shakeForEvents(run);
     }
     // Frozen while a card is chosen or the run is over: no interpolation, no animation time.
     const { alpha, dt } = viewTiming(run.state, this.loop.alpha, dtSeconds);
-    for (const view of this.views) view.update(run, alpha, dt);
+    // The camera moves first so views that project to the screen use this frame's camera.
     const { hero } = run;
     this.camera.follow(
       (hero.prevX + (hero.x - hero.prevX) * alpha) * SCENE_SCALE,
       -(hero.prevY + (hero.y - hero.prevY) * alpha) * SCENE_SCALE,
       dtSeconds,
+      dt,
     );
+    for (const view of this.views) view.update(run, alpha, dt);
+  }
+
+  private shakeForEvents(run: Run): void {
+    const { events } = run;
+    for (let i = 0; i < events.count; i++) {
+      if (events.kind[i] === EventKind.Cast) this.camera.shake(SHAKE_CAST);
+      else if (events.kind[i] === EventKind.HeroHit) this.camera.shake(SHAKE_HERO_HIT);
+    }
   }
 }

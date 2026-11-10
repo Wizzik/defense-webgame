@@ -12,6 +12,10 @@ function newRun(durationSeconds = 100) {
   data.rules.arena.heroStart = { x: 0, y: 0 };
   data.rules.arena.castle = { x: 0, y: -2000 };
   data.rules.hero.collision = 32;
+  // Nobody spawns, so no enemy pushes the hero.
+  for (const phase of data.rules.phases) phase.spawnPerSecond = 0;
+  // The movement tests count in world units, so the hero speed is pinned.
+  for (const hero of data.heroes) hero.moveSpeed = 300;
   return createRun(data, { seed: 1, durationSeconds });
 }
 
