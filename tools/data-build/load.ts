@@ -86,6 +86,7 @@ export interface AbilityEntry {
   id: string;
   source: string;
   name: Ability["name"];
+  description: Ability["description"];
   kind: Ability["kind"];
   targeting: Ability["targeting"];
   params: Record<string, ParamSpec>;
@@ -100,6 +101,7 @@ export interface HeroEntry {
   /** Name of the hero in the map, only for looking it up. Never written to data/generated. */
   mapName?: string;
   name: Hero["name"];
+  role: Hero["role"];
   signatureAbilities: Hero["signatureAbilities"];
   ultimate: string;
 }

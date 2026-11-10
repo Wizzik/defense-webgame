@@ -3,5 +3,6 @@
   source: H001
   mapName: Test Hero
   name: { en: Fixture Hero, cs: Testovací hrdina }
+  role: { en: Fixture role, cs: Testovací role }
   signatureAbilities: [pulse, focus, spark]
   ultimate: echo

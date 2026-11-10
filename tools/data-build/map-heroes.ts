@@ -23,6 +23,7 @@ export function mapHero(exp: ExportHero, entry: HeroEntry): Hero {
   return {
     id: entry.id,
     name: entry.name,
+    role: entry.role,
     primary: String(exp.primary).toLowerCase() as Hero["primary"],
     hp: exp.hp,
     armor: exp.armor,

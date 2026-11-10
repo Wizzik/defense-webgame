@@ -9,6 +9,7 @@ function fixture(): any {
       {
         id: "hero-one",
         name: names("Hero"),
+        role: names("Role"),
         primary: "str",
         hp: 800,
         armor: 2,
@@ -24,14 +25,14 @@ function fixture(): any {
       },
     ],
     abilities: [
-      { ...base, id: "pulse", name: names("Pulse"), kind: "nova", targeting: "around_self",
+      { ...base, id: "pulse", name: names("Pulse"), description: names("d"), kind: "nova", targeting: "around_self",
         params: { damage: [10, 20, 30], radius: [5, 6, 7] } },
-      { ...base, id: "might", name: names("Might"), kind: "aura", targeting: "self",
+      { ...base, id: "might", name: names("Might"), description: names("d"), kind: "aura", targeting: "self",
         params: { damageBonus: [0.1, 0.2, 0.3] } },
-      { ...base, id: "rend", name: names("Rend"), kind: "on_hit", targeting: "on_attack",
+      { ...base, id: "rend", name: names("Rend"), description: names("d"), kind: "on_hit", targeting: "on_attack",
         params: { chance: [0.1, 0.2, 0.3] } },
-      { ...base, id: "swarm", name: names("Swarm"), kind: "summon", targeting: "self",
-        params: { count: [1, 2, 3], duration: [10, 10, 10], range: [1, 1, 1] } },
+      { ...base, id: "swarm", name: names("Swarm"), description: names("d"), kind: "summon", targeting: "self",
+        params: { count: [1, 2, 3], duration: [10, 10, 10], range: [1, 1, 1], damageDealt: [1, 1, 1] } },
     ],
     enemies: [
       {
@@ -41,14 +42,16 @@ function fixture(): any {
       },
     ],
     rules: {
-      slice: { hero: "hero-one", ability: "pulse" },
+      start: { hero: "hero-one" },
       run: { durationSeconds: 180, phaseSeconds: 50, timeScaling: { seconds: 1200, cap: 2 } },
       arena: {
         width: 6000, height: 5000, castle: { x: 0, y: -2000 }, heroStart: { x: 0, y: -1500 },
         gates: [{ x: -1800, y: 2200 }, { x: 1800, y: 2200 }], gateRadius: 150,
       },
       castle: { hp: 3000, radius: 180, regenPercentPerMinute: 2 },
-      hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01 },
+      hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
+        dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 } },
+      autocast: { novaMinEnemies: 1, healBelow: 0.6, shieldBelow: 0.35 },
       enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 } },
       phases: [
         { enemy: "grunt", spawnPerSecond: 0.45, hunterShare: 0.2 },
@@ -58,7 +61,7 @@ function fixture(): any {
       ],
       progression: {
         xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56,
-        attributeCardAmount: 10, cardsPerOffer: 3,
+        attributeCardAmount: 10, cardsPerOffer: 3, ultimateFromLevel: 6, ultimateLevelStep: 6,
       },
     },
     constants: {
@@ -145,7 +148,7 @@ describe("game data schemas", () => {
   it("rejects unknown param key for the kind", () => {
     const d = fixture();
     d.abilities.push({
-      levels: 3, cooldown: [5, 4, 3], id: "wave", name: { en: "W", cs: "W" }, kind: "line",
+      levels: 3, cooldown: [5, 4, 3], id: "wave", name: { en: "W", cs: "W" }, description: { en: "W", cs: "W" }, kind: "line",
       targeting: "move_direction",
       params: { damage: [1, 2, 3], length: [1, 2, 3], width: [1, 2, 3], stunSecond: [1, 1, 1] },
     });
@@ -157,7 +160,7 @@ describe("game data schemas", () => {
   it("accepts optional params of the kind", () => {
     const d = fixture();
     d.abilities.push({
-      levels: 3, cooldown: [5, 4, 3], id: "wave", name: { en: "W", cs: "W" }, kind: "line",
+      levels: 3, cooldown: [5, 4, 3], id: "wave", name: { en: "W", cs: "W" }, description: { en: "W", cs: "W" }, kind: "line",
       targeting: "move_direction",
       params: {
         damage: [1, 2, 3], length: [1, 2, 3], width: [1, 2, 3],
@@ -195,12 +198,70 @@ describe("game data schemas", () => {
     expect(msg).toContain("ghost");
   });
 
-  it("rejects slice ability the hero lacks", () => {
+  it("rejects an unknown start hero", () => {
     const d = fixture();
-    d.rules.slice.ability = "swarm";
-    const msg = errorMessage(d);
-    expect(msg).toContain("rules.slice.ability");
-    expect(msg).toContain("swarm");
+    d.rules.start.hero = "x";
+    expect(errorMessage(d)).toContain('rules.start.hero: unknown hero "x"');
+  });
+
+  it("requires a description", () => {
+    const d = fixture();
+    delete d.abilities[0].description;
+    expect(errorMessage(d)).toContain("abilities.0 (pulse).description");
+  });
+
+  it("accepts the on_cast kind", () => {
+    const d = fixture();
+    d.abilities.push({
+      levels: 3, cooldown: [5, 4, 3], id: "echo", name: { en: "E", cs: "E" }, description: { en: "E", cs: "E" },
+      kind: "on_cast", targeting: "on_cast",
+      params: { damage: [1, 2, 3], radius: [1, 1, 1], stunSeconds: [1, 1, 1] },
+    });
+    expect(() => validateGameData(d)).not.toThrow();
+  });
+
+  it("accepts empower, healPerHit and speed", () => {
+    const d = fixture();
+    d.abilities[2].params = { empower: [3, 5, 7] };
+    d.abilities.push({
+      ...d.abilities[0], id: "grasp", kind: "area", targeting: "densest_cluster",
+      params: { damage: [1, 2, 3], radius: [1, 1, 1], range: [1, 1, 1], healPerHit: [1, 2, 3] },
+    }, {
+      ...d.abilities[0], id: "bolt", kind: "projectile", targeting: "nearest",
+      params: { damage: [1, 2, 3], range: [1, 1, 1], speed: [1200, 1200, 1200] },
+    });
+    expect(() => validateGameData(d)).not.toThrow();
+  });
+
+  it("summon needs images or wards params", () => {
+    const base = { count: [1, 1, 1], duration: [5, 5, 5] };
+    const images = { damageDealt: [1, 1, 1] };
+    const wards = { damage: [1, 1, 1], attackRange: [1, 1, 1], attackInterval: [1, 1, 1], maxAlive: [1, 1, 1] };
+    const msg = "summon needs damageDealt (images) or damage, attackRange, attackInterval and maxAlive (wards)";
+    const withParams = (params: unknown) => {
+      const d = fixture();
+      d.abilities[3].params = params;
+      return d;
+    };
+    expect(() => validateGameData(withParams({ ...base, ...images }))).not.toThrow();
+    expect(() => validateGameData(withParams({ ...base, ...wards }))).not.toThrow();
+    expect(errorMessage(withParams(base))).toContain(msg);
+    expect(errorMessage(withParams({ ...base, ...images, ...wards }))).toContain(msg);
+    const partial = { ...base, damage: [1, 1, 1] };
+    expect(errorMessage(withParams(partial))).toContain(msg);
+  });
+
+  it("requires autocast, dash and ultimate levels", () => {
+    for (const mutate of [
+      (d: any) => delete d.rules.autocast,
+      (d: any) => delete d.rules.hero.dash,
+      (d: any) => delete d.rules.progression.ultimateFromLevel,
+      (d: any) => delete d.rules.progression.ultimateLevelStep,
+    ]) {
+      const d = fixture();
+      mutate(d);
+      expect(errorMessage(d)).toContain("rules.");
+    }
   });
 
   it("rejects phases shorter than the run", () => {

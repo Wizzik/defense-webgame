@@ -57,13 +57,20 @@ describe("data-build", () => {
     expect(ability).toStrictEqual({
       id: "pulse",
       name: { en: "Pulse", cs: "Puls" },
+      description: { en: "Pulse text", cs: "Puls text" },
       kind: "nova",
       targeting: "around_self",
       levels: 3,
       cooldown: [10, 10, 8],
       params: { damage: [100, 100, 300], radius: [200, 250, 300] },
     });
-    expect(Object.keys(ability)).toEqual(["id", "name", "kind", "targeting", "levels", "cooldown", "params"]);
+    expect(Object.keys(ability)).toEqual(["id", "name", "description", "kind", "targeting", "levels", "cooldown", "params"]);
+  });
+
+  it("copies descriptions and roles", () => {
+    const data = buildGameData(mapExport(), design(), "test");
+    expect(data.abilities[0].description).toEqual({ en: "Pulse text", cs: "Puls text" });
+    expect(data.heroes[0].role).toEqual({ en: "Fixture role", cs: "Testovací role" });
   });
 
   it("maps weapon_type mbounce to bounce", () => {
@@ -97,6 +104,7 @@ describe("data-build", () => {
       {
         id: "fixture-hero",
         name: { en: "Fixture Hero", cs: "Testovací hrdina" },
+        role: { en: "Fixture role", cs: "Testovací role" },
         primary: "agi",
         hp: 500,
         armor: 2,
@@ -116,6 +124,7 @@ describe("data-build", () => {
     expect(data.abilities[2]).toStrictEqual({
       id: "spark",
       name: { en: "Spark", cs: "Jiskra" },
+      description: { en: "Spark text", cs: "Jiskra text" },
       kind: "projectile",
       targeting: "nearest",
       levels: 3,
@@ -211,7 +220,7 @@ describe("data-build", () => {
   it("keeps key order of heroes and enemies", () => {
     const data = buildGameData(mapExport(), design(), "test");
     expect(Object.keys(data.heroes[0])).toEqual([
-      "id", "name", "primary", "hp", "armor", "moveSpeed", "attributes", "baseAttack", "signatureAbilities", "ultimate",
+      "id", "name", "role", "primary", "hp", "armor", "moveSpeed", "attributes", "baseAttack", "signatureAbilities", "ultimate",
     ]);
     expect(Object.keys(data.enemies[0])).toEqual([
       "id", "name", "level", "hp", "hpRegen", "armor", "moveSpeed", "collision", "acquireRange", "attack", "xp",

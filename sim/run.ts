@@ -54,8 +54,8 @@ export class Run {
       (options.durationSeconds ?? rules.run.durationSeconds) * TICKS_PER_SECOND,
     );
 
-    const def = data.heroes.find((h) => h.id === rules.slice.hero);
-    if (!def) throw new Error(`createRun: unknown hero "${rules.slice.hero}"`);
+    const def = data.heroes.find((h) => h.id === rules.start.hero);
+    if (!def) throw new Error(`createRun: unknown hero "${rules.start.hero}"`);
     const stats: HeroStats = {
       maxHp: 0, regenPerSecond: 0, armor: 0, attackIntervalSeconds: 0, damageMin: 0, damageMax: 0,
       spellPower: 0, cooldownScale: 0, moveSpeed: 0, collision: 0,

@@ -86,11 +86,8 @@ export function validateGameData(data: unknown): GameData {
     }
   });
 
-  const sliceHero = heroes.find((h) => h.id === rules.slice.hero);
-  if (!sliceHero) {
-    errors.push(`rules.slice.hero: unknown hero "${rules.slice.hero}"`);
-  } else if (!sliceHero.signatureAbilities.includes(rules.slice.ability)) {
-    errors.push(`rules.slice.ability: hero "${sliceHero.id}" has no ability "${rules.slice.ability}"`);
+  if (!heroIds.has(rules.start.hero)) {
+    errors.push(`rules.start.hero: unknown hero "${rules.start.hero}"`);
   }
 
   rules.phases.forEach((p, i) => {

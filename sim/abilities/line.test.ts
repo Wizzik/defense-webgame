@@ -14,10 +14,11 @@ function newRun(intelligence = 24) {
   };
   data.rules.hero = {
     collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
+    dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 },
   };
   data.rules.phases[0].spawnPerSecond = 0;
   data.constants.defenseArmor = 0.02;
-  const ab = data.abilities.find((a) => a.id === data.rules.slice.ability);
+  const ab = data.abilities.find((a) => a.id === "rock-rupture");
   if (!ab || ab.kind !== "line") throw new Error("test setup");
   ab.cooldown = [12, 12, 12, 12, 12];
   ab.params.damage = [500, 1000, 2000, 3500, 5000];
@@ -162,7 +163,8 @@ describe("line ability", () => {
 
   it("rejects an unsupported ability kind", () => {
     const data = gameData();
-    data.rules.slice.ability = "enhanced-totem";
+    const hero = data.heroes.find((h) => h.id === data.rules.start.hero)!;
+    hero.signatureAbilities[0] = "enhanced-totem";
     expect(() => createRun(data, { seed: 1 })).toThrow("sim: ability kind on_hit is not implemented");
   });
 });

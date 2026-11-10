@@ -1,6 +1,7 @@
 # MVP abilities. The names are working names and may change.
 # source: ability code in the map export (abilities.json). cooldown comes from the export
 #   times abilities.cooldown in design/scaling.yaml (data-build applies it to every level).
+# description: the player-facing text of the ability, written for the game (never copied from the map).
 # Each param names where its per-level numbers come from:
 #   DataA ... DataI                      object data field of the ability
 #   cooldown | area | range | duration   per-level field of the ability
@@ -15,6 +16,7 @@
 - id: rock-rupture
   source: A0A7
   name: { en: Rock Rupture, cs: Skalní zlom }
+  description: { en: "A line of stone spikes that stuns.", cs: "Řada kamenných hrotů, která omráčí." }
   kind: line
   targeting: move_direction
   params:
@@ -28,34 +30,36 @@
 - id: enhanced-totem
   source: A0A8
   name: { en: Enhanced Totem, cs: Posílený totem }
+  description: { en: "Every few seconds your next attack hits far harder.", cs: "Každých pár sekund udeří další útok mnohem silněji." }
   kind: on_hit
   targeting: on_attack
   params:
-    splashRadius: { design: [0, 0, 0, 0, 0] }
-    splashPercent: { design: [0, 0, 0, 0, 0] }
+    # DataA is Damage Increase 3, 5, 7, 9, 10 (+300 % to +1000 %).
+    empower: DataA
   review:
     notes: >-
-      splashRadius and splashPercent are 0: no trigger code holds a splash radius or percentage.
       Trig_AllStun_Func001Func002C belongs to the Trig_AllStun_* trigger (war3map.j v20.75, lines 27704-27739),
       which answers casts of A0A7, A0AA or A0A8 by O00C with the seismic-echo stun (see seismic-echo).
       A0A8 is the only ability that applies buff B00U. Trig_Attacked_Entotem_Conditions/Actions (27664-27676)
       and Trig_DealDamage_Conditions/Actions (27678-27690) remove B00U from the attacker after the attacked unit
-      takes damage from it, so the buff lasts for one hit and has no radius.
-      The size of that hit is object data, not script: DataA damage increase 3, 5, 7, 9, 10.
+      takes damage from it, so the buff lasts for one hit and has no radius, no splash.
+      The size of that hit is object data, not script: DataA damage increase 3, 5, 7, 9, 10 (empower).
       AI_Setup (33277-33279) only stores AI hints.
 
 - id: seismic-echo
   source: A00M
   name: { en: Seismic Echo, cs: Seizmická ozvěna }
-  kind: on_hit
-  targeting: on_attack
+  description: { en: "Each of your spells sends a stunning shockwave around you.", cs: "Každé tvé kouzlo vyšle kolem tebe omračující otřes." }
+  kind: on_cast
+  targeting: on_cast
   params:
-    chance: { design: [0, 0, 0, 0, 0] }
-    stunSeconds: { design: [0, 0, 0, 0, 0] }
-    bonusDamage: { design: [0, 0, 0, 0, 0] }
+    damage: { design: [150, 300, 450, 600, 750] }
+    radius: { design: [350, 350, 350, 350, 350] }
+    stunSeconds: { design: [1, 1.5, 2, 2.5, 3] }
   review:
     notes: >-
-      chance, stunSeconds and bonusDamage are 0: no trigger code holds these values.
+      The values are design values taken from the helper spell below (A0A9) and are used now:
+      the sim casts the stun after each of the hero's own spells.
       Trig_Learn_Allstun_Conditions/Actions (war3map.j v20.75, lines 27692-27702) enable the Trig_AllStun_* trigger
       once A00M is learned. Trig_AllStun_Func001Func002C, Trig_AllStun_Func001C and Trig_AllStun_Conditions
       (27704-27732) let it fire on every cast of A0A7, A0AA or A0A8 by O00C, with no chance roll.
@@ -67,6 +71,7 @@
 - id: earthquake
   source: A0AA
   name: { en: Earthquake, cs: Zemětřesení }
+  description: { en: "A massive blow to everything around you.", cs: "Mohutný úder do všeho kolem tebe." }
   kind: nova
   targeting: around_self
   params:
@@ -78,6 +83,7 @@
 - id: hunters-focus
   source: A01A
   name: { en: Hunter's Focus, cs: Soustředění lovce }
+  description: { en: "Your attacks deal more damage.", cs: "Tvoje útoky dávají větší poškození." }
   kind: aura
   targeting: self
   params:
@@ -86,6 +92,7 @@
 - id: falling-stars
   source: A01B
   name: { en: Falling Stars, cs: Padající hvězdy }
+  description: { en: "Stars strike around you and slow enemies.", cs: "Kolem tebe dopadají hvězdy a zpomalují nepřátele." }
   kind: nova
   targeting: around_self
   params:
@@ -97,6 +104,7 @@
 - id: swift-pace
   source: A007
   name: { en: Swift Pace, cs: Rychlý krok }
+  description: { en: "You move and attack faster.", cs: "Pohybuješ se a útočíš rychleji." }
   kind: aura
   targeting: self
   params:
@@ -106,6 +114,7 @@
 - id: shadow-sisters
   source: A019
   name: { en: Shadow Sisters, cs: Stínové sestry }
+  description: { en: "Three shadow copies fight at your side.", cs: "Po tvém boku bojují tři stínové kopie." }
   kind: summon
   targeting: self
   params:
@@ -119,12 +128,14 @@
 - id: grave-grasp
   source: A02H
   name: { en: Grave Grasp, cs: Hrobový stisk }
+  description: { en: "Strikes the thickest crowd and heals you for every hit.", cs: "Udeří do největšího shluku a za každý zásah tě vyléčí." }
   kind: area
   targeting: densest_cluster
   params:
     radius: area
     range: range
     damage: { design: [400, 800, 1600, 3200, 6400] }
+    healPerHit: { design: [50, 100, 150, 200, 300] }
   review:
     jassFunctions:
       - Trig_Dead_Catch_Func003Func002A
@@ -141,12 +152,13 @@
       Each living enemy within the group radius of the target point takes it once. That radius in
       Trig_Dead_Catch_Actions (lines 18036-18052: 250, 300, 350, 400, 500) equals the object data area used for
       radius; range is object data. Not mapped: each hit also creates a dummy unit (h00J, timed life 3 s) ordered
-      to attack the caster, and Trig_Catch_Actions heals the caster by 50, 100, 150, 200, 300 per level when it
-      attacks (lines 18113-18125). AI_Setup (33067-33069) only stores AI hints.
+      to attack the caster. Mapped as healPerHit: Trig_Catch_Actions heals the caster by 50, 100, 150, 200, 300
+      per level when it attacks (lines 18113-18125); the heal is wired in. AI_Setup (33067-33069) only stores AI hints.
 
 - id: skull-ring
   source: A02K
   name: { en: Skull Ring, cs: Kruh lebek }
+  description: { en: "A ring of skulls bursts out around you.", cs: "Kolem tebe vyletí prstenec lebek." }
   kind: nova
   targeting: around_self
   params:
@@ -156,15 +168,22 @@
 - id: soul-bolt
   source: A036
   name: { en: Soul Bolt, cs: Střela duše }
+  description: { en: "A seeking bolt that hits the nearest enemy hard.", cs: "Samonaváděná střela, která tvrdě zasáhne nejbližšího nepřítele." }
   kind: projectile
   targeting: nearest_elite_first
   params:
-    damage: DataA
+    damage: { design: [500, 1000, 2500, 5000, 10000] }
     range: range
+    speed: { design: [1200, 1200, 1200, 1200, 1200] }
+  review:
+    notes: >-
+      The engine spell deals the enemy half of DataA (1000 to 20000 over the five levels), so damage is a design
+      value of that half; the speed of the bolt is a design value too.
 
 - id: bone-stampede
   source: A037
   name: { en: Bone Stampede, cs: Kostěné stádo }
+  description: { en: "Bones rain down around you for a while.", cs: "Kolem tebe chvíli prší kosti." }
   kind: ticking_area
   targeting: densest_cluster
   params:
@@ -179,16 +198,24 @@
 - id: serpent-totem
   source: A062
   name: { en: Serpent Totem, cs: Hadí totem }
+  description: { en: "Raises snake totems that bite nearby enemies.", cs: "Postaví hadí totemy, které koušou nepřátele v okolí." }
   kind: summon
   targeting: densest_cluster
   params:
     count: DataA
     duration: duration
     range: range
+    # The map's totem attacks for 101, finds a target within 600 and has an attack interval of 1.0 s,
+    # which is multiplied by heroes.attackCooldown 0.5. The cap on living totems is our own.
+    damage: { design: [101, 101, 101, 101, 101] }
+    attackRange: { design: [600, 600, 600, 600, 600] }
+    attackInterval: { design: [0.5, 0.5, 0.5, 0.5, 0.5] }
+    maxAlive: { design: [3, 6, 9, 12, 15] }
 
 - id: forked-bolt
   source: A064
   name: { en: Forked Bolt, cs: Rozvětvený blesk }
+  description: { en: "Lightning forks through the enemies in front of you.", cs: "Blesk se rozvětví mezi nepřátele před tebou." }
   kind: cone
   targeting: nearest
   params:
@@ -200,6 +227,7 @@
 - id: mending-tide
   source: A063
   name: { en: Mending Tide, cs: Hojivý příliv }
+  description: { en: "Heals you when you are hurt.", cs: "Vyléčí tě, když jsi zraněný." }
   kind: heal
   targeting: low_hp_ally
   params:
@@ -210,6 +238,7 @@
 - id: spirit-ward
   source: A065
   name: { en: Spirit Ward, cs: Duchovní ochrana }
+  description: { en: "Neither you nor the castle can be harmed for a while.", cs: "Tobě ani hradu chvíli nic neublíží." }
   kind: shield
   targeting: self
   params:

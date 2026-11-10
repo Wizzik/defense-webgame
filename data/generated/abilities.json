@@ -5,6 +5,10 @@
       "en": "Rock Rupture",
       "cs": "Skalní zlom"
     },
+    "description": {
+      "en": "A line of stone spikes that stuns.",
+      "cs": "Řada kamenných hrotů, která omráčí."
+    },
     "kind": "line",
     "targeting": "move_direction",
     "levels": 5,
@@ -59,6 +63,10 @@
       "en": "Enhanced Totem",
       "cs": "Posílený totem"
     },
+    "description": {
+      "en": "Every few seconds your next attack hits far harder.",
+      "cs": "Každých pár sekund udeří další útok mnohem silněji."
+    },
     "kind": "on_hit",
     "targeting": "on_attack",
     "levels": 5,
@@ -70,19 +78,12 @@
       2.31
     ],
     "params": {
-      "splashRadius": [
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      "splashPercent": [
-        0,
-        0,
-        0,
-        0,
-        0
+      "empower": [
+        3,
+        5,
+        7,
+        9,
+        10
       ]
     }
   },
@@ -92,8 +93,12 @@
       "en": "Seismic Echo",
       "cs": "Seizmická ozvěna"
     },
-    "kind": "on_hit",
-    "targeting": "on_attack",
+    "description": {
+      "en": "Each of your spells sends a stunning shockwave around you.",
+      "cs": "Každé tvé kouzlo vyšle kolem tebe omračující otřes."
+    },
+    "kind": "on_cast",
+    "targeting": "on_cast",
     "levels": 5,
     "cooldown": [
       0,
@@ -103,26 +108,26 @@
       0
     ],
     "params": {
-      "chance": [
-        0,
-        0,
-        0,
-        0,
-        0
+      "damage": [
+        150,
+        300,
+        450,
+        600,
+        750
+      ],
+      "radius": [
+        350,
+        350,
+        350,
+        350,
+        350
       ],
       "stunSeconds": [
-        0,
-        0,
-        0,
-        0,
-        0
-      ],
-      "bonusDamage": [
-        0,
-        0,
-        0,
-        0,
-        0
+        1,
+        1.5,
+        2,
+        2.5,
+        3
       ]
     }
   },
@@ -131,6 +136,10 @@
     "name": {
       "en": "Earthquake",
       "cs": "Zemětřesení"
+    },
+    "description": {
+      "en": "A massive blow to everything around you.",
+      "cs": "Mohutný úder do všeho kolem tebe."
     },
     "kind": "nova",
     "targeting": "around_self",
@@ -155,6 +164,10 @@
     "name": {
       "en": "Hunter's Focus",
       "cs": "Soustředění lovce"
+    },
+    "description": {
+      "en": "Your attacks deal more damage.",
+      "cs": "Tvoje útoky dávají větší poškození."
     },
     "kind": "aura",
     "targeting": "self",
@@ -181,6 +194,10 @@
     "name": {
       "en": "Falling Stars",
       "cs": "Padající hvězdy"
+    },
+    "description": {
+      "en": "Stars strike around you and slow enemies.",
+      "cs": "Kolem tebe dopadají hvězdy a zpomalují nepřátele."
     },
     "kind": "nova",
     "targeting": "around_self",
@@ -229,6 +246,10 @@
       "en": "Swift Pace",
       "cs": "Rychlý krok"
     },
+    "description": {
+      "en": "You move and attack faster.",
+      "cs": "Pohybuješ se a útočíš rychleji."
+    },
     "kind": "aura",
     "targeting": "self",
     "levels": 5,
@@ -262,6 +283,10 @@
       "en": "Shadow Sisters",
       "cs": "Stínové sestry"
     },
+    "description": {
+      "en": "Three shadow copies fight at your side.",
+      "cs": "Po tvém boku bojují tři stínové kopie."
+    },
     "kind": "summon",
     "targeting": "self",
     "levels": 2,
@@ -294,6 +319,10 @@
       "en": "Grave Grasp",
       "cs": "Hrobový stisk"
     },
+    "description": {
+      "en": "Strikes the thickest crowd and heals you for every hit.",
+      "cs": "Udeří do největšího shluku a za každý zásah tě vyléčí."
+    },
     "kind": "area",
     "targeting": "densest_cluster",
     "levels": 5,
@@ -325,6 +354,13 @@
         1600,
         3200,
         6400
+      ],
+      "healPerHit": [
+        50,
+        100,
+        150,
+        200,
+        300
       ]
     }
   },
@@ -333,6 +369,10 @@
     "name": {
       "en": "Skull Ring",
       "cs": "Kruh lebek"
+    },
+    "description": {
+      "en": "A ring of skulls bursts out around you.",
+      "cs": "Kolem tebe vyletí prstenec lebek."
     },
     "kind": "nova",
     "targeting": "around_self",
@@ -367,6 +407,10 @@
       "en": "Soul Bolt",
       "cs": "Střela duše"
     },
+    "description": {
+      "en": "A seeking bolt that hits the nearest enemy hard.",
+      "cs": "Samonaváděná střela, která tvrdě zasáhne nejbližšího nepřítele."
+    },
     "kind": "projectile",
     "targeting": "nearest_elite_first",
     "levels": 5,
@@ -379,11 +423,11 @@
     ],
     "params": {
       "damage": [
+        500,
         1000,
-        2000,
+        2500,
         5000,
-        10000,
-        20000
+        10000
       ],
       "range": [
         99999,
@@ -391,6 +435,13 @@
         99999,
         99999,
         99999
+      ],
+      "speed": [
+        1200,
+        1200,
+        1200,
+        1200,
+        1200
       ]
     }
   },
@@ -399,6 +450,10 @@
     "name": {
       "en": "Bone Stampede",
       "cs": "Kostěné stádo"
+    },
+    "description": {
+      "en": "Bones rain down around you for a while.",
+      "cs": "Kolem tebe chvíli prší kosti."
     },
     "kind": "ticking_area",
     "targeting": "densest_cluster",
@@ -436,6 +491,10 @@
       "en": "Serpent Totem",
       "cs": "Hadí totem"
     },
+    "description": {
+      "en": "Raises snake totems that bite nearby enemies.",
+      "cs": "Postaví hadí totemy, které koušou nepřátele v okolí."
+    },
     "kind": "summon",
     "targeting": "densest_cluster",
     "levels": 5,
@@ -467,6 +526,34 @@
         500,
         800,
         800
+      ],
+      "damage": [
+        101,
+        101,
+        101,
+        101,
+        101
+      ],
+      "attackRange": [
+        600,
+        600,
+        600,
+        600,
+        600
+      ],
+      "attackInterval": [
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "maxAlive": [
+        3,
+        6,
+        9,
+        12,
+        15
       ]
     }
   },
@@ -475,6 +562,10 @@
     "name": {
       "en": "Forked Bolt",
       "cs": "Rozvětvený blesk"
+    },
+    "description": {
+      "en": "Lightning forks through the enemies in front of you.",
+      "cs": "Blesk se rozvětví mezi nepřátele před tebou."
     },
     "kind": "cone",
     "targeting": "nearest",
@@ -523,6 +614,10 @@
       "en": "Mending Tide",
       "cs": "Hojivý příliv"
     },
+    "description": {
+      "en": "Heals you when you are hurt.",
+      "cs": "Vyléčí tě, když jsi zraněný."
+    },
     "kind": "heal",
     "targeting": "low_hp_ally",
     "levels": 5,
@@ -562,6 +657,10 @@
     "name": {
       "en": "Spirit Ward",
       "cs": "Duchovní ochrana"
+    },
+    "description": {
+      "en": "Neither you nor the castle can be harmed for a while.",
+      "cs": "Tobě ani hradu chvíli nic neublíží."
     },
     "kind": "shield",
     "targeting": "self",

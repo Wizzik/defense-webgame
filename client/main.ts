@@ -155,7 +155,7 @@ interface Ui {
 /** Builds the menu, HUD, cards, end screen and castle pointer, and wires them to the session. */
 function createUi(data: GameData, session: Session, followCamera: FollowCamera, sfx: Sfx, nextSeed: () => number): Ui {
   const root = document.getElementById("ui")!;
-  const heroDef = data.heroes.find((h) => h.id === data.rules.slice.hero)!;
+  const heroDef = data.heroes.find((h) => h.id === data.rules.start.hero)!;
   let menuOpen = true;
   const showMenu = (): void => {
     menuOpen = true;

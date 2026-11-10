@@ -8,9 +8,10 @@ describe("heroStats", () => {
     const data = gameData();
     data.rules.hero = {
       collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
+      dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 },
     };
-    const def = data.heroes.find((h) => h.id === data.rules.slice.hero);
-    if (!def) throw new Error("slice hero is missing");
+    const def = data.heroes.find((h) => h.id === data.rules.start.hero);
+    if (!def) throw new Error("start hero is missing");
     const run = createRun(data, { seed: 1 });
     const s = heroStats(data, run.hero, { ...run.hero.stats });
     expect(s.maxHp).toBeCloseTo(1325, 6);

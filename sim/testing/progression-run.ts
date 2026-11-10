@@ -15,11 +15,13 @@ export function progressionRun(options: ProgressionOptions = {}) {
   };
   data.rules.hero = {
     collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
+    dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 },
   };
   data.rules.phases[0].spawnPerSecond = 0;
   data.rules.progression = {
     xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56,
     attributeCardAmount: 10, cardsPerOffer: options.cardsPerOffer ?? 3,
+    ultimateFromLevel: 6, ultimateLevelStep: 6,
   };
   return createRun(data, { seed: 7, durationSeconds: options.durationSeconds ?? 100000 });
 }

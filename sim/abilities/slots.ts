@@ -20,11 +20,11 @@ export interface AbilitySlot {
 }
 
 /**
- * One slot: rules.slice.ability at level 1. Any kind other than line throws
+ * One slot: the hero's first signature ability at level 1. Any kind other than line throws
  * `sim: ability kind <kind> is not implemented`.
  */
 export function createAbilitySlots(run: Run): AbilitySlot[] {
-  const id = run.data.rules.slice.ability;
+  const id = run.hero.def.signatureAbilities[0];
   const def = run.data.abilities.find((a) => a.id === id);
   if (!def) throw new Error(`sim: unknown ability "${id}"`);
   if (def.kind !== "line") throw new Error(`sim: ability kind ${def.kind} is not implemented`);

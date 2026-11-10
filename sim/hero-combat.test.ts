@@ -18,6 +18,7 @@ function newRun() {
   };
   data.rules.hero = {
     collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
+    dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 },
   };
   // The attack tests count ticks, so the base attack cooldown is pinned.
   for (const hero of data.heroes) hero.baseAttack.cooldown = 1.5;
