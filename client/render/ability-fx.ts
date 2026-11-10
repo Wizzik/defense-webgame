@@ -6,17 +6,18 @@ import { BlastFx } from "./fx/blasts";
 import { BoltFx } from "./fx/bolts";
 import { Bubbles } from "./fx/bubbles";
 import { ProjectileView } from "./fx/projectile-view";
+import { type Rgb, rgb } from "./fx/instances";
 import { RingFx } from "./fx/rings";
 import { heroAccent } from "./hero-tints";
 
-const NOVA_COLOR = 0xffd27a;
-const ON_CAST_COLOR = 0xc8a165;
-const AREA_COLOR = 0x7dff9a;
-const CONE_BOLT_COLOR = 0x9fd8ff;
+const NOVA_COLOR = rgb(0xffd27a);
+const ON_CAST_COLOR = rgb(0xc8a165);
+const AREA_COLOR = rgb(0x7dff9a);
+const CONE_BOLT_COLOR = rgb(0x9fd8ff);
 const CONE_BOLT_LIFE = 0.18;
-const ATTACK_BOLT_COLOR = 0xfff1b3;
+const ATTACK_BOLT_COLOR = rgb(0xfff1b3);
 const ATTACK_BOLT_LIFE = 0.1;
-const WARD_BOLT_COLOR = 0x1fa38a;
+const WARD_BOLT_COLOR = rgb(0x1fa38a);
 const ALLY_BOLT_LIFE = 0.12;
 
 /** Rings, blasts, bolts, projectiles and bubbles for every ability kind. Events create effects; `update` draws them. */
@@ -28,6 +29,8 @@ export class AbilityFx implements RunView {
   private readonly projectiles: ProjectileView;
   private readonly bubbles = new Bubbles();
   private lastRun: Run | null = null;
+  /** The hero's effect colour, computed when the run changes. */
+  private heroColor: Rgb = rgb(0);
 
   constructor() {
     this.projectiles = new ProjectileView(PROJECTILE_CAPACITY);
@@ -81,6 +84,7 @@ export class AbilityFx implements RunView {
   private sync(run: Run): void {
     if (run === this.lastRun) return;
     this.lastRun = run;
+    this.heroColor = rgb(heroAccent(run.hero.def.id));
     this.rings.reset();
     this.blasts.reset();
     this.bolts.reset();
@@ -117,7 +121,7 @@ export class AbilityFx implements RunView {
       }
     } else if (source === 2) {
       const ally = events.v[event]!;
-      const color = run.allies.kind[ally] === AllyKind.Ward ? WARD_BOLT_COLOR : heroAccent(hero.def.id);
+      const color = run.allies.kind[ally] === AllyKind.Ward ? WARD_BOLT_COLOR : this.heroColor;
       this.bolts.add(
         now, run.allies.x[ally]! * SCENE_SCALE, -run.allies.y[ally]! * SCENE_SCALE, x, z, color, ALLY_BOLT_LIFE,
       );

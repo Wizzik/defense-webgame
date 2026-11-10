@@ -1,5 +1,5 @@
 import { CircleGeometry, type InstancedMesh, RingGeometry } from "three/webgpu";
-import { createFxMesh, disposeMesh, hide, rgb, setColor, writeScaled } from "./instances";
+import { createFxMesh, disposeMesh, hide, type Rgb, rgb, setColor, writeScaled } from "./instances";
 import { FxPool } from "./pool";
 
 const RING_POOL = 64;
@@ -43,16 +43,15 @@ export class RingFx {
     this.meshes = [this.discs, this.rings, this.heals];
   }
 
-  /** A ring at (x, z) in scene units that expands to `radius`. */
-  addRing(now: number, x: number, z: number, radius: number, hex: number, disc: boolean): void {
+  /** A ring at (x, z) in scene units that expands to `radius`; `color` is precomputed (no allocation here). */
+  addRing(now: number, x: number, z: number, radius: number, color: Rgb, disc: boolean): void {
     const i = this.pool.add(now);
     this.x[i] = x;
     this.z[i] = z;
     this.radius[i] = radius;
-    const [r, g, b] = rgb(hex);
-    this.color[i * 3] = r;
-    this.color[i * 3 + 1] = g;
-    this.color[i * 3 + 2] = b;
+    this.color[i * 3] = color[0];
+    this.color[i * 3 + 1] = color[1];
+    this.color[i * 3 + 2] = color[2];
     this.disc[i] = disc ? 1 : 0;
   }
 

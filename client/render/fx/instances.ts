@@ -7,8 +7,10 @@ import {
   MeshBasicNodeMaterial,
 } from "three/webgpu";
 
-/** Linear rgb of a hex colour, the way the material colour would be read. */
-export function rgb(hex: number): [number, number, number] {
+export type Rgb = readonly [number, number, number];
+
+/** Linear rgb of a hex colour, the way the material colour would be read. Allocates: call it at setup or when the run changes. */
+export function rgb(hex: number): Rgb {
   const c = new Color(hex);
   return [c.r, c.g, c.b];
 }

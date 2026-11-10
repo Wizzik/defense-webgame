@@ -87,7 +87,8 @@ export class Bubbles {
 
     let aura = false;
     let charged = false;
-    for (const slot of run.abilities) {
+    for (let i = 0; i < run.abilities.length; i++) {
+      const slot = run.abilities[i]!;
       if (slot.level < 1) continue;
       if (slot.def.kind === "aura") aura = true;
       else if (slot.def.kind === "on_hit" && slot.active) charged = true;

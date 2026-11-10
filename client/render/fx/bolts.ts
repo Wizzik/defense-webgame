@@ -1,5 +1,5 @@
 import { BoxGeometry, type InstancedMesh } from "three/webgpu";
-import { createFxMesh, disposeMesh, hide, setColor, writeBeam, rgb } from "./instances";
+import { createFxMesh, disposeMesh, hide, type Rgb, setColor, writeBeam } from "./instances";
 import { FxPool } from "./pool";
 
 const BOLT_POOL = 96;
@@ -24,18 +24,17 @@ export class BoltFx {
     this.mesh = createFxMesh(new BoxGeometry(1, 1, 1), BOLT_POOL);
   }
 
-  /** Scene coordinates; `life` in seconds (at most 0.18). */
-  add(now: number, ax: number, az: number, bx: number, bz: number, hex: number, life: number): void {
+  /** Scene coordinates; `color` is precomputed (no allocation here); `life` in seconds (at most 0.18). */
+  add(now: number, ax: number, az: number, bx: number, bz: number, color: Rgb, life: number): void {
     const i = this.pool.add(now);
     this.ax[i] = ax;
     this.az[i] = az;
     this.bx[i] = bx;
     this.bz[i] = bz;
     this.life[i] = life;
-    const [r, g, b] = rgb(hex);
-    this.color[i * 3] = r;
-    this.color[i * 3 + 1] = g;
-    this.color[i * 3 + 2] = b;
+    this.color[i * 3] = color[0];
+    this.color[i * 3 + 1] = color[1];
+    this.color[i * 3 + 2] = color[2];
   }
 
   write(now: number): void {
