@@ -29,10 +29,10 @@ The repository is public (decided 2026-11-04): never commit anything that must n
 - `npm run e2e` - Playwright end-to-end tests
 - `npm run map:extract` - local map extraction toolkit (output stays untracked)
 - `npm run data:build` - build game data from validated sources
-- `npm run sim:run` - autopilot run summaries for balance tuning
+- `npm run sim:run -- --hero all --runs 5` - autopilot run summaries per hero for balance tuning
 
 ## Debugging in the browser
-URL parameters of the game page: `seed`, `speed` (1-16), `duration` (5-600 s), `debug=1` (`window.__game.debug.grantXp(n)`), `fps=1` (overlay), `lang` (`en`|`cs`), `renderer=webgl2`. `window.__game` exposes `backend`, `frames`, `screen`, `tick`, `level`, `kills`, `heroHp`, `castleHp`, `enemies`; the e2e tests read it. Run balance tuning headless with `npm run sim:run -- --runs 5`.
+URL parameters of the game page: `seed`, `speed` (1-16), `duration` (5-600 s), `hero` (`stonehorn`|`nightglaive`|`gravecaller`|`serpent-shaman`), `debug=1` (`window.__game.debug.grantXp(n)`, `window.__game.debug.setAbilityLevel(slot, level)`), `fps=1` (overlay), `lang` (`en`|`cs`), `renderer=webgl2`. `window.__game` exposes `backend`, `frames`, `screen`, `tick`, `level`, `kills`, `heroHp`, `castleHp`, `enemies`, `hero`, `heroX`, `heroY`, `abilityLevels`, `abilityCooldowns`, `ultimateAuto`, `allies`, `projectiles`; the e2e tests read it. Run balance tuning headless with `npm run sim:run -- --hero all --runs 5`.
 
 ## Code rules
 - `sim/` is pure: no `three`, no imports from `client/`, no DOM globals (`window`, `document`, `navigator`, `globalThis`).

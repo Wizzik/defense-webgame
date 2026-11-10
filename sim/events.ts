@@ -7,6 +7,9 @@ export const EventKind = {
   Pickup: 6,
   LevelUp: 7,
   RunEnd: 8,
+  Blast: 9,
+  Heal: 10,
+  Dash: 11,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

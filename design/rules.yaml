@@ -3,7 +3,7 @@
 # The map's castle (hcas) has 155 000 HP and regenerates 200 HP/s.
 # The spawn flow starts from 7 units per gate per 30 s on Normal.
 # Tuned with `npm run sim:run -- --runs 5` (castle hp, hunterShare, xpStep) for the survivors pace.
-slice: { hero: stonehorn, ability: rock-rupture }
+start: { hero: stonehorn }
 run:
   durationSeconds: 180
   phaseSeconds: 50
@@ -16,11 +16,14 @@ arena:
   gates: [{ x: -1600, y: 1500 }, { x: 1600, y: 1500 }]
   gateRadius: 150
 castle: { hp: 12000, radius: 180, regenPercentPerMinute: 2 }
-hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01 }
+hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
+        dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 } }
+autocast: { novaMinEnemies: 1, healBelow: 0.6, shieldBelow: 0.35 }
 enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 } }
 phases:
   - { enemy: shieldbearer, spawnPerSecond: 1.2, hunterShare: 0.2 }
   - { enemy: shieldbearer, spawnPerSecond: 1.8, hunterShare: 0.2 }
   - { enemy: shieldbearer, spawnPerSecond: 2.4, hunterShare: 0.2 }
   - { enemy: shieldbearer, spawnPerSecond: 3.0, hunterShare: 0.2 }
-progression: { xpFirst: 5, xpStep: 3, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3 }
+progression: { xpFirst: 5, xpStep: 3, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3,
+  ultimateFromLevel: 6, ultimateLevelStep: 6 }   # map: ultimates need hero level 10

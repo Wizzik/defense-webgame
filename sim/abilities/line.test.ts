@@ -14,10 +14,11 @@ function newRun(intelligence = 24) {
   };
   data.rules.hero = {
     collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
+    dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 },
   };
   data.rules.phases[0].spawnPerSecond = 0;
   data.constants.defenseArmor = 0.02;
-  const ab = data.abilities.find((a) => a.id === data.rules.slice.ability);
+  const ab = data.abilities.find((a) => a.id === "rock-rupture");
   if (!ab || ab.kind !== "line") throw new Error("test setup");
   ab.cooldown = [12, 12, 12, 12, 12];
   ab.params.damage = [500, 1000, 2000, 3500, 5000];
@@ -160,9 +161,24 @@ describe("line ability", () => {
     expect(run.enemies.hp[far]).toBe(hp);
   });
 
-  it("rejects an unsupported ability kind", () => {
+  it("hits carry the slot as ref", () => {
+    const run = newRun();
+    add(run, 0, 600);
+    let hits: number[] = [];
+    for (let n = 0; n < 40 && hits.length === 0; n++) {
+      run.step(NO_INPUT);
+      hits = ofKind(run, EventKind.Hit);
+    }
+    expect(hits.length).toBeGreaterThan(0);
+    expect(run.events.u[hits[0]]).toBe(1);
+    expect(run.events.v[hits[0]]).toBe(0);
+  });
+
+  it("an unsupported ability kind throws when stepped", () => {
     const data = gameData();
-    data.rules.slice.ability = "enhanced-totem";
-    expect(() => createRun(data, { seed: 1 })).toThrow("sim: ability kind on_hit is not implemented");
+    const run = createRun(data, { seed: 1 });
+    // No hero uses chain, so no updater exists for it.
+    run.abilities[0].def = { ...run.abilities[0].def, kind: "chain" } as never;
+    expect(() => run.step(NO_INPUT)).toThrow("sim: ability kind chain is not implemented");
   });
 });

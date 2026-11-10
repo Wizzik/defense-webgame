@@ -5,8 +5,8 @@ import { describe, expect, it } from "vitest";
 import { validateGameData } from "./schema";
 
 const FILES = ["heroes.json", "abilities.json", "enemies.json", "rules.json", "constants.json"] as const;
-/** Keys that carry map texts (tooltips, descriptions) or design-only lookups (mapName). */
-const FORBIDDEN_KEYS = new Set(["tooltip", "ubertip", "tip", "description", "mapName", "source", "review", "jassFunctions"]);
+/** Keys that carry map texts (tooltips) or design-only lookups (mapName). */
+const FORBIDDEN_KEYS = new Set(["tooltip", "ubertip", "tip", "mapName", "source", "review", "jassFunctions"]);
 
 function read(file: (typeof FILES)[number]): string {
   return readFileSync(join(import.meta.dirname, "generated", file), "utf8");
@@ -21,8 +21,10 @@ function designLists(): Record<string, unknown>[][] {
     .filter((v): v is Record<string, unknown>[] => Array.isArray(v));
 }
 
-function designEntries(file: string): { id: string; name: unknown }[] {
-  return parse(readFileSync(join(import.meta.dirname, "..", "design", file), "utf8")) as { id: string; name: unknown }[];
+type Entry = { id: string; name: unknown; description?: unknown; role?: unknown };
+
+function designEntries(file: string): Entry[] {
+  return parse(readFileSync(join(import.meta.dirname, "..", "design", file), "utf8")) as Entry[];
 }
 
 function forbiddenKeyPaths(value: unknown, path: string): string[] {
@@ -78,8 +80,9 @@ describe("generated game data", () => {
       ["enemies.json", "enemies.yaml"],
     ] as const;
     for (const [json, yaml] of pairs) {
-      const generated = (JSON.parse(read(json)) as { id: string; name: unknown }[]).map(({ id, name }) => ({ id, name }));
-      const design = designEntries(yaml).map(({ id, name }) => ({ id, name }));
+      const pick = ({ id, name, description, role }: Entry) => ({ id, name, description, role });
+      const generated = (JSON.parse(read(json)) as Entry[]).map(pick);
+      const design = designEntries(yaml).map(pick);
       expect(generated, `${json} differs from design/${yaml}: run npm run data:build`).toEqual(design);
     }
   });
@@ -89,6 +92,16 @@ describe("generated game data", () => {
     expect(JSON.parse(read("rules.json")), "rules.json differs from design/rules.yaml: run npm run data:build").toEqual(rules);
     const xp = (list: { id: string; xp?: number }[]) => list.map(({ id, xp }) => ({ id, xp }));
     expect(xp(JSON.parse(read("enemies.json")))).toEqual(xp(designEntries("enemies.yaml") as { id: string; xp?: number }[]));
+  });
+
+  it("carries the phase 2a mechanics", () => {
+    const abilities = JSON.parse(read("abilities.json")) as { id: string; kind: string; params: Record<string, number[]> }[];
+    const heroes = JSON.parse(read("heroes.json")) as { id: string; signatureAbilities: string[] }[];
+    const ability = (id: string) => abilities.find((a) => a.id === id)!;
+    expect(ability("enhanced-totem").params.empower).toEqual([3, 5, 7, 9, 10]);
+    expect(ability("seismic-echo").kind).toBe("on_cast");
+    expect(heroes.find((h) => h.id === "nightglaive")!.signatureAbilities[0]).toBe("falling-stars");
+    expect(ability("serpent-totem").params.maxAlive).toBeDefined();
   });
 
   it("carries no map texts", () => {

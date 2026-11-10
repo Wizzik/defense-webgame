@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { stateHash } from "./hash";
 import { NO_INPUT } from "./input";
 import { chooseCard, openOffer } from "./cards";
+import { UPDATERS } from "./abilities/kinds";
 import { gainXp } from "./level-up";
 import { progressionRun } from "./testing/progression-run";
 
@@ -11,6 +12,22 @@ function offered(run: ReturnType<typeof progressionRun>) {
   return run.offer!.cards;
 }
 
+// These tests set their own rules for which kinds exist: only `line` keeps its updater (stubs are added per test).
+const savedUpdaters = new Map<string, unknown>();
+beforeEach(() => {
+  const updaters = UPDATERS as Record<string, unknown>;
+  for (const kind of Object.keys(updaters)) {
+    if (kind === "line") continue;
+    savedUpdaters.set(kind, updaters[kind]);
+    delete updaters[kind];
+  }
+});
+afterEach(() => {
+  const updaters = UPDATERS as Record<string, unknown>;
+  for (const [kind, fn] of savedUpdaters) updaters[kind] = fn;
+  savedUpdaters.clear();
+});
+
 describe("cards", () => {
   it("choosing a card applies it and resumes", () => {
     for (let index = 0; index < 3; index++) {
@@ -18,7 +35,7 @@ describe("cards", () => {
       const cards = offered(run);
       const card = cards[index];
       const before = { str: run.hero.str, agi: run.hero.agi, int: run.hero.int, max: run.hero.stats.maxHp, hp: run.hero.hp };
-      run.step({ moveX: 0, moveY: 0, card: index });
+      run.step({ moveX: 0, moveY: 0, card: index, actions: 0 });
       expect(run.state).toBe("playing");
       expect(run.offer).toBeNull();
       expect(run.hero.pendingLevelUps).toBe(0);
@@ -41,7 +58,7 @@ describe("cards", () => {
     offered(run);
     const hash = stateHash(run);
     for (const card of [-1, 3, 99, 1.5, NaN]) {
-      run.step({ moveX: 0, moveY: 0, card });
+      run.step({ moveX: 0, moveY: 0, card, actions: 0 });
       expect(run.state).toBe("levelUp");
       expect(stateHash(run)).toBe(hash);
     }
@@ -83,5 +100,62 @@ describe("cards", () => {
       seen = run.offer!.cards.some((c) => c.kind === "ability");
     }
     expect(seen).toBe(true);
+  });
+
+  describe("learn and ultimate cards", () => {
+    const stubbed: string[] = [];
+    function stub(...kinds: string[]): void {
+      for (const kind of kinds) {
+        const updaters = UPDATERS as Record<string, unknown>;
+        if (updaters[kind]) continue;
+        updaters[kind] = () => {};
+        stubbed.push(kind);
+      }
+    }
+    afterEach(() => {
+      for (const kind of stubbed) delete (UPDATERS as Record<string, unknown>)[kind];
+      stubbed.length = 0;
+    });
+
+    function offerAt(level: number, ultimateLevel = 0) {
+      const run = progressionRun({ cardsPerOffer: 10 });
+      run.hero.level = level;
+      run.abilities[3].level = ultimateLevel;
+      run.hero.pendingLevelUps = 1;
+      openOffer(run);
+      return run.offer!.cards.map((c) =>
+        c.kind === "ability" ? `${c.slot}:${c.fromLevel}>${c.toLevel}` : c.attribute,
+      ).sort();
+    }
+
+    it("offers learn cards for unlearned signatures", () => {
+      stub("on_hit", "on_cast", "nova");
+      expect(offerAt(2)).toEqual(["0:1>2", "1:0>1", "2:0>1", "agi", "int", "str"]);
+    });
+
+    it("does not offer kinds without an updater", () => {
+      expect(offerAt(2)).toEqual(["0:1>2", "agi", "int", "str"]);
+    });
+
+    it("the ultimate appears from ultimateFromLevel", () => {
+      stub("on_hit", "on_cast", "nova");
+      expect(offerAt(5)).not.toContain("3:0>1");
+      expect(offerAt(6)).toContain("3:0>1");
+      expect(offerAt(11, 1)).not.toContain("3:1>2");
+      expect(offerAt(12, 1)).toContain("3:1>2");
+    });
+
+    it("learning an ability makes it ready", () => {
+      stub("on_hit", "on_cast", "nova");
+      const run = progressionRun({ cardsPerOffer: 10 });
+      run.hero.level = 2;
+      run.hero.pendingLevelUps = 1;
+      openOffer(run);
+      const index = run.offer!.cards.findIndex((c) => c.kind === "ability" && c.slot === 1);
+      run.abilities[1].cooldown = 99;
+      chooseCard(run, index);
+      expect(run.abilities[1].level).toBe(1);
+      expect(run.abilities[1].cooldown).toBe(0);
+    });
   });
 });

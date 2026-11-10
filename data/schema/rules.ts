@@ -8,7 +8,7 @@ const positive = z.number().positive();
 const nonNegative = z.number().min(0);
 
 export const RulesSchema = z.object({
-  slice: z.object({ hero: Slug, ability: Slug }).strict(),
+  start: z.object({ hero: Slug }).strict(),
   run: z.object({
     durationSeconds: positive,
     phaseSeconds: positive,
@@ -29,6 +29,12 @@ export const RulesSchema = z.object({
     regenPerStr: nonNegative,
     spellPowerPerInt: nonNegative,
     cooldownSpeedPerInt: nonNegative,
+    dash: z.object({ distance: positive, seconds: positive, cooldownSeconds: positive }).strict(),
+  }).strict(),
+  autocast: z.object({
+    novaMinEnemies: z.number().int().min(1),
+    healBelow: z.number().min(0).max(1),
+    shieldBelow: z.number().min(0).max(1),
   }).strict(),
   enemies: z.object({
     maxAlive: z.number().int().positive(),
@@ -51,6 +57,8 @@ export const RulesSchema = z.object({
     pickupRadius: positive,
     attributeCardAmount: positive,
     cardsPerOffer: z.number().int().positive(),
+    ultimateFromLevel: z.number().int().min(1),
+    ultimateLevelStep: z.number().int().min(1),
   }).strict(),
 }).strict();
 

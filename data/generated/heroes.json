@@ -5,6 +5,10 @@
       "en": "Stonehorn",
       "cs": "Kamenorohý"
     },
+    "role": {
+      "en": "Melee bruiser. Stuns with stone and quakes.",
+      "cs": "Rváč na blízko. Omračuje kamenem a otřesy."
+    },
     "primary": "str",
     "hp": 800,
     "armor": 5,
@@ -35,13 +39,17 @@
       "enhanced-totem",
       "seismic-echo"
     ],
-    "ultimate": "earthquake"
+    "ultimate": "groundbreaker"
   },
   {
     "id": "nightglaive",
     "name": {
       "en": "Nightglaive",
       "cs": "Noční čepel"
+    },
+    "role": {
+      "en": "Ranged hunter. Swift strikes and falling stars.",
+      "cs": "Lovkyně na dálku. Rychlé útoky a padající hvězdy."
     },
     "primary": "agi",
     "hp": 800,
@@ -69,8 +77,8 @@
       "damageMax": 24
     },
     "signatureAbilities": [
-      "hunters-focus",
       "falling-stars",
+      "hunters-focus",
       "swift-pace"
     ],
     "ultimate": "shadow-sisters"
@@ -80,6 +88,10 @@
     "name": {
       "en": "Gravecaller",
       "cs": "Hrobník"
+    },
+    "role": {
+      "en": "Spellcaster. Drains souls and hurls skulls.",
+      "cs": "Kouzelník. Vysává duše a metá lebky."
     },
     "primary": "int",
     "hp": 900,
@@ -118,6 +130,10 @@
     "name": {
       "en": "Serpent Shaman",
       "cs": "Hadí šaman"
+    },
+    "role": {
+      "en": "Summoner. Totems, lightning and healing.",
+      "cs": "Vyvolávač. Totemy, blesky a léčení."
     },
     "primary": "int",
     "hp": 1000,

@@ -29,6 +29,9 @@ export class EnemyStore {
   readonly knockVX: Float64Array;
   readonly knockVY: Float64Array;
   readonly knockTicks: Int32Array;
+  /** Slow: ticks left and the share of walking speed removed (0..1). */
+  readonly slowTicks: Int32Array;
+  readonly slowFactor: Float64Array;
 
   constructor(capacity: number) {
     this.capacity = capacity;
@@ -55,6 +58,8 @@ export class EnemyStore {
     this.knockVX = new Float64Array(capacity);
     this.knockVY = new Float64Array(capacity);
     this.knockTicks = new Int32Array(capacity);
+    this.slowTicks = new Int32Array(capacity);
+    this.slowFactor = new Float64Array(capacity);
   }
 
   /** Takes the lowest free slot; returns -1 when the store is full. */
@@ -94,6 +99,8 @@ export class EnemyStore {
     this.knockVX[slot] = 0;
     this.knockVY[slot] = 0;
     this.knockTicks[slot] = 0;
+    this.slowTicks[slot] = 0;
+    this.slowFactor[slot] = 0;
     return slot;
   }
 
@@ -102,4 +109,11 @@ export class EnemyStore {
     this.alive[slot] = 0;
     this.aliveCount--;
   }
+}
+
+/** Slows an enemy; with a slow already active, both the factor and the ticks keep the larger value. */
+export function applySlow(e: EnemyStore, slot: number, factor: number, ticks: number): void {
+  if (ticks <= 0) return;
+  e.slowFactor[slot] = e.slowTicks[slot] > 0 ? Math.max(e.slowFactor[slot], factor) : factor;
+  e.slowTicks[slot] = Math.max(e.slowTicks[slot], ticks);
 }

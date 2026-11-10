@@ -3,18 +3,18 @@ import { LocalizedText, Slug } from "./common";
 
 export const AbilityKind = z.enum([
   "projectile", "instant", "chain", "area", "line", "nova", "cone",
-  "ticking_area", "aura", "summon", "on_hit", "heal", "shield",
+  "ticking_area", "aura", "summon", "on_hit", "heal", "shield", "on_cast",
 ]);
 
 export const Targeting = z.enum([
   "nearest", "nearest_elite_first", "densest_cluster", "move_direction",
-  "around_self", "self", "on_attack", "low_hp_ally",
+  "around_self", "self", "on_attack", "low_hp_ally", "on_cast",
 ]);
 
 const PerLevel = z.array(z.number());
 
 /** Params of a kind: required keys, optional keys, and nothing else. */
-function params<R extends string, O extends string>(required: readonly R[], optional: readonly O[] = []) {
+function params<R extends string, O extends string = never>(required: readonly R[], optional: readonly O[] = []) {
   const shape = {
     ...Object.fromEntries(required.map((k) => [k, PerLevel])),
     ...Object.fromEntries(optional.map((k) => [k, PerLevel.optional()])),
@@ -32,9 +32,30 @@ function paramsAnyOf(anyOf: readonly string[], optional: readonly string[] = [])
   });
 }
 
+const WARD_KEYS = ["damage", "attackRange", "attackInterval", "maxAlive"] as const;
+
+/** A summon is either copies of the hero (damageDealt) or totems (damage, attackRange, attackInterval, maxAlive). */
+function summonParams() {
+  return params(
+    ["count", "duration"],
+    ["range", "damageDealt", "damageTaken", ...WARD_KEYS],
+  ).superRefine((p, ctx) => {
+    const images = p.damageDealt !== undefined;
+    const anyWard = WARD_KEYS.some((k) => p[k] !== undefined);
+    const wards = WARD_KEYS.every((k) => p[k] !== undefined);
+    if (!((images && !anyWard) || (!images && wards))) {
+      ctx.addIssue({
+        code: "custom",
+        message: "summon needs damageDealt (images) or damage, attackRange, attackInterval and maxAlive (wards)",
+      });
+    }
+  });
+}
+
 const common = {
   id: Slug,
   name: LocalizedText,
+  description: LocalizedText,
   targeting: Targeting,
   levels: z.number().int().min(1).max(5),
   cooldown: z.array(z.number().min(0)),
@@ -46,17 +67,18 @@ function variant<K extends string, P extends z.ZodType>(kind: K, p: P) {
 
 export const AbilitySchema = z
   .discriminatedUnion("kind", [
-    variant("projectile", params(["damage", "range"])),
+    variant("projectile", params(["damage", "range"], ["speed"])),
+    variant("on_cast", params(["damage", "radius", "stunSeconds"])),
     variant("instant", params(["damage", "range"])),
     variant("chain", params(["damage", "range", "bounces"])),
-    variant("area", params(["damage", "radius", "range"])),
+    variant("area", params(["damage", "radius", "range"], ["healPerHit"])),
     variant("line", params(["damage", "length", "width"], ["stunSeconds", "waveSpeed"])),
     variant("nova", params(["damage", "radius"], ["slow", "slowSeconds"])),
     variant("cone", params(["damage", "length", "endWidth", "maxTargets"])),
     variant("ticking_area", params(["tickDamage", "ticksPerSecond", "radius", "duration"], ["hitRadius"])),
     variant("aura", paramsAnyOf(["damageBonus", "moveSpeedBonus", "attackSpeedBonus"])),
-    variant("summon", params(["count", "duration"], ["range", "damageDealt", "damageTaken"])),
-    variant("on_hit", paramsAnyOf(["chance", "splashRadius", "bonusDamage"], ["splashPercent", "stunSeconds"])),
+    variant("summon", summonParams()),
+    variant("on_hit", paramsAnyOf(["chance", "splashRadius", "bonusDamage", "empower"], ["splashPercent", "stunSeconds"])),
     variant("heal", params(["amount", "maxTargets", "range"])),
     variant("shield", params(["duration", "radius"])),
   ])

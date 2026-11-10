@@ -30,7 +30,7 @@ describe("gameData", () => {
 describe("Run", () => {
   it("hero moves north at move speed", () => {
     const run = newRun();
-    for (let i = 0; i < 30; i++) run.step({ moveX: 0, moveY: 1, card: -1 });
+    for (let i = 0; i < 30; i++) run.step({ moveX: 0, moveY: 1, card: -1, actions: 0 });
     expect(run.hero.y).toBeCloseTo(300, 6);
     expect(run.hero.x).toBe(0);
     expect(run.hero.moving).toBe(true);
@@ -39,17 +39,17 @@ describe("Run", () => {
 
   it("diagonal speed is normalized", () => {
     const run = newRun();
-    for (let i = 0; i < 30; i++) run.step({ moveX: 1, moveY: 1, card: -1 });
+    for (let i = 0; i < 30; i++) run.step({ moveX: 1, moveY: 1, card: -1, actions: 0 });
     expect(run.hero.x).toBeCloseTo(300 / Math.SQRT2, 6);
     expect(run.hero.y).toBeCloseTo(300 / Math.SQRT2, 6);
   });
 
   it("hero stays inside the arena", () => {
     const run = newRun(1000);
-    for (let i = 0; i < 600; i++) run.step({ moveX: 1, moveY: 1, card: -1 });
+    for (let i = 0; i < 600; i++) run.step({ moveX: 1, moveY: 1, card: -1, actions: 0 });
     expect(run.hero.x).toBe(3000 - 32);
     expect(run.hero.y).toBe(2500 - 32);
-    for (let i = 0; i < 900; i++) run.step({ moveX: -1, moveY: -1, card: -1 });
+    for (let i = 0; i < 900; i++) run.step({ moveX: -1, moveY: -1, card: -1, actions: 0 });
     expect(run.hero.x).toBe(-(3000 - 32));
     expect(run.hero.y).toBe(-(2500 - 32));
   });
@@ -71,15 +71,15 @@ describe("Run", () => {
     const run = newRun(1);
     for (let i = 0; i < 30; i++) run.step(NO_INPUT);
     const before = stateHash(run);
-    run.step({ moveX: 1, moveY: 1, card: -1 });
+    run.step({ moveX: 1, moveY: 1, card: -1, actions: 0 });
     expect(stateHash(run)).toBe(before);
     expect(run.tick).toBe(30);
   });
 
   it("saves previous positions for interpolation", () => {
     const run = newRun();
-    run.step({ moveX: 0, moveY: 1, card: -1 });
-    run.step({ moveX: 0, moveY: 1, card: -1 });
+    run.step({ moveX: 0, moveY: 1, card: -1, actions: 0 });
+    run.step({ moveX: 0, moveY: 1, card: -1, actions: 0 });
     expect(run.hero.prevY).toBeCloseTo(10, 6);
     expect(run.hero.y).toBeCloseTo(20, 6);
   });

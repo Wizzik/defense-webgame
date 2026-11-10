@@ -1,5 +1,5 @@
 import type { GameData } from "../../data/schema";
-import { createRun, EventKind, NO_INPUT, type Run, TICK_SECONDS, type TickInput } from "../../sim";
+import { createRun, EventKind, NO_INPUT, type Run, TICK_SECONDS, type TickInput, ULTIMATE_SLOT } from "../../sim";
 import { SCENE_SCALE } from "../render/coords";
 import type { FollowCamera } from "../render/camera";
 import type { Scene } from "three/webgpu";
@@ -11,9 +11,13 @@ import { viewTiming } from "./view-timing";
 /** Most simulation steps one frame may run at speed 1; a longer backlog is dropped. */
 const MAX_STEPS_PER_FRAME = 4;
 
-/** Camera shake in scene units for a cast and for a hit on the hero. */
-const SHAKE_CAST = 0.25;
+/** Camera shake in scene units for the ultimate, for another shaking cast, and for a hit on the hero. */
+const SHAKE_ULTIMATE = 0.25;
+const SHAKE_CAST = 0.12;
 const SHAKE_HERO_HIT = 0.1;
+
+/** Ability kinds whose cast shakes the camera. */
+const SHAKING_KINDS: ReadonlySet<string> = new Set(["line", "nova", "area", "ticking_area", "cone"]);
 
 /** One visual layer of a run (hero, enemies, crystals, effects). */
 export interface RunView {
@@ -49,8 +53,8 @@ export class Session {
     this.keyboard = deps.keyboard;
   }
 
-  start(seed: number, paused = false): void {
-    this.run = createRun(this.data, { seed, durationSeconds: this.params.durationSeconds });
+  start(seed: number, paused = false, hero?: string): void {
+    this.run = createRun(this.data, { seed, hero, durationSeconds: this.params.durationSeconds });
     this.seed = seed;
     this.paused = paused;
     this.pendingCard = -1;
@@ -65,6 +69,8 @@ export class Session {
   frame(dtSeconds: number): void {
     const { run, input } = this;
     if (!run) return;
+    // keys pressed behind the menu must not fire when the run starts
+    if (this.paused) this.keyboard.read(input);
     const steps = this.paused ? 0 : this.loop.advance(dtSeconds, this.params.speed);
     for (let i = 0; i < steps; i++) {
       this.keyboard.read(input);
@@ -90,8 +96,12 @@ export class Session {
   private shakeForEvents(run: Run): void {
     const { events } = run;
     for (let i = 0; i < events.count; i++) {
-      if (events.kind[i] === EventKind.Cast) this.camera.shake(SHAKE_CAST);
-      else if (events.kind[i] === EventKind.HeroHit) this.camera.shake(SHAKE_HERO_HIT);
+      if (events.kind[i] === EventKind.Cast) {
+        const slot = events.a[i]!;
+        if (SHAKING_KINDS.has(run.abilities[slot]!.def.kind)) {
+          this.camera.shake(slot === ULTIMATE_SLOT ? SHAKE_ULTIMATE : SHAKE_CAST);
+        }
+      } else if (events.kind[i] === EventKind.HeroHit) this.camera.shake(SHAKE_HERO_HIT);
     }
   }
 }

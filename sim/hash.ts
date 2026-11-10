@@ -25,6 +25,8 @@ export function stateHash(run: Run): number {
   mixInt(STATES[run.state]);
   mixInt(run.result === null ? 0 : RESULTS[run.result]);
   mixInt(run.rng.state);
+  mixInt(run.heroIndex);
+  mixInt(run.ultimateAuto ? 1 : 0);
   const hero = run.hero;
   mixFloat(hero.x);
   mixFloat(hero.y);
@@ -38,6 +40,14 @@ export function stateHash(run: Run): number {
   mixFloat(hero.hp);
   mixInt(hero.attackCooldown);
   mixInt(hero.pendingLevelUps);
+  mixInt(hero.dashTicks);
+  mixInt(hero.dashCooldown);
+  mixFloat(hero.dashDirX);
+  mixFloat(hero.dashDirY);
+  mixFloat(hero.bonus.damage);
+  mixFloat(hero.bonus.moveSpeed);
+  mixFloat(hero.bonus.attackSpeed);
+  mixInt(run.shieldTicks);
   mixInt(run.stats.kills);
   mixInt(run.stats.spawned);
   mixFloat(run.castle.hp);
@@ -48,10 +58,12 @@ export function stateHash(run: Run): number {
     mixInt(slot.cooldown);
     mixInt(slot.active ? 1 : 0);
     mixFloat(slot.front);
+    mixInt(slot.ticksLeft);
     mixFloat(slot.originX);
     mixFloat(slot.originY);
     mixFloat(slot.dirX);
     mixFloat(slot.dirY);
+    for (let i = 0; i < slot.hit.length; i++) mixInt(slot.hit[i]);
   }
   const e = run.enemies;
   for (let i = 0; i < e.capacity; i++) {
@@ -69,6 +81,8 @@ export function stateHash(run: Run): number {
     mixFloat(e.knockVX[i]);
     mixFloat(e.knockVY[i]);
     mixInt(e.knockTicks[i]);
+    mixInt(e.slowTicks[i]);
+    mixFloat(e.slowFactor[i]);
   }
   const c = run.crystals;
   for (let i = 0; i < c.capacity; i++) {
@@ -78,6 +92,35 @@ export function stateHash(run: Run): number {
     mixInt(c.value[i]);
     mixFloat(c.x[i]);
     mixFloat(c.y[i]);
+  }
+  const pr = run.projectiles;
+  for (let i = 0; i < pr.capacity; i++) {
+    if (pr.alive[i] === 0) continue;
+    mixInt(i);
+    mixInt(pr.ability[i]);
+    mixInt(pr.target[i]);
+    mixInt(pr.targetSpawnTick[i]);
+    mixFloat(pr.damage[i]);
+    mixFloat(pr.speed[i]);
+    mixFloat(pr.x[i]);
+    mixFloat(pr.y[i]);
+  }
+  const al = run.allies;
+  for (let i = 0; i < al.capacity; i++) {
+    if (al.alive[i] === 0) continue;
+    mixInt(i);
+    mixInt(al.kind[i]);
+    mixInt(al.ability[i]);
+    mixFloat(al.x[i]);
+    mixFloat(al.y[i]);
+    mixInt(al.expiresTick[i]);
+    mixInt(al.attackCooldown[i]);
+    mixInt(al.spawnTick[i]);
+    mixInt(al.lastAttackTick[i]);
+    mixInt(al.formation[i]);
+    mixInt(al.moving[i]);
+    mixFloat(al.facingX[i]);
+    mixFloat(al.facingY[i]);
   }
   if (run.offer) {
     for (const card of run.offer.cards) {

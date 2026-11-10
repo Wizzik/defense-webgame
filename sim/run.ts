@@ -5,11 +5,14 @@ import { TICKS_PER_SECOND } from "./constants";
 import { chooseCard, openOffer } from "./cards";
 import type { CardOffer } from "./cards";
 import { regenCastle } from "./castle";
+import { ALLY_CAPACITY, AllyStore, updateAllies } from "./allies";
+import { PROJECTILE_CAPACITY, ProjectileStore, updateProjectiles } from "./projectiles";
 import { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
 import { updateEnemies } from "./enemy-ai";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
-import { heroStats, moveHero, updateHeroCombat } from "./hero";
+import { refreshHeroStats } from "./level-up";
+import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import type { TickInput } from "./input";
 import { Rng } from "./rng";
 import { spawnEnemies } from "./spawner";
@@ -21,6 +24,8 @@ export type RunResult = "won" | "castle" | "hero";
 export interface RunOptions {
   seed: number;
   durationSeconds?: number;
+  /** Hero id; defaults to rules.start.hero. */
+  hero?: string;
 }
 
 const EVENT_CAPACITY = 1024;
@@ -33,13 +38,22 @@ export class Run {
   readonly castle: CastleState;
   readonly enemies: EnemyStore;
   readonly grid: SpatialHash;
+  readonly heroIndex: number;
   readonly abilities: AbilitySlot[];
   readonly crystals = new CrystalStore(CRYSTAL_CAPACITY);
+  readonly projectiles = new ProjectileStore(PROJECTILE_CAPACITY);
+  readonly allies = new AllyStore(ALLY_CAPACITY);
   offer: CardOffer | null = null;
   spawnCredit = 0;
   nextGate = 0;
   readonly stats: RunStats = { kills: 0, spawned: 0, damageDealt: 0 };
   readonly durationTicks: number;
+  /** The ultimate casts by itself; the player can switch this off (Task 7). */
+  ultimateAuto = true;
+  /** R was pressed in this step; cleared by updateAbilities. */
+  ultimateRequested = false;
+  /** Steps left of the spirit shield: hero and castle take no damage while > 0. */
+  shieldTicks = 0;
   tick = 0;
   state: RunState = "playing";
   result: RunResult | null = null;
@@ -54,8 +68,11 @@ export class Run {
       (options.durationSeconds ?? rules.run.durationSeconds) * TICKS_PER_SECOND,
     );
 
-    const def = data.heroes.find((h) => h.id === rules.slice.hero);
-    if (!def) throw new Error(`createRun: unknown hero "${rules.slice.hero}"`);
+    const heroId = options.hero ?? rules.start.hero;
+    const heroIndex = data.heroes.findIndex((h) => h.id === heroId);
+    if (heroIndex < 0) throw new Error(`createRun: unknown hero "${heroId}"`);
+    const def = data.heroes[heroIndex];
+    this.heroIndex = heroIndex;
     const stats: HeroStats = {
       maxHp: 0, regenPerSecond: 0, armor: 0, attackIntervalSeconds: 0, damageMin: 0, damageMax: 0,
       spellPower: 0, cooldownScale: 0, moveSpeed: 0, collision: 0,
@@ -66,13 +83,15 @@ export class Run {
       facingX: 0, facingY: 1, moving: false,
       level: 1, xp: 0,
       str: def.attributes.str.base, agi: def.attributes.agi.base, int: def.attributes.int.base,
-      hp: 0, stats, attackCooldown: 0, pendingLevelUps: 0,
+      hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, attackCooldown: 0, pendingLevelUps: 0,
+      dashTicks: 0, dashCooldown: 0, dashDirX: 0, dashDirY: 0,
     };
     heroStats(data, hero, stats);
     hero.hp = stats.maxHp;
     this.hero = hero;
 
     this.abilities = createAbilitySlots(this);
+    refreshHeroStats(this); // the same path as every later refresh, so a starting aura counts
 
     this.castle = {
       x: rules.arena.castle.x, y: rules.arena.castle.y, radius: rules.castle.radius,
@@ -96,11 +115,14 @@ export class Run {
    *   events.clear();
    *   if (state === "levelUp") { chooseCard(this, input.card); return; }   // Task 7; time stands still
    *   savePrevious(this);         // Task 3 (crystals: Task 7)
+   *   applyActions(this, input);  // phase 2a, Task 7 (R, T, dash)
    *   moveHero(this, input);      // Task 3
    *   spawnEnemies(this);         // Task 4
    *   updateEnemies(this);        // Task 4
    *   updateHeroCombat(this);     // Task 5
    *   updateAbilities(this);      // Task 6
+   *   updateProjectiles(this);    // phase 2a, Task 4
+   *   updateAllies(this);         // phase 2a, Task 6
    *   updateCrystals(this);       // Task 7
    *   regenCastle(this);          // Task 4
    *   this.tick++;
@@ -115,11 +137,14 @@ export class Run {
       return;
     }
     savePrevious(this);
+    applyActions(this, input);
     moveHero(this, input);
     spawnEnemies(this);
     updateEnemies(this);
     updateHeroCombat(this);
     updateAbilities(this);
+    updateProjectiles(this);
+    updateAllies(this);
     updateCrystals(this);
     regenCastle(this);
     this.tick++;
@@ -129,13 +154,23 @@ export class Run {
 }
 
 function savePrevious(run: Run): void {
-  const { hero, enemies, crystals } = run;
+  const { hero, enemies, crystals, projectiles, allies } = run;
   hero.prevX = hero.x;
   hero.prevY = hero.y;
   for (let i = 0; i < crystals.capacity; i++) {
     if (crystals.alive[i] === 0) continue;
     crystals.prevX[i] = crystals.x[i];
     crystals.prevY[i] = crystals.y[i];
+  }
+  for (let i = 0; i < projectiles.capacity; i++) {
+    if (projectiles.alive[i] === 0) continue;
+    projectiles.prevX[i] = projectiles.x[i];
+    projectiles.prevY[i] = projectiles.y[i];
+  }
+  for (let i = 0; i < allies.capacity; i++) {
+    if (allies.alive[i] === 0) continue;
+    allies.prevX[i] = allies.x[i];
+    allies.prevY[i] = allies.y[i];
   }
   for (let i = 0; i < enemies.capacity; i++) {
     if (enemies.alive[i] === 0) continue;

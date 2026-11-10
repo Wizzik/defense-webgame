@@ -20,6 +20,7 @@ export function mapAbility(exp: ExportAbility, entry: AbilityEntry): Ability {
   return {
     id: entry.id,
     name: entry.name,
+    description: entry.description,
     kind: entry.kind,
     targeting: entry.targeting,
     levels: exp.levels,

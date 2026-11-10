@@ -26,6 +26,15 @@ function percent(ratio: number): string {
   return p < 0 ? `−${-p} %` : `+${p} %`;
 }
 
+/** Params whose values are ratios shown as "+50 %". */
+const PERCENT_KEYS = new Set(["slow", "damageBonus", "moveSpeedBonus", "attackSpeedBonus", "damageDealt", "empower"]);
+/** Params that are damage or healing and scale with spell power. */
+const POWER_KEYS = new Set(["damage", "tickDamage", "amount", "healPerHit"]);
+
+function ratio(value: number): string {
+  return `+${Math.round(value * 100)} %`;
+}
+
 function statLabel(key: string): MessageKey | null {
   const label = `stat.${key}`;
   return label in messagesEn ? (label as MessageKey) : null;
@@ -34,21 +43,22 @@ function statLabel(key: string): MessageKey | null {
 function abilityLines(run: Run, card: Extract<Card, { kind: "ability" }>): CardLine[] {
   const { def } = run.abilities[card.slot];
   const { spellPower } = run.hero.stats;
-  const from = card.fromLevel - 1;
+  // fromLevel 0 is learning: only the level 1 values are shown, with an empty "from".
+  const learn = card.fromLevel === 0;
+  const from = learn ? card.toLevel - 1 : card.fromLevel - 1;
   const to = card.toLevel - 1;
   const lines: CardLine[] = [];
   for (const [key, values] of Object.entries(def.params as Record<string, number[]>)) {
-    if (values[from] === values[to]) continue;
+    if (!learn && values[from] === values[to]) continue;
     const label = statLabel(key);
     if (!label) continue;
-    if (key === "damage") {
-      lines.push({ label, from: whole(values[from] * spellPower), to: whole(values[to] * spellPower) });
-    } else {
-      lines.push({ label, from: num(values[from]), to: num(values[to]) });
-    }
+    const show = (v: number): string =>
+      PERCENT_KEYS.has(key) ? ratio(v) : POWER_KEYS.has(key) ? whole(v * spellPower) : num(v);
+    lines.push({ label, from: learn ? "" : show(values[from]), to: show(values[to]) });
   }
-  if (def.cooldown[from] !== def.cooldown[to]) {
-    lines.push({ label: "stat.cooldown", from: num(def.cooldown[from]), to: num(def.cooldown[to]) });
+  const hasCooldown = def.cooldown[to] > 0;
+  if (hasCooldown && (learn || def.cooldown[from] !== def.cooldown[to])) {
+    lines.push({ label: "stat.cooldown", from: learn ? "" : num(def.cooldown[from]), to: num(def.cooldown[to]) });
   }
   return lines;
 }
@@ -56,8 +66,9 @@ function abilityLines(run: Run, card: Extract<Card, { kind: "ability" }>): CardL
 function statsWith(run: Run, attribute: "str" | "agi" | "int", amount: number): [HeroStats, HeroStats] {
   const { hero, data } = run;
   const blank = (): HeroStats => ({ ...hero.stats });
-  const before = heroStats(data, { ...hero }, blank());
-  const after = heroStats(data, { ...hero, [attribute]: hero[attribute] + amount }, blank());
+  // The copy carries the aura bonuses so the preview uses the same formulas as the sim.
+  const before = heroStats(data, { ...hero, bonus: { ...hero.bonus } }, blank());
+  const after = heroStats(data, { ...hero, bonus: { ...hero.bonus }, [attribute]: hero[attribute] + amount }, blank());
   return [before, after];
 }
 

@@ -1,4 +1,5 @@
 import type { Rules } from "../data/schema";
+import { auraBonuses } from "./abilities/aura";
 import { EventKind } from "./events";
 import { heroStats } from "./hero";
 import type { Run } from "./run";
@@ -8,12 +9,13 @@ export function xpToNext(rules: Rules, level: number): number {
   return rules.progression.xpFirst + rules.progression.xpStep * (level - 1);
 }
 
-/** Recomputes the hero stats from the attributes; hp grows by the gain in maxHp. */
+/** Recomputes the hero stats from the attributes and the learned auras; a living hero's hp grows by the gain in maxHp (the dead stay dead). */
 export function refreshHeroStats(run: Run): void {
   const { hero, data } = run;
   const before = hero.stats.maxHp;
+  auraBonuses(run, hero.bonus);
   heroStats(data, hero, hero.stats);
-  hero.hp += hero.stats.maxHp - before;
+  if (hero.hp > 0) hero.hp += hero.stats.maxHp - before;
 }
 
 /** Adds XP; every threshold crossed is a level-up with per-level attribute growth. */

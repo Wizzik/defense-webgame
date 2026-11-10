@@ -50,7 +50,7 @@ describe("level-up", () => {
     expect(cards).toHaveLength(3);
     expect(new Set(cards.map((c) => JSON.stringify(c))).size).toBe(3);
     const tick = run.tick;
-    run.step({ moveX: 1, moveY: 1, card: -1 });
+    run.step({ moveX: 1, moveY: 1, card: -1, actions: 0 });
     expect(run.tick).toBe(tick);
     expect(run.hero.x).toBe(0);
   });
@@ -63,15 +63,15 @@ describe("level-up", () => {
     run.step(NO_INPUT);
     expect(run.state).toBe("levelUp");
     const tick = run.tick;
-    run.step({ moveX: 1, moveY: 0, card: -1 });
+    run.step({ moveX: 1, moveY: 0, card: -1, actions: 0 });
     expect(run.hero.x).toBe(0);
     expect(run.tick).toBe(tick);
-    run.step({ moveX: 1, moveY: 0, card: 0 });
+    run.step({ moveX: 1, moveY: 0, card: 0, actions: 0 });
     expect(run.state).toBe("levelUp");
     expect(run.hero.pendingLevelUps).toBe(1);
     expect(run.offer).not.toBeNull();
     expect(run.tick).toBe(tick);
-    run.step({ moveX: 1, moveY: 0, card: 0 });
+    run.step({ moveX: 1, moveY: 0, card: 0, actions: 0 });
     expect(run.state).toBe("playing");
     expect(run.offer).toBeNull();
     expect(run.hero.pendingLevelUps).toBe(0);
@@ -88,9 +88,20 @@ describe("level-up", () => {
     for (let i = 0; i < 100; i++) run.step(NO_INPUT);
     expect(run.state).toBe("levelUp");
     expect(run.tick).toBe(59);
-    run.step({ moveX: 0, moveY: 0, card: 0 });
+    run.step({ moveX: 0, moveY: 0, card: 0, actions: 0 });
     expect(run.state).toBe("playing");
     run.step(NO_INPUT);
     expect(run.state).toBe("won");
+  });
+
+  it("a level-up does not revive a dead hero", () => {
+    const run = progressionRun();
+    run.hero.hp = -5;
+    run.crystals.drop(run.hero.x, run.hero.y, 50);
+    run.step(NO_INPUT);
+    expect(run.hero.level).toBeGreaterThan(1);
+    expect(run.hero.hp).toBeLessThanOrEqual(0);
+    expect(run.result).toBe("hero");
+    expect(run.state).toBe("lost");
   });
 });

@@ -8,20 +8,23 @@
   source: O00C
   mapName: Tauren
   name: { en: Stonehorn, cs: Kamenorohý }
+  role: { en: "Melee bruiser. Stuns with stone and quakes.", cs: "Rváč na blízko. Omračuje kamenem a otřesy." }
   signatureAbilities: [rock-rupture, enhanced-totem, seismic-echo]
-  ultimate: earthquake
+  ultimate: groundbreaker
 
 - id: nightglaive
   source: O008
   mapName: Daisho
   name: { en: Nightglaive, cs: Noční čepel }
-  signatureAbilities: [hunters-focus, falling-stars, swift-pace]
+  role: { en: "Ranged hunter. Swift strikes and falling stars.", cs: "Lovkyně na dálku. Rychlé útoky a padající hvězdy." }
+  signatureAbilities: [falling-stars, hunters-focus, swift-pace]
   ultimate: shadow-sisters
 
 - id: gravecaller
   source: O00F
   mapName: UnderTaker
   name: { en: Gravecaller, cs: Hrobník }
+  role: { en: "Spellcaster. Drains souls and hurls skulls.", cs: "Kouzelník. Vysává duše a metá lebky." }
   signatureAbilities: [grave-grasp, skull-ring, soul-bolt]
   ultimate: bone-stampede
 
@@ -29,5 +32,6 @@
   source: O00X
   mapName: Snaker
   name: { en: Serpent Shaman, cs: Hadí šaman }
+  role: { en: "Summoner. Totems, lightning and healing.", cs: "Vyvolávač. Totemy, blesky a léčení." }
   signatureAbilities: [serpent-totem, forked-bolt, mending-tide]
   ultimate: spirit-ward

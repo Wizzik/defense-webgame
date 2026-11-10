@@ -2,6 +2,7 @@
 - id: pulse
   source: A001
   name: { en: Pulse, cs: Puls }
+  description: { en: Pulse text, cs: Puls text }
   kind: nova
   targeting: around_self
   params:
@@ -13,6 +14,7 @@
 - id: focus
   source: A002
   name: { en: Focus, cs: Soustředění }
+  description: { en: Focus text, cs: Soustředění text }
   kind: aura
   targeting: self
   params:
@@ -21,6 +23,7 @@
 - id: spark
   source: A003
   name: { en: Spark, cs: Jiskra }
+  description: { en: Spark text, cs: Jiskra text }
   kind: projectile
   targeting: nearest
   params:
@@ -30,8 +33,10 @@
 - id: echo
   source: A004
   name: { en: Echo, cs: Ozvěna }
+  description: { en: Echo text, cs: Ozvěna text }
   kind: summon
   targeting: self
   params:
     count: DataA
     duration: duration
+    damageDealt: DataB
