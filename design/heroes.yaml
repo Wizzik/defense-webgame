@@ -10,7 +10,7 @@
   name: { en: Stonehorn, cs: Kamenorohý }
   role: { en: "Melee bruiser. Stuns with stone and quakes.", cs: "Rváč na blízko. Omračuje kamenem a otřesy." }
   signatureAbilities: [rock-rupture, enhanced-totem, seismic-echo]
-  ultimate: earthquake
+  ultimate: groundbreaker
 
 - id: nightglaive
   source: O008

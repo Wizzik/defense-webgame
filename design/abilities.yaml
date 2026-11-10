@@ -68,9 +68,10 @@
       duration 1, 1.5, 2, 2.5, 3; DataA damage 150, 300, 450, 600, 750; area 350.
       AI_Setup (32758) only lists A00M as hero slot 2 of O00C.
 
-- id: earthquake
+- id: groundbreaker
   source: A0AA
-  name: { en: Earthquake, cs: Zemětřesení }
+  mapName: Earthquake
+  name: { en: Groundbreaker, cs: Zemělam }
   description: { en: "A massive blow to everything around you.", cs: "Mohutný úder do všeho kolem tebe." }
   kind: nova
   targeting: around_self

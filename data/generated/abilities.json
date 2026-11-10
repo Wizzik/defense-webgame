@@ -132,10 +132,10 @@
     }
   },
   {
-    "id": "earthquake",
+    "id": "groundbreaker",
     "name": {
-      "en": "Earthquake",
-      "cs": "Zemětřesení"
+      "en": "Groundbreaker",
+      "cs": "Zemělam"
     },
     "description": {
       "en": "A massive blow to everything around you.",
