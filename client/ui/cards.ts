@@ -1,3 +1,4 @@
+import { ULTIMATE_SLOT } from "../../sim";
 import type { Card, CardOffer, Run } from "../../sim";
 import { cardLines } from "./card-lines";
 import { el } from "./dom";
@@ -65,11 +66,20 @@ export class Cards {
   private render(run: Run, card: Card, index: number, lang: Lang): HTMLElement {
     const button = el("button", `card ${card.kind}`);
     el("span", "card-key", button, String(index + 1));
-    const name =
-      card.kind === "ability"
-        ? t(lang, "cards.ability", { name: run.abilities[card.slot].def.name[lang], n: card.toLevel })
-        : t(lang, ATTRIBUTE_KEYS[card.attribute], { n: card.amount });
-    el("span", "card-name", button, name);
+    let name: string;
+    if (card.kind === "ability") {
+      const { def } = run.abilities[card.slot];
+      const learn = card.fromLevel === 0;
+      name = learn
+        ? t(lang, "cards.learn", { name: def.name[lang] })
+        : t(lang, "cards.ability", { name: def.name[lang], n: card.toLevel });
+      if (card.slot === ULTIMATE_SLOT) el("span", "card-badge", button, t(lang, "cards.ultimate"));
+      el("span", "card-name", button, name);
+      if (learn) el("span", "card-desc", button, def.description[lang]);
+    } else {
+      name = t(lang, ATTRIBUTE_KEYS[card.attribute], { n: card.amount });
+      el("span", "card-name", button, name);
+    }
     for (const line of cardLines(run, card)) {
       const row = el("span", "card-line", button);
       el("span", "card-stat", row, t(lang, line.label));

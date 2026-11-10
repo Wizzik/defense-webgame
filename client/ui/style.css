@@ -389,6 +389,26 @@
   font-size: 19px;
   font-weight: 700;
 }
+.card-desc {
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.card-badge {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  padding: 1px 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+}
+.card-name {
+  overflow-wrap: anywhere;
+}
 .card-line {
   display: flex;
   flex-direction: column;

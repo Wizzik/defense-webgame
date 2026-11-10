@@ -26,6 +26,15 @@ function percent(ratio: number): string {
   return p < 0 ? `−${-p} %` : `+${p} %`;
 }
 
+/** Params whose values are ratios shown as "+50 %". */
+const PERCENT_KEYS = new Set(["slow", "damageBonus", "moveSpeedBonus", "attackSpeedBonus", "damageDealt", "empower"]);
+/** Params that are damage or healing and scale with spell power. */
+const POWER_KEYS = new Set(["damage", "tickDamage", "amount", "healPerHit"]);
+
+function ratio(value: number): string {
+  return `+${Math.round(value * 100)} %`;
+}
+
 function statLabel(key: string): MessageKey | null {
   const label = `stat.${key}`;
   return label in messagesEn ? (label as MessageKey) : null;
@@ -43,15 +52,12 @@ function abilityLines(run: Run, card: Extract<Card, { kind: "ability" }>): CardL
     if (!learn && values[from] === values[to]) continue;
     const label = statLabel(key);
     if (!label) continue;
-    if (key === "damage") {
-      lines.push({
-        label, from: learn ? "" : whole(values[from] * spellPower), to: whole(values[to] * spellPower),
-      });
-    } else {
-      lines.push({ label, from: learn ? "" : num(values[from]), to: num(values[to]) });
-    }
+    const show = (v: number): string =>
+      PERCENT_KEYS.has(key) ? ratio(v) : POWER_KEYS.has(key) ? whole(v * spellPower) : num(v);
+    lines.push({ label, from: learn ? "" : show(values[from]), to: show(values[to]) });
   }
-  if (learn || def.cooldown[from] !== def.cooldown[to]) {
+  const hasCooldown = def.cooldown[to] > 0;
+  if (hasCooldown && (learn || def.cooldown[from] !== def.cooldown[to])) {
     lines.push({ label: "stat.cooldown", from: learn ? "" : num(def.cooldown[from]), to: num(def.cooldown[to]) });
   }
   return lines;
