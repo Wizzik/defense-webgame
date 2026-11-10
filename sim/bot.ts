@@ -12,6 +12,7 @@ export function botInput(run: Run, out: TickInput): TickInput {
   out.moveX = 0;
   out.moveY = 0;
   out.card = -1;
+  out.actions = 0;
   if (run.state === "levelUp") {
     out.card = 0;
     return out;

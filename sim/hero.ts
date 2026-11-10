@@ -2,6 +2,8 @@ import type { GameData } from "../data/schema";
 import { consumeEmpower } from "./abilities/on-hit";
 import { armorReduction, damageEnemy, rollDamage } from "./combat";
 import { TICKS_PER_SECOND, TICK_SECONDS } from "./constants";
+import { EventKind } from "./events";
+import { InputAction } from "./input";
 import type { TickInput } from "./input";
 import type { Run } from "./run";
 import type { HeroState, HeroStats } from "./world";
@@ -31,17 +33,55 @@ function sign(n: number): number {
   return n > 0 ? 1 : n < 0 ? -1 : 0;
 }
 
-/** Moves the hero by the input direction at move speed, kept inside the arena. */
-export function moveHero(run: Run, input: TickInput): void {
+/** Between savePrevious and moveHero: R sets ultimateRequested, T toggles ultimateAuto, Space starts a dash. */
+export function applyActions(run: Run, input: TickInput): void {
+  const actions = input.actions;
+  if (actions === 0) return;
+  if ((actions & InputAction.Ultimate) !== 0) run.ultimateRequested = true;
+  if ((actions & InputAction.ToggleAuto) !== 0) run.ultimateAuto = !run.ultimateAuto;
   const hero = run.hero;
+  if ((actions & InputAction.Dash) === 0 || hero.hp <= 0 || hero.dashCooldown > 0 || hero.dashTicks > 0) return;
   let dx = sign(input.moveX);
   let dy = sign(input.moveY);
-  hero.moving = false;
-  if (dx === 0 && dy === 0) return;
-  const len = Math.sqrt(dx * dx + dy * dy);
-  dx /= len;
-  dy /= len;
-  const step = hero.stats.moveSpeed * TICK_SECONDS;
+  if (dx === 0 && dy === 0) {
+    dx = hero.facingX;
+    dy = hero.facingY;
+  } else {
+    const len = Math.sqrt(dx * dx + dy * dy);
+    dx /= len;
+    dy /= len;
+  }
+  const { dash } = run.data.rules.hero;
+  hero.dashDirX = dx;
+  hero.dashDirY = dy;
+  hero.dashTicks = Math.round(dash.seconds * TICKS_PER_SECOND);
+  hero.dashCooldown = Math.round(dash.cooldownSeconds * TICKS_PER_SECOND);
+  run.events.push(EventKind.Dash, 0, dash.distance, hero.x, hero.y, dx, dy);
+}
+
+/** Moves the hero by the input direction at move speed (or along the dash), kept inside the arena. */
+export function moveHero(run: Run, input: TickInput): void {
+  const hero = run.hero;
+  if (hero.dashCooldown > 0) hero.dashCooldown--;
+  let dx: number;
+  let dy: number;
+  let step: number;
+  if (hero.dashTicks > 0) {
+    const { dash } = run.data.rules.hero;
+    dx = hero.dashDirX;
+    dy = hero.dashDirY;
+    step = dash.distance / Math.round(dash.seconds * TICKS_PER_SECOND);
+    hero.dashTicks--;
+  } else {
+    dx = sign(input.moveX);
+    dy = sign(input.moveY);
+    hero.moving = false;
+    if (dx === 0 && dy === 0) return;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    dx /= len;
+    dy /= len;
+    step = hero.stats.moveSpeed * TICK_SECONDS;
+  }
   const { arena } = run.data.rules;
   const limitX = arena.width / 2 - hero.stats.collision;
   const limitY = arena.height / 2 - hero.stats.collision;

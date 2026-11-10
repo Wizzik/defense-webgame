@@ -49,7 +49,7 @@ describe("Keyboard", () => {
   it("leaves the card alone", () => {
     const { press, keyboard } = setup();
     press("KeyW");
-    const input: TickInput = { moveX: 0, moveY: 0, card: 2 };
+    const input: TickInput = { moveX: 0, moveY: 0, card: 2, actions: 0 };
     keyboard.read(input);
     expect(input.card).toBe(2);
   });

@@ -167,7 +167,7 @@ describe("shadow copies", () => {
     const ids = wardsOf(run);
     expect(ids.length).toBe(count);
     for (const i of ids) expect(run.allies.kind[i]).toBe(AllyKind.Image);
-    for (let s = 0; s < 60; s++) run.step({ moveX: 1, moveY: 0, card: -1 });
+    for (let s = 0; s < 60; s++) run.step({ moveX: 1, moveY: 0, card: -1, actions: 0 });
     expect(run.hero.x).toBeGreaterThan(100);
     for (const i of ids) {
       const [ox, oy] = IMAGE_OFFSETS[run.allies.formation[i]];
@@ -213,7 +213,7 @@ describe("allies determinism", () => {
       const run = createRun(gameData(), { seed: 11, hero: "serpent-shaman", durationSeconds: 100000 });
       let peak = 0;
       for (let s = 0; s < 900; s++) {
-        run.step({ moveX: s % 120 < 60 ? 1 : -1, moveY: 0, card: -1 });
+        run.step({ moveX: s % 120 < 60 ? 1 : -1, moveY: 0, card: -1, actions: 0 });
         peak = Math.max(peak, run.allies.count);
       }
       return { hash: stateHash(run), peak };

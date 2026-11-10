@@ -8,7 +8,7 @@ import { gameData } from "./testing/game-data";
 function play(seed: number, inputSeed: number, steps: number): number {
   const run = createRun(gameData(), { seed });
   const inputs = new Rng(inputSeed);
-  const input: TickInput = { moveX: 0, moveY: 0, card: -1 };
+  const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   for (let i = 0; i < steps; i++) {
     input.moveX = inputs.int(3) - 1;
     input.moveY = inputs.int(3) - 1;

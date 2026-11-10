@@ -11,7 +11,7 @@ import { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
 import { updateEnemies } from "./enemy-ai";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
-import { heroStats, moveHero, updateHeroCombat } from "./hero";
+import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import type { TickInput } from "./input";
 import { Rng } from "./rng";
 import { spawnEnemies } from "./spawner";
@@ -83,6 +83,7 @@ export class Run {
       level: 1, xp: 0,
       str: def.attributes.str.base, agi: def.attributes.agi.base, int: def.attributes.int.base,
       hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, attackCooldown: 0, pendingLevelUps: 0,
+      dashTicks: 0, dashCooldown: 0, dashDirX: 0, dashDirY: 0,
     };
     heroStats(data, hero, stats);
     hero.hp = stats.maxHp;
@@ -112,6 +113,7 @@ export class Run {
    *   events.clear();
    *   if (state === "levelUp") { chooseCard(this, input.card); return; }   // Task 7; time stands still
    *   savePrevious(this);         // Task 3 (crystals: Task 7)
+   *   applyActions(this, input);  // phase 2a, Task 7 (R, T, dash)
    *   moveHero(this, input);      // Task 3
    *   spawnEnemies(this);         // Task 4
    *   updateEnemies(this);        // Task 4
@@ -133,6 +135,7 @@ export class Run {
       return;
     }
     savePrevious(this);
+    applyActions(this, input);
     moveHero(this, input);
     spawnEnemies(this);
     updateEnemies(this);

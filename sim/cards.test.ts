@@ -35,7 +35,7 @@ describe("cards", () => {
       const cards = offered(run);
       const card = cards[index];
       const before = { str: run.hero.str, agi: run.hero.agi, int: run.hero.int, max: run.hero.stats.maxHp, hp: run.hero.hp };
-      run.step({ moveX: 0, moveY: 0, card: index });
+      run.step({ moveX: 0, moveY: 0, card: index, actions: 0 });
       expect(run.state).toBe("playing");
       expect(run.offer).toBeNull();
       expect(run.hero.pendingLevelUps).toBe(0);
@@ -58,7 +58,7 @@ describe("cards", () => {
     offered(run);
     const hash = stateHash(run);
     for (const card of [-1, 3, 99, 1.5, NaN]) {
-      run.step({ moveX: 0, moveY: 0, card });
+      run.step({ moveX: 0, moveY: 0, card, actions: 0 });
       expect(run.state).toBe("levelUp");
       expect(stateHash(run)).toBe(hash);
     }

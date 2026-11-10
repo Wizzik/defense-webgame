@@ -19,6 +19,7 @@ export { stateHash } from "./hash";
 export { debugGrantXp, gainXp, xpToNext } from "./level-up";
 export { heroStats, moveHero } from "./hero";
 export { NO_INPUT } from "./input";
+export { InputAction } from "./input";
 export type { TickInput } from "./input";
 export { Rng } from "./rng";
 export { createRun, Run } from "./run";

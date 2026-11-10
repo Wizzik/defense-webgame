@@ -7,13 +7,13 @@ import { createRun } from "./run";
 import type { Run } from "./run";
 import { gameData } from "./testing/game-data";
 
-function play(seed: number, onStep?: (run: Run) => void, record?: TickInput[]): Run {
-  const run = createRun(gameData(), { seed });
-  const input: TickInput = { moveX: 0, moveY: 0, card: -1 };
+function play(seed: number, onStep?: (run: Run) => void, record?: TickInput[], hero?: string): Run {
+  const run = createRun(gameData(), { seed, hero });
+  const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   let guard = 0;
   while (run.state !== "won" && run.state !== "lost") {
     botInput(run, input);
-    if (record) record.push({ moveX: input.moveX, moveY: input.moveY, card: input.card });
+    if (record) record.push({ ...input });
     run.step(input);
     onStep?.(run);
     if (++guard > run.durationTicks * 4) throw new Error("run did not end");
@@ -46,6 +46,18 @@ describe("autopilot", () => {
     expect(replay.tick).toBe(first.tick);
   });
 
+  for (const hero of gameData().heroes.map((h) => h.id)) {
+    it(`replaying recorded inputs gives the same hash (${hero})`, () => {
+      const inputs: TickInput[] = [];
+      const first = play(3, undefined, inputs, hero);
+      expect(inputs.length).toBeGreaterThan(0);
+      const replay = createRun(gameData(), { seed: 3, hero });
+      for (const input of inputs) replay.step(input);
+      expect(stateHash(replay)).toBe(stateHash(first));
+      expect(replay.tick).toBe(first.tick);
+    });
+  }
+
   it("three seeds give three different hashes", () => {
     const hashes = new Set([1, 2, 3].map((seed) => stateHash(play(seed))));
     expect(hashes.size).toBe(3);
@@ -54,14 +66,14 @@ describe("autopilot", () => {
   it("moves toward the castle post when no enemy is alive", () => {
     const run = createRun(gameData(), { seed: 1 });
     run.hero.x = 1000;
-    const input = botInput(run, { moveX: 0, moveY: 0, card: -1 });
+    const input = botInput(run, { moveX: 0, moveY: 0, card: -1, actions: 0 });
     expect(input.moveX).toBe(-1);
   });
 
   it("picks card 0 in the level-up state", () => {
     const run = createRun(gameData(), { seed: 1 });
     run.state = "levelUp";
-    expect(botInput(run, { moveX: 1, moveY: 1, card: -1 })).toEqual({ moveX: 0, moveY: 0, card: 0 });
+    expect(botInput(run, { moveX: 1, moveY: 1, card: -1, actions: 0 })).toEqual({ moveX: 0, moveY: 0, card: 0, actions: 0 });
   });
 });
 

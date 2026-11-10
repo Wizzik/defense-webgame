@@ -28,7 +28,7 @@ describe("formatSummary", () => {
 describe("bot run speed", () => {
   it("full run stays fast", () => {
     const run = createRun(gameData(), { seed: 1, durationSeconds: 180 });
-    const input: TickInput = { moveX: 0, moveY: 0, card: -1 };
+    const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
     const start = performance.now();
     let steps = 0;
     while (steps < 5400 && run.state !== "won" && run.state !== "lost") {

@@ -22,7 +22,7 @@ export interface RunSummary {
 
 export function playBot(data: GameData, seed: number, durationSeconds?: number): RunSummary {
   const run = createRun(data, { seed, durationSeconds });
-  const input: TickInput = { moveX: 0, moveY: 0, card: -1 };
+  const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   while (run.state !== "won" && run.state !== "lost") {
     botInput(run, input);
     run.step(input);
