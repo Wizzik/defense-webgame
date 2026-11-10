@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-10 (phase 2a implemented). Read this first when you resume work.
+Updated 2026-11-10 late (2b-1 plan written; phase 2a merged; the 20 fps was Chrome's GPU blocklist, not the game). Read this first when you resume work.
 
 ## Now
 
@@ -16,34 +16,58 @@ Updated 2026-11-10 (phase 2a implemented). Read this first when you resume work.
   - survivors pace through `design/scaling.yaml`: about 360 enemies a run, level about 11, Rock Rupture every 4 s;
   - knockback, damage numbers, death pop, camera shake and synthesized sounds (M mutes).
   - The pace is tuned in `design/scaling.yaml` (multipliers on map numbers) and `design/rules.yaml` (castle, spawns, XP). After a change run `npm run data:build` and `npm run sim:run -- --hero all --runs 5`.
-  - The hero is rarely in danger, because hunters are 20 % in every phase. Raise `hunterShare` if the run feels too easy.
+- **Phase 2a (heroes and abilities): merged** (PR #5 on 2026-11-10) and live: 4 heroes, 16 abilities in 12 kinds, hero choice in the menu, R (ultimate), T (auto switch), Space (dash), ability HUD, effects, wards and copies, learn and ultimate cards, `sim:run --hero`.
 
 ## Next
 
-1. **Phase 2a (heroes and abilities): implemented** on branch `phase-2a` (PR #5, built on PR #4 `effects`, which is still open). It waits for Petr to play and merge: 4 heroes (Stonehorn, Nightglaive, Gravecaller, Serpent Shaman), 16 abilities in 12 kinds, hero choice in the menu, R (ultimate), T (auto switch) and Space (dash), ability HUD, effects, wards and copies, learn and ultimate cards, `sim:run --hero`.
-2. Next is the plan for **phase 2b (run structure)**: 20 phases, factions, elites, bosses, difficulties. It also replaces the run, enemies and phases, which closes the known 2a gaps (idle runs win with 3 heroes, Gravecaller averages level 7.2).
-3. Phase 2c economy, 2d shared abilities, passives and evolutions, 2e meta progression and saves follow.
+**2b-1 Swarms and enemy variety: plan written (2026-11-10), waiting for Petr's review and execution choice.**
+- Plan: `docs/superpowers/plans/2026-11-10-phase-2b1-swarms-and-enemies.md` on branch `phase-2b1` (also in the claude.ai project under `claude/plans/`).
+- Petr's choices: the 4 humans of the map (Footman, Rifleman, Knight, Priest with map numbers) plus a runner and an elite as variants (multipliers in `design/enemies.yaml`); ranged enemies hit instantly like heroes; the run lasts 5 minutes in 6 phases; the Priest (Chaplain) heals wounded enemies.
+- 6 tasks: perf and software-GPU warning, enemy data, pack spawner, chaplain heal, client colours and shots, tuning and docs.
+- Recommended execution: native in a new chat, with one final review on the most capable model.
+- The map export is in `data-source/v20.75/out/` only while the container lives; otherwise run `npm run map:extract`.
+
+**Petr's playtest of 2a (2026-11-10), the reason for 2b-1 and the visual passes:**
+- 20.5 fps: **resolved, not a game bug** (see below);
+- the graphics are "terrible" and he wants a big improvement, with Tripo or Blender if useful (his Blender MCP does not install; no Tripo or Blender connector exists in the claude.ai directory);
+- enemies come one by one, not in swarms, and there is only one enemy type: boring.
+
+**Fps investigation (2026-11-10 evening):**
+- Simulation cost is negligible: under 0.1 ms per step on average for all 4 heroes (about 20 enemies alive in the first 3 minutes).
+- Measured the live build in the Claude desktop app's built-in browser on Petr's desktop (Windows, Chromium 152, WebGPU, NVIDIA Blackwell / RTX 50, 144 Hz, dpr 1, 1129x1275): stonehorn holds **144 fps, 1% low 141** up to 70 s; JS in the rAF callback is under 1 ms per frame (p95 1.6 ms).
+- **Cause found and fixed:** Petr's Chrome 157 (Windows 10 22H2) had every GPU feature on "Software only". Enabling `chrome://flags` "Override software rendering list" gave **140 fps**, so Chrome's GPU blocklist was blocking his NVIDIA driver. Advised: update the NVIDIA driver, then set the flag back to Default and check chrome://gpu.
+- 2b-1 Task 1 adds the GPU name to the `?fps=1` overlay and a menu warning on software rendering.
+
+**Order after 2b-1 (approved by Petr 2026-11-10):**
+1. **Visual pass A, no external tools** (code and CC0 assets, in the cloud container): ground texture and lane edges, fog, shadows, better light, a real castle and gates from a CC0 kit, props (trees, rocks), CC0 rigged characters instead of the robot (KayKit, Quaternius: check that the shell can download them from GitHub; otherwise Petr attaches the zips), per-type enemy models baked into VAT.
+2. **Visual pass B, own hero models** (needs Petr's computer): Tripo (text or image to 3D with auto-rig; check the licence of his plan before anything is committed, the repo is public) or Blender. Blender MCP install problem: Petr pastes the error into a chat on the computer with Blender. Constraints: hero <= 5000 triangles, enemy <= 2000, clips Idle, Running/Walking, Punch, Death, every asset in `assets/LICENSES.md`.
+3. Then the rest of 2b (20 phases, elites, bosses, difficulties), 2c economy, 2d shared abilities, 2e meta progression.
 4. Propose the second skill (project development rules).
 
-## For Petr to try
+**Fps test links for Petr** (play about 2 minutes, read the overlay: average and 1% low, and the backend it names):
+- https://wizzik.github.io/defense-webgame/?fps=1&hero=stonehorn
+- https://wizzik.github.io/defense-webgame/?fps=1&hero=serpent-shaman (totems)
+- https://wizzik.github.io/defense-webgame/?fps=1&hero=gravecaller (Bone Stampede from hero level 6)
+- the same with `&renderer=webgl2`
 
-- Each hero from the menu (or `?hero=<id>`): spells cast themselves, check the look and the feel of each.
-- R casts the ultimate, T switches its automation, Space dashes.
-- `?fps=1` with full serpent totems (Serpent Shaman) and with Bone Stampede (Gravecaller): about 60 fps expected, on both renderers (`&renderer=webgl2`).
+## Working with tokens
+
+- One chat per plan or per phase: write the plan in one chat, execute it in the next. A new chat starts from this file.
+- Tell Petr when a chat has grown long (he asked for this on 2026-11-10): at the latest after a plan is written, after a phase is merged, or when the history holds a whole executed plan.
+- Subagent-driven execution costs the most (a fresh context per task and per review). For small plans (up to about 6 tasks) offer native execution with one final review.
 
 ## Open questions for Petr
 
 - Branch previews (Cloudflare Pages, spec §4) need his Cloudflare account. Until then the game is played from `main` after a merge.
 - Branch protection for `main` is a GitHub setting he controls.
-- PR #4 (effects, includes the tempo pass) must be merged before PR #5; PR #3 (tempo) is closed after that.
 - The WebGPU e2e project runs only in CI (it fails in the cloud container for an environmental reason); the local gate is `--project=webgl2-fallback`.
-- Character art (own hero models) is a separate plan, to be made with the Blender MCP.
 
 ## Environment notes (cloud container)
 
 - `gh` GraphQL does not work here; use the REST API (`gh api`), for example `gh api -X POST repos/Wizzik/defense-webgame/pulls ...`. A draft PR cannot be marked ready without GraphQL, so open PRs as ready or close and reopen them.
 - Commits must use the identity `Claude <noreply@anthropic.com>` (set in the repo's git config), or GitHub shows them as Unverified. Add the session's co-author trailers.
-- The shell cannot reach github.io or Actions artifact storage. Check the live site with WebFetch.
+- Push access: `add_repo` with `access: push` was refused once by the auto-mode classifier; in the 2b-1 planning chat it worked.
+- The shell cannot reach github.io or Actions artifact storage. Check the live site with WebFetch, or measure it on Petr's computer through the desktop app's built-in browser (`javascript_exec` can read `window.__game` and time frames).
 - The map export is in `data-source/v20.75/out/` (untracked). If it is missing, run `npm run map:extract -- <map.w3x> v20.75`; the map is a file in the claude.ai project.
 - Playwright uses the pre-installed Chromium (`/opt/pw-browsers/chromium-1243`), so `@playwright/test` stays at 1.63.0.
 
