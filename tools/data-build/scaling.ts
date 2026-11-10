@@ -5,13 +5,13 @@ export const SCALING_YAML = "design/scaling.yaml";
 /** Uniform multipliers from the map's numbers to the survivors pace (design/scaling.yaml). */
 export interface Scaling {
   heroes: { moveSpeed: number; attackCooldown: number };
-  abilities: { cooldown: number };
+  abilities: { cooldown: number; damage: number };
   enemies: { hp: number; moveSpeed: number };
 }
 
 const SHAPE: { [G in keyof Scaling]: readonly string[] } = {
   heroes: ["moveSpeed", "attackCooldown"],
-  abilities: ["cooldown"],
+  abilities: ["cooldown", "damage"],
   enemies: ["hp", "moveSpeed"],
 };
 
@@ -52,8 +52,16 @@ export function scaleHero(hero: Hero, s: Scaling): Hero {
   };
 }
 
+/** Param keys that `abilities.damage` multiplies: direct, per-tick and heal/shield amounts. `empower` is not one of them. */
+const DAMAGE_PARAMS: readonly string[] = ["damage", "tickDamage", "amount"];
+
 export function scaleAbility(ability: Ability, s: Scaling): Ability {
-  return { ...ability, cooldown: ability.cooldown.map((c) => seconds(c * s.abilities.cooldown)) };
+  const params: Record<string, number[]> = {};
+  for (const [key, value] of Object.entries(ability.params as Record<string, number[]>)) {
+    params[key] =
+      DAMAGE_PARAMS.includes(key) && Array.isArray(value) ? value.map((v) => whole(v * s.abilities.damage)) : value;
+  }
+  return { ...ability, cooldown: ability.cooldown.map((c) => seconds(c * s.abilities.cooldown)), params } as Ability;
 }
 
 export function scaleEnemy(enemy: Enemy, s: Scaling): Enemy {

@@ -15,7 +15,7 @@ const unscaledDesign = () => ({
   ...design(),
   scaling: {
     heroes: { moveSpeed: 1, attackCooldown: 1 },
-    abilities: { cooldown: 1 },
+    abilities: { cooldown: 1, damage: 1 },
     enemies: { hp: 1, moveSpeed: 1 },
   },
 });

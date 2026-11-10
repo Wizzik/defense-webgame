@@ -8,6 +8,7 @@ import { gameData } from "../../sim/testing/game-data";
 import type { GameData } from "../../data/schema";
 
 export interface RunSummary {
+  hero: string;
   seed: number;
   result: RunResult;
   seconds: number;
@@ -20,14 +21,15 @@ export interface RunSummary {
   heroMaxHp: number;
 }
 
-export function playBot(data: GameData, seed: number, durationSeconds?: number): RunSummary {
-  const run = createRun(data, { seed, durationSeconds });
+export function playBot(data: GameData, seed: number, durationSeconds?: number, hero?: string): RunSummary {
+  const run = createRun(data, { seed, durationSeconds, hero });
   const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   while (run.state !== "won" && run.state !== "lost") {
     botInput(run, input);
     run.step(input);
   }
   return {
+    hero: data.heroes[run.heroIndex].id,
     seed,
     result: run.result ?? "won",
     seconds: Math.floor(run.tick / TICKS_PER_SECOND),
@@ -46,39 +48,57 @@ export function formatSummary(s: RunSummary): string {
   const sec = String(s.seconds % 60).padStart(2, "0");
   const outcome = s.result === "won" ? "won" : `lost (${s.result})`;
   return (
-    `seed ${s.seed}: ${outcome} at ${m}:${sec}, kills ${s.kills}, spawned ${s.spawned}, level ${s.level}, ` +
+    `${s.hero} seed ${s.seed}: ${outcome} at ${m}:${sec}, kills ${s.kills}, spawned ${s.spawned}, level ${s.level}, ` +
     `castle ${s.castleHp}/${s.castleMaxHp}, hero ${s.heroHp}/${s.heroMaxHp}`
   );
 }
 
-function parseArgs(argv: string[]): { seed: number; runs: number; duration?: number } {
-  const out: { seed: number; runs: number; duration?: number } = { seed: 1, runs: 1 };
+interface Args {
+  hero: string;
+  seed: number;
+  runs: number;
+  duration?: number;
+}
+
+function parseArgs(argv: string[]): Args {
+  const out: Args = { hero: "all", seed: 1, runs: 1 };
   for (let i = 0; i < argv.length; i += 2) {
-    const value = Number(argv[i + 1]);
-    if (!Number.isFinite(value)) throw new Error(`sim:run: bad value for ${argv[i]}`);
-    if (argv[i] === "--seed") out.seed = value;
-    else if (argv[i] === "--runs") out.runs = value;
-    else if (argv[i] === "--duration") out.duration = value;
-    else throw new Error(`sim:run: unknown option ${argv[i]}`);
+    const flag = argv[i];
+    const raw = argv[i + 1];
+    if (flag === "--hero") {
+      if (!raw) throw new Error("sim:run: --hero needs a hero id or all");
+      out.hero = raw;
+      continue;
+    }
+    const value = Number(raw);
+    if (!Number.isFinite(value)) throw new Error(`sim:run: bad value for ${flag}`);
+    if (flag === "--seed") out.seed = value;
+    else if (flag === "--runs") out.runs = value;
+    else if (flag === "--duration") out.duration = value;
+    else throw new Error(`sim:run: unknown option ${flag}`);
   }
   return out;
 }
 
 function main(): void {
   const args = parseArgs(process.argv.slice(2));
-  const summaries: RunSummary[] = [];
-  for (let i = 0; i < args.runs; i++) {
-    const s = playBot(gameData(), args.seed + i, args.duration);
-    summaries.push(s);
-    console.log(formatSummary(s));
+  const data = gameData();
+  const ids = args.hero === "all" ? data.heroes.map((h) => h.id) : [args.hero];
+  for (const hero of ids) {
+    const summaries: RunSummary[] = [];
+    for (let i = 0; i < args.runs; i++) {
+      const s = playBot(data, args.seed + i, args.duration, hero);
+      summaries.push(s);
+      console.log(formatSummary(s));
+    }
+    const won = summaries.filter((s) => s.result === "won").length;
+    const avg = (f: (s: RunSummary) => number) =>
+      summaries.reduce((a, s) => a + f(s), 0) / summaries.length;
+    console.log(
+      `${hero}: ${summaries.length} runs: ${won} won, ${summaries.length - won} lost; ` +
+        `kills avg ${Math.round(avg((s) => s.kills))}, spawned avg ${Math.round(avg((s) => s.spawned))}; level avg ${avg((s) => s.level).toFixed(1)}`,
+    );
   }
-  const won = summaries.filter((s) => s.result === "won").length;
-  const avg = (f: (s: RunSummary) => number) =>
-    summaries.reduce((a, s) => a + f(s), 0) / summaries.length;
-  console.log(
-    `${summaries.length} runs: ${won} won, ${summaries.length - won} lost; ` +
-      `kills avg ${Math.round(avg((s) => s.kills))}, spawned avg ${Math.round(avg((s) => s.spawned))}; level avg ${avg((s) => s.level).toFixed(1)}`,
-  );
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) main();

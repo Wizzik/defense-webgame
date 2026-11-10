@@ -39,23 +39,44 @@ describe("scaling", () => {
     const rawAbility = mapAbility(mapExport().abilities.find((a) => a.id === "A001")!, d.abilities[0]);
     const ability = scaleAbility(rawAbility, s);
     expect(ability.cooldown).toEqual(rawAbility.cooldown.map((c) => Math.round(c * s.abilities.cooldown * 100) / 100));
-    expect(ability.params).toStrictEqual(rawAbility.params);
+    const raw = rawAbility.params as Record<string, number[]>;
+    const scaled = ability.params as Record<string, number[]>;
+    expect(scaled.damage).toEqual(raw.damage.map((v) => Math.round(v * s.abilities.damage)));
+    expect(scaled.radius).toEqual(raw.radius);
   });
 
   it("rounds speeds and hp to integers and cooldowns to 2 decimals", () => {
     const s = parseScaling({
       heroes: { moveSpeed: 1.4, attackCooldown: 0.5 },
-      abilities: { cooldown: 0.33 },
+      abilities: { cooldown: 0.33, damage: 0.5 },
       enemies: { hp: 0.3, moveSpeed: 1.22 },
     });
     const enemy = scaleEnemy({ hp: 421, moveSpeed: 270 } as never, s);
     expect(enemy.hp).toBe(126);
     expect(enemy.moveSpeed).toBe(329);
-    const ability = scaleAbility({ cooldown: [10, 8, 0] } as never, s);
+    const ability = scaleAbility({ cooldown: [10, 8, 0], params: {} } as never, s);
     expect(ability.cooldown).toEqual([3.3, 2.64, 0]);
     const hero = scaleHero({ moveSpeed: 305, baseAttack: { cooldown: 1.35 } } as never, s);
     expect(hero.moveSpeed).toBe(427);
     expect(hero.baseAttack.cooldown).toBe(0.68);
+  });
+
+  it("scales damage, tickDamage and amount but not other params", () => {
+    const s = parseScaling({
+      heroes: { moveSpeed: 1, attackCooldown: 1 },
+      abilities: { cooldown: 1, damage: 0.5 },
+      enemies: { hp: 1, moveSpeed: 1 },
+    });
+    const ability = scaleAbility(
+      {
+        cooldown: [1],
+        params: { damage: [101, 500], tickDamage: [100, 500], amount: [500, 1001], empower: [3, 5], radius: [350, 400], damageBonus: [0.05, 0.1] },
+      } as never,
+      s,
+    );
+    expect(ability.params).toEqual({
+      damage: [51, 250], tickDamage: [50, 250], amount: [250, 501], empower: [3, 5], radius: [350, 400], damageBonus: [0.05, 0.1],
+    });
   });
 
   it("scales every hero, ability and enemy in buildGameData", () => {
@@ -76,15 +97,17 @@ describe("scaling", () => {
   it("rejects a missing key, an unknown key and a non-positive multiplier", () => {
     const ok = {
       heroes: { moveSpeed: 1, attackCooldown: 1 },
-      abilities: { cooldown: 1 },
+      abilities: { cooldown: 1, damage: 1 },
       enemies: { hp: 1, moveSpeed: 1 },
     };
     expect(() => parseScaling(ok)).not.toThrow();
     expect(errorMessage(() => parseScaling({ ...ok, enemies: { hp: 1 } }))).toContain("design/scaling.yaml");
     expect(errorMessage(() => parseScaling({ ...ok, enemies: { hp: 1 } }))).toContain("moveSpeed");
     expect(errorMessage(() => parseScaling({ ...ok, extra: {} }))).toContain("extra");
-    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 0 } }))).toContain("cooldown");
-    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: -1 } }))).toContain("design/scaling.yaml");
+    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 0, damage: 1 } }))).toContain("cooldown");
+    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1, damage: 0 } }))).toContain("abilities.damage");
+    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1 } }))).toContain("damage");
+    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1, damage: -1 } }))).toContain("design/scaling.yaml");
     expect(errorMessage(() => parseScaling(null))).toContain("design/scaling.yaml");
   });
 });

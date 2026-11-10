@@ -11,8 +11,10 @@ describe("cardLines", () => {
   it("ability card lists changed params with spell power", () => {
     const run = stonehornRun();
     const lines = cardLines(run, { kind: "ability", slot: 0, fromLevel: 1, toLevel: 2 });
+    const params = run.data.abilities.find((a) => a.id === run.data.heroes[run.heroIndex].signatureAbilities[0])!.params as Record<string, number[]>;
+    const { spellPower } = run.hero.stats;
     expect(lines).toEqual([
-      { label: "stat.damage", from: "620", to: "1240" },
+      { label: "stat.damage", from: String(Math.round(params.damage[0] * spellPower)), to: String(Math.round(params.damage[1] * spellPower)) },
       { label: "stat.width", from: "350", to: "400" },
     ]);
   });
