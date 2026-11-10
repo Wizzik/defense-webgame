@@ -9,3 +9,10 @@ const TINTS: Readonly<Record<string, number>> = {
 export function heroTint(heroId: string): number {
   return TINTS[heroId] ?? 0x553300;
 }
+
+/** The hero's colour for effects: the tint, brightened so it shows up as a light on the floor. */
+export function heroAccent(heroId: string): number {
+  const tint = heroTint(heroId);
+  const lift = (shift: number): number => Math.min(255, Math.round(((tint >> shift) & 0xff) * 2.5));
+  return (lift(16) << 16) | (lift(8) << 8) | lift(0);
+}

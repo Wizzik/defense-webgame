@@ -23,6 +23,16 @@ export class SoundView implements RunView {
           this.sfx.death();
           break;
         case EventKind.Cast:
+          if (run.abilities[events.a[i]!]!.def.kind === "on_hit") this.sfx.hit();
+          else this.sfx.cast();
+          break;
+        case EventKind.Blast:
+          this.sfx.hit();
+          break;
+        case EventKind.Heal:
+          this.sfx.pickup();
+          break;
+        case EventKind.Dash:
           this.sfx.cast();
           break;
         case EventKind.CastleHit:

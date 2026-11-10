@@ -15,6 +15,7 @@ import { FollowCamera } from "./render/camera";
 import { createRenderer, NoGpuError } from "./render/gpu";
 import { CrystalView } from "./render/crystal-view";
 import { DamageNumbers } from "./render/damage-numbers";
+import { AbilityFx } from "./render/ability-fx";
 import { Effects } from "./render/effects";
 import { EnemyCrowd, IDLE_CLIP, PUNCH_CLIP, VAT_FPS, WALK_CLIP } from "./render/enemy-crowd";
 import { HeroView } from "./render/hero-view";
@@ -145,11 +146,12 @@ async function start(): Promise<void> {
   );
   const crystals = new CrystalView(CRYSTAL_CAPACITY);
   const effects = new Effects(data);
-  scene.add(crowd.mesh, crystals.mesh, effects.object);
+  const abilityFx = new AbilityFx();
+  scene.add(crowd.mesh, crystals.mesh, effects.object, abilityFx.object);
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
   const sfx = new Sfx();
   sfx.setMuted(readStoredMuted());
-  session.views.push(heroView, crowd, crystals, effects, numbers, new SoundView(sfx));
+  session.views.push(heroView, crowd, crystals, effects, abilityFx, numbers, new SoundView(sfx));
   // the menu shows a fresh, paused run behind it
   session.start(params.seed, true, hero);
 
