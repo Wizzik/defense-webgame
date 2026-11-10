@@ -2,7 +2,7 @@
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { Color, Scene, type WebGPURenderer } from "three/webgpu";
 import type { GameData } from "../data/schema";
-import { CRYSTAL_CAPACITY } from "../sim";
+import { ALLY_CAPACITY, CRYSTAL_CAPACITY } from "../sim";
 import { Sfx } from "./audio/sfx";
 import { SoundView } from "./audio/sound-view";
 import { loadGameData } from "./game/data";
@@ -18,6 +18,7 @@ import { DamageNumbers } from "./render/damage-numbers";
 import { AbilityFx } from "./render/ability-fx";
 import { Effects } from "./render/effects";
 import { EnemyCrowd, IDLE_CLIP, PUNCH_CLIP, VAT_FPS, WALK_CLIP } from "./render/enemy-crowd";
+import { AllyView } from "./render/ally-view";
 import { HeroView } from "./render/hero-view";
 import { createArena } from "./render/scene";
 import { bakeVat } from "./render/vat";
@@ -147,11 +148,12 @@ async function start(): Promise<void> {
   const crystals = new CrystalView(CRYSTAL_CAPACITY);
   const effects = new Effects(data);
   const abilityFx = new AbilityFx();
-  scene.add(crowd.mesh, crystals.mesh, effects.object, abilityFx.object);
+  const allyView = new AllyView(gltf, ALLY_CAPACITY);
+  scene.add(crowd.mesh, crystals.mesh, effects.object, abilityFx.object, ...allyView.objects);
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
   const sfx = new Sfx();
   sfx.setMuted(readStoredMuted());
-  session.views.push(heroView, crowd, crystals, effects, abilityFx, numbers, new SoundView(sfx));
+  session.views.push(heroView, allyView, crowd, crystals, effects, abilityFx, numbers, new SoundView(sfx));
   // the menu shows a fresh, paused run behind it
   session.start(params.seed, true, hero);
 

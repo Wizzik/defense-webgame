@@ -16,3 +16,15 @@ export function heroAccent(heroId: string): number {
   const lift = (shift: number): number => Math.min(255, Math.round(((tint >> shift) & 0xff) * 2.5));
   return (lift(16) << 16) | (lift(8) << 8) | lift(0);
 }
+
+const BODY_COLORS: Readonly<Record<string, number>> = {
+  stonehorn: 0xd9a441,
+  nightglaive: 0x9a5cff,
+  gravecaller: 0x7fdc3a,
+  "serpent-shaman": 0x22c4e0,
+};
+
+/** Bright body colour of the hero's model (warm gold, violet, green, teal); unknown heroes get the first. */
+export function heroBodyColor(heroId: string): number {
+  return BODY_COLORS[heroId] ?? 0xd9a441;
+}

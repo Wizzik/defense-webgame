@@ -17,8 +17,8 @@ const CONE_BOLT_COLOR = rgb(0x9fd8ff);
 const CONE_BOLT_LIFE = 0.18;
 const ATTACK_BOLT_COLOR = rgb(0xfff1b3);
 const ATTACK_BOLT_LIFE = 0.1;
-const WARD_BOLT_COLOR = rgb(0x1fa38a);
-const ALLY_BOLT_LIFE = 0.12;
+const WARD_BOLT_COLOR = rgb(0x7fffe6);
+const ALLY_BOLT_LIFE = 0.18;
 
 /** Rings, blasts, bolts, projectiles and bubbles for every ability kind. Events create effects; `update` draws them. */
 export class AbilityFx implements RunView {
