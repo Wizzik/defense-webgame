@@ -18,6 +18,11 @@ const xpFirst = (
   }
 ).progression.xpFirst;
 
+/** Hero ids from the generated data, so adding a hero extends the test. */
+const heroIds = (
+  JSON.parse(readFileSync(join(import.meta.dirname, "..", "data", "generated", "heroes.json"), "utf8")) as { id: string }[]
+).map((h) => h.id);
+
 type Screen = GameSnapshot["screen"];
 
 async function waitForScreen(page: Page, screen: Screen, timeout = 90_000): Promise<void> {
@@ -92,4 +97,84 @@ test("run ends with the end screen", async ({ page }, testInfo) => {
   await page.locator("#again").click();
   await expect(page.locator("#start")).toBeVisible();
   await waitForScreen(page, "menu", 10_000);
+});
+
+test("menu lets you pick a hero", async ({ page }, testInfo) => {
+  await page.goto("/?seed=1&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await expect(page.locator("button.hero-button")).toHaveCount(4);
+  await page.locator("button.hero-button", { hasText: "Nightglaive" }).click();
+  await testInfo.attach(`menu-hero-${testInfo.project.name}`, {
+    body: await page.screenshot({ type: "png" }),
+    contentType: "image/png",
+  });
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => window.__game?.hero)).toBe("nightglaive");
+  expect(await page.evaluate(() => window.__game?.screen)).toBe("playing");
+});
+
+test("every hero plays without errors", async ({ page }, testInfo) => {
+  test.setTimeout(10 * 60_000);
+  for (const hero of heroIds) {
+    await page.goto(`/?seed=1&hero=${hero}&debug=1&speed=8&duration=20&lang=en`);
+    await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+    await page.locator("#start").click();
+    await waitForScreen(page, "playing");
+    expect(await page.evaluate(() => window.__game?.hero)).toBe(hero);
+    await page.evaluate(() => {
+      for (let slot = 0; slot < 4; slot++) window.__game!.debug!.setAbilityLevel(slot, 1);
+    });
+    // mid-run: enemies are on screen and abilities have fired
+    await page.waitForFunction(
+      () => {
+        const g = window.__game;
+        return g !== undefined && (g.screen !== "playing" || (g.tick > 240 && g.enemies > 0));
+      },
+      undefined,
+      { timeout: 60_000, polling: 100 },
+    );
+    await testInfo.attach(`hero-${hero}-${testInfo.project.name}`, {
+      body: await page.screenshot({ type: "png" }),
+      contentType: "image/png",
+    });
+    // a level-up pauses the run; pick a card until the run ends (within 60 s)
+    const deadline = Date.now() + 60_000;
+    let screen = await page.evaluate(() => window.__game?.screen);
+    while (screen !== "won" && screen !== "lost" && Date.now() < deadline) {
+      if (screen === "levelUp") await page.locator("button.card").first().click();
+      await page.waitForTimeout(250);
+      screen = await page.evaluate(() => window.__game?.screen);
+    }
+    expect(["won", "lost"], `${hero} ended`).toContain(screen);
+  }
+});
+
+test("R casts the ultimate and T switches auto", async ({ page }) => {
+  await page.goto("/?seed=1&hero=stonehorn&debug=1&lang=en");
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  await page.evaluate(() => window.__game!.debug!.setAbilityLevel(3, 1));
+  expect(await page.evaluate(() => window.__game?.ultimateAuto)).toBe(true);
+
+  await page.keyboard.press("t");
+  await page.waitForFunction(() => window.__game?.ultimateAuto === false, undefined, { timeout: 10_000 });
+  expect(await page.evaluate(() => window.__game?.abilityCooldowns[3])).toBe(0);
+
+  await page.keyboard.press("r");
+  await page.waitForFunction(() => (window.__game?.abilityCooldowns[3] ?? 0) > 0, undefined, { timeout: 10_000 });
+});
+
+test("Space dashes", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en");
+  await page.locator("#start").click(); // the mouse click leaves the hidden Start button focused
+  await waitForScreen(page, "playing");
+  await page.waitForFunction(() => (window.__game?.tick ?? 0) > 5, undefined, { timeout: 30_000 });
+  const before = await page.evaluate(() => ({ x: window.__game!.heroX, y: window.__game!.heroY }));
+  await page.keyboard.press("Space");
+  await page.waitForFunction(
+    (b) => Math.hypot(window.__game!.heroX - b.x, window.__game!.heroY - b.y) >= 300,
+    before,
+    { timeout: 10_000, polling: 50 },
+  );
 });

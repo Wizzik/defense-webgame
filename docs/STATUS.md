@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-06 (phase 2a plan). Read this first when you resume work.
+Updated 2026-11-10 (phase 2a implemented). Read this first when you resume work.
 
 ## Now
 
@@ -20,16 +20,24 @@ Updated 2026-11-06 (phase 2a plan). Read this first when you resume work.
 
 ## Next
 
-1. Petr merges PR #4 (it includes the tempo pass of PR #3; close #3 after that).
-2. **Phase 2 (MVP) is split into five plans:** 2a heroes and abilities, 2b run structure (20 phases, factions, elites, bosses, difficulties), 2c economy (gold, wood, shop, items, towers), 2d shared abilities, passives and evolutions, 2e meta progression and saves. See the table at the top of the 2a plan.
-3. **Phase 2a plan waits for Petr's review:** `docs/superpowers/plans/2026-11-06-phase-2a-heroes-and-abilities.md` on branch `phase-2a` (based on `effects`). He starts with the table "Co plán rozhoduje". Execution: subagent-driven, task by task (13 tasks).
-4. Petr plays the slice and measures fps with `?fps=1` in a full run, on both renderers (`&renderer=webgl2`).
-5. Propose the second skill (project development rules).
+1. **Phase 2a (heroes and abilities): implemented** on branch `phase-2a` (PR #5, built on PR #4 `effects`, which is still open). It waits for Petr to play and merge: 4 heroes (Stonehorn, Nightglaive, Gravecaller, Serpent Shaman), 16 abilities in 11 kinds, hero choice in the menu, R (ultimate), T (auto switch) and Space (dash), ability HUD, effects, wards and copies, learn and ultimate cards, `sim:run --hero`.
+2. Next is the plan for **phase 2b (run structure)**: 20 phases, factions, elites, bosses, difficulties. It also replaces the run, enemies and phases, which closes the known 2a gaps (idle runs win with 3 heroes, Gravecaller averages level 7.2).
+3. Phase 2c economy, 2d shared abilities, passives and evolutions, 2e meta progression and saves follow.
+4. Propose the second skill (project development rules).
+
+## For Petr to try
+
+- Each hero from the menu (or `?hero=<id>`): spells cast themselves, check the look and the feel of each.
+- R casts the ultimate, T switches its automation, Space dashes.
+- `?fps=1` with full serpent totems (Serpent Shaman) and with Bone Stampede (Gravecaller): about 60 fps expected, on both renderers (`&renderer=webgl2`).
 
 ## Open questions for Petr
 
 - Branch previews (Cloudflare Pages, spec §4) need his Cloudflare account. Until then the game is played from `main` after a merge.
 - Branch protection for `main` is a GitHub setting he controls.
+- PR #4 (effects, includes the tempo pass) must be merged before PR #5; PR #3 (tempo) is closed after that.
+- The WebGPU e2e project runs only in CI (it fails in the cloud container for an environmental reason); the local gate is `--project=webgl2-fallback`.
+- Character art (own hero models) is a separate plan, to be made with the Blender MCP.
 
 ## Environment notes (cloud container)
 

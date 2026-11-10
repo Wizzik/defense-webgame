@@ -35,12 +35,14 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 - `validateGameData(data: unknown): GameData` throws `GameDataError` with `path: message` lines.
 - Files: `heroes.json`, `abilities.json`, `constants.json`, `enemies.json`, `rules.json`.
 - `data/generated.test.ts` guards the content, because data-build cannot run in CI.
-- Ability kinds (13) and targeting rules (8) are listed in `data/schema/ability.ts`.
+- Ability kinds (13) and targeting rules (8) are listed in `data/schema/ability.ts`. Eleven kinds are implemented; `instant` and `chain` wait for a spell that needs them (phase 2d).
 
 ## Simulation
 
-- `createRun(data, { seed })` returns a `Run`. `run.step(input: TickInput)` advances one fixed step (30 per second). `savePrevious` runs first, then systems in a fixed order: hero movement, spawning, enemy AI, hero combat, abilities, crystals, castle regeneration, end check, level-up offer. In the `levelUp` state only `chooseCard` runs.
+- `createRun(data, { seed })` returns a `Run`. `run.step(input: TickInput)` advances one fixed step (30 per second). `savePrevious` runs first, then systems in a fixed order: actions (R, T, Space), hero movement, spawning, enemy AI, hero combat, abilities, projectiles, allies, crystals, castle regeneration, end check, level-up offer. In the `levelUp` state only `chooseCard` runs.
 - State lives in stores of typed arrays with a fixed capacity (`EnemyStore`, `CrystalStore`) and in hero and castle structs. Each step writes an `EventLog` (hits, deaths, casts, pickups, level-ups, run end) that the client turns into effects.
+- Abilities: a hero has 4 slots (`run.abilities`, three signature spells and the ultimate). `sim/abilities/kinds.ts` is the registry: one updater per ability kind (`line`, `nova`, `area`, `ticking_area`, `projectile`, `cone`, `aura`, `on_hit`, `on_cast`, `heal`, `shield`, `summon`), run every step for each learned slot; a learned slot whose kind has no updater throws on the first step, and cards skip such kinds. `slots.ts` holds slot state and the cast mode (auto, manual, none), `targeting.ts` the targeting rules. Spell damage and healing scale with the hero's spell power (INT), and spells ignore armor.
+- `ProjectileStore` holds flying bolts (the hit is instant, the bolt is an effect or a homing hit) and `AllyStore` holds summoned units (serpent totems and wards, shadow copies); allies are not attacked by enemies and expire. Both are typed arrays and part of `stateHash`.
 - Determinism: a seeded `Rng` (mulberry32), no transcendental `Math` functions, no allocation per step. `stateHash(run)` (FNV-1a) backs the determinism and replay tests.
 - Units are the map's world units with `y` pointing north. The client scales by `1/64` and draws north as `-z`.
 - `sim/bot.ts` plays runs without graphics. `npm run sim:run` prints run summaries for balance tuning.
@@ -52,14 +54,14 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 - `client/main.ts` wires the pieces, including the menu and restart wiring (`createUi`); `client/game/` holds the session (run, frames, input), the fixed-step loop with interpolation (`loop.ts`), URL parameters (`params.ts`), keyboard input and the debug snapshot (`debug.ts`).
 - `client/render/` draws the arena, hero, castle, enemies, crystals and spell effects from the simulation state and its `EventLog`. It also handles the death pop, the pooled DOM damage numbers (`damage-numbers.ts`, pure pool logic in `damage-number-pool.ts`) and the camera shake (`FollowCamera.shake`). Effects freeze while the run is paused.
 - `client/audio/` synthesizes the sound effects with Web Audio, with no audio assets. `Sfx` makes the sounds, `SoundView` turns events into sounds, and `Throttle` allows each sound at most 4 times per 50 ms. The `AudioContext` is created on the Start click. M or the menu toggle mutes, and the choice is stored in `localStorage`.
-- `client/ui/` is an HTML/CSS layer: menu, HUD, upgrade cards, end screen and castle pointer. Texts come from `messages-en.ts` and `messages-cs.ts` through `t(lang, key)`.
+- `client/render/` also holds the ability effects (`ability-fx.ts`), projectile and ally views, and the hero colours (`hero-tints.ts`). `client/ui/` is an HTML/CSS layer: menu with hero choice, ability HUD, HUD, upgrade cards, end screen and castle pointer. Texts come from `messages-en.ts` and `messages-cs.ts` through `t(lang, key)`.
 - `client/perf/` has the frame-rate overlay (`?fps=1`, bottom-left so it does not cover the HUD).
-- Debug: `window.__game` (game page) and `window.__spike` (benchmark). Game URL params: `seed`, `speed`, `duration`, `debug`, `fps`, `lang`, `renderer`; the spike takes `n`, `renderer` and `seed`.
+- Debug: `window.__game` (game page) and `window.__spike` (benchmark). Game URL params: `seed`, `speed`, `duration`, `hero`, `debug`, `fps`, `lang`, `renderer`; the spike takes `n`, `renderer` and `seed`.
 
 ## Tests and delivery
 
 - `npm run check`: typecheck, Vitest and Python tests. Required before every commit.
-- `npm run e2e`: builds, serves the preview and runs Playwright in both projects. `e2e/fixtures.ts` makes every test fail on console or page errors. The game spec covers the menu, a level-up pick and the end screen; the render check hides the UI and needs a luminance stddev above 2.5.
+- `npm run e2e`: builds, serves the preview and runs Playwright in both projects. `e2e/fixtures.ts` makes every test fail on console or page errors. The game spec covers the menu, hero choice, every hero playing a run, R and T, the Space dash, a level-up pick and the end screen; the render check hides the UI and needs a luminance stddev above 2.5.
 - CI runs `.github/workflows/ci.yml` on pushes to `main` and on pull requests (one run per ref, 25 minutes at most). `pages.yml` deploys `main` to https://wizzik.github.io/defense-webgame/ (the spike lives at `/spike/`).
 
 ## Glossary
