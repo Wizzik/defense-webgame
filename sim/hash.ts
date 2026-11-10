@@ -97,6 +97,17 @@ export function stateHash(run: Run): number {
     mixFloat(pr.x[i]);
     mixFloat(pr.y[i]);
   }
+  const al = run.allies;
+  for (let i = 0; i < al.capacity; i++) {
+    if (al.alive[i] === 0) continue;
+    mixInt(i);
+    mixInt(al.kind[i]);
+    mixInt(al.ability[i]);
+    mixFloat(al.x[i]);
+    mixFloat(al.y[i]);
+    mixInt(al.expiresTick[i]);
+    mixInt(al.attackCooldown[i]);
+  }
   if (run.offer) {
     for (const card of run.offer.cards) {
       if (card.kind === "ability") {

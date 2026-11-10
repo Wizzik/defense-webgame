@@ -7,6 +7,7 @@ import { updateCone } from "./cone";
 import { updateLine } from "./line";
 import { updateNova } from "./nova";
 import { updateProjectile } from "./projectile";
+import { updateSummon } from "./summon";
 import { updateTickingArea } from "./ticking-area";
 import { CastMode, castMode } from "./slots";
 import type { AbilitySlot } from "./slots";
@@ -31,4 +32,5 @@ export const UPDATERS: Partial<Record<Ability["kind"], AbilityUpdate>> = {
   },
   heal: updateHeal,
   shield: updateShield,
+  summon: updateSummon,
 };

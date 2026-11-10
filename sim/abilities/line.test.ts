@@ -176,9 +176,9 @@ describe("line ability", () => {
 
   it("an unsupported ability kind throws when stepped", () => {
     const data = gameData();
-    const hero = data.heroes.find((h) => h.id === data.rules.start.hero)!;
-    hero.signatureAbilities[0] = "serpent-totem";
     const run = createRun(data, { seed: 1 });
-    expect(() => run.step(NO_INPUT)).toThrow("sim: ability kind summon is not implemented");
+    // No hero uses chain, so no updater exists for it.
+    run.abilities[0].def = { ...run.abilities[0].def, kind: "chain" } as never;
+    expect(() => run.step(NO_INPUT)).toThrow("sim: ability kind chain is not implemented");
   });
 });

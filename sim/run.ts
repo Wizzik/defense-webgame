@@ -5,6 +5,7 @@ import { TICKS_PER_SECOND } from "./constants";
 import { chooseCard, openOffer } from "./cards";
 import type { CardOffer } from "./cards";
 import { regenCastle } from "./castle";
+import { ALLY_CAPACITY, AllyStore, updateAllies } from "./allies";
 import { PROJECTILE_CAPACITY, ProjectileStore, updateProjectiles } from "./projectiles";
 import { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
 import { updateEnemies } from "./enemy-ai";
@@ -40,6 +41,7 @@ export class Run {
   readonly abilities: AbilitySlot[];
   readonly crystals = new CrystalStore(CRYSTAL_CAPACITY);
   readonly projectiles = new ProjectileStore(PROJECTILE_CAPACITY);
+  readonly allies = new AllyStore(ALLY_CAPACITY);
   offer: CardOffer | null = null;
   spawnCredit = 0;
   nextGate = 0;
@@ -116,6 +118,7 @@ export class Run {
    *   updateHeroCombat(this);     // Task 5
    *   updateAbilities(this);      // Task 6
    *   updateProjectiles(this);    // phase 2a, Task 4
+   *   updateAllies(this);         // phase 2a, Task 6
    *   updateCrystals(this);       // Task 7
    *   regenCastle(this);          // Task 4
    *   this.tick++;
@@ -136,6 +139,7 @@ export class Run {
     updateHeroCombat(this);
     updateAbilities(this);
     updateProjectiles(this);
+    updateAllies(this);
     updateCrystals(this);
     regenCastle(this);
     this.tick++;
@@ -145,7 +149,7 @@ export class Run {
 }
 
 function savePrevious(run: Run): void {
-  const { hero, enemies, crystals, projectiles } = run;
+  const { hero, enemies, crystals, projectiles, allies } = run;
   hero.prevX = hero.x;
   hero.prevY = hero.y;
   for (let i = 0; i < crystals.capacity; i++) {
@@ -157,6 +161,11 @@ function savePrevious(run: Run): void {
     if (projectiles.alive[i] === 0) continue;
     projectiles.prevX[i] = projectiles.x[i];
     projectiles.prevY[i] = projectiles.y[i];
+  }
+  for (let i = 0; i < allies.capacity; i++) {
+    if (allies.alive[i] === 0) continue;
+    allies.prevX[i] = allies.x[i];
+    allies.prevY[i] = allies.y[i];
   }
   for (let i = 0; i < enemies.capacity; i++) {
     if (enemies.alive[i] === 0) continue;

@@ -11,6 +11,7 @@ export { chooseCard, openOffer } from "./cards";
 export type { Card, CardOffer } from "./cards";
 export { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
 export { TICKS_PER_SECOND, TICK_SECONDS } from "./constants";
+export { ALLY_CAPACITY, AllyKind, AllyStore, updateAllies } from "./allies";
 export { Action, EnemyStore, Role } from "./enemies";
 export { EventKind, EventLog } from "./events";
 export { PROJECTILE_CAPACITY, ProjectileStore, RETARGET_RANGE, updateProjectiles } from "./projectiles";
