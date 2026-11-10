@@ -68,9 +68,13 @@ describe("autopilot", () => {
 describe("balance", () => {
   it("idle run loses before the end", () => {
     const run = createRun(gameData(), { seed: 1 });
-    // Idle movement, but the cards are taken so that a level-up does not pause the run forever.
-    const idle: TickInput = { ...NO_INPUT, card: 0 };
-    while (run.state === "playing" || run.state === "levelUp") run.step(idle);
+    // Idle movement; an attribute card is taken at each level-up so that the run does not pause forever
+    // and the hero stays with its first ability.
+    while (run.state === "playing" || run.state === "levelUp") {
+      const card = run.offer ? Math.max(0, run.offer.cards.findIndex((c) => c.kind === "attribute")) : 0;
+      const idle: TickInput = { ...NO_INPUT, card };
+      run.step(idle);
+    }
     expect(run.state).toBe("lost");
     expect(run.tick).toBeLessThan(run.durationTicks);
   });

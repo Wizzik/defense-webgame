@@ -3,6 +3,7 @@ import { TICKS_PER_SECOND } from "../constants";
 import { EventKind } from "../events";
 import { refreshHeroStats } from "../level-up";
 import type { Run } from "../run";
+import { onHeroCast } from "./echo";
 import { UPDATERS } from "./kinds";
 
 /** The hero's ultimate always sits in the last slot. */
@@ -72,13 +73,14 @@ export function castMode(run: Run, index: number): number {
   return run.ultimateAuto ? CastMode.Auto : CastMode.None;
 }
 
-/** Casting: the Cast event and the cooldown. */
+/** Casting: the Cast event and the cooldown, then the echo reacts. The caller applies its own damage afterwards. */
 export function startCast(
   run: Run, index: number, value: number, x: number, y: number, u: number, v: number,
 ): void {
   const slot = run.abilities[index];
   run.events.push(EventKind.Cast, index, value, x, y, u, v);
   slot.cooldown = abilityCooldownTicks(run, slot);
+  onHeroCast(run, index);
 }
 
 /** Lowers the cooldown of learned slots by 1, then runs their updaters in slot order. */

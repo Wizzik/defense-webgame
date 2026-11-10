@@ -31,6 +31,13 @@ export function updateEnemies(run: Run): void {
     const y = e.y[i];
     if (e.attackCooldown[i] > 0) e.attackCooldown[i]--;
 
+    // Slow lowers walking speed only (not knockback) and runs down even while stunned.
+    let walk = def.moveSpeed;
+    if (e.slowTicks[i] > 0) {
+      walk *= 1 - e.slowFactor[i];
+      e.slowTicks[i]--;
+    }
+
     let vx = 0;
     let vy = 0;
     let tx = castle.x;
@@ -79,8 +86,8 @@ export function updateEnemies(run: Run): void {
         e.facingY[i] = uy;
       } else {
         e.action[i] = Action.Move;
-        vx = ux * def.moveSpeed;
-        vy = uy * def.moveSpeed;
+        vx = ux * walk;
+        vy = uy * walk;
       }
     }
 

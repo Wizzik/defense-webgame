@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { stateHash } from "./hash";
 import { NO_INPUT } from "./input";
 import { chooseCard, openOffer } from "./cards";
@@ -11,6 +11,22 @@ function offered(run: ReturnType<typeof progressionRun>) {
   run.step(NO_INPUT);
   return run.offer!.cards;
 }
+
+// These tests set their own rules for which kinds exist: only `line` keeps its updater (stubs are added per test).
+const savedUpdaters = new Map<string, unknown>();
+beforeEach(() => {
+  const updaters = UPDATERS as Record<string, unknown>;
+  for (const kind of Object.keys(updaters)) {
+    if (kind === "line") continue;
+    savedUpdaters.set(kind, updaters[kind]);
+    delete updaters[kind];
+  }
+});
+afterEach(() => {
+  const updaters = UPDATERS as Record<string, unknown>;
+  for (const [kind, fn] of savedUpdaters) updaters[kind] = fn;
+  savedUpdaters.clear();
+});
 
 describe("cards", () => {
   it("choosing a card applies it and resumes", () => {

@@ -14,7 +14,7 @@ export const Targeting = z.enum([
 const PerLevel = z.array(z.number());
 
 /** Params of a kind: required keys, optional keys, and nothing else. */
-function params<R extends string, O extends string>(required: readonly R[], optional: readonly O[] = []) {
+function params<R extends string, O extends string = never>(required: readonly R[], optional: readonly O[] = []) {
   const shape = {
     ...Object.fromEntries(required.map((k) => [k, PerLevel])),
     ...Object.fromEntries(optional.map((k) => [k, PerLevel.optional()])),

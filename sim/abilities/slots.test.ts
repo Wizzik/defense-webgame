@@ -23,10 +23,20 @@ function castSlots(run: ReturnType<typeof createRun>): number[] {
   return out;
 }
 
-const stubbed: string[] = [];
+/** Updaters replaced by a test, restored afterwards (undefined = there was none). */
+const replaced = new Map<string, unknown>();
+function stubUpdater(kind: string, fn: unknown): void {
+  const updaters = UPDATERS as Record<string, unknown>;
+  if (!replaced.has(kind)) replaced.set(kind, updaters[kind]);
+  updaters[kind] = fn;
+}
 afterEach(() => {
-  for (const kind of stubbed) delete (UPDATERS as Record<string, unknown>)[kind];
-  stubbed.length = 0;
+  const updaters = UPDATERS as Record<string, unknown>;
+  for (const [kind, fn] of replaced) {
+    if (fn === undefined) delete updaters[kind];
+    else updaters[kind] = fn;
+  }
+  replaced.clear();
 });
 
 describe("ability slots", () => {
@@ -69,11 +79,10 @@ describe("ability slots", () => {
   });
 
   it("the ultimate waits while auto is off", () => {
-    (UPDATERS as Record<string, unknown>).nova = (r: typeof run, _s: unknown, i: number) => {
-      if (castMode(r, i) !== CastMode.None) startCast(r, i, 0, 0, 0, 0, 0);
-    };
-    stubbed.push("nova");
     const run = createRun(quietData(), { seed: 1, hero: "stonehorn" });
+    stubUpdater("nova", (r: typeof run, _s: unknown, i: number) => {
+      if (castMode(r, i) !== CastMode.None) startCast(r, i, 0, 0, 0, 0, 0);
+    });
     debugSetAbilityLevel(run, ULTIMATE_SLOT, 1);
     run.ultimateAuto = false;
     run.step(NO_INPUT);
