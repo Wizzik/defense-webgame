@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { botInput } from "./bot";
+import { botInput, LEASH_DISTANCE } from "./bot";
 import { stateHash } from "./hash";
 import { NO_INPUT } from "./input";
 import type { TickInput } from "./input";
@@ -70,6 +70,48 @@ describe("autopilot", () => {
     expect(input.moveX).toBe(-1);
   });
 
+  for (const hero of gameData().heroes.map((h) => h.id)) {
+    it(`never leaves the leash around the castle post for long (${hero})`, () => {
+      let beyond = 0;
+      play(1, (r) => {
+        const dx = r.hero.x - r.castle.x;
+        const dy = r.hero.y - (r.castle.y + 700);
+        // One step of overshoot is allowed: the bot turns back the tick after it crosses the leash.
+        if (Math.sqrt(dx * dx + dy * dy) > LEASH_DISTANCE + 100) beyond++;
+      }, undefined, hero);
+      expect(beyond).toBe(0);
+    });
+  }
+
+  it("walks back to the post when beyond the leash, even with an enemy in sight", () => {
+    const run = createRun(gameData(), { seed: 1 });
+    run.hero.x = run.castle.x + LEASH_DISTANCE + 300;
+    run.hero.y = run.castle.y + 700;
+    run.enemies.alive[0] = 1;
+    run.enemies.x[0] = run.hero.x + 1000;
+    run.enemies.y[0] = run.hero.y;
+    expect(botInput(run, { moveX: 0, moveY: 0, card: -1, actions: 0 }).moveX).toBe(-1);
+  });
+
+  it("a ranged hero does not chase an enemy, a melee hero does", () => {
+    const data = gameData();
+    const kindOf = (id: string) => data.heroes.find((h) => h.id === id)!.baseAttack.kind;
+    const ranged = data.heroes.find((h) => h.baseAttack.kind !== "melee")!.id;
+    const melee = data.heroes.find((h) => h.baseAttack.kind === "melee")!.id;
+    expect(kindOf(ranged)).not.toBe("melee");
+    const probe = (hero: string) => {
+      const run = createRun(gameData(), { seed: 1, hero });
+      run.hero.x = run.castle.x;
+      run.hero.y = run.castle.y + 700;
+      run.enemies.alive[0] = 1;
+      run.enemies.x[0] = run.hero.x + 700;
+      run.enemies.y[0] = run.hero.y;
+      return botInput(run, { moveX: 0, moveY: 0, card: -1, actions: 0 });
+    };
+    expect(probe(ranged).moveX).toBe(0);
+    expect(probe(melee).moveX).toBe(1);
+  });
+
   it("picks card 0 in the level-up state", () => {
     const run = createRun(gameData(), { seed: 1 });
     run.state = "levelUp";
@@ -80,13 +122,11 @@ describe("autopilot", () => {
 const HEROES = gameData().heroes.map((h) => h.id);
 
 // Targets (phase 2a, task 8): the bot wins 3 of 5 seeds and an idle run loses, for every hero.
-// Met today: stonehorn and serpent-shaman win 4 of 5; only stonehorn loses idle.
-// Gaps, kept at the level that is met (see .superpowers/sdd/2026-11-06-phase-2a-heroes-and-abilities/task-8-report.md):
-//  - nightglaive and gravecaller: the bot chases the nearest enemy to a gate and the other gate reaches the castle,
-//    so the bot loses 5 of 5 while an idle hero at the post wins 5 of 5 (ranged attack covers the post);
-//  - serpent-shaman, nightglaive and gravecaller: an idle hero at the post wins, because totems and ranged attacks
-//    clear the stream without any movement.
-const MIN_BOT_WINS: Record<string, number> = { stonehorn: 3, "serpent-shaman": 3, nightglaive: 0, gravecaller: 0 };
+// Met: the bot wins 3 of 5 with every hero. Gap, kept at the level that is met: an idle run loses only with
+// stonehorn; the other heroes hold the post alone with their level-1 ability (ranged attack, totems), so an idle run
+// wins. Phase 2b replaces the 3-minute run, the enemies and the phases, which is where this gets fixed
+// (see .superpowers/sdd/2026-11-06-phase-2a-heroes-and-abilities/task-8-report.md).
+const MIN_BOT_WINS: Record<string, number> = { stonehorn: 3, "serpent-shaman": 3, nightglaive: 3, gravecaller: 3 };
 const IDLE_LOSES: Record<string, boolean> = { stonehorn: true, "serpent-shaman": false, nightglaive: false, gravecaller: false };
 
 describe("balance", () => {
