@@ -13,6 +13,7 @@ describe("readGameParams", () => {
       renderer: "webgpu",
       fps: false,
       lang: undefined,
+      hero: undefined,
     });
   });
 
@@ -32,5 +33,11 @@ describe("readGameParams", () => {
       debug: true, fps: true, renderer: "webgl2", lang: "cs",
     });
     expect(readGameParams("?debug=true&fps=0&lang=de", random)).toMatchObject({ debug: false, fps: false, lang: undefined });
+  });
+
+  it("reads the hero param", () => {
+    expect(readGameParams("?hero=nightglaive", random).hero).toBe("nightglaive");
+    expect(readGameParams("?hero=", random).hero).toBeUndefined();
+    expect(readGameParams("", random).hero).toBeUndefined();
   });
 });

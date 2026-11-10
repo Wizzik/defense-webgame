@@ -17,7 +17,7 @@ describe("i18n", () => {
 
   it("t fills placeholders", () => {
     expect(t("en", "hud.phase", { n: 2, total: 4 })).toBe("Phase 2/4");
-    expect(t("cs", "menu.hero", { name: "Kamenorog" })).toBe("Hrdina: Kamenorog");
+    expect(t("cs", "menu.chooseHero")).toBe("Vyber hrdinu");
     expect(t("en", "menu.start")).toBe("Start");
   });
 });

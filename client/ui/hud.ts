@@ -1,4 +1,4 @@
-import { TICKS_PER_SECOND, type Run, xpToNext } from "../../sim";
+import { TICKS_PER_SECOND, type Run, ULTIMATE_SLOT, xpToNext } from "../../sim";
 import { el, formatTime, setText } from "./dom";
 import { type Lang, t } from "./i18n";
 
@@ -21,7 +21,28 @@ function fraction(value: number, max: number): string {
   return `${Math.max(0, Math.min(1, max > 0 ? value / max : 0)) * 100}%`;
 }
 
-/** In-run display: hero, time and phase, castle and kills, spell, castle-under-attack banner. */
+/** One cell of the ability bar: name, state line, cooldown bar, and for the ultimate a key and the auto switch. */
+interface Cell {
+  root: HTMLElement;
+  name: HTMLElement;
+  state: HTMLElement;
+  fill: HTMLElement;
+  /** Ultimate only. */
+  mode?: HTMLElement;
+}
+
+function cell(parent: HTMLElement, extra: string, key?: string, withMode = false): Cell {
+  const root = el("div", `cell ${extra}`, parent);
+  if (key) el("span", "cell-key", root, key);
+  const name = el("div", "cell-name", root);
+  const state = el("div", "cell-state", root);
+  const mode = withMode ? el("div", "cell-mode", root) : undefined;
+  const track = el("div", "cell-track", root);
+  const fill = el("div", "bar-fill", track);
+  return { root, name, state, fill, mode };
+}
+
+/** In-run display: hero, time and phase, castle and kills, ability bar, castle-under-attack banner. */
 export class Hud {
   private readonly root: HTMLElement;
   private readonly heroHp: Bar;
@@ -30,9 +51,8 @@ export class Hud {
   private readonly phase: HTMLElement;
   private readonly castle: Bar;
   private readonly kills: HTMLElement;
-  private readonly spellName: HTMLElement;
-  private readonly spellState: HTMLElement;
-  private readonly spellFill: HTMLElement;
+  private readonly cells: Cell[] = [];
+  private readonly dash: Cell;
   private readonly banner: HTMLElement;
   private readonly muteKey: HTMLElement;
 
@@ -49,11 +69,12 @@ export class Hud {
     this.castle = bar(right, "castle");
     this.kills = el("div", "hud-kills", right);
     this.muteKey = el("div", "hud-mute", right);
-    const spell = el("div", "hud-spell", this.root);
-    this.spellName = el("div", "hud-spell-name", spell);
-    const track = el("div", "bar cooldown", spell);
-    this.spellFill = el("div", "bar-fill", track);
-    this.spellState = el("span", "bar-label", track);
+    const abilities = el("div", "hud-abilities", this.root);
+    for (let i = 0; i <= ULTIMATE_SLOT; i++) {
+      const ultimate = i === ULTIMATE_SLOT;
+      this.cells.push(cell(abilities, ultimate ? "ultimate" : "spell", ultimate ? "R" : undefined, ultimate));
+    }
+    this.dash = cell(abilities, "dash");
   }
 
   setVisible(visible: boolean): void {
@@ -80,13 +101,45 @@ export class Hud {
     setText(this.muteKey, t(lang, "hud.muteKey"));
     setText(this.kills, t(lang, "hud.kills", { n: run.stats.kills }));
 
-    const slot = run.abilities[0];
-    if (slot) {
-      setText(this.spellName, `${slot.def.name[lang]} · ${t(lang, "hud.level", { n: slot.level })}`);
-      const ready = slot.cooldown <= 0;
-      setText(this.spellState, ready ? t(lang, "hud.ready") : `${(slot.cooldown / TICKS_PER_SECOND).toFixed(1)} s`);
-      const total = slot.def.cooldown[slot.level - 1] * run.hero.stats.cooldownScale * TICKS_PER_SECOND;
-      this.spellFill.style.width = ready ? "100%" : fraction(total - slot.cooldown, total);
+    this.updateAbilities(run, lang);
+  }
+  private updateAbilities(run: Run, lang: Lang): void {
+    for (let i = 0; i < this.cells.length; i++) {
+      const view = this.cells[i]!;
+      const slot = run.abilities[i]!;
+      const learned = slot.level >= 1;
+      view.root.classList.toggle("dim", !learned);
+      // a charged empowered strike (an armed on_hit ability) lights the frame
+      view.root.classList.toggle("charged", learned && slot.def.kind === "on_hit" && slot.active);
+      setText(view.name, slot.def.name[lang]);
+      if (!learned) {
+        setText(view.state, t(lang, "hud.notLearned"));
+        view.fill.style.width = "0%";
+      } else {
+        const ready = slot.cooldown <= 0;
+        const base = slot.def.cooldown[slot.level - 1]! * run.hero.stats.cooldownScale * TICKS_PER_SECOND;
+        setText(
+          view.state,
+          `${t(lang, "hud.level", { n: slot.level })} · ${
+            ready ? t(lang, "hud.ready") : `${(slot.cooldown / TICKS_PER_SECOND).toFixed(1)} s`
+          }`,
+        );
+        view.fill.style.width = ready ? "100%" : fraction(base - slot.cooldown, base);
+      }
+      if (view.mode) {
+        setText(
+          view.mode,
+          `${t(lang, run.ultimateAuto ? "hud.auto" : "hud.manual")} · ${t(lang, "hud.toggleKey")}`,
+        );
+      }
     }
+    const { hero } = run;
+    const total = Math.round(run.data.rules.hero.dash.cooldownSeconds * TICKS_PER_SECOND);
+    setText(this.dash.name, t(lang, "hud.dash"));
+    setText(
+      this.dash.state,
+      hero.dashCooldown <= 0 ? t(lang, "hud.ready") : `${(hero.dashCooldown / TICKS_PER_SECOND).toFixed(1)} s`,
+    );
+    this.dash.fill.style.width = hero.dashCooldown <= 0 ? "100%" : fraction(total - hero.dashCooldown, total);
   }
 }

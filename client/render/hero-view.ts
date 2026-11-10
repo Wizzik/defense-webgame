@@ -15,18 +15,18 @@ import { clone } from "three/addons/utils/SkeletonUtils.js";
 import { EventKind, type Run } from "../../sim";
 import type { RunView } from "../game/session";
 import { SCENE_SCALE } from "./coords";
+import { heroTint } from "./hero-tints";
 
 /** The hero's footprint is 1.4 times its collision circle. */
 const BODY_FACTOR = 1.4;
 const FADE_SECONDS = 0.15;
-const GOLD_TINT = 0x553300;
 
 export const IDLE_CLIP = "Idle";
 export const RUN_CLIP = "Running";
 export const PUNCH_CLIP = "Punch";
 export const DEATH_CLIP = "Death";
 
-/** The hero: a gold-tinted copy of the robot that idles, runs, punches on attacks and casts, and dies. */
+/** The hero: a copy of the robot that idles, runs, punches on attacks and casts, and dies. */
 export class HeroView implements RunView {
   readonly object = new Group();
   private readonly model: Object3D;
@@ -50,12 +50,8 @@ export class HeroView implements RunView {
     this.model.traverse((node) => {
       const mesh = node as Mesh;
       if (!mesh.isMesh) return;
-      const tint = (material: Material): Material => {
-        const copy = material.clone() as Material & { emissive?: Color };
-        copy.emissive?.setHex(GOLD_TINT);
-        return copy;
-      };
-      mesh.material = Array.isArray(mesh.material) ? mesh.material.map(tint) : tint(mesh.material);
+      const own = (material: Material): Material => material.clone();
+      mesh.material = Array.isArray(mesh.material) ? mesh.material.map(own) : own(mesh.material);
     });
     this.object.add(this.model);
 
@@ -104,6 +100,7 @@ export class HeroView implements RunView {
     if (!this.fitted) this.fit(hero.stats.collision);
     if (run !== this.lastRun) {
       this.lastRun = run;
+      this.tint(heroTint(hero.def.id));
       this.punching = false;
       this.fadeTo(this.idle);
     }
@@ -122,6 +119,17 @@ export class HeroView implements RunView {
     // the model faces +Z; north is -z in the scene
     this.object.rotation.y = Math.atan2(hero.facingX, -hero.facingY);
     this.mixer.update(dt);
+  }
+
+  /** Sets the emissive colour on every material of the model (the materials are this view's own copies). */
+  private tint(color: number): void {
+    this.model.traverse((node) => {
+      const mesh = node as Mesh;
+      if (!mesh.isMesh) return;
+      for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+        (material as Material & { emissive?: Color }).emissive?.setHex(color);
+      }
+    });
   }
 
   dispose(): void {

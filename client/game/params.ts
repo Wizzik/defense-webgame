@@ -6,6 +6,8 @@ export interface GameParams {
   renderer: "webgpu" | "webgl2";
   fps: boolean;
   lang?: "en" | "cs";
+  /** ?hero=<id>; the caller checks it against the data. */
+  hero?: string;
 }
 
 function readInt(value: string | null): number | undefined {
@@ -23,6 +25,7 @@ export function readGameParams(search: string, randomSeed: () => number): GamePa
   const speed = readInt(params.get("speed"));
   const duration = readInt(params.get("duration"));
   const lang = params.get("lang");
+  const hero = params.get("hero")?.trim();
   return {
     seed: readInt(params.get("seed")) ?? randomSeed(),
     speed: speed === undefined ? 1 : clamp(speed, 1, 16),
@@ -31,5 +34,6 @@ export function readGameParams(search: string, randomSeed: () => number): GamePa
     renderer: params.get("renderer") === "webgl2" ? "webgl2" : "webgpu",
     fps: params.get("fps") === "1",
     lang: lang === "en" || lang === "cs" ? lang : undefined,
+    hero: hero ? hero : undefined,
   };
 }

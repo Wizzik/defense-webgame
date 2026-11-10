@@ -49,8 +49,8 @@ export class Session {
     this.keyboard = deps.keyboard;
   }
 
-  start(seed: number, paused = false): void {
-    this.run = createRun(this.data, { seed, durationSeconds: this.params.durationSeconds });
+  start(seed: number, paused = false, hero?: string): void {
+    this.run = createRun(this.data, { seed, hero, durationSeconds: this.params.durationSeconds });
     this.seed = seed;
     this.paused = paused;
     this.pendingCard = -1;
@@ -65,6 +65,8 @@ export class Session {
   frame(dtSeconds: number): void {
     const { run, input } = this;
     if (!run) return;
+    // keys pressed behind the menu must not fire when the run starts
+    if (this.paused) this.keyboard.read(input);
     const steps = this.paused ? 0 : this.loop.advance(dtSeconds, this.params.speed);
     for (let i = 0; i < steps; i++) {
       this.keyboard.read(input);

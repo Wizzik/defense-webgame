@@ -33,6 +33,7 @@ const MODEL_URL = `${import.meta.env.BASE_URL}models/robot-expressive/RobotExpre
 const ENEMY_TINT = 0x771111;
 const LANG_KEY = "defense-webgame.lang";
 const MUTE_KEY = "defense-webgame.muted";
+const HERO_KEY = "defense-webgame.hero";
 
 let lang: Lang = "en";
 
@@ -68,6 +69,32 @@ function storeMuted(value: boolean): void {
   }
 }
 
+function readStoredHero(): string | null {
+  try {
+    return localStorage.getItem(HERO_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function storeHero(value: string): void {
+  try {
+    localStorage.setItem(HERO_KEY, value);
+  } catch {
+    // storage may be blocked; the choice then lasts until reload
+  }
+}
+
+/** The URL wins (an unknown id is ignored with a warning), then the stored choice, then the start hero. */
+function pickHero(data: GameData, param: string | undefined, stored: string | null): string {
+  const known = (id: string | null | undefined): id is string => !!id && data.heroes.some((h) => h.id === id);
+  if (param !== undefined) {
+    if (known(param)) return param;
+    console.warn(`unknown hero "${param}" in ?hero, ignored`);
+  }
+  return known(stored) ? stored : data.rules.start.hero;
+}
+
 function randomSeed(): number {
   return Math.floor(Math.random() * 0x1_0000_0000);
 }
@@ -99,6 +126,7 @@ async function start(): Promise<void> {
   document.documentElement.lang = lang;
 
   const data = loadGameData();
+  const hero = pickHero(data, params.hero, readStoredHero());
   const { renderer, backend } = await createRenderer(params.renderer, document.body);
   const gltf = await loadModel();
 
@@ -123,7 +151,7 @@ async function start(): Promise<void> {
   sfx.setMuted(readStoredMuted());
   session.views.push(heroView, crowd, crystals, effects, numbers, new SoundView(sfx));
   // the menu shows a fresh, paused run behind it
-  session.start(params.seed, true);
+  session.start(params.seed, true, hero);
 
   addEventListener("resize", () => {
     renderer.setSize(innerWidth, innerHeight);
@@ -132,7 +160,7 @@ async function start(): Promise<void> {
 
   const snapshot = publishSnapshot(backend);
   if (params.debug) addDebugHooks(snapshot, () => session.run);
-  const ui = createUi(data, session, followCamera, sfx, randomSeed);
+  const ui = createUi(data, session, followCamera, sfx, randomSeed, hero);
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
   if (overlay) {
     document.getElementById("overlay")!.hidden = false;
@@ -153,9 +181,16 @@ interface Ui {
 }
 
 /** Builds the menu, HUD, cards, end screen and castle pointer, and wires them to the session. */
-function createUi(data: GameData, session: Session, followCamera: FollowCamera, sfx: Sfx, nextSeed: () => number): Ui {
+function createUi(
+  data: GameData,
+  session: Session,
+  followCamera: FollowCamera,
+  sfx: Sfx,
+  nextSeed: () => number,
+  initialHero: string,
+): Ui {
   const root = document.getElementById("ui")!;
-  const heroDef = data.heroes.find((h) => h.id === data.rules.start.hero)!;
+  let heroId = initialHero;
   let menuOpen = true;
   const showMenu = (): void => {
     menuOpen = true;
@@ -166,14 +201,22 @@ function createUi(data: GameData, session: Session, followCamera: FollowCamera, 
     lang = next;
     document.documentElement.lang = next;
     storeLang(next);
-    menu.setLang(next, heroDef.name[next]);
+    menu.setLang(next);
   };
-  const menu = new Menu(root, {
+  const menu = new Menu(root, data.heroes, heroId, {
     onStart: () => {
       sfx.enable();
       menuOpen = false;
       session.paused = false;
       menu.setVisible(false);
+    },
+    onHero: (id) => {
+      if (id === heroId) return;
+      heroId = id;
+      storeHero(id);
+      menu.setHero(id);
+      // the paused run behind the menu is replaced, so the new hero is on screen at once
+      session.start(session.seed, true, id);
     },
     onLang: applyLang,
     onSound: () => setMuted(!muted),
@@ -195,10 +238,10 @@ function createUi(data: GameData, session: Session, followCamera: FollowCamera, 
   const pointer = new CastlePointer(root);
   const cards = new Cards(root, (index) => session.setCard(index));
   const end = new EndScreen(root, () => {
-    session.start(nextSeed(), true);
+    session.start(nextSeed(), true, heroId);
     showMenu();
   });
-  menu.setLang(lang, heroDef.name[lang]);
+  menu.setLang(lang);
   let ended = false;
 
   return {
