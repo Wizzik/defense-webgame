@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { stateHash } from "./hash";
 import { NO_INPUT } from "./input";
 import { chooseCard, openOffer } from "./cards";
+import { UPDATERS } from "./abilities/kinds";
 import { gainXp } from "./level-up";
 import { progressionRun } from "./testing/progression-run";
 
@@ -83,5 +84,62 @@ describe("cards", () => {
       seen = run.offer!.cards.some((c) => c.kind === "ability");
     }
     expect(seen).toBe(true);
+  });
+
+  describe("learn and ultimate cards", () => {
+    const stubbed: string[] = [];
+    function stub(...kinds: string[]): void {
+      for (const kind of kinds) {
+        const updaters = UPDATERS as Record<string, unknown>;
+        if (updaters[kind]) continue;
+        updaters[kind] = () => {};
+        stubbed.push(kind);
+      }
+    }
+    afterEach(() => {
+      for (const kind of stubbed) delete (UPDATERS as Record<string, unknown>)[kind];
+      stubbed.length = 0;
+    });
+
+    function offerAt(level: number, ultimateLevel = 0) {
+      const run = progressionRun({ cardsPerOffer: 10 });
+      run.hero.level = level;
+      run.abilities[3].level = ultimateLevel;
+      run.hero.pendingLevelUps = 1;
+      openOffer(run);
+      return run.offer!.cards.map((c) =>
+        c.kind === "ability" ? `${c.slot}:${c.fromLevel}>${c.toLevel}` : c.attribute,
+      ).sort();
+    }
+
+    it("offers learn cards for unlearned signatures", () => {
+      stub("on_hit", "on_cast", "nova");
+      expect(offerAt(2)).toEqual(["0:1>2", "1:0>1", "2:0>1", "agi", "int", "str"]);
+    });
+
+    it("does not offer kinds without an updater", () => {
+      expect(offerAt(2)).toEqual(["0:1>2", "agi", "int", "str"]);
+    });
+
+    it("the ultimate appears from ultimateFromLevel", () => {
+      stub("on_hit", "on_cast", "nova");
+      expect(offerAt(5)).not.toContain("3:0>1");
+      expect(offerAt(6)).toContain("3:0>1");
+      expect(offerAt(11, 1)).not.toContain("3:1>2");
+      expect(offerAt(12, 1)).toContain("3:1>2");
+    });
+
+    it("learning an ability makes it ready", () => {
+      stub("on_hit", "on_cast", "nova");
+      const run = progressionRun({ cardsPerOffer: 10 });
+      run.hero.level = 2;
+      run.hero.pendingLevelUps = 1;
+      openOffer(run);
+      const index = run.offer!.cards.findIndex((c) => c.kind === "ability" && c.slot === 1);
+      run.abilities[1].cooldown = 99;
+      chooseCard(run, index);
+      expect(run.abilities[1].level).toBe(1);
+      expect(run.abilities[1].cooldown).toBe(0);
+    });
   });
 });

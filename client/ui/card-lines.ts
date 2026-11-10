@@ -34,21 +34,25 @@ function statLabel(key: string): MessageKey | null {
 function abilityLines(run: Run, card: Extract<Card, { kind: "ability" }>): CardLine[] {
   const { def } = run.abilities[card.slot];
   const { spellPower } = run.hero.stats;
-  const from = card.fromLevel - 1;
+  // fromLevel 0 is learning: only the level 1 values are shown, with an empty "from".
+  const learn = card.fromLevel === 0;
+  const from = learn ? card.toLevel - 1 : card.fromLevel - 1;
   const to = card.toLevel - 1;
   const lines: CardLine[] = [];
   for (const [key, values] of Object.entries(def.params as Record<string, number[]>)) {
-    if (values[from] === values[to]) continue;
+    if (!learn && values[from] === values[to]) continue;
     const label = statLabel(key);
     if (!label) continue;
     if (key === "damage") {
-      lines.push({ label, from: whole(values[from] * spellPower), to: whole(values[to] * spellPower) });
+      lines.push({
+        label, from: learn ? "" : whole(values[from] * spellPower), to: whole(values[to] * spellPower),
+      });
     } else {
-      lines.push({ label, from: num(values[from]), to: num(values[to]) });
+      lines.push({ label, from: learn ? "" : num(values[from]), to: num(values[to]) });
     }
   }
-  if (def.cooldown[from] !== def.cooldown[to]) {
-    lines.push({ label: "stat.cooldown", from: num(def.cooldown[from]), to: num(def.cooldown[to]) });
+  if (learn || def.cooldown[from] !== def.cooldown[to]) {
+    lines.push({ label: "stat.cooldown", from: learn ? "" : num(def.cooldown[from]), to: num(def.cooldown[to]) });
   }
   return lines;
 }

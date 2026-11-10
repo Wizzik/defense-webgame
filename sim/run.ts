@@ -21,6 +21,8 @@ export type RunResult = "won" | "castle" | "hero";
 export interface RunOptions {
   seed: number;
   durationSeconds?: number;
+  /** Hero id; defaults to rules.start.hero. */
+  hero?: string;
 }
 
 const EVENT_CAPACITY = 1024;
@@ -33,6 +35,7 @@ export class Run {
   readonly castle: CastleState;
   readonly enemies: EnemyStore;
   readonly grid: SpatialHash;
+  readonly heroIndex: number;
   readonly abilities: AbilitySlot[];
   readonly crystals = new CrystalStore(CRYSTAL_CAPACITY);
   offer: CardOffer | null = null;
@@ -40,6 +43,10 @@ export class Run {
   nextGate = 0;
   readonly stats: RunStats = { kills: 0, spawned: 0, damageDealt: 0 };
   readonly durationTicks: number;
+  /** The ultimate casts by itself; the player can switch this off (Task 7). */
+  ultimateAuto = true;
+  /** R was pressed in this step; cleared by updateAbilities. */
+  ultimateRequested = false;
   tick = 0;
   state: RunState = "playing";
   result: RunResult | null = null;
@@ -54,8 +61,11 @@ export class Run {
       (options.durationSeconds ?? rules.run.durationSeconds) * TICKS_PER_SECOND,
     );
 
-    const def = data.heroes.find((h) => h.id === rules.start.hero);
-    if (!def) throw new Error(`createRun: unknown hero "${rules.start.hero}"`);
+    const heroId = options.hero ?? rules.start.hero;
+    const heroIndex = data.heroes.findIndex((h) => h.id === heroId);
+    if (heroIndex < 0) throw new Error(`createRun: unknown hero "${heroId}"`);
+    const def = data.heroes[heroIndex];
+    this.heroIndex = heroIndex;
     const stats: HeroStats = {
       maxHp: 0, regenPerSecond: 0, armor: 0, attackIntervalSeconds: 0, damageMin: 0, damageMax: 0,
       spellPower: 0, cooldownScale: 0, moveSpeed: 0, collision: 0,

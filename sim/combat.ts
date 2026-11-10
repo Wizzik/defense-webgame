@@ -39,9 +39,10 @@ export function damageCastle(run: Run, amount: number, attacker: number): void {
 
 /**
  * Subtracts `amount` from an enemy, wakes a sieger and kills it at 0 hp.
- * `source` is 0 for the base attack and 1 for an ability.
+ * `source`: 0 base attack, 1 spell, 2 summoned unit. `ref`: spell slot (1), ally index (2), else -1.
+ * Only sources 0 and 1 knock back.
  */
-export function damageEnemy(run: Run, slot: number, amount: number, source: 0 | 1): void {
+export function damageEnemy(run: Run, slot: number, amount: number, source: 0 | 1 | 2, ref = -1): void {
   const e = run.enemies;
   if (e.alive[slot] === 0) return;
   const before = e.hp[slot];
@@ -49,9 +50,9 @@ export function damageEnemy(run: Run, slot: number, amount: number, source: 0 | 
   e.lastHitTick[slot] = run.tick;
   if (e.role[slot] === Role.Sieger) e.aggro[slot] = 1;
   run.stats.damageDealt += Math.min(amount, before);
-  run.events.push(EventKind.Hit, slot, amount, e.x[slot], e.y[slot], source, 0);
+  run.events.push(EventKind.Hit, slot, amount, e.x[slot], e.y[slot], source, ref);
   if (e.hp[slot] <= 0) killEnemy(run, slot);
-  else knockBack(run, slot, source);
+  else if (source !== 2) knockBack(run, slot, source);
 }
 
 /** Pushes a surviving enemy away from the hero; a newer knockback replaces an older one. */

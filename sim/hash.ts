@@ -25,6 +25,8 @@ export function stateHash(run: Run): number {
   mixInt(STATES[run.state]);
   mixInt(run.result === null ? 0 : RESULTS[run.result]);
   mixInt(run.rng.state);
+  mixInt(run.heroIndex);
+  mixInt(run.ultimateAuto ? 1 : 0);
   const hero = run.hero;
   mixFloat(hero.x);
   mixFloat(hero.y);
@@ -48,6 +50,7 @@ export function stateHash(run: Run): number {
     mixInt(slot.cooldown);
     mixInt(slot.active ? 1 : 0);
     mixFloat(slot.front);
+    mixInt(slot.ticksLeft);
     mixFloat(slot.originX);
     mixFloat(slot.originY);
     mixFloat(slot.dirX);

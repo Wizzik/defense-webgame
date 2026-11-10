@@ -73,7 +73,7 @@ export class Cards {
     for (const line of cardLines(run, card)) {
       const row = el("span", "card-line", button);
       el("span", "card-stat", row, t(lang, line.label));
-      el("span", "card-change", row, `${line.from} → ${line.to}`);
+      el("span", "card-change", row, line.from === "" ? line.to : `${line.from} → ${line.to}`);
     }
     button.addEventListener("click", () => this.pick(index));
     return button;

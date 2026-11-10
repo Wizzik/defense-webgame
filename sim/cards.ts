@@ -1,3 +1,5 @@
+import { UPDATERS } from "./abilities/kinds";
+import { ULTIMATE_SLOT } from "./abilities/slots";
 import { refreshHeroStats } from "./level-up";
 import type { Run } from "./run";
 
@@ -13,9 +15,13 @@ export interface CardOffer {
 export function openOffer(run: Run): void {
   const { progression } = run.data.rules;
   const candidates: Card[] = [];
-  const slot = run.abilities[0];
-  if (slot && slot.level < slot.def.levels) {
-    candidates.push({ kind: "ability", slot: 0, fromLevel: slot.level, toLevel: slot.level + 1 });
+  const { hero } = run;
+  const { ultimateFromLevel, ultimateLevelStep } = progression;
+  for (let i = 0; i < run.abilities.length; i++) {
+    const slot = run.abilities[i];
+    if (slot.level >= slot.def.levels || !UPDATERS[slot.def.kind]) continue;
+    if (i === ULTIMATE_SLOT && hero.level < ultimateFromLevel + slot.level * ultimateLevelStep) continue;
+    candidates.push({ kind: "ability", slot: i, fromLevel: slot.level, toLevel: slot.level + 1 });
   }
   const amount = progression.attributeCardAmount;
   candidates.push({ kind: "attribute", attribute: "str", amount });
@@ -41,7 +47,9 @@ export function chooseCard(run: Run, index: number): void {
   if (!offer || !Number.isInteger(index) || index < 0 || index >= offer.cards.length) return;
   const card = offer.cards[index];
   if (card.kind === "ability") {
-    run.abilities[card.slot].level = card.toLevel;
+    const slot = run.abilities[card.slot];
+    slot.level = card.toLevel;
+    if (card.fromLevel === 0) slot.cooldown = 0;
   } else {
     run.hero[card.attribute] += card.amount;
   }

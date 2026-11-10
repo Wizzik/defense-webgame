@@ -1,4 +1,10 @@
-export { abilityCooldownTicks, createAbilitySlots, updateAbilities } from "./abilities/slots";
+export { UPDATERS } from "./abilities/kinds";
+export type { AbilityUpdate } from "./abilities/kinds";
+export {
+  abilityCooldownTicks, CastMode, castMode, createAbilitySlots, debugSetAbilityLevel, startCast, ULTIMATE_SLOT,
+  updateAbilities,
+} from "./abilities/slots";
+export { countEnemiesWithin, densestCluster, nearestEnemy } from "./abilities/targeting";
 export type { AbilitySlot } from "./abilities/slots";
 export { botInput } from "./bot";
 export { chooseCard, openOffer } from "./cards";

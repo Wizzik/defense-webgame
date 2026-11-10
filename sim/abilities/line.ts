@@ -1,9 +1,9 @@
 import { damageEnemy } from "../combat";
 import { TICKS_PER_SECOND, TICK_SECONDS } from "../constants";
-import { EventKind } from "../events";
 import type { Run } from "../run";
-import { abilityCooldownTicks } from "./slots";
+import { CastMode, castMode, startCast } from "./slots";
 import type { AbilitySlot } from "./slots";
+import { nearestEnemy } from "./targeting";
 
 /** Auto-casts a line wave at the nearest enemy and advances the wave in flight. */
 export function updateLine(run: Run, slot: AbilitySlot, index: number): void {
@@ -15,33 +15,19 @@ export function updateLine(run: Run, slot: AbilitySlot, index: number): void {
   const hero = run.hero;
   const e = run.enemies;
 
-  if (slot.cooldown > 0) slot.cooldown--;
-
-  if (!slot.active && slot.cooldown <= 0 && hero.hp > 0) {
-    let best = -1;
-    let bestSq = 0;
-    const maxSq = length * length;
-    let bestDx = 0;
-    let bestDy = 0;
-    for (let i = 0; i < e.capacity; i++) {
-      if (e.alive[i] === 0) continue;
-      const dx = e.x[i] - hero.x;
-      const dy = e.y[i] - hero.y;
-      const sq = dx * dx + dy * dy;
-      if (sq > maxSq || (best >= 0 && sq >= bestSq)) continue;
-      best = i;
-      bestSq = sq;
-      bestDx = dx;
-      bestDy = dy;
-    }
+  if (!slot.active && castMode(run, index) !== CastMode.None) {
+    const best = nearestEnemy(run, hero.x, hero.y, length);
     if (best < 0) return;
+    const dx = e.x[best] - hero.x;
+    const dy = e.y[best] - hero.y;
+    const sq = dx * dx + dy * dy;
 
     let dirX = hero.facingX;
     let dirY = hero.facingY;
-    if (!hero.moving && bestSq > 0) {
-      const len = Math.sqrt(bestSq);
-      dirX = bestDx / len;
-      dirY = bestDy / len;
+    if (!hero.moving && sq > 0) {
+      const len = Math.sqrt(sq);
+      dirX = dx / len;
+      dirY = dy / len;
     }
     slot.originX = hero.x;
     slot.originY = hero.y;
@@ -50,8 +36,7 @@ export function updateLine(run: Run, slot: AbilitySlot, index: number): void {
     slot.front = 0;
     slot.active = true;
     slot.hit.fill(0);
-    run.events.push(EventKind.Cast, index, length, hero.x, hero.y, dirX, dirY);
-    slot.cooldown = abilityCooldownTicks(run, slot);
+    startCast(run, index, length, hero.x, hero.y, dirX, dirY);
   }
 
   if (!slot.active) return;
@@ -71,7 +56,7 @@ export function updateLine(run: Run, slot: AbilitySlot, index: number): void {
     const c = run.data.enemies[e.type[i]].collision;
     if (!(t + c > slot.front && t - c <= next && t >= -c && s <= halfWidth + c)) continue;
     slot.hit[i] = 1;
-    damageEnemy(run, i, damage, 1); // spells ignore armor
+    damageEnemy(run, i, damage, 1, index); // spells ignore armor
     if (e.alive[i] !== 0 && stun > e.stunTicks[i]) e.stunTicks[i] = stun;
   }
   slot.front = next;

@@ -161,10 +161,24 @@ describe("line ability", () => {
     expect(run.enemies.hp[far]).toBe(hp);
   });
 
-  it("rejects an unsupported ability kind", () => {
+  it("hits carry the slot as ref", () => {
+    const run = newRun();
+    add(run, 0, 600);
+    let hits: number[] = [];
+    for (let n = 0; n < 40 && hits.length === 0; n++) {
+      run.step(NO_INPUT);
+      hits = ofKind(run, EventKind.Hit);
+    }
+    expect(hits.length).toBeGreaterThan(0);
+    expect(run.events.u[hits[0]]).toBe(1);
+    expect(run.events.v[hits[0]]).toBe(0);
+  });
+
+  it("an unsupported ability kind throws when stepped", () => {
     const data = gameData();
     const hero = data.heroes.find((h) => h.id === data.rules.start.hero)!;
     hero.signatureAbilities[0] = "enhanced-totem";
-    expect(() => createRun(data, { seed: 1 })).toThrow("sim: ability kind on_hit is not implemented");
+    const run = createRun(data, { seed: 1 });
+    expect(() => run.step(NO_INPUT)).toThrow("sim: ability kind on_hit is not implemented");
   });
 });
