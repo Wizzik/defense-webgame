@@ -13,6 +13,7 @@ export { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
 export { TICKS_PER_SECOND, TICK_SECONDS } from "./constants";
 export { Action, EnemyStore, Role } from "./enemies";
 export { EventKind, EventLog } from "./events";
+export { PROJECTILE_CAPACITY, ProjectileStore, RETARGET_RANGE, updateProjectiles } from "./projectiles";
 export { stateHash } from "./hash";
 export { debugGrantXp, gainXp, xpToNext } from "./level-up";
 export { heroStats, moveHero } from "./hero";

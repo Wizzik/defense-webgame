@@ -5,6 +5,7 @@ import { TICKS_PER_SECOND } from "./constants";
 import { chooseCard, openOffer } from "./cards";
 import type { CardOffer } from "./cards";
 import { regenCastle } from "./castle";
+import { PROJECTILE_CAPACITY, ProjectileStore, updateProjectiles } from "./projectiles";
 import { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
 import { updateEnemies } from "./enemy-ai";
 import { EnemyStore } from "./enemies";
@@ -38,6 +39,7 @@ export class Run {
   readonly heroIndex: number;
   readonly abilities: AbilitySlot[];
   readonly crystals = new CrystalStore(CRYSTAL_CAPACITY);
+  readonly projectiles = new ProjectileStore(PROJECTILE_CAPACITY);
   offer: CardOffer | null = null;
   spawnCredit = 0;
   nextGate = 0;
@@ -111,6 +113,7 @@ export class Run {
    *   updateEnemies(this);        // Task 4
    *   updateHeroCombat(this);     // Task 5
    *   updateAbilities(this);      // Task 6
+   *   updateProjectiles(this);    // phase 2a, Task 4
    *   updateCrystals(this);       // Task 7
    *   regenCastle(this);          // Task 4
    *   this.tick++;
@@ -130,6 +133,7 @@ export class Run {
     updateEnemies(this);
     updateHeroCombat(this);
     updateAbilities(this);
+    updateProjectiles(this);
     updateCrystals(this);
     regenCastle(this);
     this.tick++;
@@ -139,13 +143,18 @@ export class Run {
 }
 
 function savePrevious(run: Run): void {
-  const { hero, enemies, crystals } = run;
+  const { hero, enemies, crystals, projectiles } = run;
   hero.prevX = hero.x;
   hero.prevY = hero.y;
   for (let i = 0; i < crystals.capacity; i++) {
     if (crystals.alive[i] === 0) continue;
     crystals.prevX[i] = crystals.x[i];
     crystals.prevY[i] = crystals.y[i];
+  }
+  for (let i = 0; i < projectiles.capacity; i++) {
+    if (projectiles.alive[i] === 0) continue;
+    projectiles.prevX[i] = projectiles.x[i];
+    projectiles.prevY[i] = projectiles.y[i];
   }
   for (let i = 0; i < enemies.capacity; i++) {
     if (enemies.alive[i] === 0) continue;

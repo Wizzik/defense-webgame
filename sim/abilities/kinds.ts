@@ -1,8 +1,10 @@
 import type { Ability } from "../../data/schema";
 import type { Run } from "../run";
 import { updateArea } from "./area";
+import { updateCone } from "./cone";
 import { updateLine } from "./line";
 import { updateNova } from "./nova";
+import { updateProjectile } from "./projectile";
 import { updateTickingArea } from "./ticking-area";
 import type { AbilitySlot } from "./slots";
 
@@ -16,4 +18,6 @@ export const UPDATERS: Partial<Record<Ability["kind"], AbilityUpdate>> = {
   on_cast: () => {},
   area: updateArea,
   ticking_area: updateTickingArea,
+  projectile: updateProjectile,
+  cone: updateCone,
 };
