@@ -55,6 +55,7 @@ export class Figure {
     this.model.traverse((node) => {
       const mesh = node as Mesh;
       if (!mesh.isMesh) return;
+      mesh.castShadow = true;
       const own = (material: Material): Material => {
         const copy = material.clone() as MeshStandardMaterial;
         if (copy.color) this.materials.push({ material: copy, base: copy.color.clone() });

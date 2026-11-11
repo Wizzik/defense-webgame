@@ -70,6 +70,26 @@ test("menu starts a run on the available backend", async ({ page }, testInfo) =>
   expect(stdDev, `luminance stddev ${stdDev.toFixed(2)}`).toBeGreaterThan(2.5);
 });
 
+test("the shadow map is on unless ?shadows=0 or the GPU is software, and the game draws either way", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  const { shadows, software } = await page.evaluate(() => ({
+    shadows: window.__game!.render.shadows,
+    software: window.__game!.gpu.software,
+  }));
+  expect(shadows).toBe(!software);
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  await page.waitForFunction(() => (window.__game?.frames ?? 0) > 30, undefined, { timeout: 90_000, polling: 250 });
+
+  await page.goto("/?seed=1&lang=en&shadows=0");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  expect(await page.evaluate(() => window.__game!.render.shadows)).toBe(false);
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  await page.waitForFunction(() => (window.__game?.frames ?? 0) > 30, undefined, { timeout: 90_000, polling: 250 });
+});
+
 test("menu warns about software rendering only on a software GPU", async ({ page }) => {
   await page.goto("/?seed=1&lang=en");
   const start = page.locator("#start");

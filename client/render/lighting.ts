@@ -8,7 +8,7 @@ const FOG_FAR = 105;
 
 export interface Lighting {
   readonly object: Group;
-  /** The moon: the only light that will cast shadows. */
+  /** The moon: the only light that casts shadows (see `SunShadow`). */
   readonly sun: DirectionalLight;
   /** Sets the dusk background and fog of `scene`. */
   applyTo(scene: Scene): void;
@@ -18,7 +18,7 @@ export function createLighting(): Lighting {
   const object = new Group();
   const sun = new DirectionalLight(MOON, MOON_INTENSITY);
   sun.position.set(30, 60, 20);
-  object.add(sun, new HemisphereLight(HEMI_SKY, HEMI_GROUND, HEMI_INTENSITY));
+  object.add(sun, sun.target, new HemisphereLight(HEMI_SKY, HEMI_GROUND, HEMI_INTENSITY));
   return {
     object,
     sun,

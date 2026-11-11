@@ -21,6 +21,8 @@ import { tintTable } from "./render/enemy-tints";
 import { EnemyCrowd, IDLE_CLIP, PUNCH_CLIP, VAT_FPS, WALK_CLIP } from "./render/enemy-crowd";
 import { AllyView } from "./render/ally-view";
 import { HeroView } from "./render/hero-view";
+import { BlobShadows } from "./render/blob-shadows";
+import { SunShadow, shadowsEnabled } from "./render/shadows";
 import { createLighting } from "./render/lighting";
 import { createArena } from "./render/scene";
 import { ModelCache, modelUrl } from "./render/models";
@@ -127,6 +129,7 @@ async function start(): Promise<void> {
   const scene = new Scene();
   const lighting = createLighting();
   lighting.applyTo(scene);
+  const sunShadow = new SunShadow(lighting.sun, renderer, shadowsEnabled(params.shadows, gpu.software));
   scene.add(lighting.object, createArena(data.rules));
   const followCamera = new FollowCamera(innerWidth / innerHeight);
   const keyboard = new Keyboard(window);
@@ -145,12 +148,13 @@ async function start(): Promise<void> {
   const abilityFx = new AbilityFx();
   const enemyFx = new EnemyFx(data);
   const allyView = new AllyView(ALLY_CAPACITY);
-  scene.add(crowd.object, crystals.mesh, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
+  const blobShadows = new BlobShadows(data.rules.enemies.maxAlive + ALLY_CAPACITY);
+  scene.add(blobShadows.mesh, crowd.object, crystals.mesh, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
   const sfx = new Sfx();
   sfx.setMuted(readStoredMuted());
   const packArrows = new PackArrows(document.getElementById("ui")!, followCamera.camera);
-  session.views.push(heroView, allyView, crowd, crystals, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(sfx));
+  session.views.push(heroView, allyView, blobShadows, crowd, crystals, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(sfx));
 
   addEventListener("resize", () => {
     renderer.setSize(innerWidth, innerHeight);
@@ -159,6 +163,7 @@ async function start(): Promise<void> {
 
   const snapshot = publishSnapshot(backend, gpu);
   snapshot.render.enemyMeshes = crowd.meshCount;
+  snapshot.render.shadows = sunShadow.enabled;
   if (params.debug) addDebugHooks(snapshot, () => session.run);
   const ui = createUi(data, session, followCamera, sfx, randomSeed, hero, gpu.software, (setLoading) =>
     heroLoader(models, session, heroView, allyView, setLoading),
@@ -177,7 +182,7 @@ async function start(): Promise<void> {
   session.frame(0);
   await renderer.compileAsync(scene, followCamera.camera);
 
-  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows, heroView);
+  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows, heroView, sunShadow);
 }
 
 /** Switches the run to a hero: `useHero(id, seed)` returns when the hero's model is in place (or its loading failed and the error is shown). */
@@ -326,6 +331,7 @@ function runLoop(
   ui: Ui,
   packArrows: PackArrows,
   heroView: HeroView,
+  sunShadow: SunShadow,
 ): void {
   let last = -1;
   renderer.setAnimationLoop((now) => {
@@ -338,6 +344,7 @@ function runLoop(
       ui.update(innerWidth, innerHeight);
       updateSnapshot(snapshot, session.run, ui.menuOpen, packArrows.visible);
       snapshot.render.heroModels = heroView.modelCount;
+      sunShadow.follow(followCamera.targetX, followCamera.targetZ);
       renderer.render(scene, followCamera.camera);
     } catch (error) {
       renderer.setAnimationLoop(null);

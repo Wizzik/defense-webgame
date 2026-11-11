@@ -12,6 +12,7 @@ describe("readGameParams", () => {
       durationSeconds: undefined,
       renderer: "webgpu",
       fps: false,
+      shadows: true,
       lang: undefined,
       hero: undefined,
     });
@@ -33,6 +34,12 @@ describe("readGameParams", () => {
       debug: true, fps: true, renderer: "webgl2", lang: "cs",
     });
     expect(readGameParams("?debug=true&fps=0&lang=de", random)).toMatchObject({ debug: false, fps: false, lang: undefined });
+  });
+
+  it("reads the shadows param", () => {
+    expect(readGameParams("?shadows=0", random).shadows).toBe(false);
+    expect(readGameParams("?shadows=1", random).shadows).toBe(true);
+    expect(readGameParams("", random).shadows).toBe(true);
   });
 
   it("reads the hero param", () => {
