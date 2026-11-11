@@ -5,6 +5,7 @@
 #   data-build never writes it to data/generated.
 # multipliers: a variant of the map unit (runner, elite). They multiply the map's numbers
 #   (hp, damage, moveSpeed, collision) before design/scaling.yaml applies.
+# behavior: how the type walks (design value): siege, flank, skirmish, support or charge.
 # xp: crystal value (design value).
 # heal: design value. The map's Priest uses the default WC3 Heal (25 hp for mana);
 #   8 = 25 x 0.3, the same factor scaling.yaml gives enemy hp.
@@ -13,6 +14,7 @@
   source: hfoo
   mapName: Footman
   name: { en: Shieldbearer, cs: Štítonoš }
+  behavior: siege
   xp: 1
 
 - id: scout
@@ -20,12 +22,14 @@
   mapName: Footman
   name: { en: Scout, cs: Zvěd }
   multipliers: { hp: 0.5, moveSpeed: 1.5, collision: 0.8, damage: 0.6 }
+  behavior: flank
   xp: 1
 
 - id: musketeer
   source: hrif
   mapName: Rifleman
   name: { en: Musketeer, cs: Mušketýr }
+  behavior: skirmish
   xp: 2
 
 - id: chaplain
@@ -34,6 +38,7 @@
   name: { en: Chaplain, cs: Kaplan }
   # a healer first: its 600-range attack at full damage outranged and wore down every hero but one
   multipliers: { damage: 0.5 }
+  behavior: support
   xp: 2
   heal: { amount: 8, range: 450, cooldown: 1 }
 
@@ -41,6 +46,7 @@
   source: hkni
   mapName: Knight
   name: { en: Lancer, cs: Kopiník }
+  behavior: charge
   xp: 4
 
 - id: captain
@@ -48,4 +54,5 @@
   mapName: Knight
   name: { en: Captain, cs: Kapitán }
   multipliers: { hp: 3, damage: 1.5, collision: 1.5, moveSpeed: 0.8 }
+  behavior: siege
   xp: 12

@@ -19,6 +19,8 @@ export const EnemySchema = z.object({
     damageMin: z.number().min(0),
     damageMax: z.number().min(0),
   }).strict(),
+  /** How the type walks: see sim/enemy-steer.ts and sim/enemy-charge.ts. */
+  behavior: z.enum(["siege", "flank", "skirmish", "support", "charge"]),
   xp: z.number().int().positive(),
   /** Heals the most wounded enemy in `range` (itself too) by `amount` every `cooldown` seconds. */
   heal: z.object({

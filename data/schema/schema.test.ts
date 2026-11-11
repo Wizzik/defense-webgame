@@ -38,7 +38,7 @@ function fixture(): any {
       {
         id: "grunt", name: names("Grunt"), level: 1, hp: 400, hpRegen: 0.25, armor: 3, moveSpeed: 270,
         collision: 31, acquireRange: 500,
-        attack: { kind: "melee", range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 }, xp: 1,
+        attack: { kind: "melee", range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 }, behavior: "siege", xp: 1,
       },
     ],
     rules: {

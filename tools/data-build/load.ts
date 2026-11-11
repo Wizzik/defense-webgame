@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
-import type { Ability, Hero, Rules } from "../../data/schema";
+import type { Ability, Enemy, Hero, Rules } from "../../data/schema";
 import { parseScaling, SCALING_YAML, type Scaling } from "./scaling";
 
 /** Design files as they are named in error messages. */
@@ -115,6 +115,8 @@ export interface EnemyEntry {
   mapName?: string;
   name: Hero["name"];
   xp: number;
+  /** How the type walks (design value, copied as it is). */
+  behavior: Enemy["behavior"];
   /** A variant of the map unit: applied to the map's numbers before scaling.yaml. */
   multipliers?: { hp?: number; damage?: number; moveSpeed?: number; collision?: number };
   /** Design value, copied as it is. */

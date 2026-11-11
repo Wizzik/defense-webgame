@@ -19,6 +19,7 @@
       "damageMin": 14,
       "damageMax": 15
     },
+    "behavior": "siege",
     "xp": 1
   },
   {
@@ -41,6 +42,7 @@
       "damageMin": 8,
       "damageMax": 9
     },
+    "behavior": "flank",
     "xp": 1
   },
   {
@@ -63,6 +65,7 @@
       "damageMin": 26,
       "damageMax": 32
     },
+    "behavior": "skirmish",
     "xp": 2
   },
   {
@@ -85,6 +88,7 @@
       "damageMin": 11,
       "damageMax": 11
     },
+    "behavior": "support",
     "xp": 2,
     "heal": {
       "amount": 8,
@@ -112,6 +116,7 @@
       "damageMin": 42,
       "damageMax": 50
     },
+    "behavior": "charge",
     "xp": 4
   },
   {
@@ -134,6 +139,7 @@
       "damageMin": 63,
       "damageMax": 75
     },
+    "behavior": "siege",
     "xp": 12
   }
 ]

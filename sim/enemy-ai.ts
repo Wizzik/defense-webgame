@@ -1,13 +1,15 @@
 import { armorReduction, damageCastle, damageHero, rollDamage } from "./combat";
 import { TICK_SECONDS, TICKS_PER_SECOND } from "./constants";
 import { Action, Role } from "./enemies";
+import { Behavior, steer, steerHold, steerX, steerY } from "./enemy-steer";
 import type { Run } from "./run";
 
 const MAX_NEIGHBOURS = 64;
 const neighbours = new Int32Array(MAX_NEIGHBOURS);
 
 /**
- * Moves, targets and attacks every living enemy in slot order. Separation looks at the
+ * Moves, targets and attacks every living enemy in slot order. The walking direction of a type comes
+ * from `steer` (flankers come from the side, skirmishers back off, supports follow an ally). Separation looks at the
  * neighbours within twice the collision radius; if more than MAX_NEIGHBOURS (64) are
  * in range, the rest are ignored, which only matters in an extreme pile-up.
  */
@@ -54,7 +56,7 @@ export function updateEnemies(run: Run): void {
         if (heroDist < rules.enemies.siegerAggroRange) e.aggro[i] = 1;
         else if (heroDist > rules.enemies.leashRange) e.aggro[i] = 0;
       }
-      const targetsHero = e.role[i] === Role.Hunter || e.aggro[i] === 1;
+      const targetsHero = e.role[i] === Role.Hunter || e.aggro[i] === 1 || run.enemyBehavior[e.type[i]] === Behavior.Flank;
       let targetRadius: number;
       if (targetsHero) {
         tx = hero.x;
@@ -69,7 +71,8 @@ export function updateEnemies(run: Run): void {
       const reach = def.collision + targetRadius + def.attack.range;
       const ux = dist > 1e-6 ? dx / dist : 0;
       const uy = dist > 1e-6 ? dy / dist : 0;
-      if (dist <= reach) {
+      steer(run, i, targetsHero, ux, uy, dist, reach);
+      if (dist <= reach && !steerHold) {
         e.action[i] = Action.Attack;
         if (e.attackCooldown[i] <= 0) {
           const raw = rollDamage(run.rng, def.attack.damageMin, def.attack.damageMax) * e.damageScale[i];
@@ -86,8 +89,8 @@ export function updateEnemies(run: Run): void {
         e.facingY[i] = uy;
       } else {
         e.action[i] = Action.Move;
-        vx = ux * walk;
-        vy = uy * walk;
+        vx = steerX * walk;
+        vy = steerY * walk;
       }
     }
 

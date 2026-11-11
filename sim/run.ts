@@ -9,6 +9,7 @@ import { ALLY_CAPACITY, AllyStore, updateAllies } from "./allies";
 import { PROJECTILE_CAPACITY, ProjectileStore, updateProjectiles } from "./projectiles";
 import { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
 import { updateEnemies } from "./enemy-ai";
+import { BEHAVIOR_IDS } from "./enemy-steer";
 import { healEnemies } from "./enemy-heal";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
@@ -48,6 +49,8 @@ export class Run {
   offer: CardOffer | null = null;
   /** Weighted enemy types per phase, built once here so a step does not allocate. */
   readonly phaseTables: PhaseTable[];
+  /** Enemy type index to its Behavior. */
+  readonly enemyBehavior: Uint8Array;
   /** Type index of the elite. */
   readonly eliteType: number;
   /** The step in which the next pack comes. */
@@ -72,6 +75,7 @@ export class Run {
     this.rng = new Rng(options.seed);
     this.enemies = new EnemyStore(rules.enemies.maxAlive);
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);
+    this.enemyBehavior = Uint8Array.from(data.enemies, (e) => BEHAVIOR_IDS.indexOf(e.behavior));
     this.phaseTables = buildPhaseTables(data);
     this.eliteType = enemyType(data, rules.enemies.elite, "rules.enemies.elite");
     this.nextPackTick = Math.round(rules.run.firstPackSeconds * TICKS_PER_SECOND);

@@ -169,8 +169,22 @@ describe("data-build", () => {
       collision: 31,
       acquireRange: 500,
       attack: { kind: "melee", range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 },
+      behavior: "siege",
       xp: 1,
     });
+  });
+
+  it("copies the behavior of a design entry", () => {
+    const entry = { ...design().enemies[0], behavior: "flank" as const };
+    expect(mapEnemy(mapExport().units[0], entry).behavior).toBe("flank");
+  });
+
+  it("fails when a design entry has no behavior", () => {
+    const entry = { ...design().enemies[0] } as Partial<ReturnType<typeof design>["enemies"][number]>;
+    delete entry.behavior;
+    expect(errorMessage(() => mapEnemy(mapExport().units[0], entry as never))).toBe(
+      "design/enemies.yaml: grunt: missing behavior",
+    );
   });
 
   it("maps a ranged weapon to a ranged attack", () => {
@@ -259,7 +273,7 @@ describe("data-build", () => {
       "id", "name", "role", "primary", "hp", "armor", "moveSpeed", "attributes", "baseAttack", "signatureAbilities", "ultimate",
     ]);
     expect(Object.keys(data.enemies[0])).toEqual([
-      "id", "name", "level", "hp", "hpRegen", "armor", "moveSpeed", "collision", "acquireRange", "attack", "xp",
+      "id", "name", "level", "hp", "hpRegen", "armor", "moveSpeed", "collision", "acquireRange", "attack", "behavior", "xp",
     ]);
   });
 

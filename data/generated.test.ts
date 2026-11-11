@@ -103,6 +103,13 @@ describe("generated game data", () => {
     expect(enemies.filter((e) => e.heal !== undefined).map((e) => e.id)).toEqual(["chaplain"]);
   });
 
+  it("every enemy type has its behavior", () => {
+    const enemies = JSON.parse(read("enemies.json")) as { id: string; behavior: string }[];
+    expect(Object.fromEntries(enemies.map((e) => [e.id, e.behavior]))).toEqual({
+      shieldbearer: "siege", scout: "flank", musketeer: "skirmish", chaplain: "support", lancer: "charge", captain: "siege",
+    });
+  });
+
   it("carries the phase 2a mechanics", () => {
     const abilities = JSON.parse(read("abilities.json")) as { id: string; kind: string; params: Record<string, number[]> }[];
     const heroes = JSON.parse(read("heroes.json")) as { id: string; signatureAbilities: string[] }[];
