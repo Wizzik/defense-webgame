@@ -28,6 +28,8 @@ export interface GameSnapshot {
   packArrows: number;
   /** Enemies in a charge (windup or run). */
   charging: number;
+  /** What the renderer built; set once at start. */
+  render: { enemyMeshes: number; heroModels: number; shadows: boolean };
   /** Only with ?debug=1. */
   debug?: {
     grantXp(amount: number): void;
@@ -51,6 +53,7 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     backend, gpu, frames: 0, screen: "menu", tick: 0, level: 0, kills: 0, heroHp: 0, castleHp: 0, enemies: 0, enemyTypes: 0,
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], ultimateAuto: true, allies: 0,
     projectiles: 0, packArrows: 0, charging: 0,
+    render: { enemyMeshes: 0, heroModels: 1, shadows: false },
   };
   window.__game = snapshot;
   return snapshot;

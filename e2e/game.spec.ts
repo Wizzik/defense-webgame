@@ -47,6 +47,7 @@ test("menu starts a run on the available backend", async ({ page }, testInfo) =>
   const expected = testInfo.project.name === "webgpu-swiftshader" ? "WebGPU" : "WebGL2";
   expect(await page.evaluate(() => window.__game?.backend)).toBe(expected);
   expect(await page.evaluate(() => window.__game?.screen)).toBe("playing");
+  expect(await page.evaluate(() => window.__game?.render.enemyMeshes)).toBe(6);
 
   // enemies spawn a few seconds into the run
   await page.waitForFunction(() => (window.__game?.enemies ?? 0) > 0, undefined, {

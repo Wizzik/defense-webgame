@@ -1,5 +1,4 @@
 /// <reference types="vite/client" />
-import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { Color, Scene, type WebGPURenderer } from "three/webgpu";
 import type { GameData } from "../data/schema";
 import { ALLY_CAPACITY, CRYSTAL_CAPACITY } from "../sim";
@@ -23,6 +22,7 @@ import { EnemyCrowd, IDLE_CLIP, PUNCH_CLIP, VAT_FPS, WALK_CLIP } from "./render/
 import { AllyView } from "./render/ally-view";
 import { HeroView } from "./render/hero-view";
 import { createArena } from "./render/scene";
+import { ModelCache, modelUrl } from "./render/models";
 import { bakeVat } from "./render/vat";
 import { Cards } from "./ui/cards";
 import { CastlePointer } from "./ui/castle-pointer";
@@ -33,7 +33,7 @@ import { Menu } from "./ui/menu";
 import { PackArrows } from "./ui/pack-arrows";
 import "./ui/style.css";
 
-const MODEL_URL = `${import.meta.env.BASE_URL}models/robot-expressive/RobotExpressive.glb`;
+const ROBOT_URL = `${import.meta.env.BASE_URL}models/robot-expressive/RobotExpressive.glb`;
 
 const LANG_KEY = "defense-webgame.lang";
 const MUTE_KEY = "defense-webgame.muted";
@@ -103,17 +103,6 @@ function randomSeed(): number {
   return Math.floor(Math.random() * 0x1_0000_0000);
 }
 
-/** The model loads twice at most: a failed first try may be a network blip (spec 7). */
-async function loadModel(): Promise<GLTF> {
-  const loader = new GLTFLoader();
-  try {
-    return await loader.loadAsync(MODEL_URL);
-  } catch (error) {
-    console.warn("model load failed, retrying once", error);
-    return loader.loadAsync(MODEL_URL);
-  }
-}
-
 function showError(error: unknown): void {
   console.error(error);
   const element = document.getElementById("error")!;
@@ -133,7 +122,11 @@ async function start(): Promise<void> {
   const hero = pickHero(data, params.hero, readStoredHero());
   const { renderer, backend } = await createRenderer(params.renderer, document.body);
   const gpu = describeGpu(renderer.backend, backend);
-  const gltf = await loadModel();
+  const models = new ModelCache();
+  const [gltf, ...enemyModels] = await Promise.all([
+    models.get(ROBOT_URL),
+    ...data.enemies.map((enemy) => models.get(modelUrl("enemies", enemy.id))),
+  ]);
 
   const scene = new Scene();
   scene.background = new Color(0x1d2228);
@@ -144,7 +137,7 @@ async function start(): Promise<void> {
   const heroView = new HeroView(gltf);
   scene.add(heroView.object);
   const crowd = new EnemyCrowd(
-    bakeVat(gltf, [WALK_CLIP, PUNCH_CLIP, IDLE_CLIP], VAT_FPS),
+    enemyModels.map((model) => bakeVat(model, [WALK_CLIP, PUNCH_CLIP, IDLE_CLIP], VAT_FPS)),
     data.rules.enemies.maxAlive,
     tintTable(data.enemies),
   );
@@ -153,7 +146,7 @@ async function start(): Promise<void> {
   const abilityFx = new AbilityFx();
   const enemyFx = new EnemyFx(data);
   const allyView = new AllyView(gltf, ALLY_CAPACITY);
-  scene.add(crowd.mesh, crystals.mesh, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
+  scene.add(crowd.object, crystals.mesh, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
   const sfx = new Sfx();
   sfx.setMuted(readStoredMuted());
@@ -168,6 +161,7 @@ async function start(): Promise<void> {
   });
 
   const snapshot = publishSnapshot(backend, gpu);
+  snapshot.render.enemyMeshes = crowd.meshCount;
   if (params.debug) addDebugHooks(snapshot, () => session.run);
   const ui = createUi(data, session, followCamera, sfx, randomSeed, hero, gpu.software);
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
