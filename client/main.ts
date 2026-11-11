@@ -17,6 +17,8 @@ import { CrystalView } from "./render/crystal-view";
 import { DamageNumbers } from "./render/damage-numbers";
 import { AbilityFx } from "./render/ability-fx";
 import { Effects } from "./render/effects";
+import { EnemyFx } from "./render/enemy-fx";
+import { tintTable } from "./render/enemy-tints";
 import { EnemyCrowd, IDLE_CLIP, PUNCH_CLIP, VAT_FPS, WALK_CLIP } from "./render/enemy-crowd";
 import { AllyView } from "./render/ally-view";
 import { HeroView } from "./render/hero-view";
@@ -32,7 +34,6 @@ import "./ui/style.css";
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/robot-expressive/RobotExpressive.glb`;
 
-const ENEMY_TINT = 0x771111;
 const LANG_KEY = "defense-webgame.lang";
 const MUTE_KEY = "defense-webgame.muted";
 const HERO_KEY = "defense-webgame.hero";
@@ -144,17 +145,18 @@ async function start(): Promise<void> {
   const crowd = new EnemyCrowd(
     bakeVat(gltf, [WALK_CLIP, PUNCH_CLIP, IDLE_CLIP], VAT_FPS),
     data.rules.enemies.maxAlive,
-    ENEMY_TINT,
+    tintTable(data.enemies),
   );
   const crystals = new CrystalView(CRYSTAL_CAPACITY);
   const effects = new Effects(data);
   const abilityFx = new AbilityFx();
+  const enemyFx = new EnemyFx(data);
   const allyView = new AllyView(gltf, ALLY_CAPACITY);
-  scene.add(crowd.mesh, crystals.mesh, effects.object, abilityFx.object, ...allyView.objects);
+  scene.add(crowd.mesh, crystals.mesh, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
   const sfx = new Sfx();
   sfx.setMuted(readStoredMuted());
-  session.views.push(heroView, allyView, crowd, crystals, effects, abilityFx, numbers, new SoundView(sfx));
+  session.views.push(heroView, allyView, crowd, crystals, effects, abilityFx, enemyFx, numbers, new SoundView(sfx));
   // the menu shows a fresh, paused run behind it
   session.start(params.seed, true, hero);
 

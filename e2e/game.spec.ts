@@ -18,6 +18,11 @@ const xpFirst = (
   }
 ).progression.xpFirst;
 
+/** Enemy ids from the generated data, so adding a type extends the test. */
+const enemyIds = (
+  JSON.parse(readFileSync(join(import.meta.dirname, "..", "data", "generated", "enemies.json"), "utf8")) as { id: string }[]
+).map((e) => e.id);
+
 /** Hero ids from the generated data, so adding a hero extends the test. */
 const heroIds = (
   JSON.parse(readFileSync(join(import.meta.dirname, "..", "data", "generated", "heroes.json"), "utf8")) as { id: string }[]
@@ -167,6 +172,31 @@ test("every hero plays without errors", async ({ page }, testInfo) => {
     }
     expect(["won", "lost"], `${hero} ended`).toContain(screen);
   }
+});
+
+test("every enemy type renders without errors", async ({ page }, testInfo) => {
+  await page.goto("/?seed=1&debug=1&speed=2&duration=60&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  // behind the menu the run is paused, so nobody dies before the count is read
+  await page.evaluate(() => window.__game!.debug!.spawnEach());
+  await page.waitForFunction((n) => (window.__game?.enemyTypes ?? 0) >= n, enemyIds.length, {
+    timeout: 3_000,
+    polling: 50,
+  });
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  // the row walks to the hero: shooters fire and die next to it, the chaplain heals
+  await page.waitForTimeout(1_500);
+  while ((await page.evaluate(() => window.__game?.screen)) === "levelUp") {
+    await page.locator("button.card").first().click();
+    await page.waitForTimeout(100);
+  }
+  await testInfo.attach(`enemy-types-${testInfo.project.name}`, {
+    body: await page.screenshot({ type: "png" }),
+    contentType: "image/png",
+  });
+  await page.waitForTimeout(2_000);
+  expect(["playing", "levelUp", "won", "lost"]).toContain(await page.evaluate(() => window.__game?.screen));
 });
 
 test("R casts the ultimate and T switches auto", async ({ page }) => {

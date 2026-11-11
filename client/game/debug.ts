@@ -1,4 +1,4 @@
-import { debugGrantXp, debugSetAbilityLevel, type Run } from "../../sim";
+import { debugGrantXp, debugSetAbilityLevel, debugSpawnEach, type Run } from "../../sim";
 import type { Backend, GpuInfo } from "../render/gpu";
 
 /** Read by the e2e tests; refreshed every frame. */
@@ -13,6 +13,8 @@ export interface GameSnapshot {
   heroHp: number;
   castleHp: number;
   enemies: number;
+  /** How many different enemy types are alive. */
+  enemyTypes: number;
   hero: string;
   heroX: number;
   heroY: number;
@@ -23,7 +25,12 @@ export interface GameSnapshot {
   allies: number;
   projectiles: number;
   /** Only with ?debug=1. */
-  debug?: { grantXp(amount: number): void; setAbilityLevel(slot: number, level: number): void };
+  debug?: {
+    grantXp(amount: number): void;
+    setAbilityLevel(slot: number, level: number): void;
+    /** One hunter of every enemy type, in a row north of the hero. */
+    spawnEach(): void;
+  };
 }
 
 declare global {
@@ -35,7 +42,7 @@ declare global {
 /** Creates the snapshot and publishes it as `window.__game`. */
 export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
   const snapshot: GameSnapshot = {
-    backend, gpu, frames: 0, screen: "menu", tick: 0, level: 0, kills: 0, heroHp: 0, castleHp: 0, enemies: 0,
+    backend, gpu, frames: 0, screen: "menu", tick: 0, level: 0, kills: 0, heroHp: 0, castleHp: 0, enemies: 0, enemyTypes: 0,
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], ultimateAuto: true, allies: 0,
     projectiles: 0,
   };
@@ -54,7 +61,32 @@ export function addDebugHooks(snapshot: GameSnapshot, getRun: () => Run | null):
       const run = getRun();
       if (run) debugSetAbilityLevel(run, slot, level);
     },
+    spawnEach(): void {
+      const run = getRun();
+      if (run) debugSpawnEach(run);
+    },
   };
+}
+
+/** Scratch for `countTypes`; it grows only when the data has more enemy types. */
+let seenTypes = new Uint8Array(0);
+
+/** Different enemy types alive, without allocating. */
+function countTypes(run: Run): number {
+  const types = run.data.enemies.length;
+  if (seenTypes.length < types) seenTypes = new Uint8Array(types);
+  seenTypes.fill(0);
+  const { enemies } = run;
+  let n = 0;
+  for (let i = 0; i < enemies.capacity; i++) {
+    if (enemies.alive[i] === 0) continue;
+    const type = enemies.type[i]!;
+    if (seenTypes[type] === 0) {
+      seenTypes[type] = 1;
+      n++;
+    }
+  }
+  return n;
 }
 
 /** Counts a rendered frame and copies the run state; `menuOpen` shows "menu" in place of the run state. */
@@ -68,6 +100,7 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
   snapshot.heroHp = run.hero.hp;
   snapshot.castleHp = run.castle.hp;
   snapshot.enemies = run.enemies.aliveCount;
+  snapshot.enemyTypes = countTypes(run);
   snapshot.hero = run.hero.def.id;
   snapshot.heroX = run.hero.x;
   snapshot.heroY = run.hero.y;
