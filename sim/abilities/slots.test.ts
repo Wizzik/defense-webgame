@@ -12,7 +12,7 @@ function quietData() {
   const data = gameData();
   data.rules.arena = {
     width: 6000, height: 5000, castle: { x: 0, y: -2400 }, heroStart: { x: 0, y: 0 },
-    gates: [{ x: -1800, y: 2200 }, { x: 1800, y: 2200 }], gateRadius: 150,
+    spawn: { radius: 2000, spread: 150 },
   };
   silenceSpawns(data);
   return data;
@@ -62,7 +62,7 @@ describe("ability slots", () => {
 
   it("unlearned slots never cast", () => {
     const run = createRun(quietData(), { seed: 1, hero: "stonehorn" });
-    run.enemies.spawn(0, Role.Hunter, 0, 0, 300, 100000, 1, 0);
+    run.enemies.spawn(0, Role.Hunter, 0, 300, 100000, 1, 0);
     const seen = new Set<number>();
     for (let n = 0; n < 60; n++) {
       run.step(NO_INPUT);

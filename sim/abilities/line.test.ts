@@ -11,7 +11,7 @@ function newRun(intelligence = 24) {
   const data = gameData();
   data.rules.arena = {
     width: 6000, height: 5000, castle: { x: 0, y: -2400 }, heroStart: { x: 0, y: 0 },
-    gates: [{ x: -1800, y: 2200 }, { x: 1800, y: 2200 }], gateRadius: 150,
+    spawn: { radius: 2000, spread: 150 },
   };
   data.rules.hero = {
     collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
@@ -38,7 +38,7 @@ function newRun(intelligence = 24) {
 type TestRun = ReturnType<typeof newRun>;
 
 function add(run: TestRun, dx: number, dy: number, hp = 100000): number {
-  const i = run.enemies.spawn(0, Role.Hunter, 0, run.hero.x + dx, run.hero.y + dy, hp, 1, 0);
+  const i = run.enemies.spawn(0, Role.Hunter, run.hero.x + dx, run.hero.y + dy, hp, 1, 0);
   run.enemies.stunTicks[i] = 100000;
   return i;
 }
@@ -115,7 +115,7 @@ describe("line ability", () => {
 
   it("stuns for the configured time", () => {
     const run = newRun();
-    const e = run.enemies.spawn(0, Role.Hunter, 0, 0, 300, 5000, 1, 0);
+    const e = run.enemies.spawn(0, Role.Hunter, 0, 300, 5000, 1, 0);
     run.step(NO_INPUT);
     // the wave needs a few steps to reach 300; run until the hit
     for (let n = 0; n < 30 && run.enemies.hp[e] === 5000; n++) run.step(NO_INPUT);

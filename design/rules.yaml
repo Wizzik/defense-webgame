@@ -10,26 +10,26 @@ run:
   phaseSeconds: 50
   firstPackSeconds: 2
   timeScaling: { seconds: 1200, cap: 2 }   # enemy HP and damage x min(cap, 1 + t / seconds), spec 3.2
-arena:
+arena:   # the castle stands in the middle; packs come from random directions on the spawn ring
   width: 6000
-  height: 4400
-  castle: { x: 0, y: -1700 }
-  heroStart: { x: 0, y: -1200 }
-  gates: [{ x: -1600, y: 1500 }, { x: 1600, y: 1500 }]
-  gateRadius: 150
+  height: 6000
+  castle: { x: 0, y: 0 }
+  heroStart: { x: 0, y: 500 }
+  spawn: { radius: 2400, spread: 150 }
 castle: { hp: 12000, radius: 180, regenPercentPerMinute: 2 }
 hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
         dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 } }
 autocast: { novaMinEnemies: 1, healBelow: 0.6, shieldBelow: 0.35 }
 enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 }, elite: captain }
-# A phase sends packs: `mix` weights the enemy types, `pack` is the size and the interval, `hunterShare`
-# the chance that a pack hunts the hero, `elites` the elites (enemies.elite) that come with its first pack.
+# A phase sends `packs` packs every interval, each from its own side: `mix` weights the enemy types, `pack` is
+# the size and the interval, `hunterShare` the chance that a pack hunts the hero, `elites` the elites
+# (enemies.elite) that come with the first pack of the phase.
 phases:
-  - { mix: { shieldbearer: 8, scout: 3 }, pack: { min: 6, max: 10, everySeconds: 6 }, hunterShare: 0.24, elites: 0 }
-  - { mix: { shieldbearer: 6, scout: 3, musketeer: 2 }, pack: { min: 8, max: 12, everySeconds: 6 }, hunterShare: 0.28, elites: 0 }
-  - { mix: { shieldbearer: 5, scout: 3, musketeer: 2, chaplain: 1, lancer: 1 }, pack: { min: 10, max: 14, everySeconds: 6 }, hunterShare: 0.28, elites: 1 }
-  - { mix: { shieldbearer: 4, scout: 3, musketeer: 3, chaplain: 2, lancer: 2 }, pack: { min: 12, max: 16, everySeconds: 5 }, hunterShare: 0.32, elites: 1 }
-  - { mix: { shieldbearer: 4, scout: 2, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 14, max: 18, everySeconds: 5 }, hunterShare: 0.32, elites: 2 }
-  - { mix: { shieldbearer: 3, scout: 3, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 16, max: 20, everySeconds: 4 }, hunterShare: 0.36, elites: 2 }
+  - { mix: { shieldbearer: 8, scout: 3 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.25, elites: 0 }
+  - { mix: { shieldbearer: 6, scout: 3, musketeer: 2 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 1, hunterShare: 0.3, elites: 0 }
+  - { mix: { shieldbearer: 5, scout: 3, musketeer: 2, chaplain: 1, lancer: 1 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 2, hunterShare: 0.3, elites: 1 }
+  - { mix: { shieldbearer: 4, scout: 3, musketeer: 3, chaplain: 2, lancer: 2 }, pack: { min: 10, max: 14, everySeconds: 6 }, packs: 2, hunterShare: 0.35, elites: 1 }
+  - { mix: { shieldbearer: 4, scout: 2, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 10, max: 14, everySeconds: 5 }, packs: 2, hunterShare: 0.35, elites: 2 }
+  - { mix: { shieldbearer: 3, scout: 3, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 10, max: 14, everySeconds: 5 }, packs: 3, hunterShare: 0.4, elites: 2 }
 progression: { xpFirst: 7, xpStep: 4.5, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3,
   ultimateFromLevel: 6, ultimateLevelStep: 6 }   # map: ultimates need hero level 10

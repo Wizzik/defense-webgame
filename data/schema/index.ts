@@ -108,9 +108,6 @@ export function validateGameData(data: unknown): GameData {
     Math.abs(p.x) <= arena.width / 2 && Math.abs(p.y) <= arena.height / 2;
   if (!inside(arena.castle)) errors.push("rules.arena.castle: outside the arena");
   if (!inside(arena.heroStart)) errors.push("rules.arena.heroStart: outside the arena");
-  arena.gates.forEach((g, i) => {
-    if (!inside(g)) errors.push(`rules.arena.gates.${i}: outside the arena`);
-  });
 
   if (errors.length > 0) throw new GameDataError(errors);
   return parsed.data;

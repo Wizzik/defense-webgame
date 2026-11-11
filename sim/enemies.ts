@@ -8,7 +8,6 @@ export class EnemyStore {
   readonly alive: Uint8Array;
   readonly type: Uint16Array;
   readonly role: Uint8Array;
-  readonly gate: Uint8Array;
   readonly aggro: Uint8Array;
   readonly action: Uint8Array;
   readonly x: Float64Array;
@@ -40,7 +39,6 @@ export class EnemyStore {
     this.alive = new Uint8Array(capacity);
     this.type = new Uint16Array(capacity);
     this.role = new Uint8Array(capacity);
-    this.gate = new Uint8Array(capacity);
     this.aggro = new Uint8Array(capacity);
     this.action = new Uint8Array(capacity);
     this.x = new Float64Array(capacity);
@@ -67,7 +65,7 @@ export class EnemyStore {
 
   /** Takes the lowest free slot; returns -1 when the store is full. */
   spawn(
-    type: number, role: number, gate: number, x: number, y: number,
+    type: number, role: number, x: number, y: number,
     hp: number, damageScale: number, tick: number,
   ): number {
     let slot = -1;
@@ -82,7 +80,6 @@ export class EnemyStore {
     this.aliveCount++;
     this.type[slot] = type;
     this.role[slot] = role;
-    this.gate[slot] = gate;
     this.aggro[slot] = 0;
     this.action[slot] = Action.Move;
     this.x[slot] = x;

@@ -54,7 +54,6 @@ export class Run {
   nextPackTick: number;
   /** The last phase whose elites were sent (-1: none yet). */
   elitePhase = -1;
-  nextGate = 0;
   readonly stats: RunStats = { kills: 0, spawned: 0, damageDealt: 0 };
   readonly durationTicks: number;
   /** The ultimate casts by itself; the player can switch this off (Task 7). */

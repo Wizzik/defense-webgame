@@ -12,6 +12,8 @@ export const EventKind = {
   Dash: 11,
   /** An enemy healed an enemy: a = healed slot, value = hp healed, x/y = the healed one, u = the healer's slot. */
   EnemyHeal: 12,
+  /** A pack arrived: a = its role, value = members spawned, x/y = the centre of the pack. */
+  PackSpawn: 13,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

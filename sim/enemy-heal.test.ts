@@ -12,7 +12,7 @@ function newRun() {
   const data = gameData();
   data.rules.arena = {
     width: 6000, height: 5000, castle: { x: 0, y: -2400 }, heroStart: { x: 0, y: 2400 },
-    gates: [{ x: -1800, y: 2200 }, { x: 1800, y: 2200 }], gateRadius: 150,
+    spawn: { radius: 2000, spread: 150 },
   };
   silenceSpawns(data);
   // nobody walks, so distances stay as the test sets them
@@ -28,7 +28,7 @@ const MAX_HP = 100;
 
 /** A sieger far from the hero and the castle, with `lost` hp missing. */
 function add(run: TestRun, type: number, x: number, y: number, lost = 0, damageScale = 1): number {
-  const i = run.enemies.spawn(type, Role.Sieger, 0, x, y, MAX_HP, damageScale, 0);
+  const i = run.enemies.spawn(type, Role.Sieger, x, y, MAX_HP, damageScale, 0);
   run.enemies.hp[i] = MAX_HP - lost;
   return i;
 }

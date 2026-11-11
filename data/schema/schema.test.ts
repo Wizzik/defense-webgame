@@ -46,7 +46,7 @@ function fixture(): any {
       run: { durationSeconds: 180, phaseSeconds: 50, firstPackSeconds: 2, timeScaling: { seconds: 1200, cap: 2 } },
       arena: {
         width: 6000, height: 5000, castle: { x: 0, y: -2000 }, heroStart: { x: 0, y: -1500 },
-        gates: [{ x: -1800, y: 2200 }, { x: 1800, y: 2200 }], gateRadius: 150,
+        spawn: { radius: 2000, spread: 150 },
       },
       castle: { hp: 3000, radius: 180, regenPercentPerMinute: 2 },
       hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
@@ -54,10 +54,10 @@ function fixture(): any {
       autocast: { novaMinEnemies: 1, healBelow: 0.6, shieldBelow: 0.35 },
       enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 }, elite: "grunt" },
       phases: [
-        { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, hunterShare: 0.2, elites: 0 },
-        { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, hunterShare: 0.25, elites: 0 },
-        { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, hunterShare: 0.3, elites: 0 },
-        { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, hunterShare: 0.35, elites: 0 },
+        { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.2, elites: 0 },
+        { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.25, elites: 0 },
+        { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.3, elites: 0 },
+        { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.35, elites: 0 },
       ],
       progression: {
         xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56,
@@ -298,10 +298,24 @@ describe("game data schemas", () => {
     expect(errorMessage(d)).toContain("phases cover 150 s, the run lasts 180 s");
   });
 
-  it("rejects gate outside the arena", () => {
+  it("rejects packs outside 1..3", () => {
+    for (const packs of [0, 4, 1.5]) {
+      const d = fixture();
+      d.rules.phases[1].packs = packs;
+      expect(errorMessage(d)).toContain("rules.phases.1.packs");
+    }
+  });
+
+  it("rejects a spawn ring that does not fit the arena", () => {
     const d = fixture();
-    d.rules.arena.gates[1].x = 3001;
-    expect(errorMessage(d)).toContain("rules.arena.gates.1");
+    d.rules.arena.spawn = { radius: 2400, spread: 150 };
+    expect(errorMessage(d)).toContain("arena.spawn: the ring does not fit the arena");
+  });
+
+  it("rejects the old arena.gates key", () => {
+    const d = fixture();
+    d.rules.arena.gates = [{ x: 0, y: 0 }];
+    expect(errorMessage(d)).toContain("gates");
   });
 
   it("rejects duplicate enemy id", () => {

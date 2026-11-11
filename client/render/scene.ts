@@ -1,6 +1,5 @@
 import {
   AmbientLight,
-  BoxGeometry,
   ConeGeometry,
   CylinderGeometry,
   DirectionalLight,
@@ -8,44 +7,17 @@ import {
   Mesh,
   MeshStandardNodeMaterial,
   PlaneGeometry,
+  RingGeometry,
 } from "three/webgpu";
 import type { Rules } from "../../data/schema";
 import { SCENE_SCALE } from "./coords";
 
-/** Width of a lane from a gate to the castle, in world units. */
-const LANE_WIDTH = 400;
-const LANE_LIFT = 0.02;
+/** The spawn ring: a thin dark band on the ground at `arena.spawn.radius`. */
+const RING_WIDTH = 40;
+const RING_LIFT = 0.02;
 
 function material(color: number): MeshStandardNodeMaterial {
   return new MeshStandardNodeMaterial({ color, roughness: 0.95 });
-}
-
-/** Adds a lane strip and returns its rotation about y. */
-function addLane(group: Group, fromX: number, fromZ: number, toX: number, toZ: number): number {
-  const dx = toX - fromX;
-  const dz = toZ - fromZ;
-  const lane = new Mesh(new BoxGeometry(Math.hypot(dx, dz), LANE_LIFT, LANE_WIDTH * SCENE_SCALE), material(0x7a6a4f));
-  lane.position.set((fromX + toX) / 2, LANE_LIFT / 2, (fromZ + toZ) / 2);
-  lane.rotation.y = Math.atan2(-dz, dx);
-  group.add(lane);
-  return lane.rotation.y;
-}
-
-/** `angle` is the lane's rotation about y; the gate opens along the lane. */
-function createGate(x: number, z: number, radius: number, angle: number): Group {
-  const gate = new Group();
-  const post = new BoxGeometry(0.5, 3, 0.5);
-  const stone = material(0x8a8d93);
-  const left = new Mesh(post, stone);
-  left.position.set(-radius, 1.5, 0);
-  const right = new Mesh(post, stone);
-  right.position.set(radius, 1.5, 0);
-  const lintel = new Mesh(new BoxGeometry(radius * 2 + 0.9, 0.5, 0.6), stone);
-  lintel.position.set(0, 3.15, 0);
-  gate.add(left, right, lintel);
-  gate.position.set(x, 0, z);
-  gate.rotation.y = angle + Math.PI / 2;
-  return gate;
 }
 
 function createCastle(x: number, z: number, radius: number): Group {
@@ -70,7 +42,7 @@ function createCastle(x: number, z: number, radius: number): Group {
   return castle;
 }
 
-/** Floor, lanes from the gates to the castle, gates, castle and lights. Static: built once per run. */
+/** Floor, castle in the middle, the spawn ring and lights. Static: built once per run. */
 export function createArena(rules: Rules): Group {
   const { arena, castle } = rules;
   const group = new Group();
@@ -84,12 +56,13 @@ export function createArena(rules: Rules): Group {
 
   const castleX = arena.castle.x * SCENE_SCALE;
   const castleZ = -arena.castle.y * SCENE_SCALE;
-  for (const gate of arena.gates) {
-    const gateX = gate.x * SCENE_SCALE;
-    const gateZ = -gate.y * SCENE_SCALE;
-    const angle = addLane(group, gateX, gateZ, castleX, castleZ);
-    group.add(createGate(gateX, gateZ, arena.gateRadius * SCENE_SCALE, angle));
-  }
+  const ring = new Mesh(
+    new RingGeometry((arena.spawn.radius - RING_WIDTH / 2) * SCENE_SCALE, (arena.spawn.radius + RING_WIDTH / 2) * SCENE_SCALE, 96),
+    material(0x2a3140),
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.set(castleX, RING_LIFT, castleZ);
+  group.add(ring);
   group.add(createCastle(castleX, castleZ, castle.radius * SCENE_SCALE));
 
   const sun = new DirectionalLight(0xffffff, 2.5);

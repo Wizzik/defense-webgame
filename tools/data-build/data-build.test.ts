@@ -228,7 +228,7 @@ describe("data-build", () => {
   it("copies rules", () => {
     const data = buildGameData(mapExport(), design(), "test");
     expect(data.rules).toStrictEqual(design().rules);
-    expect(data.rules.arena.gates).toHaveLength(2);
+    expect(data.rules.arena.spawn).toEqual({ radius: 2000, spread: 150 });
   });
 
   it("maps hero hp and armor", () => {

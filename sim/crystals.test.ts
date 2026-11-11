@@ -26,7 +26,7 @@ describe("crystals", () => {
   it("killed enemies drop crystals", () => {
     const run = progressionRun();
     run.data.enemies[0].xp = 3;
-    run.enemies.spawn(0, Role.Hunter, 0, run.hero.x + 100, run.hero.y, 1, 1, 0);
+    run.enemies.spawn(0, Role.Hunter, run.hero.x + 100, run.hero.y, 1, 1, 0);
     run.hero.stats.damageMin = 500;
     run.hero.stats.damageMax = 500;
     run.step(NO_INPUT);
@@ -75,7 +75,7 @@ describe("crystals", () => {
     const run = progressionRun();
     for (let i = 0; i < CRYSTAL_CAPACITY; i++) run.crystals.drop(2500, 2000, 1);
     run.data.enemies[0].xp = 3;
-    run.enemies.spawn(0, Role.Hunter, 0, run.hero.x + 100, run.hero.y, 1, 1, 0);
+    run.enemies.spawn(0, Role.Hunter, run.hero.x + 100, run.hero.y, 1, 1, 0);
     run.hero.stats.damageMin = 500;
     run.hero.stats.damageMax = 500;
     run.step(NO_INPUT);

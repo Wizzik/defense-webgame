@@ -53,7 +53,6 @@ export function stateHash(run: Run): number {
   mixFloat(run.castle.hp);
   mixInt(run.nextPackTick);
   mixInt(run.elitePhase);
-  mixInt(run.nextGate);
   for (const slot of run.abilities) {
     mixInt(slot.level);
     mixInt(slot.cooldown);
