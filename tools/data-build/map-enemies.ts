@@ -1,7 +1,20 @@
 import type { Enemy } from "../../data/schema";
 import { ENEMIES_YAML, type EnemyEntry, type ExportUnit } from "./load";
 
-/** Builds a game enemy from its units.json record and its design entry. */
+/** Export weapon_type to the kind of the enemy's attack: every missile type hits at once from range. */
+const ATTACK_KINDS = new Map<string, Enemy["attack"]["kind"]>([
+  ["normal", "melee"],
+  ["instant", "ranged"],
+  ["missile", "ranged"],
+  ["msplash", "ranged"],
+  ["mline", "ranged"],
+  ["mbounce", "ranged"],
+]);
+
+/**
+ * Builds a game enemy from its units.json record and its design entry. The entry's multipliers make
+ * a variant of the map unit; they apply here, before scaling.yaml (hp and moveSpeed are rounded there).
+ */
 export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
   const num = (field: keyof ExportUnit): number => {
     const value = exp[field];
@@ -10,23 +23,34 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
     }
     return value;
   };
+  const kind = ATTACK_KINDS.get(exp.weapon_type ?? "");
+  if (!kind) {
+    throw new Error(
+      `${ENEMIES_YAML}: ${entry.id}: unsupported weapon_type ${JSON.stringify(exp.weapon_type)} of ${exp.id} ` +
+        `in units.json; known: ${[...ATTACK_KINDS.keys()].join(", ")}`,
+    );
+  }
+  const m = entry.multipliers ?? {};
   // The key order here is the order in data/generated. validateGameData (build.ts) checks the shape.
-  return {
+  const enemy: Enemy = {
     id: entry.id,
     name: entry.name,
     level: num("level"),
-    hp: num("hp"),
+    hp: num("hp") * (m.hp ?? 1),
     hpRegen: num("hp_regen"),
     armor: num("armor"),
-    moveSpeed: num("move_speed"),
-    collision: num("collision"),
+    moveSpeed: num("move_speed") * (m.moveSpeed ?? 1),
+    collision: Math.round(num("collision") * (m.collision ?? 1)),
     acquireRange: num("acquire_range"),
     attack: {
+      kind,
       range: num("range"),
       cooldown: num("cooldown"),
-      damageMin: num("damage_min"),
-      damageMax: num("damage_max"),
+      damageMin: Math.round(num("damage_min") * (m.damage ?? 1)),
+      damageMax: Math.round(num("damage_max") * (m.damage ?? 1)),
     },
     xp: entry.xp,
   };
+  if (entry.heal) enemy.heal = { amount: entry.heal.amount, range: entry.heal.range, cooldown: entry.heal.cooldown };
+  return enemy;
 }

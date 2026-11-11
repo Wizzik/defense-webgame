@@ -38,7 +38,7 @@ function fixture(): any {
       {
         id: "grunt", name: names("Grunt"), level: 1, hp: 400, hpRegen: 0.25, armor: 3, moveSpeed: 270,
         collision: 31, acquireRange: 500,
-        attack: { range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 }, xp: 1,
+        attack: { kind: "melee", range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 }, xp: 1,
       },
     ],
     rules: {
@@ -182,6 +182,18 @@ describe("game data schemas", () => {
     const d = fixture();
     d.abilities[0].cooldown = [5, -1, 3];
     expect(errorMessage(d)).toContain("abilities.0 (pulse).cooldown.1");
+  });
+
+  it("rejects an enemy without an attack kind", () => {
+    const d = fixture();
+    delete d.enemies[0].attack.kind;
+    expect(errorMessage(d)).toContain("enemies.0 (grunt).attack.kind");
+  });
+
+  it("rejects an enemy heal with a zero amount", () => {
+    const d = fixture();
+    d.enemies[0].heal = { amount: 0, range: 450, cooldown: 1 };
+    expect(errorMessage(d)).toContain("enemies.0 (grunt).heal.amount");
   });
 
   it("rejects enemy attack cooldown 0", () => {

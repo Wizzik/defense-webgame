@@ -168,9 +168,45 @@ describe("data-build", () => {
       moveSpeed: 270,
       collision: 31,
       acquireRange: 500,
-      attack: { range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 },
+      attack: { kind: "melee", range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 },
       xp: 1,
     });
+  });
+
+  it("maps a ranged weapon to a ranged attack", () => {
+    for (const weapon_type of ["instant", "missile"]) {
+      const enemy = mapEnemy({ ...mapExport().units[0], weapon_type }, design().enemies[0]);
+      expect(enemy.attack.kind, weapon_type).toBe("ranged");
+    }
+  });
+
+  it("fails on an unknown weapon type", () => {
+    const unit = { ...mapExport().units[0], weapon_type: "artillery" };
+    expect(errorMessage(() => mapEnemy(unit, design().enemies[0]))).toBe(
+      'design/enemies.yaml: grunt: unsupported weapon_type "artillery" of U001 in units.json; '
+        + "known: normal, instant, missile, msplash, mline, mbounce",
+    );
+  });
+
+  it("applies enemy multipliers before scaling", () => {
+    const d = unscaledDesign();
+    d.scaling.enemies = { hp: 0.3, moveSpeed: 1.22 };
+    d.enemies[0].multipliers = { hp: 0.5, moveSpeed: 1.5, collision: 0.8, damage: 0.6 };
+    const enemy = buildGameData(mapExport(), d, "test").enemies[0];
+    expect(enemy.hp).toBe(63);
+    expect(enemy.moveSpeed).toBe(494);
+    expect(enemy.collision).toBe(25);
+    expect([enemy.attack.damageMin, enemy.attack.damageMax]).toEqual([8, 9]);
+  });
+
+  it("copies the heal of a design entry", () => {
+    const d = design();
+    expect("heal" in buildGameData(mapExport(), d, "test").enemies[0]).toBe(false);
+    d.enemies[0].heal = { amount: 8, range: 450, cooldown: 1 };
+    const enemy = buildGameData(mapExport(), d, "test").enemies[0];
+    expect(enemy.heal).toStrictEqual({ amount: 8, range: 450, cooldown: 1 });
+    expect(Object.keys(enemy).slice(-2)).toEqual(["xp", "heal"]);
+    expect(Object.keys(enemy)).not.toContain("multipliers");
   });
 
   it("fails with readable error when enemy source is missing", () => {

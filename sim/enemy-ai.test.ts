@@ -20,7 +20,7 @@ function newRun() {
   const e = data.enemies[0];
   e.moveSpeed = 270;
   e.collision = 31;
-  e.attack = { range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 };
+  e.attack = { kind: "melee", range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 };
   return createRun(data, { seed: 3, durationSeconds: 100000 });
 }
 

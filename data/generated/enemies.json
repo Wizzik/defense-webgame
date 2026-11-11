@@ -13,11 +13,127 @@
     "collision": 31,
     "acquireRange": 500,
     "attack": {
+      "kind": "melee",
       "range": 90,
       "cooldown": 1.35,
       "damageMin": 14,
       "damageMax": 15
     },
     "xp": 1
+  },
+  {
+    "id": "scout",
+    "name": {
+      "en": "Scout",
+      "cs": "Zvěd"
+    },
+    "level": 1,
+    "hp": 63,
+    "hpRegen": 0.25,
+    "armor": 3,
+    "moveSpeed": 494,
+    "collision": 25,
+    "acquireRange": 500,
+    "attack": {
+      "kind": "melee",
+      "range": 90,
+      "cooldown": 1.35,
+      "damageMin": 8,
+      "damageMax": 9
+    },
+    "xp": 1
+  },
+  {
+    "id": "musketeer",
+    "name": {
+      "en": "Musketeer",
+      "cs": "Mušketýr"
+    },
+    "level": 1,
+    "hp": 161,
+    "hpRegen": 0.25,
+    "armor": 4,
+    "moveSpeed": 329,
+    "collision": 32,
+    "acquireRange": 600,
+    "attack": {
+      "kind": "ranged",
+      "range": 400,
+      "cooldown": 1.5,
+      "damageMin": 26,
+      "damageMax": 32
+    },
+    "xp": 2
+  },
+  {
+    "id": "chaplain",
+    "name": {
+      "en": "Chaplain",
+      "cs": "Kaplan"
+    },
+    "level": 2,
+    "hp": 111,
+    "hpRegen": 0.25,
+    "armor": 3,
+    "moveSpeed": 329,
+    "collision": 16,
+    "acquireRange": 600,
+    "attack": {
+      "kind": "ranged",
+      "range": 600,
+      "cooldown": 1.5,
+      "damageMin": 21,
+      "damageMax": 22
+    },
+    "xp": 2,
+    "heal": {
+      "amount": 8,
+      "range": 450,
+      "cooldown": 1
+    }
+  },
+  {
+    "id": "lancer",
+    "name": {
+      "en": "Lancer",
+      "cs": "Kopiník"
+    },
+    "level": 1,
+    "hp": 551,
+    "hpRegen": 0.25,
+    "armor": 8,
+    "moveSpeed": 366,
+    "collision": 32,
+    "acquireRange": 500,
+    "attack": {
+      "kind": "melee",
+      "range": 100,
+      "cooldown": 1.4,
+      "damageMin": 42,
+      "damageMax": 50
+    },
+    "xp": 4
+  },
+  {
+    "id": "captain",
+    "name": {
+      "en": "Captain",
+      "cs": "Kapitán"
+    },
+    "level": 1,
+    "hp": 1652,
+    "hpRegen": 0.25,
+    "armor": 8,
+    "moveSpeed": 293,
+    "collision": 48,
+    "acquireRange": 500,
+    "attack": {
+      "kind": "melee",
+      "range": 100,
+      "cooldown": 1.4,
+      "damageMin": 63,
+      "damageMax": 75
+    },
+    "xp": 12
   }
 ]

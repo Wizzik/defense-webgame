@@ -14,6 +14,7 @@
     "cooldown": 1.35,
     "range": 90,
     "damage_min": 14,
-    "damage_max": 15
+    "damage_max": 15,
+    "weapon_type": "normal"
   }
 ]

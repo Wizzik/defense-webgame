@@ -12,12 +12,20 @@ export const EnemySchema = z.object({
   collision: z.number().positive(),
   acquireRange: z.number().positive(),
   attack: z.object({
+    /** `ranged` hits at once like a hero's ranged attack; the shot is only an effect. */
+    kind: z.enum(["melee", "ranged"]),
     range: z.number().min(0),
     cooldown: z.number().positive(),
     damageMin: z.number().min(0),
     damageMax: z.number().min(0),
   }).strict(),
   xp: z.number().int().positive(),
+  /** Heals the most wounded enemy in `range` (itself too) by `amount` every `cooldown` seconds. */
+  heal: z.object({
+    amount: z.number().positive(),
+    range: z.number().positive(),
+    cooldown: z.number().positive(),
+  }).strict().optional(),
 }).strict();
 
 export type Enemy = z.infer<typeof EnemySchema>;
