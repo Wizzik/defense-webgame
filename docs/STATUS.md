@@ -1,6 +1,12 @@
 # Status
 
-Updated 2026-11-11 (phase 2b-1 executed on branch `phase-2b1`; PR #6 open, CI green, final review clean). Read this first when you resume work.
+Updated 2026-11-11 (phase 2b-1 merged with PR #6; the plan of phase 2b-2 is written and waits for Petr's approval). Read this first when you resume work.
+
+## Next step: phase 2b-2 (ring arena, enemy AI, four heroes)
+
+- Petr's playtest of 2b-1 (2026-11-11): too easy, enemies mostly never reach him, and there are too few heroes. He chose: +4 heroes (8 in all), the castle in the middle with packs from every side, difficulty "hard"; the enemy AI is ours to design.
+- Plan: `docs/superpowers/plans/2026-11-11-phase-2b2-ring-ai-heroes.md` (branch `phase-2b2`, 6 tasks). Execute it in a new chat once Petr approves it. It suggests native execution with one final review.
+- Visual pass A moves behind this phase.
 
 ## Now
 
