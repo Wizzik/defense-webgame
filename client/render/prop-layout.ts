@@ -15,13 +15,16 @@ const CELL = 230;
 const REACH = 900;
 /** Props start this far outside the spawn ring, so none stands where enemies walk (the sim has no obstacles). */
 const GAP = 250;
+/** Nothing stands inside the arena rectangle grown by this much: the hero can reach every corner, and the sim has no obstacles. */
+const ARENA_GAP = 150;
 const FILL = 0.6;
 const JITTER = 80;
 const SCALE_MIN = 0.9;
 const SCALE_MAX = 1.4;
 
 /**
- * Scatters `models` kinds of props on a jittered grid around the arena, outside the spawn ring.
+ * Scatters `models` kinds of props on a jittered grid in a border around the arena: outside the arena rectangle
+ * (grown by ARENA_GAP) and outside the spawn ring.
  * Deterministic for a seed; sim coordinates.
  */
 export function layoutProps(rules: Rules, models: number, seed: number): PropPlacement[] {
@@ -44,7 +47,12 @@ export function layoutProps(rules: Rules, models: number, seed: number): PropPla
       const radius = Math.sqrt(rng.next()) * JITTER;
       const scale = SCALE_MIN + rng.next() * (SCALE_MAX - SCALE_MIN);
       const turn = rng.int(4);
-      if (Math.hypot(cellX - arena.castle.x, cellY - arena.castle.y) <= minDistance || roll >= FILL) continue;
+      if (roll >= FILL) continue;
+      if (Math.hypot(cellX - arena.castle.x, cellY - arena.castle.y) <= minDistance) continue;
+      const insideArena =
+        Math.abs(cellX - arena.castle.x) <= arena.width / 2 + ARENA_GAP &&
+        Math.abs(cellY - arena.castle.y) <= arena.height / 2 + ARENA_GAP;
+      if (insideArena) continue;
       // the shift is a point of a disc, so it never moves a prop more than JITTER toward the castle
       placements.push({
         model,

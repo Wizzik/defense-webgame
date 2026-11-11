@@ -28,9 +28,17 @@ describe("layoutProps", () => {
     }
   });
 
-  it("places between 250 and 900 props, uses every model and gives each a quarter turn and a scale", () => {
+  it("keeps every prop outside the arena rectangle (the forest is only a border, the hero walks on open ground)", () => {
+    const edgeX = rules.arena.width / 2 + 150 - 80;
+    const edgeY = rules.arena.height / 2 + 150 - 80;
+    for (const p of layoutProps(rules, MODELS, 1)) {
+      expect(Math.abs(p.x - centre.x) > edgeX || Math.abs(p.y - centre.y) > edgeY).toBe(true);
+    }
+  });
+
+  it("places between 150 and 900 props, uses every model and gives each a quarter turn and a scale", () => {
     const props = layoutProps(rules, MODELS, 1);
-    expect(props.length).toBeGreaterThanOrEqual(250);
+    expect(props.length).toBeGreaterThanOrEqual(150);
     expect(props.length).toBeLessThanOrEqual(900);
     expect(new Set(props.map((p) => p.model))).toEqual(new Set(Array.from({ length: MODELS }, (_, i) => i)));
     for (const p of props) {

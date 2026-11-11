@@ -3,16 +3,20 @@ import type { GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { SCENE_SCALE } from "./coords";
 import type { PropPlacement } from "./prop-layout";
 
-/** The env models used as props and the scene height of each at placement scale 1 (the kit models are tiny). */
-export const PROP_MODELS: readonly { id: string; height: number }[] = [
-  { id: "tree-a", height: 4.5 },
-  { id: "tree-b", height: 4.5 },
-  { id: "trees-a", height: 4.5 },
-  { id: "trees-b", height: 4.5 },
-  { id: "trees-c", height: 4.5 },
-  { id: "rock-a", height: 1.6 },
-  { id: "rock-b", height: 1.6 },
-  { id: "rock-c", height: 1.6 },
+/**
+ * The env models used as props and the scene size of each at placement scale 1 (the kit models are tiny):
+ * the height for trees, the largest extent for rocks, which are wide and flat. A rock stays below the hero's
+ * height (3.08 scene units) even at the largest placement scale 1.4.
+ */
+export const PROP_MODELS: readonly { id: string; size: number; by: "height" | "extent" }[] = [
+  { id: "tree-a", size: 4.5, by: "height" },
+  { id: "tree-b", size: 4.5, by: "height" },
+  { id: "trees-a", size: 4.5, by: "height" },
+  { id: "trees-b", size: 4.5, by: "height" },
+  { id: "trees-c", size: 4.5, by: "height" },
+  { id: "rock-a", size: 2, by: "extent" },
+  { id: "rock-b", size: 2, by: "extent" },
+  { id: "rock-c", size: 2, by: "extent" },
 ];
 
 const UP = new Vector3(0, 1, 0);
@@ -28,12 +32,15 @@ export function createProps(models: GLTF[], placements: PropPlacement[]): Group 
     for (const p of placements) {
       if (p.model !== index) continue;
       const key = `${Math.floor(p.x / TILE)},${Math.floor(p.y / TILE)}`;
-      tiles.set(key, [...(tiles.get(key) ?? []), p]);
+      const tile = tiles.get(key);
+      if (tile) tile.push(p);
+      else tiles.set(key, [p]);
     }
     if (tiles.size === 0) return;
     gltf.scene.updateMatrixWorld(true);
-    const height = new Box3().setFromObject(gltf.scene).getSize(new Vector3()).y;
-    const base = (PROP_MODELS[index]?.height ?? 1) / height;
+    const box = new Box3().setFromObject(gltf.scene).getSize(new Vector3());
+    const prop = PROP_MODELS[index];
+    const base = (prop?.size ?? 1) / (prop?.by === "extent" ? Math.max(box.x, box.y, box.z) : box.y);
     const meshes: Mesh[] = [];
     gltf.scene.traverse((node) => {
       if ((node as Mesh).isMesh) meshes.push(node as Mesh);
