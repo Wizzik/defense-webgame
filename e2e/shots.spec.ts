@@ -1,0 +1,69 @@
+import { mkdirSync } from "node:fs";
+import { join } from "node:path";
+import type { Page } from "@playwright/test";
+import type { GameSnapshot } from "../client/game/debug";
+import { test } from "./fixtures";
+
+declare global {
+  interface Window {
+    __game?: GameSnapshot;
+  }
+}
+
+/** Screenshots for visual review (`npm run shots`). They assert nothing about the image; the fixtures fail a page error. */
+const shotsDir = join(import.meta.dirname, "..", "test-results", "shots");
+
+test.use({ viewport: { width: 1280, height: 720 } });
+test.beforeAll(() => mkdirSync(shotsDir, { recursive: true }));
+
+async function startRun(page: Page, query: string): Promise<void> {
+  await page.goto(`/?${query}`);
+  await page.locator("#start").click();
+  await page.waitForFunction(() => window.__game?.screen === "playing", undefined, { timeout: 90_000, polling: 250 });
+}
+
+async function shot(page: Page, name: string): Promise<void> {
+  await page.screenshot({ path: join(shotsDir, `${name}.png`) });
+}
+
+test("shot: menu", async ({ page }) => {
+  await page.goto("/?seed=7&lang=cs");
+  await page.locator("#start").waitFor({ timeout: 90_000 });
+  await page.waitForTimeout(1_000);
+  await shot(page, "menu");
+});
+
+test("shot: start", async ({ page }) => {
+  await startRun(page, "seed=7&hero=stonehorn");
+  await page.waitForTimeout(2_000);
+  await shot(page, "start");
+});
+
+test("shot: fight", async ({ page }) => {
+  await startRun(page, "seed=7&hero=stonehorn&debug=1&speed=4");
+  // a level-up card pauses the run, so pick the first card until the tick is reached
+  for (let i = 0; i < 600; i++) {
+    const { tick, screen } = await page.evaluate(() => ({ tick: window.__game!.tick, screen: window.__game!.screen }));
+    if (tick >= 2700) break;
+    if (screen === "levelUp") await page.keyboard.press("1");
+    await page.waitForTimeout(250);
+  }
+  await page.waitForFunction(() => window.__game?.screen === "playing", undefined, { timeout: 10_000 });
+  await page.evaluate(() => window.__game!.debug!.spawnEach());
+  await page.waitForTimeout(1_000);
+  await shot(page, "fight");
+});
+
+test("shot: castle", async ({ page }) => {
+  await startRun(page, "seed=7&hero=gravecaller&debug=1");
+  await page.evaluate(() => window.__game!.debug!.teleport(0, -420));
+  await page.waitForTimeout(1_000);
+  await shot(page, "castle");
+});
+
+test("shot: corner", async ({ page }) => {
+  await startRun(page, "seed=7&hero=nightglaive&debug=1");
+  await page.evaluate(() => window.__game!.debug!.teleport(2900, 2900));
+  await page.waitForTimeout(1_000);
+  await shot(page, "corner");
+});

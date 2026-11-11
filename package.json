@@ -16,7 +16,8 @@
     "data:build": "tsx tools/data-build/build.ts",
     "sim:run": "tsx tools/sim-run/run.ts",
     "test:py": "python3 -I -m unittest discover -s tools/map-extract/tests -v",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "shots": "playwright test e2e/shots.spec.ts --project=webgl2-fallback"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

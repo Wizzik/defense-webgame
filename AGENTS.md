@@ -27,6 +27,7 @@ The repository is public (decided 2026-11-04): never commit anything that must n
 - `npm run check` - typecheck + tests (must pass before every commit)
 - `npm run build` - production build into `dist/`
 - `npm run e2e` - Playwright end-to-end tests
+- `npm run shots` - writes 1280x720 screenshots (`menu`, `start`, `fight`, `castle`, `corner`) to `test-results/shots/` for visual review; `?debug=1` adds `window.__game.debug.teleport(x, y)` to move the hero (clamped to the arena)
 - `npm run map:extract` - local map extraction toolkit (output stays untracked)
 - `npm run data:build` - build game data from validated sources
 - `npm run sim:run -- --hero all --runs 5` - autopilot run summaries per hero for balance tuning; add `--idle` for runs with no input
