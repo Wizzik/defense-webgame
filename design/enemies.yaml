@@ -32,6 +32,8 @@
   source: hmpr
   mapName: Priest
   name: { en: Chaplain, cs: Kaplan }
+  # a healer first: its 600-range attack at full damage outranged and wore down every hero but one
+  multipliers: { damage: 0.5 }
   xp: 2
   heal: { amount: 8, range: 450, cooldown: 1 }
 

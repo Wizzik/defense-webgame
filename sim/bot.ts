@@ -6,6 +6,8 @@ const HOME_TOLERANCE = 100;
 const CHASE_DISTANCE = 450;
 const RETREAT_DISTANCE = 180;
 const AXIS_DEADZONE = 30;
+/** A ranged hero walks up to an enemy nearer than this that its base attack does not reach. */
+export const RANGED_CHASE_DISTANCE = 800;
 /** The bot never stays farther than this from the castle post; beyond it, it walks back whatever the enemies do. */
 export const LEASH_DISTANCE = 800;
 
@@ -60,8 +62,12 @@ export function botInput(run: Run, out: TickInput): TickInput {
         dx = tx;
         dy = ty;
       }
-    } else if (homeDist > HOME_TOLERANCE) {
-      // A ranged hero does not approach: it holds the post.
+    } else if (d > run.data.heroes[run.heroIndex].baseAttack.range && d < RANGED_CHASE_DISTANCE) {
+      // A ranged hero steps up to an enemy that stands just out of its reach (a shooter), within the leash.
+      dx = tx;
+      dy = ty;
+    } else if (d >= RANGED_CHASE_DISTANCE && homeDist > HOME_TOLERANCE) {
+      // Otherwise it holds the post.
       dx = homeX;
       dy = homeY;
     }

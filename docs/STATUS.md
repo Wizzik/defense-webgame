@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-10 late (2b-1 plan written; phase 2a merged; the 20 fps was Chrome's GPU blocklist, not the game). Read this first when you resume work.
+Updated 2026-11-11 (phase 2b-1 executed on branch `phase-2b1`; PR open). Read this first when you resume work.
 
 ## Now
 
@@ -20,14 +20,16 @@ Updated 2026-11-10 late (2b-1 plan written; phase 2a merged; the 20 fps was Chro
 
 ## Next
 
-**2b-1 Swarms and enemy variety: plan written (2026-11-10), waiting for Petr's review and execution choice.**
-- Plan: `docs/superpowers/plans/2026-11-10-phase-2b1-swarms-and-enemies.md` on branch `phase-2b1` (also in the claude.ai project under `claude/plans/`).
-- Petr's choices: the 4 humans of the map (Footman, Rifleman, Knight, Priest with map numbers) plus a runner and an elite as variants (multipliers in `design/enemies.yaml`); ranged enemies hit instantly like heroes; the run lasts 5 minutes in 6 phases; the Priest (Chaplain) heals wounded enemies.
-- 6 tasks: perf and software-GPU warning, enemy data, pack spawner, chaplain heal, client colours and shots, tuning and docs.
-- Recommended execution: native in a new chat, with one final review on the most capable model.
+**2b-1 Swarms and enemy variety: done on branch `phase-2b1` (2026-11-11), PR open, waiting for Petr's playtest and merge.**
+- What it brings: enemies come in packs of 6–20 from one gate, there are 6 types in their own colours (Shieldbearer, Scout, Musketeer, Chaplain, Lancer, Captain), musketeers and chaplains shoot, chaplains heal, the run lasts 5 minutes in 6 phases, the `?fps=1` overlay names the GPU and the menu warns on software rendering.
+- Balance (seeds 1–5, `npm run sim:run -- --hero all --runs 5`, and with `--idle`): Stonehorn 4 of 5 won, Nightglaive 3, Gravecaller 5, Serpent Shaman 5; an idle run loses with every hero except Gravecaller.
+- **Open for Petr:** Gravecaller is never in danger and wins even without input (Grave Grasp heals 50 HP per enemy hit). The fix is a change of that spell (`healPerHit`), which 2b-1 was not allowed to make. The Nightglaive's average level is 20 (target 10–18). Details in `docs/DECISIONS.md`.
+- What Petr should check in the playtest: packs feel like swarms, the types read apart, the hero has to move, and `?fps=1` shows about 60 fps or more in the last phase with his NVIDIA card named in the overlay.
+- Next step after the merge: **Visual pass A** (plan in a new chat).
+- Plan: `docs/superpowers/plans/2026-11-10-phase-2b1-swarms-and-enemies.md`.
 - The map export is in `data-source/v20.75/out/` only while the container lives; otherwise run `npm run map:extract`.
 
-**Petr's playtest of 2a (2026-11-10), the reason for 2b-1 and the visual passes:**
+**Petr's playtest of 2a (2026-11-10), the reason for 2b-1 (done) and the visual passes:**
 - 20.5 fps: **resolved, not a game bug** (see below);
 - the graphics are "terrible" and he wants a big improvement, with Tripo or Blender if useful (his Blender MCP does not install; no Tripo or Blender connector exists in the claude.ai directory);
 - enemies come one by one, not in swarms, and there is only one enemy type: boring.
@@ -36,7 +38,7 @@ Updated 2026-11-10 late (2b-1 plan written; phase 2a merged; the 20 fps was Chro
 - Simulation cost is negligible: under 0.1 ms per step on average for all 4 heroes (about 20 enemies alive in the first 3 minutes).
 - Measured the live build in the Claude desktop app's built-in browser on Petr's desktop (Windows, Chromium 152, WebGPU, NVIDIA Blackwell / RTX 50, 144 Hz, dpr 1, 1129x1275): stonehorn holds **144 fps, 1% low 141** up to 70 s; JS in the rAF callback is under 1 ms per frame (p95 1.6 ms).
 - **Cause found and fixed:** Petr's Chrome 157 (Windows 10 22H2) had every GPU feature on "Software only". Enabling `chrome://flags` "Override software rendering list" gave **140 fps**, so Chrome's GPU blocklist was blocking his NVIDIA driver. Advised: update the NVIDIA driver, then set the flag back to Default and check chrome://gpu.
-- 2b-1 Task 1 adds the GPU name to the `?fps=1` overlay and a menu warning on software rendering.
+- 2b-1 added the GPU name to the `?fps=1` overlay and a menu warning on software rendering.
 
 **Order after 2b-1 (approved by Petr 2026-11-10):**
 1. **Visual pass A, no external tools** (code and CC0 assets, in the cloud container): ground texture and lane edges, fog, shadows, better light, a real castle and gates from a CC0 kit, props (trees, rocks), CC0 rigged characters instead of the robot (KayKit, Quaternius: check that the shell can download them from GitHub; otherwise Petr attaches the zips), per-type enemy models baked into VAT.

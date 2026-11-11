@@ -82,8 +82,8 @@
       "kind": "ranged",
       "range": 600,
       "cooldown": 1.5,
-      "damageMin": 21,
-      "damageMax": 22
+      "damageMin": 11,
+      "damageMax": 11
     },
     "xp": 2,
     "heal": {

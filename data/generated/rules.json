@@ -78,7 +78,7 @@
         "max": 10,
         "everySeconds": 6
       },
-      "hunterShare": 0.3,
+      "hunterShare": 0.24,
       "elites": 0
     },
     {
@@ -92,7 +92,7 @@
         "max": 12,
         "everySeconds": 6
       },
-      "hunterShare": 0.35,
+      "hunterShare": 0.28,
       "elites": 0
     },
     {
@@ -108,7 +108,7 @@
         "max": 14,
         "everySeconds": 6
       },
-      "hunterShare": 0.35,
+      "hunterShare": 0.28,
       "elites": 1
     },
     {
@@ -124,7 +124,7 @@
         "max": 16,
         "everySeconds": 5
       },
-      "hunterShare": 0.4,
+      "hunterShare": 0.32,
       "elites": 1
     },
     {
@@ -140,7 +140,7 @@
         "max": 18,
         "everySeconds": 5
       },
-      "hunterShare": 0.4,
+      "hunterShare": 0.32,
       "elites": 2
     },
     {
@@ -156,13 +156,13 @@
         "max": 20,
         "everySeconds": 4
       },
-      "hunterShare": 0.45,
+      "hunterShare": 0.36,
       "elites": 2
     }
   ],
   "progression": {
-    "xpFirst": 5,
-    "xpStep": 3,
+    "xpFirst": 7,
+    "xpStep": 4.5,
     "magnetRadius": 300,
     "crystalSpeed": 900,
     "pickupRadius": 56,
