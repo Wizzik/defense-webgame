@@ -199,6 +199,29 @@ test("every enemy type renders without errors", async ({ page }, testInfo) => {
   expect(["playing", "levelUp", "won", "lost"]).toContain(await page.evaluate(() => window.__game?.screen));
 });
 
+test("pack arrows point at a new pack", async ({ page }) => {
+  await page.goto("/?seed=1&speed=2&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  expect(await page.evaluate(() => window.__game?.packArrows)).toBe(0);
+  await page.locator("#start").click();
+  await page.waitForFunction(() => (window.__game?.packArrows ?? 0) >= 1, undefined, { timeout: 5_000, polling: 50 });
+  await expect(page.locator(".pack-arrow:not([hidden])").first()).toBeVisible();
+});
+
+test("a lancer charge renders without errors", async ({ page }, testInfo) => {
+  await page.goto("/?seed=1&debug=1&duration=60&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await page.evaluate(() => window.__game!.debug!.spawnEach());
+  await page.locator("#start").click();
+  await page.waitForFunction(() => (window.__game?.charging ?? 0) >= 1, undefined, { timeout: 6_000, polling: 30 });
+  await testInfo.attach(`lancer-charge-${testInfo.project.name}`, {
+    body: await page.screenshot({ type: "png" }),
+    contentType: "image/png",
+  });
+  await page.waitForTimeout(1_500);
+  expect(["playing", "levelUp", "won", "lost"]).toContain(await page.evaluate(() => window.__game?.screen));
+});
+
 test("R casts the ultimate and T switches auto", async ({ page }) => {
   await page.goto("/?seed=1&hero=stonehorn&debug=1&lang=en");
   await page.locator("#start").click();

@@ -30,6 +30,7 @@ import { EndScreen } from "./ui/end-screen";
 import { Hud } from "./ui/hud";
 import { type Lang, pickLang, t } from "./ui/i18n";
 import { Menu } from "./ui/menu";
+import { PackArrows } from "./ui/pack-arrows";
 import "./ui/style.css";
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/robot-expressive/RobotExpressive.glb`;
@@ -156,7 +157,8 @@ async function start(): Promise<void> {
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
   const sfx = new Sfx();
   sfx.setMuted(readStoredMuted());
-  session.views.push(heroView, allyView, crowd, crystals, effects, abilityFx, enemyFx, numbers, new SoundView(sfx));
+  const packArrows = new PackArrows(document.getElementById("ui")!, followCamera.camera);
+  session.views.push(heroView, allyView, crowd, crystals, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(sfx));
   // the menu shows a fresh, paused run behind it
   session.start(params.seed, true, hero);
 
@@ -179,7 +181,7 @@ async function start(): Promise<void> {
   session.frame(0);
   await renderer.compileAsync(scene, followCamera.camera);
 
-  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui);
+  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows);
 }
 
 interface Ui {
@@ -286,6 +288,7 @@ function runLoop(
   snapshot: ReturnType<typeof publishSnapshot>,
   overlay: Overlay | null,
   ui: Ui,
+  packArrows: PackArrows,
 ): void {
   let last = -1;
   renderer.setAnimationLoop((now) => {
@@ -296,7 +299,7 @@ function runLoop(
       }
       last = now;
       ui.update(innerWidth, innerHeight);
-      updateSnapshot(snapshot, session.run, ui.menuOpen);
+      updateSnapshot(snapshot, session.run, ui.menuOpen, packArrows.visible);
       renderer.render(scene, followCamera.camera);
     } catch (error) {
       renderer.setAnimationLoop(null);
