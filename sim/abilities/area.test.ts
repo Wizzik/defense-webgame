@@ -29,6 +29,8 @@ describe("area", () => {
   it("heals per hit up to max hp", () => {
     const data = quietData();
     const p = params(data);
+    // the test's own heal: three hits must overfill the 20 hp that the second run misses
+    p.healPerHit = [10, 20, 30, 40, 60];
     data.rules.hero.baseRegen = 0;
     data.rules.hero.regenPerStr = 0;
     const run = abilityRun("gravecaller", { 0: 1 }, data);

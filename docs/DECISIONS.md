@@ -4,6 +4,7 @@ Decisions that still apply. Check here before you change a rule. Newest first in
 
 ## Product (Petr)
 
+- 2026-11-11 evening (Petr, after the result of phase 2b-2): Serpent Totem damage is halved (design 101 -> 50, in the game 30 -> 15 a hit) and Grave Grasp heals 75 % less (`healPerHit` 2.5, 5, 7.5, 10, 15; the map has 50 to 300). Measured on seeds 1-5: both heroes still win 5 of 5 and never drop below 50 % HP. Serpent Shaman: castle of the won runs 61 % (was 83 %), level 19.0, an idle run loses by 2:01. Gravecaller: castle 93 %, level 16.0, an idle run now loses by 2:38 (was 4:20; seed 1 at 2:08). The other six heroes are unchanged. Open gap 1 below stays open: the two need more than these cuts.
 - 2026-11-11 (phase 2b-2, ring arena, enemy AI, four heroes; Petr chose the first four points after his playtest of 2b-1, the rest is the plan's choice):
   - why (Petr): 2b-1 was too easy, enemies mostly never reached him, and four heroes were too few. He chose +4 heroes (8 in all), the castle in the middle with packs from every side and the difficulty "hard"; the enemy AI was ours to design. Visual pass A moved behind this phase;
   - arena: 6000 × 6000, castle at (0, 0), the hero starts at (0, 500). Gates and lanes are gone; `arena.spawn` is the ring (`radius` 2400, `spread` 150). This replaces the spec's "castle in the south, gates in the north" (spec 3.2 is updated);

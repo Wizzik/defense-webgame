@@ -121,7 +121,7 @@ describe("generated game data", () => {
     expect(of("stunning-tide").chance).toEqual([0.175, 0.175, 0.175, 0.175, 0.175]);
     expect(of("stunning-tide").bonusDamage!.every((v) => v > 0)).toBe(true);
     expect(of("searing-rounds").bonusDamage!.every((v) => v > 0)).toBe(true);
-    expect(of("grave-grasp").healPerHit).toEqual([10, 20, 30, 40, 60]);
+    expect(of("grave-grasp").healPerHit).toEqual([2.5, 5, 7.5, 10, 15]);
   });
 
   it("every enemy type has its behavior", () => {

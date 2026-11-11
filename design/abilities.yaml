@@ -136,8 +136,9 @@
     radius: area
     range: range
     damage: { design: [400, 800, 1600, 3200, 6400] }
-    # The map heals 50 to 300; phase 2b-2 lowers it: with the map's values the hero was never in danger.
-    healPerHit: { design: [10, 20, 30, 40, 60] }
+    # The map heals 50 to 300. Phase 2b-2 lowered it to 10-60 (with the map's values the hero was never in
+    # danger) and Petr cut that by another 75 % on 2026-11-11.
+    healPerHit: { design: [2.5, 5, 7.5, 10, 15] }
   review:
     jassFunctions:
       - Trig_Dead_Catch_Func003Func002A
@@ -209,7 +210,8 @@
     range: range
     # The map's totem attacks for 101, finds a target within 600 and has an attack interval of 1.0 s,
     # which is multiplied by heroes.attackCooldown 0.5. The cap on living totems is our own.
-    damage: { design: [101, 101, 101, 101, 101] }
+    # The map's ward attacks for 101; Petr halved it on 2026-11-11 (the Serpent Shaman won every run).
+    damage: { design: [50, 50, 50, 50, 50] }
     attackRange: { design: [600, 600, 600, 600, 600] }
     attackInterval: { design: [0.5, 0.5, 0.5, 0.5, 0.5] }
     maxAlive: { design: [3, 6, 9, 12, 15] }

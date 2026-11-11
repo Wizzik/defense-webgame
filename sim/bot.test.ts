@@ -227,8 +227,8 @@ describe("abilities of every hero", () => {
 // within 2:30, the bot's hero drops below 50 % hp in at least 4 runs, the castle of the won runs ends below 60 %
 // on average, the average level is 10 to 18 and 700 to 1200 enemies come. Results: docs/DECISIONS.md.
 // Six heroes meet all of them. Gaps, kept at the level that is met: the Gravecaller and the Serpent Shaman win
-// every seed and are never in danger. The numbers the plan let us tune (enemies, phases, castle, the new heroes'
-// spells) do not reach them; they need a change of their own spells, which is Petr's decision.
+// every seed and are never in danger, also after Petr's cuts of 2026-11-11 (Serpent Totem damage halved, Grave
+// Grasp heal -75 %). The numbers the plan let us tune do not reach them; their kits need a redesign.
 const MIN_BOT_WINS = 2;
 const MAX_BOT_WINS = 4;
 const DANGER_HP = 0.5;
@@ -238,7 +238,7 @@ const CASTLE_BELOW = 0.6;
 const MAX_LEVEL = 18;
 interface Gap { maxWins: number; dangerSeeds: number; castleBelow: number; maxLevel: number; idleSeconds: number }
 const GAPS: Record<string, Gap> = {
-  gravecaller: { maxWins: 5, dangerSeeds: 0, castleBelow: 1, maxLevel: MAX_LEVEL, idleSeconds: 200 },
+  gravecaller: { maxWins: 5, dangerSeeds: 0, castleBelow: 1, maxLevel: MAX_LEVEL, idleSeconds: IDLE_LOSES_BY_SECONDS },
   "serpent-shaman": { maxWins: 5, dangerSeeds: 0, castleBelow: 1, maxLevel: 19, idleSeconds: IDLE_LOSES_BY_SECONDS },
 };
 
