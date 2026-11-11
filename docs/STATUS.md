@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-11 (phase 2b-1 executed on branch `phase-2b1`; PR open). Read this first when you resume work.
+Updated 2026-11-11 (phase 2b-1 executed on branch `phase-2b1`; PR #6 open, CI green, final review clean). Read this first when you resume work.
 
 ## Now
 
@@ -20,11 +20,12 @@ Updated 2026-11-11 (phase 2b-1 executed on branch `phase-2b1`; PR open). Read th
 
 ## Next
 
-**2b-1 Swarms and enemy variety: done on branch `phase-2b1` (2026-11-11), PR open, waiting for Petr's playtest and merge.**
+**2b-1 Swarms and enemy variety: done on branch `phase-2b1` (2026-11-11), PR #6 open, waiting for Petr's decision on the merge and his playtest.**
 - What it brings: enemies come in packs of 6–20 from one gate, there are 6 types in their own colours (Shieldbearer, Scout, Musketeer, Chaplain, Lancer, Captain), musketeers and chaplains shoot, chaplains heal, the run lasts 5 minutes in 6 phases, the `?fps=1` overlay names the GPU and the menu warns on software rendering.
 - Balance (seeds 1–5, `npm run sim:run -- --hero all --runs 5`, and with `--idle`): Stonehorn 4 of 5 won, Nightglaive 3, Gravecaller 5, Serpent Shaman 5; an idle run loses with every hero except Gravecaller.
 - **Open for Petr:** Gravecaller is never in danger and wins even without input (Grave Grasp heals 50 HP per enemy hit). The fix is a change of that spell (`healPerHit`), which 2b-1 was not allowed to make. The Nightglaive's average level is 20 (target 10–18). Details in `docs/DECISIONS.md`.
 - What Petr should check in the playtest: packs feel like swarms, the types read apart, the hero has to move, and `?fps=1` shows about 60 fps or more in the last phase with his NVIDIA card named in the overlay.
+- PR: https://github.com/Wizzik/defense-webgame/pull/6 (CI green). The final review of the whole branch found nothing critical or important. Five minor notes are left for a later pass: the chaplain heals every 31 steps, not 30; `sim:run` rounds `hero low` while the test does not; `Effects` keeps uploading behind the menu after a restart; the Lancer and the Chaplain are both pale (size tells them apart); the e2e test for a shooter that dies in the step it fired only proves that nothing crashes.
 - Next step after the merge: **Visual pass A** (plan in a new chat).
 - Plan: `docs/superpowers/plans/2026-11-10-phase-2b1-swarms-and-enemies.md`.
 - The map export is in `data-source/v20.75/out/` only while the container lives; otherwise run `npm run map:extract`.
