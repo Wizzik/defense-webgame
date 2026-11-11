@@ -33,8 +33,6 @@ import { Menu } from "./ui/menu";
 import { PackArrows } from "./ui/pack-arrows";
 import "./ui/style.css";
 
-const ROBOT_URL = `${import.meta.env.BASE_URL}models/robot-expressive/RobotExpressive.glb`;
-
 const LANG_KEY = "defense-webgame.lang";
 const MUTE_KEY = "defense-webgame.muted";
 const HERO_KEY = "defense-webgame.hero";
@@ -123,10 +121,7 @@ async function start(): Promise<void> {
   const { renderer, backend } = await createRenderer(params.renderer, document.body);
   const gpu = describeGpu(renderer.backend, backend);
   const models = new ModelCache();
-  const [gltf, ...enemyModels] = await Promise.all([
-    models.get(ROBOT_URL),
-    ...data.enemies.map((enemy) => models.get(modelUrl("enemies", enemy.id))),
-  ]);
+  const enemyModels = await Promise.all(data.enemies.map((enemy) => models.get(modelUrl("enemies", enemy.id))));
 
   const scene = new Scene();
   scene.background = new Color(0x1d2228);
@@ -134,7 +129,7 @@ async function start(): Promise<void> {
   const followCamera = new FollowCamera(innerWidth / innerHeight);
   const keyboard = new Keyboard(window);
   const session = new Session({ data, params, scene, camera: followCamera, keyboard });
-  const heroView = new HeroView(gltf);
+  const heroView = new HeroView();
   scene.add(heroView.object);
   const crowd = new EnemyCrowd(
     enemyModels.map((model) => bakeVat(model, [WALK_CLIP, PUNCH_CLIP, IDLE_CLIP], VAT_FPS)),
@@ -145,7 +140,7 @@ async function start(): Promise<void> {
   const effects = new Effects(data);
   const abilityFx = new AbilityFx();
   const enemyFx = new EnemyFx(data);
-  const allyView = new AllyView(gltf, ALLY_CAPACITY);
+  const allyView = new AllyView(ALLY_CAPACITY);
   scene.add(crowd.object, crystals.mesh, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
   const sfx = new Sfx();
@@ -163,24 +158,67 @@ async function start(): Promise<void> {
   const snapshot = publishSnapshot(backend, gpu);
   snapshot.render.enemyMeshes = crowd.meshCount;
   if (params.debug) addDebugHooks(snapshot, () => session.run);
-  const ui = createUi(data, session, followCamera, sfx, randomSeed, hero, gpu.software);
+  const ui = createUi(data, session, followCamera, sfx, randomSeed, hero, gpu.software, (setLoading) =>
+    heroLoader(models, session, heroView, allyView, setLoading),
+  );
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
   if (overlay) {
     document.getElementById("overlay")!.hidden = false;
     overlay.start(backend, 0, gpu.name);
   }
 
+  // the first hero's model is in the scene before the shaders compile
+  await ui.useHero(hero);
+
   // without this, WebGL2 skips objects while their programs compile in parallel, so the first
   // frames would be empty
   session.frame(0);
   await renderer.compileAsync(scene, followCamera.camera);
 
-  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows);
+  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows, heroView);
+}
+
+/** Switches the run to a hero: `useHero(id, seed)` returns when the hero's model is in place (or its loading failed and the error is shown). */
+type UseHero = (id: string, seed?: number) => Promise<void>;
+
+/**
+ * Loads a hero's model (cached by URL), gives it to the hero and the shadow copies, and only then starts
+ * the paused menu run with that hero. When picks overlap, the last one wins; a failed load shows the error.
+ */
+function heroLoader(
+  models: ModelCache,
+  session: Session,
+  heroView: HeroView,
+  allyView: AllyView,
+  setLoading: (loading: boolean, failed?: boolean) => void,
+): UseHero {
+  let latest = 0;
+  let errorShown = false;
+  return async (id, seed = session.seed) => {
+    const ticket = ++latest;
+    setLoading(true);
+    try {
+      const gltf = await models.get(modelUrl("heroes", id));
+      if (ticket !== latest) return;
+      heroView.setModel(gltf);
+      allyView.setModel(gltf);
+      session.start(seed, true, id);
+      if (errorShown) document.getElementById("error")!.hidden = true;
+      errorShown = false;
+      setLoading(false);
+    } catch (error) {
+      if (ticket !== latest) return;
+      setLoading(false, true);
+      errorShown = true;
+      showError(new Error(`could not load the model of ${id} (${modelUrl("heroes", id)})`, { cause: error }));
+    }
+  };
 }
 
 interface Ui {
   update(width: number, height: number): void;
   readonly menuOpen: boolean;
+  useHero: UseHero;
 }
 
 /** Builds the menu, HUD, cards, end screen and castle pointer, and wires them to the session. */
@@ -192,6 +230,7 @@ function createUi(
   nextSeed: () => number,
   initialHero: string,
   softwareGpu: boolean,
+  makeUseHero: (setLoading: (loading: boolean, failed?: boolean) => void) => UseHero,
 ): Ui {
   const root = document.getElementById("ui")!;
   let heroId = initialHero;
@@ -215,16 +254,16 @@ function createUi(
       menu.setVisible(false);
     },
     onHero: (id) => {
-      if (id === heroId) return;
       heroId = id;
       storeHero(id);
       menu.setHero(id);
-      // the paused run behind the menu is replaced, so the new hero is on screen at once
-      session.start(session.seed, true, id);
+      // Start waits for the model; the paused run behind the menu is then replaced by one with the new hero
+      void useHero(id);
     },
     onLang: applyLang,
     onSound: () => setMuted(!muted),
   });
+  const useHero = makeUseHero((loading, failed) => menu.setLoading(loading, failed));
   let muted = readStoredMuted();
   const setMuted = (value: boolean): void => {
     muted = value;
@@ -243,13 +282,14 @@ function createUi(
   const pointer = new CastlePointer(root);
   const cards = new Cards(root, (index) => session.setCard(index));
   const end = new EndScreen(root, () => {
-    session.start(nextSeed(), true, heroId);
+    void useHero(heroId, nextSeed());
     showMenu();
   });
   menu.setLang(lang);
   let ended = false;
 
   return {
+    useHero,
     get menuOpen() {
       return menuOpen;
     },
@@ -283,6 +323,7 @@ function runLoop(
   overlay: Overlay | null,
   ui: Ui,
   packArrows: PackArrows,
+  heroView: HeroView,
 ): void {
   let last = -1;
   renderer.setAnimationLoop((now) => {
@@ -294,6 +335,7 @@ function runLoop(
       last = now;
       ui.update(innerWidth, innerHeight);
       updateSnapshot(snapshot, session.run, ui.menuOpen, packArrows.visible);
+      snapshot.render.heroModels = heroView.modelCount;
       renderer.render(scene, followCamera.camera);
     } catch (error) {
       renderer.setAnimationLoop(null);

@@ -13,11 +13,12 @@ import {
 } from "three/webgpu";
 import type { GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { clone } from "three/addons/utils/SkeletonUtils.js";
+import { MODEL_HEIGHT_FACTOR } from "./coords";
 
 const FADE_SECONDS = 0.15;
 /** How far the model's own colour moves toward the tint, and how much of the tint glows. */
-const TINT_MIX = 0.75;
-const TINT_GLOW = 0.25;
+const TINT_MIX = 0.2;
+const TINT_GLOW = 0.08;
 
 export const IDLE_CLIP = "Idle";
 export const RUN_CLIP = "Running";
@@ -29,7 +30,7 @@ interface Tinted {
   base: Color;
 }
 
-/** A skinned copy of the robot with its own materials and animation mixer: idles, runs, punches, dies. */
+/** A skinned copy of a character model with its own materials and animation mixer: idles, runs, punches, dies. */
 export class Figure {
   readonly object = new Group();
   private readonly model: Object3D;
@@ -40,8 +41,8 @@ export class Figure {
   private readonly death: AnimationAction;
   private readonly materials: Tinted[] = [];
   private readonly tint = new Color();
-  /** Footprint of the idle pose and the height of its lowest point, at scale 1. */
-  private readonly modelWidth: number;
+  /** Height of the idle pose and the height of its lowest point, at scale 1. */
+  private readonly modelHeight: number;
   private readonly modelFeet: number;
   private current: AnimationAction;
   private wantedBase: AnimationAction;
@@ -81,7 +82,7 @@ export class Figure {
     this.idle.play();
     this.mixer.update(0);
     const box = this.measure();
-    this.modelWidth = Math.max(box.max.x - box.min.x, box.max.z - box.min.z);
+    this.modelHeight = box.max.y - box.min.y;
     this.modelFeet = box.min.y;
     this.mixer.addEventListener("finished", (event) => {
       if (event.action === this.punching) {
@@ -112,9 +113,9 @@ export class Figure {
     }
   }
 
-  /** Scales the model to a footprint of `diameterScene` and puts its feet on the floor. */
+  /** Scales the model to `MODEL_HEIGHT_FACTOR` times `diameterScene` tall (weapons do not widen it) and puts its feet on the floor. */
   fit(diameterScene: number): void {
-    const scale = diameterScene / this.modelWidth;
+    const scale = (MODEL_HEIGHT_FACTOR * diameterScene) / this.modelHeight;
     this.model.scale.setScalar(scale);
     this.model.position.y = -this.modelFeet * scale;
   }
@@ -155,10 +156,12 @@ export class Figure {
     this.mixer.update(dt);
   }
 
+  /** Frees what the figure owns: its materials, skeletons and mixer. Geometry and textures belong to the model cache. */
   dispose(): void {
     this.mixer.stopAllAction();
     this.mixer.uncacheRoot(this.model);
     this.object.removeFromParent();
+    this.model.traverse((node) => (node as SkinnedMesh).skeleton?.dispose());
     for (const { material } of this.materials) material.dispose();
   }
 

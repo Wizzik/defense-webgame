@@ -134,6 +134,40 @@ test("menu lets you pick a hero", async ({ page }, testInfo) => {
   expect(await page.evaluate(() => window.__game?.screen)).toBe("playing");
 });
 
+test("every hero has its own model", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  for (const hero of heroIds) {
+    await page.locator(`button.hero-button[data-hero="${hero}"]`).click();
+    // Start is disabled while the model loads, and the run behind the menu then has the new hero
+    await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+    await expect(page.locator("#start")).toBeEnabled();
+    await page.waitForFunction((id) => window.__game?.hero === id, hero, { timeout: 10_000 });
+    // exactly one hero model stands in the scene: the old one is gone
+    await page.waitForFunction(() => window.__game?.render.heroModels === 1, undefined, { timeout: 10_000 });
+    expect(await page.evaluate(() => window.__game?.render.heroModels), `${hero} models`).toBe(1);
+  }
+  // a restart puts a fresh model in place of the old one
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => window.__game?.render.heroModels)).toBe(1);
+});
+
+test.describe("a missing hero model", () => {
+  test.use({ allowedConsoleErrors: [/mistwarden\.glb/] });
+
+  test("shows an error", async ({ page }) => {
+    await page.route("**/models/heroes/mistwarden.glb", (route) => route.abort());
+    await page.goto("/?seed=1&hero=mistwarden&lang=en");
+    const error = page.locator("#error");
+    await expect(error).toBeVisible({ timeout: 90_000 });
+    await expect(error).toContainText("Something went wrong");
+    expect((await error.textContent())?.length ?? 0).toBeGreaterThan(0);
+    // no run without a hero
+    await expect(page.locator("#start")).toBeDisabled();
+  });
+});
+
 test("the menu lists eight heroes and starts each of the new ones", async ({ page }) => {
   test.setTimeout(5 * 60_000);
   for (const hero of ["mistwarden", "sparkshot", "redcleaver", "tidecaller"]) {

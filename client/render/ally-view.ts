@@ -2,6 +2,7 @@ import {
   ConeGeometry,
   CylinderGeometry,
   DynamicDrawUsage,
+  Group,
   InstancedMesh,
   MeshStandardNodeMaterial,
 } from "three/webgpu";
@@ -32,7 +33,9 @@ const STRETCH_SECONDS = 0.1;
 export class AllyView implements RunView {
   private readonly shafts: InstancedMesh;
   private readonly heads: InstancedMesh;
-  private readonly figures: Figure[] = [];
+  /** One stable holder per copy; `setModel` puts a fresh figure into each. */
+  private readonly holders: Group[] = [];
+  private figures: Figure[] = [];
   /** Ally slot shown by each figure, or -1; and the last attack tick the figure has punched for. */
   private readonly owner = new Int32Array(IMAGE_POOL).fill(-1);
   private readonly punched = new Int32Array(IMAGE_POOL).fill(-1);
@@ -42,7 +45,7 @@ export class AllyView implements RunView {
   private lastRun: Run | null = null;
   private fitted = false;
 
-  constructor(gltf: GLTF, capacity: number) {
+  constructor(capacity: number) {
     const material = (): MeshStandardNodeMaterial =>
       new MeshStandardNodeMaterial({ color: 0x2a5a52, emissive: TOTEM_COLOR, emissiveIntensity: 0.9, roughness: 0.6 });
     const shaft = new CylinderGeometry(SHAFT_RADIUS, SHAFT_RADIUS, SHAFT_HEIGHT, 12);
@@ -56,23 +59,32 @@ export class AllyView implements RunView {
       mesh.frustumCulled = false;
       mesh.count = 0;
     }
-    for (let i = 0; i < IMAGE_POOL; i++) {
+    for (let i = 0; i < IMAGE_POOL; i++) this.holders.push(new Group());
+  }
+
+  /** Replaces every copy's figure with one of the new hero's model; the old ones free their materials and mixers. */
+  setModel(gltf: GLTF): void {
+    for (const figure of this.figures) figure.dispose();
+    this.figures = this.holders.map((holder) => {
       const figure = new Figure(gltf);
       figure.object.visible = false;
       figure.setOpacity(COPY_OPACITY);
-      this.figures.push(figure);
-    }
+      holder.add(figure.object);
+      return figure;
+    });
+    this.fitted = false;
+    this.lastRun = null;
   }
 
   /** The things to add to the scene. */
-  get objects(): readonly [InstancedMesh, InstancedMesh, ...Figure["object"][]] {
-    return [this.shafts, this.heads, ...this.figures.map((f) => f.object)];
+  get objects(): readonly [InstancedMesh, InstancedMesh, ...Group[]] {
+    return [this.shafts, this.heads, ...this.holders];
   }
 
   update(run: Run, alpha: number, dt: number): void {
     const { allies, hero } = run;
     if (run !== this.lastRun) this.start(run);
-    if (!this.fitted) {
+    if (!this.fitted && this.figures.length > 0) {
       for (const figure of this.figures) figure.fit(2 * hero.stats.collision * BODY_FACTOR * SCENE_SCALE);
       this.fitted = true;
     }
@@ -101,7 +113,8 @@ export class AllyView implements RunView {
     this.heads.instanceMatrix.needsUpdate = true;
 
     for (let i = 0; i < IMAGE_POOL; i++) {
-      const figure = this.figures[i]!;
+      const figure = this.figures[i];
+      if (!figure) break;
       if (this.shown[i] === 0) {
         figure.object.visible = false;
         this.owner[i] = -1;
@@ -119,6 +132,7 @@ export class AllyView implements RunView {
       mesh.dispose();
     }
     for (const figure of this.figures) figure.dispose();
+    for (const holder of this.holders) holder.removeFromParent();
   }
 
   /** A new run: every copy hides and takes the new hero's colour. */
@@ -137,6 +151,7 @@ export class AllyView implements RunView {
 
   private drawImage(run: Run, slot: number, x: number, z: number, nowTick: number): void {
     const { allies } = run;
+    if (this.figures.length === 0) return;
     let i = -1;
     let free = -1;
     for (let f = 0; f < IMAGE_POOL; f++) {

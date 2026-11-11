@@ -3,6 +3,7 @@ export const messagesEn = {
   "menu.subtitle": "Hold the castle for five minutes.",
   "menu.chooseHero": "Choose your hero",
   "menu.start": "Start",
+  "menu.loading": "Loading…",
   "menu.controls": "WASD or arrows to move, Space to dash, R for the ultimate. Spells cast themselves.",
   "menu.primary": "Main attribute: {attr}",
   "attr.str": "Strength",

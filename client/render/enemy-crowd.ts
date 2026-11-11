@@ -10,7 +10,7 @@ import {
 } from "three/webgpu";
 import { Action, type Run, TICKS_PER_SECOND } from "../../sim";
 import type { RunView } from "../game/session";
-import { SCENE_SCALE } from "./coords";
+import { MODEL_HEIGHT_FACTOR, SCENE_SCALE } from "./coords";
 import { CrowdBuckets } from "./crowd-buckets";
 import { type BakedVat, type VatClip, vatPositionNode } from "./vat";
 
@@ -26,8 +26,6 @@ const FLASH_SECONDS = 0.12;
 const BODY_TINT = 0.45;
 /** Share of the type colour that the model also emits, so the type reads in the dark arena. */
 const GLOW = 0.12;
-/** An enemy stands this many collision diameters tall in the scene (arms and weapons do not count). */
-const ENEMY_HEIGHT_FACTOR = 2.2;
 /** Marks "never hit" in `anim.w`, far enough in the past for the flash window. */
 const NEVER = -1000;
 
@@ -126,7 +124,7 @@ export class EnemyCrowd implements RunView {
       const { matrices, anim, walk, punch, idle, height, feet } = types[type];
       const n = buckets.push(type);
       const diameter = 2 * run.data.enemies[type].collision * SCENE_SCALE;
-      const scale = (ENEMY_HEIGHT_FACTOR * diameter) / height;
+      const scale = (MODEL_HEIGHT_FACTOR * diameter) / height;
       // rotation about Y turning the model's +Z axis to the heading (north is -z in the scene)
       const cos = -enemies.facingY[slot] * scale;
       const sin = enemies.facingX[slot] * scale;
