@@ -52,8 +52,8 @@ export function scaleHero(hero: Hero, s: Scaling): Hero {
   };
 }
 
-/** Param keys that `abilities.damage` multiplies: direct, per-tick and heal/shield amounts. `empower` is not one of them. */
-const DAMAGE_PARAMS: readonly string[] = ["damage", "tickDamage", "amount"];
+/** Param keys that `abilities.damage` multiplies: direct, per-tick, on-hit bonus and heal/shield amounts. `empower` is not one of them. */
+const DAMAGE_PARAMS: readonly string[] = ["damage", "tickDamage", "amount", "bonusDamage"];
 
 export function scaleAbility(ability: Ability, s: Scaling): Ability {
   const params: Record<string, number[]> = {};

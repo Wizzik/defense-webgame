@@ -136,7 +136,8 @@
     radius: area
     range: range
     damage: { design: [400, 800, 1600, 3200, 6400] }
-    healPerHit: { design: [50, 100, 150, 200, 300] }
+    # The map heals 50 to 300; phase 2b-2 lowers it: with the map's values the hero was never in danger.
+    healPerHit: { design: [10, 20, 30, 40, 60] }
   review:
     jassFunctions:
       - Trig_Dead_Catch_Func003Func002A
@@ -245,3 +246,254 @@
   params:
     duration: duration
     radius: area
+
+# Mistwarden
+
+- id: soul-burst
+  source: A010
+  name: { en: Soul Burst, cs: Výbuch duší }
+  description: { en: "A burst of souls tears into the thickest crowd.", cs: "Výbuch duší zasáhne největší shluk nepřátel." }
+  kind: area
+  targeting: densest_cluster
+  params:
+    damage: DataA
+    radius: area
+    range: range
+
+- id: wisp-ward
+  source: A00X
+  name: { en: Wisp Ward, cs: Bludný strážce }
+  description: { en: "Raises ghostly wards that shoot nearby enemies.", cs: "Postaví přízračné strážce, kteří střílí po nepřátelích v okolí." }
+  kind: summon
+  targeting: densest_cluster
+  params:
+    count: DataA
+    duration: duration
+    range: range
+    # Design values, the same as the serpent totem: the map's first ward attacks for 101 and finds a target
+    # within 600; the interval is our own. The cap on living wards is our own too.
+    damage: { design: [101, 101, 101, 101, 101] }
+    attackRange: { design: [600, 600, 600, 600, 600] }
+    attackInterval: { design: [0.5, 0.5, 0.5, 0.5, 0.5] }
+    maxAlive: { design: [2, 4, 4, 6, 6] }
+
+- id: mist-surge
+  source: A00Y
+  name: { en: Mist Surge, cs: Příval mlhy }
+  description: { en: "Mist bursts keep striking around you for a few seconds.", cs: "Kolem tebe pár sekund udeřují výbuchy mlhy." }
+  kind: ticking_area
+  targeting: densest_cluster
+  params:
+    tickDamage: DataB
+    radius: area
+    # The map sends 12 waves of shards; the game sends one burst a second for 4 s (design values).
+    ticksPerSecond: { design: [1, 1, 1, 1, 1] }
+    duration: { design: [4, 4, 4, 4, 4] }
+
+- id: wailing-wave
+  source: A00Z
+  name: { en: Wailing Wave, cs: Kvílivá vlna }
+  description: { en: "A wail that wounds and slows everything around you.", cs: "Kvílení, které zraní a zpomalí vše kolem tebe." }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: { design: [1000, 5000] }
+    radius: area
+    slow: DataC
+    slowSeconds: duration
+  review:
+    jassFunctions:
+      - Trig_Ghost_Angry_Actions
+    notes: >-
+      Trig_Ghost_Angry_Actions (war3map.j v20.75, lines 17149-17155) sets the damage to 100 x hero level at
+      ability level 1 and 250 x hero level at level 2 (Trig_Ghost_Angry_Func003C, 17046, tells the levels apart),
+      and deals it in 15 growing rings of 12 circles (radius 250) around the caster. The game has no damage per
+      hero level, so damage is a design value: the script's amount at the hero level that unlocks each ability
+      level in the map (10 and 20): 1000 and 5000. The plan's stand-in values (3000, 8000) were not needed.
+      radius, slow and slowSeconds are object data.
+
+# Sparkshot
+
+- id: rocket-fan
+  source: A06L
+  name: { en: Rocket Fan, cs: Raketový vějíř }
+  description: { en: "Rockets hit every enemy around you.", cs: "Rakety zasáhnou každého nepřítele kolem tebe." }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: { design: [400, 800, 1600, 3200, 6400] }
+    radius: { design: [600, 600, 600, 600, 600] }
+  review:
+    jassFunctions:
+      - Trig_Fan_of_Rocket_Func002A
+      - Trig_Fan_of_Rocket_Actions
+    notes: >-
+      Trig_Fan_of_Rocket_Actions (war3map.j v20.75, line 16026) picks every enemy within 1000 of the caster and
+      Trig_Fan_of_Rocket_Func002A (16015-16020) creates one rocket unit (h01U, timed life 1 s) per enemy that
+      attacks it; the rocket's attack is 401 at every ability level (units.json). Level 1 damage is that 401
+      rounded to 400; the script does not raise it with the level, so the later levels double it as the map's
+      other spells of this tier do (design values). radius is a design value: the script's 1000 covers the whole
+      screen, the game uses 600 (the plan's stand-in).
+
+- id: searing-rounds
+  source: A06M
+  name: { en: Searing Rounds, cs: Žhavé náboje }
+  description: { en: "Every shot burns for extra damage.", cs: "Každý výstřel pálí a dává poškození navíc." }
+  kind: on_hit
+  targeting: on_attack
+  params:
+    bonusDamage: DataA
+
+- id: quickstep
+  source: A06N
+  name: { en: Quickstep, cs: Hbitý krok }
+  description: { en: "You move and shoot faster.", cs: "Pohybuješ se a střílíš rychleji." }
+  kind: aura
+  targeting: self
+  params:
+    moveSpeedBonus: DataA
+    attackSpeedBonus: DataB
+
+- id: beam-swarm
+  source: A06P
+  name: { en: Beam Swarm, cs: Roj paprsků }
+  description: { en: "Beams rain down around you for a while.", cs: "Kolem tebe chvíli prší paprsky." }
+  kind: ticking_area
+  targeting: around_self
+  params:
+    radius: area
+    tickDamage: { design: [150, 400] }
+    ticksPerSecond: { design: [4, 4] }
+    duration: { design: [8, 8] }
+  review:
+    notes: >-
+      The map's spell is a locust swarm (20 and 30 units for 30 s); the game has no swarm units, so the damage,
+      the rate and the duration are design values (plan of phase 2b-2). radius is the object data area (800).
+      AI_Setup and LB_Init only store hints and late bonuses.
+
+# Redcleaver (its third spell is swift-pace, shared with the Nightglaive)
+
+- id: cleaver-toss
+  source: A05K
+  name: { en: Cleaver Toss, cs: Hod sekáčkem }
+  description: { en: "A thrown cleaver cuts through a line of enemies.", cs: "Hozený sekáček prosekne řadu nepřátel." }
+  kind: line
+  targeting: move_direction
+  params:
+    damage: { design: [500, 1500, 3000, 6000, 12000] }
+    length: { design: [1200, 1200, 1200, 1200, 1200] }
+    width: { design: [250, 250, 250, 250, 250] }
+    waveSpeed: { design: [1600, 1600, 1600, 1600, 1600] }
+  review:
+    jassFunctions:
+      - Trig_Xich_Continue_1_Func014Func022Func002A
+      - Trig_Xich_Continue_1_Func014Func022Func001Func002A
+      - Trig_Xich_Continue_1_Func014Func022Func001Func001Func002A
+      - Trig_Xich_Continue_1_Func014Func022Func001Func001Func001Func002A
+      - Trig_Xich_Continue_1_Func014Func022Func001Func001Func001Func001Func002A
+    notes: >-
+      damage per level is the UnitDamageTargetBJ amount in the group callbacks of Trig_Xich_Continue_1_Actions
+      (war3map.j v20.75): 500 (Trig_Xich_Continue_1_Func014Func022Func002A, line 23492), 1500 (..Func001Func002A,
+      23461), 3000 (..Func001Func001Func002A, 23430), 6000 (..Func001Func001Func001Func002A, 23399), 12000
+      (..Func001Func001Func001Func001Func002A, 23368), dealt within 500 (700 on level 5) of the point the cleaver
+      reaches (lines 23566-23582). The map throws the cleaver to a target point and pulls a unit back; the game
+      maps it to a line along the hero's movement. length, width and waveSpeed are design values (the plan's
+      stand-ins): the script moves the cleaver 20 units per tick along the cast angle (Trig_Xich_Move_Actions,
+      23259-23291) up to the ability range of 2000 and hits within 100 to 200 of it on the way.
+
+- id: blood-fan
+  source: A05L
+  name: { en: Blood Fan, cs: Krvavý vějíř }
+  description: { en: "A fan of blades cuts everything around you.", cs: "Vějíř čepelí posekne vše kolem tebe." }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: DataA
+    radius: area
+
+- id: rot-field
+  source: A05M
+  name: { en: Rot Field, cs: Pole hniloby }
+  description: { en: "The ground around you rots and keeps hurting enemies.", cs: "Země kolem tebe hnije a průběžně zraňuje nepřátele." }
+  kind: ticking_area
+  targeting: densest_cluster
+  params:
+    radius: area
+    duration: duration
+    # The map drains a share of the target's life per second; the game has no percent damage, so the
+    # tick is a design value.
+    tickDamage: { design: [150, 500] }
+    ticksPerSecond: { design: [1, 1] }
+
+# Tidecaller
+
+- id: crushing-wave
+  source: A03M
+  name: { en: Crushing Wave, cs: Drtivá vlna }
+  description: { en: "A wide wave rolls through the enemies ahead.", cs: "Široká vlna se prožene nepřáteli před tebou." }
+  kind: line
+  targeting: move_direction
+  params:
+    damage: DataA
+    length: DataC
+    width: area
+    # The map's wave speed is not in the export; a design value.
+    waveSpeed: { design: [1600, 1600, 1600, 1600, 1600] }
+
+- id: stunning-tide
+  source: A00Q
+  name: { en: Stunning Tide, cs: Omračující příliv }
+  description: { en: "Your attacks sometimes hit harder and stun.", cs: "Tvoje útoky občas udeří silněji a omráčí." }
+  kind: on_hit
+  targeting: on_attack
+  params:
+    # DataA is the chance in percent (17.5 on every level); the game reads a share of 1.
+    chance: { design: [0.175, 0.175, 0.175, 0.175, 0.175] }
+    bonusDamage: DataC
+    stunSeconds: duration
+
+- id: riptide
+  source: A0BD
+  name: { en: Riptide, cs: Zpětný proud }
+  description: { en: "A bolt of water strikes the nearest enemy hard.", cs: "Vodní střela tvrdě zasáhne nejbližšího nepřítele." }
+  kind: projectile
+  targeting: nearest_elite_first
+  params:
+    damage: { design: [500, 1000, 2000, 3000, 6000] }
+    range: range
+    speed: { design: [1400, 1400, 1400, 1400, 1400] }
+  review:
+    jassFunctions:
+      - Trig_Wave_Form_Move_Func006A
+    notes: >-
+      damage per level is the UnitDamageTargetBJ amount in Trig_Wave_Form_Move_Func006A (war3map.j v20.75,
+      lines 28104-28116): 500, 1000, 2000, 3000 and 6000; level 5 also adds the hero's agility, which is not
+      mapped. In the map the hero itself slides along a line and hits everything within 450 of it
+      (Trig_Wave_Form_Move_Actions, 28141); the game maps it to one seeking bolt, so speed is a design value
+      and range is the object data range (1500).
+
+- id: drowned-lake
+  source: A04P
+  name: { en: Drowned Lake, cs: Utopené jezero }
+  description: { en: "A lake rises around you and keeps drowning enemies.", cs: "Kolem tebe se zvedne jezero a topí nepřátele." }
+  kind: ticking_area
+  targeting: densest_cluster
+  params:
+    radius: area
+    tickDamage: { design: [500, 900] }
+    ticksPerSecond: { design: [2, 2] }
+    duration: { design: [10, 10] }
+  review:
+    jassFunctions:
+      - Trig_Dead_Lake_Cast_Actions
+      - Trig_Special_Actions
+      - Trig_Special_Func018Func001002
+      - Trig_Special_Func018Func002002
+    notes: >-
+      Trig_Dead_Lake_Cast_Actions (war3map.j v20.75, lines 20695-20701) enables the periodic trigger of
+      Trig_Special_Actions for 10 s; it fires every 0.5 s (line 30397), which gives ticksPerSecond 2 and
+      duration 10. Each firing deals 500 + 2 x agility (Trig_Special_Func018Func002002, 20748, and
+      Trig_Special_Func018Func001002, 20740) to enemies within 500 at ability level 1 and within 1500 at level 2
+      (Trig_Special_Actions, 20775-20781). The agility part is not mapped. Level 1 tickDamage is the script's 500.
+      Level 2 in the script keeps 500 and triples the radius; the game keeps the object data area (500) on both
+      levels and raises the tick to 900 in its place (design value, the plan's stand-in for level 2).

@@ -15,7 +15,7 @@ URL parameters (all optional):
 | `seed` | integer | Seed of the run; the same seed gives the same run. Default: random. |
 | `speed` | 1 to 16 | Simulation speed multiplier. Default 1. |
 | `duration` | 5 to 600 | Run length in seconds. Default: the full run. |
-| `hero` | `stonehorn`, `nightglaive`, `gravecaller`, `serpent-shaman` | Hero of the run (the menu choice starts from it). Default: `stonehorn`. |
+| `hero` | `stonehorn`, `nightglaive`, `gravecaller`, `serpent-shaman`, `mistwarden`, `sparkshot`, `redcleaver`, `tidecaller` | Hero of the run (the menu choice starts from it). Default: `stonehorn`. |
 | `debug` | `1` | Adds `window.__game.debug` (`grantXp(n)`, `setAbilityLevel(slot, level)`, `spawnEach()`: one enemy of every type next to the hero). |
 | `fps` | `1` | Shows the frame-rate overlay (bottom-left): backend, GPU name, enemies alive, average fps and 1% low. |
 | `lang` | `en`, `cs` | Interface language. Default: the browser language. |

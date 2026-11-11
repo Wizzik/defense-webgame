@@ -75,10 +75,14 @@
   font-weight: 600;
 }
 .menu-heroes {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(112px, 1fr));
   gap: 8px;
+}
+@media (max-width: 560px) {
+  .menu-heroes {
+    grid-template-columns: repeat(2, minmax(112px, 1fr));
+  }
 }
 .hero-button {
   min-width: 112px;

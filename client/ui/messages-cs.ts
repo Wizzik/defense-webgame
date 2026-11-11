@@ -57,6 +57,8 @@ export const messagesCs = {
   "stat.amount": "Léčení",
   "stat.healPerHit": "Léčení za zásah",
   "stat.empower": "Posílený úder",
+  "stat.bonusDamage": "Poškození navíc",
+  "stat.chance": "Šance",
   "stat.maxAlive": "Max. totemů",
   "stat.maxTargets": "Max. cílů",
   "stat.maxHp": "Max. životy",
