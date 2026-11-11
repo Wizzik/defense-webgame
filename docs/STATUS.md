@@ -1,18 +1,22 @@
 # Status
 
-Updated 2026-11-11 (phase 2b-2 is done on branch `phase-2b2`, pushed, PR open; waits for CI, Petr's playtest and the merge). Read this first when you resume work.
+Updated 2026-11-11 night (phase 2b-2 is merged; the plan for Visual pass A is written on branch `visual-a` and waits for Petr's review). Read this first when you resume work.
 
-## Phase 2b-2 (ring arena, enemy AI, four heroes): done, with two open points
+## Visual pass A: plan written, not started
 
-- What it brings: the castle stands in the middle and packs come from every side (1 to 3 at once, arrows on the screen edge point at them); every enemy type behaves its own way (scouts flank, musketeers back off while they reload, chaplains follow their pack, lancers charge after a warning line, captains buff the enemies around them); 8 heroes (new: Mistwarden, Sparkshot, Redcleaver, Tidecaller); the game is hard: the autopilot loses about half of its runs.
-- Checks: `npm run check` (451 tests), `npm run build` and `npm run e2e -- --project=webgl2-fallback` (15 tests) pass locally. CI runs on the PR.
-- Balance (seeds 1–5, `npm run sim:run -- --hero all --runs 5`, and with `--idle`): Stonehorn 2 of 5 won, Nightglaive 3, Mistwarden 2, Sparkshot 3, Redcleaver 3, Tidecaller 2; these six meet every target of the plan. Numbers and what changed: `docs/DECISIONS.md`.
-- **Open for Petr 1:** Gravecaller and Serpent Shaman still win 5 of 5 and are never in danger, also after Petr's cuts of 2026-11-11 evening (Serpent Totem damage halved, Grave Grasp heal -75 %; committed on the branch). The cuts brought the Gravecaller's idle run under 2:30 on seed 1 and the Serpent Shaman's castle to 61 %. They need a redesign of their kits.
-- **Open for Petr 2:** the targets are measured on 5 seeds and a run is chaotic. On seeds 6–15 the same build gives 1 to 9 wins of 10 depending on the hero. The next balance pass should measure on more seeds with wider bands.
-- Pushed on 2026-11-11 evening; PR `Phase 2b-2: ring arena, enemy AI and four heroes` is open. Next: CI green, Petr's playtest, merge. No final whole-branch review has run yet.
-- What Petr should check in the playtest: packs come from all sides and reach him and the castle, the types read apart (scouts from the side, musketeers back off, lancers charge and can be dodged), the first tries are often lost, and the menu shows 8 heroes.
-- Plan: `docs/superpowers/plans/2026-11-11-phase-2b2-ring-ai-heroes.md`.
-- After the merge: **Visual pass A** (plan in a new chat).
+- Plan: `docs/superpowers/plans/2026-11-11-visual-pass-a.md` (7 tasks, branch `visual-a`). Execute it in a new chat.
+- What it brings: KayKit CC0 models (8 heroes from 5 adventurer bodies, 6 skeleton enemy types with weapons, a castle, a forest around the arena), procedural ground, dusk light and fog, a shadow map plus blob shadows, a build tool for assets. The simulation and the balance do not change.
+- Checked on 2026-11-11: the cloud shell can download the kits (`raw.githubusercontent.com` and `git clone` of `KayKit-Game-Assets/*` work; github.com pages and zip downloads of other repos do not). Petr does not have to attach anything.
+- Decisions Petr can still change before execution (all in the plan's tables): which body and weapon each hero gets, skeletons as the enemies, the cool dusk palette, no trees or rocks inside the spawn ring (the simulation has no obstacles).
+- Petr has to choose the execution method: subagent-driven or native.
+
+## Phase 2b-2 (ring arena, enemy AI, four heroes): merged (PR #7, 2026-11-11)
+
+- Live at https://wizzik.github.io/defense-webgame/ (CI and Pages green on `eb6e671`). 8 heroes, packs from every side, five enemy behaviours; the autopilot loses about half of its runs. No final whole-branch review ran before the merge.
+- **Open for Petr 1:** Gravecaller and Serpent Shaman still win 5 of 5 and are never in danger, also after Petr's cuts of 2026-11-11 evening (Serpent Totem damage halved, Grave Grasp heal -75 %). They need a redesign of their kits.
+- **Open for Petr 2:** the balance targets are measured on 5 seeds and a run is chaotic. On seeds 6-15 the same build gives 1 to 9 wins of 10 depending on the hero. The next balance pass should measure on more seeds with wider bands.
+- What Petr should check in the playtest: packs come from all sides and reach him and the castle, the types read apart, the first tries are often lost, and the menu shows 8 heroes.
+- Numbers: `docs/DECISIONS.md`. Plan: `docs/superpowers/plans/2026-11-11-phase-2b2-ring-ai-heroes.md`.
 
 ## Now
 
@@ -46,7 +50,7 @@ Updated 2026-11-11 (phase 2b-2 is done on branch `phase-2b2`, pushed, PR open; w
 - 2b-1 added the GPU name to the `?fps=1` overlay and a menu warning on software rendering.
 
 **Order after 2b-2 (approved by Petr 2026-11-10; 2b-2 was put in front on 2026-11-11):**
-1. **Visual pass A, no external tools** (code and CC0 assets, in the cloud container): ground texture and lane edges, fog, shadows, better light, a real castle and gates from a CC0 kit, props (trees, rocks), CC0 rigged characters instead of the robot (KayKit, Quaternius: check that the shell can download them from GitHub; otherwise Petr attaches the zips), per-type enemy models baked into VAT.
+1. **Visual pass A, no external tools**: planned, see the top of this file.
 2. **Visual pass B, own hero models** (needs Petr's computer): Tripo (text or image to 3D with auto-rig; check the licence of his plan before anything is committed, the repo is public) or Blender. Blender MCP install problem: Petr pastes the error into a chat on the computer with Blender. Constraints: hero <= 5000 triangles, enemy <= 2000, clips Idle, Running/Walking, Punch, Death, every asset in `assets/LICENSES.md`.
 3. Then the rest of 2b (20 phases, elites, bosses, difficulties), 2c economy, 2d shared abilities, 2e meta progression.
 4. Propose the second skill (project development rules).
