@@ -12,7 +12,8 @@ const BOLT_HEIGHT = 0.6;
 /** Thin beams from point A to point B that fade out: cone hits, ranged attacks, ally attacks. */
 export class BoltFx {
   readonly mesh: InstancedMesh;
-  private readonly pool = new FxPool(BOLT_POOL, BOLT_MAX_LIFE);
+  private readonly pool: FxPool;
+  private readonly thickness: number;
   private readonly ax = new Float32Array(BOLT_POOL);
   private readonly az = new Float32Array(BOLT_POOL);
   private readonly bx = new Float32Array(BOLT_POOL);
@@ -22,11 +23,14 @@ export class BoltFx {
   /** True when the last write showed something, so one more write must hide it. */
   private shown = false;
 
-  constructor() {
+  /** `maxLife` is the longest life a bolt of this pool may have (seconds). */
+  constructor(maxLife = BOLT_MAX_LIFE, thickness = BOLT_THICKNESS) {
+    this.pool = new FxPool(BOLT_POOL, maxLife);
+    this.thickness = thickness;
     this.mesh = createFxMesh(new BoxGeometry(1, 1, 1), BOLT_POOL);
   }
 
-  /** Scene coordinates; `color` is precomputed (no allocation here); `life` in seconds (at most 0.18). */
+  /** Scene coordinates; `color` is precomputed (no allocation here); `life` in seconds (at most the pool's `maxLife`). */
   add(now: number, ax: number, az: number, bx: number, bz: number, color: Rgb, life: number): void {
     const i = this.pool.add(now);
     this.ax[i] = ax;
@@ -51,7 +55,7 @@ export class BoltFx {
       const life = this.life[i]!;
       if (
         age < 0 || age > life
-        || !writeBeam(m, i, this.ax[i]!, this.az[i]!, this.bx[i]!, this.bz[i]!, BOLT_HEIGHT, BOLT_THICKNESS)
+        || !writeBeam(m, i, this.ax[i]!, this.az[i]!, this.bx[i]!, this.bz[i]!, BOLT_HEIGHT, this.thickness)
       ) {
         hide(m, c, i);
         continue;

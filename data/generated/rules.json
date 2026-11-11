@@ -13,31 +13,24 @@
   },
   "arena": {
     "width": 6000,
-    "height": 4400,
+    "height": 6000,
     "castle": {
       "x": 0,
-      "y": -1700
+      "y": 0
     },
     "heroStart": {
       "x": 0,
-      "y": -1200
+      "y": 500
     },
-    "gates": [
-      {
-        "x": -1600,
-        "y": 1500
-      },
-      {
-        "x": 1600,
-        "y": 1500
-      }
-    ],
-    "gateRadius": 150
+    "spawn": {
+      "radius": 2400,
+      "spread": 150
+    }
   },
   "castle": {
-    "hp": 12000,
+    "hp": 14000,
     "radius": 180,
-    "regenPercentPerMinute": 2
+    "regenPercentPerMinute": 1
   },
   "hero": {
     "collision": 32,
@@ -78,7 +71,8 @@
         "max": 10,
         "everySeconds": 6
       },
-      "hunterShare": 0.24,
+      "packs": 1,
+      "hunterShare": 0.25,
       "elites": 0
     },
     {
@@ -89,10 +83,11 @@
       },
       "pack": {
         "min": 8,
-        "max": 12,
+        "max": 11,
         "everySeconds": 6
       },
-      "hunterShare": 0.28,
+      "packs": 1,
+      "hunterShare": 0.3,
       "elites": 0
     },
     {
@@ -104,11 +99,12 @@
         "lancer": 1
       },
       "pack": {
-        "min": 10,
-        "max": 14,
+        "min": 8,
+        "max": 12,
         "everySeconds": 6
       },
-      "hunterShare": 0.28,
+      "packs": 2,
+      "hunterShare": 0.3,
       "elites": 1
     },
     {
@@ -120,11 +116,12 @@
         "lancer": 2
       },
       "pack": {
-        "min": 12,
-        "max": 16,
-        "everySeconds": 5
+        "min": 10,
+        "max": 14,
+        "everySeconds": 6
       },
-      "hunterShare": 0.32,
+      "packs": 2,
+      "hunterShare": 0.35,
       "elites": 1
     },
     {
@@ -136,11 +133,12 @@
         "lancer": 3
       },
       "pack": {
-        "min": 14,
-        "max": 18,
+        "min": 9,
+        "max": 13,
         "everySeconds": 5
       },
-      "hunterShare": 0.32,
+      "packs": 2,
+      "hunterShare": 0.35,
       "elites": 2
     },
     {
@@ -152,17 +150,18 @@
         "lancer": 3
       },
       "pack": {
-        "min": 16,
-        "max": 20,
-        "everySeconds": 4
+        "min": 11,
+        "max": 15,
+        "everySeconds": 5
       },
-      "hunterShare": 0.36,
+      "packs": 3,
+      "hunterShare": 0.4,
       "elites": 2
     }
   ],
   "progression": {
-    "xpFirst": 7,
-    "xpStep": 4.5,
+    "xpFirst": 10,
+    "xpStep": 8,
     "magnetRadius": 300,
     "crystalSpeed": 900,
     "pickupRadius": 56,

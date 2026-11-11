@@ -30,6 +30,7 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
         `in units.json; known: ${[...ATTACK_KINDS.keys()].join(", ")}`,
     );
   }
+  if (entry.behavior === undefined) throw new Error(`${ENEMIES_YAML}: ${entry.id}: missing behavior`);
   const m = entry.multipliers ?? {};
   // The key order here is the order in data/generated. validateGameData (build.ts) checks the shape.
   const enemy: Enemy = {
@@ -49,8 +50,17 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
       damageMin: Math.round(num("damage_min") * (m.damage ?? 1)),
       damageMax: Math.round(num("damage_max") * (m.damage ?? 1)),
     },
+    behavior: entry.behavior,
     xp: entry.xp,
   };
   if (entry.heal) enemy.heal = { amount: entry.heal.amount, range: entry.heal.range, cooldown: entry.heal.cooldown };
+  if (entry.charge) {
+    const c = entry.charge;
+    enemy.charge = {
+      minRange: c.minRange, maxRange: c.maxRange, windupSeconds: c.windupSeconds, speedMultiplier: c.speedMultiplier,
+      damageMultiplier: c.damageMultiplier, distance: c.distance, cooldownSeconds: c.cooldownSeconds,
+    };
+  }
+  if (entry.aura) enemy.aura = { radius: entry.aura.radius, moveSpeed: entry.aura.moveSpeed, damage: entry.aura.damage };
   return enemy;
 }

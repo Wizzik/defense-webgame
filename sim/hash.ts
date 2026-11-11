@@ -53,7 +53,6 @@ export function stateHash(run: Run): number {
   mixFloat(run.castle.hp);
   mixInt(run.nextPackTick);
   mixInt(run.elitePhase);
-  mixInt(run.nextGate);
   for (const slot of run.abilities) {
     mixInt(slot.level);
     mixInt(slot.cooldown);
@@ -85,6 +84,12 @@ export function stateHash(run: Run): number {
     mixInt(e.knockTicks[i]);
     mixInt(e.slowTicks[i]);
     mixFloat(e.slowFactor[i]);
+    mixInt(e.chargeState[i]);
+    mixInt(e.chargeTicks[i]);
+    mixInt(e.chargeCooldown[i]);
+    mixFloat(e.chargeDirX[i]);
+    mixFloat(e.chargeDirY[i]);
+    mixInt(e.buffed[i]);
   }
   const c = run.crystals;
   for (let i = 0; i < c.capacity; i++) {

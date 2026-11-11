@@ -55,9 +55,11 @@ Hra je **veřejná, zdarma a postavená jako čistý remake**:
 ### 3.2 Mapa, hrad a nepřátelé
 
 **Mapa:**
-- Jedna aréna: hrad na jihu a 2–3 brány na severu, z nich lajny k hradu.
+- Jedna čtvercová aréna s hradem uprostřed. Brány a lajny nejsou (změna z 2026-11-11, fáze 2b-2; původně hrad na jihu a 2–3 brány na severu).
+- Roje přicházejí dokola: každý se objeví na kružnici kolem hradu v náhodném směru. Když jich v jednom intervalu přijde víc, jsou rozložené rovnoměrně (2 naproti sobě, 3 po 120°).
+- Směr nového roje ukáže šipka u okraje obrazovky (červená obléhatelé, fialová lovci).
 - Hrdina se pohybuje volně.
-- Počet bran jako nastavení hustoty (2/4/6/8 jako v mapě) až po MVP.
+- Hustotu určuje tabulka fází (velikost roje, interval a počet rojů naráz), ne počet bran.
 
 **Hrad:**
 - Má HP, které se samo pomalu obnovuje (výchozí 2 % maxima za minutu).
@@ -66,8 +68,9 @@ Hra je **veřejná, zdarma a postavená jako čistý remake**:
 - Útok na hrad ukáže šipka u okraje obrazovky a upozornění v HUD.
 
 **Nepřátelé:**
-- **Obléhači** jdou po lajně na hrad. Na hrdinu reagují, až když na ně zaútočí, nebo když přijde do jejich malého dosahu.
+- **Obléhači** jdou přímo na hrad. Na hrdinu reagují, až když na ně zaútočí, nebo když přijde do jejich malého dosahu.
 - **Lovci** pronásledují hrdinu.
+- Každý typ nepřítele má vlastní chování (od fáze 2b-2): štítonoš a kapitán jdou rovně na cíl, zvěd obchází z boku a jde vždy po hrdinovi, mušketýr při přebíjení couvá, kaplan se drží za spojenci a léčí, kopiník po krátké výstraze najede po přímce. Kapitán posiluje nepřátele kolem sebe.
 - Poměr obléhačů a lovců určuje tabulka fází. Je to hlavní ladicí knoflík a v MVP se ověřuje jako první.
 - Na ploše je najednou nejvýš **150 živých nepřátel** (nastavitelné; cíl po MVP 300).
 

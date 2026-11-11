@@ -11,7 +11,7 @@ function newRun() {
 }
 
 function add(run: ReturnType<typeof newRun>, x: number, y: number): number {
-  return run.enemies.spawn(0, Role.Hunter, 0, x, y, 100, 1, 0);
+  return run.enemies.spawn(0, Role.Hunter, x, y, 100, 1, 0);
 }
 
 describe("targeting", () => {

@@ -10,7 +10,7 @@ export function quietData(): GameData {
   const data = gameData();
   data.rules.arena = {
     width: 6000, height: 5000, castle: { x: 0, y: -2400 }, heroStart: { x: 0, y: 0 },
-    gates: [{ x: -1800, y: 2200 }, { x: 1800, y: 2200 }], gateRadius: 150,
+    spawn: { radius: 2000, spread: 150 },
   };
   silenceSpawns(data);
   data.rules.enemies.knockback = { attack: 0, ability: 0, seconds: 0.15 };
@@ -30,7 +30,7 @@ export type AbilityRun = ReturnType<typeof abilityRun>;
 
 /** A stunned enemy of type 0 at hero + (dx, dy), with a lot of hp. */
 export function addEnemy(run: AbilityRun, dx: number, dy: number, hp = 1e6): number {
-  const i = run.enemies.spawn(0, Role.Hunter, 0, run.hero.x + dx, run.hero.y + dy, hp, 1, 0);
+  const i = run.enemies.spawn(0, Role.Hunter, run.hero.x + dx, run.hero.y + dy, hp, 1, 0);
   run.enemies.stunTicks[i] = 1e6;
   return i;
 }

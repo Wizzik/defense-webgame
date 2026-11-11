@@ -121,7 +121,7 @@ test("run ends with the end screen", async ({ page }, testInfo) => {
 test("menu lets you pick a hero", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&lang=en");
   await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
-  await expect(page.locator("button.hero-button")).toHaveCount(4);
+  await expect(page.locator("button.hero-button")).toHaveCount(8);
   await page.locator("button.hero-button", { hasText: "Nightglaive" }).click();
   await testInfo.attach(`menu-hero-${testInfo.project.name}`, {
     body: await page.screenshot({ type: "png" }),
@@ -131,6 +131,27 @@ test("menu lets you pick a hero", async ({ page }, testInfo) => {
   await waitForScreen(page, "playing");
   expect(await page.evaluate(() => window.__game?.hero)).toBe("nightglaive");
   expect(await page.evaluate(() => window.__game?.screen)).toBe("playing");
+});
+
+test("the menu lists eight heroes and starts each of the new ones", async ({ page }) => {
+  test.setTimeout(5 * 60_000);
+  for (const hero of ["mistwarden", "sparkshot", "redcleaver", "tidecaller"]) {
+    await page.goto(`/?hero=${hero}&seed=1&speed=4&duration=20&lang=en`);
+    await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+    await expect(page.locator("button.hero-button")).toHaveCount(8);
+    await expect(page.locator(`button.hero-button[data-hero="${hero}"]`)).toHaveAttribute("aria-pressed", "true");
+    await page.locator("#start").click();
+    await waitForScreen(page, "playing");
+    expect(await page.evaluate(() => window.__game?.hero)).toBe(hero);
+    const deadline = Date.now() + 60_000;
+    let screen = await page.evaluate(() => window.__game?.screen);
+    while (screen !== "won" && screen !== "lost" && Date.now() < deadline) {
+      if (screen === "levelUp") await page.locator("button.card").first().click();
+      await page.waitForTimeout(200);
+      screen = await page.evaluate(() => window.__game?.screen);
+    }
+    expect(["won", "lost"], `${hero} ended`).toContain(screen);
+  }
 });
 
 test("every hero plays without errors", async ({ page }, testInfo) => {
@@ -196,6 +217,29 @@ test("every enemy type renders without errors", async ({ page }, testInfo) => {
     contentType: "image/png",
   });
   await page.waitForTimeout(2_000);
+  expect(["playing", "levelUp", "won", "lost"]).toContain(await page.evaluate(() => window.__game?.screen));
+});
+
+test("pack arrows point at a new pack", async ({ page }) => {
+  await page.goto("/?seed=1&speed=2&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  expect(await page.evaluate(() => window.__game?.packArrows)).toBe(0);
+  await page.locator("#start").click();
+  await page.waitForFunction(() => (window.__game?.packArrows ?? 0) >= 1, undefined, { timeout: 5_000, polling: 50 });
+  await expect(page.locator(".pack-arrow:not([hidden])").first()).toBeVisible();
+});
+
+test("a lancer charge renders without errors", async ({ page }, testInfo) => {
+  await page.goto("/?seed=1&debug=1&duration=60&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await page.evaluate(() => window.__game!.debug!.spawnEach());
+  await page.locator("#start").click();
+  await page.waitForFunction(() => (window.__game?.charging ?? 0) >= 1, undefined, { timeout: 6_000, polling: 30 });
+  await testInfo.attach(`lancer-charge-${testInfo.project.name}`, {
+    body: await page.screenshot({ type: "png" }),
+    contentType: "image/png",
+  });
+  await page.waitForTimeout(1_500);
   expect(["playing", "levelUp", "won", "lost"]).toContain(await page.evaluate(() => window.__game?.screen));
 });
 

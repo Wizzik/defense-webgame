@@ -15,7 +15,7 @@ function newRun() {
   const data = gameData();
   data.rules.arena = {
     width: 6000, height: 5000, castle: { x: 0, y: -2000 }, heroStart: { x: 0, y: 1500 },
-    gates: [{ x: -1800, y: 2200 }, { x: 1800, y: 2200 }], gateRadius: 150,
+    spawn: { radius: 2000, spread: 150 },
   };
   data.rules.hero = {
     collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
@@ -36,7 +36,7 @@ type TestRun = ReturnType<typeof newRun>;
 
 /** Spawns an enemy `dx` east of the hero (y equal), with plenty of hp. */
 function add(run: TestRun, role: number, dx: number, hp = 100000): number {
-  return run.enemies.spawn(0, role, 0, run.hero.x + dx, run.hero.y, hp, 1, 0);
+  return run.enemies.spawn(0, role, run.hero.x + dx, run.hero.y, hp, 1, 0);
 }
 
 function hits(run: TestRun): number[] {
@@ -69,7 +69,7 @@ describe("hero combat", () => {
   it("equal distance goes to the lower slot", () => {
     const run = newRun();
     const a = add(run, Role.Hunter, 100);
-    run.enemies.spawn(0, Role.Hunter, 0, run.hero.x - 100, run.hero.y, 1000, 1, 0);
+    run.enemies.spawn(0, Role.Hunter, run.hero.x - 100, run.hero.y, 1000, 1, 0);
     updateHeroCombat(run);
     expect(run.events.a[hits(run)[0]]).toBe(a);
   });

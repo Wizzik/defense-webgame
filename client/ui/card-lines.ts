@@ -53,7 +53,7 @@ function abilityLines(run: Run, card: Extract<Card, { kind: "ability" }>): CardL
     const label = statLabel(key);
     if (!label) continue;
     const show = (v: number): string =>
-      PERCENT_KEYS.has(key) ? ratio(v) : POWER_KEYS.has(key) ? whole(v * spellPower) : num(v);
+      key === "chance" ? `${num(v * 100)} %` : PERCENT_KEYS.has(key) ? ratio(v) : POWER_KEYS.has(key) ? whole(v * spellPower) : num(v);
     lines.push({ label, from: learn ? "" : show(values[from]), to: show(values[to]) });
   }
   const hasCooldown = def.cooldown[to] > 0;

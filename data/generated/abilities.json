@@ -356,11 +356,11 @@
         1920
       ],
       "healPerHit": [
-        50,
-        100,
-        150,
-        200,
-        300
+        2.5,
+        5,
+        7.5,
+        10,
+        15
       ]
     }
   },
@@ -528,11 +528,11 @@
         800
       ],
       "damage": [
-        30,
-        30,
-        30,
-        30,
-        30
+        15,
+        15,
+        15,
+        15,
+        15
       ],
       "attackRange": [
         600,
@@ -677,6 +677,648 @@
       "radius": [
         99999,
         99999
+      ]
+    }
+  },
+  {
+    "id": "soul-burst",
+    "name": {
+      "en": "Soul Burst",
+      "cs": "Výbuch duší"
+    },
+    "description": {
+      "en": "A burst of souls tears into the thickest crowd.",
+      "cs": "Výbuch duší zasáhne největší shluk nepřátel."
+    },
+    "kind": "area",
+    "targeting": "densest_cluster",
+    "levels": 5,
+    "cooldown": [
+      3.3,
+      3.3,
+      3.3,
+      3.3,
+      3.3
+    ],
+    "params": {
+      "damage": [
+        30,
+        60,
+        120,
+        240,
+        480
+      ],
+      "radius": [
+        400,
+        400,
+        400,
+        400,
+        400
+      ],
+      "range": [
+        800,
+        800,
+        800,
+        800,
+        800
+      ]
+    }
+  },
+  {
+    "id": "wisp-ward",
+    "name": {
+      "en": "Wisp Ward",
+      "cs": "Bludný strážce"
+    },
+    "description": {
+      "en": "Raises ghostly wards that shoot nearby enemies.",
+      "cs": "Postaví přízračné strážce, kteří střílí po nepřátelích v okolí."
+    },
+    "kind": "summon",
+    "targeting": "densest_cluster",
+    "levels": 5,
+    "cooldown": [
+      4.95,
+      4.95,
+      4.95,
+      4.95,
+      4.95
+    ],
+    "params": {
+      "count": [
+        1,
+        2,
+        1,
+        2,
+        2
+      ],
+      "duration": [
+        60,
+        60,
+        60,
+        60,
+        60
+      ],
+      "range": [
+        500,
+        500,
+        500,
+        800,
+        800
+      ],
+      "damage": [
+        28,
+        28,
+        28,
+        28,
+        28
+      ],
+      "attackRange": [
+        600,
+        600,
+        600,
+        600,
+        600
+      ],
+      "attackInterval": [
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "maxAlive": [
+        2,
+        4,
+        4,
+        6,
+        6
+      ]
+    }
+  },
+  {
+    "id": "mist-surge",
+    "name": {
+      "en": "Mist Surge",
+      "cs": "Příval mlhy"
+    },
+    "description": {
+      "en": "Mist bursts keep striking around you for a few seconds.",
+      "cs": "Kolem tebe pár sekund udeřují výbuchy mlhy."
+    },
+    "kind": "ticking_area",
+    "targeting": "densest_cluster",
+    "levels": 5,
+    "cooldown": [
+      3.96,
+      3.96,
+      3.96,
+      3.96,
+      3.96
+    ],
+    "params": {
+      "tickDamage": [
+        18,
+        45,
+        72,
+        99,
+        126
+      ],
+      "radius": [
+        500,
+        600,
+        700,
+        800,
+        850
+      ],
+      "ticksPerSecond": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "duration": [
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  },
+  {
+    "id": "wailing-wave",
+    "name": {
+      "en": "Wailing Wave",
+      "cs": "Kvílivá vlna"
+    },
+    "description": {
+      "en": "A wail that wounds and slows everything around you.",
+      "cs": "Kvílení, které zraní a zpomalí vše kolem tebe."
+    },
+    "kind": "nova",
+    "targeting": "around_self",
+    "levels": 2,
+    "cooldown": [
+      33,
+      13.2
+    ],
+    "params": {
+      "damage": [
+        280,
+        1398
+      ],
+      "radius": [
+        1000,
+        1000
+      ],
+      "slow": [
+        0.5,
+        0.5
+      ],
+      "slowSeconds": [
+        5,
+        5
+      ]
+    }
+  },
+  {
+    "id": "rocket-fan",
+    "name": {
+      "en": "Rocket Fan",
+      "cs": "Raketový vějíř"
+    },
+    "description": {
+      "en": "Rockets hit every enemy around you.",
+      "cs": "Rakety zasáhnou každého nepřítele kolem tebe."
+    },
+    "kind": "nova",
+    "targeting": "around_self",
+    "levels": 5,
+    "cooldown": [
+      3.3,
+      3.3,
+      3.3,
+      3.3,
+      3.3
+    ],
+    "params": {
+      "damage": [
+        58,
+        115,
+        228,
+        456,
+        912
+      ],
+      "radius": [
+        600,
+        600,
+        600,
+        600,
+        600
+      ]
+    }
+  },
+  {
+    "id": "searing-rounds",
+    "name": {
+      "en": "Searing Rounds",
+      "cs": "Žhavé náboje"
+    },
+    "description": {
+      "en": "Every shot burns for extra damage.",
+      "cs": "Každý výstřel pálí a dává poškození navíc."
+    },
+    "kind": "on_hit",
+    "targeting": "on_attack",
+    "levels": 5,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "bonusDamage": [
+        300,
+        600,
+        900,
+        1200,
+        1500
+      ]
+    }
+  },
+  {
+    "id": "quickstep",
+    "name": {
+      "en": "Quickstep",
+      "cs": "Hbitý krok"
+    },
+    "description": {
+      "en": "You move and shoot faster.",
+      "cs": "Pohybuješ se a střílíš rychleji."
+    },
+    "kind": "aura",
+    "targeting": "self",
+    "levels": 5,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "moveSpeedBonus": [
+        0.08,
+        0.13,
+        0.18,
+        0.23,
+        0.28
+      ],
+      "attackSpeedBonus": [
+        0.15,
+        0.25,
+        0.35,
+        0.45,
+        0.55
+      ]
+    }
+  },
+  {
+    "id": "beam-swarm",
+    "name": {
+      "en": "Beam Swarm",
+      "cs": "Roj paprsků"
+    },
+    "description": {
+      "en": "Beams rain down around you for a while.",
+      "cs": "Kolem tebe chvíli prší paprsky."
+    },
+    "kind": "ticking_area",
+    "targeting": "around_self",
+    "levels": 2,
+    "cooldown": [
+      33,
+      23.1
+    ],
+    "params": {
+      "radius": [
+        800,
+        800
+      ],
+      "tickDamage": [
+        22,
+        58
+      ],
+      "ticksPerSecond": [
+        4,
+        4
+      ],
+      "duration": [
+        8,
+        8
+      ]
+    }
+  },
+  {
+    "id": "cleaver-toss",
+    "name": {
+      "en": "Cleaver Toss",
+      "cs": "Hod sekáčkem"
+    },
+    "description": {
+      "en": "A thrown cleaver cuts through a line of enemies.",
+      "cs": "Hozený sekáček prosekne řadu nepřátel."
+    },
+    "kind": "line",
+    "targeting": "move_direction",
+    "levels": 5,
+    "cooldown": [
+      3.3,
+      3.3,
+      3.3,
+      3.3,
+      3.3
+    ],
+    "params": {
+      "damage": [
+        61,
+        184,
+        369,
+        738,
+        1475
+      ],
+      "length": [
+        1200,
+        1200,
+        1200,
+        1200,
+        1200
+      ],
+      "width": [
+        250,
+        250,
+        250,
+        250,
+        250
+      ],
+      "waveSpeed": [
+        1600,
+        1600,
+        1600,
+        1600,
+        1600
+      ]
+    }
+  },
+  {
+    "id": "blood-fan",
+    "name": {
+      "en": "Blood Fan",
+      "cs": "Krvavý vějíř"
+    },
+    "description": {
+      "en": "A fan of blades cuts everything around you.",
+      "cs": "Vějíř čepelí posekne vše kolem tebe."
+    },
+    "kind": "nova",
+    "targeting": "around_self",
+    "levels": 5,
+    "cooldown": [
+      1.98,
+      1.98,
+      1.98,
+      1.98,
+      1.98
+    ],
+    "params": {
+      "damage": [
+        90,
+        180,
+        270,
+        540,
+        810
+      ],
+      "radius": [
+        600,
+        600,
+        600,
+        600,
+        600
+      ]
+    }
+  },
+  {
+    "id": "rot-field",
+    "name": {
+      "en": "Rot Field",
+      "cs": "Pole hniloby"
+    },
+    "description": {
+      "en": "The ground around you rots and keeps hurting enemies.",
+      "cs": "Země kolem tebe hnije a průběžně zraňuje nepřátele."
+    },
+    "kind": "ticking_area",
+    "targeting": "densest_cluster",
+    "levels": 2,
+    "cooldown": [
+      26.4,
+      19.8
+    ],
+    "params": {
+      "radius": [
+        800,
+        1000
+      ],
+      "duration": [
+        10,
+        20
+      ],
+      "tickDamage": [
+        18,
+        61
+      ],
+      "ticksPerSecond": [
+        1,
+        1
+      ]
+    }
+  },
+  {
+    "id": "crushing-wave",
+    "name": {
+      "en": "Crushing Wave",
+      "cs": "Drtivá vlna"
+    },
+    "description": {
+      "en": "A wide wave rolls through the enemies ahead.",
+      "cs": "Široká vlna se prožene nepřáteli před tebou."
+    },
+    "kind": "line",
+    "targeting": "move_direction",
+    "levels": 5,
+    "cooldown": [
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64
+    ],
+    "params": {
+      "damage": [
+        120,
+        300,
+        450,
+        600,
+        1200
+      ],
+      "length": [
+        1000,
+        1000,
+        1000,
+        1000,
+        1000
+      ],
+      "width": [
+        350,
+        400,
+        450,
+        500,
+        550
+      ],
+      "waveSpeed": [
+        1600,
+        1600,
+        1600,
+        1600,
+        1600
+      ]
+    }
+  },
+  {
+    "id": "stunning-tide",
+    "name": {
+      "en": "Stunning Tide",
+      "cs": "Omračující příliv"
+    },
+    "description": {
+      "en": "Your attacks sometimes hit harder and stun.",
+      "cs": "Tvoje útoky občas udeří silněji a omráčí."
+    },
+    "kind": "on_hit",
+    "targeting": "on_attack",
+    "levels": 5,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "chance": [
+        0.175,
+        0.175,
+        0.175,
+        0.175,
+        0.175
+      ],
+      "bonusDamage": [
+        30,
+        90,
+        180,
+        300,
+        1500
+      ],
+      "stunSeconds": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    }
+  },
+  {
+    "id": "riptide",
+    "name": {
+      "en": "Riptide",
+      "cs": "Zpětný proud"
+    },
+    "description": {
+      "en": "A bolt of water strikes the nearest enemy hard.",
+      "cs": "Vodní střela tvrdě zasáhne nejbližšího nepřítele."
+    },
+    "kind": "projectile",
+    "targeting": "nearest_elite_first",
+    "levels": 5,
+    "cooldown": [
+      3.96,
+      3.96,
+      3.96,
+      3.96,
+      3.96
+    ],
+    "params": {
+      "damage": [
+        90,
+        180,
+        360,
+        540,
+        1080
+      ],
+      "range": [
+        1500,
+        1500,
+        1500,
+        1500,
+        1500
+      ],
+      "speed": [
+        1400,
+        1400,
+        1400,
+        1400,
+        1400
+      ]
+    }
+  },
+  {
+    "id": "drowned-lake",
+    "name": {
+      "en": "Drowned Lake",
+      "cs": "Utopené jezero"
+    },
+    "description": {
+      "en": "A lake rises around you and keeps drowning enemies.",
+      "cs": "Kolem tebe se zvedne jezero a topí nepřátele."
+    },
+    "kind": "ticking_area",
+    "targeting": "densest_cluster",
+    "levels": 2,
+    "cooldown": [
+      33,
+      19.8
+    ],
+    "params": {
+      "radius": [
+        500,
+        500
+      ],
+      "tickDamage": [
+        90,
+        165
+      ],
+      "ticksPerSecond": [
+        2,
+        2
+      ],
+      "duration": [
+        10,
+        10
       ]
     }
   }

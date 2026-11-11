@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { GameData } from "../data/schema";
 import { Role } from "./enemies";
+import { EventKind } from "./events";
 import { createRun } from "./run";
 import { spawnEnemies } from "./spawner";
 import { buildPhaseTables, pickType } from "./spawn-tables";
@@ -8,17 +9,16 @@ import { gameData } from "./testing/game-data";
 
 type Phase = GameData["rules"]["phases"][number];
 
-const GATES = [{ x: -1800, y: 2200 }, { x: 1800, y: 2200 }];
-const GATE_RADIUS = 150;
+const ARENA = { width: 6000, height: 6000, castle: { x: 100, y: -50 }, heroStart: { x: 0, y: 500 }, spawn: { radius: 2400, spread: 150 } };
+const SPREAD = ARENA.spawn.spread;
 
 function phase(over: Partial<Phase> = {}): Phase {
-  return { mix: { shieldbearer: 1 }, pack: { min: 6, max: 10, everySeconds: 5 }, hunterShare: 0.3, elites: 0, ...over };
+  return { mix: { shieldbearer: 1 }, pack: { min: 6, max: 10, everySeconds: 5 }, packs: 1, hunterShare: 0.3, elites: 0, ...over };
 }
 
 function newRun(tweak?: (d: GameData) => void, seed = 1) {
   const data = gameData();
-  data.rules.arena.gates = GATES.map((g) => ({ ...g }));
-  data.rules.arena.gateRadius = GATE_RADIUS;
+  data.rules.arena = JSON.parse(JSON.stringify(ARENA));
   data.rules.run.phaseSeconds = 50;
   data.rules.run.firstPackSeconds = 0;
   data.rules.run.timeScaling = { seconds: 1200, cap: 2 };
@@ -41,6 +41,26 @@ function spawnOnly(run: TestRun, steps: number): number[] {
     run.tick++;
   }
   return added;
+}
+
+interface Pack { tick: number; role: number; count: number; x: number; y: number; first: number }
+
+/** Like spawnOnly, but returns the PackSpawn events; `first` is the pack's first slot while nobody dies. */
+function spawnPacks(run: TestRun, steps: number): Pack[] {
+  const packs: Pack[] = [];
+  for (let i = 0; i < steps; i++) {
+    run.events.clear();
+    let first = run.stats.spawned;
+    spawnEnemies(run);
+    const ev = run.events;
+    for (let k = 0; k < ev.count; k++) {
+      if (ev.kind[k] !== EventKind.PackSpawn) continue;
+      packs.push({ tick: run.tick, role: ev.a[k]!, count: ev.value[k]!, x: ev.x[k]!, y: ev.y[k]!, first });
+      first += ev.value[k]!;
+    }
+    run.tick++;
+  }
+  return packs;
 }
 
 const typeOf = (run: TestRun, id: string): number => run.data.enemies.findIndex((e) => e.id === id);
@@ -104,21 +124,95 @@ describe("spawner", () => {
     expect(run.stats.spawned).toBe(run.enemies.aliveCount);
   });
 
-  it("a pack shares one gate and one role; gates alternate", () => {
+  it("a pack appears on the ring around the castle", () => {
     const run = newRun((d) => {
-      d.rules.phases = [phase({ pack: { min: 5, max: 5, everySeconds: 1 }, hunterShare: 0.5 })];
+      d.rules.phases = [phase({ pack: { min: 5, max: 5, everySeconds: 1 } })];
     });
-    spawnOnly(run, 91);
+    const packs = spawnPacks(run, 91);
+    expect(packs).toHaveLength(4);
     const e = run.enemies;
-    expect(e.aliveCount).toBe(20);
-    for (let pack = 0; pack < 4; pack++) {
-      const first = pack * 5;
-      for (let i = first; i < first + 5; i++) {
-        expect(e.gate[i]).toBe(pack % 2);
-        expect(e.role[i]).toBe(e.role[first]);
-        expect(Math.abs(e.x[i]! - GATES[pack % 2]!.x)).toBeLessThanOrEqual(GATE_RADIUS);
+    for (const pack of packs) {
+      const dx = pack.x - ARENA.castle.x;
+      const dy = pack.y - ARENA.castle.y;
+      expect(Math.abs(Math.sqrt(dx * dx + dy * dy) - ARENA.spawn.radius)).toBeLessThan(1e-6);
+      expect(pack.count).toBe(5);
+      for (let i = pack.first; i < pack.first + 5; i++) {
+        expect(e.role[i]).toBe(pack.role);
+        expect(Math.abs(e.x[i]! - pack.x)).toBeLessThanOrEqual(SPREAD);
+        expect(Math.abs(e.y[i]! - pack.y)).toBeLessThanOrEqual(SPREAD);
       }
     }
+    // packs of different intervals come from different directions
+    expect(new Set(packs.map((p) => Math.round(p.x))).size).toBe(4);
+  });
+
+  it("packs of one interval come from different sides", () => {
+    const two = newRun((d) => {
+      d.rules.phases = [phase({ packs: 2 })];
+    });
+    const [a, b, ...rest] = spawnPacks(two, 1);
+    expect(rest).toHaveLength(0);
+    expect(a!.x + b!.x).toBeCloseTo(2 * ARENA.castle.x, 6);
+    expect(a!.y + b!.y).toBeCloseTo(2 * ARENA.castle.y, 6);
+
+    const three = newRun((d) => {
+      d.rules.phases = [phase({ packs: 3 })];
+    });
+    const packs = spawnPacks(three, 1);
+    expect(packs).toHaveLength(3);
+    const r2 = ARENA.spawn.radius * ARENA.spawn.radius;
+    for (let k = 0; k < 3; k++) {
+      const p = packs[k]!;
+      const q = packs[(k + 1) % 3]!;
+      const dot = (p.x - ARENA.castle.x) * (q.x - ARENA.castle.x) + (p.y - ARENA.castle.y) * (q.y - ARENA.castle.y);
+      expect(dot / r2).toBeCloseTo(-0.5, 9);
+    }
+  });
+
+  it("each pack has its own role and size", () => {
+    const run = newRun((d) => {
+      d.rules.enemies.maxAlive = 2000;
+      d.rules.phases = [phase({ packs: 3, pack: { min: 3, max: 12, everySeconds: 1 }, hunterShare: 0.5 })];
+    });
+    const packs = spawnPacks(run, 20 * 30);
+    expect(packs).toHaveLength(60);
+    let mixedSizes = 0;
+    let mixedRoles = 0;
+    for (let i = 0; i < packs.length; i += 3) {
+      const trio = packs.slice(i, i + 3);
+      expect(new Set(trio.map((p) => p.tick)).size).toBe(1);
+      if (new Set(trio.map((p) => p.count)).size > 1) mixedSizes++;
+      if (new Set(trio.map((p) => p.role)).size > 1) mixedRoles++;
+      for (const pack of trio) {
+        expect(pack.count).toBeGreaterThanOrEqual(3);
+        expect(pack.count).toBeLessThanOrEqual(12);
+        for (let s = pack.first; s < pack.first + pack.count; s++) expect(run.enemies.role[s]).toBe(pack.role);
+      }
+    }
+    expect(mixedSizes).toBeGreaterThan(5);
+    expect(mixedRoles).toBeGreaterThan(5);
+  });
+
+  it("pack members stay inside the arena", () => {
+    const run = newRun((d) => {
+      d.rules.arena.castle = { x: 0, y: 0 };
+      d.rules.arena.spawn = { radius: 2900, spread: 400 };
+      d.rules.enemies.maxAlive = 2000;
+      d.rules.phases = [phase({ packs: 3, pack: { min: 20, max: 20, everySeconds: 1 } })];
+    });
+    spawnPacks(run, 20 * 30);
+    const e = run.enemies;
+    expect(e.aliveCount).toBe(1200);
+    let onEdge = 0;
+    for (let i = 0; i < 1200; i++) {
+      const limit = 3000 - run.data.enemies[e.type[i]!]!.collision;
+      expect(Math.abs(e.x[i]!)).toBeLessThanOrEqual(limit);
+      expect(Math.abs(e.y[i]!)).toBeLessThanOrEqual(limit);
+      if (Math.abs(e.x[i]!) === limit || Math.abs(e.y[i]!) === limit) onEdge++;
+      const d = Math.sqrt(e.x[i]! * e.x[i]! + e.y[i]! * e.y[i]!);
+      expect(d).toBeGreaterThan(run.castle.radius + 100);
+    }
+    expect(onEdge).toBeGreaterThan(0);
   });
 
   it("hunter share decides the role of whole packs", () => {
@@ -153,18 +247,18 @@ describe("spawner", () => {
     expect(musketeers / 500).toBeLessThanOrEqual(0.35);
   });
 
-  it("elites come once per phase with its first pack", () => {
+  it("elites come once per phase with the first pack of its first interval", () => {
     const run = newRun((d) => {
-      const elitePhase = () => phase({ pack: { min: 3, max: 3, everySeconds: 20 }, elites: 2 });
+      const elitePhase = () => phase({ packs: 2, pack: { min: 3, max: 3, everySeconds: 20 }, elites: 2 });
       d.rules.phases = [elitePhase(), elitePhase()];
     });
-    // packs at 0 s and 20 s (phase 0), 40 s (phase 0), 60 s (phase 1)
-    const added = spawnOnly(run, 60 * 30 + 1).filter((n) => n > 0);
-    expect(added).toEqual([5, 3, 3, 5]);
+    // intervals at 0, 20 and 40 s (phase 0) and 60 s (phase 1), two packs each
+    const packs = spawnPacks(run, 60 * 30 + 1);
+    expect(packs.map((p) => p.count)).toEqual([5, 3, 3, 3, 3, 3, 5, 3]);
     const captain = typeOf(run, "captain");
     const captains: number[] = [];
     for (let i = 0; i < run.enemies.aliveCount; i++) if (run.enemies.type[i] === captain) captains.push(i);
-    expect(captains).toEqual([0, 1, 11, 12]);
+    expect(captains).toEqual([0, 1, 20, 21]);
   });
 
   it("elites go first when the cap cuts the pack", () => {
@@ -206,10 +300,10 @@ describe("spawner", () => {
     }
   });
 
-  it("a pack at the cap fills only free slots and banks nothing", () => {
+  it("a volley at the cap fills only free slots and banks nothing", () => {
     const run = newRun((d) => {
       d.rules.enemies.maxAlive = 5;
-      d.rules.phases = [phase({ pack: { min: 8, max: 8, everySeconds: 1 } })];
+      d.rules.phases = [phase({ packs: 2, pack: { min: 4, max: 4, everySeconds: 1 } })];
     });
     spawnOnly(run, 1);
     expect(run.enemies.aliveCount).toBe(5);
@@ -227,28 +321,17 @@ describe("spawner", () => {
     const run = newRun((d) => {
       d.rules.phases = [phase({ pack: { min: 20, max: 20, everySeconds: 5 } })];
     });
-    spawnOnly(run, 1);
-    const half = GATE_RADIUS * Math.sqrt(20 / 8);
+    const [pack] = spawnPacks(run, 1);
+    const half = SPREAD * Math.sqrt(20 / 8);
     let farthest = 0;
     for (let i = 0; i < 20; i++) {
-      const dx = Math.abs(run.enemies.x[i]! - GATES[0]!.x);
-      const dy = Math.abs(run.enemies.y[i]! - GATES[0]!.y);
+      const dx = Math.abs(run.enemies.x[i]! - pack!.x);
+      const dy = Math.abs(run.enemies.y[i]! - pack!.y);
       expect(dx).toBeLessThanOrEqual(half);
       expect(dy).toBeLessThanOrEqual(half);
       farthest = Math.max(farthest, dx, dy);
     }
-    expect(farthest).toBeGreaterThan(GATE_RADIUS);
-  });
-
-  it("a small pack stays within the gate radius", () => {
-    const run = newRun((d) => {
-      d.rules.phases = [phase({ pack: { min: 4, max: 4, everySeconds: 5 } })];
-    });
-    spawnOnly(run, 1);
-    for (let i = 0; i < 4; i++) {
-      expect(Math.abs(run.enemies.x[i]! - GATES[0]!.x)).toBeLessThanOrEqual(GATE_RADIUS);
-      expect(Math.abs(run.enemies.y[i]! - GATES[0]!.y)).toBeLessThanOrEqual(GATE_RADIUS);
-    }
+    expect(farthest).toBeGreaterThan(SPREAD);
   });
 
   it("phase changes after phaseSeconds", () => {

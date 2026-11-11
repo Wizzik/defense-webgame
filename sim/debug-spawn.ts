@@ -14,7 +14,7 @@ export function debugSpawnEach(run: Run): void {
   for (let type = 0; type < defs.length; type++) {
     if (store.aliveCount >= store.capacity) return;
     const x = hero.x + (type - (defs.length - 1) / 2) * SPACING;
-    store.spawn(type, Role.Hunter, 0, x, hero.y + NORTH, defs[type].hp * scale, scale, run.tick);
+    store.spawn(type, Role.Hunter, x, hero.y + NORTH, defs[type].hp * scale, scale, run.tick);
     run.stats.spawned++;
   }
 }

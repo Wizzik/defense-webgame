@@ -6,7 +6,7 @@ Design specification: [docs/superpowers/specs/2026-11-04-defense-webgame-design.
 
 ## Play
 
-The game runs at https://wizzik.github.io/defense-webgame/ (the crowd benchmark is at `/spike/`). A run lasts 5 minutes in 6 phases; enemies of six types arrive in packs from two gates. Pick one of four heroes in the menu. Move with WASD or the arrow keys, the spells cast themselves, Space dashes, R casts the ultimate and T switches its automatic casting on or off. Pick an upgrade card (learn a spell, raise a spell level, learn the ultimate, or an attribute) with a click or the keys 1 to 3 when you level up. M (or the menu toggle) mutes the sound.
+The game runs at https://wizzik.github.io/defense-webgame/ (the crowd benchmark is at `/spike/`). A run lasts 5 minutes in 6 phases; the castle stands in the middle of the arena and enemies of six types arrive in packs from every side (arrows on the edge of the screen point at new packs). Each type fights its own way: scouts come from the side, musketeers back off while they reload, chaplains follow and heal their pack, lancers charge in a straight line after a short warning (step out of the line), and captains make the enemies around them faster and stronger. Pick one of eight heroes in the menu. Move with WASD or the arrow keys, the spells cast themselves, Space dashes, R casts the ultimate and T switches its automatic casting on or off. Pick an upgrade card (learn a spell, raise a spell level, learn the ultimate, or an attribute) with a click or the keys 1 to 3 when you level up. M (or the menu toggle) mutes the sound.
 
 URL parameters (all optional):
 
@@ -15,7 +15,7 @@ URL parameters (all optional):
 | `seed` | integer | Seed of the run; the same seed gives the same run. Default: random. |
 | `speed` | 1 to 16 | Simulation speed multiplier. Default 1. |
 | `duration` | 5 to 600 | Run length in seconds. Default: the full run. |
-| `hero` | `stonehorn`, `nightglaive`, `gravecaller`, `serpent-shaman` | Hero of the run (the menu choice starts from it). Default: `stonehorn`. |
+| `hero` | `stonehorn`, `nightglaive`, `gravecaller`, `serpent-shaman`, `mistwarden`, `sparkshot`, `redcleaver`, `tidecaller` | Hero of the run (the menu choice starts from it). Default: `stonehorn`. |
 | `debug` | `1` | Adds `window.__game.debug` (`grantXp(n)`, `setAbilityLevel(slot, level)`, `spawnEach()`: one enemy of every type next to the hero). |
 | `fps` | `1` | Shows the frame-rate overlay (bottom-left): backend, GPU name, enemies alive, average fps and 1% low. |
 | `lang` | `en`, `cs` | Interface language. Default: the browser language. |

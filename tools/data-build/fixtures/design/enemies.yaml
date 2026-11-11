@@ -3,4 +3,5 @@
   source: U001
   mapName: Test Unit
   name: { en: Grunt, cs: Pěšák }
+  behavior: siege
   xp: 1

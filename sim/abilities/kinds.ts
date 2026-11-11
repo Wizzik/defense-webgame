@@ -26,8 +26,10 @@ export const UPDATERS: Partial<Record<Ability["kind"], AbilityUpdate>> = {
   cone: updateCone,
   // Bonuses come from auraBonuses (aura.ts) when the stats are recomputed; nothing to do per step.
   aura: () => {},
-  // Charges up here; the charge is spent by consumeEmpower (on-hit.ts) on the hero's attack.
+  // An empowered strike charges up here; the charge is spent by consumeEmpower (on-hit.ts) on the hero's
+  // attack. The other on_hit abilities are passive: onHitBonus (on-hit.ts) reads them on every attack.
   on_hit: (run, slot, index) => {
+    if (slot.def.kind !== "on_hit" || slot.def.params.empower === undefined) return;
     if (!slot.active && castMode(run, index) !== CastMode.None) slot.active = true;
   },
   heal: updateHeal,

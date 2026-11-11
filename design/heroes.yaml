@@ -35,3 +35,37 @@
   role: { en: "Summoner. Totems, lightning and healing.", cs: "Vyvolávač. Totemy, blesky a léčení." }
   signatureAbilities: [serpent-totem, forked-bolt, mending-tide]
   ultimate: spirit-ward
+
+# Phase 2b-2: four more heroes. Their spells use only the kinds the simulation already has.
+
+- id: mistwarden
+  source: O00H
+  mapName: Ghost
+  name: { en: Mistwarden, cs: Strážce mlh }
+  role: { en: "Caster. Wards and zones that grind crowds down.", cs: "Kouzelník. Strážci a zóny, které drtí davy." }
+  signatureAbilities: [soul-burst, wisp-ward, mist-surge]
+  ultimate: wailing-wave
+
+- id: sparkshot
+  source: O010
+  mapName: Kigami
+  name: { en: Sparkshot, cs: Jiskrostřelec }
+  role: { en: "Gunner. Fast shots and rocket bursts.", cs: "Střelec. Rychlé výstřely a raketové salvy." }
+  signatureAbilities: [rocket-fan, searing-rounds, quickstep]
+  ultimate: beam-swarm
+
+- id: redcleaver
+  source: O00U
+  mapName: Meater
+  name: { en: Redcleaver, cs: Rudý sekáč }
+  role: { en: "Melee butcher. Wide blows at close range.", cs: "Řezník na blízko. Široké rány zblízka." }
+  signatureAbilities: [cleaver-toss, blood-fan, swift-pace]
+  ultimate: rot-field
+
+- id: tidecaller
+  source: O00N
+  mapName: SeaSea
+  name: { en: Tidecaller, cs: Přílivová vědma }
+  role: { en: "Tide mage. Waves that stun and push through.", cs: "Mág přílivu. Vlny, které omračují a prorážejí." }
+  signatureAbilities: [crushing-wave, stunning-tide, riptide]
+  ultimate: drowned-lake

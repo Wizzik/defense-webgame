@@ -103,6 +103,40 @@ describe("generated game data", () => {
     expect(enemies.filter((e) => e.heal !== undefined).map((e) => e.id)).toEqual(["chaplain"]);
   });
 
+  it("there are eight heroes, each with three signature abilities and an ultimate that exist", () => {
+    const heroes = JSON.parse(read("heroes.json")) as { id: string; signatureAbilities: string[]; ultimate: string }[];
+    const abilities = new Set((JSON.parse(read("abilities.json")) as { id: string }[]).map((a) => a.id));
+    expect(heroes.map((h) => h.id)).toEqual([
+      "stonehorn", "nightglaive", "gravecaller", "serpent-shaman", "mistwarden", "sparkshot", "redcleaver", "tidecaller",
+    ]);
+    for (const hero of heroes) {
+      expect(hero.signatureAbilities, hero.id).toHaveLength(3);
+      for (const id of [...hero.signatureAbilities, hero.ultimate]) expect(abilities.has(id), `${hero.id}: ${id}`).toBe(true);
+    }
+  });
+
+  it("the new on_hit abilities carry a bonus, and the chance is a share of 1", () => {
+    const abilities = JSON.parse(read("abilities.json")) as { id: string; params: Record<string, number[]> }[];
+    const of = (id: string) => abilities.find((a) => a.id === id)!.params;
+    expect(of("stunning-tide").chance).toEqual([0.175, 0.175, 0.175, 0.175, 0.175]);
+    expect(of("stunning-tide").bonusDamage!.every((v) => v > 0)).toBe(true);
+    expect(of("searing-rounds").bonusDamage!.every((v) => v > 0)).toBe(true);
+    expect(of("grave-grasp").healPerHit).toEqual([2.5, 5, 7.5, 10, 15]);
+  });
+
+  it("every enemy type has its behavior", () => {
+    const enemies = JSON.parse(read("enemies.json")) as { id: string; behavior: string }[];
+    expect(Object.fromEntries(enemies.map((e) => [e.id, e.behavior]))).toEqual({
+      shieldbearer: "siege", scout: "flank", musketeer: "skirmish", chaplain: "support", lancer: "charge", captain: "siege",
+    });
+  });
+
+  it("the lancer charges and the captain has an aura", () => {
+    const enemies = JSON.parse(read("enemies.json")) as { id: string; charge?: unknown; aura?: unknown }[];
+    expect(enemies.filter((e) => e.charge !== undefined).map((e) => e.id)).toEqual(["lancer"]);
+    expect(enemies.filter((e) => e.aura !== undefined).map((e) => e.id)).toEqual(["captain"]);
+  });
+
   it("carries the phase 2a mechanics", () => {
     const abilities = JSON.parse(read("abilities.json")) as { id: string; kind: string; params: Record<string, number[]> }[];
     const heroes = JSON.parse(read("heroes.json")) as { id: string; signatureAbilities: string[] }[];

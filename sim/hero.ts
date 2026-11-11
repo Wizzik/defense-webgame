@@ -1,5 +1,5 @@
 import type { GameData } from "../data/schema";
-import { consumeEmpower } from "./abilities/on-hit";
+import { consumeEmpower, onHitBonus, onHitStunTicks } from "./abilities/on-hit";
 import { armorReduction, damageEnemy, rollDamage } from "./combat";
 import { TICKS_PER_SECOND, TICK_SECONDS } from "./constants";
 import { EventKind } from "./events";
@@ -123,7 +123,9 @@ export function updateHeroCombat(run: Run): void {
 
   const reduction = armorReduction(data.enemies[e.type[best]].armor, data.constants.defenseArmor);
   const empower = consumeEmpower(run, e.x[best], e.y[best]);
-  const amount = rollDamage(run.rng, stats.damageMin, stats.damageMax) * empower * (1 - reduction);
+  const bonus = onHitBonus(run, e.x[best], e.y[best]);
+  const stun = onHitStunTicks;
+  const amount = (rollDamage(run.rng, stats.damageMin, stats.damageMax) * empower + bonus) * (1 - reduction);
   if (!hero.moving && bestSq > 0) {
     const len = Math.sqrt(bestSq);
     hero.facingX = bestDx / len;
@@ -131,4 +133,5 @@ export function updateHeroCombat(run: Run): void {
   }
   hero.attackCooldown = Math.round(stats.attackIntervalSeconds * TICKS_PER_SECOND);
   damageEnemy(run, best, amount, 0);
+  if (stun > e.stunTicks[best] && e.alive[best] === 1) e.stunTicks[best] = stun;
 }

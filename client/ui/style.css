@@ -75,10 +75,14 @@
   font-weight: 600;
 }
 .menu-heroes {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(112px, 1fr));
   gap: 8px;
+}
+@media (max-width: 560px) {
+  .menu-heroes {
+    grid-template-columns: repeat(2, minmax(112px, 1fr));
+  }
 }
 .hero-button {
   min-width: 112px;
@@ -318,6 +322,23 @@
   font-size: 13px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+/* pack arrows: where a new pack comes from (red: siegers, purple: hunters) */
+.pack-arrow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-left: 18px solid #d94a4a;
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.9));
+  pointer-events: none;
+}
+.pack-arrow.hunter {
+  border-left-color: #b84ad8;
 }
 
 /* castle pointer */

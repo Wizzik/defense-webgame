@@ -166,5 +166,173 @@
       "mending-tide"
     ],
     "ultimate": "spirit-ward"
+  },
+  {
+    "id": "mistwarden",
+    "name": {
+      "en": "Mistwarden",
+      "cs": "Strážce mlh"
+    },
+    "role": {
+      "en": "Caster. Wards and zones that grind crowds down.",
+      "cs": "Kouzelník. Strážci a zóny, které drtí davy."
+    },
+    "primary": "int",
+    "hp": 900,
+    "armor": 5,
+    "moveSpeed": 731,
+    "attributes": {
+      "str": {
+        "base": 25,
+        "perLevel": 2
+      },
+      "agi": {
+        "base": 28,
+        "perLevel": 2
+      },
+      "int": {
+        "base": 39,
+        "perLevel": 3
+      }
+    },
+    "baseAttack": {
+      "kind": "ranged",
+      "range": 600,
+      "cooldown": 0.75,
+      "damageMin": 2,
+      "damageMax": 8
+    },
+    "signatureAbilities": [
+      "soul-burst",
+      "wisp-ward",
+      "mist-surge"
+    ],
+    "ultimate": "wailing-wave"
+  },
+  {
+    "id": "sparkshot",
+    "name": {
+      "en": "Sparkshot",
+      "cs": "Jiskrostřelec"
+    },
+    "role": {
+      "en": "Gunner. Fast shots and rocket bursts.",
+      "cs": "Střelec. Rychlé výstřely a raketové salvy."
+    },
+    "primary": "agi",
+    "hp": 1000,
+    "armor": 5,
+    "moveSpeed": 448,
+    "attributes": {
+      "str": {
+        "base": 29,
+        "perLevel": 2.5
+      },
+      "agi": {
+        "base": 35,
+        "perLevel": 3.75
+      },
+      "int": {
+        "base": 26,
+        "perLevel": 2.25
+      }
+    },
+    "baseAttack": {
+      "kind": "bounce",
+      "range": 700,
+      "cooldown": 0.75,
+      "damageMin": 2,
+      "damageMax": 24
+    },
+    "signatureAbilities": [
+      "rocket-fan",
+      "searing-rounds",
+      "quickstep"
+    ],
+    "ultimate": "beam-swarm"
+  },
+  {
+    "id": "redcleaver",
+    "name": {
+      "en": "Redcleaver",
+      "cs": "Rudý sekáč"
+    },
+    "role": {
+      "en": "Melee butcher. Wide blows at close range.",
+      "cs": "Řezník na blízko. Široké rány zblízka."
+    },
+    "primary": "str",
+    "hp": 1000,
+    "armor": 5,
+    "moveSpeed": 420,
+    "attributes": {
+      "str": {
+        "base": 41,
+        "perLevel": 3.2
+      },
+      "agi": {
+        "base": 30,
+        "perLevel": 2.75
+      },
+      "int": {
+        "base": 24,
+        "perLevel": 2.3
+      }
+    },
+    "baseAttack": {
+      "kind": "melee",
+      "range": 128,
+      "cooldown": 0.75,
+      "damageMin": 2,
+      "damageMax": 12
+    },
+    "signatureAbilities": [
+      "cleaver-toss",
+      "blood-fan",
+      "swift-pace"
+    ],
+    "ultimate": "rot-field"
+  },
+  {
+    "id": "tidecaller",
+    "name": {
+      "en": "Tidecaller",
+      "cs": "Přílivová vědma"
+    },
+    "role": {
+      "en": "Tide mage. Waves that stun and push through.",
+      "cs": "Mág přílivu. Vlny, které omračují a prorážejí."
+    },
+    "primary": "int",
+    "hp": 1000,
+    "armor": 5,
+    "moveSpeed": 448,
+    "attributes": {
+      "str": {
+        "base": 35,
+        "perLevel": 2.2
+      },
+      "agi": {
+        "base": 38,
+        "perLevel": 2.8
+      },
+      "int": {
+        "base": 39,
+        "perLevel": 3
+      }
+    },
+    "baseAttack": {
+      "kind": "bounce",
+      "range": 650,
+      "cooldown": 0.75,
+      "damageMin": 2,
+      "damageMax": 8
+    },
+    "signatureAbilities": [
+      "crushing-wave",
+      "stunning-tide",
+      "riptide"
+    ],
+    "ultimate": "drowned-lake"
   }
 ]

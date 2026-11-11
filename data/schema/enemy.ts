@@ -19,12 +19,30 @@ export const EnemySchema = z.object({
     damageMin: z.number().min(0),
     damageMax: z.number().min(0),
   }).strict(),
+  /** How the type walks: see sim/enemy-steer.ts and sim/enemy-charge.ts. */
+  behavior: z.enum(["siege", "flank", "skirmish", "support", "charge"]),
   xp: z.number().int().positive(),
   /** Heals the most wounded enemy in `range` (itself too) by `amount` every `cooldown` seconds. */
   heal: z.object({
     amount: z.number().positive(),
     range: z.number().positive(),
     cooldown: z.number().positive(),
+  }).strict().optional(),
+  /** A charge at the hero: a windup, then a straight run that hits harder (sim/enemy-charge.ts). */
+  charge: z.object({
+    minRange: z.number().positive(),
+    maxRange: z.number().positive(),
+    windupSeconds: z.number().positive(),
+    speedMultiplier: z.number().positive(),
+    damageMultiplier: z.number().positive(),
+    distance: z.number().positive(),
+    cooldownSeconds: z.number().positive(),
+  }).strict().refine((c) => c.minRange < c.maxRange, "minRange is not below maxRange").optional(),
+  /** Enemies within `radius` (other carriers of an aura excepted) walk and hit harder by these shares. */
+  aura: z.object({
+    radius: z.number().positive(),
+    moveSpeed: z.number().min(0),
+    damage: z.number().min(0),
   }).strict().optional(),
 }).strict();
 

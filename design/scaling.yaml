@@ -2,4 +2,4 @@
 # data-build applies them to every hero, ability and enemy, so the map's ratios stay.
 heroes: { moveSpeed: 1.4, attackCooldown: 0.5 }
 abilities: { cooldown: 0.33, damage: 0.3 }   # damage: direct, tick and heal amounts of every ability; empower is untouched
-enemies: { hp: 0.3, moveSpeed: 1.22 }
+enemies: { hp: 0.35, moveSpeed: 1.32 }   # phase 2b-2: tougher and faster packs (hp 0.3 -> 0.35, moveSpeed 1.22 -> 1.32)

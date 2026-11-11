@@ -169,8 +169,22 @@ describe("data-build", () => {
       collision: 31,
       acquireRange: 500,
       attack: { kind: "melee", range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 },
+      behavior: "siege",
       xp: 1,
     });
+  });
+
+  it("copies the behavior of a design entry", () => {
+    const entry = { ...design().enemies[0], behavior: "flank" as const };
+    expect(mapEnemy(mapExport().units[0], entry).behavior).toBe("flank");
+  });
+
+  it("fails when a design entry has no behavior", () => {
+    const entry = { ...design().enemies[0] } as Partial<ReturnType<typeof design>["enemies"][number]>;
+    delete entry.behavior;
+    expect(errorMessage(() => mapEnemy(mapExport().units[0], entry as never))).toBe(
+      "design/enemies.yaml: grunt: missing behavior",
+    );
   });
 
   it("maps a ranged weapon to a ranged attack", () => {
@@ -209,6 +223,18 @@ describe("data-build", () => {
     expect(Object.keys(enemy)).not.toContain("multipliers");
   });
 
+  it("copies charge and aura of a design entry after heal", () => {
+    const d = design();
+    const charge = { minRange: 300, maxRange: 700, windupSeconds: 0.5, speedMultiplier: 2.5, damageMultiplier: 2, distance: 900, cooldownSeconds: 6 };
+    d.enemies[0].heal = { amount: 8, range: 450, cooldown: 1 };
+    d.enemies[0].charge = charge;
+    d.enemies[0].aura = { radius: 400, moveSpeed: 0.25, damage: 0.25 };
+    const enemy = buildGameData(mapExport(), d, "test").enemies[0];
+    expect(enemy.charge).toStrictEqual(charge);
+    expect(enemy.aura).toStrictEqual({ radius: 400, moveSpeed: 0.25, damage: 0.25 });
+    expect(Object.keys(enemy).slice(-4)).toEqual(["xp", "heal", "charge", "aura"]);
+  });
+
   it("fails with readable error when enemy source is missing", () => {
     const d = design();
     d.enemies[0].source = "U404";
@@ -228,7 +254,7 @@ describe("data-build", () => {
   it("copies rules", () => {
     const data = buildGameData(mapExport(), design(), "test");
     expect(data.rules).toStrictEqual(design().rules);
-    expect(data.rules.arena.gates).toHaveLength(2);
+    expect(data.rules.arena.spawn).toEqual({ radius: 2000, spread: 150 });
   });
 
   it("maps hero hp and armor", () => {
@@ -259,7 +285,7 @@ describe("data-build", () => {
       "id", "name", "role", "primary", "hp", "armor", "moveSpeed", "attributes", "baseAttack", "signatureAbilities", "ultimate",
     ]);
     expect(Object.keys(data.enemies[0])).toEqual([
-      "id", "name", "level", "hp", "hpRegen", "armor", "moveSpeed", "collision", "acquireRange", "attack", "xp",
+      "id", "name", "level", "hp", "hpRegen", "armor", "moveSpeed", "collision", "acquireRange", "attack", "behavior", "xp",
     ]);
   });
 

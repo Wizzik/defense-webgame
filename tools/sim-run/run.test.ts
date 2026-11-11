@@ -10,10 +10,10 @@ describe("formatSummary", () => {
     expect(
       formatSummary({
         hero: "stonehorn", seed: 1, result: "castle", seconds: 134, kills: 63, spawned: 320, level: 7,
-        castleHp: 0, castleMaxHp: 3000, heroHp: 812, heroMaxHp: 1555, minHeroHpPercent: 42,
+        castleHp: 0, castleMaxHp: 3000, castleHpPercent: 0, heroHp: 812, heroMaxHp: 1555, minHeroHpPercent: 42,
       }),
     ).toBe(
-      "stonehorn seed 1: lost (castle) at 2:14, kills 63, spawned 320, level 7, castle 0/3000, hero 812/1555, hero low 42%",
+      "stonehorn seed 1: lost (castle) at 2:14, kills 63, spawned 320, level 7, castle 0%, hero 812/1555, hero low 42%",
     );
   });
 
@@ -21,9 +21,9 @@ describe("formatSummary", () => {
     expect(
       formatSummary({
         hero: "nightglaive", seed: 2, result: "won", seconds: 180, kills: 5, spawned: 9, level: 2,
-        castleHp: 10, castleMaxHp: 3000, heroHp: 1, heroMaxHp: 2, minHeroHpPercent: 0,
+        castleHp: 1860, castleMaxHp: 3000, castleHpPercent: 62, heroHp: 1, heroMaxHp: 2, minHeroHpPercent: 0,
       }),
-    ).toBe("nightglaive seed 2: won at 3:00, kills 5, spawned 9, level 2, castle 10/3000, hero 1/2, hero low 0%");
+    ).toBe("nightglaive seed 2: won at 3:00, kills 5, spawned 9, level 2, castle 62%, hero 1/2, hero low 0%");
   });
 });
 
@@ -73,4 +73,19 @@ describe("bot run speed", () => {
       expect(elapsed).toBeLessThan(8000);
     });
   }
+
+  it("a full run with the late phases at full size stays fast", () => {
+    const run = createRun(gameData(), { seed: 1, durationSeconds: 300 });
+    const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
+    const start = performance.now();
+    // the hero and the castle cannot fall, so the run lasts its 300 s
+    while (run.state !== "won" && run.state !== "lost") {
+      botInput(run, input);
+      run.hero.hp = run.hero.stats.maxHp;
+      run.castle.hp = run.castle.maxHp;
+      run.step(input);
+    }
+    expect(run.tick).toBe(300 * 30);
+    expect(performance.now() - start).toBeLessThan(8000);
+  });
 });

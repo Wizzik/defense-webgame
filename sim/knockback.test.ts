@@ -10,7 +10,7 @@ function newRun() {
   const data = gameData();
   data.rules.arena = {
     width: 6000, height: 5000, castle: { x: 0, y: -2000 }, heroStart: { x: 0, y: 1500 },
-    gates: [{ x: -1800, y: 2200 }, { x: 1800, y: 2200 }], gateRadius: 150,
+    spawn: { radius: 2000, spread: 150 },
   };
   data.rules.castle.radius = 180;
   data.rules.hero.collision = 32;
@@ -25,7 +25,7 @@ function newRun() {
 }
 
 function spawn(run: ReturnType<typeof newRun>, x: number, y: number): number {
-  return run.enemies.spawn(0, Role.Sieger, 0, x, y, 1000, 1, 0);
+  return run.enemies.spawn(0, Role.Sieger, x, y, 1000, 1, 0);
 }
 
 function step(run: ReturnType<typeof newRun>): void {

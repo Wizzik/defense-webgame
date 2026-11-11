@@ -24,6 +24,10 @@ export interface GameSnapshot {
   ultimateAuto: boolean;
   allies: number;
   projectiles: number;
+  /** Pack arrows on screen. */
+  packArrows: number;
+  /** Enemies in a charge (windup or run). */
+  charging: number;
   /** Only with ?debug=1. */
   debug?: {
     grantXp(amount: number): void;
@@ -44,7 +48,7 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
   const snapshot: GameSnapshot = {
     backend, gpu, frames: 0, screen: "menu", tick: 0, level: 0, kills: 0, heroHp: 0, castleHp: 0, enemies: 0, enemyTypes: 0,
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], ultimateAuto: true, allies: 0,
-    projectiles: 0,
+    projectiles: 0, packArrows: 0, charging: 0,
   };
   window.__game = snapshot;
   return snapshot;
@@ -90,7 +94,7 @@ function countTypes(run: Run): number {
 }
 
 /** Counts a rendered frame and copies the run state; `menuOpen` shows "menu" in place of the run state. */
-export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen: boolean): void {
+export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen: boolean, packArrows = 0): void {
   snapshot.frames++;
   if (!run) return;
   snapshot.screen = menuOpen ? "menu" : run.state;
@@ -115,4 +119,11 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
   snapshot.ultimateAuto = run.ultimateAuto;
   snapshot.allies = run.allies.count;
   snapshot.projectiles = run.projectiles.count;
+  snapshot.packArrows = packArrows;
+  let charging = 0;
+  const { enemies } = run;
+  for (let i = 0; i < enemies.capacity; i++) {
+    if (enemies.alive[i] === 1 && enemies.chargeState[i] !== 0) charging++;
+  }
+  snapshot.charging = charging;
 }

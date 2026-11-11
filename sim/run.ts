@@ -9,6 +9,7 @@ import { ALLY_CAPACITY, AllyStore, updateAllies } from "./allies";
 import { PROJECTILE_CAPACITY, ProjectileStore, updateProjectiles } from "./projectiles";
 import { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
 import { updateEnemies } from "./enemy-ai";
+import { BEHAVIOR_IDS } from "./enemy-steer";
 import { healEnemies } from "./enemy-heal";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
@@ -48,13 +49,16 @@ export class Run {
   offer: CardOffer | null = null;
   /** Weighted enemy types per phase, built once here so a step does not allocate. */
   readonly phaseTables: PhaseTable[];
+  /** Enemy type index to its Behavior. */
+  readonly enemyBehavior: Uint8Array;
+  /** Type index of the first enemy type with an aura; -1 when there is none. */
+  readonly auraType: number;
   /** Type index of the elite. */
   readonly eliteType: number;
   /** The step in which the next pack comes. */
   nextPackTick: number;
   /** The last phase whose elites were sent (-1: none yet). */
   elitePhase = -1;
-  nextGate = 0;
   readonly stats: RunStats = { kills: 0, spawned: 0, damageDealt: 0 };
   readonly durationTicks: number;
   /** The ultimate casts by itself; the player can switch this off (Task 7). */
@@ -73,6 +77,8 @@ export class Run {
     this.rng = new Rng(options.seed);
     this.enemies = new EnemyStore(rules.enemies.maxAlive);
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);
+    this.enemyBehavior = Uint8Array.from(data.enemies, (e) => BEHAVIOR_IDS.indexOf(e.behavior));
+    this.auraType = data.enemies.findIndex((e) => e.aura !== undefined);
     this.phaseTables = buildPhaseTables(data);
     this.eliteType = enemyType(data, rules.enemies.elite, "rules.enemies.elite");
     this.nextPackTick = Math.round(rules.run.firstPackSeconds * TICKS_PER_SECOND);

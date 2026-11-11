@@ -10,7 +10,7 @@ function newRun() {
   const data = gameData();
   data.rules.arena = {
     width: 6000, height: 5000, castle: { x: 0, y: -2000 }, heroStart: { x: 0, y: 1500 },
-    gates: [{ x: -1800, y: 2200 }, { x: 1800, y: 2200 }], gateRadius: 150,
+    spawn: { radius: 2000, spread: 150 },
   };
   data.rules.castle.radius = 180;
   data.rules.hero.collision = 32;
@@ -30,7 +30,7 @@ function dist(dx: number, dy: number): number {
 }
 
 function add(run: ReturnType<typeof newRun>, role: number, x: number, y: number): number {
-  return run.enemies.spawn(0, role, 0, x, y, 420, 1, 0);
+  return run.enemies.spawn(0, role, x, y, 420, 1, 0);
 }
 
 function tickAI(run: ReturnType<typeof newRun>): void {
