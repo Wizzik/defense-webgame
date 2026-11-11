@@ -19,6 +19,8 @@ export class BoltFx {
   private readonly bz = new Float32Array(BOLT_POOL);
   private readonly life = new Float32Array(BOLT_POOL);
   private readonly color = new Float32Array(BOLT_POOL * 3);
+  /** True when the last write showed something, so one more write must hide it. */
+  private shown = false;
 
   constructor() {
     this.mesh = createFxMesh(new BoxGeometry(1, 1, 1), BOLT_POOL);
@@ -37,7 +39,11 @@ export class BoltFx {
     this.color[i * 3 + 2] = color[2];
   }
 
+  /** Skips the write and the GPU upload while no bolt is alive. */
   write(now: number): void {
+    const live = this.pool.liveCount(now) > 0;
+    if (!live && !this.shown) return;
+    this.shown = live;
     const m = this.mesh.instanceMatrix.array as Float32Array;
     const c = this.mesh.instanceColor!.array as Float32Array;
     for (let i = 0; i < BOLT_POOL; i++) {

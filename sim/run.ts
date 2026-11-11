@@ -9,6 +9,7 @@ import { ALLY_CAPACITY, AllyStore, updateAllies } from "./allies";
 import { PROJECTILE_CAPACITY, ProjectileStore, updateProjectiles } from "./projectiles";
 import { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
 import { updateEnemies } from "./enemy-ai";
+import { healEnemies } from "./enemy-heal";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
 import { refreshHeroStats } from "./level-up";
@@ -16,6 +17,7 @@ import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import type { TickInput } from "./input";
 import { Rng } from "./rng";
 import { spawnEnemies } from "./spawner";
+import { buildPhaseTables, enemyType, type PhaseTable } from "./spawn-tables";
 import { SpatialHash } from "./spatial-grid";
 import type { CastleState, HeroState, HeroStats, RunStats } from "./world";
 
@@ -44,7 +46,14 @@ export class Run {
   readonly projectiles = new ProjectileStore(PROJECTILE_CAPACITY);
   readonly allies = new AllyStore(ALLY_CAPACITY);
   offer: CardOffer | null = null;
-  spawnCredit = 0;
+  /** Weighted enemy types per phase, built once here so a step does not allocate. */
+  readonly phaseTables: PhaseTable[];
+  /** Type index of the elite. */
+  readonly eliteType: number;
+  /** The step in which the next pack comes. */
+  nextPackTick: number;
+  /** The last phase whose elites were sent (-1: none yet). */
+  elitePhase = -1;
   nextGate = 0;
   readonly stats: RunStats = { kills: 0, spawned: 0, damageDealt: 0 };
   readonly durationTicks: number;
@@ -64,6 +73,9 @@ export class Run {
     this.rng = new Rng(options.seed);
     this.enemies = new EnemyStore(rules.enemies.maxAlive);
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);
+    this.phaseTables = buildPhaseTables(data);
+    this.eliteType = enemyType(data, rules.enemies.elite, "rules.enemies.elite");
+    this.nextPackTick = Math.round(rules.run.firstPackSeconds * TICKS_PER_SECOND);
     this.durationTicks = Math.round(
       (options.durationSeconds ?? rules.run.durationSeconds) * TICKS_PER_SECOND,
     );
@@ -119,6 +131,7 @@ export class Run {
    *   moveHero(this, input);      // Task 3
    *   spawnEnemies(this);         // Task 4
    *   updateEnemies(this);        // Task 4
+   *   healEnemies(this);          // phase 2b-1 (reads the grid built by updateEnemies)
    *   updateHeroCombat(this);     // Task 5
    *   updateAbilities(this);      // Task 6
    *   updateProjectiles(this);    // phase 2a, Task 4
@@ -141,6 +154,7 @@ export class Run {
     moveHero(this, input);
     spawnEnemies(this);
     updateEnemies(this);
+    healEnemies(this);
     updateHeroCombat(this);
     updateAbilities(this);
     updateProjectiles(this);

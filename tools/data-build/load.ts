@@ -69,6 +69,7 @@ export interface ExportUnit {
   cooldown?: number;
   damage_min?: number;
   damage_max?: number;
+  weapon_type?: string;
 }
 
 export interface MapExport {
@@ -114,6 +115,10 @@ export interface EnemyEntry {
   mapName?: string;
   name: Hero["name"];
   xp: number;
+  /** A variant of the map unit: applied to the map's numbers before scaling.yaml. */
+  multipliers?: { hp?: number; damage?: number; moveSpeed?: number; collision?: number };
+  /** Design value, copied as it is. */
+  heal?: { amount: number; range: number; cooldown: number };
 }
 
 export interface Design {

@@ -6,6 +6,8 @@ export type Backend = "WebGPU" | "WebGL2";
 export interface SpikeState {
   backend: Backend;
   n: number;
+  /** GPU name, when the caller knows it. */
+  gpu?: string;
   frames: number;
   avgFps: number;
   low1Fps: number;
@@ -24,6 +26,8 @@ const REFRESH_MS = 500;
 
 /** Frames longer than this (a hidden tab, a debugger pause) are not statistics, so they are skipped. */
 const MAX_FRAME_MS = 250;
+/** The GPU line is cut to this many characters. */
+const GPU_NAME_CHARS = 40;
 
 /** Frame-rate overlay: keeps the last frame durations; the spike also publishes `window.__spike`. */
 export class Overlay {
@@ -43,8 +47,9 @@ export class Overlay {
   }
 
   /** Called once the renderer runs; with `publishState`, `window.__spike` exists from here on. */
-  start(backend: Backend, n: number): void {
+  start(backend: Backend, n: number, gpu?: string): void {
     this.state = { backend, n, frames: 0, avgFps: 0, low1Fps: 0 };
+    if (gpu !== undefined) this.state.gpu = gpu.slice(0, GPU_NAME_CHARS);
     if (this.publishState) window.__spike = this.state;
     this.render(this.state);
   }
@@ -76,11 +81,8 @@ export class Overlay {
 
   private render(state: SpikeState): void {
     const fps = (value: number) => (state.frames > 0 ? value.toFixed(1) : "-");
-    this.element.textContent = [
-      `backend  ${state.backend}`,
-      `n        ${state.n}`,
-      `avg fps  ${fps(state.avgFps)}`,
-      `1% low   ${fps(state.low1Fps)}`,
-    ].join("\n");
+    const gpu = state.gpu === undefined ? "" : `gpu      ${state.gpu}\n`;
+    this.element.textContent =
+      `backend  ${state.backend}\n${gpu}n        ${state.n}\navg fps  ${fps(state.avgFps)}\n1% low   ${fps(state.low1Fps)}`;
   }
 }

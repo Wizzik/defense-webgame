@@ -2,7 +2,7 @@ import type { MessageKey } from "./i18n";
 
 export const messagesCs = {
   "menu.title": "Defense Webgame",
-  "menu.subtitle": "Ubraň hrad tři minuty.",
+  "menu.subtitle": "Ubraň hrad pět minut.",
   "menu.chooseHero": "Vyber hrdinu",
   "menu.start": "Hrát",
   "menu.controls": "Pohyb WASD nebo šipkami, mezerník úskok, R ultimátka. Kouzla se sesílají sama.",
@@ -10,6 +10,8 @@ export const messagesCs = {
   "attr.str": "Síla",
   "attr.agi": "Obratnost",
   "attr.int": "Inteligence",
+  "menu.gpuWarning":
+    "Prohlížeč kreslí hru bez grafické karty (softwarové vykreslování), takže poběží pomalu. Aktualizuj ovladač grafiky, nebo v nastavení prohlížeče zapni hardwarovou akceleraci.",
   "menu.language": "Jazyk",
   "menu.soundOn": "Zvuk: zapnutý",
   "menu.soundOff": "Zvuk: vypnutý",

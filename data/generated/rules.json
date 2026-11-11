@@ -3,8 +3,9 @@
     "hero": "stonehorn"
   },
   "run": {
-    "durationSeconds": 180,
+    "durationSeconds": 300,
     "phaseSeconds": 50,
+    "firstPackSeconds": 2,
     "timeScaling": {
       "seconds": 1200,
       "cap": 2
@@ -63,33 +64,105 @@
       "attack": 40,
       "ability": 90,
       "seconds": 0.15
-    }
+    },
+    "elite": "captain"
   },
   "phases": [
     {
-      "enemy": "shieldbearer",
-      "spawnPerSecond": 1.2,
-      "hunterShare": 0.2
+      "mix": {
+        "shieldbearer": 8,
+        "scout": 3
+      },
+      "pack": {
+        "min": 6,
+        "max": 10,
+        "everySeconds": 6
+      },
+      "hunterShare": 0.24,
+      "elites": 0
     },
     {
-      "enemy": "shieldbearer",
-      "spawnPerSecond": 1.8,
-      "hunterShare": 0.2
+      "mix": {
+        "shieldbearer": 6,
+        "scout": 3,
+        "musketeer": 2
+      },
+      "pack": {
+        "min": 8,
+        "max": 12,
+        "everySeconds": 6
+      },
+      "hunterShare": 0.28,
+      "elites": 0
     },
     {
-      "enemy": "shieldbearer",
-      "spawnPerSecond": 2.4,
-      "hunterShare": 0.2
+      "mix": {
+        "shieldbearer": 5,
+        "scout": 3,
+        "musketeer": 2,
+        "chaplain": 1,
+        "lancer": 1
+      },
+      "pack": {
+        "min": 10,
+        "max": 14,
+        "everySeconds": 6
+      },
+      "hunterShare": 0.28,
+      "elites": 1
     },
     {
-      "enemy": "shieldbearer",
-      "spawnPerSecond": 3,
-      "hunterShare": 0.2
+      "mix": {
+        "shieldbearer": 4,
+        "scout": 3,
+        "musketeer": 3,
+        "chaplain": 2,
+        "lancer": 2
+      },
+      "pack": {
+        "min": 12,
+        "max": 16,
+        "everySeconds": 5
+      },
+      "hunterShare": 0.32,
+      "elites": 1
+    },
+    {
+      "mix": {
+        "shieldbearer": 4,
+        "scout": 2,
+        "musketeer": 3,
+        "chaplain": 2,
+        "lancer": 3
+      },
+      "pack": {
+        "min": 14,
+        "max": 18,
+        "everySeconds": 5
+      },
+      "hunterShare": 0.32,
+      "elites": 2
+    },
+    {
+      "mix": {
+        "shieldbearer": 3,
+        "scout": 3,
+        "musketeer": 3,
+        "chaplain": 2,
+        "lancer": 3
+      },
+      "pack": {
+        "min": 16,
+        "max": 20,
+        "everySeconds": 4
+      },
+      "hunterShare": 0.36,
+      "elites": 2
     }
   ],
   "progression": {
-    "xpFirst": 5,
-    "xpStep": 3,
+    "xpFirst": 7,
+    "xpStep": 4.5,
     "magnetRadius": 300,
     "crystalSpeed": 900,
     "pickupRadius": 56,

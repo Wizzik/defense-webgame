@@ -12,6 +12,8 @@ export const RulesSchema = z.object({
   run: z.object({
     durationSeconds: positive,
     phaseSeconds: positive,
+    /** The first pack of the run comes at this time. */
+    firstPackSeconds: nonNegative,
     timeScaling: z.object({ seconds: positive, cap: z.number().min(1) }).strict(),
   }).strict(),
   arena: z.object({
@@ -43,11 +45,22 @@ export const RulesSchema = z.object({
     /** Knockback for the base attack and for an ability: initial speed = value / `seconds` (world units),
      *  fading linearly to zero over `seconds`, so the enemy travels about 0.67 × value. */
     knockback: z.object({ attack: nonNegative, ability: nonNegative, seconds: positive }).strict(),
+    /** The enemy type that comes as the elite of a phase. */
+    elite: Slug,
   }).strict(),
+  /** Enemies come in packs: one pack is one gate and one role. */
   phases: z.array(z.object({
-    enemy: Slug,
-    spawnPerSecond: positive,
+    /** Enemy id to weight; each member of a pack is drawn from it. */
+    mix: z.record(Slug, positive).refine((mix) => Object.keys(mix).length > 0, "needs at least one enemy"),
+    pack: z.object({
+      min: z.number().int().min(1),
+      max: z.number().int().min(1),
+      everySeconds: positive,
+    }).strict().refine((pack) => pack.min <= pack.max, "min is above max"),
+    /** Chance that a pack hunts the hero in place of walking to the castle. */
     hunterShare: z.number().min(0).max(1),
+    /** Elites that come once, with the first pack of the phase. */
+    elites: z.number().int().min(0),
   }).strict()).min(1),
   progression: z.object({
     xpFirst: positive,

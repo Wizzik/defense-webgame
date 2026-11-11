@@ -5,6 +5,7 @@ import { heroStats } from "../hero";
 import { NO_INPUT } from "../input";
 import { createRun } from "../run";
 import { gameData } from "../testing/game-data";
+import { silenceSpawns } from "../testing/silence";
 
 function newRun(intelligence = 24) {
   const data = gameData();
@@ -16,7 +17,7 @@ function newRun(intelligence = 24) {
     collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
     dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 },
   };
-  data.rules.phases[0].spawnPerSecond = 0;
+  silenceSpawns(data);
   data.constants.defenseArmor = 0.02;
   const ab = data.abilities.find((a) => a.id === "rock-rupture");
   if (!ab || ab.kind !== "line") throw new Error("test setup");

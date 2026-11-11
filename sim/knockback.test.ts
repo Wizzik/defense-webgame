@@ -4,6 +4,7 @@ import { updateEnemies } from "./enemy-ai";
 import { Role } from "./enemies";
 import { createRun } from "./run";
 import { gameData } from "./testing/game-data";
+import { silenceSpawns } from "./testing/silence";
 
 function newRun() {
   const data = gameData();
@@ -13,7 +14,7 @@ function newRun() {
   };
   data.rules.castle.radius = 180;
   data.rules.hero.collision = 32;
-  data.rules.phases[0].spawnPerSecond = 0;
+  silenceSpawns(data);
   data.rules.enemies.knockback = { attack: 40, ability: 90, seconds: 0.15 };
   data.enemies[0].moveSpeed = 0.0001;
   data.enemies[0].collision = 31;

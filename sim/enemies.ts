@@ -22,6 +22,8 @@ export class EnemyStore {
   readonly damageScale: Float64Array;
   readonly attackCooldown: Int32Array;
   readonly stunTicks: Int32Array;
+  /** Steps until an enemy with a heal may heal again. */
+  readonly healCooldown: Int32Array;
   readonly spawnTick: Int32Array;
   readonly lastHitTick: Int32Array;
   readonly lastAttackTick: Int32Array;
@@ -52,6 +54,7 @@ export class EnemyStore {
     this.damageScale = new Float64Array(capacity);
     this.attackCooldown = new Int32Array(capacity);
     this.stunTicks = new Int32Array(capacity);
+    this.healCooldown = new Int32Array(capacity);
     this.spawnTick = new Int32Array(capacity);
     this.lastHitTick = new Int32Array(capacity);
     this.lastAttackTick = new Int32Array(capacity);
@@ -93,6 +96,7 @@ export class EnemyStore {
     this.damageScale[slot] = damageScale;
     this.attackCooldown[slot] = 0;
     this.stunTicks[slot] = 0;
+    this.healCooldown[slot] = 0;
     this.spawnTick[slot] = tick;
     this.lastHitTick[slot] = -1;
     this.lastAttackTick[slot] = -1;

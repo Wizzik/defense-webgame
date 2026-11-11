@@ -12,11 +12,13 @@ import { readGameParams } from "./game/params";
 import { Session } from "./game/session";
 import { Overlay } from "./perf/overlay";
 import { FollowCamera } from "./render/camera";
-import { createRenderer, NoGpuError } from "./render/gpu";
+import { createRenderer, describeGpu, NoGpuError } from "./render/gpu";
 import { CrystalView } from "./render/crystal-view";
 import { DamageNumbers } from "./render/damage-numbers";
 import { AbilityFx } from "./render/ability-fx";
 import { Effects } from "./render/effects";
+import { EnemyFx } from "./render/enemy-fx";
+import { tintTable } from "./render/enemy-tints";
 import { EnemyCrowd, IDLE_CLIP, PUNCH_CLIP, VAT_FPS, WALK_CLIP } from "./render/enemy-crowd";
 import { AllyView } from "./render/ally-view";
 import { HeroView } from "./render/hero-view";
@@ -32,7 +34,6 @@ import "./ui/style.css";
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/robot-expressive/RobotExpressive.glb`;
 
-const ENEMY_TINT = 0x771111;
 const LANG_KEY = "defense-webgame.lang";
 const MUTE_KEY = "defense-webgame.muted";
 const HERO_KEY = "defense-webgame.hero";
@@ -130,6 +131,7 @@ async function start(): Promise<void> {
   const data = loadGameData();
   const hero = pickHero(data, params.hero, readStoredHero());
   const { renderer, backend } = await createRenderer(params.renderer, document.body);
+  const gpu = describeGpu(renderer.backend, backend);
   const gltf = await loadModel();
 
   const scene = new Scene();
@@ -143,17 +145,18 @@ async function start(): Promise<void> {
   const crowd = new EnemyCrowd(
     bakeVat(gltf, [WALK_CLIP, PUNCH_CLIP, IDLE_CLIP], VAT_FPS),
     data.rules.enemies.maxAlive,
-    ENEMY_TINT,
+    tintTable(data.enemies),
   );
   const crystals = new CrystalView(CRYSTAL_CAPACITY);
   const effects = new Effects(data);
   const abilityFx = new AbilityFx();
+  const enemyFx = new EnemyFx(data);
   const allyView = new AllyView(gltf, ALLY_CAPACITY);
-  scene.add(crowd.mesh, crystals.mesh, effects.object, abilityFx.object, ...allyView.objects);
+  scene.add(crowd.mesh, crystals.mesh, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
   const sfx = new Sfx();
   sfx.setMuted(readStoredMuted());
-  session.views.push(heroView, allyView, crowd, crystals, effects, abilityFx, numbers, new SoundView(sfx));
+  session.views.push(heroView, allyView, crowd, crystals, effects, abilityFx, enemyFx, numbers, new SoundView(sfx));
   // the menu shows a fresh, paused run behind it
   session.start(params.seed, true, hero);
 
@@ -162,13 +165,13 @@ async function start(): Promise<void> {
     followCamera.resize(innerWidth / innerHeight);
   });
 
-  const snapshot = publishSnapshot(backend);
+  const snapshot = publishSnapshot(backend, gpu);
   if (params.debug) addDebugHooks(snapshot, () => session.run);
-  const ui = createUi(data, session, followCamera, sfx, randomSeed, hero);
+  const ui = createUi(data, session, followCamera, sfx, randomSeed, hero, gpu.software);
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
   if (overlay) {
     document.getElementById("overlay")!.hidden = false;
-    overlay.start(backend, 0);
+    overlay.start(backend, 0, gpu.name);
   }
 
   // without this, WebGL2 skips objects while their programs compile in parallel, so the first
@@ -192,6 +195,7 @@ function createUi(
   sfx: Sfx,
   nextSeed: () => number,
   initialHero: string,
+  softwareGpu: boolean,
 ): Ui {
   const root = document.getElementById("ui")!;
   let heroId = initialHero;
@@ -233,6 +237,7 @@ function createUi(
     menu.setSound(!value);
   };
   menu.setSound(!muted);
+  menu.setGpuWarning(softwareGpu);
   addEventListener("keydown", (event) => {
     if (event.code === "KeyM" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
       setMuted(!muted);

@@ -59,6 +59,10 @@ export class Effects implements RunView {
   private nextSpike = 0;
   private nextPop = 0;
   private lastTick = 0;
+  /** Simulation time until which some spike or pop is (or will be) visible. */
+  private busyUntil = Number.NEGATIVE_INFINITY;
+  /** True when the last write showed (or awaited) something, so one more write must hide it. */
+  private shown = true;
 
   constructor(data: GameData) {
     this.data = data;
@@ -95,6 +99,7 @@ export class Effects implements RunView {
         this.popZ[p] = -events.y[i] * SCENE_SCALE;
         this.popSize[p] = 2 * def.collision * SCENE_SCALE * POP_SIZE;
         this.popStart[p] = now;
+        this.busyUntil = Math.max(this.busyUntil, now + POP_LIFE);
       }
     }
   }
@@ -103,7 +108,11 @@ export class Effects implements RunView {
     this.write((run.tick + alpha) / TICKS_PER_SECOND);
   }
 
+  /** Skips the write and the GPU upload while nothing is visible or waiting. */
   private write(now: number): void {
+    const live = now <= this.busyUntil;
+    if (!live && !this.shown) return;
+    this.shown = live;
     const sm = this.spikes.instanceMatrix.array as Float32Array;
     for (let p = 0; p < SPIKE_POOL; p++) {
       const age = now - this.spikeStart[p];
@@ -156,6 +165,7 @@ export class Effects implements RunView {
       this.spikeX[p] = (events.x[event] + events.u[event] * d) * SCENE_SCALE;
       this.spikeZ[p] = -(events.y[event] + events.v[event] * d) * SCENE_SCALE;
       this.spikeStart[p] = now + (speed ? d / speed : 0);
+      this.busyUntil = Math.max(this.busyUntil, this.spikeStart[p] + SPIKE_LIFE);
     }
   }
 
@@ -164,6 +174,7 @@ export class Effects implements RunView {
     this.popStart.fill(-1000);
     this.nextSpike = 0;
     this.nextPop = 0;
+    this.busyUntil = Number.NEGATIVE_INFINITY;
   }
 
   private hideAll(): void {

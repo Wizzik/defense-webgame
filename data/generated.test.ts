@@ -94,6 +94,15 @@ describe("generated game data", () => {
     expect(xp(JSON.parse(read("enemies.json")))).toEqual(xp(designEntries("enemies.yaml") as { id: string; xp?: number }[]));
   });
 
+  it("enemies have six types with their attack kinds", () => {
+    const enemies = JSON.parse(read("enemies.json")) as { id: string; attack: { kind: string }; heal?: unknown }[];
+    expect(enemies.map((e) => e.id)).toEqual(["shieldbearer", "scout", "musketeer", "chaplain", "lancer", "captain"]);
+    const ranged = enemies.filter((e) => e.attack.kind === "ranged").map((e) => e.id);
+    expect(ranged).toEqual(["musketeer", "chaplain"]);
+    expect(enemies.filter((e) => e.attack.kind !== "ranged").every((e) => e.attack.kind === "melee")).toBe(true);
+    expect(enemies.filter((e) => e.heal !== undefined).map((e) => e.id)).toEqual(["chaplain"]);
+  });
+
   it("carries the phase 2a mechanics", () => {
     const abilities = JSON.parse(read("abilities.json")) as { id: string; kind: string; params: Record<string, number[]> }[];
     const heroes = JSON.parse(read("heroes.json")) as { id: string; signatureAbilities: string[] }[];

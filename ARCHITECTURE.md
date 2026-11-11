@@ -39,23 +39,26 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 
 ## Simulation
 
-- `createRun(data, { seed })` returns a `Run`. `run.step(input: TickInput)` advances one fixed step (30 per second). `savePrevious` runs first, then systems in a fixed order: actions (R, T, Space), hero movement, spawning, enemy AI, hero combat, abilities, projectiles, allies, crystals, castle regeneration, end check, level-up offer. In the `levelUp` state only `chooseCard` runs.
+- `createRun(data, { seed })` returns a `Run`. `run.step(input: TickInput)` advances one fixed step (30 per second). `savePrevious` runs first, then systems in a fixed order: actions (R, T, Space), hero movement, spawning, enemy AI, enemy healing, hero combat, abilities, projectiles, allies, crystals, castle regeneration, end check, level-up offer. In the `levelUp` state only `chooseCard` runs.
 - State lives in stores of typed arrays with a fixed capacity (`EnemyStore`, `CrystalStore`) and in hero and castle structs. Each step writes an `EventLog` (hits, deaths, casts, pickups, level-ups, run end) that the client turns into effects.
 - Abilities: a hero has 4 slots (`run.abilities`, three signature spells and the ultimate). `sim/abilities/kinds.ts` is the registry: one updater per ability kind (`line`, `nova`, `area`, `ticking_area`, `projectile`, `cone`, `aura`, `on_hit`, `on_cast`, `heal`, `shield`, `summon`), run every step for each learned slot; a learned slot whose kind has no updater throws on the first step, and cards skip such kinds. `slots.ts` holds slot state and the cast mode (auto, manual, none), `targeting.ts` the targeting rules. Spell damage and healing scale with the hero's spell power (INT), and spells ignore armor.
 - `ProjectileStore` holds flying bolts (the hit is instant, the bolt is an effect or a homing hit) and `AllyStore` holds summoned units (serpent totems and wards, shadow copies); allies are not attacked by enemies and expire. Both are typed arrays and part of `stateHash`.
+- Spawning: enemies come in packs (`sim/spawner.ts`). A phase of `rules.phases` gives the weights of the enemy types (`mix`), the pack size and interval (`pack`), the chance that a pack hunts the hero (`hunterShare`) and its `elites`. A pack has one gate (gates alternate) and one role and appears at once in a square around the gate that grows with the pack. The elites of a phase (`rules.enemies.elite`) come once, with its first pack and ahead of the others. At the cap (`maxAlive`) a pack fills only the free slots; nothing is banked. `sim/spawn-tables.ts` builds the weighted tables once per run.
+- Enemy types are data (`design/enemies.yaml`): a map unit plus optional `multipliers` (the runner and the elite are variants). The attack is `melee` or `ranged`; a ranged attack hits at once like a hero's (the shot is only an effect). An enemy with `heal` (the chaplain) heals the most wounded enemy in range, itself included: `healEnemies` (`sim/enemy-heal.ts`) runs right after the enemy AI and reads its grid.
 - Determinism: a seeded `Rng` (mulberry32), no transcendental `Math` functions, no allocation per step. `stateHash(run)` (FNV-1a) backs the determinism and replay tests.
 - Units are the map's world units with `y` pointing north. The client scales by `1/64` and draws north as `-z`.
-- `sim/bot.ts` plays runs without graphics. `npm run sim:run` prints run summaries for balance tuning.
+- `sim/bot.ts` plays runs without graphics. `npm run sim:run` prints run summaries for balance tuning: the result, the level and `hero low` (the lowest hero hp of the run in percent); `--idle` plays a player who does nothing.
 
 ## Client
 
 - Renderer: Three.js `WebGPURenderer`, WebGPU with an automatic WebGL2 fallback (`?renderer=webgl2` forces it). The overlay shows the backend in use.
-- Crowd: one `InstancedMesh` for all enemies (sized per instance by type) with the animation baked into a texture (VAT) at load time. `SpatialHash` lives in `sim/spatial-grid.ts` and serves the sim's separation and the spike, not the game client.
+- Crowd: one `InstancedMesh` for all enemies (sized per instance by type, coloured per instance by type from `enemy-tints.ts`) with the animation baked into a texture (VAT) at load time. `SpatialHash` lives in `sim/spatial-grid.ts` and serves the sim's separation and the spike, not the game client.
 - `client/main.ts` wires the pieces, including the menu and restart wiring (`createUi`); `client/game/` holds the session (run, frames, input), the fixed-step loop with interpolation (`loop.ts`), URL parameters (`params.ts`), keyboard input and the debug snapshot (`debug.ts`).
 - `client/render/` draws the arena, hero, castle, enemies, crystals and spell effects from the simulation state and its `EventLog`. It also handles the death pop, the pooled DOM damage numbers (`damage-numbers.ts`, pure pool logic in `damage-number-pool.ts`) and the camera shake (`FollowCamera.shake`). Effects freeze while the run is paused.
 - `client/audio/` synthesizes the sound effects with Web Audio, with no audio assets. `Sfx` makes the sounds, `SoundView` turns events into sounds, and `Throttle` allows each sound at most 4 times per 50 ms. The `AudioContext` is created on the Start click. M or the menu toggle mutes, and the choice is stored in `localStorage`.
 - `client/render/` also holds the ability effects (`ability-fx.ts`), projectile and ally views, and the hero colours (`hero-tints.ts`). `client/ui/` is an HTML/CSS layer: menu with hero choice, ability HUD, HUD, upgrade cards, end screen and castle pointer. Texts come from `messages-en.ts` and `messages-cs.ts` through `t(lang, key)`.
-- `client/perf/` has the frame-rate overlay (`?fps=1`, bottom-left so it does not cover the HUD).
+- `client/render/enemy-fx.ts` draws the shots of ranged enemies and the chaplains' heal beams. Effect meshes skip their write and GPU upload while nothing is alive.
+- `client/perf/` has the frame-rate overlay (`?fps=1`, bottom-left so it does not cover the HUD); it also names the GPU. `describeGpu` (`client/render/gpu.ts`) reads the name, and the menu warns when the browser draws without the graphics card (software rendering).
 - Debug: `window.__game` (game page) and `window.__spike` (benchmark). Game URL params: `seed`, `speed`, `duration`, `hero`, `debug`, `fps`, `lang`, `renderer`; the spike takes `n`, `renderer` and `seed`.
 
 ## Tests and delivery
@@ -67,7 +70,8 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 ## Glossary
 
 - **Sieger** (obléhač): an enemy that walks to the castle. **Hunter** (lovec): an enemy that chases the hero.
-- **Phase**: a 50-second part of the run timeline with its own spawn rate and hunter share.
+- **Phase**: a 50-second part of the run timeline with its own enemy mix, pack size and interval, hunter share and elites. A run has 6 phases (5 minutes).
+- **Pack**: a group of enemies that arrives at once from one gate with one role.
 - **Slice**: the phase-1 vertical slice, a 3-minute run.
 - **VAT**: vertex animation texture.
 - **SDD**: subagent-driven development. Its working files live in `.superpowers/sdd/<plan>/`, excluded from git.

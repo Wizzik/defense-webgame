@@ -4,6 +4,7 @@ import { EventKind } from "./events";
 import { updateEnemies } from "./enemy-ai";
 import { createRun } from "./run";
 import { gameData } from "./testing/game-data";
+import { silenceSpawns } from "./testing/silence";
 
 function newRun() {
   const data = gameData();
@@ -15,12 +16,12 @@ function newRun() {
   data.rules.hero.collision = 32;
   data.rules.enemies.siegerAggroRange = 250;
   data.rules.enemies.leashRange = 900;
-  data.rules.phases[0].spawnPerSecond = 0;
+  silenceSpawns(data);
   data.constants.defenseArmor = 0.02;
   const e = data.enemies[0];
   e.moveSpeed = 270;
   e.collision = 31;
-  e.attack = { range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 };
+  e.attack = { kind: "melee", range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 };
   return createRun(data, { seed: 3, durationSeconds: 100000 });
 }
 

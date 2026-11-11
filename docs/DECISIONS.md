@@ -4,6 +4,25 @@ Decisions that still apply. Check here before you change a rule. Newest first in
 
 ## Product (Petr)
 
+- 2026-11-11 (phase 2b-1, swarms and enemy types; Petr approved the four marked points on 2026-11-10, the rest is the plan's choice):
+  - types (Petr): the map's four humans with their numbers plus a runner and an elite as variants. Shieldbearer (Footman), Scout (runner, Footman), Musketeer (Rifleman), Chaplain (Priest), Lancer (Knight), Captain (elite, Knight). The elite is only bigger and has its own colour for now;
+  - ranged attack (Petr): an instant hit like a hero's; the shot is only an effect. The only way to dodge is to leave the range;
+  - length (Petr): 5 minutes, 6 phases of 50 s;
+  - chaplain (Petr): heals wounded enemies in range, itself too: 8 HP × the time scaling, every 1 s, range 450, the most wounded target first. The map uses the default WC3 Heal (25 HP for mana); 8 ≈ 25 × 0.3, the factor of enemy HP;
+  - variants: Scout HP ×0.5, speed ×1.5, size ×0.8, damage ×0.6. Captain HP ×3, damage ×1.5, size ×1.5, speed ×0.8. They multiply the map's numbers, then `scaling.yaml` applies. The Lancer keeps the map's speed (faster than the Shieldbearer); it is a tank by HP;
+  - packs: one pack is one gate (gates alternate) and one role (hunters with the chance `hunterShare`). All appear at once in a square around the gate with the half side `gateRadius × max(1, √(size/8))`. The first pack comes at 2 s;
+  - cap 150: a pack fills only the free slots, the rest is dropped and nothing is banked;
+  - elites: the phase's Captains come with its first pack, ahead of the others. Elite rushes at 3:00, 6:00 … come with the rest of 2b;
+  - XP: Shieldbearer 1, Scout 1, Musketeer 2, Chaplain 2, Lancer 4, Captain 12;
+  - colours: Shieldbearer red `0xc23b3b`, Scout yellow `0xd8c84a`, Musketeer blue `0x3b7bd9`, Chaplain white `0xe6e6f2`, Lancer steel `0x7a8296`, Captain violet `0xb84ad8`. No orange;
+  - performance: effect meshes are not uploaded to the GPU while they show nothing, the `?fps=1` overlay names the GPU, and the menu warns on software rendering (SwiftShader, llvmpipe, Microsoft Basic Render Driver or a fallback adapter).
+- 2026-11-11 (phase 2b-1, tuning result, not Petr's choice):
+  - targets per hero over seeds 1–5: the autopilot wins 3–5, an idle run loses, the hero drops below 70 % HP in at least 3 runs, the average level is 10–18 with the lowest hero at 70 % of the median or more, and 600–1000 enemies arrive;
+  - changes against the plan's first numbers: `xpFirst` 7 and `xpStep` 4.5 (was 5 and 3), `hunterShare` ×0.8 in every phase (0.24 / 0.28 / 0.28 / 0.32 / 0.32 / 0.36), and the Chaplain's damage ×0.5 (its 600-range attack outranged every hero but one);
+  - the autopilot changed too: a ranged hero now steps up to an enemy nearer than 800 that its base attack does not reach. Before, it stood on its post while shooters hit it, so the Nightglaive bot lost every run whatever the numbers were;
+  - result (autopilot | idle): Stonehorn 4 of 5 won, level 17.0, in danger 5 of 5 | idle loses 5 of 5. Nightglaive 3 won, level 20.0, in danger 5 | idle loses 5. Gravecaller 5 won, level 16.0, in danger 0 | idle wins 5. Serpent Shaman 5 won, level 15.6, in danger 5 | idle loses 5. About 670–770 enemies a run;
+  - **open gap:** Gravecaller never drops below 70 % HP and wins even an idle run, because Grave Grasp heals 50 HP per enemy hit from range 800. Phase numbers that would threaten it kill the other three heroes, and this phase was not allowed to change one hero's spell. The tests keep the level that is met (`sim/bot.test.ts`). The Nightglaive's average level (20.0) is above the 10–18 target. Both wait for Petr's decision (lower `healPerHit`, or leave it until the rest of 2b);
+  - the run of 2a was 3 minutes with one type, about 360 enemies and level about 11; this entry replaces that pace.
 - 2026-11-10 (phase 2a, heroes and abilities; Petr approved the plan):
   - scope: only heroes and their spells; the run stays 3 minutes with one enemy type, shop and more enemies come in 2b and 2c;
   - start and cards: the hero starts with the 1st signature spell; cards offer a new spell, a spell level, the ultimate and attributes. The ultimate can be learned from hero level 6 and its 2nd level from 12 (map: 10). Card rerolls come in 2d;

@@ -4,6 +4,7 @@ import { stateHash } from "./hash";
 import { NO_INPUT } from "./input";
 import { createRun } from "./run";
 import { gameData } from "./testing/game-data";
+import { silenceSpawns } from "./testing/silence";
 
 function newRun(durationSeconds = 100) {
   const data = gameData();
@@ -13,7 +14,7 @@ function newRun(durationSeconds = 100) {
   data.rules.arena.castle = { x: 0, y: -2000 };
   data.rules.hero.collision = 32;
   // Nobody spawns, so no enemy pushes the hero.
-  for (const phase of data.rules.phases) phase.spawnPerSecond = 0;
+  silenceSpawns(data);
   // The movement tests count in world units, so the hero speed is pinned.
   for (const hero of data.heroes) hero.moveSpeed = 300;
   return createRun(data, { seed: 1, durationSeconds });

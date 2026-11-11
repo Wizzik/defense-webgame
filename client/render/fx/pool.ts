@@ -25,6 +25,16 @@ export class FxPool {
     return age >= 0 && age <= this.life ? age : -1;
   }
 
+  /** Entries whose age is in [0, life]. */
+  liveCount(now: number): number {
+    let n = 0;
+    for (let i = 0; i < this.capacity; i++) {
+      const age = now - this.start[i]!;
+      if (age >= 0 && age <= this.life) n++;
+    }
+    return n;
+  }
+
   reset(): void {
     this.start.fill(Number.NEGATIVE_INFINITY);
     this.next = 0;

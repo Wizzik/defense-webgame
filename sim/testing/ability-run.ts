@@ -4,6 +4,7 @@ import type { GameData } from "../../data/schema";
 import { Role } from "../enemies";
 import { createRun } from "../run";
 import { gameData } from "./game-data";
+import { silenceSpawns } from "./silence";
 
 export function quietData(): GameData {
   const data = gameData();
@@ -11,7 +12,7 @@ export function quietData(): GameData {
     width: 6000, height: 5000, castle: { x: 0, y: -2400 }, heroStart: { x: 0, y: 0 },
     gates: [{ x: -1800, y: 2200 }, { x: 1800, y: 2200 }], gateRadius: 150,
   };
-  data.rules.phases[0].spawnPerSecond = 0;
+  silenceSpawns(data);
   data.rules.enemies.knockback = { attack: 0, ability: 0, seconds: 0.15 };
   data.enemies[0].collision = 31;
   return data;

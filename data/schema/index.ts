@@ -91,8 +91,13 @@ export function validateGameData(data: unknown): GameData {
   }
 
   rules.phases.forEach((p, i) => {
-    if (!enemyIds.has(p.enemy)) errors.push(`rules.phases.${i}.enemy: unknown enemy "${p.enemy}"`);
+    for (const id of Object.keys(p.mix)) {
+      if (!enemyIds.has(id)) errors.push(`rules.phases.${i}.mix: unknown enemy "${id}"`);
+    }
   });
+  if (!enemyIds.has(rules.enemies.elite)) {
+    errors.push(`rules.enemies.elite: unknown enemy "${rules.enemies.elite}"`);
+  }
   const covered = rules.phases.length * rules.run.phaseSeconds;
   if (covered < rules.run.durationSeconds) {
     errors.push(`rules.phases: phases cover ${covered} s, the run lasts ${rules.run.durationSeconds} s`);
