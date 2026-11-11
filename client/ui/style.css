@@ -465,3 +465,14 @@
 .damage-number.spell {
   color: #ff9a2e;
 }
+
+.menu-warning {
+  max-width: 320px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid #d8c84a;
+  border-radius: 6px;
+  color: #f0e6a8;
+  font-size: 14px;
+  line-height: 1.35;
+}

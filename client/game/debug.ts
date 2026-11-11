@@ -1,9 +1,10 @@
 import { debugGrantXp, debugSetAbilityLevel, type Run } from "../../sim";
-import type { Backend } from "../render/gpu";
+import type { Backend, GpuInfo } from "../render/gpu";
 
 /** Read by the e2e tests; refreshed every frame. */
 export interface GameSnapshot {
   backend: Backend;
+  gpu: GpuInfo;
   frames: number;
   screen: "menu" | "playing" | "levelUp" | "won" | "lost";
   tick: number;
@@ -32,9 +33,9 @@ declare global {
 }
 
 /** Creates the snapshot and publishes it as `window.__game`. */
-export function publishSnapshot(backend: Backend): GameSnapshot {
+export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
   const snapshot: GameSnapshot = {
-    backend, frames: 0, screen: "menu", tick: 0, level: 0, kills: 0, heroHp: 0, castleHp: 0, enemies: 0,
+    backend, gpu, frames: 0, screen: "menu", tick: 0, level: 0, kills: 0, heroHp: 0, castleHp: 0, enemies: 0,
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], ultimateAuto: true, allies: 0,
     projectiles: 0,
   };

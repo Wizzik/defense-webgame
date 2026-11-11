@@ -10,6 +10,8 @@ export const messagesCs = {
   "attr.str": "Síla",
   "attr.agi": "Obratnost",
   "attr.int": "Inteligence",
+  "menu.gpuWarning":
+    "Prohlížeč kreslí hru bez grafické karty (softwarové vykreslování), takže poběží pomalu. Aktualizuj ovladač grafiky, nebo v nastavení prohlížeče zapni hardwarovou akceleraci.",
   "menu.language": "Jazyk",
   "menu.soundOn": "Zvuk: zapnutý",
   "menu.soundOff": "Zvuk: vypnutý",

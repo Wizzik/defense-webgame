@@ -37,4 +37,13 @@ describe("FxPool", () => {
     expect(pool.age(i, 0.1)).toBe(-1);
     expect(pool.add(0)).toBe(0);
   });
+
+  it("liveCount counts entries within their life", () => {
+    const pool = new FxPool(4, 1);
+    pool.add(0);
+    pool.add(0.5);
+    expect(pool.liveCount(0.8)).toBe(2);
+    expect(pool.liveCount(1.2)).toBe(1);
+    expect(pool.liveCount(2)).toBe(0);
+  });
 });

@@ -64,6 +64,20 @@ test("menu starts a run on the available backend", async ({ page }, testInfo) =>
   expect(stdDev, `luminance stddev ${stdDev.toFixed(2)}`).toBeGreaterThan(2.5);
 });
 
+test("menu warns about software rendering only on a software GPU", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en");
+  const start = page.locator("#start");
+  await expect(start).toHaveText("Start", { timeout: 90_000 });
+  const gpu = await page.evaluate(() => window.__game!.gpu);
+  expect(gpu.name.length).toBeGreaterThan(0);
+  const warning = page.locator("#gpu-warning");
+  if (gpu.software) await expect(warning).toBeVisible();
+  else await expect(warning).toBeHidden();
+  // the warning never blocks the start
+  await start.click();
+  await waitForScreen(page, "playing");
+});
+
 test("level-up shows three cards and a pick resumes the run", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&debug=1&lang=cs");
   await page.locator("#start").click();

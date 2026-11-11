@@ -16,6 +16,8 @@ export class BlastFx {
   private readonly z = new Float32Array(BLAST_POOL);
   private readonly size = new Float32Array(BLAST_POOL);
   private readonly color = rgb(BLAST_COLOR);
+  /** True when the last write showed something, so one more write must hide it. */
+  private shown = false;
 
   constructor() {
     this.mesh = createFxMesh(new SphereGeometry(0.5, 12, 8), BLAST_POOL);
@@ -29,7 +31,11 @@ export class BlastFx {
     this.size[i] = diameter;
   }
 
+  /** Skips the write and the GPU upload while no blast is alive. */
   write(now: number): void {
+    const live = this.pool.liveCount(now) > 0;
+    if (!live && !this.shown) return;
+    this.shown = live;
     const m = this.mesh.instanceMatrix.array as Float32Array;
     const c = this.mesh.instanceColor!.array as Float32Array;
     const [r, g, b] = this.color;

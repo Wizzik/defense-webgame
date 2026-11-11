@@ -34,6 +34,8 @@ export class RingFx {
   private readonly healX = new Float32Array(HEAL_POOL);
   private readonly healZ = new Float32Array(HEAL_POOL);
   private readonly healRgb = rgb(HEAL_COLOR);
+  /** True when the last write showed something, so one more write must hide it. */
+  private shown = false;
 
   constructor() {
     const flat = (geometry: RingGeometry | CircleGeometry): typeof geometry => geometry.rotateX(-Math.PI / 2);
@@ -61,7 +63,11 @@ export class RingFx {
     this.healZ[i] = z;
   }
 
+  /** Skips the write and the GPU upload while no ring is alive. */
   write(now: number): void {
+    const live = this.pool.liveCount(now) + this.healPool.liveCount(now) > 0;
+    if (!live && !this.shown) return;
+    this.shown = live;
     const rm = this.rings.instanceMatrix.array as Float32Array;
     const rc = this.rings.instanceColor!.array as Float32Array;
     const dm = this.discs.instanceMatrix.array as Float32Array;

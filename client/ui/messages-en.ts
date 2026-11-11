@@ -9,6 +9,8 @@ export const messagesEn = {
   "attr.agi": "Agility",
   "attr.int": "Intelligence",
   "menu.language": "Language",
+  "menu.gpuWarning":
+    "Your browser is drawing the game without the graphics card (software rendering), so it will run slowly. Update the graphics driver, or turn on hardware acceleration in the browser settings.",
   "menu.soundOn": "Sound: on",
   "menu.soundOff": "Sound: off",
   "hud.muteKey": "M: mute",

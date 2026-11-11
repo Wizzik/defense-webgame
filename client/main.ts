@@ -12,7 +12,7 @@ import { readGameParams } from "./game/params";
 import { Session } from "./game/session";
 import { Overlay } from "./perf/overlay";
 import { FollowCamera } from "./render/camera";
-import { createRenderer, NoGpuError } from "./render/gpu";
+import { createRenderer, describeGpu, NoGpuError } from "./render/gpu";
 import { CrystalView } from "./render/crystal-view";
 import { DamageNumbers } from "./render/damage-numbers";
 import { AbilityFx } from "./render/ability-fx";
@@ -130,6 +130,7 @@ async function start(): Promise<void> {
   const data = loadGameData();
   const hero = pickHero(data, params.hero, readStoredHero());
   const { renderer, backend } = await createRenderer(params.renderer, document.body);
+  const gpu = describeGpu(renderer.backend, backend);
   const gltf = await loadModel();
 
   const scene = new Scene();
@@ -162,13 +163,13 @@ async function start(): Promise<void> {
     followCamera.resize(innerWidth / innerHeight);
   });
 
-  const snapshot = publishSnapshot(backend);
+  const snapshot = publishSnapshot(backend, gpu);
   if (params.debug) addDebugHooks(snapshot, () => session.run);
-  const ui = createUi(data, session, followCamera, sfx, randomSeed, hero);
+  const ui = createUi(data, session, followCamera, sfx, randomSeed, hero, gpu.software);
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
   if (overlay) {
     document.getElementById("overlay")!.hidden = false;
-    overlay.start(backend, 0);
+    overlay.start(backend, 0, gpu.name);
   }
 
   // without this, WebGL2 skips objects while their programs compile in parallel, so the first
@@ -192,6 +193,7 @@ function createUi(
   sfx: Sfx,
   nextSeed: () => number,
   initialHero: string,
+  softwareGpu: boolean,
 ): Ui {
   const root = document.getElementById("ui")!;
   let heroId = initialHero;
@@ -233,6 +235,7 @@ function createUi(
     menu.setSound(!value);
   };
   menu.setSound(!muted);
+  menu.setGpuWarning(softwareGpu);
   addEventListener("keydown", (event) => {
     if (event.code === "KeyM" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
       setMuted(!muted);

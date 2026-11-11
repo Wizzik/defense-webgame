@@ -20,6 +20,7 @@ export class Menu {
   private readonly controls: HTMLElement;
   private readonly languageLabel: HTMLElement;
   private readonly sound: HTMLButtonElement;
+  private readonly gpuWarning: HTMLElement;
   private soundOn = true;
   private lang: Lang = "en";
   private readonly langButtons = new Map<Lang, HTMLButtonElement>();
@@ -47,6 +48,9 @@ export class Menu {
     }
     this.heroRole = el("p", "menu-hero-role", panel);
     this.heroPrimary = el("p", "menu-hero-primary", panel);
+    this.gpuWarning = el("p", "menu-warning", panel);
+    this.gpuWarning.id = "gpu-warning";
+    this.gpuWarning.hidden = true;
     this.start = el("button", "button primary", panel);
     this.start.id = "start";
     this.start.addEventListener("click", handlers.onStart);
@@ -69,6 +73,7 @@ export class Menu {
     this.start.textContent = t(lang, "menu.start");
     this.controls.textContent = t(lang, "menu.controls");
     this.languageLabel.textContent = t(lang, "menu.language");
+    this.gpuWarning.textContent = t(lang, "menu.gpuWarning");
     this.lang = lang;
     this.renderHero();
     this.renderSound();
@@ -102,6 +107,11 @@ export class Menu {
   private renderSound(): void {
     this.sound.textContent = t(this.lang, this.soundOn ? "menu.soundOn" : "menu.soundOff");
     this.sound.setAttribute("aria-pressed", String(this.soundOn));
+  }
+
+  /** Shows the warning that the browser draws without the graphics card. */
+  setGpuWarning(software: boolean): void {
+    this.gpuWarning.hidden = !software;
   }
 
   setVisible(visible: boolean): void {

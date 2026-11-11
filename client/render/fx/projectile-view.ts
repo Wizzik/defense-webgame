@@ -12,6 +12,7 @@ const BOLT_HEIGHT = 0.6;
 /** Live homing bolts as glowing spheres, interpolated between steps. `update` does not allocate. */
 export class ProjectileView implements RunView {
   readonly mesh: InstancedMesh;
+  private shown = 0;
 
   constructor(capacity: number) {
     this.mesh = createFxMesh(new SphereGeometry(0.5, 12, 8), capacity);
@@ -39,7 +40,9 @@ export class ProjectileView implements RunView {
       n++;
     }
     this.mesh.count = n;
-    this.mesh.instanceMatrix.needsUpdate = true;
+    // nothing to upload while no bolt flies
+    if (n > 0 || this.shown > 0) this.mesh.instanceMatrix.needsUpdate = true;
+    this.shown = n;
   }
 
   dispose(): void {
