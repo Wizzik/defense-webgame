@@ -4,11 +4,11 @@ import { AllyKind, type Run } from "../../sim";
 import type { RunView } from "../game/session";
 import { SCENE_SCALE } from "./coords";
 
-/** The circle is this many times the collision diameter; a ward has no collision, so it gets a fixed size. */
-const SIZE_FACTOR = 1.1;
-const WARD_DIAMETER = 0.6;
+/** The circle is this many times the collision diameter; a ward has no collision, so it gets a fixed size (0.6 scaled by the same 1.6 / 1.1 as the circles). */
+const SIZE_FACTOR = 1.6;
+const WARD_DIAMETER = 0.87;
 /** Opacity at the centre; it falls to 0 at the edge. */
-const CENTRE_OPACITY = 0.35;
+const CENTRE_OPACITY = 0.6;
 /** Just above the floor, so the circle neither sinks into it nor hides the hero ring (0.04). */
 const LIFT = 0.02;
 
