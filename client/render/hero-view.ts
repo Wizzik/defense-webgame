@@ -8,9 +8,9 @@ import { heroBodyColor } from "./hero-tints";
 
 /** The hero's figure is sized from 1.4 times its collision diameter. */
 const BODY_FACTOR = 1.4;
-/** The ring under the hero spans 0.9 to 1.15 collision radii, drawn at 70 % opacity just above the floor. */
-const RING_INNER = 0.9;
-const RING_OUTER = 1.15;
+/** The ring under the hero spans 1.6 to 1.9 collision radii (it clears the figure's body), drawn at 70 % opacity just above the floor. */
+const RING_INNER = 1.6;
+const RING_OUTER = 1.9;
 const RING_OPACITY = 0.7;
 const RING_LIFT = 0.04;
 
@@ -37,7 +37,9 @@ export class HeroView implements RunView {
 
   /** How many figures stand in the scene under `object` (always 0 before the first model, then 1). */
   get modelCount(): number {
-    return this.object.children.filter((child) => child !== this.ring).length;
+    let count = 0;
+    for (const child of this.object.children) if (child !== this.ring) count++;
+    return count;
   }
 
   /** Replaces the figure. The old one frees its materials and mixer; its geometry belongs to the cache. */

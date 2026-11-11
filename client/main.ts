@@ -129,6 +129,8 @@ async function start(): Promise<void> {
   const followCamera = new FollowCamera(innerWidth / innerHeight);
   const keyboard = new Keyboard(window);
   const session = new Session({ data, params, scene, camera: followCamera, keyboard });
+  // the run behind the menu starts once the first hero's model is loaded and uses this seed
+  session.seed = params.seed;
   const heroView = new HeroView();
   scene.add(heroView.object);
   const crowd = new EnemyCrowd(
@@ -147,8 +149,6 @@ async function start(): Promise<void> {
   sfx.setMuted(readStoredMuted());
   const packArrows = new PackArrows(document.getElementById("ui")!, followCamera.camera);
   session.views.push(heroView, allyView, crowd, crystals, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(sfx));
-  // the menu shows a fresh, paused run behind it
-  session.start(params.seed, true, hero);
 
   addEventListener("resize", () => {
     renderer.setSize(innerWidth, innerHeight);

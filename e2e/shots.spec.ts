@@ -1,4 +1,4 @@
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Page } from "@playwright/test";
 import type { GameSnapshot } from "../client/game/debug";
@@ -74,4 +74,19 @@ test("shot: corner", async ({ page }) => {
   await page.evaluate(() => window.__game!.debug!.teleport(2900, 2900));
   await page.waitForTimeout(1_000);
   await shot(page, "corner");
+});
+
+/** Hero ids from the generated data, so adding a hero adds a shot. */
+const heroIds = (
+  JSON.parse(readFileSync(join(import.meta.dirname, "..", "data", "generated", "heroes.json"), "utf8")) as { id: string }[]
+).map((h) => h.id);
+
+test("shot: heroes", async ({ page }) => {
+  test.setTimeout(5 * 60_000);
+  for (const hero of heroIds) {
+    await startRun(page, `seed=7&hero=${hero}`);
+    await page.waitForTimeout(1_000);
+    // the hero stands at the middle of the screen
+    await page.screenshot({ path: join(shotsDir, `hero-${hero}.png`), clip: { x: 520, y: 240, width: 240, height: 200 } });
+  }
 });
