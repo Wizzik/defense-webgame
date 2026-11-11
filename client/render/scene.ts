@@ -1,20 +1,13 @@
 import {
-  AmbientLight,
   ConeGeometry,
   CylinderGeometry,
-  DirectionalLight,
   Group,
   Mesh,
   MeshStandardNodeMaterial,
-  PlaneGeometry,
-  RingGeometry,
 } from "three/webgpu";
 import type { Rules } from "../../data/schema";
 import { SCENE_SCALE } from "./coords";
-
-/** The spawn ring: a thin dark band on the ground at `arena.spawn.radius`. */
-const RING_WIDTH = 40;
-const RING_LIFT = 0.02;
+import { createGround } from "./ground";
 
 function material(color: number): MeshStandardNodeMaterial {
   return new MeshStandardNodeMaterial({ color, roughness: 0.95 });
@@ -42,31 +35,16 @@ function createCastle(x: number, z: number, radius: number): Group {
   return castle;
 }
 
-/** Floor, castle in the middle, the spawn ring and lights. Static: built once per run. */
+/** Ground and castle in the middle. Static: built once per run. */
 export function createArena(rules: Rules): Group {
   const { arena, castle } = rules;
   const group = new Group();
 
-  const floor = new Mesh(
-    new PlaneGeometry(arena.width * SCENE_SCALE, arena.height * SCENE_SCALE),
-    material(0x56614c),
-  );
-  floor.rotation.x = -Math.PI / 2;
-  group.add(floor);
+  group.add(createGround(rules));
 
   const castleX = arena.castle.x * SCENE_SCALE;
   const castleZ = -arena.castle.y * SCENE_SCALE;
-  const ring = new Mesh(
-    new RingGeometry((arena.spawn.radius - RING_WIDTH / 2) * SCENE_SCALE, (arena.spawn.radius + RING_WIDTH / 2) * SCENE_SCALE, 96),
-    material(0x2a3140),
-  );
-  ring.rotation.x = -Math.PI / 2;
-  ring.position.set(castleX, RING_LIFT, castleZ);
-  group.add(ring);
   group.add(createCastle(castleX, castleZ, castle.radius * SCENE_SCALE));
 
-  const sun = new DirectionalLight(0xffffff, 2.5);
-  sun.position.set(30, 60, 20);
-  group.add(sun, new AmbientLight(0xffffff, 0.7));
   return group;
 }

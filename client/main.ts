@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { Color, Scene, type WebGPURenderer } from "three/webgpu";
+import { Scene, type WebGPURenderer } from "three/webgpu";
 import type { GameData } from "../data/schema";
 import { ALLY_CAPACITY, CRYSTAL_CAPACITY } from "../sim";
 import { Sfx } from "./audio/sfx";
@@ -21,6 +21,7 @@ import { tintTable } from "./render/enemy-tints";
 import { EnemyCrowd, IDLE_CLIP, PUNCH_CLIP, VAT_FPS, WALK_CLIP } from "./render/enemy-crowd";
 import { AllyView } from "./render/ally-view";
 import { HeroView } from "./render/hero-view";
+import { createLighting } from "./render/lighting";
 import { createArena } from "./render/scene";
 import { ModelCache, modelUrl } from "./render/models";
 import { bakeVat } from "./render/vat";
@@ -124,8 +125,9 @@ async function start(): Promise<void> {
   const enemyModels = await Promise.all(data.enemies.map((enemy) => models.get(modelUrl("enemies", enemy.id))));
 
   const scene = new Scene();
-  scene.background = new Color(0x1d2228);
-  scene.add(createArena(data.rules));
+  const lighting = createLighting();
+  lighting.applyTo(scene);
+  scene.add(lighting.object, createArena(data.rules));
   const followCamera = new FollowCamera(innerWidth / innerHeight);
   const keyboard = new Keyboard(window);
   const session = new Session({ data, params, scene, camera: followCamera, keyboard });
