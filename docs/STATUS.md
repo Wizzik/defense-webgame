@@ -4,7 +4,7 @@ Updated 2026-11-11 night (phase 2b-2 is merged; Visual pass A is finished on bra
 
 ## Visual pass A: done on branch `visual-a`, not merged
 
-- Plan: `docs/superpowers/plans/2026-11-11-visual-pass-a.md` (7 tasks, all done). PR: <number>. It waits for the final review and Petr's playtest.
+- Plan: `docs/superpowers/plans/2026-11-11-visual-pass-a.md` (7 tasks, all done). PR: #8 (https://github.com/Wizzik/defense-webgame/pull/8), open, not merged; merge only when CI is green on `webgpu-swiftshader` (first WebGPU run of this branch). It waits for the final review and Petr's playtest.
 - What it brings: KayKit CC0 models (8 heroes from 5 adventurer bodies, 6 skeleton enemy types with weapons, the castle with towers and flags, a forest around the spawn ring), procedural ground, dusk light and fog, a moon shadow map plus blob shadows, a build tool for assets. The simulation and the balance did not change (`git diff main -- sim design data` is empty). Decisions: `docs/DECISIONS.md`, section Visual pass A.
 - What Petr checks in the playtest:
   - the look and the readability of the six enemy types; the strong type tint on enemies; the chaplain's small size;
