@@ -5,7 +5,7 @@ import { SCENE_SCALE } from "./coords";
 import { DIRT, GRASS_A, GRASS_B, GRASS_C } from "./palette";
 
 /** The plane reaches this far (sim units) past the arena on every side. */
-const MARGIN = 1800;
+const MARGIN = 6000;
 /** Noise periods in scene units. */
 const COARSE_PERIOD = 9;
 const FINE_PERIOD = 2.3;

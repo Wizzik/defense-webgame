@@ -25,6 +25,7 @@ import { BlobShadows } from "./render/blob-shadows";
 import { SunShadow, shadowsEnabled } from "./render/shadows";
 import { createLighting } from "./render/lighting";
 import { createArena } from "./render/scene";
+import { PROP_MODELS } from "./render/props";
 import { ModelCache, modelUrl } from "./render/models";
 import { bakeVat } from "./render/vat";
 import { Cards } from "./ui/cards";
@@ -124,13 +125,20 @@ async function start(): Promise<void> {
   const { renderer, backend } = await createRenderer(params.renderer, document.body);
   const gpu = describeGpu(renderer.backend, backend);
   const models = new ModelCache();
-  const enemyModels = await Promise.all(data.enemies.map((enemy) => models.get(modelUrl("enemies", enemy.id))));
+  const env = (id: string) => models.get(modelUrl("env", id));
+  const [enemyModels, castle, tower, flag, props] = await Promise.all([
+    Promise.all(data.enemies.map((enemy) => models.get(modelUrl("enemies", enemy.id)))),
+    env("castle"),
+    env("tower"),
+    env("flag"),
+    Promise.all(PROP_MODELS.map((prop) => env(prop.id))),
+  ]);
 
   const scene = new Scene();
   const lighting = createLighting();
   lighting.applyTo(scene);
   const sunShadow = new SunShadow(lighting.sun, renderer, shadowsEnabled(params.shadows, gpu.software));
-  scene.add(lighting.object, createArena(data.rules));
+  scene.add(lighting.object, createArena(data.rules, { castle, tower, flag, props }));
   const followCamera = new FollowCamera(innerWidth / innerHeight);
   const keyboard = new Keyboard(window);
   const session = new Session({ data, params, scene, camera: followCamera, keyboard });

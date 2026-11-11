@@ -282,6 +282,7 @@ assets/   modely a textury + LICENSES.md
 
 **Pipeline:**
 - glTF → gltf-transform (meshopt, textury KTX2) → zapečení animací nepřátel;
+- poznámka (Vizuál A, 2026-11-11): skutečná pipeline je bez KTX2 a bez meshopt. Textury zůstávají PNG uvnitř GLB, zjednodušení dělá `simplify` z gltf-transform a animace nepřátel se pečou do textury při načtení; modely jsou v `assets/models/`, sestavené nástrojem `tools/assets-build/`;
 - assety jdou do několika verzovaných balíčků, ne stovek souborů.
 
 **Efekty a pocit ze hry:**

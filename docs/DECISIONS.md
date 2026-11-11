@@ -2,6 +2,17 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Visual pass A (2026-11-11, the plan's choices, not Petr's)
+
+- Models come from pinned CC0 KayKit packs (Kay Lousberg); heroes are five adventurer bodies with different weapons and colours, enemies are six skeleton types, the environment is the castle set and eight tree and rock models. Built by `tools/assets-build/`; the pipeline has no KTX2 and no meshopt (textures stay PNG inside the GLB, `simplify` replaces meshopt), see spec section 6.
+- Trees and rocks stand only from `spawn.radius + 250` outward, up to 900 past the arena edge, because the simulation has no obstacles. The arena corners lie beyond the spawn ring, so props stand in the corners too (the hero there walks among trees). The layout is a jittered grid (cell 230, fill 0.6, shift in a disc of 80, scale 0.9-1.4, fixed seed 1), 250-900 props.
+- The ground plane reaches 6000 sim units past the arena on every side (was 1800 in the plan). With 1800 the end of the plane showed as a blue wedge in the `corner` shot; fog is fully dense at 105 scene units (6720 sim units) from the camera, so 6000 hides the edge. Checked on `corner.png`.
+- Models are scaled by height: scene height = 2.2 x the collision diameter (`MODEL_HEIGHT_FACTOR`), not by footprint width, because the rest pose and the weapons widen the footprint.
+- Hero ring radii are 1.6 and 1.9 x the collision radius (the plan said 0.9 and 1.15), because the figure hid the ring.
+- Enemy models may have up to 3000 triangles (see Engineering below). Blob shadows: opacity 0.6, diameter 1.6 x collision (see Engineering below).
+- Prop heights: trees 4.5 scene units, rocks 1.6, times the placement scale (`PROP_MODELS` in `client/render/props.ts`); the kit models are tiny and are normalised by height.
+- Castle: the kit castle scaled so its footprint corner to corner fits a circle of 2 x castle.radius x 1.1; four towers on the diagonals at 0.95 radius, height 0.8 of the castle, a flag (30 % of the tower height) on each.
+
 ## Product (Petr)
 
 - 2026-11-11 evening (Petr, after the result of phase 2b-2): Serpent Totem damage is halved (design 101 -> 50, in the game 30 -> 15 a hit) and Grave Grasp heals 75 % less (`healPerHit` 2.5, 5, 7.5, 10, 15; the map has 50 to 300). Measured on seeds 1-5: both heroes still win 5 of 5 and never drop below 50 % HP. Serpent Shaman: castle of the won runs 61 % (was 83 %), level 19.0, an idle run loses by 2:01. Gravecaller: castle 93 %, level 16.0, an idle run now loses by 2:38 (was 4:20; seed 1 at 2:08). The other six heroes are unchanged. Open gap 1 below stays open: the two need more than these cuts.

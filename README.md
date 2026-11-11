@@ -30,4 +30,8 @@ URL parameters (all optional):
 - `npm run data:build -- --source data-source/<label>/out --out data/generated` - build game data (`data/generated/*.json` is generated; see AGENTS.md)
 - `npm run sim:run -- [--hero <id>|all] [--seed 1] [--runs 1] [--duration 300] [--idle]` - play the autopilot headless and print run summaries (balance tuning); `--idle` plays a player who does nothing
 
+## Credits
+
+3D models: the KayKit Character Pack Adventures, Character Pack Skeletons and Medieval Hexagon Pack by Kay Lousberg (www.kaylousberg.com), CC0. Every asset and its source is listed in [assets/LICENSES.md](assets/LICENSES.md).
+
 See [AGENTS.md](AGENTS.md) for the project rules.

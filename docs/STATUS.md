@@ -1,14 +1,20 @@
 # Status
 
-Updated 2026-11-11 night (phase 2b-2 is merged; the plan for Visual pass A is written on branch `visual-a` and waits for Petr's review). Read this first when you resume work.
+Updated 2026-11-11 night (phase 2b-2 is merged; Visual pass A is finished on branch `visual-a`, its PR is open and not merged). Read this first when you resume work.
 
-## Visual pass A: plan written, not started
+## Visual pass A: done on branch `visual-a`, PR open and not merged
 
-- Plan: `docs/superpowers/plans/2026-11-11-visual-pass-a.md` (7 tasks, branch `visual-a`). Execute it in a new chat.
-- What it brings: KayKit CC0 models (8 heroes from 5 adventurer bodies, 6 skeleton enemy types with weapons, a castle, a forest around the arena), procedural ground, dusk light and fog, a shadow map plus blob shadows, a build tool for assets. The simulation and the balance do not change.
-- Checked on 2026-11-11: the cloud shell can download the kits (`raw.githubusercontent.com` and `git clone` of `KayKit-Game-Assets/*` work; github.com pages and zip downloads of other repos do not). Petr does not have to attach anything.
-- Decisions Petr can still change before execution (all in the plan's tables): which body and weapon each hero gets, skeletons as the enemies, the cool dusk palette, no trees or rocks inside the spawn ring (the simulation has no obstacles).
-- Petr has to choose the execution method: subagent-driven or native.
+- Plan: `docs/superpowers/plans/2026-11-11-visual-pass-a.md` (7 tasks, all done). The PR is open and not merged (PR number: filled in by the controller); it waits for the final review and Petr's playtest.
+- What it brings: KayKit CC0 models (8 heroes from 5 adventurer bodies, 6 skeleton enemy types with weapons, the castle with towers and flags, a forest around the spawn ring), procedural ground, dusk light and fog, a moon shadow map plus blob shadows, a build tool for assets. The simulation and the balance did not change (`git diff main -- sim design data` is empty). Decisions: `docs/DECISIONS.md`, section Visual pass A.
+- What Petr checks in the playtest:
+  - the look and the readability of the six enemy types; the strong type tint on enemies; the chaplain's small size;
+  - the grass colour and the dark earth around the castle;
+  - the mage hats hide gravecaller and mistwarden from above;
+  - orange details in the kit textures (not removable without new textures) and stonehorn's orange hero colour;
+  - the hero in the arena corners, where trees and rocks stand among the hero's path (the corners lie beyond the spawn ring), and how large the rocks look;
+  - `?fps=1` on his machine: the shadow map has never run on real hardware (only on software rendering here). Compare the default with `?shadows=0`;
+  - the enemy cap of 3000 triangles and its fps cost with a full crowd.
+- From the five minor notes after 2b-1, "the Lancer and the Chaplain are both pale" is gone (they are textured models now); four remain.
 
 ## Phase 2b-2 (ring arena, enemy AI, four heroes): merged (PR #7, 2026-11-11)
 
@@ -36,7 +42,7 @@ Updated 2026-11-11 night (phase 2b-2 is merged; the plan for Visual pass A is wr
 
 ## Next
 
-**2b-1 Swarms and enemy variety: merged (PR #6, 2026-11-11).** Packs, 6 enemy types, shooters and healers, a 5-minute run in 6 phases, the GPU name in the `?fps=1` overlay. Five minor review notes are left for a later pass: the chaplain heals every 31 steps, not 30; `Effects` keeps uploading behind the menu after a restart; the Lancer and the Chaplain are both pale (size tells them apart); the e2e test for a shooter that dies in the step it fired only proves that nothing crashes. Plan: `docs/superpowers/plans/2026-11-10-phase-2b1-swarms-and-enemies.md`.
+**2b-1 Swarms and enemy variety: merged (PR #6, 2026-11-11).** Packs, 6 enemy types, shooters and healers, a 5-minute run in 6 phases, the GPU name in the `?fps=1` overlay. Minor review notes are left for a later pass (the pale Lancer and Chaplain note was closed by Visual pass A): the chaplain heals every 31 steps, not 30; `Effects` keeps uploading behind the menu after a restart; the e2e test for a shooter that dies in the step it fired only proves that nothing crashes. Plan: `docs/superpowers/plans/2026-11-10-phase-2b1-swarms-and-enemies.md`.
 
 **Petr's playtest of 2a (2026-11-10), the reason for 2b-1 (done) and the visual passes:**
 - 20.5 fps: **resolved, not a game bug** (see below);
@@ -50,7 +56,7 @@ Updated 2026-11-11 night (phase 2b-2 is merged; the plan for Visual pass A is wr
 - 2b-1 added the GPU name to the `?fps=1` overlay and a menu warning on software rendering.
 
 **Order after 2b-2 (approved by Petr 2026-11-10; 2b-2 was put in front on 2026-11-11):**
-1. **Visual pass A, no external tools**: planned, see the top of this file.
+1. **Visual pass A, no external tools**: done on `visual-a`, PR open, see the top of this file.
 2. **Visual pass B, own hero models** (needs Petr's computer): Tripo (text or image to 3D with auto-rig; check the licence of his plan before anything is committed, the repo is public) or Blender. Blender MCP install problem: Petr pastes the error into a chat on the computer with Blender. Constraints: hero <= 5000 triangles, enemy <= 2000, clips Idle, Running/Walking, Punch, Death, every asset in `assets/LICENSES.md`.
 3. Then the rest of 2b (20 phases, elites, bosses, difficulties), 2c economy, 2d shared abilities, 2e meta progression.
 4. Propose the second skill (project development rules).
