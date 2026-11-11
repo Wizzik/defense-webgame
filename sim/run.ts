@@ -9,6 +9,7 @@ import { ALLY_CAPACITY, AllyStore, updateAllies } from "./allies";
 import { PROJECTILE_CAPACITY, ProjectileStore, updateProjectiles } from "./projectiles";
 import { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
 import { updateEnemies } from "./enemy-ai";
+import { healEnemies } from "./enemy-heal";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
 import { refreshHeroStats } from "./level-up";
@@ -130,6 +131,7 @@ export class Run {
    *   moveHero(this, input);      // Task 3
    *   spawnEnemies(this);         // Task 4
    *   updateEnemies(this);        // Task 4
+   *   healEnemies(this);          // phase 2b-1 (reads the grid built by updateEnemies)
    *   updateHeroCombat(this);     // Task 5
    *   updateAbilities(this);      // Task 6
    *   updateProjectiles(this);    // phase 2a, Task 4
@@ -152,6 +154,7 @@ export class Run {
     moveHero(this, input);
     spawnEnemies(this);
     updateEnemies(this);
+    healEnemies(this);
     updateHeroCombat(this);
     updateAbilities(this);
     updateProjectiles(this);

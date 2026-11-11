@@ -77,6 +77,7 @@ export function stateHash(run: Run): number {
     mixFloat(e.hp[i]);
     mixInt(e.attackCooldown[i]);
     mixInt(e.stunTicks[i]);
+    mixInt(e.healCooldown[i]);
     mixInt(e.aggro[i]);
     mixInt(e.action[i]);
     mixFloat(e.knockVX[i]);

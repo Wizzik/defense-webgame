@@ -10,6 +10,8 @@ export const EventKind = {
   Blast: 9,
   Heal: 10,
   Dash: 11,
+  /** An enemy healed an enemy: a = healed slot, value = hp healed, x/y = the healed one, u = the healer's slot. */
+  EnemyHeal: 12,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */
