@@ -1,6 +1,7 @@
 // Tests only: a quiet run (no spawns) with explicit progression rules.
 import { createRun } from "../run";
 import { gameData } from "./game-data";
+import { silenceSpawns } from "./silence";
 
 export interface ProgressionOptions {
   durationSeconds?: number;
@@ -17,7 +18,7 @@ export function progressionRun(options: ProgressionOptions = {}) {
     collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
     dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 },
   };
-  data.rules.phases[0].spawnPerSecond = 0;
+  silenceSpawns(data);
   data.rules.progression = {
     xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56,
     attributeCardAmount: 10, cardsPerOffer: options.cardsPerOffer ?? 3,

@@ -51,7 +51,8 @@ export function stateHash(run: Run): number {
   mixInt(run.stats.kills);
   mixInt(run.stats.spawned);
   mixFloat(run.castle.hp);
-  mixFloat(run.spawnCredit);
+  mixInt(run.nextPackTick);
+  mixInt(run.elitePhase);
   mixInt(run.nextGate);
   for (const slot of run.abilities) {
     mixInt(slot.level);

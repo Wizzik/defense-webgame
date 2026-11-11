@@ -2,7 +2,7 @@ import type { MessageKey } from "./i18n";
 
 export const messagesCs = {
   "menu.title": "Defense Webgame",
-  "menu.subtitle": "Ubraň hrad tři minuty.",
+  "menu.subtitle": "Ubraň hrad pět minut.",
   "menu.chooseHero": "Vyber hrdinu",
   "menu.start": "Hrát",
   "menu.controls": "Pohyb WASD nebo šipkami, mezerník úskok, R ultimátka. Kouzla se sesílají sama.",

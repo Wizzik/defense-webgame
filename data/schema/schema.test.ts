@@ -43,7 +43,7 @@ function fixture(): any {
     ],
     rules: {
       start: { hero: "hero-one" },
-      run: { durationSeconds: 180, phaseSeconds: 50, timeScaling: { seconds: 1200, cap: 2 } },
+      run: { durationSeconds: 180, phaseSeconds: 50, firstPackSeconds: 2, timeScaling: { seconds: 1200, cap: 2 } },
       arena: {
         width: 6000, height: 5000, castle: { x: 0, y: -2000 }, heroStart: { x: 0, y: -1500 },
         gates: [{ x: -1800, y: 2200 }, { x: 1800, y: 2200 }], gateRadius: 150,
@@ -52,12 +52,12 @@ function fixture(): any {
       hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
         dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 } },
       autocast: { novaMinEnemies: 1, healBelow: 0.6, shieldBelow: 0.35 },
-      enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 } },
+      enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 }, elite: "grunt" },
       phases: [
-        { enemy: "grunt", spawnPerSecond: 0.45, hunterShare: 0.2 },
-        { enemy: "grunt", spawnPerSecond: 0.55, hunterShare: 0.25 },
-        { enemy: "grunt", spawnPerSecond: 0.65, hunterShare: 0.3 },
-        { enemy: "grunt", spawnPerSecond: 0.75, hunterShare: 0.35 },
+        { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, hunterShare: 0.2, elites: 0 },
+        { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, hunterShare: 0.25, elites: 0 },
+        { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, hunterShare: 0.3, elites: 0 },
+        { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, hunterShare: 0.35, elites: 0 },
       ],
       progression: {
         xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56,
@@ -204,10 +204,26 @@ describe("game data schemas", () => {
 
   it("rejects phase with unknown enemy", () => {
     const d = fixture();
-    d.rules.phases[2].enemy = "ghost";
-    const msg = errorMessage(d);
-    expect(msg).toContain("rules.phases.2.enemy");
-    expect(msg).toContain("ghost");
+    d.rules.phases[2].mix.ghost = 2;
+    expect(errorMessage(d)).toContain('rules.phases.2.mix: unknown enemy "ghost"');
+  });
+
+  it("rejects an unknown elite", () => {
+    const d = fixture();
+    d.rules.enemies.elite = "ghost";
+    expect(errorMessage(d)).toContain('rules.enemies.elite: unknown enemy "ghost"');
+  });
+
+  it("rejects a pack whose min is above its max", () => {
+    const d = fixture();
+    d.rules.phases[1].pack = { min: 9, max: 8, everySeconds: 6 };
+    expect(errorMessage(d)).toContain("rules.phases.1.pack");
+  });
+
+  it("rejects an empty mix", () => {
+    const d = fixture();
+    d.rules.phases[0].mix = {};
+    expect(errorMessage(d)).toContain("rules.phases.0.mix");
   });
 
   it("rejects an unknown start hero", () => {

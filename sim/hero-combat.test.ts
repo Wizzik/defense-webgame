@@ -7,6 +7,7 @@ import { NO_INPUT } from "./input";
 import { stateHash } from "./hash";
 import { createRun } from "./run";
 import { gameData } from "./testing/game-data";
+import { silenceSpawns } from "./testing/silence";
 
 const REDUCTION = 0.06 / 1.06;
 
@@ -23,7 +24,7 @@ function newRun() {
   // The attack tests count ticks, so the base attack cooldown is pinned.
   for (const hero of data.heroes) hero.baseAttack.cooldown = 1.5;
   data.rules.castle.hp = 3000;
-  data.rules.phases[0].spawnPerSecond = 0;
+  silenceSpawns(data);
   data.constants.defenseArmor = 0.02;
   const e = data.enemies[0];
   e.collision = 31;

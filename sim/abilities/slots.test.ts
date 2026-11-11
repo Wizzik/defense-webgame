@@ -6,6 +6,7 @@ import { createRun } from "../run";
 import { gameData } from "../testing/game-data";
 import { UPDATERS } from "./kinds";
 import { CastMode, castMode, debugSetAbilityLevel, startCast, ULTIMATE_SLOT } from "./slots";
+import { silenceSpawns } from "../testing/silence";
 
 function quietData() {
   const data = gameData();
@@ -13,7 +14,7 @@ function quietData() {
     width: 6000, height: 5000, castle: { x: 0, y: -2400 }, heroStart: { x: 0, y: 0 },
     gates: [{ x: -1800, y: 2200 }, { x: 1800, y: 2200 }], gateRadius: 150,
   };
-  data.rules.phases[0].spawnPerSecond = 0;
+  silenceSpawns(data);
   return data;
 }
 

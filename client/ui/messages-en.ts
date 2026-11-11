@@ -1,6 +1,6 @@
 export const messagesEn = {
   "menu.title": "Defense Webgame",
-  "menu.subtitle": "Hold the castle for three minutes.",
+  "menu.subtitle": "Hold the castle for five minutes.",
   "menu.chooseHero": "Choose your hero",
   "menu.start": "Start",
   "menu.controls": "WASD or arrows to move, Space to dash, R for the ultimate. Spells cast themselves.",
