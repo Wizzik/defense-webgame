@@ -1,17 +1,17 @@
 # Status
 
-Updated 2026-11-11 (phase 2b-2 is done on the local branch `phase-2b2`; it is not pushed, see "Blocked" below). Read this first when you resume work.
+Updated 2026-11-11 (phase 2b-2 is done on branch `phase-2b2`, pushed, PR open; waits for CI, Petr's playtest and the merge). Read this first when you resume work.
 
 ## Phase 2b-2 (ring arena, enemy AI, four heroes): done, with two open points
 
 - What it brings: the castle stands in the middle and packs come from every side (1 to 3 at once, arrows on the screen edge point at them); every enemy type behaves its own way (scouts flank, musketeers back off while they reload, chaplains follow their pack, lancers charge after a warning line, captains buff the enemies around them); 8 heroes (new: Mistwarden, Sparkshot, Redcleaver, Tidecaller); the game is hard: the autopilot loses about half of its runs.
-- Checks: `npm run check` (451 tests), `npm run build` and `npm run e2e -- --project=webgl2-fallback` (15 tests) pass locally. CI has not run, because the branch is not pushed.
+- Checks: `npm run check` (451 tests), `npm run build` and `npm run e2e -- --project=webgl2-fallback` (15 tests) pass locally. CI runs on the PR.
 - Balance (seeds 1–5, `npm run sim:run -- --hero all --runs 5`, and with `--idle`): Stonehorn 2 of 5 won, Nightglaive 3, Mistwarden 2, Sparkshot 3, Redcleaver 3, Tidecaller 2; these six meet every target of the plan. Numbers and what changed: `docs/DECISIONS.md`.
 - **Open for Petr 1:** Gravecaller and Serpent Shaman still win 5 of 5 and are never in danger, also after Petr's cuts of 2026-11-11 evening (Serpent Totem damage halved, Grave Grasp heal -75 %; committed on the branch). The cuts brought the Gravecaller's idle run under 2:30 on seed 1 and the Serpent Shaman's castle to 61 %. They need a redesign of their kits.
 - **Open for Petr 2:** the targets are measured on 5 seeds and a run is chaotic. On seeds 6–15 the same build gives 1 to 9 wins of 10 depending on the hero. The next balance pass should measure on more seeds with wider bands.
-- **Blocked:** this session could not push (`add_repo` with push access was refused by the auto-mode classifier, twice). The 7 commits of the phase exist only in the cloud container (`/home/claude/wizzik/defense-webgame`, branch `phase-2b2`). Next step: push the branch, open the PR `Phase 2b-2: ring arena, enemy AI and four heroes` with `gh api`, wait for CI, then Petr's playtest and merge. If the container is gone, the phase must be redone from the plan.
+- Pushed on 2026-11-11 evening; PR `Phase 2b-2: ring arena, enemy AI and four heroes` is open. Next: CI green, Petr's playtest, merge. No final whole-branch review has run yet.
 - What Petr should check in the playtest: packs come from all sides and reach him and the castle, the types read apart (scouts from the side, musketeers back off, lancers charge and can be dodged), the first tries are often lost, and the menu shows 8 heroes.
-- Plan: `docs/superpowers/plans/2026-11-11-phase-2b2-ring-ai-heroes.md`. No final whole-branch review has run yet.
+- Plan: `docs/superpowers/plans/2026-11-11-phase-2b2-ring-ai-heroes.md`.
 - After the merge: **Visual pass A** (plan in a new chat).
 
 ## Now
