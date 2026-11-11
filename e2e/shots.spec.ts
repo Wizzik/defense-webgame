@@ -54,6 +54,14 @@ test("shot: fight", async ({ page }) => {
   await shot(page, "fight");
 });
 
+test("shot: types", async ({ page }) => {
+  await startRun(page, "seed=7&hero=stonehorn&debug=1");
+  await page.evaluate(() => window.__game!.debug!.spawnEach());
+  await page.waitForTimeout(500);
+  // the six hunters stand in a row north of the hero, who is at the middle of the screen
+  await page.screenshot({ path: join(shotsDir, "types.png"), clip: { x: 400, y: 90, width: 480, height: 270 } });
+});
+
 test("shot: castle", async ({ page }) => {
   await startRun(page, "seed=7&hero=gravecaller&debug=1");
   await page.evaluate(() => window.__game!.debug!.teleport(0, -420));

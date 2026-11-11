@@ -26,6 +26,8 @@ const FLASH_SECONDS = 0.12;
 const BODY_TINT = 0.45;
 /** Share of the type colour that the model also emits, so the type reads in the dark arena. */
 const GLOW = 0.12;
+/** An enemy stands this many collision diameters tall in the scene (arms and weapons do not count). */
+const ENEMY_HEIGHT_FACTOR = 2.2;
 /** Marks "never hit" in `anim.w`, far enough in the past for the flash window. */
 const NEVER = -1000;
 
@@ -44,8 +46,8 @@ interface TypeMesh {
   walk: VatClip;
   punch: VatClip;
   idle: VatClip;
-  /** Model width (footprint) and the height of its lowest point at scale 1. */
-  width: number;
+  /** Model height and the height of its lowest point at scale 1. */
+  height: number;
   feet: number;
 }
 
@@ -105,7 +107,7 @@ export class EnemyCrowd implements RunView {
       walk: requireClip(vat, WALK_CLIP),
       punch: requireClip(vat, PUNCH_CLIP),
       idle: requireClip(vat, IDLE_CLIP),
-      width: Math.max(box.max.x - box.min.x, box.max.z - box.min.z),
+      height: box.max.y - box.min.y,
       feet: box.min.y,
     };
   }
@@ -121,10 +123,10 @@ export class EnemyCrowd implements RunView {
       const x = enemies.prevX[slot] + (enemies.x[slot] - enemies.prevX[slot]) * alpha;
       const y = enemies.prevY[slot] + (enemies.y[slot] - enemies.prevY[slot]) * alpha;
       const type = enemies.type[slot];
-      const { matrices, anim, walk, punch, idle, width, feet } = types[type];
+      const { matrices, anim, walk, punch, idle, height, feet } = types[type];
       const n = buckets.push(type);
       const diameter = 2 * run.data.enemies[type].collision * SCENE_SCALE;
-      const scale = diameter / width;
+      const scale = (ENEMY_HEIGHT_FACTOR * diameter) / height;
       // rotation about Y turning the model's +Z axis to the heading (north is -z in the scene)
       const cos = -enemies.facingY[slot] * scale;
       const sin = enemies.facingX[slot] * scale;
