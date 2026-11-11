@@ -17,6 +17,8 @@ export interface RunSummary {
   level: number;
   castleHp: number;
   castleMaxHp: number;
+  /** Castle hp at the end, in whole percent of its maximum. */
+  castleHpPercent: number;
   heroHp: number;
   heroMaxHp: number;
   /** Lowest hero hp / max hp seen during the run, in whole percent. */
@@ -55,6 +57,7 @@ export function playBot(
     level: run.hero.level,
     castleHp: Math.max(0, Math.round(run.castle.hp)),
     castleMaxHp: Math.round(run.castle.maxHp),
+    castleHpPercent: Math.max(0, Math.round((run.castle.hp / run.castle.maxHp) * 100)),
     heroHp: Math.max(0, Math.round(run.hero.hp)),
     heroMaxHp: Math.round(run.hero.stats.maxHp),
     minHeroHpPercent: Math.max(0, Math.round(lowest * 100)),
@@ -67,12 +70,12 @@ export function formatSummary(s: RunSummary): string {
   const outcome = s.result === "won" ? "won" : `lost (${s.result})`;
   return (
     `${s.hero} seed ${s.seed}: ${outcome} at ${m}:${sec}, kills ${s.kills}, spawned ${s.spawned}, level ${s.level}, ` +
-    `castle ${s.castleHp}/${s.castleMaxHp}, hero ${s.heroHp}/${s.heroMaxHp}, hero low ${s.minHeroHpPercent}%`
+    `castle ${s.castleHpPercent}%, hero ${s.heroHp}/${s.heroMaxHp}, hero low ${s.minHeroHpPercent}%`
   );
 }
 
 /** Below this share of max hp the hero counts as in danger (tuning target). */
-const DANGER_PERCENT = 70;
+const DANGER_PERCENT = 50;
 
 interface Args {
   hero: string;
@@ -123,10 +126,14 @@ function main(): void {
     const avg = (f: (s: RunSummary) => number) =>
       summaries.reduce((a, s) => a + f(s), 0) / summaries.length;
     const inDanger = summaries.filter((s) => s.minHeroHpPercent < DANGER_PERCENT).length;
+    const wonRuns = summaries.filter((s) => s.result === "won");
+    const castleOfWon = wonRuns.length > 0 ? `${Math.round(wonRuns.reduce((a, s) => a + s.castleHpPercent, 0) / wonRuns.length)}%` : "-";
+    const longest = Math.max(...summaries.map((s) => s.seconds));
     console.log(
       `${hero}${args.idle ? " (idle)" : ""}: ${summaries.length} runs: ${won} won, ${summaries.length - won} lost; ` +
         `kills avg ${Math.round(avg((s) => s.kills))}, spawned avg ${Math.round(avg((s) => s.spawned))}; ` +
-        `level avg ${avg((s) => s.level).toFixed(1)}; hero below ${DANGER_PERCENT}% in ${inDanger}`,
+        `level avg ${avg((s) => s.level).toFixed(1)}; hero below ${DANGER_PERCENT}% in ${inDanger}; ` +
+        `castle of won runs avg ${castleOfWon}; longest ${Math.floor(longest / 60)}:${String(longest % 60).padStart(2, "0")}`,
     );
   }
 }

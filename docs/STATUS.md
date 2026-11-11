@@ -1,12 +1,18 @@
 # Status
 
-Updated 2026-11-11 (phase 2b-1 merged with PR #6; the plan of phase 2b-2 is written and waits for Petr's approval). Read this first when you resume work.
+Updated 2026-11-11 (phase 2b-2 is done on the local branch `phase-2b2`; it is not pushed, see "Blocked" below). Read this first when you resume work.
 
-## Next step: phase 2b-2 (ring arena, enemy AI, four heroes)
+## Phase 2b-2 (ring arena, enemy AI, four heroes): done, with two open points
 
-- Petr's playtest of 2b-1 (2026-11-11): too easy, enemies mostly never reach him, and there are too few heroes. He chose: +4 heroes (8 in all), the castle in the middle with packs from every side, difficulty "hard"; the enemy AI is ours to design.
-- Plan: `docs/superpowers/plans/2026-11-11-phase-2b2-ring-ai-heroes.md` (branch `phase-2b2`, 6 tasks). Execute it in a new chat once Petr approves it. It suggests native execution with one final review.
-- Visual pass A moves behind this phase.
+- What it brings: the castle stands in the middle and packs come from every side (1 to 3 at once, arrows on the screen edge point at them); every enemy type behaves its own way (scouts flank, musketeers back off while they reload, chaplains follow their pack, lancers charge after a warning line, captains buff the enemies around them); 8 heroes (new: Mistwarden, Sparkshot, Redcleaver, Tidecaller); the game is hard: the autopilot loses about half of its runs.
+- Checks: `npm run check` (451 tests), `npm run build` and `npm run e2e -- --project=webgl2-fallback` (15 tests) pass locally. CI has not run, because the branch is not pushed.
+- Balance (seeds 1–5, `npm run sim:run -- --hero all --runs 5`, and with `--idle`): Stonehorn 2 of 5 won, Nightglaive 3, Mistwarden 2, Sparkshot 3, Redcleaver 3, Tidecaller 2; these six meet every target of the plan. Numbers and what changed: `docs/DECISIONS.md`.
+- **Open for Petr 1:** Gravecaller and Serpent Shaman still win 5 of 5 and are never in danger. Global numbers do not reach them and simple cuts of their spells did not either; they need a redesign of their kits (his decision; the plan did not allow it).
+- **Open for Petr 2:** the targets are measured on 5 seeds and a run is chaotic. On seeds 6–15 the same build gives 1 to 9 wins of 10 depending on the hero. The next balance pass should measure on more seeds with wider bands.
+- **Blocked:** this session could not push (`add_repo` with push access was refused by the auto-mode classifier, twice). The 6 commits of the phase exist only in the cloud container (`/home/claude/wizzik/defense-webgame`, branch `phase-2b2`). Next step: push the branch, open the PR `Phase 2b-2: ring arena, enemy AI and four heroes` with `gh api`, wait for CI, then Petr's playtest and merge. If the container is gone, the phase must be redone from the plan.
+- What Petr should check in the playtest: packs come from all sides and reach him and the castle, the types read apart (scouts from the side, musketeers back off, lancers charge and can be dodged), the first tries are often lost, and the menu shows 8 heroes.
+- Plan: `docs/superpowers/plans/2026-11-11-phase-2b2-ring-ai-heroes.md`. No final whole-branch review has run yet.
+- After the merge: **Visual pass A** (plan in a new chat).
 
 ## Now
 
@@ -26,15 +32,7 @@ Updated 2026-11-11 (phase 2b-1 merged with PR #6; the plan of phase 2b-2 is writ
 
 ## Next
 
-**2b-1 Swarms and enemy variety: done on branch `phase-2b1` (2026-11-11), PR #6 open, waiting for Petr's decision on the merge and his playtest.**
-- What it brings: enemies come in packs of 6–20 from one gate, there are 6 types in their own colours (Shieldbearer, Scout, Musketeer, Chaplain, Lancer, Captain), musketeers and chaplains shoot, chaplains heal, the run lasts 5 minutes in 6 phases, the `?fps=1` overlay names the GPU and the menu warns on software rendering.
-- Balance (seeds 1–5, `npm run sim:run -- --hero all --runs 5`, and with `--idle`): Stonehorn 4 of 5 won, Nightglaive 3, Gravecaller 5, Serpent Shaman 5; an idle run loses with every hero except Gravecaller.
-- **Open for Petr:** Gravecaller is never in danger and wins even without input (Grave Grasp heals 50 HP per enemy hit). The fix is a change of that spell (`healPerHit`), which 2b-1 was not allowed to make. The Nightglaive's average level is 20 (target 10–18). Details in `docs/DECISIONS.md`.
-- What Petr should check in the playtest: packs feel like swarms, the types read apart, the hero has to move, and `?fps=1` shows about 60 fps or more in the last phase with his NVIDIA card named in the overlay.
-- PR: https://github.com/Wizzik/defense-webgame/pull/6 (CI green). The final review of the whole branch found nothing critical or important. Five minor notes are left for a later pass: the chaplain heals every 31 steps, not 30; `sim:run` rounds `hero low` while the test does not; `Effects` keeps uploading behind the menu after a restart; the Lancer and the Chaplain are both pale (size tells them apart); the e2e test for a shooter that dies in the step it fired only proves that nothing crashes.
-- Next step after the merge: **Visual pass A** (plan in a new chat).
-- Plan: `docs/superpowers/plans/2026-11-10-phase-2b1-swarms-and-enemies.md`.
-- The map export is in `data-source/v20.75/out/` only while the container lives; otherwise run `npm run map:extract`.
+**2b-1 Swarms and enemy variety: merged (PR #6, 2026-11-11).** Packs, 6 enemy types, shooters and healers, a 5-minute run in 6 phases, the GPU name in the `?fps=1` overlay. Five minor review notes are left for a later pass: the chaplain heals every 31 steps, not 30; `Effects` keeps uploading behind the menu after a restart; the Lancer and the Chaplain are both pale (size tells them apart); the e2e test for a shooter that dies in the step it fired only proves that nothing crashes. Plan: `docs/superpowers/plans/2026-11-10-phase-2b1-swarms-and-enemies.md`.
 
 **Petr's playtest of 2a (2026-11-10), the reason for 2b-1 (done) and the visual passes:**
 - 20.5 fps: **resolved, not a game bug** (see below);
@@ -47,7 +45,7 @@ Updated 2026-11-11 (phase 2b-1 merged with PR #6; the plan of phase 2b-2 is writ
 - **Cause found and fixed:** Petr's Chrome 157 (Windows 10 22H2) had every GPU feature on "Software only". Enabling `chrome://flags` "Override software rendering list" gave **140 fps**, so Chrome's GPU blocklist was blocking his NVIDIA driver. Advised: update the NVIDIA driver, then set the flag back to Default and check chrome://gpu.
 - 2b-1 added the GPU name to the `?fps=1` overlay and a menu warning on software rendering.
 
-**Order after 2b-1 (approved by Petr 2026-11-10):**
+**Order after 2b-2 (approved by Petr 2026-11-10; 2b-2 was put in front on 2026-11-11):**
 1. **Visual pass A, no external tools** (code and CC0 assets, in the cloud container): ground texture and lane edges, fog, shadows, better light, a real castle and gates from a CC0 kit, props (trees, rocks), CC0 rigged characters instead of the robot (KayKit, Quaternius: check that the shell can download them from GitHub; otherwise Petr attaches the zips), per-type enemy models baked into VAT.
 2. **Visual pass B, own hero models** (needs Petr's computer): Tripo (text or image to 3D with auto-rig; check the licence of his plan before anything is committed, the repo is public) or Blender. Blender MCP install problem: Petr pastes the error into a chat on the computer with Blender. Constraints: hero <= 5000 triangles, enemy <= 2000, clips Idle, Running/Walking, Punch, Death, every asset in `assets/LICENSES.md`.
 3. Then the rest of 2b (20 phases, elites, bosses, difficulties), 2c economy, 2d shared abilities, 2e meta progression.
@@ -75,7 +73,7 @@ Updated 2026-11-11 (phase 2b-1 merged with PR #6; the plan of phase 2b-2 is writ
 
 - `gh` GraphQL does not work here; use the REST API (`gh api`), for example `gh api -X POST repos/Wizzik/defense-webgame/pulls ...`. A draft PR cannot be marked ready without GraphQL, so open PRs as ready or close and reopen them.
 - Commits must use the identity `Claude <noreply@anthropic.com>` (set in the repo's git config), or GitHub shows them as Unverified. Add the session's co-author trailers.
-- Push access: `add_repo` with `access: push` was refused once by the auto-mode classifier; in the 2b-1 planning chat it worked.
+- Push access: `add_repo` with `access: push` is sometimes refused by the auto-mode classifier (it worked in the 2b-1 planning chat and was refused in both 2b-2 execution sessions). Without it nothing can be pushed; tell Petr.
 - The shell cannot reach github.io or Actions artifact storage. Check the live site with WebFetch, or measure it on Petr's computer through the desktop app's built-in browser (`javascript_exec` can read `window.__game` and time frames).
 - The map export is in `data-source/v20.75/out/` (untracked). If it is missing, run `npm run map:extract -- <map.w3x> v20.75`; the map is a file in the claude.ai project.
 - Playwright uses the pre-installed Chromium (`/opt/pw-browsers/chromium-1243`), so `@playwright/test` stays at 1.63.0.

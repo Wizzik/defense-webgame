@@ -28,9 +28,9 @@
     }
   },
   "castle": {
-    "hp": 12000,
+    "hp": 14000,
     "radius": 180,
-    "regenPercentPerMinute": 2
+    "regenPercentPerMinute": 1
   },
   "hero": {
     "collision": 32,
@@ -83,7 +83,7 @@
       },
       "pack": {
         "min": 8,
-        "max": 12,
+        "max": 11,
         "everySeconds": 6
       },
       "packs": 1,
@@ -133,8 +133,8 @@
         "lancer": 3
       },
       "pack": {
-        "min": 10,
-        "max": 14,
+        "min": 9,
+        "max": 13,
         "everySeconds": 5
       },
       "packs": 2,
@@ -150,8 +150,8 @@
         "lancer": 3
       },
       "pack": {
-        "min": 10,
-        "max": 14,
+        "min": 11,
+        "max": 15,
         "everySeconds": 5
       },
       "packs": 3,
@@ -160,8 +160,8 @@
     }
   ],
   "progression": {
-    "xpFirst": 7,
-    "xpStep": 4.5,
+    "xpFirst": 10,
+    "xpStep": 8,
     "magnetRadius": 300,
     "crystalSpeed": 900,
     "pickupRadius": 56,
