@@ -14,6 +14,9 @@ export const EventKind = {
   EnemyHeal: 12,
   /** A pack arrived: a = its role, value = members spawned, x/y = the centre of the pack. */
   PackSpawn: 13,
+  /** A charge: a = slot, value = 0 windup starts / 1 the run starts, x/y = the enemy, u/v = direction
+   *  (to the hero at the windup, locked at the run). */
+  EnemyCharge: 14,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

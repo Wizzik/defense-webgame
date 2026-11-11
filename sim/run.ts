@@ -51,6 +51,8 @@ export class Run {
   readonly phaseTables: PhaseTable[];
   /** Enemy type index to its Behavior. */
   readonly enemyBehavior: Uint8Array;
+  /** Type index of the first enemy type with an aura; -1 when there is none. */
+  readonly auraType: number;
   /** Type index of the elite. */
   readonly eliteType: number;
   /** The step in which the next pack comes. */
@@ -76,6 +78,7 @@ export class Run {
     this.enemies = new EnemyStore(rules.enemies.maxAlive);
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);
     this.enemyBehavior = Uint8Array.from(data.enemies, (e) => BEHAVIOR_IDS.indexOf(e.behavior));
+    this.auraType = data.enemies.findIndex((e) => e.aura !== undefined);
     this.phaseTables = buildPhaseTables(data);
     this.eliteType = enemyType(data, rules.enemies.elite, "rules.enemies.elite");
     this.nextPackTick = Math.round(rules.run.firstPackSeconds * TICKS_PER_SECOND);

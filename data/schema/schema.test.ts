@@ -298,6 +298,18 @@ describe("game data schemas", () => {
     expect(errorMessage(d)).toContain("phases cover 150 s, the run lasts 180 s");
   });
 
+  it("accepts charge and aura of an enemy, and rejects a charge whose minRange is not below maxRange", () => {
+    const charge = { minRange: 300, maxRange: 700, windupSeconds: 0.5, speedMultiplier: 2.5, damageMultiplier: 2, distance: 900, cooldownSeconds: 6 };
+    const d = fixture();
+    d.enemies[0].charge = charge;
+    d.enemies[0].aura = { radius: 400, moveSpeed: 0.25, damage: 0 };
+    expect(validateGameData(d).enemies[0]!.charge).toEqual(charge);
+    d.enemies[0].charge = { ...charge, minRange: 700 };
+    expect(errorMessage(d)).toContain("charge");
+    d.enemies[0].charge = { ...charge, distance: 0 };
+    expect(errorMessage(d)).toContain("charge.distance");
+  });
+
   it("rejects packs outside 1..3", () => {
     for (const packs of [0, 4, 1.5]) {
       const d = fixture();

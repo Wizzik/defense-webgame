@@ -33,6 +33,14 @@ export class EnemyStore {
   /** Slow: ticks left and the share of walking speed removed (0..1). */
   readonly slowTicks: Int32Array;
   readonly slowFactor: Float64Array;
+  /** Charge (sim/enemy-charge.ts): state, ticks left of the state, ticks until the next charge, locked direction. */
+  readonly chargeState: Uint8Array;
+  readonly chargeTicks: Int32Array;
+  readonly chargeCooldown: Int32Array;
+  readonly chargeDirX: Float64Array;
+  readonly chargeDirY: Float64Array;
+  /** 1 while an enemy with an aura is near (sim/enemy-aura.ts); recomputed every step. */
+  readonly buffed: Uint8Array;
 
   constructor(capacity: number) {
     this.capacity = capacity;
@@ -61,6 +69,12 @@ export class EnemyStore {
     this.knockTicks = new Int32Array(capacity);
     this.slowTicks = new Int32Array(capacity);
     this.slowFactor = new Float64Array(capacity);
+    this.chargeState = new Uint8Array(capacity);
+    this.chargeTicks = new Int32Array(capacity);
+    this.chargeCooldown = new Int32Array(capacity);
+    this.chargeDirX = new Float64Array(capacity);
+    this.chargeDirY = new Float64Array(capacity);
+    this.buffed = new Uint8Array(capacity);
   }
 
   /** Takes the lowest free slot; returns -1 when the store is full. */
@@ -102,6 +116,12 @@ export class EnemyStore {
     this.knockTicks[slot] = 0;
     this.slowTicks[slot] = 0;
     this.slowFactor[slot] = 0;
+    this.chargeState[slot] = 0;
+    this.chargeTicks[slot] = 0;
+    this.chargeCooldown[slot] = 0;
+    this.chargeDirX[slot] = 0;
+    this.chargeDirY[slot] = 0;
+    this.buffed[slot] = 0;
     return slot;
   }
 

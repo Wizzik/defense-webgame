@@ -223,6 +223,18 @@ describe("data-build", () => {
     expect(Object.keys(enemy)).not.toContain("multipliers");
   });
 
+  it("copies charge and aura of a design entry after heal", () => {
+    const d = design();
+    const charge = { minRange: 300, maxRange: 700, windupSeconds: 0.5, speedMultiplier: 2.5, damageMultiplier: 2, distance: 900, cooldownSeconds: 6 };
+    d.enemies[0].heal = { amount: 8, range: 450, cooldown: 1 };
+    d.enemies[0].charge = charge;
+    d.enemies[0].aura = { radius: 400, moveSpeed: 0.25, damage: 0.25 };
+    const enemy = buildGameData(mapExport(), d, "test").enemies[0];
+    expect(enemy.charge).toStrictEqual(charge);
+    expect(enemy.aura).toStrictEqual({ radius: 400, moveSpeed: 0.25, damage: 0.25 });
+    expect(Object.keys(enemy).slice(-4)).toEqual(["xp", "heal", "charge", "aura"]);
+  });
+
   it("fails with readable error when enemy source is missing", () => {
     const d = design();
     d.enemies[0].source = "U404";

@@ -110,6 +110,12 @@ describe("generated game data", () => {
     });
   });
 
+  it("the lancer charges and the captain has an aura", () => {
+    const enemies = JSON.parse(read("enemies.json")) as { id: string; charge?: unknown; aura?: unknown }[];
+    expect(enemies.filter((e) => e.charge !== undefined).map((e) => e.id)).toEqual(["lancer"]);
+    expect(enemies.filter((e) => e.aura !== undefined).map((e) => e.id)).toEqual(["captain"]);
+  });
+
   it("carries the phase 2a mechanics", () => {
     const abilities = JSON.parse(read("abilities.json")) as { id: string; kind: string; params: Record<string, number[]> }[];
     const heroes = JSON.parse(read("heroes.json")) as { id: string; signatureAbilities: string[] }[];

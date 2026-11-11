@@ -1,6 +1,7 @@
 // Tests only: a quiet run (no spawns, no knockback) on a big arena with the castle far in a corner,
 // and helpers to place enemies of a named type.
 import type { GameData } from "../../data/schema";
+import { debugSetAbilityLevel } from "../abilities/slots";
 import { EventKind } from "../events";
 import { createRun } from "../run";
 import { gameData } from "./game-data";
@@ -20,7 +21,7 @@ export function enemyRun(tweak?: (data: GameData) => void) {
   silenceSpawns(data);
   tweak?.(data);
   const run = createRun(data, { seed: 11, durationSeconds: 100000 });
-  for (const slot of run.abilities) slot.level = 0;
+  for (let i = 0; i < run.abilities.length; i++) debugSetAbilityLevel(run, i, 0);
   run.hero.stats.maxHp = 1e9;
   run.hero.hp = 1e9;
   return run;
@@ -57,3 +58,10 @@ export function countEvents(run: EnemyRun, kind: number, slot = -1): number {
 }
 
 export const heroHits = (run: EnemyRun, slot = -1): number => countEvents(run, EventKind.HeroHit, slot);
+
+/** Indices of the events of `kind` in the current step. */
+export function eventsOf(run: EnemyRun, kind: number): number[] {
+  const out: number[] = [];
+  for (let k = 0; k < run.events.count; k++) if (run.events.kind[k] === kind) out.push(k);
+  return out;
+}

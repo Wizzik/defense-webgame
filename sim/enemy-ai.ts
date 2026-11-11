@@ -1,6 +1,8 @@
 import { armorReduction, damageCastle, damageHero, rollDamage } from "./combat";
 import { TICK_SECONDS, TICKS_PER_SECOND } from "./constants";
 import { Action, Role } from "./enemies";
+import { updateEnemyAuras } from "./enemy-aura";
+import { cancelCharge, chargeVX, chargeVY, updateCharge } from "./enemy-charge";
 import { Behavior, steer, steerHold, steerX, steerY } from "./enemy-steer";
 import type { Run } from "./run";
 
@@ -26,15 +28,22 @@ export function updateEnemies(run: Run): void {
     if (e.alive[i] === 1) grid.insert(i, e.x[i], e.y[i]);
   }
 
+  updateEnemyAuras(run);
+  const aura = run.auraType >= 0 ? defs[run.auraType].aura : undefined;
+  const auraSpeed = aura === undefined ? 1 : 1 + aura.moveSpeed;
+  const auraDamage = aura === undefined ? 1 : 1 + aura.damage;
+
   for (let i = 0; i < e.capacity; i++) {
     if (e.alive[i] === 0) continue;
     const def = defs[e.type[i]];
     const x = e.x[i];
     const y = e.y[i];
     if (e.attackCooldown[i] > 0) e.attackCooldown[i]--;
+    if (e.chargeCooldown[i] > 0) e.chargeCooldown[i]--;
+    const buffed = e.buffed[i] === 1;
 
     // Slow lowers walking speed only (not knockback) and runs down even while stunned.
-    let walk = def.moveSpeed;
+    let walk = buffed ? def.moveSpeed * auraSpeed : def.moveSpeed;
     if (e.slowTicks[i] > 0) {
       walk *= 1 - e.slowFactor[i];
       e.slowTicks[i]--;
@@ -44,10 +53,12 @@ export function updateEnemies(run: Run): void {
     let vy = 0;
     let tx = castle.x;
     let ty = castle.y;
+    let charging = false;
 
     if (e.stunTicks[i] > 0) {
       e.stunTicks[i]--;
       e.action[i] = Action.Stunned;
+      cancelCharge(run, i);
     } else {
       const hx = hero.x - x;
       const hy = hero.y - y;
@@ -57,46 +68,55 @@ export function updateEnemies(run: Run): void {
         else if (heroDist > rules.enemies.leashRange) e.aggro[i] = 0;
       }
       const targetsHero = e.role[i] === Role.Hunter || e.aggro[i] === 1 || run.enemyBehavior[e.type[i]] === Behavior.Flank;
-      let targetRadius: number;
-      if (targetsHero) {
-        tx = hero.x;
-        ty = hero.y;
-        targetRadius = hero.stats.collision;
-      } else {
-        targetRadius = castle.radius;
-      }
-      const dx = tx - x;
-      const dy = ty - y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const reach = def.collision + targetRadius + def.attack.range;
-      const ux = dist > 1e-6 ? dx / dist : 0;
-      const uy = dist > 1e-6 ? dy / dist : 0;
-      steer(run, i, targetsHero, ux, uy, dist, reach);
-      if (dist <= reach && !steerHold) {
-        e.action[i] = Action.Attack;
-        if (e.attackCooldown[i] <= 0) {
-          const raw = rollDamage(run.rng, def.attack.damageMin, def.attack.damageMax) * e.damageScale[i];
-          if (targetsHero) {
-            const k = 1 - armorReduction(hero.stats.armor, constants.defenseArmor);
-            damageHero(run, raw * k, i);
-          } else {
-            damageCastle(run, raw, i);
-          }
-          e.attackCooldown[i] = Math.round(def.attack.cooldown * TICKS_PER_SECOND);
-          e.lastAttackTick[i] = run.tick;
-        }
-        e.facingX[i] = ux;
-        e.facingY[i] = uy;
-      } else {
+      charging = updateCharge(run, i, targetsHero, heroDist, walk);
+      if (charging) {
         e.action[i] = Action.Move;
-        vx = steerX * walk;
-        vy = steerY * walk;
+        vx = chargeVX;
+        vy = chargeVY;
+      } else {
+        let targetRadius: number;
+        if (targetsHero) {
+          tx = hero.x;
+          ty = hero.y;
+          targetRadius = hero.stats.collision;
+        } else {
+          targetRadius = castle.radius;
+        }
+        const dx = tx - x;
+        const dy = ty - y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const reach = def.collision + targetRadius + def.attack.range;
+        const ux = dist > 1e-6 ? dx / dist : 0;
+        const uy = dist > 1e-6 ? dy / dist : 0;
+        steer(run, i, targetsHero, ux, uy, dist, reach);
+        if (dist <= reach && !steerHold) {
+          e.action[i] = Action.Attack;
+          if (e.attackCooldown[i] <= 0) {
+            let raw = rollDamage(run.rng, def.attack.damageMin, def.attack.damageMax) * e.damageScale[i];
+            if (buffed) raw *= auraDamage;
+            if (targetsHero) {
+              const k = 1 - armorReduction(hero.stats.armor, constants.defenseArmor);
+              damageHero(run, raw * k, i);
+            } else {
+              damageCastle(run, raw, i);
+            }
+            e.attackCooldown[i] = Math.round(def.attack.cooldown * TICKS_PER_SECOND);
+            e.lastAttackTick[i] = run.tick;
+          }
+          e.facingX[i] = ux;
+          e.facingY[i] = uy;
+        } else {
+          e.action[i] = Action.Move;
+          vx = steerX * walk;
+          vy = steerY * walk;
+        }
       }
     }
 
     // Separation: push away from neighbours, linearly from 0 at 2 * collision to moveSpeed on overlap.
+    // A charging enemy holds its line: nobody pushes it aside.
     const sepRadius = 2 * def.collision;
-    const found = grid.query(x, y, sepRadius, neighbours);
+    const found = charging ? 0 : grid.query(x, y, sepRadius, neighbours);
     for (let k = 0; k < found; k++) {
       const j = neighbours[k];
       if (j === i) continue;
@@ -128,8 +148,12 @@ export function updateEnemies(run: Run): void {
     ny = pushOutY;
     nx = pushOut(nx, ny, castle.x, castle.y, castle.radius + def.collision);
     ny = pushOutY;
-    nx = Math.max(-arenaX + def.collision, Math.min(arenaX - def.collision, nx));
-    ny = Math.max(-arenaY + def.collision, Math.min(arenaY - def.collision, ny));
+    const insideX = Math.max(-arenaX + def.collision, Math.min(arenaX - def.collision, nx));
+    const insideY = Math.max(-arenaY + def.collision, Math.min(arenaY - def.collision, ny));
+    // A charge ends at the arena edge.
+    if (charging && (insideX !== nx || insideY !== ny)) cancelCharge(run, i);
+    nx = insideX;
+    ny = insideY;
     e.x[i] = nx;
     e.y[i] = ny;
 

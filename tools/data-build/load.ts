@@ -121,6 +121,9 @@ export interface EnemyEntry {
   multipliers?: { hp?: number; damage?: number; moveSpeed?: number; collision?: number };
   /** Design value, copied as it is. */
   heal?: { amount: number; range: number; cooldown: number };
+  /** Design values, copied as they are. */
+  charge?: NonNullable<Enemy["charge"]>;
+  aura?: NonNullable<Enemy["aura"]>;
 }
 
 export interface Design {
