@@ -1,4 +1,4 @@
-import { type DirectionalLight, PCFSoftShadowMap, Vector3, type WebGPURenderer } from "three/webgpu";
+import { type DirectionalLight, PCFShadowMap, Vector3, type WebGPURenderer } from "three/webgpu";
 
 /** Half the side of the orthographic shadow box, in scene units, and the shadow map resolution. */
 const BOX_HALF = 34;
@@ -35,7 +35,7 @@ export class SunShadow {
     this.offset = sun.position.clone().sub(sun.target.position);
     if (!enabled) return;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = PCFSoftShadowMap;
+    renderer.shadowMap.type = PCFShadowMap; // WebGPURenderer has no PCFSoftShadowMap (three 0.187)
     sun.castShadow = true;
     const { shadow } = sun;
     shadow.mapSize.set(MAP_SIZE, MAP_SIZE);
@@ -47,6 +47,7 @@ export class SunShadow {
     camera.near = 1;
     camera.far = this.offset.length() + 2 * BOX_HALF;
     camera.updateProjectionMatrix();
+    shadow.radius = 2; // PCF taps spread 2 shadow texels (about 0.07 units): a soft edge without visible banding
     shadow.bias = -0.0005;
     shadow.normalBias = 0.03;
     // the axes of the light's view, fixed because its direction is

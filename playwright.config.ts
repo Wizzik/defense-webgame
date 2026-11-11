@@ -14,6 +14,8 @@ export default defineConfig({
   testDir: "e2e",
   timeout: 180_000,
   workers: 1,
+  // the screenshot spec asserts nothing; it runs only through `npm run shots`
+  testIgnore: process.env.SHOTS ? [] : ["**/shots.spec.ts"],
   fullyParallel: false,
   reporter: process.env.CI ? [["line"], ["html", { open: "never" }]] : [["line"]],
   webServer: {

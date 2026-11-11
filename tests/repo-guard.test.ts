@@ -98,7 +98,7 @@ describe("repo guard", () => {
     const licenses = readFileSync(join(root, "assets/LICENSES.md"), "utf8");
     const files = execSync("git ls-files assets", { cwd: root, encoding: "utf8" })
       .split("\n")
-      .filter((f) => f !== "" && f !== "assets/LICENSES.md" && !f.endsWith(".test.ts"));
+      .filter((f) => f !== "" && f !== "assets/LICENSES.md");
     expect(files.length).toBeGreaterThan(0);
     const missing = files.filter((f) => !licenses.includes(f.slice("assets/".length)));
     expect(missing).toEqual([]);

@@ -175,8 +175,8 @@ async function buildModel(spec: ModelSpec): Promise<{ triangles: number }> {
   await doc.transform(dedup(), prune({ keepLeaves: true }), weld());
   await limitTriangles(doc, spec);
   if (Object.keys(spec.clips).length > 0) await doc.transform(resample());
-    dropStaticTracks(doc);
-    await doc.transform(dedup());
+  dropStaticTracks(doc);
+  await doc.transform(dedup());
   await doc.transform(prune({ keepLeaves: true }));
   const out = join(MODELS_DIR, spec.out);
   await mkdir(dirname(out), { recursive: true });

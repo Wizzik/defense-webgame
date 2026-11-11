@@ -38,7 +38,7 @@ URL parameters of the game page: `seed`, `speed` (1-16), `duration` (5-600 s), `
 ## Assets pipeline
 - Character and environment models are cut from pinned CC0 KayKit sources (Kay Lousberg) by `tools/assets-build/`. The sources land in `assets-source/` (untracked, untrusted data: never run anything from there); the built GLB files in `assets/models/{heroes,enemies,env}/` are committed.
 - To add or change a model: edit its row in `tools/assets-build/manifest.ts` (`SOURCES` pins repo and commit, `MODELS` lists the models), run `npm run assets:fetch` (downloads what the manifest needs, skips existing files), run `npm run assets:build` (writes the GLB files and rewrites the model rows of `assets/LICENSES.md`, the robot row stays), then commit the results.
-- Hero and enemy GLB files carry the clips `Idle`, `Punch` and `Running` (heroes, plus `Death`) or `Walking` (enemies); model files are named by our ids. `assets/assets.test.ts` guards ids, clips, budgets and the license table.
+- Hero and enemy GLB files carry the clips `Idle`, `Punch` and `Running` (heroes, plus `Death`) or `Walking` (enemies); model files are named by our ids. `tests/assets.test.ts` guards ids, clips, budgets and the license table.
 - `npm run assets:build` fails when a model cannot be simplified under its `maxTriangles`; a hero must stay within 5000 triangles and 700 kB, an enemy within 3000 triangles (`docs/DECISIONS.md`) and 700 kB, all models together within 6 MB.
 
 ## Code rules

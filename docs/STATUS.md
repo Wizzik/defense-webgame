@@ -57,7 +57,7 @@ Updated 2026-11-11 night (phase 2b-2 is merged; Visual pass A is finished on bra
 
 **Order after 2b-2 (approved by Petr 2026-11-10; 2b-2 was put in front on 2026-11-11):**
 1. **Visual pass A, no external tools**: done on `visual-a`, see the top of this file.
-2. **Visual pass B, own hero models** (needs Petr's computer): Tripo (text or image to 3D with auto-rig; check the licence of his plan before anything is committed, the repo is public) or Blender. Blender MCP install problem: Petr pastes the error into a chat on the computer with Blender. Constraints: hero <= 5000 triangles, enemy <= 2000, clips Idle, Running/Walking, Punch, Death, every asset in `assets/LICENSES.md`.
+2. **Visual pass B, own hero models** (needs Petr's computer): Tripo (text or image to 3D with auto-rig; check the licence of his plan before anything is committed, the repo is public) or Blender. Blender MCP install problem: Petr pastes the error into a chat on the computer with Blender. Constraints: hero <= 5000 triangles, enemy <= 3000 (see docs/DECISIONS.md), clips Idle, Running/Walking, Punch, Death, every asset in `assets/LICENSES.md`.
 3. Then the rest of 2b (20 phases, elites, bosses, difficulties), 2c economy, 2d shared abilities, 2e meta progression.
 4. Propose the second skill (project development rules).
 

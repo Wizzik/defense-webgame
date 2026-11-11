@@ -44,8 +44,8 @@ test("shot: fight", async ({ page }) => {
   // a level-up card pauses the run, so pick the first card until the tick is reached
   for (let i = 0; i < 600; i++) {
     const { tick, screen } = await page.evaluate(() => ({ tick: window.__game!.tick, screen: window.__game!.screen }));
-    if (tick >= 2700) break;
     if (screen === "levelUp") await page.keyboard.press("1");
+    else if (tick >= 2700) break;
     await page.waitForTimeout(250);
   }
   await page.waitForFunction(() => window.__game?.screen === "playing", undefined, { timeout: 10_000 });

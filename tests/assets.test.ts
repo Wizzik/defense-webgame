@@ -25,7 +25,7 @@ describe("license table", () => {
   const rowPath = (row: string): string => /\(`([^`]+)`\)/.exec(row)![1]!;
   const files = listFiles(ASSETS)
     .map((f) => relative(ASSETS, f))
-    .filter((f) => f !== "LICENSES.md" && !f.endsWith(".test.ts"));
+    .filter((f) => f !== "LICENSES.md");
 
   it("has exactly one row per asset file, with a matching sha256", () => {
     for (const file of files) {

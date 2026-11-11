@@ -1,7 +1,7 @@
 /** Downloads the pinned source files the manifest needs into `assets-source/` (untracked, untrusted data). */
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join, posix } from "node:path";
+import { dirname, join, posix, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { MODELS, SOURCES, splitRef } from "./manifest";
 
@@ -14,8 +14,19 @@ function url(ref: string): string {
   return `https://raw.githubusercontent.com/KayKit-Game-Assets/${s.repo}/${s.commit}/${s.root}/${path}`;
 }
 
+/** Where `path` of source `key` is written; throws when it would land outside `assets-source/<key>/` (a `../` in a downloaded file). */
+export function targetPath(key: string, path: string): string {
+  const base = resolve(SOURCE_DIR, key);
+  const target = resolve(base, path);
+  const rel = relative(base, target);
+  if (rel === "" || rel === ".." || rel.startsWith(`..${sep}`)) {
+    throw new Error(`${key}:${path} escapes ${base}`);
+  }
+  return target;
+}
+
 async function download(key: string, path: string, ref: string): Promise<boolean> {
-  const target = join(SOURCE_DIR, key, path);
+  const target = targetPath(key, path);
   if (existsSync(target)) return false;
   const res = await fetch(url(ref));
   if (!res.ok) throw new Error(`${res.status} for ${url(ref)}`);
