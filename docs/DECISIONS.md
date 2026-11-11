@@ -112,3 +112,4 @@ Decisions that still apply. Check here before you change a rule. Newest first in
 - Simulation tests set every rule value they assert on, so balance tuning cannot break them.
 - Event fields are fixed by the table in the phase 1 plan (Task 3). The client depends on them.
 - Commits use `Claude <noreply@anthropic.com>`, because the environment's signing check requires it (2026-11-06).
+- Enemy models may have up to 3000 triangles instead of 2000 (2026-11-11, visual pass A Task 2). The KayKit skeleton characters use a palette texture, so nearly every edge is a UV seam and meshopt stops at about 1800 triangles for the body alone (error 0.16, repeated passes); with weapons the shieldbearer stays at 2451. Heroes meet 5000 easily. All six enemies build at 2982-2997 triangles; check skinning on the screenshots of Tasks 3 and 4.

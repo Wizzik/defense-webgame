@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: [
+      "assets/**/*.test.ts",
       "tests/**/*.test.ts",
       "data/**/*.test.ts",
       "tools/**/*.test.ts",

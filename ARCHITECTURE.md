@@ -26,7 +26,13 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 | `e2e/` | Playwright, projects `webgl2-fallback` and `webgpu-swiftshader` | |
 | `tests/` | repository guards (map files, `sim/` purity) | |
 | `assets/` | CC0 assets, each listed in `assets/LICENSES.md` | |
+| `tools/assets-build/` | pinned KayKit sources → `assets/models/` (`npm run assets:fetch`, `npm run assets:build`) | sources in untracked `assets-source/` |
 | `docs/` | spec, plans, status, decisions | map names allowed |
+
+## Assets
+
+- Data flow: `manifest.ts` (pinned commits and the model list) → `fetch.ts` downloads source files from `raw.githubusercontent.com` into `assets-source/<key>/` → `build.ts` cuts each model with glTF-Transform: delete nodes (heroes keep the body plus listed parts), merge weapon files onto `handslot.r`/`handslot.l`, keep and rename the needed clips, drop IK and static tracks, `dedup`, `prune`, `weld`, `simplify` to the triangle limit, `resample`, write a GLB with its texture inside → `assets/models/{heroes,enemies,env}/` and the model rows of `assets/LICENSES.md`.
+- `glb-info.ts` reads a GLB's JSON chunk (triangles, clips, mesh nodes, bytes, texture) for the tests and for checking names in a source file.
 
 ## Game data
 
