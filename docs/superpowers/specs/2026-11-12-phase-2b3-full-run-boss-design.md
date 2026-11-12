@@ -42,7 +42,7 @@ Nový seznam `events` v `design/rules.yaml`, každá položka má `atSeconds` a 
 **Elitní nápor:**
 - 7 s před příchodem vznikne událost varování: text v HUD („Blíží se elitní nápor“ / „An elite rush is coming“) a šipka směru na okraji obrazovky. Mapa varuje také 7 s předem.
 - Přijde jako jedna smečka z jednoho náhodného směru na spawnovacím kruhu, role obléhači (jde na hrad).
-- Nápor obchází strop 150 jen potud, že má přednost: když není místo, zabere volné sloty jako každá smečka a zbytek propadne.
+- Pro nápor platí strop 150 jako pro každou smečku: zabere jen volné sloty a zbytek propadne.
 - Dnešní `elites` u první smečky fáze zůstávají.
 
 ## 4. Bossové
