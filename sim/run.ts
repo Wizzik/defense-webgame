@@ -18,6 +18,7 @@ import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import type { TickInput } from "./input";
 import { Rng } from "./rng";
 import { spawnEnemies } from "./spawner";
+import { buildTimeline, type TimedEvent, updateTimeline } from "./timeline";
 import { buildPhaseTables, enemyType, type PhaseTable } from "./spawn-tables";
 import { SpatialHash } from "./spatial-grid";
 import type { CastleState, HeroState, HeroStats, RunStats } from "./world";
@@ -55,6 +56,18 @@ export class Run {
   readonly auraType: number;
   /** Type index of the elite. */
   readonly eliteType: number;
+  /** `rules.events` prepared for the steps (sim/timeline.ts). */
+  readonly timeline: TimedEvent[];
+  /** Index of the next event of `timeline`. */
+  nextEvent = 0;
+  /** The next rush was announced; its side is in rushDirX/rushDirY. */
+  rushWarned = false;
+  rushDirX = 1;
+  rushDirY = 0;
+  /** 1 for every enemy type that is a boss. */
+  readonly isBoss: Uint8Array;
+  /** Living bosses. */
+  bossCount = 0;
   /** The step in which the next pack comes. */
   nextPackTick: number;
   /** The last phase whose elites were sent (-1: none yet). */
@@ -79,7 +92,9 @@ export class Run {
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);
     this.enemyBehavior = Uint8Array.from(data.enemies, (e) => BEHAVIOR_IDS.indexOf(e.behavior));
     this.auraType = data.enemies.findIndex((e) => e.aura !== undefined);
+    this.isBoss = Uint8Array.from(data.enemies, (e) => (e.boss ? 1 : 0));
     this.phaseTables = buildPhaseTables(data);
+    this.timeline = buildTimeline(data);
     this.eliteType = enemyType(data, rules.enemies.elite, "rules.enemies.elite");
     this.nextPackTick = Math.round(rules.run.firstPackSeconds * TICKS_PER_SECOND);
     this.durationTicks = Math.round(
@@ -135,6 +150,7 @@ export class Run {
    *   savePrevious(this);         // Task 3 (crystals: Task 7)
    *   applyActions(this, input);  // phase 2a, Task 7 (R, T, dash)
    *   moveHero(this, input);      // Task 3
+   *   updateTimeline(this);       // phase 2b-3 (elite rushes and bosses by time)
    *   spawnEnemies(this);         // Task 4
    *   updateEnemies(this);        // Task 4
    *   healEnemies(this);          // phase 2b-1 (reads the grid built by updateEnemies)
@@ -158,6 +174,7 @@ export class Run {
     savePrevious(this);
     applyActions(this, input);
     moveHero(this, input);
+    updateTimeline(this);
     spawnEnemies(this);
     updateEnemies(this);
     healEnemies(this);

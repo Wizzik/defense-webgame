@@ -17,6 +17,10 @@ export const EventKind = {
   /** A charge: a = slot, value = 0 windup starts / 1 the run starts, x/y = the enemy, u/v = direction
    *  (to the hero at the windup, locked at the run). */
   EnemyCharge: 14,
+  /** An elite rush is coming: value = seconds until it comes, x/y = the centre of its pack. */
+  RushWarning: 15,
+  /** A boss arrived: a = slot, value = type index, x/y = where. */
+  BossSpawn: 16,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

@@ -130,6 +130,19 @@ export class EnemyStore {
     this.alive[slot] = 0;
     this.aliveCount--;
   }
+
+  /**
+   * Slot of the living enemy with the lowest `spawnTick` whose type is not marked in `skip`
+   * (indexed by type); the lower slot on a tie, -1 when there is none.
+   */
+  oldestWhere(skip: Uint8Array): number {
+    let best = -1;
+    for (let i = 0; i < this.capacity; i++) {
+      if (this.alive[i] === 0 || skip[this.type[i]] === 1) continue;
+      if (best < 0 || this.spawnTick[i] < this.spawnTick[best]) best = i;
+    }
+    return best;
+  }
 }
 
 /** Slows an enemy; with a slow already active, both the factor and the ticks keep the larger value. */

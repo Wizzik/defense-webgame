@@ -81,6 +81,7 @@ export function killEnemy(run: Run, slot: number): void {
   const xp = run.data.enemies[e.type[slot]].xp;
   const x = e.x[slot];
   const y = e.y[slot];
+  if (run.isBoss[e.type[slot]] === 1) run.bossCount--;
   e.kill(slot);
   if (run.crystals.drop(x, y, xp) < 0) gainXp(run, xp);
 }

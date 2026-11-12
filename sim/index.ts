@@ -26,4 +26,5 @@ export { Rng } from "./rng";
 export { createRun, Run } from "./run";
 export type { RunOptions, RunResult, RunState } from "./run";
 export { SpatialHash } from "./spatial-grid";
+export { spawnBoss, updateTimeline } from "./timeline";
 export type { CastleState, HeroState, HeroStats, RunStats } from "./world";
