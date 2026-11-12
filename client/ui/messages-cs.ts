@@ -5,6 +5,7 @@ export const messagesCs = {
   "menu.subtitle": "Ubraň hrad pět minut.",
   "menu.chooseHero": "Vyber hrdinu",
   "menu.start": "Hrát",
+  "menu.loading": "Načítám…",
   "menu.controls": "Pohyb WASD nebo šipkami, mezerník úskok, R ultimátka. Kouzla se sesílají sama.",
   "menu.primary": "Hlavní atribut: {attr}",
   "attr.str": "Síla",

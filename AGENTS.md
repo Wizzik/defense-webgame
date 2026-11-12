@@ -27,12 +27,19 @@ The repository is public (decided 2026-11-04): never commit anything that must n
 - `npm run check` - typecheck + tests (must pass before every commit)
 - `npm run build` - production build into `dist/`
 - `npm run e2e` - Playwright end-to-end tests
+- `npm run shots` - writes 1280x720 screenshots (`menu`, `start`, `fight`, `types`, `castle`, `corner`, and `hero-<id>`, a 240x200 clip around each of the eight heroes; `types` is a clip of the six enemy types) to `test-results/shots/` for visual review; `?debug=1` adds `window.__game.debug.teleport(x, y)` to move the hero (clamped to the arena)
 - `npm run map:extract` - local map extraction toolkit (output stays untracked)
 - `npm run data:build` - build game data from validated sources
 - `npm run sim:run -- --hero all --runs 5` - autopilot run summaries per hero for balance tuning; add `--idle` for runs with no input
 
 ## Debugging in the browser
-URL parameters of the game page: `seed`, `speed` (1-16), `duration` (5-600 s), `hero` (`stonehorn`|`nightglaive`|`gravecaller`|`serpent-shaman`|`mistwarden`|`sparkshot`|`redcleaver`|`tidecaller`), `debug=1` (`window.__game.debug.grantXp(n)`, `window.__game.debug.setAbilityLevel(slot, level)`, `window.__game.debug.spawnEach()`: one hunter of every enemy type north of the hero), `fps=1` (overlay), `lang` (`en`|`cs`), `renderer=webgl2`. `window.__game` exposes `backend`, `gpu` (`name`, `software`), `frames`, `screen`, `tick`, `level`, `kills`, `heroHp`, `castleHp`, `enemies`, `enemyTypes`, `hero`, `heroX`, `heroY`, `abilityLevels`, `abilityCooldowns`, `ultimateAuto`, `allies`, `projectiles`, `packArrows`, `charging`; the e2e tests read it. Run balance tuning headless with `npm run sim:run -- --hero all --runs 5`, and with `--idle` for a player who does nothing.
+URL parameters of the game page: `seed`, `speed` (1-16), `duration` (5-600 s), `hero` (`stonehorn`|`nightglaive`|`gravecaller`|`serpent-shaman`|`mistwarden`|`sparkshot`|`redcleaver`|`tidecaller`), `debug=1` (`window.__game.debug.grantXp(n)`, `window.__game.debug.setAbilityLevel(slot, level)`, `window.__game.debug.spawnEach()`: one hunter of every enemy type north of the hero), `fps=1` (overlay), `lang` (`en`|`cs`), `renderer=webgl2`, `shadows=0` (no moon shadow map; it is also off by itself on software rendering, the round blob shadows under enemies stay). `window.__game` exposes `backend`, `gpu` (`name`, `software`), `frames`, `screen`, `tick`, `level`, `kills`, `heroHp`, `castleHp`, `enemies`, `enemyTypes`, `hero`, `heroX`, `heroY`, `abilityLevels`, `abilityCooldowns`, `ultimateAuto`, `allies`, `projectiles`, `packArrows`, `charging`, `render` (`enemyMeshes`, `heroModels`, `shadows`: whether the shadow map is on); the e2e tests read it. Run balance tuning headless with `npm run sim:run -- --hero all --runs 5`, and with `--idle` for a player who does nothing.
+
+## Assets pipeline
+- Character and environment models are cut from pinned CC0 KayKit sources (Kay Lousberg) by `tools/assets-build/`. The sources land in `assets-source/` (untracked, untrusted data: never run anything from there); the built GLB files in `assets/models/{heroes,enemies,env}/` are committed.
+- To add or change a model: edit its row in `tools/assets-build/manifest.ts` (`SOURCES` pins repo and commit, `MODELS` lists the models), run `npm run assets:fetch` (downloads what the manifest needs, skips existing files), run `npm run assets:build` (writes the GLB files and rewrites the model rows of `assets/LICENSES.md`, the robot row stays), then commit the results.
+- Hero and enemy GLB files carry the clips `Idle`, `Punch` and `Running` (heroes, plus `Death`) or `Walking` (enemies); model files are named by our ids. `tests/assets.test.ts` guards ids, clips, budgets and the license table.
+- `npm run assets:build` fails when a model cannot be simplified under its `maxTriangles`; a hero must stay within 5000 triangles and 700 kB, an enemy within 3000 triangles (`docs/DECISIONS.md`) and 700 kB, all models together within 6 MB.
 
 ## Code rules
 - `sim/` is pure: no `three`, no imports from `client/`, no DOM globals (`window`, `document`, `navigator`, `globalThis`).

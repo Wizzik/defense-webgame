@@ -16,12 +16,18 @@
     "data:build": "tsx tools/data-build/build.ts",
     "sim:run": "tsx tools/sim-run/run.ts",
     "test:py": "python3 -I -m unittest discover -s tools/map-extract/tests -v",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "assets:fetch": "tsx tools/assets-build/fetch.ts",
+    "assets:build": "tsx tools/assets-build/build.ts",
+    "shots": "SHOTS=1 playwright test e2e/shots.spec.ts --project=webgl2-fallback"
   },
   "devDependencies": {
+    "@gltf-transform/core": "4.5.1",
+    "@gltf-transform/functions": "4.5.1",
     "@playwright/test": "1.63.0",
     "@types/node": "22.19.1",
     "@types/three": "0.187.0",
+    "meshoptimizer": "1.3.0",
     "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vite": "8.3.5",

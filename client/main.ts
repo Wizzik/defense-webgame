@@ -1,6 +1,5 @@
 /// <reference types="vite/client" />
-import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
-import { Color, Scene, type WebGPURenderer } from "three/webgpu";
+import { Scene, type WebGPURenderer } from "three/webgpu";
 import type { GameData } from "../data/schema";
 import { ALLY_CAPACITY, CRYSTAL_CAPACITY } from "../sim";
 import { Sfx } from "./audio/sfx";
@@ -22,7 +21,12 @@ import { tintTable } from "./render/enemy-tints";
 import { EnemyCrowd, IDLE_CLIP, PUNCH_CLIP, VAT_FPS, WALK_CLIP } from "./render/enemy-crowd";
 import { AllyView } from "./render/ally-view";
 import { HeroView } from "./render/hero-view";
+import { BlobShadows } from "./render/blob-shadows";
+import { SunShadow, shadowsEnabled } from "./render/shadows";
+import { createLighting } from "./render/lighting";
 import { createArena } from "./render/scene";
+import { PROP_MODELS } from "./render/props";
+import { ModelCache, modelUrl } from "./render/models";
 import { bakeVat } from "./render/vat";
 import { Cards } from "./ui/cards";
 import { CastlePointer } from "./ui/castle-pointer";
@@ -32,8 +36,6 @@ import { type Lang, pickLang, t } from "./ui/i18n";
 import { Menu } from "./ui/menu";
 import { PackArrows } from "./ui/pack-arrows";
 import "./ui/style.css";
-
-const MODEL_URL = `${import.meta.env.BASE_URL}models/robot-expressive/RobotExpressive.glb`;
 
 const LANG_KEY = "defense-webgame.lang";
 const MUTE_KEY = "defense-webgame.muted";
@@ -103,17 +105,6 @@ function randomSeed(): number {
   return Math.floor(Math.random() * 0x1_0000_0000);
 }
 
-/** The model loads twice at most: a failed first try may be a network blip (spec 7). */
-async function loadModel(): Promise<GLTF> {
-  const loader = new GLTFLoader();
-  try {
-    return await loader.loadAsync(MODEL_URL);
-  } catch (error) {
-    console.warn("model load failed, retrying once", error);
-    return loader.loadAsync(MODEL_URL);
-  }
-}
-
 function showError(error: unknown): void {
   console.error(error);
   const element = document.getElementById("error")!;
@@ -133,18 +124,30 @@ async function start(): Promise<void> {
   const hero = pickHero(data, params.hero, readStoredHero());
   const { renderer, backend } = await createRenderer(params.renderer, document.body);
   const gpu = describeGpu(renderer.backend, backend);
-  const gltf = await loadModel();
+  const models = new ModelCache();
+  const env = (id: string) => models.get(modelUrl("env", id));
+  const [enemyModels, castle, tower, flag, props] = await Promise.all([
+    Promise.all(data.enemies.map((enemy) => models.get(modelUrl("enemies", enemy.id)))),
+    env("castle"),
+    env("tower"),
+    env("flag"),
+    Promise.all(PROP_MODELS.map((prop) => env(prop.id))),
+  ]);
 
   const scene = new Scene();
-  scene.background = new Color(0x1d2228);
-  scene.add(createArena(data.rules));
+  const lighting = createLighting();
+  lighting.applyTo(scene);
+  const sunShadow = new SunShadow(lighting.sun, renderer, shadowsEnabled(params.shadows, gpu.software));
+  scene.add(lighting.object, createArena(data.rules, { castle, tower, flag, props }));
   const followCamera = new FollowCamera(innerWidth / innerHeight);
   const keyboard = new Keyboard(window);
   const session = new Session({ data, params, scene, camera: followCamera, keyboard });
-  const heroView = new HeroView(gltf);
+  // the run behind the menu starts once the first hero's model is loaded and uses this seed
+  session.seed = params.seed;
+  const heroView = new HeroView();
   scene.add(heroView.object);
   const crowd = new EnemyCrowd(
-    bakeVat(gltf, [WALK_CLIP, PUNCH_CLIP, IDLE_CLIP], VAT_FPS),
+    enemyModels.map((model) => bakeVat(model, [WALK_CLIP, PUNCH_CLIP, IDLE_CLIP], VAT_FPS)),
     data.rules.enemies.maxAlive,
     tintTable(data.enemies),
   );
@@ -152,15 +155,14 @@ async function start(): Promise<void> {
   const effects = new Effects(data);
   const abilityFx = new AbilityFx();
   const enemyFx = new EnemyFx(data);
-  const allyView = new AllyView(gltf, ALLY_CAPACITY);
-  scene.add(crowd.mesh, crystals.mesh, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
+  const allyView = new AllyView(ALLY_CAPACITY);
+  const blobShadows = new BlobShadows(data.rules.enemies.maxAlive + ALLY_CAPACITY);
+  scene.add(blobShadows.mesh, crowd.object, crystals.mesh, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
   const sfx = new Sfx();
   sfx.setMuted(readStoredMuted());
   const packArrows = new PackArrows(document.getElementById("ui")!, followCamera.camera);
-  session.views.push(heroView, allyView, crowd, crystals, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(sfx));
-  // the menu shows a fresh, paused run behind it
-  session.start(params.seed, true, hero);
+  session.views.push(heroView, allyView, blobShadows, crowd, crystals, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(sfx));
 
   addEventListener("resize", () => {
     renderer.setSize(innerWidth, innerHeight);
@@ -168,25 +170,70 @@ async function start(): Promise<void> {
   });
 
   const snapshot = publishSnapshot(backend, gpu);
+  snapshot.render.enemyMeshes = crowd.meshCount;
+  snapshot.render.shadows = sunShadow.enabled;
   if (params.debug) addDebugHooks(snapshot, () => session.run);
-  const ui = createUi(data, session, followCamera, sfx, randomSeed, hero, gpu.software);
+  const ui = createUi(data, session, followCamera, sfx, randomSeed, hero, gpu.software, (setLoading) =>
+    heroLoader(models, session, heroView, allyView, setLoading),
+  );
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
   if (overlay) {
     document.getElementById("overlay")!.hidden = false;
     overlay.start(backend, 0, gpu.name);
   }
 
+  // the first hero's model is in the scene before the shaders compile
+  await ui.useHero(hero);
+
   // without this, WebGL2 skips objects while their programs compile in parallel, so the first
   // frames would be empty
   session.frame(0);
   await renderer.compileAsync(scene, followCamera.camera);
 
-  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows);
+  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows, heroView, sunShadow);
+}
+
+/** Switches the run to a hero: `useHero(id, seed)` returns when the hero's model is in place (or its loading failed and the error is shown). */
+type UseHero = (id: string, seed?: number) => Promise<void>;
+
+/**
+ * Loads a hero's model (cached by URL), gives it to the hero and the shadow copies, and only then starts
+ * the paused menu run with that hero. When picks overlap, the last one wins; a failed load shows the error.
+ */
+function heroLoader(
+  models: ModelCache,
+  session: Session,
+  heroView: HeroView,
+  allyView: AllyView,
+  setLoading: (loading: boolean, failed?: boolean) => void,
+): UseHero {
+  let latest = 0;
+  let errorShown = false;
+  return async (id, seed = session.seed) => {
+    const ticket = ++latest;
+    setLoading(true);
+    try {
+      const gltf = await models.get(modelUrl("heroes", id));
+      if (ticket !== latest) return;
+      heroView.setModel(gltf);
+      allyView.setModel(gltf);
+      session.start(seed, true, id);
+      if (errorShown) document.getElementById("error")!.hidden = true;
+      errorShown = false;
+      setLoading(false);
+    } catch (error) {
+      if (ticket !== latest) return;
+      setLoading(false, true);
+      errorShown = true;
+      showError(new Error(`could not load the model of ${id} (${modelUrl("heroes", id)})`, { cause: error }));
+    }
+  };
 }
 
 interface Ui {
   update(width: number, height: number): void;
   readonly menuOpen: boolean;
+  useHero: UseHero;
 }
 
 /** Builds the menu, HUD, cards, end screen and castle pointer, and wires them to the session. */
@@ -198,6 +245,7 @@ function createUi(
   nextSeed: () => number,
   initialHero: string,
   softwareGpu: boolean,
+  makeUseHero: (setLoading: (loading: boolean, failed?: boolean) => void) => UseHero,
 ): Ui {
   const root = document.getElementById("ui")!;
   let heroId = initialHero;
@@ -221,16 +269,16 @@ function createUi(
       menu.setVisible(false);
     },
     onHero: (id) => {
-      if (id === heroId) return;
       heroId = id;
       storeHero(id);
       menu.setHero(id);
-      // the paused run behind the menu is replaced, so the new hero is on screen at once
-      session.start(session.seed, true, id);
+      // Start waits for the model; the paused run behind the menu is then replaced by one with the new hero
+      void useHero(id);
     },
     onLang: applyLang,
     onSound: () => setMuted(!muted),
   });
+  const useHero = makeUseHero((loading, failed) => menu.setLoading(loading, failed));
   let muted = readStoredMuted();
   const setMuted = (value: boolean): void => {
     muted = value;
@@ -249,13 +297,14 @@ function createUi(
   const pointer = new CastlePointer(root);
   const cards = new Cards(root, (index) => session.setCard(index));
   const end = new EndScreen(root, () => {
-    session.start(nextSeed(), true, heroId);
+    void useHero(heroId, nextSeed());
     showMenu();
   });
   menu.setLang(lang);
   let ended = false;
 
   return {
+    useHero,
     get menuOpen() {
       return menuOpen;
     },
@@ -289,6 +338,8 @@ function runLoop(
   overlay: Overlay | null,
   ui: Ui,
   packArrows: PackArrows,
+  heroView: HeroView,
+  sunShadow: SunShadow,
 ): void {
   let last = -1;
   renderer.setAnimationLoop((now) => {
@@ -300,6 +351,8 @@ function runLoop(
       last = now;
       ui.update(innerWidth, innerHeight);
       updateSnapshot(snapshot, session.run, ui.menuOpen, packArrows.visible);
+      snapshot.render.heroModels = heroView.modelCount;
+      sunShadow.follow(followCamera.targetX, followCamera.targetZ);
       renderer.render(scene, followCamera.camera);
     } catch (error) {
       renderer.setAnimationLoop(null);

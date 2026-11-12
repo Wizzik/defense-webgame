@@ -29,6 +29,15 @@ export class FollowCamera {
     this.place();
   }
 
+  /** The point on the floor the camera looks at, without shake. */
+  get targetX(): number {
+    return this.x;
+  }
+
+  get targetZ(): number {
+    return this.z;
+  }
+
   /** `animDt` drives the shake; the session passes 0 while the scene is frozen. */
   follow(sceneX: number, sceneZ: number, dt: number, animDt = dt): void {
     if (!this.placed) {

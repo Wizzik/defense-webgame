@@ -14,6 +14,7 @@ import {
   type Node,
   RGBAFormat,
   type SkinnedMesh,
+  type Texture,
   type UniformNode,
   Vector3,
 } from "three/webgpu";
@@ -44,12 +45,14 @@ export interface VatClip {
 }
 
 export interface BakedVat {
-  /** All meshes of the model merged in the default pose (positions, normals, material colour as vertex colour). */
+  /** All meshes of the model merged in the default pose (positions, normals, uv, material colour as vertex colour). */
   geometry: BufferGeometry;
   /** RGBA float texture tiled by `layout`; rgb = model-space position. */
   texture: DataTexture;
   clips: Record<string, VatClip>;
   layout: VatLayout;
+  /** Colour texture of the first material that has one, or null. */
+  map: Texture | null;
 }
 
 // the texture height (rowsPerFrame * total frames) has to stay within this
@@ -71,13 +74,15 @@ export function bakeVat(gltf: GLTF, clipNames: string[], fps: number): BakedVat 
   const layout = vatLayout(vertexCount);
   const geometry = mergeDefaultPose(meshes, vertexCount);
   const { texture, clips } = bakeClips(gltf, meshes, layout, clipNames, fps);
-  return { geometry, texture, clips, layout };
+  const map = meshes.map((mesh) => (mesh.material as MeshStandardMaterial).map).find((texture) => texture) ?? null;
+  return { geometry, texture, clips, layout, map };
 }
 
 function mergeDefaultPose(meshes: Mesh[], vertexCount: number): BufferGeometry {
   const positions = new Float32Array(vertexCount * 3);
   const normals = new Float32Array(vertexCount * 3);
   const colors = new Float32Array(vertexCount * 3);
+  const uvs = new Float32Array(vertexCount * 2);
   const indices: number[] = [];
   const vector = new Vector3();
   const tip = new Vector3();
@@ -85,7 +90,7 @@ function mergeDefaultPose(meshes: Mesh[], vertexCount: number): BufferGeometry {
   const normalMatrix = new Matrix3();
   let offset = 0;
   for (const mesh of meshes) {
-    const { position, normal } = mesh.geometry.attributes;
+    const { position, normal, uv } = mesh.geometry.attributes;
     const { color } = mesh.material as MeshStandardMaterial;
     normalMatrix.getNormalMatrix(mesh.matrixWorld);
     for (let i = 0; i < position.count; i++) {
@@ -100,6 +105,10 @@ function mergeDefaultPose(meshes: Mesh[], vertexCount: number): BufferGeometry {
       }
       tip.applyMatrix3(normalMatrix).normalize().toArray(normals, vertex * 3);
       color.toArray(colors, vertex * 3);
+      if (uv) {
+        uvs[vertex * 2] = uv.getX(i);
+        uvs[vertex * 2 + 1] = uv.getY(i);
+      }
     }
     const index = mesh.geometry.index;
     const count = index ? index.count : position.count;
@@ -110,6 +119,7 @@ function mergeDefaultPose(meshes: Mesh[], vertexCount: number): BufferGeometry {
   geometry.setAttribute("position", new BufferAttribute(positions, 3));
   geometry.setAttribute("normal", new BufferAttribute(normals, 3));
   geometry.setAttribute("color", new BufferAttribute(colors, 3));
+  geometry.setAttribute("uv", new BufferAttribute(uvs, 2));
   geometry.setIndex(indices);
   return geometry;
 }

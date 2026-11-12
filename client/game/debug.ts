@@ -28,12 +28,16 @@ export interface GameSnapshot {
   packArrows: number;
   /** Enemies in a charge (windup or run). */
   charging: number;
+  /** What the renderer built: `heroModels` is how many hero figures stand in the scene (refreshed every frame). */
+  render: { enemyMeshes: number; heroModels: number; shadows: boolean };
   /** Only with ?debug=1. */
   debug?: {
     grantXp(amount: number): void;
     setAbilityLevel(slot: number, level: number): void;
     /** One hunter of every enemy type, in a row north of the hero. */
     spawnEach(): void;
+    /** Moves the hero to simulation coordinates, clamped to the arena. */
+    teleport(x: number, y: number): void;
   };
 }
 
@@ -49,6 +53,7 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     backend, gpu, frames: 0, screen: "menu", tick: 0, level: 0, kills: 0, heroHp: 0, castleHp: 0, enemies: 0, enemyTypes: 0,
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], ultimateAuto: true, allies: 0,
     projectiles: 0, packArrows: 0, charging: 0,
+    render: { enemyMeshes: 0, heroModels: 0, shadows: false },
   };
   window.__game = snapshot;
   return snapshot;
@@ -68,6 +73,16 @@ export function addDebugHooks(snapshot: GameSnapshot, getRun: () => Run | null):
     spawnEach(): void {
       const run = getRun();
       if (run) debugSpawnEach(run);
+    },
+    teleport(x: number, y: number): void {
+      const run = getRun();
+      if (!run) return;
+      const { hero } = run;
+      const { arena } = run.data.rules;
+      const limitX = arena.width / 2 - hero.stats.collision;
+      const limitY = arena.height / 2 - hero.stats.collision;
+      hero.x = hero.prevX = Math.max(-limitX, Math.min(limitX, x));
+      hero.y = hero.prevY = Math.max(-limitY, Math.min(limitY, y));
     },
   };
 }

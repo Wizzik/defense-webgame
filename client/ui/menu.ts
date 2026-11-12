@@ -22,6 +22,8 @@ export class Menu {
   private readonly sound: HTMLButtonElement;
   private readonly gpuWarning: HTMLElement;
   private soundOn = true;
+  private loading = false;
+  private failed = false;
   private lang: Lang = "en";
   private readonly langButtons = new Map<Lang, HTMLButtonElement>();
 
@@ -70,11 +72,11 @@ export class Menu {
     this.title.textContent = t(lang, "menu.title");
     this.subtitle.textContent = t(lang, "menu.subtitle");
     this.heroTitle.textContent = t(lang, "menu.chooseHero");
-    this.start.textContent = t(lang, "menu.start");
+    this.lang = lang;
+    this.renderStart();
     this.controls.textContent = t(lang, "menu.controls");
     this.languageLabel.textContent = t(lang, "menu.language");
     this.gpuWarning.textContent = t(lang, "menu.gpuWarning");
-    this.lang = lang;
     this.renderHero();
     this.renderSound();
     for (const [code, button] of this.langButtons) button.setAttribute("aria-pressed", String(code === lang));
@@ -97,6 +99,22 @@ export class Menu {
     if (!chosen) return;
     this.heroRole.textContent = chosen.role[lang];
     this.heroPrimary.textContent = t(lang, "menu.primary", { attr: t(lang, ATTRIBUTE_KEYS[chosen.primary]) });
+  }
+
+  /**
+   * While the hero's model loads, Start is disabled and says so. A `failed` load keeps Start disabled
+   * (the run would have no hero) but shows the normal label; the error itself is shown elsewhere.
+   */
+  setLoading(loading: boolean, failed = false): void {
+    this.loading = loading;
+    this.failed = failed;
+    this.renderStart();
+    if (!this.start.disabled && !this.root.hidden) this.start.focus();
+  }
+
+  private renderStart(): void {
+    this.start.textContent = t(this.lang, this.loading ? "menu.loading" : "menu.start");
+    this.start.disabled = this.loading || this.failed;
   }
 
   setSound(on: boolean): void {

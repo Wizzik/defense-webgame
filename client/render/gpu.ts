@@ -1,4 +1,4 @@
-import { WebGPURenderer } from "three/webgpu";
+import { NeutralToneMapping, WebGPURenderer } from "three/webgpu";
 
 export type Backend = "WebGPU" | "WebGL2";
 
@@ -63,6 +63,8 @@ export async function createRenderer(
   parent: HTMLElement,
 ): Promise<{ renderer: WebGPURenderer; backend: Backend }> {
   const renderer = new WebGPURenderer({ forceWebGL: kind === "webgl2" });
+  renderer.toneMapping = NeutralToneMapping;
+  renderer.toneMappingExposure = 1;
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setSize(innerWidth, innerHeight);
   parent.prepend(renderer.domElement);

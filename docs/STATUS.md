@@ -1,18 +1,28 @@
 # Status
 
-Updated 2026-11-11 (phase 2b-2 is done on branch `phase-2b2`, pushed, PR open; waits for CI, Petr's playtest and the merge). Read this first when you resume work.
+Updated 2026-11-11 night (phase 2b-2 is merged; Visual pass A is finished on branch `visual-a`, not merged). Read this first when you resume work.
 
-## Phase 2b-2 (ring arena, enemy AI, four heroes): done, with two open points
+## Visual pass A: done on branch `visual-a`, not merged
 
-- What it brings: the castle stands in the middle and packs come from every side (1 to 3 at once, arrows on the screen edge point at them); every enemy type behaves its own way (scouts flank, musketeers back off while they reload, chaplains follow their pack, lancers charge after a warning line, captains buff the enemies around them); 8 heroes (new: Mistwarden, Sparkshot, Redcleaver, Tidecaller); the game is hard: the autopilot loses about half of its runs.
-- Checks: `npm run check` (451 tests), `npm run build` and `npm run e2e -- --project=webgl2-fallback` (15 tests) pass locally. CI runs on the PR.
-- Balance (seeds 1–5, `npm run sim:run -- --hero all --runs 5`, and with `--idle`): Stonehorn 2 of 5 won, Nightglaive 3, Mistwarden 2, Sparkshot 3, Redcleaver 3, Tidecaller 2; these six meet every target of the plan. Numbers and what changed: `docs/DECISIONS.md`.
-- **Open for Petr 1:** Gravecaller and Serpent Shaman still win 5 of 5 and are never in danger, also after Petr's cuts of 2026-11-11 evening (Serpent Totem damage halved, Grave Grasp heal -75 %; committed on the branch). The cuts brought the Gravecaller's idle run under 2:30 on seed 1 and the Serpent Shaman's castle to 61 %. They need a redesign of their kits.
-- **Open for Petr 2:** the targets are measured on 5 seeds and a run is chaotic. On seeds 6–15 the same build gives 1 to 9 wins of 10 depending on the hero. The next balance pass should measure on more seeds with wider bands.
-- Pushed on 2026-11-11 evening; PR `Phase 2b-2: ring arena, enemy AI and four heroes` is open. Next: CI green, Petr's playtest, merge. No final whole-branch review has run yet.
-- What Petr should check in the playtest: packs come from all sides and reach him and the castle, the types read apart (scouts from the side, musketeers back off, lancers charge and can be dodged), the first tries are often lost, and the menu shows 8 heroes.
-- Plan: `docs/superpowers/plans/2026-11-11-phase-2b2-ring-ai-heroes.md`.
-- After the merge: **Visual pass A** (plan in a new chat).
+- Plan: `docs/superpowers/plans/2026-11-11-visual-pass-a.md` (7 tasks, all done). PR: #8 (https://github.com/Wizzik/defense-webgame/pull/8), open, not merged; merge only when CI is green on `webgpu-swiftshader` (first WebGPU run of this branch). It waits for the final review and Petr's playtest.
+- What it brings: KayKit CC0 models (8 heroes from 5 adventurer bodies, 6 skeleton enemy types with weapons, the castle with towers and flags, a forest around the spawn ring), procedural ground, dusk light and fog, a moon shadow map plus blob shadows, a build tool for assets. The simulation and the balance did not change (`git diff main -- sim design data` is empty). Decisions: `docs/DECISIONS.md`, section Visual pass A.
+- What Petr checks in the playtest:
+  - the look and the readability of the six enemy types; the strong type tint on enemies; the chaplain's small size;
+  - the grass colour and the dark earth around the castle;
+  - the mage hats hide gravecaller and mistwarden from above;
+  - orange details in the kit textures (not removable without new textures) and stonehorn's orange hero colour;
+  - the forest border outside the arena edge: that it hides the end of the world in every corner, and the size of the rocks;
+  - `?fps=1` on his machine: the shadow map has never run on real hardware (only on software rendering here). Compare the default with `?shadows=0`;
+  - the enemy cap of 3000 triangles and its fps cost with a full crowd.
+- From the five minor notes after 2b-1, "the Lancer and the Chaplain are both pale" is gone (they are textured models now); four remain.
+
+## Phase 2b-2 (ring arena, enemy AI, four heroes): merged (PR #7, 2026-11-11)
+
+- Live at https://wizzik.github.io/defense-webgame/ (CI and Pages green on `eb6e671`). 8 heroes, packs from every side, five enemy behaviours; the autopilot loses about half of its runs. No final whole-branch review ran before the merge.
+- **Open for Petr 1:** Gravecaller and Serpent Shaman still win 5 of 5 and are never in danger, also after Petr's cuts of 2026-11-11 evening (Serpent Totem damage halved, Grave Grasp heal -75 %). They need a redesign of their kits.
+- **Open for Petr 2:** the balance targets are measured on 5 seeds and a run is chaotic. On seeds 6-15 the same build gives 1 to 9 wins of 10 depending on the hero. The next balance pass should measure on more seeds with wider bands.
+- What Petr should check in the playtest: packs come from all sides and reach him and the castle, the types read apart, the first tries are often lost, and the menu shows 8 heroes.
+- Numbers: `docs/DECISIONS.md`. Plan: `docs/superpowers/plans/2026-11-11-phase-2b2-ring-ai-heroes.md`.
 
 ## Now
 
@@ -32,7 +42,7 @@ Updated 2026-11-11 (phase 2b-2 is done on branch `phase-2b2`, pushed, PR open; w
 
 ## Next
 
-**2b-1 Swarms and enemy variety: merged (PR #6, 2026-11-11).** Packs, 6 enemy types, shooters and healers, a 5-minute run in 6 phases, the GPU name in the `?fps=1` overlay. Five minor review notes are left for a later pass: the chaplain heals every 31 steps, not 30; `Effects` keeps uploading behind the menu after a restart; the Lancer and the Chaplain are both pale (size tells them apart); the e2e test for a shooter that dies in the step it fired only proves that nothing crashes. Plan: `docs/superpowers/plans/2026-11-10-phase-2b1-swarms-and-enemies.md`.
+**2b-1 Swarms and enemy variety: merged (PR #6, 2026-11-11).** Packs, 6 enemy types, shooters and healers, a 5-minute run in 6 phases, the GPU name in the `?fps=1` overlay. Minor review notes are left for a later pass (the pale Lancer and Chaplain note was closed by Visual pass A): the chaplain heals every 31 steps, not 30; `Effects` keeps uploading behind the menu after a restart; the e2e test for a shooter that dies in the step it fired only proves that nothing crashes. Plan: `docs/superpowers/plans/2026-11-10-phase-2b1-swarms-and-enemies.md`.
 
 **Petr's playtest of 2a (2026-11-10), the reason for 2b-1 (done) and the visual passes:**
 - 20.5 fps: **resolved, not a game bug** (see below);
@@ -46,8 +56,8 @@ Updated 2026-11-11 (phase 2b-2 is done on branch `phase-2b2`, pushed, PR open; w
 - 2b-1 added the GPU name to the `?fps=1` overlay and a menu warning on software rendering.
 
 **Order after 2b-2 (approved by Petr 2026-11-10; 2b-2 was put in front on 2026-11-11):**
-1. **Visual pass A, no external tools** (code and CC0 assets, in the cloud container): ground texture and lane edges, fog, shadows, better light, a real castle and gates from a CC0 kit, props (trees, rocks), CC0 rigged characters instead of the robot (KayKit, Quaternius: check that the shell can download them from GitHub; otherwise Petr attaches the zips), per-type enemy models baked into VAT.
-2. **Visual pass B, own hero models** (needs Petr's computer): Tripo (text or image to 3D with auto-rig; check the licence of his plan before anything is committed, the repo is public) or Blender. Blender MCP install problem: Petr pastes the error into a chat on the computer with Blender. Constraints: hero <= 5000 triangles, enemy <= 2000, clips Idle, Running/Walking, Punch, Death, every asset in `assets/LICENSES.md`.
+1. **Visual pass A, no external tools**: done on `visual-a`, see the top of this file.
+2. **Visual pass B, own hero models** (needs Petr's computer): Tripo (text or image to 3D with auto-rig; check the licence of his plan before anything is committed, the repo is public) or Blender. Blender MCP install problem: Petr pastes the error into a chat on the computer with Blender. Constraints: hero <= 5000 triangles, enemy <= 3000 (see docs/DECISIONS.md), clips Idle, Running/Walking, Punch, Death, every asset in `assets/LICENSES.md`.
 3. Then the rest of 2b (20 phases, elites, bosses, difficulties), 2c economy, 2d shared abilities, 2e meta progression.
 4. Propose the second skill (project development rules).
 

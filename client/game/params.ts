@@ -5,6 +5,8 @@ export interface GameParams {
   durationSeconds?: number;
   renderer: "webgpu" | "webgl2";
   fps: boolean;
+  /** ?shadows=0 switches the shadow map off. */
+  shadows: boolean;
   lang?: "en" | "cs";
   /** ?hero=<id>; the caller checks it against the data. */
   hero?: string;
@@ -19,7 +21,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-/** seed: ?seed or randomSeed(); speed 1..16 (default 1); duration 5..600; debug and fps only "1". */
+/** seed: ?seed or randomSeed(); speed 1..16 (default 1); duration 5..600; debug and fps only "1"; shadows on unless "0". */
 export function readGameParams(search: string, randomSeed: () => number): GameParams {
   const params = new URLSearchParams(search);
   const speed = readInt(params.get("speed"));
@@ -33,6 +35,7 @@ export function readGameParams(search: string, randomSeed: () => number): GamePa
     durationSeconds: duration === undefined ? undefined : clamp(duration, 5, 600),
     renderer: params.get("renderer") === "webgl2" ? "webgl2" : "webgpu",
     fps: params.get("fps") === "1",
+    shadows: params.get("shadows") !== "0",
     lang: lang === "en" || lang === "cs" ? lang : undefined,
     hero: hero ? hero : undefined,
   };

@@ -34,6 +34,18 @@ async function waitForScreen(page: Page, screen: Screen, timeout = 90_000): Prom
   await page.waitForFunction((s) => window.__game?.screen === s, screen, { timeout, polling: 250 });
 }
 
+/**
+ * Picks the first level-up card. `window.__game.screen` can lag a slow frame behind the DOM, so the
+ * card may already be gone when the click starts: a bounded wait lets the caller's loop read again.
+ */
+async function pickCard(page: Page): Promise<void> {
+  await page
+    .locator("button.card")
+    .first()
+    .click({ timeout: 10_000 })
+    .catch(() => undefined);
+}
+
 test("menu starts a run on the available backend", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&lang=en");
   const start = page.locator("#start");
@@ -47,6 +59,7 @@ test("menu starts a run on the available backend", async ({ page }, testInfo) =>
   const expected = testInfo.project.name === "webgpu-swiftshader" ? "WebGPU" : "WebGL2";
   expect(await page.evaluate(() => window.__game?.backend)).toBe(expected);
   expect(await page.evaluate(() => window.__game?.screen)).toBe("playing");
+  expect(await page.evaluate(() => window.__game?.render.enemyMeshes)).toBe(6);
 
   // enemies spawn a few seconds into the run
   await page.waitForFunction(() => (window.__game?.enemies ?? 0) > 0, undefined, {
@@ -67,6 +80,26 @@ test("menu starts a run on the available backend", async ({ page }, testInfo) =>
   const stdDev = await luminanceStdDev(page, shot);
   console.log(`game luminance stddev (${testInfo.project.name}): ${stdDev.toFixed(2)}`);
   expect(stdDev, `luminance stddev ${stdDev.toFixed(2)}`).toBeGreaterThan(2.5);
+});
+
+test("the shadow map is on unless ?shadows=0 or the GPU is software, and the game draws either way", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  const { shadows, software } = await page.evaluate(() => ({
+    shadows: window.__game!.render.shadows,
+    software: window.__game!.gpu.software,
+  }));
+  expect(shadows).toBe(!software);
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  await page.waitForFunction(() => (window.__game?.frames ?? 0) > 30, undefined, { timeout: 90_000, polling: 250 });
+
+  await page.goto("/?seed=1&lang=en&shadows=0");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  expect(await page.evaluate(() => window.__game!.render.shadows)).toBe(false);
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  await page.waitForFunction(() => (window.__game?.frames ?? 0) > 30, undefined, { timeout: 90_000, polling: 250 });
 });
 
 test("menu warns about software rendering only on a software GPU", async ({ page }) => {
@@ -133,6 +166,40 @@ test("menu lets you pick a hero", async ({ page }, testInfo) => {
   expect(await page.evaluate(() => window.__game?.screen)).toBe("playing");
 });
 
+test("every hero has its own model", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  for (const hero of heroIds) {
+    await page.locator(`button.hero-button[data-hero="${hero}"]`).click();
+    // Start is disabled while the model loads, and the run behind the menu then has the new hero
+    await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+    await expect(page.locator("#start")).toBeEnabled();
+    await page.waitForFunction((id) => window.__game?.hero === id, hero, { timeout: 10_000 });
+    // exactly one hero model stands in the scene: the old one is gone
+    await page.waitForFunction(() => window.__game?.render.heroModels === 1, undefined, { timeout: 10_000 });
+    expect(await page.evaluate(() => window.__game?.render.heroModels), `${hero} models`).toBe(1);
+  }
+  // a restart puts a fresh model in place of the old one
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => window.__game?.render.heroModels)).toBe(1);
+});
+
+test.describe("a missing hero model", () => {
+  test.use({ allowedConsoleErrors: [/mistwarden\.glb/] });
+
+  test("shows an error", async ({ page }) => {
+    await page.route("**/models/heroes/mistwarden.glb", (route) => route.abort());
+    await page.goto("/?seed=1&hero=mistwarden&lang=en");
+    const error = page.locator("#error");
+    await expect(error).toBeVisible({ timeout: 90_000 });
+    await expect(error).toContainText("Something went wrong");
+    expect((await error.textContent())?.length ?? 0).toBeGreaterThan(0);
+    // no run without a hero
+    await expect(page.locator("#start")).toBeDisabled();
+  });
+});
+
 test("the menu lists eight heroes and starts each of the new ones", async ({ page }) => {
   test.setTimeout(5 * 60_000);
   for (const hero of ["mistwarden", "sparkshot", "redcleaver", "tidecaller"]) {
@@ -146,7 +213,7 @@ test("the menu lists eight heroes and starts each of the new ones", async ({ pag
     const deadline = Date.now() + 60_000;
     let screen = await page.evaluate(() => window.__game?.screen);
     while (screen !== "won" && screen !== "lost" && Date.now() < deadline) {
-      if (screen === "levelUp") await page.locator("button.card").first().click();
+      if (screen === "levelUp") await pickCard(page);
       await page.waitForTimeout(200);
       screen = await page.evaluate(() => window.__game?.screen);
     }
@@ -176,7 +243,7 @@ test("every hero plays without errors", async ({ page }, testInfo) => {
     );
     // no screenshot of the level-up overlay: pick a card first
     while ((await page.evaluate(() => window.__game?.screen)) === "levelUp") {
-      await page.locator("button.card").first().click();
+      await pickCard(page);
       await page.waitForTimeout(100);
     }
     await testInfo.attach(`hero-${hero}-${testInfo.project.name}`, {
@@ -187,7 +254,7 @@ test("every hero plays without errors", async ({ page }, testInfo) => {
     const deadline = Date.now() + 60_000;
     let screen = await page.evaluate(() => window.__game?.screen);
     while (screen !== "won" && screen !== "lost" && Date.now() < deadline) {
-      if (screen === "levelUp") await page.locator("button.card").first().click();
+      if (screen === "levelUp") await pickCard(page);
       await page.waitForTimeout(250);
       screen = await page.evaluate(() => window.__game?.screen);
     }
@@ -209,7 +276,7 @@ test("every enemy type renders without errors", async ({ page }, testInfo) => {
   // the row walks to the hero: shooters fire and die next to it, the chaplain heals
   await page.waitForTimeout(1_500);
   while ((await page.evaluate(() => window.__game?.screen)) === "levelUp") {
-    await page.locator("button.card").first().click();
+    await pickCard(page);
     await page.waitForTimeout(100);
   }
   await testInfo.attach(`enemy-types-${testInfo.project.name}`, {
