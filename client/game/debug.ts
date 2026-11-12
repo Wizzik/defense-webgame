@@ -31,12 +31,12 @@ export interface GameSnapshot {
   charging: number;
   /** Phase of the run from 1; the finale is one past the last phase (21). */
   phase: number;
-  /** The living boss that came last. */
-  boss: { id: string; hp: number; maxHp: number } | null;
+  /** The living boss that came last; `x`, `y` are simulation coordinates. */
+  boss: { id: string; hp: number; maxHp: number; x: number; y: number } | null;
   /** Slams winding up (warning circles on the ground). */
   slams: number;
-  /** What the renderer built: `heroModels` is how many hero figures stand in the scene (refreshed every frame). */
-  render: { enemyMeshes: number; heroModels: number; shadows: boolean };
+  /** What the renderer built: `heroModels` is how many hero figures stand in the scene (refreshed every frame), `slamRings` how many slam circles lie on the floor. */
+  render: { enemyMeshes: number; heroModels: number; shadows: boolean; slamRings: number };
   /** Only with ?debug=1. */
   debug?: {
     grantXp(amount: number): void;
@@ -62,7 +62,7 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     backend, gpu, frames: 0, screen: "menu", tick: 0, level: 0, kills: 0, heroHp: 0, castleHp: 0, enemies: 0, enemyTypes: 0,
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], ultimateAuto: true, allies: 0,
     projectiles: 0, packArrows: 0, charging: 0, phase: 1, boss: null, slams: 0,
-    render: { enemyMeshes: 0, heroModels: 0, shadows: false },
+    render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0 },
   };
   window.__game = snapshot;
   return snapshot;
@@ -168,9 +168,11 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
     snapshot.boss = null;
   } else {
     // one object, filled in place while a boss lives
-    const info = snapshot.boss ?? (snapshot.boss = { id: "", hp: 0, maxHp: 0 });
+    const info = snapshot.boss ?? (snapshot.boss = { id: "", hp: 0, maxHp: 0, x: 0, y: 0 });
     info.id = run.data.enemies[enemies.type[boss]!]!.id;
     info.hp = enemies.hp[boss]!;
     info.maxHp = enemies.maxHp[boss]!;
+    info.x = enemies.x[boss]!;
+    info.y = enemies.y[boss]!;
   }
 }

@@ -1,4 +1,4 @@
-import { EventKind, type Run } from "../../sim";
+import { EventKind, type Run, SlamEvent } from "../../sim";
 import type { RunView } from "../game/session";
 import type { Sfx } from "./sfx";
 
@@ -43,6 +43,15 @@ export class SoundView implements RunView {
           break;
         case EventKind.LevelUp:
           this.sfx.levelUp();
+          break;
+        case EventKind.BossSpawn:
+          this.sfx.bossArrive();
+          break;
+        case EventKind.Slam:
+          if (events.value[i] === SlamEvent.Hit) this.sfx.slam();
+          break;
+        case EventKind.Enrage:
+          this.sfx.enrage();
           break;
       }
     }

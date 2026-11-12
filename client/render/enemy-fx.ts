@@ -1,11 +1,12 @@
 import { Group } from "three/webgpu";
 import type { GameData } from "../../data/schema";
-import { EventKind, type Run, TICKS_PER_SECOND } from "../../sim";
+import { EventKind, type Run, SlamEvent, TICKS_PER_SECOND } from "../../sim";
 import type { RunView } from "../game/session";
 import { SCENE_SCALE } from "./coords";
 import { AuraRings } from "./fx/aura-rings";
 import { BoltFx } from "./fx/bolts";
 import { rgb } from "./fx/instances";
+import { SlamRings } from "./fx/slam-rings";
 
 const SHOT_COLOR = rgb(0xfff2b0);
 const SHOT_LIFE = 0.12;
@@ -16,10 +17,13 @@ const CHARGE_COLOR = rgb(0xff5a5a);
 const CHARGE_THICKNESS = 0.18;
 const AURA_COLOR = rgb(0xb84ad8);
 const AURA_OPACITY = 0.25;
+/** Warning circle of a boss slam. */
+const SLAM_COLOR = rgb(0xd94a4a);
 
 /**
  * Shots of ranged enemies (the hit is instant, the beam is only an effect) and the heal beams of
- * chaplains, the line that warns of a lancer's charge and the ring under a captain's aura. A shooter that died in the same step is drawn from its last position: its slot keeps
+ * chaplains, the line that warns of a lancer's charge, the ring under a captain's aura and the warning circle of a
+ * boss slam. A shooter that died in the same step is drawn from its last position: its slot keeps
  * the values until the next spawn, which comes only in the next step.
  */
 export class EnemyFx implements RunView {
@@ -27,6 +31,7 @@ export class EnemyFx implements RunView {
   private readonly bolts = new BoltFx();
   private readonly telegraphs: BoltFx;
   private readonly auraRings = new AuraRings();
+  private readonly slamRings = new SlamRings(SLAM_COLOR);
   private readonly data: GameData;
   /** 1 for enemy types that shoot. */
   private readonly ranged: Uint8Array;
@@ -37,7 +42,12 @@ export class EnemyFx implements RunView {
     this.data = data;
     const windup = Math.max(0.1, ...data.enemies.map((e) => e.charge?.windupSeconds ?? 0));
     this.telegraphs = new BoltFx(windup, CHARGE_THICKNESS);
-    this.object.add(this.bolts.mesh, this.telegraphs.mesh, this.auraRings.mesh);
+    this.object.add(this.bolts.mesh, this.telegraphs.mesh, this.auraRings.mesh, this.slamRings.outlines, this.slamRings.fills);
+  }
+
+  /** Slam circles on the floor now (warning or flashing). */
+  get slamRingCount(): number {
+    return this.slamRings.visible;
   }
 
   onEvents(run: Run): void {
@@ -69,6 +79,15 @@ export class EnemyFx implements RunView {
           (x + events.u[i]! * charge.distance) * SCENE_SCALE, -(y + events.v[i]! * charge.distance) * SCENE_SCALE,
           CHARGE_COLOR, charge.windupSeconds,
         );
+      } else if (kind === EventKind.Slam) {
+        const value = events.value[i];
+        if (value === SlamEvent.Warning) {
+          this.slamRings.warn(
+            a, events.x[i]! * SCENE_SCALE, -events.y[i]! * SCENE_SCALE, events.u[i]! * SCENE_SCALE,
+            now, events.v[i]! / TICKS_PER_SECOND,
+          );
+        } else if (value === SlamEvent.Hit) this.slamRings.hit(a, now);
+        else this.slamRings.cancel(a);
       }
     }
   }
@@ -78,6 +97,7 @@ export class EnemyFx implements RunView {
     const now = (run.tick + alpha) / TICKS_PER_SECOND;
     this.bolts.write(now);
     this.telegraphs.write(now);
+    this.slamRings.write(now);
     this.auraRings.begin();
     const auraType = run.auraType;
     if (auraType >= 0) {
@@ -98,6 +118,7 @@ export class EnemyFx implements RunView {
     this.bolts.dispose();
     this.telegraphs.dispose();
     this.auraRings.dispose();
+    this.slamRings.dispose();
   }
 
   private beam(now: number, ax: number, ay: number, bx: number, by: number, shot: boolean): void {
@@ -113,5 +134,6 @@ export class EnemyFx implements RunView {
     this.lastRun = run;
     this.bolts.reset();
     this.telegraphs.reset();
+    this.slamRings.reset();
   }
 }

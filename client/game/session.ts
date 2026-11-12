@@ -1,5 +1,5 @@
 import type { GameData } from "../../data/schema";
-import { createRun, EventKind, NO_INPUT, type Run, TICK_SECONDS, type TickInput, ULTIMATE_SLOT } from "../../sim";
+import { createRun, EventKind, NO_INPUT, type Run, SlamEvent, TICK_SECONDS, type TickInput, ULTIMATE_SLOT } from "../../sim";
 import { SCENE_SCALE } from "../render/coords";
 import type { FollowCamera } from "../render/camera";
 import type { Scene } from "three/webgpu";
@@ -11,7 +11,7 @@ import { viewTiming } from "./view-timing";
 /** Most simulation steps one frame may run at speed 1; a longer backlog is dropped. */
 const MAX_STEPS_PER_FRAME = 4;
 
-/** Camera shake in scene units for the ultimate, for another shaking cast, and for a hit on the hero. */
+/** Camera shake in scene units for the ultimate (and a boss slam that lands), for another shaking cast, and for a hit on the hero. */
 const SHAKE_ULTIMATE = 0.25;
 const SHAKE_CAST = 0.12;
 const SHAKE_HERO_HIT = 0.1;
@@ -105,6 +105,7 @@ export class Session {
           this.camera.shake(slot === ULTIMATE_SLOT ? SHAKE_ULTIMATE : SHAKE_CAST);
         }
       } else if (events.kind[i] === EventKind.HeroHit) this.camera.shake(SHAKE_HERO_HIT);
+      else if (events.kind[i] === EventKind.Slam && events.value[i] === SlamEvent.Hit) this.camera.shake(SHAKE_ULTIMATE);
     }
   }
 }

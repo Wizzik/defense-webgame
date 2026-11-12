@@ -371,6 +371,15 @@
 .pack-arrow.hunter {
   border-left-color: #b84ad8;
 }
+.pack-arrow.rush,
+.pack-arrow.boss {
+  border-top-width: 14px;
+  border-bottom-width: 14px;
+  border-left-width: 28px;
+}
+.pack-arrow.rush {
+  border-left-color: #b84ad8;
+}
 
 /* castle pointer */
 .castle-pointer {

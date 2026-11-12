@@ -200,7 +200,7 @@ async function start(): Promise<void> {
   session.frame(0);
   await renderer.compileAsync(scene, followCamera.camera);
 
-  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows, heroView, sunShadow);
+  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows, heroView, enemyFx, sunShadow);
 }
 
 /** Switches the run to a hero: `useHero(id, seed)` returns when the hero's model is in place (or its loading failed and the error is shown). */
@@ -351,6 +351,7 @@ function runLoop(
   ui: Ui,
   packArrows: PackArrows,
   heroView: HeroView,
+  enemyFx: EnemyFx,
   sunShadow: SunShadow,
 ): void {
   let last = -1;
@@ -364,6 +365,7 @@ function runLoop(
       ui.update(innerWidth, innerHeight);
       updateSnapshot(snapshot, session.run, ui.menuOpen, packArrows.visible);
       snapshot.render.heroModels = heroView.modelCount;
+      snapshot.render.slamRings = enemyFx.slamRingCount;
       sunShadow.follow(followCamera.targetX, followCamera.targetZ);
       renderer.render(scene, followCamera.camera);
     } catch (error) {

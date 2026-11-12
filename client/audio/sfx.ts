@@ -91,6 +91,30 @@ export class Sfx {
     });
   }
 
+  /** A boss arrives: a deep tone. */
+  bossArrive(): void {
+    this.play("bossArrive", (at) => {
+      this.tone(at, "sawtooth", 70, 45, 0.6, 0.6);
+      this.tone(at, "sine", 140, 90, 0.6, 0.35);
+    });
+  }
+
+  /** A slam lands: a thump. */
+  slam(): void {
+    this.play("slam", (at) => {
+      this.tone(at, "sine", 110, 30, 0.3, 0.8);
+      this.burst(at, 0.25, 300, 0.6);
+    });
+  }
+
+  /** The final boss enrages: two tones. */
+  enrage(): void {
+    this.play("enrage", (at) => {
+      this.tone(at, "square", 220, 220, 0.18, 0.4);
+      this.tone(at + 0.2, "square", 165, 110, 0.4, 0.45);
+    });
+  }
+
   private play(key: string, make: (at: number, now: number) => void): void {
     const { ctx } = this;
     if (!ctx || this.muted) return;

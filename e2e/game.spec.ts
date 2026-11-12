@@ -445,3 +445,34 @@ test("a restart clears the boss bar", async ({ page }) => {
   await page.waitForFunction(() => window.__game?.boss !== null, undefined, { timeout: 30_000, polling: 50 });
   await expect(page.locator("#boss-bar")).toBeVisible();
 });
+
+test("a slam shows a ring and hides it after the hit", async ({ page }, testInfo) => {
+  await page.goto("/?seed=1&debug=1&phase=6&speed=4&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await page.waitForFunction(() => window.__game?.phase === 6, undefined, { timeout: 30_000 });
+  expect(await page.evaluate(() => window.__game!.render.slamRings)).toBe(0);
+  await page.locator("#start").click();
+  await page.waitForFunction(() => window.__game?.boss?.id === "iron-marshal", undefined, { timeout: 30_000, polling: 50 });
+  // stay next to the boss until its slam is ready (7 s after it came) and it winds up
+  const deadline = Date.now() + 60_000;
+  let rings = 0;
+  while (rings === 0 && Date.now() < deadline) {
+    rings = await page.evaluate(() => {
+      const g = window.__game!;
+      if (g.screen === "playing" && g.boss && g.slams === 0) g.debug!.teleport(g.boss.x - 150, g.boss.y);
+      return g.render.slamRings;
+    });
+    if ((await page.evaluate(() => window.__game?.screen)) === "levelUp") await pickCard(page);
+    if (rings === 0) await page.waitForTimeout(30);
+  }
+  expect(rings).toBe(1);
+  expect(await page.evaluate(() => window.__game!.slams)).toBeLessThanOrEqual(1);
+  await testInfo.attach(`slam-${testInfo.project.name}`, { body: await page.screenshot({ type: "png" }), contentType: "image/png" });
+  // the windup is 1 s and the flash 0.2 s of game time; a level-up card would freeze both
+  const gone = Date.now() + 30_000;
+  while ((await page.evaluate(() => window.__game!.render.slamRings)) !== 0 && Date.now() < gone) {
+    if ((await page.evaluate(() => window.__game?.screen)) === "levelUp") await pickCard(page);
+    await page.waitForTimeout(50);
+  }
+  expect(await page.evaluate(() => window.__game!.render.slamRings)).toBe(0);
+});
