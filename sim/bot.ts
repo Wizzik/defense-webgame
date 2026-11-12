@@ -1,5 +1,6 @@
 import type { CardOffer } from "./cards";
 import { Charge } from "./enemy-charge";
+import { Slam } from "./enemy-slam";
 import { InputAction } from "./input";
 import type { TickInput } from "./input";
 import type { Run } from "./run";
@@ -23,6 +24,8 @@ const DODGE_DISTANCE = 700;
 /** Below this share of its hp the hero keeps this far from every enemy, as a careful player would. */
 const LOW_HP = 0.3;
 const LOW_HP_DISTANCE = 350;
+/** The bot leaves a slam circle when it stands nearer than the radius plus this to its centre. */
+const SLAM_MARGIN = 60;
 const AXIS_DEADZONE = 30;
 /** Share of a unit vector under which an axis is not pressed (between sin 22.5° and cos 67.5°). */
 const AXIS_SHARE = 0.38;
@@ -47,13 +50,15 @@ export function botInput(run: Run, out: TickInput): TickInput {
   }
   const { hero, castle, enemies } = run;
 
-  // One pass: the threat nearest to the castle, the enemy nearest to the hero, the nearest charge winding up.
+  // One pass: the threat nearest to the castle, the enemy nearest to the hero, the nearest charge winding up
+  // and a slam circle the hero stands in (or within SLAM_MARGIN of).
   let threat = -1;
   let threatSq = DEFEND_RADIUS * DEFEND_RADIUS;
   let near = -1;
   let nearSq = Infinity;
   let charger = -1;
   let chargerSq = DODGE_DISTANCE * DODGE_DISTANCE;
+  let slammer = -1;
   for (let i = 0; i < enemies.capacity; i++) {
     if (enemies.alive[i] === 0) continue;
     const cx = enemies.x[i] - castle.x;
@@ -74,6 +79,23 @@ export function botInput(run: Run, out: TickInput): TickInput {
       chargerSq = heroSq;
       charger = i;
     }
+    if (slammer < 0 && enemies.slamState[i] === Slam.Windup) {
+      const reach = run.data.enemies[enemies.type[i]].slam!.radius + SLAM_MARGIN;
+      const sx = hero.x - enemies.slamX[i];
+      const sy = hero.y - enemies.slamY[i];
+      if (sx * sx + sy * sy < reach * reach) slammer = i;
+    }
+  }
+
+  if (slammer >= 0) {
+    // Straight out of the circle, away from its centre; the dash helps when it is ready.
+    const sx = hero.x - enemies.slamX[slammer];
+    const sy = hero.y - enemies.slamY[slammer];
+    const d = Math.sqrt(sx * sx + sy * sy);
+    out.moveX = axis(d > 1e-6 ? sx / d : 1);
+    out.moveY = axis(d > 1e-6 ? sy / d : 0);
+    if (hero.dashCooldown === 0 && hero.dashTicks === 0) out.actions |= InputAction.Dash;
+    return out;
   }
 
   if (charger >= 0) {
@@ -105,7 +127,9 @@ export function botInput(run: Run, out: TickInput): TickInput {
     dx = hero.x - enemies.x[near];
     dy = hero.y - enemies.y[near];
   } else {
-    const target = threat >= 0 ? threat : near >= 0 && nearDist <= CHASE_DISTANCE ? near : -1;
+    // In the finale the final boss is the target: the run is won when it falls.
+    const target = run.finalBossSlot >= 0 ? run.finalBossSlot
+      : threat >= 0 ? threat : near >= 0 && nearDist <= CHASE_DISTANCE ? near : -1;
     if (target >= 0) {
       const tx = enemies.x[target] - hero.x;
       const ty = enemies.y[target] - hero.y;

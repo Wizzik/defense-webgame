@@ -6,7 +6,9 @@ import { Charge } from "./enemy-charge";
 import { stateHash } from "./hash";
 import { InputAction, NO_INPUT } from "./input";
 import type { TickInput } from "./input";
+import { Role } from "./enemies";
 import { createRun } from "./run";
+import { spawnBoss } from "./timeline";
 import type { Run } from "./run";
 import { gameData } from "./testing/game-data";
 
@@ -171,6 +173,59 @@ describe("autopilot", () => {
     // a windup far away is ignored
     run.enemies.x[0] = run.hero.x + 900;
     expect(move(run).actions & InputAction.Dash).toBe(0);
+  });
+
+  it("the bot walks out of a slam circle", () => {
+    const run = postRun();
+    const boss = spawnBoss(run, run.data.enemies.findIndex((e) => e.id === "iron-marshal"), Role.Hunter);
+    const radius = run.data.enemies[run.enemies.type[boss]!]!.slam!.radius;
+    run.enemies.x[boss] = run.hero.x + 120;
+    run.enemies.y[boss] = run.hero.y;
+    run.enemies.slamCooldown[boss] = 0;
+    run.enemies.attackCooldown[boss] = 1_000_000;
+    run.enemies.chargeCooldown[boss] = 1_000_000;
+    const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
+    let landed = false;
+    for (let i = 0; i < 40 && !landed; i++) {
+      botInput(run, input);
+      if (i === 1) expect(input.moveX).toBe(-1); // straight away from the centre of the circle
+      run.step(input);
+      for (let k = 0; k < run.events.count; k++) {
+        if (run.events.kind[k] === EventKind.Slam && run.events.value[k] === 1) landed = true;
+        expect(run.events.kind[k]).not.toBe(EventKind.HeroHit);
+      }
+    }
+    expect(landed).toBe(true);
+    const dx = run.hero.x - run.enemies.slamX[boss]!;
+    const dy = run.hero.y - run.enemies.slamY[boss]!;
+    expect(Math.sqrt(dx * dx + dy * dy)).toBeGreaterThan(radius);
+  });
+
+  it("a slam circle the hero is not in changes nothing", () => {
+    const run = postRun();
+    const boss = spawnBoss(run, run.data.enemies.findIndex((e) => e.id === "iron-marshal"), Role.Sieger);
+    run.enemies.x[boss] = run.hero.x + 2500;
+    run.enemies.y[boss] = run.hero.y;
+    const calm = { ...move(run) };
+    run.enemies.slamState[boss] = 1;
+    run.enemies.slamX[boss] = run.hero.x + 350 + 61;
+    run.enemies.slamY[boss] = run.hero.y;
+    expect(move(run)).toEqual(calm);
+    run.enemies.slamX[boss] = run.hero.x + 350 + 59;
+    expect(move(run).moveX).toBe(-1);
+  });
+
+  it("the bot fights the final boss in the finale", () => {
+    const run = postRun();
+    // a threat west of the castle, the final boss far to the east
+    put(run, 0, run.castle.x - 600, run.castle.y + HOME_OFFSET);
+    expect(move(run).moveX).toBe(-1);
+    const boss = spawnBoss(run, run.finalBossType, Role.Hunter);
+    run.enemies.x[boss] = run.castle.x + 1800;
+    run.enemies.y[boss] = run.castle.y + HOME_OFFSET;
+    expect(move(run).moveX).toBe(-1); // not the final boss of this run yet
+    run.finalBossSlot = boss;
+    expect(move(run)).toMatchObject({ moveX: 1, moveY: 0 });
   });
 
   it("picks card 0 in the level-up state when no offer is open", () => {
