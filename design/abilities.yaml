@@ -6,6 +6,8 @@
 #   DataA ... DataI                      object data field of the ability
 #   cooldown | area | range | duration   per-level field of the ability
 #   { design: [...] }                    one value per level, written here
+# An optional top-level `cooldown: { design: [...] }` replaces the export's cooldown (map seconds,
+#   still multiplied by abilities.cooldown).
 # A missing export value takes the value of the level before; on level 1 it gives 0.
 # review is allowed only on script-backed abilities. It holds notes for the port (jassFunctions: the
 #   functions that design values come from; notes: where each value comes from). data-build checks
@@ -204,17 +206,23 @@
   description: { en: "Raises snake totems that bite nearby enemies.", cs: "Postaví hadí totemy, které koušou nepřátele v okolí." }
   kind: summon
   targeting: densest_cluster
+  # The map's cooldown is 5, 7, 9, 12, 15. Petr set one slow cast for every level on 2026-11-12, the same
+  # as Wisp Ward: with the small cap below, each cast moves half of the totems to the fight.
+  cooldown: { design: [15, 15, 15, 15, 15] }
   params:
-    count: DataA
+    # The map's DataA is 1, 2, 3, 4, 5. Petr's values of 2026-11-12, shared with Wisp Ward.
+    count: { design: [1, 2, 2, 3, 3] }
     duration: duration
     range: range
     # The map's totem attacks for 101, finds a target within 600 and has an attack interval of 1.0 s,
     # which is multiplied by heroes.attackCooldown 0.5. The cap on living totems is our own.
     # The map's ward attacks for 101; Petr halved it on 2026-11-11 (the Serpent Shaman won every run).
-    damage: { design: [50, 50, 50, 50, 50] }
+    # 60 since 2026-11-12: with the cap of 2-6 totems and the slow cast, 50 won 1 of 5 test seeds and 75 won 15 of 15.
+    damage: { design: [60, 60, 60, 60, 60] }
     attackRange: { design: [600, 600, 600, 600, 600] }
     attackInterval: { design: [0.5, 0.5, 0.5, 0.5, 0.5] }
-    maxAlive: { design: [3, 6, 9, 12, 15] }
+    # Petr's values of 2026-11-12 (was 3, 6, 9, 12, 15), shared with Wisp Ward.
+    maxAlive: { design: [2, 4, 4, 6, 6] }
 
 - id: forked-bolt
   source: A064
@@ -269,7 +277,9 @@
   kind: summon
   targeting: densest_cluster
   params:
-    count: DataA
+    # The map's DataA is 1, 2, 1, 2, 2: level 3 raised fewer wards than level 2. Petr's values of
+    # 2026-11-12, shared with Serpent Totem.
+    count: { design: [1, 2, 2, 3, 3] }
     duration: duration
     range: range
     # Design values: the map's first ward attacks for 101 and finds a target within 600; the damage is 93

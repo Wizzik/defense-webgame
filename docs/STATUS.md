@@ -1,10 +1,16 @@
 # Status
 
-Updated 2026-11-11 night (phase 2b-2 is merged; Visual pass A is finished on branch `visual-a`, not merged). Read this first when you resume work.
+Updated 2026-11-12 (Visual pass A is merged and live; the ward rework is on branch `ward-rework`, PR #9). Read this first when you resume work.
 
-## Visual pass A: done on branch `visual-a`, not merged
+## Ward rework (2026-11-12): PR #9 on branch `ward-rework`, not merged
 
-- Plan: `docs/superpowers/plans/2026-11-11-visual-pass-a.md` (7 tasks, all done). PR: #8 (https://github.com/Wizzik/defense-webgame/pull/8), open, not merged; merge only when CI is green on `webgpu-swiftshader` (first WebGPU run of this branch). It waits for the final review and Petr's playtest.
+- Petr's decision after the first playtest of visual pass A: Serpent Totem and Wisp Ward both raise 1, 2, 2, 3, 3 wards a cast, at most 2, 4, 4, 6, 6 alive, and the totem casts every 4.95 s on every level. Details and numbers: `docs/DECISIONS.md` (Product, 2026-11-12).
+- Serpent Totem damage went 50 -> 60 to keep the Serpent Shaman in the balance bands (Claude's tuning; Petr may change it). The Serpent Shaman is no longer an open balance gap; the Gravecaller still is.
+- What Petr checks: both heroes on the live game after the merge. Do the wards follow the fight well enough, or should they move with the hero (that needs new simulation code)?
+
+## Visual pass A: merged (PR #8, 2026-11-12)
+
+- Plan: `docs/superpowers/plans/2026-11-11-visual-pass-a.md` (7 tasks, all done). PR #8 merged as `0a6de7e`; CI was green on both e2e projects, Pages deployed. Live at https://wizzik.github.io/defense-webgame/.
 - What it brings: KayKit CC0 models (8 heroes from 5 adventurer bodies, 6 skeleton enemy types with weapons, the castle with towers and flags, a forest around the spawn ring), procedural ground, dusk light and fog, a moon shadow map plus blob shadows, a build tool for assets. The simulation and the balance did not change (`git diff main -- sim design data` is empty). Decisions: `docs/DECISIONS.md`, section Visual pass A.
 - What Petr checks in the playtest:
   - the look and the readability of the six enemy types; the strong type tint on enemies; the chaplain's small size;
@@ -19,7 +25,7 @@ Updated 2026-11-11 night (phase 2b-2 is merged; Visual pass A is finished on bra
 ## Phase 2b-2 (ring arena, enemy AI, four heroes): merged (PR #7, 2026-11-11)
 
 - Live at https://wizzik.github.io/defense-webgame/ (CI and Pages green on `eb6e671`). 8 heroes, packs from every side, five enemy behaviours; the autopilot loses about half of its runs. No final whole-branch review ran before the merge.
-- **Open for Petr 1:** Gravecaller and Serpent Shaman still win 5 of 5 and are never in danger, also after Petr's cuts of 2026-11-11 evening (Serpent Totem damage halved, Grave Grasp heal -75 %). They need a redesign of their kits.
+- **Open for Petr 1 (2026-11-12: the Serpent Shaman part is closed by the ward rework, the Gravecaller stays):** Gravecaller and Serpent Shaman still win 5 of 5 and are never in danger, also after Petr's cuts of 2026-11-11 evening (Serpent Totem damage halved, Grave Grasp heal -75 %). They need a redesign of their kits.
 - **Open for Petr 2:** the balance targets are measured on 5 seeds and a run is chaotic. On seeds 6-15 the same build gives 1 to 9 wins of 10 depending on the hero. The next balance pass should measure on more seeds with wider bands.
 - What Petr should check in the playtest: packs come from all sides and reach him and the castle, the types read apart, the first tries are often lost, and the menu shows 8 heroes.
 - Numbers: `docs/DECISIONS.md`. Plan: `docs/superpowers/plans/2026-11-11-phase-2b2-ring-ai-heroes.md`.
@@ -56,7 +62,7 @@ Updated 2026-11-11 night (phase 2b-2 is merged; Visual pass A is finished on bra
 - 2b-1 added the GPU name to the `?fps=1` overlay and a menu warning on software rendering.
 
 **Order after 2b-2 (approved by Petr 2026-11-10; 2b-2 was put in front on 2026-11-11):**
-1. **Visual pass A, no external tools**: done on `visual-a`, see the top of this file.
+1. **Visual pass A, no external tools**: merged, see the top of this file.
 2. **Visual pass B, own hero models** (needs Petr's computer): Tripo (text or image to 3D with auto-rig; check the licence of his plan before anything is committed, the repo is public) or Blender. Blender MCP install problem: Petr pastes the error into a chat on the computer with Blender. Constraints: hero <= 5000 triangles, enemy <= 3000 (see docs/DECISIONS.md), clips Idle, Running/Walking, Punch, Death, every asset in `assets/LICENSES.md`.
 3. Then the rest of 2b (20 phases, elites, bosses, difficulties), 2c economy, 2d shared abilities, 2e meta progression.
 4. Propose the second skill (project development rules).
