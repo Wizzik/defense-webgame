@@ -1,8 +1,8 @@
 # Status
 
-Updated 2026-11-12 (Visual pass A is merged and live; the ward rework is on branch `ward-rework`, PR: <number>). Read this first when you resume work.
+Updated 2026-11-12 (Visual pass A is merged and live; the ward rework is on branch `ward-rework`, PR #9). Read this first when you resume work.
 
-## Ward rework (2026-11-12): on branch `ward-rework`, not merged
+## Ward rework (2026-11-12): PR #9 on branch `ward-rework`, not merged
 
 - Petr's decision after the first playtest of visual pass A: Serpent Totem and Wisp Ward both raise 1, 2, 2, 3, 3 wards a cast, at most 2, 4, 4, 6, 6 alive, and the totem casts every 4.95 s on every level. Details and numbers: `docs/DECISIONS.md` (Product, 2026-11-12).
 - Serpent Totem damage went 50 -> 60 to keep the Serpent Shaman in the balance bands (Claude's tuning; Petr may change it). The Serpent Shaman is no longer an open balance gap; the Gravecaller still is.
