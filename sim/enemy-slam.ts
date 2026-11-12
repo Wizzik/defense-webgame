@@ -1,9 +1,11 @@
 import { armorReduction, damageCastle, damageHero } from "./combat";
 import { TICKS_PER_SECOND } from "./constants";
+import { endStrike } from "./enemy-strike";
 import { EventKind } from "./events";
 import type { Run } from "./run";
 
-export const Slam = { None: 0, Windup: 1 } as const;
+/** Windup: a slam around the enemy. Strike: a strike from afar (sim/enemy-strike.ts), a circle on the hero. */
+export const Slam = { None: 0, Windup: 1, Strike: 2 } as const;
 /** `value` of a Slam event. */
 export const SlamEvent = { Warning: 0, Hit: 1, Cancelled: 2 } as const;
 
@@ -21,7 +23,7 @@ const START_SHARE = 0.8;
 export function updateSlam(run: Run, i: number, heroDist: number): boolean {
   const e = run.enemies;
   const slam = run.data.enemies[e.type[i]].slam;
-  if (slam === undefined) return false;
+  if (slam === undefined || e.slamState[i] === Slam.Strike) return false;
   const { hero, castle } = run;
 
   if (e.slamState[i] === Slam.None) {
@@ -53,13 +55,22 @@ export function updateSlam(run: Run, i: number, heroDist: number): boolean {
   return true;
 }
 
-/** Ends a windup without a hit and starts the cooldown. Does nothing for an enemy that is not winding up. */
+/** Ends the windup of a slam or of a strike from afar without a hit and starts its cooldown. Does nothing for an enemy that is not winding up. */
 export function cancelSlam(run: Run, i: number): void {
   const e = run.enemies;
-  if (e.slamState[i] !== Slam.Windup) return;
-  const slam = run.data.enemies[e.type[i]].slam;
-  run.events.push(EventKind.Slam, i, SlamEvent.Cancelled, e.slamX[i], e.slamY[i], slam === undefined ? 0 : slam.radius, 0);
-  endSlam(run, i);
+  if (e.slamState[i] === Slam.None) return;
+  run.events.push(EventKind.Slam, i, SlamEvent.Cancelled, e.slamX[i], e.slamY[i], windupRadius(run, i), 0);
+  if (e.slamState[i] === Slam.Strike) endStrike(run, i);
+  else endSlam(run, i);
+}
+
+/** Radius of the warning circle enemy i is winding up (a slam or a strike from afar); 0 when there is none. */
+export function windupRadius(run: Run, i: number): number {
+  const e = run.enemies;
+  const def = run.data.enemies[e.type[i]];
+  if (e.slamState[i] === Slam.Strike) return def.strike === undefined ? 0 : def.strike.radius;
+  if (e.slamState[i] === Slam.Windup) return def.slam === undefined ? 0 : def.slam.radius;
+  return 0;
 }
 
 /** Draws the next cooldown: exactly one rng value per ended slam. */

@@ -1,6 +1,6 @@
 import { TICKS_PER_SECOND } from "./constants";
 import { Role } from "./enemies";
-import { Slam, SlamEvent } from "./enemy-slam";
+import { Slam, SlamEvent, windupRadius } from "./enemy-slam";
 import { EventKind } from "./events";
 import { gainXp } from "./level-up";
 import type { Rng } from "./rng";
@@ -94,9 +94,8 @@ export function killEnemy(run: Run, slot: number): void {
   const xp = run.data.enemies[e.type[slot]].xp;
   const x = e.x[slot];
   const y = e.y[slot];
-  if (e.slamState[slot] === Slam.Windup) {
-    const slam = run.data.enemies[e.type[slot]].slam;
-    run.events.push(EventKind.Slam, slot, SlamEvent.Cancelled, e.slamX[slot], e.slamY[slot], slam === undefined ? 0 : slam.radius, 0);
+  if (e.slamState[slot] !== Slam.None) {
+    run.events.push(EventKind.Slam, slot, SlamEvent.Cancelled, e.slamX[slot], e.slamY[slot], windupRadius(run, slot), 0);
   }
   if (run.isBoss[e.type[slot]] === 1) {
     run.bossCount--;

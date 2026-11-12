@@ -114,7 +114,7 @@ describe("timeline", () => {
     expect(came[0]!.value).toBe(marshal);
     const slot = came[0]!.a;
     expect(aliveOfType(run, marshal)).toEqual([slot]);
-    expect(run.enemies.role[slot]).toBe(Role.Sieger);
+    expect(run.enemies.role[slot]).toBe(Role.Hunter);
     const scale = timeScale(run.data.rules, run.tick);
     expect(run.enemies.hp[slot]).toBe(run.data.enemies[marshal]!.hp * scale);
     expect(run.enemies.maxHp[slot]).toBe(run.enemies.hp[slot]);

@@ -71,5 +71,13 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
       cooldownSeconds: [s.cooldownSeconds[0], s.cooldownSeconds[1]],
     };
   }
+  if (entry.strike) {
+    const s = entry.strike;
+    enemy.strike = {
+      minRange: s.minRange, maxRange: s.maxRange, radius: s.radius, damage: s.damage,
+      windupSeconds: s.windupSeconds, cooldownSeconds: s.cooldownSeconds, leap: s.leap,
+    };
+  }
+  if (entry.hunter) enemy.hunter = true;
   return enemy;
 }

@@ -47,6 +47,8 @@ export class EnemyStore {
   readonly slamCooldown: Int32Array;
   readonly slamX: Float64Array;
   readonly slamY: Float64Array;
+  /** Ticks until the next strike from afar (sim/enemy-strike.ts); its windup lives in the slam fields. */
+  readonly strikeCooldown: Int32Array;
 
   constructor(capacity: number) {
     this.capacity = capacity;
@@ -86,6 +88,7 @@ export class EnemyStore {
     this.slamCooldown = new Int32Array(capacity);
     this.slamX = new Float64Array(capacity);
     this.slamY = new Float64Array(capacity);
+    this.strikeCooldown = new Int32Array(capacity);
   }
 
   /** Takes the lowest free slot; returns -1 when the store is full. */
@@ -138,6 +141,7 @@ export class EnemyStore {
     this.slamCooldown[slot] = 0;
     this.slamX[slot] = 0;
     this.slamY[slot] = 0;
+    this.strikeCooldown[slot] = 0;
     return slot;
   }
 

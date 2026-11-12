@@ -17,7 +17,7 @@ describe("enemy behaviours", () => {
     expect(of("musketeer")).toBe(Behavior.Skirmish);
     expect(of("chaplain")).toBe(Behavior.Support);
     expect(of("lancer")).toBe(Behavior.Charge);
-    expect(of("captain")).toBe(Behavior.Siege);
+    expect(of("captain")).toBe(Behavior.Charge);
   });
 
   it("a flanker approaches at an angle", () => {

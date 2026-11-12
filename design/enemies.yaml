@@ -17,6 +17,8 @@
 #   (12 000, 20 000, 30 000 and 257 000 for the final boss, tuned up from 60 000 so the last fight takes 40-90 s)
 #   divided by the generated hp of the source.
 # model: id of the enemy type whose model the type is drawn with.
+# strike: design value (sim/enemy-strike.ts): a warning circle on the hero from afar; with `leap` the boss jumps into it.
+# hunter: design value: the type goes for the hero whatever the role of its pack is.
 # slam: design value (sim/enemy-slam.ts). The cooldown range is the map's Thunder Clap of the final golems (7-15 s).
 
 - id: shieldbearer
@@ -67,9 +69,12 @@
   source: hkni
   mapName: Knight
   name: { en: Captain, cs: Kapitán }
-  multipliers: { hp: 3, damage: 0.75, collision: 1.5, moveSpeed: 0.8 }
-  behavior: siege
+  # elite-boss-threat (2026-11-12): the elite hunts the hero, keeps up with it and charges (hp 3 -> 6, damage 0.75 -> 1, moveSpeed 0.8 -> 1.1)
+  multipliers: { hp: 6, damage: 1, collision: 1.5, moveSpeed: 1.1 }
+  behavior: charge
+  hunter: true
   xp: 12
+  charge: { minRange: 300, maxRange: 700, windupSeconds: 0.5, speedMultiplier: 2.5, damageMultiplier: 1.5, distance: 900, cooldownSeconds: 6 }
   aura: { radius: 400, moveSpeed: 0.25, damage: 0.25 }
 
 - id: iron-marshal
@@ -83,6 +88,7 @@
   boss: true
   model: lancer
   slam: { radius: 350, damage: 120, windupSeconds: 1, cooldownSeconds: [7, 15] }
+  strike: { minRange: 450, maxRange: 1300, radius: 260, damage: 150, windupSeconds: 1, cooldownSeconds: 6, leap: true }
 
 - id: pale-abbot
   source: hmpr
@@ -95,6 +101,7 @@
   boss: true
   model: chaplain
   slam: { radius: 400, damage: 180, windupSeconds: 1, cooldownSeconds: [7, 15] }
+  strike: { minRange: 450, maxRange: 1300, radius: 280, damage: 220, windupSeconds: 1, cooldownSeconds: 6, leap: true }
 
 - id: gunmaster
   source: hrif
@@ -106,6 +113,8 @@
   boss: true
   model: musketeer
   slam: { radius: 400, damage: 240, windupSeconds: 1, cooldownSeconds: [7, 15] }
+  # the shooter stays where it is: the shot lands where the hero stood
+  strike: { minRange: 450, maxRange: 1500, radius: 240, damage: 260, windupSeconds: 1, cooldownSeconds: 4, leap: false }
 
 - id: dread-regent
   source: hkni
@@ -119,3 +128,4 @@
   boss: true
   model: captain
   slam: { radius: 500, damage: 350, windupSeconds: 1, cooldownSeconds: [7, 15] }
+  strike: { minRange: 450, maxRange: 1300, radius: 300, damage: 400, windupSeconds: 1, cooldownSeconds: 5, leap: true }

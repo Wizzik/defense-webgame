@@ -63,6 +63,8 @@ export class Run {
   readonly phaseTables: PhaseTable[];
   /** Enemy type index to its Behavior. */
   readonly enemyBehavior: Uint8Array;
+  /** 1 for an enemy type that goes for the hero whatever its role is. */
+  readonly enemyHunter: Uint8Array;
   /** Type index of the first enemy type with an aura; -1 when there is none. */
   readonly auraType: number;
   /** Type index of the elite. */
@@ -116,6 +118,7 @@ export class Run {
     this.enemies = new EnemyStore(rules.enemies.maxAlive);
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);
     this.enemyBehavior = Uint8Array.from(data.enemies, (e) => BEHAVIOR_IDS.indexOf(e.behavior));
+    this.enemyHunter = Uint8Array.from(data.enemies, (e) => (e.hunter ? 1 : 0));
     this.auraType = data.enemies.findIndex((e) => e.aura !== undefined);
     this.isBoss = Uint8Array.from(data.enemies, (e) => (e.boss ? 1 : 0));
     this.phaseTables = buildPhaseTables(data);

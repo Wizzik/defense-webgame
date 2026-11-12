@@ -1,6 +1,6 @@
 import type { CardOffer } from "./cards";
 import { Charge } from "./enemy-charge";
-import { Slam } from "./enemy-slam";
+import { Slam, windupRadius } from "./enemy-slam";
 import { InputAction } from "./input";
 import type { TickInput } from "./input";
 import type { Run } from "./run";
@@ -79,8 +79,8 @@ export function botInput(run: Run, out: TickInput): TickInput {
       chargerSq = heroSq;
       charger = i;
     }
-    if (slammer < 0 && enemies.slamState[i] === Slam.Windup) {
-      const reach = run.data.enemies[enemies.type[i]].slam!.radius + SLAM_MARGIN;
+    if (slammer < 0 && enemies.slamState[i] !== Slam.None) {
+      const reach = windupRadius(run, i) + SLAM_MARGIN;
       const sx = hero.x - enemies.slamX[i];
       const sy = hero.y - enemies.slamY[i];
       if (sx * sx + sy * sy < reach * reach) slammer = i;
