@@ -1,6 +1,6 @@
 import type { GameData } from "../data/schema";
 import { consumeEmpower, onHitBonus, onHitStunTicks } from "./abilities/on-hit";
-import { armorReduction, damageEnemy, rollDamage } from "./combat";
+import { armorReduction, damageEnemy, rollDamage, stunEnemy } from "./combat";
 import { TICKS_PER_SECOND, TICK_SECONDS } from "./constants";
 import { EventKind } from "./events";
 import { InputAction } from "./input";
@@ -133,5 +133,5 @@ export function updateHeroCombat(run: Run): void {
   }
   hero.attackCooldown = Math.round(stats.attackIntervalSeconds * TICKS_PER_SECOND);
   damageEnemy(run, best, amount, 0);
-  if (stun > e.stunTicks[best] && e.alive[best] === 1) e.stunTicks[best] = stun;
+  if (e.alive[best] === 1) stunEnemy(run, best, stun);
 }

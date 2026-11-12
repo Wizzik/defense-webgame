@@ -1,5 +1,6 @@
 import { TICKS_PER_SECOND } from "./constants";
 import { Role } from "./enemies";
+import { Slam, SlamEvent } from "./enemy-slam";
 import { EventKind } from "./events";
 import { gainXp } from "./level-up";
 import type { Rng } from "./rng";
@@ -57,9 +58,10 @@ export function damageEnemy(run: Run, slot: number, amount: number, source: 0 | 
   else if (source !== 2) knockBack(run, slot, source);
 }
 
-/** Pushes a surviving enemy away from the hero; a newer knockback replaces an older one. */
+/** Pushes a surviving enemy away from the hero; a newer knockback replaces an older one. A boss does not move. */
 function knockBack(run: Run, slot: number, source: 0 | 1): void {
   const e = run.enemies;
+  if (run.isBoss[e.type[slot]] === 1) return;
   const { knockback } = run.data.rules.enemies;
   const dx = e.x[slot] - run.hero.x;
   const dy = e.y[slot] - run.hero.y;
@@ -72,6 +74,17 @@ function knockBack(run: Run, slot: number, source: 0 | 1): void {
   e.knockTicks[slot] = Math.round(knockback.seconds * TICKS_PER_SECOND);
 }
 
+/**
+ * Stuns a living enemy for `ticks` steps; a longer stun that already runs stays. On a boss the stun lasts
+ * `rules.enemies.bossStunScale` of the time (rounded up).
+ */
+export function stunEnemy(run: Run, slot: number, ticks: number): void {
+  if (ticks <= 0) return;
+  const e = run.enemies;
+  const scaled = run.isBoss[e.type[slot]] === 1 ? Math.ceil(ticks * run.data.rules.enemies.bossStunScale) : ticks;
+  if (scaled > e.stunTicks[slot]) e.stunTicks[slot] = scaled;
+}
+
 /** Emits Death, counts the kill, frees the slot and drops an XP crystal (XP goes straight to the hero when the store is full). */
 export function killEnemy(run: Run, slot: number): void {
   const e = run.enemies;
@@ -81,6 +94,10 @@ export function killEnemy(run: Run, slot: number): void {
   const xp = run.data.enemies[e.type[slot]].xp;
   const x = e.x[slot];
   const y = e.y[slot];
+  if (e.slamState[slot] === Slam.Windup) {
+    const slam = run.data.enemies[e.type[slot]].slam;
+    run.events.push(EventKind.Slam, slot, SlamEvent.Cancelled, e.slamX[slot], e.slamY[slot], slam === undefined ? 0 : slam.radius, 0);
+  }
   if (run.isBoss[e.type[slot]] === 1) run.bossCount--;
   e.kill(slot);
   if (run.crystals.drop(x, y, xp) < 0) gainXp(run, xp);

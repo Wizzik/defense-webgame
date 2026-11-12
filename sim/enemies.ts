@@ -41,6 +41,12 @@ export class EnemyStore {
   readonly chargeDirY: Float64Array;
   /** 1 while an enemy with an aura is near (sim/enemy-aura.ts); recomputed every step. */
   readonly buffed: Uint8Array;
+  /** Slam (sim/enemy-slam.ts): state, ticks left of the windup, ticks until the next slam, centre of the circle. */
+  readonly slamState: Uint8Array;
+  readonly slamTicks: Int32Array;
+  readonly slamCooldown: Int32Array;
+  readonly slamX: Float64Array;
+  readonly slamY: Float64Array;
 
   constructor(capacity: number) {
     this.capacity = capacity;
@@ -75,6 +81,11 @@ export class EnemyStore {
     this.chargeDirX = new Float64Array(capacity);
     this.chargeDirY = new Float64Array(capacity);
     this.buffed = new Uint8Array(capacity);
+    this.slamState = new Uint8Array(capacity);
+    this.slamTicks = new Int32Array(capacity);
+    this.slamCooldown = new Int32Array(capacity);
+    this.slamX = new Float64Array(capacity);
+    this.slamY = new Float64Array(capacity);
   }
 
   /** Takes the lowest free slot; returns -1 when the store is full. */
@@ -122,6 +133,11 @@ export class EnemyStore {
     this.chargeDirX[slot] = 0;
     this.chargeDirY[slot] = 0;
     this.buffed[slot] = 0;
+    this.slamState[slot] = 0;
+    this.slamTicks[slot] = 0;
+    this.slamCooldown[slot] = 0;
+    this.slamX[slot] = 0;
+    this.slamY[slot] = 0;
     return slot;
   }
 

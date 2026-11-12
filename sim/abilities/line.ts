@@ -1,4 +1,4 @@
-import { damageEnemy } from "../combat";
+import { damageEnemy, stunEnemy } from "../combat";
 import { TICKS_PER_SECOND, TICK_SECONDS } from "../constants";
 import type { Run } from "../run";
 import { CastMode, castMode, startCast } from "./slots";
@@ -57,7 +57,7 @@ export function updateLine(run: Run, slot: AbilitySlot, index: number): void {
     if (!(t + c > slot.front && t - c <= next && t >= -c && s <= halfWidth + c)) continue;
     slot.hit[i] = 1;
     damageEnemy(run, i, damage, 1, index); // spells ignore armor
-    if (e.alive[i] !== 0 && stun > e.stunTicks[i]) e.stunTicks[i] = stun;
+    if (e.alive[i] !== 0) stunEnemy(run, i, stun);
   }
   slot.front = next;
   if (slot.front >= length) slot.active = false;

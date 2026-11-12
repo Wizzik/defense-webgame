@@ -121,6 +121,7 @@ export function spawnBoss(run: Run, type: number, role: number): number {
   }
   const scale = timeScale(rules, run.tick);
   const slot = store.spawn(type, role, x, y, def.hp * scale, scale, run.tick);
+  if (def.slam) store.slamCooldown[slot] = Math.round(def.slam.cooldownSeconds[0] * TICKS_PER_SECOND);
   run.stats.spawned++;
   run.bossCount++;
   run.events.push(EventKind.BossSpawn, slot, type, x, y, 0, 0);

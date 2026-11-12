@@ -68,6 +68,8 @@ export class Run {
   readonly isBoss: Uint8Array;
   /** Living bosses. */
   bossCount = 0;
+  /** Multiplies the cooldown drawn after a slam (the enrage of the final boss lowers it). */
+  slamCooldownScale = 1;
   /** The step in which the next pack comes. */
   nextPackTick: number;
   /** The last phase whose elites were sent (-1: none yet). */

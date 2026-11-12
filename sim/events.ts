@@ -21,6 +21,9 @@ export const EventKind = {
   RushWarning: 15,
   /** A boss arrived: a = slot, value = type index, x/y = where. */
   BossSpawn: 16,
+  /** A slam: a = slot, value = 0 the warning starts / 1 it hits / 2 it was cancelled, x/y = the centre of the
+   *  circle, u = its radius, v = steps of the warning (0 for values 1 and 2). */
+  Slam: 17,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */
