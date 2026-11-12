@@ -67,6 +67,11 @@ describe("data-build", () => {
     expect(Object.keys(ability)).toEqual(["id", "name", "description", "kind", "targeting", "levels", "cooldown", "params"]);
   });
 
+  it("takes the cooldown from the design entry when it gives one", () => {
+    const entry = { ...abilityEntry("pulse"), cooldown: { design: [15, 15, 15] } };
+    expect(mapAbility(exportAbility("A001"), entry).cooldown).toEqual([15, 15, 15]);
+  });
+
   it("copies descriptions and roles", () => {
     const data = buildGameData(mapExport(), design(), "test");
     expect(data.abilities[0].description).toEqual({ en: "Pulse text", cs: "Puls text" });

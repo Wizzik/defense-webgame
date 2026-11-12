@@ -24,7 +24,7 @@ export function mapAbility(exp: ExportAbility, entry: AbilityEntry): Ability {
     kind: entry.kind,
     targeting: entry.targeting,
     levels: exp.levels,
-    cooldown: resolve("cooldown", "cooldown"),
+    cooldown: resolve("cooldown", entry.cooldown ?? "cooldown"),
     params,
   } as Ability;
 }

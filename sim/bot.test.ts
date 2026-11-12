@@ -239,7 +239,8 @@ const MAX_LEVEL = 18;
 interface Gap { maxWins: number; dangerSeeds: number; castleBelow: number; maxLevel: number; idleSeconds: number }
 const GAPS: Record<string, Gap> = {
   gravecaller: { maxWins: 5, dangerSeeds: 0, castleBelow: 1, maxLevel: MAX_LEVEL, idleSeconds: IDLE_LOSES_BY_SECONDS },
-  "serpent-shaman": { maxWins: 5, dangerSeeds: 0, castleBelow: 1, maxLevel: 19, idleSeconds: IDLE_LOSES_BY_SECONDS },
+  // Wisp Ward raises 1, 2, 2, 3, 3 wards since 2026-11-12: the wards hold the castle better, its won runs end at 66 %.
+  mistwarden: { maxWins: MAX_BOT_WINS, dangerSeeds: MIN_DANGER_SEEDS, castleBelow: 0.7, maxLevel: MAX_LEVEL, idleSeconds: IDLE_LOSES_BY_SECONDS },
 };
 
 interface BotRun { won: boolean; lowest: number; spawned: number; level: number; castle: number }

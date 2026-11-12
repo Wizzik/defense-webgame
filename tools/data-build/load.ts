@@ -91,6 +91,8 @@ export interface AbilityEntry {
   kind: Ability["kind"];
   targeting: Ability["targeting"];
   params: Record<string, ParamSpec>;
+  /** Replaces the export's cooldown (map seconds per level, before `abilities.cooldown` of scaling.yaml). */
+  cooldown?: ParamSpec;
   /** Porting notes. data-build only checks where they are allowed and never writes them. */
   review?: { notes?: string; jassFunctions?: string[] };
 }
