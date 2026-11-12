@@ -118,7 +118,7 @@ describe("generated game data", () => {
 
   it("boss hp matches the design targets", () => {
     const enemies = JSON.parse(read("enemies.json")) as { id: string; hp: number; boss?: true }[];
-    const targets: Record<string, number> = { "iron-marshal": 12000, "pale-abbot": 20000, gunmaster: 30000, "dread-regent": 60000 };
+    const targets: Record<string, number> = { "iron-marshal": 12000, "pale-abbot": 20000, gunmaster: 30000, "dread-regent": 257000 };
     for (const boss of enemies.filter((e) => e.boss)) {
       const target = targets[boss.id]!;
       expect(Math.abs(boss.hp - target) / target, boss.id).toBeLessThanOrEqual(0.01);

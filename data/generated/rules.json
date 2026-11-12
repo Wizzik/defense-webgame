@@ -13,7 +13,7 @@
     "rushWarningSeconds": 7,
     "finale": {
       "boss": "dread-regent",
-      "packScale": 0.5,
+      "packScale": 0.35,
       "enrageAfterSeconds": 200,
       "enrage": {
         "damage": 2,
@@ -39,7 +39,7 @@
     }
   },
   "castle": {
-    "hp": 14000,
+    "hp": 58000,
     "radius": 180,
     "regenPercentPerMinute": 1
   },
@@ -128,11 +128,11 @@
         "lancer": 2
       },
       "pack": {
-        "min": 8,
-        "max": 12,
+        "min": 9,
+        "max": 13,
         "everySeconds": 6
       },
-      "packs": 2,
+      "packs": 1,
       "hunterShare": 0.3,
       "elites": 1
     },
@@ -145,8 +145,8 @@
         "lancer": 3
       },
       "pack": {
-        "min": 9,
-        "max": 13,
+        "min": 7,
+        "max": 10,
         "everySeconds": 6
       },
       "packs": 2,
@@ -162,8 +162,8 @@
         "lancer": 3
       },
       "pack": {
-        "min": 10,
-        "max": 14,
+        "min": 8,
+        "max": 12,
         "everySeconds": 6
       },
       "packs": 2,
@@ -179,8 +179,8 @@
         "lancer": 3
       },
       "pack": {
-        "min": 10,
-        "max": 14,
+        "min": 8,
+        "max": 12,
         "everySeconds": 6
       },
       "packs": 2,
@@ -196,8 +196,8 @@
         "lancer": 3
       },
       "pack": {
-        "min": 10,
-        "max": 14,
+        "min": 8,
+        "max": 12,
         "everySeconds": 6
       },
       "packs": 2,
@@ -414,8 +414,8 @@
       "atSeconds": 180,
       "kind": "rush",
       "units": {
-        "captain": 3,
-        "lancer": 4
+        "captain": 2,
+        "lancer": 3
       }
     },
     {
@@ -469,30 +469,30 @@
   "debug": {
     "phaseXp": [
       0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
+      45,
+      105,
+      207,
+      374,
+      580,
+      975,
+      1235,
+      1561,
+      1922,
+      2314,
+      3086,
+      3663,
+      4176,
+      4822,
+      5623,
+      6708,
+      7628,
+      8513,
+      9579
     ]
   },
   "progression": {
     "xpFirst": 10,
-    "xpStep": 14,
+    "xpStep": 9,
     "magnetRadius": 300,
     "crystalSpeed": 900,
     "pickupRadius": 56,

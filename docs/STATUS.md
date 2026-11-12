@@ -1,13 +1,20 @@
 # Status
 
-Updated 2026-11-12 (Visual pass A and the ward rework are merged and live; the plan of phase 2b-3 waits for Petr's review). Read this first when you resume work.
+Updated 2026-11-12 (phase 2b-3, the full run with a boss, is built on its branch and waits for Petr's merge and playtest). Read this first when you resume work.
 
-## Phase 2b-3 (full run with a boss): plan written, not executed
+## Phase 2b-3 (full run with a boss): done on branch `phase-2b3-full-run`, PR open, waits for Petr
 
-- Petr chose the scope on 2026-11-12: 20 phases (16:40) with the six enemy types we have, elite rushes, 3 minibosses, a final boss with an enrage, the win by killing the boss. Bosses reuse the behaviours we have plus one new attack (a slam with a warning circle). Factions, difficulties and the minimap come in a later plan.
-- Spec: `docs/superpowers/specs/2026-11-12-phase-2b3-full-run-boss-design.md` (Petr asked for the plan after it was written). Plan: `docs/superpowers/plans/2026-11-12-phase-2b3-full-run-boss.md`, 8 tasks. Both are on branch `phase-2b3-full-run`; nothing is implemented yet.
-- The plan sharpens the spec in four points (bosses sized by collision, `?duration` moves only the final boss, the enrage is relative to its arrival, `?phase` reads a hand-filled XP table); its Task 8 writes them into the spec.
-- Next: Petr reviews the plan and picks the execution method, then execute it **in a new chat** starting from Task 1. Task 1 needs the map export (`npm run map:extract`, the map is a file in the claude.ai project).
+- All 8 tasks of `docs/superpowers/plans/2026-11-12-phase-2b3-full-run-boss.md` are done (executed inline in one chat with one final review). `npm run check`, the build and the e2e project `webgl2-fallback` pass.
+- What it brings: a run of 20 phases (16:40), five elite rushes announced 7 s ahead, three minibosses (Iron Marshal 4:10, Pale Abbot 8:20, Gunmaster 12:30) and the final boss Dread Regent at 16:40 with an enrage 200 s later; the run is won when the final boss falls. Bosses slam the ground after a red warning circle. The HUD shows the phase, news and the boss's hp bar. `?debug=1&phase=N` starts at a phase.
+- What Petr checks in the playtest (after the merge, on the live game):
+  - the length and the pace of the run, and whether the second half feels thin (after the kit is full the cards offer only attributes; meant to last until 2c);
+  - the slam circle: is it readable on the grass and on the dark earth by the castle, is 1 s enough to walk out;
+  - how hard the bosses are; the final boss has 257 000 hp (the spec's 60 000 fell in under 30 s);
+  - the news line and the boss bar under the clock (they share the place with "The castle is under attack!");
+  - quick links: https://wizzik.github.io/defense-webgame/?debug=1&phase=6 (first miniboss at once), `&phase=4` (elite rush after 30 s), `&phase=21` (finale).
+- **Open for Petr 1 (balance spread):** on 20 seeds the autopilot wins 10 (Stonehorn), 12 (Nightglaive), 7 (Mistwarden), but 17 (Serpent Shaman), 15 (Redcleaver), 14 (Tidecaller) and 0 (Sparkshot: its castle is almost gone when the finale starts). The run-wide numbers cannot close this spread; it needs kit work or a look at how the autopilot plays a ranged hero in the finale. Gravecaller still wins everything.
+- **Open for Petr 2 (XP curve):** the full kit comes in phases 7-9 (the spec wanted 12-14) and a won run ends at level 49-50 (wanted 35-45). A slower curve made the heroes die between 2:00 and 6:00; it needs the early phases retuned with it. Numbers: `docs/DECISIONS.md`, section Phase 2b-3.
+- Next: Petr merges the PR and plays. Then, in a new chat: the two open balance points, or the next plan (2c economy, or factions and difficulties).
 
 ## Ward rework: merged (PR #9, 2026-11-12)
 
@@ -35,7 +42,7 @@ Updated 2026-11-12 (Visual pass A and the ward rework are merged and live; the p
 
 - Live at https://wizzik.github.io/defense-webgame/ (CI and Pages green on `eb6e671`). 8 heroes, packs from every side, five enemy behaviours; the autopilot loses about half of its runs. No final whole-branch review ran before the merge.
 - **Open for Petr 1 (2026-11-12: the Serpent Shaman part is closed by the ward rework, the Gravecaller stays):** Gravecaller and Serpent Shaman still win 5 of 5 and are never in danger, also after Petr's cuts of 2026-11-11 evening (Serpent Totem damage halved, Grave Grasp heal -75 %). They need a redesign of their kits.
-- **Open for Petr 2:** the balance targets are measured on 5 seeds and a run is chaotic. On seeds 6-15 the same build gives 1 to 9 wins of 10 depending on the hero. The next balance pass should measure on more seeds with wider bands.
+- **Open for Petr 2 (closed by 2b-3):** balance is now measured on 20 seeds (`sim:run --seeds 1-20`), with seeds 21-40 as a check; CI guards only the shape of a run.
 - What Petr should check in the playtest: packs come from all sides and reach him and the castle, the types read apart, the first tries are often lost, and the menu shows 8 heroes.
 - Numbers: `docs/DECISIONS.md`. Plan: `docs/superpowers/plans/2026-11-11-phase-2b2-ring-ai-heroes.md`.
 
@@ -73,7 +80,7 @@ Updated 2026-11-12 (Visual pass A and the ward rework are merged and live; the p
 **Order after 2b-2 (approved by Petr 2026-11-10; 2b-2 was put in front on 2026-11-11):**
 1. **Visual pass A, no external tools**: merged, see the top of this file.
 2. **Visual pass B, own hero models** (needs Petr's computer): Tripo (text or image to 3D with auto-rig; check the licence of his plan before anything is committed, the repo is public) or Blender. Blender MCP install problem: Petr pastes the error into a chat on the computer with Blender. Constraints: hero <= 5000 triangles, enemy <= 3000 (see docs/DECISIONS.md), clips Idle, Running/Walking, Punch, Death, every asset in `assets/LICENSES.md`.
-3. Then the rest of 2b (20 phases, elites, bosses, difficulties), 2c economy, 2d shared abilities, 2e meta progression.
+3. Then the rest of 2b: 20 phases, elites and bosses are done (2b-3); factions and difficulties remain. Then 2c economy, 2d shared abilities, 2e meta progression.
 4. Propose the second skill (project development rules).
 
 **Fps test links for Petr** (play about 2 minutes, read the overlay: average and 1% low, and the backend it names):

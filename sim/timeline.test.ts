@@ -12,7 +12,19 @@ import { spawnBoss, updateTimeline } from "./timeline";
 import { enemyRun } from "./testing/enemy-run";
 import { gameData } from "./testing/game-data";
 
-const newRun = (seed = 1) => createRun(gameData(), { seed, durationSeconds: 100000 });
+/** The tests set the events they count on, so balance tuning cannot break them. */
+const newRun = (seed = 1) => {
+  const data = gameData();
+  data.rules.events = [
+    { atSeconds: 180, kind: "rush", units: { captain: 3, lancer: 4 } },
+    { atSeconds: 250, kind: "boss", enemy: "iron-marshal" },
+    { atSeconds: 360, kind: "rush", units: { captain: 4, lancer: 6 } },
+    { atSeconds: 500, kind: "boss", enemy: "pale-abbot" },
+    { atSeconds: 750, kind: "boss", enemy: "gunmaster" },
+  ];
+  data.rules.run.rushWarningSeconds = 7;
+  return createRun(data, { seed, durationSeconds: 100000 });
+};
 const typeOf = (run: Run, id: string) => run.data.enemies.findIndex((e) => e.id === id);
 
 interface Seen { kind: number; a: number; value: number; x: number; y: number }

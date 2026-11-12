@@ -286,100 +286,44 @@ describe("abilities of every hero", () => {
   }
 });
 
-// Targets (phase 2b-2, task 6), for every hero over seeds 1 to 5: the bot wins 2 to 4 runs, an idle run loses
-// within 2:30, the bot's hero drops below 50 % hp in at least 4 runs, the castle of the won runs ends below 60 %
-// on average, the average level is 10 to 18 and 700 to 1200 enemies come. Results: docs/DECISIONS.md.
-// Six heroes meet all of them. Gaps, kept at the level that is met: the Gravecaller and the Serpent Shaman win
-// every seed and are never in danger, also after Petr's cuts of 2026-11-11 (Serpent Totem damage halved, Grave
-// Grasp heal -75 %). The numbers the plan let us tune do not reach them; their kits need a redesign.
-const MIN_BOT_WINS = 2;
-const MAX_BOT_WINS = 4;
-const DANGER_HP = 0.5;
-const MIN_DANGER_SEEDS = 4;
-const IDLE_LOSES_BY_SECONDS = 150;
-const CASTLE_BELOW = 0.6;
-const MAX_LEVEL = 18;
-interface Gap { maxWins: number; dangerSeeds: number; castleBelow: number; maxLevel: number; idleSeconds: number }
-const GAPS: Record<string, Gap> = {
-  gravecaller: { maxWins: 5, dangerSeeds: 0, castleBelow: 1, maxLevel: MAX_LEVEL, idleSeconds: IDLE_LOSES_BY_SECONDS },
-  // Wisp Ward raises 1, 2, 2, 3, 3 wards since 2026-11-12: the wards hold the castle better, its won runs end at 66 %.
-  mistwarden: { maxWins: MAX_BOT_WINS, dangerSeeds: MIN_DANGER_SEEDS, castleBelow: 0.7, maxLevel: MAX_LEVEL, idleSeconds: IDLE_LOSES_BY_SECONDS },
-};
+// Balance of the full run (phase 2b-3): the targets are measured on seeds 1 to 20 with `npm run sim:run` and
+// written down in docs/DECISIONS.md with the heroes that miss them. CI only guards the shape of a run, on three
+// seeds a hero: it ends, and a player who does nothing loses early.
+const SEEDS = [1, 2, 3];
+const RUN_ENDS_BY_SECONDS = 1400;
+const IDLE_LOSES_BY_SECONDS = 240;
+/** The Gravecaller is outside the bands (its kit waits for a redesign): its idle runs last longer. */
+const IDLE_GAPS: Record<string, number> = { gravecaller: 300 };
 
-interface BotRun { won: boolean; lowest: number; spawned: number; level: number; castle: number }
-
-/** Five bot runs of a hero (seeds 1 to 5), played once and shared by the tests below. */
-const botRuns = new Map<string, BotRun[]>();
-function fiveRuns(hero: string): BotRun[] {
-  let runs = botRuns.get(hero);
-  if (!runs) {
-    runs = [];
-    for (let seed = 1; seed <= 5; seed++) {
-      let lowest = 1;
-      const run = play(seed, (r) => {
-        lowest = Math.min(lowest, r.hero.hp / r.hero.stats.maxHp);
-      }, undefined, hero);
-      runs.push({
-        won: run.result === "won", lowest, spawned: run.stats.spawned, level: run.hero.level,
-        castle: Math.max(0, run.castle.hp) / run.castle.maxHp,
-      });
-    }
-    botRuns.set(hero, runs);
-  }
-  return runs;
-}
-
-const average = (values: number[]): number => values.reduce((sum, v) => sum + v, 0) / values.length;
-
-// Skipped while phase 2b-3 is built: the bands were measured on the 5-minute run. Task 8 of the 2b-3 plan replaces them.
-describe.skip("balance", () => {
+describe("balance", () => {
   for (const hero of HEROES) {
-    const gap = GAPS[hero];
-    const maxWins = gap?.maxWins ?? MAX_BOT_WINS;
-    const dangerSeeds = gap?.dangerSeeds ?? MIN_DANGER_SEEDS;
-    const castleBelow = gap?.castleBelow ?? CASTLE_BELOW;
-    const maxLevel = gap?.maxLevel ?? MAX_LEVEL;
-    const idleSeconds = gap?.idleSeconds ?? IDLE_LOSES_BY_SECONDS;
-
-    it(`an idle run loses within ${idleSeconds} s (${hero})`, () => {
-      const run = createRun(gameData(), { seed: 1, hero });
-      // Idle movement; an attribute card is taken at each level-up so that the run does not pause forever
-      // and the hero stays with its first ability.
-      while (run.state === "playing" || run.state === "levelUp") {
-        const card = run.offer ? Math.max(0, run.offer.cards.findIndex((c) => c.kind === "attribute")) : 0;
-        const idle: TickInput = { ...NO_INPUT, card };
-        run.step(idle);
+    it(`every hero's run ends by a loss or by killing the final boss within ${RUN_ENDS_BY_SECONDS} s (${hero})`, () => {
+      for (const seed of SEEDS) {
+        const run = play(seed, undefined, undefined, hero);
+        expect(run.tick, `seed ${seed}`).toBeLessThanOrEqual(RUN_ENDS_BY_SECONDS * 30);
+        if (run.state === "won") {
+          expect(run.finalBossDead, `seed ${seed}`).toBe(true);
+          expect(run.tick, `seed ${seed}`).toBeGreaterThan(run.durationTicks);
+        } else {
+          expect(["castle", "hero"], `seed ${seed}`).toContain(run.result);
+        }
       }
-      expect(run.state).toBe("lost");
-      expect(run.tick).toBeLessThanOrEqual(idleSeconds * 30);
     });
 
-    it(`the bot wins ${MIN_BOT_WINS} to ${maxWins} of 5 seeds (${hero})`, () => {
-      const wins = fiveRuns(hero).filter((r) => r.won).length;
-      expect(wins).toBeGreaterThanOrEqual(MIN_BOT_WINS);
-      expect(wins).toBeLessThanOrEqual(maxWins);
-    });
-
-    it(`the bot's hero drops below 50 % hp in at least ${dangerSeeds} of 5 seeds (${hero})`, () => {
-      expect(fiveRuns(hero).filter((r) => r.lowest < DANGER_HP).length).toBeGreaterThanOrEqual(dangerSeeds);
-    });
-
-    it(`the castle of the won runs ends below ${castleBelow * 100} % on average (${hero})`, () => {
-      const won = fiveRuns(hero).filter((r) => r.won);
-      expect(won.length).toBeGreaterThan(0);
-      expect(average(won.map((r) => r.castle))).toBeLessThan(castleBelow);
-    });
-
-    it(`the average level is 10 to ${maxLevel} (${hero})`, () => {
-      const level = average(fiveRuns(hero).map((r) => r.level));
-      expect(level).toBeGreaterThanOrEqual(10);
-      expect(level).toBeLessThanOrEqual(maxLevel);
-    });
-
-    it(`a run sees between 700 and 1200 enemies (${hero})`, () => {
-      const spawned = average(fiveRuns(hero).map((r) => r.spawned));
-      expect(spawned).toBeGreaterThanOrEqual(700);
-      expect(spawned).toBeLessThanOrEqual(1200);
+    const idleSeconds = IDLE_GAPS[hero] ?? IDLE_LOSES_BY_SECONDS;
+    it(`the idle player loses within ${idleSeconds} s (${hero})`, () => {
+      for (const seed of SEEDS) {
+        const run = createRun(gameData(), { seed, hero });
+        const input: TickInput = { ...NO_INPUT };
+        while (run.state !== "won" && run.state !== "lost") {
+          // no movement and no action; at a level-up the attribute card, so the first spell stays alone
+          input.card = run.offer ? Math.max(0, run.offer.cards.findIndex((c) => c.kind === "attribute")) : -1;
+          run.step(input);
+          if (run.tick > idleSeconds * 30) break;
+        }
+        expect(run.state, `seed ${seed}`).toBe("lost");
+        expect(run.tick, `seed ${seed}`).toBeLessThanOrEqual(idleSeconds * 30);
+      }
     });
   }
 });

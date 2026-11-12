@@ -1,8 +1,8 @@
 # Run rules: a run of 20 phases (16:40) that ends with the final boss (phase 2b-3). Defaults, tuned by playing.
 # Comments may name the origin in the map; they never reach data/generated/rules.json.
-# The map's castle (hcas) has 155 000 HP and regenerates 200 HP/s.
+# The map's castle (hcas) has 155 000 HP and regenerates 200 HP/s; ours has 58 000 for the 16:40 run (14 000 held 5 minutes).
 # The map sends 7 units per gate per 30 s on Normal; the game sends packs (below).
-# Tuned with `npm run sim:run -- --hero all --runs 5` and the same with `--idle` (hunterShare, xpFirst, xpStep);
+# Tuned with `npm run sim:run -- --hero all --seeds 1-20` and the same with `--idle` (phases, castle hp, xpStep, finale);
 # the targets and the results are in docs/DECISIONS.md.
 start: { hero: stonehorn }
 run:
@@ -12,14 +12,14 @@ run:
   timeScaling: { seconds: 1200, cap: 2 }   # enemy HP and damage x min(cap, 1 + t / seconds), spec 3.2
   rushWarningSeconds: 7   # the map warns 7 s ahead too
   # packScale: pack sizes of the last phase while the finale lasts. The enrage counts from the boss's arrival.
-  finale: { boss: dread-regent, packScale: 0.5, enrageAfterSeconds: 200, enrage: { damage: 2, moveSpeed: 1.3, slamCooldown: 0.5 } }
+  finale: { boss: dread-regent, packScale: 0.35, enrageAfterSeconds: 200, enrage: { damage: 2, moveSpeed: 1.3, slamCooldown: 0.5 } }
 arena:   # the castle stands in the middle; packs come from random directions on the spawn ring
   width: 6000
   height: 6000
   castle: { x: 0, y: 0 }
   heroStart: { x: 0, y: 500 }
   spawn: { radius: 2400, spread: 150 }
-castle: { hp: 14000, radius: 180, regenPercentPerMinute: 1 }
+castle: { hp: 58000, radius: 180, regenPercentPerMinute: 1 }
 hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
         dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 } }
 autocast: { novaMinEnemies: 1, healBelow: 0.6, shieldBelow: 0.35 }
@@ -31,11 +31,11 @@ phases:
   - { mix: { shieldbearer: 8, scout: 3 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.25, elites: 0 }   # 1
   - { mix: { shieldbearer: 6, scout: 3, musketeer: 2 }, pack: { min: 8, max: 11, everySeconds: 6 }, packs: 1, hunterShare: 0.3, elites: 0 }   # 2
   - { mix: { shieldbearer: 5, scout: 3, musketeer: 2, chaplain: 1, lancer: 1 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 1, hunterShare: 0.3, elites: 1 }   # 3
-  - { mix: { shieldbearer: 4, scout: 3, musketeer: 3, chaplain: 2, lancer: 2 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 2, hunterShare: 0.3, elites: 1 }   # 4
-  - { mix: { shieldbearer: 4, scout: 2, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 9, max: 13, everySeconds: 6 }, packs: 2, hunterShare: 0.35, elites: 1 }   # 5
-  - { mix: { shieldbearer: 4, scout: 3, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 10, max: 14, everySeconds: 6 }, packs: 2, hunterShare: 0.35, elites: 1 }   # 6
-  - { mix: { shieldbearer: 4, scout: 3, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 10, max: 14, everySeconds: 6 }, packs: 2, hunterShare: 0.35, elites: 1 }   # 7
-  - { mix: { shieldbearer: 4, scout: 3, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 10, max: 14, everySeconds: 6 }, packs: 2, hunterShare: 0.35, elites: 1 }   # 8
+  - { mix: { shieldbearer: 4, scout: 3, musketeer: 3, chaplain: 2, lancer: 2 }, pack: { min: 9, max: 13, everySeconds: 6 }, packs: 1, hunterShare: 0.3, elites: 1 }   # 4
+  - { mix: { shieldbearer: 4, scout: 2, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 7, max: 10, everySeconds: 6 }, packs: 2, hunterShare: 0.35, elites: 1 }   # 5
+  - { mix: { shieldbearer: 4, scout: 3, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 2, hunterShare: 0.35, elites: 1 }   # 6
+  - { mix: { shieldbearer: 4, scout: 3, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 2, hunterShare: 0.35, elites: 1 }   # 7
+  - { mix: { shieldbearer: 4, scout: 3, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 2, hunterShare: 0.35, elites: 1 }   # 8
   - { mix: { shieldbearer: 3, scout: 3, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 9, max: 13, everySeconds: 5 }, packs: 2, hunterShare: 0.35, elites: 2 }   # 9
   - { mix: { shieldbearer: 3, scout: 3, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 9, max: 13, everySeconds: 5 }, packs: 2, hunterShare: 0.35, elites: 2 }   # 10
   - { mix: { shieldbearer: 3, scout: 3, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 11, max: 15, everySeconds: 5 }, packs: 2, hunterShare: 0.4, elites: 2 }   # 11
@@ -51,7 +51,7 @@ phases:
 # Timed events, ascending by time. A rush is one pack of siegers from one side, announced rushWarningSeconds ahead;
 # a boss comes alone.
 events:
-  - { atSeconds: 180, kind: rush, units: { captain: 3, lancer: 4 } }
+  - { atSeconds: 180, kind: rush, units: { captain: 2, lancer: 3 } }
   - { atSeconds: 250, kind: boss, enemy: iron-marshal }
   - { atSeconds: 360, kind: rush, units: { captain: 4, lancer: 6 } }
   - { atSeconds: 500, kind: boss, enemy: pale-abbot }
@@ -60,6 +60,6 @@ events:
   - { atSeconds: 750, kind: boss, enemy: gunmaster }
   - { atSeconds: 900, kind: rush, units: { captain: 8, lancer: 12 } }
 # XP a hero has at the start of each phase, for ?phase=N. Filled from `npm run sim:run -- --phase-xp`.
-debug: { phaseXp: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }
-progression: { xpFirst: 10, xpStep: 14, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3,
+debug: { phaseXp: [0, 45, 105, 207, 374, 580, 975, 1235, 1561, 1922, 2314, 3086, 3663, 4176, 4822, 5623, 6708, 7628, 8513, 9579] }
+progression: { xpFirst: 10, xpStep: 9, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3,
   ultimateFromLevel: 6, ultimateLevelStep: 6 }   # map: ultimates need hero level 10

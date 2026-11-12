@@ -1,6 +1,6 @@
 # Fáze 2b-3: celý běh s bossem (návrh)
 
-Datum: 2026-11-12. Schválil Petr v chatu 2026-11-12 (rozsah, složitost bossů, celý návrh). Navazuje na spec `2026-11-04-defense-webgame-design.md`, oddíly 3.1 a 3.2.
+Datum: 2026-11-12. Schválil Petr v chatu 2026-11-12 (rozsah, složitost bossů, celý návrh). Po implementaci (2026-11-12) zpřesněno ve čtyřech bodech podle plánu (velikost bosse, `?duration`, enrage, `?phase`) a doplněna výsledná čísla balancu; viz `docs/DECISIONS.md`. Navazuje na spec `2026-11-04-defense-webgame-design.md`, oddíly 3.1 a 3.2.
 
 ## 1. Cíl a rozsah
 
@@ -29,7 +29,7 @@ Nový seznam `events` v `design/rules.yaml`, každá položka má `atSeconds` a 
 
 | Čas | Druh | Obsah (výchozí čísla, ladí se) |
 |---|---|---|
-| 3:00 | elitní nápor | 3 kapitáni + 4 kopiníci |
+| 3:00 | elitní nápor | 2 kapitáni + 3 kopiníci (po balancu; výchozí 3 + 4) |
 | 4:10 | miniboss | Železný maršál |
 | 6:00 | elitní nápor | 4 kapitáni + 6 kopiníků |
 | 8:20 | miniboss | Bledý opat |
@@ -49,7 +49,7 @@ Nový seznam `events` v `design/rules.yaml`, každá položka má `atSeconds` a 
 
 **Společná pravidla:**
 - Boss je typ nepřítele v `design/enemies.yaml` s příznakem `boss`. Je to varianta existujícího mapového zdroje a modelu (násobiče jako u zvěda a kapitána), žádný nový model.
-- Vzhled: měřítko 2,5 (minibossové) a 3 (finální), vlastní barva, žádná oranžová.
+- Vzhled: velikost určuje `collision` (minibossové 80, finální 96; klient škáluje model podle kolize), vlastní barva, žádná oranžová.
 - HP bar se jménem nahoře na obrazovce, dokud boss žije. Žije-li víc bossů, ukazuje se ten, který přišel poslední.
 - Nejde odhodit (knockback 0). Omráčení na něj trvá čtvrtinu času.
 - Přichází sám z náhodného směru na spawnovacím kruhu, se šipkou a zvukem. Místo má vždy: když je plno, nahradí nejstaršího běžného nepřítele.
@@ -69,14 +69,14 @@ Nový seznam `events` v `design/rules.yaml`, každá položka má `atSeconds` a 
 | `iron-marshal` | Iron Marshal / Železný maršál | kopiník, `charge` + úder | 12 000 | 350 / 120 | hrad |
 | `pale-abbot` | Pale Abbot / Bledý opat | kaplan, léčí okolí (`heal` ×5 v dosahu 600) + úder; jde na cíl jako `siege` | 20 000 | 400 / 180 | hrad |
 | `gunmaster` | Gunmaster / Mistr střelby | mušketýr, `skirmish` s dosahem 700 + úder | 30 000 | 400 / 240 | hrad |
-| `dread-regent` | Dread Regent / Hrůzný regent | kapitán, `charge` + `aura` + úder | 60 000 | 500 / 350 | hrdina |
+| `dread-regent` | Dread Regent / Hrůzný regent | kapitán, `charge` + `aura` + úder | 257 000 (po balancu; výchozích 60 000 padlo za 11–26 s) | 500 / 350 | hrdina |
 
 - Minibossové mají roli obléhač: na hrdinu reagují podle dnešních pravidel (když na ně zaútočí nebo přijde blízko).
 - Finální boss má roli lovec.
 
 **Finále:**
-- Od 16:40 platí tabulka fáze 20 s velikostí smeček × 0,5 (`run.finale.packScale`).
-- Ve 20:00 (`run.finale.enrageAtSeconds` 1200) finální boss zesílí: poškození ×2, rychlost ×1,3, cooldown úderu ×0,5. HUD to oznámí.
+- Od 16:40 platí tabulka fáze 20 s velikostí smeček × `run.finale.packScale` (po balancu 0,35; výchozí 0,5).
+- 200 s po svém příchodu (`run.finale.enrageAfterSeconds`; v běžném běhu ve 20:00) finální boss zesílí: poškození ×2, rychlost ×1,3, cooldown úderu ×0,5. HUD to oznámí.
 - Výhra: finální boss padne. Živí minibossové ani ostatní nepřátelé výhře nebrání.
 - Prohra: jako dnes (padne hrad nebo hrdina).
 
@@ -95,8 +95,8 @@ Nový seznam `events` v `design/rules.yaml`, každá položka má `atSeconds` a 
 
 ## 7. Ladicí nástroje
 
-- `?phase=N` (jen s `debug=1`, N 1–21; 21 je finále): běh začne na začátku fáze N. Hrdina dostane XP, které autopilot v tom čase průměrně má (tabulka `debugPhaseXp` generovaná z měření), a level-upy se rozdají kartami podle pravidla autopilota (první karta kouzla před atributem). Události s časem před začátkem fáze se přeskočí.
-- `?duration` zůstává pro testy: přepíše čas příchodu finálního bosse (5–1200 s) a fáze se zkrátí poměrně.
+- `?phase=N` (jen s `debug=1`, N 1–21; 21 je finále): běh začne na začátku fáze N. Hrdina dostane XP, které autopilot v tom čase průměrně má (ručně plněná tabulka `rules.debug.phaseXp` z měření `sim:run --phase-xp`), a level-upy se rozdají kartami podle pravidla autopilota (první karta kouzla před atributem). Události s časem před začátkem fáze se přeskočí.
+- `?duration` zůstává pro testy: přepíše jen čas příchodu finálního bosse (5–1200 s). Fáze ani události se nezkracují; testy, které chtějí rychlý konec, volají `debug.killBoss()`.
 - `npm run sim:run` nově vypíše čas zabití každého bosse, čas a důvod konce běhu a přijímá `--seeds A-B`.
 
 ## 8. Cíle balancu
@@ -111,6 +111,8 @@ Měří se autopilotem na seedech 1–20 pro každého hrdinu (dosud 1–5; ře�
 - hrad vyhraných běhů končí v průměru pod 60 %.
 
 Gravecaller je mimo pásma (známá otevřená díra, redesign je samostatný úkol). Výsledky a odchylky se zapíší do `docs/DECISIONS.md`.
+
+**Výsledek (2026-11-12):** pásmo výher plní Stonehorn, Nightglaive a Mistwarden; Serpent Shaman, Redcleaver a Tidecaller vyhrávají častěji (14–17 z 20), Sparkshot nevyhrává. Plný kit má autopilot už ve fázi 7–9 a vyhrává na úrovni 49–50 (cíl z oddílu 5 byl 12–14 a 35–45). Ostatní cíle platí. Podrobnosti a otevřené body: `docs/DECISIONS.md`, oddíl Phase 2b-3.
 
 ## 9. Dopad na kód
 

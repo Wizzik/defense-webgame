@@ -14,7 +14,8 @@
 # heal: design value. The map's Priest uses the default WC3 Heal (25 hp for mana);
 #   8 = 25 x 0.3, the same factor scaling.yaml gives enemy hp.
 # boss: a boss of phase 2b-3: a variant of a map unit with its own name. The hp multiplier is the target hp
-#   (12 000, 20 000, 30 000, 60 000) divided by the generated hp of the source.
+#   (12 000, 20 000, 30 000 and 257 000 for the final boss, tuned up from 60 000 so the last fight takes 40-90 s)
+#   divided by the generated hp of the source.
 # model: id of the enemy type whose model the type is drawn with.
 # slam: design value (sim/enemy-slam.ts). The cooldown range is the map's Thunder Clap of the final golems (7-15 s).
 
@@ -110,7 +111,7 @@
   source: hkni
   mapName: Knight
   name: { en: Dread Regent, cs: Hrůzný regent }
-  multipliers: { hp: 93.5, collision: 3, damage: 1.5, moveSpeed: 0.8 }
+  multipliers: { hp: 400, collision: 3, damage: 1.5, moveSpeed: 0.8 }
   behavior: charge
   xp: 1
   charge: { minRange: 300, maxRange: 700, windupSeconds: 0.5, speedMultiplier: 2.5, damageMultiplier: 1.5, distance: 900, cooldownSeconds: 6 }

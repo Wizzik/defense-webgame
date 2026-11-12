@@ -61,7 +61,9 @@ describe("summaries of the full run", () => {
   it("a summary lists boss kill times", () => {
     const s = playBot(gameData(), 1, 260, "stonehorn", false, 6);
     expect(s.bosses[0]).toMatchObject({ id: "iron-marshal", spawnSeconds: 250 });
-    expect(s.phaseXp).toHaveLength(6);
+    // the run starts in phase 6, so the phases before it show the XP the start gave
+    expect(s.phaseXp.length).toBeGreaterThanOrEqual(6);
+    expect(new Set(s.phaseXp.slice(0, 6)).size).toBe(1);
     const runs = [
       summary({ bosses: [{ id: "iron-marshal", spawnSeconds: 250, killSeconds: 270 }, { id: "dread-regent", spawnSeconds: 1000, killSeconds: 1040 }] }),
       summary({ bosses: [{ id: "iron-marshal", spawnSeconds: 250, killSeconds: 290 }, { id: "dread-regent", spawnSeconds: 1000, killSeconds: 1090 }], seconds: 1090, enraged: true }),

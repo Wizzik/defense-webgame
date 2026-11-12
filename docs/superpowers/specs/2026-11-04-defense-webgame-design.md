@@ -47,7 +47,8 @@ Hra je **veřejná, zdarma a postavená jako čistý remake**:
 - **Bossové:**
   - minibossové na začátku fází 6, 11 a 16 (4:10, 8:20, 12:30);
   - finální boss v 16:40; běžný tok nepřátel mezitím pokračuje, jen slabší.
-  - Ve 20:00 finální boss zesílí (enrage), aby běh nešel natahovat.
+  - 200 s po svém příchodu (v běžném běhu ve 20:00) finální boss zesílí (enrage), aby běh nešel natahovat.
+  - Ladicí `?duration` posouvá jen příchod finálního bosse; fáze, nápory a minibossové drží své časy.
 - **Výhra:** padne finální boss.
 - **Prohra:** padne hrad, nebo zemře hrdina a nemá oživení (perk nebo item).
 - **Pauza:** hra se zastaví jen při level-upu (výběr karty) a v menu.

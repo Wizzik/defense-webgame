@@ -2,6 +2,30 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Phase 2b-3: the full run with a boss (2026-11-12, the plan's and Claude's choices unless Petr is named)
+
+- Scope (Petr, 2026-11-12): 20 phases (16:40) with the six enemy types, five elite rushes, three minibosses, a final boss with an enrage; the run is won when the final boss falls. Factions, difficulties and the minimap come later.
+- Where the plan sharpened the spec (the spec now says the same):
+  - A boss is sized by `collision` (80 for minibosses, 96 for the final boss), because the client scales a model by its collision; a "scale 2.5" would have made a small boss of the chaplain.
+  - `?duration` and `RunOptions.durationSeconds` move only the arrival of the final boss. Phases and timed events keep their times; tests that need a fast end call `debug.killBoss()`. `?duration` is 5-1200.
+  - The enrage counts from the arrival of the final boss (`finale.enrageAfterSeconds: 200`, 20:00 in a normal run), not from the start of the run.
+  - `?phase=N` gives the hero the XP of the hand-filled table `rules.debug.phaseXp`, measured with `sim:run --phase-xp`.
+- Other choices made while building it:
+  - In the finale the spawner uses the table of the last phase whatever the clock says, at `finale.packScale` of the pack size.
+  - `debug.spawnEach()` spawns the six common types only; bosses come by the timeline (`?phase=6`, `11`, `16`, `21`).
+  - Only the next pending rush is announced. Two rushes closer than `rushWarningSeconds` would leave the second without a warning (the data has none).
+  - The autopilot leaves a slam circle (with the dash when it is ready) and in the finale goes for the final boss, ignoring other threats.
+  - On a win the end screen shows "Final boss fell at" in place of the time line.
+- Balance, tuned in 10 rounds on seeds 1-20 with `npm run sim:run -- --hero all --seeds 1-20` (the plan allowed 12; the last three rounds tried a slower XP curve and were dropped, see the open points):
+  - Start of the phase (the plan's first numbers): every hero but the Gravecaller lost between 2:00 and 8:00, 2 wins in 140 runs.
+  - Final values: `xpStep` 9 (was 8 in the 5-minute run; the plan's 14 lost every run early), castle hp 58 000 (was 14 000 for 5 minutes), first rush 2 captains + 3 lancers, phase 4 one pack of 9-13, phase 5 packs of 7-10, phases 6-8 packs of 8-12, `finale.packScale` 0.35, final boss hp 257 000 (multiplier 400; the spec's 60 000 fell in 11-26 s).
+  - Results on seeds 1-20, wins of 20 (seeds 21-40 in brackets, not tuned on): Stonehorn 10 (6), Nightglaive 12 (11), Serpent Shaman 17 (19), Mistwarden 7 (8), Sparkshot 0 (1), Redcleaver 15 (16), Tidecaller 14 (8), Gravecaller 20 (20, outside the bands).
+  - Met: an idle run loses by 3:27 for every hero in the bands (Gravecaller 4:27); every miniboss falls in a median of 12-48 s (target 45: the Serpent Shaman's Gunmaster takes 48 s); the final fight takes a median of 41-52 s (Mistwarden 98 s) and no run reached the enrage; the castle of the won runs ends at 21-57 % on average; no hero has more than half of its losses in one two-minute window on seeds 1-20.
+  - **Open 1:** the win band of 6-12 holds for Stonehorn, Nightglaive and Mistwarden. Serpent Shaman, Redcleaver and Tidecaller win more (14-17), Sparkshot never wins: it reaches the finale in most runs with the castle almost gone and loses it within 30 s (a castle of 70 000 hp did not help). The spread between heroes is wider than the run-wide numbers can close; it needs work on the kits or on how the autopilot plays a ranged hero in the finale.
+  - **Open 2:** the autopilot has the full kit (4 spells x 5 levels) in phases 7-9, not 12-14, and wins at level 49-50, not 35-45. `xpStep` 11 with smaller packs brought the level to 41-44 and the kit to phases 8-11, but the heroes then died between 2:00 and 6:00 (Stonehorn 0-3 wins, Tidecaller 2-4). A slower curve needs the early phases retuned with it.
+  - **Open 3:** the runs are chaotic: between seeds 1-20 and 21-40 the Stonehorn moves from 10 to 6 wins and the Tidecaller from 14 to 8. Read a difference of 3-4 wins of 20 as noise.
+  - CI guards only the shape of a run on seeds 1-3 a hero (`sim/bot.test.ts`): it ends within 1400 s by a loss or by the fall of the final boss, and an idle player loses within 240 s (Gravecaller 300 s).
+
 ## Visual pass A (2026-11-11, the plan's choices, not Petr's)
 
 - Models come from pinned CC0 KayKit packs (Kay Lousberg); heroes are five adventurer bodies with different weapons and colours, enemies are six skeleton types, the environment is the castle set and eight tree and rock models. Built by `tools/assets-build/`; the pipeline has no KTX2 and no meshopt (textures stay PNG inside the GLB, `simplify` replaces meshopt), see spec section 6.
