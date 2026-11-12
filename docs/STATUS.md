@@ -2,11 +2,12 @@
 
 Updated 2026-11-12 (the elite and boss threat pass is on its branch and waits for Petr's merge and playtest; phase 2b-3 is merged). Read this first when you resume work.
 
-## Elite and boss threat: done on branch `elite-boss-threat`, PR open, waits for Petr
+## Elite and boss threat: done on branch `elite-boss-threat`, PR #11 open, waits for Petr
 
 - Why: Petr's playtest of 2b-3 (elites too weak, running away kills everything, bosses cannot reach or catch the hero). Spec: `docs/superpowers/specs/2026-11-12-elite-boss-threat-design.md`; numbers and the balance table: `docs/DECISIONS.md`, section Elite and boss threat.
 - What it brings: elites hunt the hero and charge; minibosses hunt the hero; every boss strikes from afar with a 1 s warning circle on the hero (three of them leap into it, the Gunmaster shoots). `npm run check`, the build and the e2e project `webgl2-fallback` pass.
 - What Petr checks in the playtest: is running away still safe; is 1 s enough to leave the circle; are the elites and the first boss (4:10) too hard now; do minibosses still die too fast (about 20 s for the autopilot, their hp did not change). Quick links: `?debug=1&phase=6` (first miniboss), `&phase=4` (elite rush after 30 s), `&phase=21` (finale).
+- Next: Petr merges PR #11 (https://github.com/Wizzik/defense-webgame/pull/11) and plays.
 - Open: the Tidecaller fell from 14 to 2 autopilot wins of 20; Sparkshot still wins none.
 
 ## Next (agreed with Petr 2026-11-12, each with its own design and plan, in new chats)
