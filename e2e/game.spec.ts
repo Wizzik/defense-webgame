@@ -34,6 +34,18 @@ async function waitForScreen(page: Page, screen: Screen, timeout = 90_000): Prom
   await page.waitForFunction((s) => window.__game?.screen === s, screen, { timeout, polling: 250 });
 }
 
+/**
+ * Picks the first level-up card. `window.__game.screen` can lag a slow frame behind the DOM, so the
+ * card may already be gone when the click starts: a short timeout lets the caller's loop read again.
+ */
+async function pickCard(page: Page): Promise<void> {
+  await page
+    .locator("button.card")
+    .first()
+    .click({ timeout: 2_000 })
+    .catch(() => undefined);
+}
+
 test("menu starts a run on the available backend", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&lang=en");
   const start = page.locator("#start");
@@ -201,7 +213,7 @@ test("the menu lists eight heroes and starts each of the new ones", async ({ pag
     const deadline = Date.now() + 60_000;
     let screen = await page.evaluate(() => window.__game?.screen);
     while (screen !== "won" && screen !== "lost" && Date.now() < deadline) {
-      if (screen === "levelUp") await page.locator("button.card").first().click();
+      if (screen === "levelUp") await pickCard(page);
       await page.waitForTimeout(200);
       screen = await page.evaluate(() => window.__game?.screen);
     }
@@ -231,7 +243,7 @@ test("every hero plays without errors", async ({ page }, testInfo) => {
     );
     // no screenshot of the level-up overlay: pick a card first
     while ((await page.evaluate(() => window.__game?.screen)) === "levelUp") {
-      await page.locator("button.card").first().click();
+      await pickCard(page);
       await page.waitForTimeout(100);
     }
     await testInfo.attach(`hero-${hero}-${testInfo.project.name}`, {
@@ -242,7 +254,7 @@ test("every hero plays without errors", async ({ page }, testInfo) => {
     const deadline = Date.now() + 60_000;
     let screen = await page.evaluate(() => window.__game?.screen);
     while (screen !== "won" && screen !== "lost" && Date.now() < deadline) {
-      if (screen === "levelUp") await page.locator("button.card").first().click();
+      if (screen === "levelUp") await pickCard(page);
       await page.waitForTimeout(250);
       screen = await page.evaluate(() => window.__game?.screen);
     }
@@ -264,7 +276,7 @@ test("every enemy type renders without errors", async ({ page }, testInfo) => {
   // the row walks to the hero: shooters fire and die next to it, the chaplain heals
   await page.waitForTimeout(1_500);
   while ((await page.evaluate(() => window.__game?.screen)) === "levelUp") {
-    await page.locator("button.card").first().click();
+    await pickCard(page);
     await page.waitForTimeout(100);
   }
   await testInfo.attach(`enemy-types-${testInfo.project.name}`, {
