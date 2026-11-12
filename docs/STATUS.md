@@ -1,12 +1,20 @@
 # Status
 
-Updated 2026-11-12 (Visual pass A is merged and live; the ward rework is on branch `ward-rework`, PR #9). Read this first when you resume work.
+Updated 2026-11-12 (Visual pass A and the ward rework are merged and live; the spec of phase 2b-3 waits for Petr's review). Read this first when you resume work.
 
-## Ward rework (2026-11-12): PR #9 on branch `ward-rework`, not merged
+## Phase 2b-3 (full run with a boss): spec written, not planned yet
+
+- Petr chose the scope on 2026-11-12: 20 phases (16:40) with the six enemy types we have, elite rushes, 3 minibosses, a final boss with an enrage, the win by killing the boss. Bosses reuse the behaviours we have plus one new attack (a slam with a warning circle). Factions, difficulties and the minimap come in a later plan.
+- Spec: `docs/superpowers/specs/2026-11-12-phase-2b3-full-run-boss-design.md`, on branch `phase-2b3-full-run`. Petr approved the design in chat; **he has not approved the written spec yet.**
+- Next: after his approval write the plan (`docs/superpowers/plans/`), then execute it in a new chat.
+
+## Ward rework: merged (PR #9, 2026-11-12)
+
+- Merged as `5207271`, Pages deployed.
 
 - Petr's decision after the first playtest of visual pass A: Serpent Totem and Wisp Ward both raise 1, 2, 2, 3, 3 wards a cast, at most 2, 4, 4, 6, 6 alive, and the totem casts every 4.95 s on every level. Details and numbers: `docs/DECISIONS.md` (Product, 2026-11-12).
 - Serpent Totem damage went 50 -> 60 to keep the Serpent Shaman in the balance bands (Claude's tuning; Petr may change it). The Serpent Shaman is no longer an open balance gap; the Gravecaller still is.
-- What Petr checks: both heroes on the live game after the merge. Do the wards follow the fight well enough, or should they move with the hero (that needs new simulation code)?
+- What Petr checks: both heroes on the live game. Do the wards follow the fight well enough, or should they move with the hero (that needs new simulation code)?
 
 ## Visual pass A: merged (PR #8, 2026-11-12)
 
