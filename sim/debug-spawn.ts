@@ -6,14 +6,21 @@ import { timeScale } from "./spawner";
 const SPACING = 300;
 const NORTH = 600;
 
-/** Debug: one hunter of every enemy type in a row north of the hero. A full store skips the rest. */
+/**
+ * Debug: one hunter of every common enemy type in a row north of the hero. A full store skips the rest.
+ * Bosses are left out (they come by the timeline; `?phase` starts near one).
+ */
 export function debugSpawnEach(run: Run): void {
   const { enemies: store, hero } = run;
   const defs = run.data.enemies;
   const scale = timeScale(run.data.rules, run.tick);
+  let common = 0;
+  for (let type = 0; type < defs.length; type++) if (run.isBoss[type] === 0) common++;
+  let k = 0;
   for (let type = 0; type < defs.length; type++) {
+    if (run.isBoss[type] === 1) continue;
     if (store.aliveCount >= store.capacity) return;
-    const x = hero.x + (type - (defs.length - 1) / 2) * SPACING;
+    const x = hero.x + (k++ - (common - 1) / 2) * SPACING;
     store.spawn(type, Role.Hunter, x, hero.y + NORTH, defs[type].hp * scale, scale, run.tick);
     run.stats.spawned++;
   }

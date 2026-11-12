@@ -8,6 +8,7 @@ export { countEnemiesWithin, densestCluster, nearestEnemy } from "./abilities/ta
 export type { AbilitySlot } from "./abilities/slots";
 export { botCard, botInput } from "./bot";
 export { chooseCard, openOffer } from "./cards";
+export { killEnemy } from "./combat";
 export type { Card, CardOffer } from "./cards";
 export { debugSpawnEach } from "./debug-spawn";
 export { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";

@@ -304,6 +304,8 @@ function createUi(
     }
   });
   const hud = new Hud(root);
+  // the HUD reads the events of every step for its news line
+  session.views.push({ update: () => {}, onEvents: (run) => hud.onEvents(run, lang), dispose: () => {} });
   const pointer = new CastlePointer(root);
   const cards = new Cards(root, (index) => session.setCard(index));
   const end = new EndScreen(root, () => {

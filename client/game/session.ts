@@ -54,7 +54,10 @@ export class Session {
   }
 
   start(seed: number, paused = false, hero?: string): void {
-    this.run = createRun(this.data, { seed, hero, durationSeconds: this.params.durationSeconds });
+    const { startPhase, durationSeconds } = this.params;
+    // a phase the data does not have is ignored: the run starts normally
+    const phase = startPhase !== undefined && startPhase <= this.data.rules.phases.length + 1 ? startPhase : undefined;
+    this.run = createRun(this.data, { seed, hero, durationSeconds, startPhase: phase });
     this.seed = seed;
     this.paused = paused;
     this.pendingCard = -1;

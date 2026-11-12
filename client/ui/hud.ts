@@ -1,7 +1,11 @@
-import { TICKS_PER_SECOND, type Run, ULTIMATE_SLOT, xpToNext } from "../../sim";
+import { EventKind, TICKS_PER_SECOND, type Run, ULTIMATE_SLOT, xpToNext } from "../../sim";
+import { Announcer } from "./announcer";
+import { BossBar } from "./boss-bar";
 import { el, formatTime, setText } from "./dom";
 import { type Lang, t } from "./i18n";
 
+/** How long the news of a boss or of an enrage stays (a rush stays for its warning time). */
+const ANNOUNCE_TICKS = 4 * TICKS_PER_SECOND;
 /** The castle counts as under attack for this long after a hit. */
 const ATTACK_BANNER_TICKS = 2 * TICKS_PER_SECOND;
 
@@ -42,7 +46,7 @@ function cell(parent: HTMLElement, extra: string, key?: string, withMode = false
   return { root, name, state, fill, mode };
 }
 
-/** In-run display: hero, time and phase, castle and kills, ability bar, castle-under-attack banner. */
+/** In-run display: hero, time and phase, news line, boss bar, castle and kills, ability bar, castle-under-attack banner. */
 export class Hud {
   private readonly root: HTMLElement;
   private readonly heroHp: Bar;
@@ -55,6 +59,10 @@ export class Hud {
   private readonly dash: Cell;
   private readonly banner: HTMLElement;
   private readonly muteKey: HTMLElement;
+  private readonly announce: HTMLElement;
+  private readonly announcer = new Announcer();
+  private readonly bossBar: BossBar;
+  private lastRun: Run | null = null;
 
   constructor(parent: HTMLElement) {
     this.root = el("div", "hud", parent);
@@ -64,6 +72,10 @@ export class Hud {
     const center = el("div", "hud-center", this.root);
     this.time = el("div", "hud-time", center);
     this.phase = el("div", "hud-phase", center);
+    this.announce = el("div", "hud-announce", center);
+    this.announce.id = "announce";
+    this.announce.hidden = true;
+    this.bossBar = new BossBar(center);
     this.banner = el("div", "hud-banner", center);
     const right = el("div", "hud-corner hud-right", this.root);
     this.castle = bar(right, "castle");
@@ -81,7 +93,34 @@ export class Hud {
     this.root.hidden = !visible;
   }
 
+  /** After every simulation step: ages the news line and reads the events that make news. */
+  onEvents(run: Run, lang: Lang): void {
+    this.sync(run);
+    this.announcer.step();
+    const { events } = run;
+    for (let i = 0; i < events.count; i++) {
+      const kind = events.kind[i];
+      if (kind === EventKind.RushWarning) {
+        this.announcer.push(t(lang, "announce.rush"), Math.round(events.value[i]! * TICKS_PER_SECOND));
+      } else if (kind === EventKind.BossSpawn) {
+        const name = run.data.enemies[events.value[i]!]!.name[lang];
+        this.announcer.push(t(lang, "announce.boss", { name }), ANNOUNCE_TICKS);
+      } else if (kind === EventKind.Enrage) {
+        const name = run.data.enemies[run.finalBossType]!.name[lang];
+        this.announcer.push(t(lang, "announce.enrage", { name }), ANNOUNCE_TICKS);
+      }
+    }
+  }
+
+  /** A new run starts with no news. */
+  private sync(run: Run): void {
+    if (run === this.lastRun) return;
+    this.lastRun = run;
+    this.announcer.clear();
+  }
+
   update(run: Run, lang: Lang): void {
+    this.sync(run);
     const { hero, castle, data } = run;
     setText(this.heroHp.label, `${Math.max(0, Math.ceil(hero.hp))} / ${Math.round(hero.stats.maxHp)}`);
     this.heroHp.fill.style.width = fraction(hero.hp, hero.stats.maxHp);
@@ -91,7 +130,14 @@ export class Hud {
 
     const total = Math.round(run.durationTicks / TICKS_PER_SECOND);
     setText(this.time, `${formatTime(run.timeSeconds)} / ${formatTime(total)}`);
-    setText(this.phase, t(lang, "hud.phase", { n: run.phaseIndex + 1, total: data.rules.phases.length }));
+    setText(
+      this.phase,
+      run.inFinale ? t(lang, "hud.finale") : t(lang, "hud.phase", { n: run.phaseIndex + 1, total: data.rules.phases.length }),
+    );
+    const news = this.announcer.text;
+    setText(this.announce, news);
+    this.announce.hidden = news === "";
+    this.bossBar.update(run, lang);
     const attacked = castle.lastHitTick >= 0 && run.tick - castle.lastHitTick <= ATTACK_BANNER_TICKS;
     setText(this.banner, attacked ? t(lang, "hud.castleAttacked") : "");
     this.banner.hidden = !attacked;
