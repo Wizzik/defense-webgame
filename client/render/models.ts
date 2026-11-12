@@ -5,6 +5,11 @@ export function modelUrl(kind: "heroes" | "enemies" | "env", id: string): string
   return `${import.meta.env.BASE_URL}models/${kind}/${id}.glb`;
 }
 
+/** Id of the model an enemy type is drawn with: a boss borrows the model of a common type. */
+export function enemyModelId(enemy: { id: string; model?: string }): string {
+  return enemy.model ?? enemy.id;
+}
+
 /**
  * One pending or finished load per URL. A failed load is tried once more (it may be a network
  * blip, spec 7); when that fails too, the URL leaves the cache so a later `get` tries again.

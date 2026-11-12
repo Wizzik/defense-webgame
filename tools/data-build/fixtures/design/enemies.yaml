@@ -5,3 +5,14 @@
   name: { en: Grunt, cs: Pěšák }
   behavior: siege
   xp: 1
+
+- id: warlord
+  source: U001
+  mapName: Test Unit
+  name: { en: Warlord, cs: Vojevůdce }
+  multipliers: { hp: 10, collision: 2.5, range: 1.5 }
+  behavior: siege
+  xp: 50
+  boss: true
+  model: grunt
+  slam: { radius: 350, damage: 120, windupSeconds: 1, cooldownSeconds: [7, 15] }

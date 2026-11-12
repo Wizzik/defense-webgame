@@ -26,8 +26,8 @@ import { SunShadow, shadowsEnabled } from "./render/shadows";
 import { createLighting } from "./render/lighting";
 import { createArena } from "./render/scene";
 import { PROP_MODELS } from "./render/props";
-import { ModelCache, modelUrl } from "./render/models";
-import { bakeVat } from "./render/vat";
+import { enemyModelId, ModelCache, modelUrl } from "./render/models";
+import { type BakedVat, bakeVat } from "./render/vat";
 import { Cards } from "./ui/cards";
 import { CastlePointer } from "./ui/castle-pointer";
 import { EndScreen } from "./ui/end-screen";
@@ -127,7 +127,7 @@ async function start(): Promise<void> {
   const models = new ModelCache();
   const env = (id: string) => models.get(modelUrl("env", id));
   const [enemyModels, castle, tower, flag, props] = await Promise.all([
-    Promise.all(data.enemies.map((enemy) => models.get(modelUrl("enemies", enemy.id)))),
+    Promise.all(data.enemies.map((enemy) => models.get(modelUrl("enemies", enemyModelId(enemy))))),
     env("castle"),
     env("tower"),
     env("flag"),
@@ -146,8 +146,18 @@ async function start(): Promise<void> {
   session.seed = params.seed;
   const heroView = new HeroView();
   scene.add(heroView.object);
+  // one bake per model: a type that borrows a model shares its texture and gets its own copy of the geometry
+  const bakedByModel = new Map<string, BakedVat>();
+  const vats = data.enemies.map((enemy, type) => {
+    const id = enemyModelId(enemy);
+    const baked = bakedByModel.get(id);
+    if (baked) return { ...baked, geometry: baked.geometry.clone() };
+    const vat = bakeVat(enemyModels[type], [WALK_CLIP, PUNCH_CLIP, IDLE_CLIP], VAT_FPS);
+    bakedByModel.set(id, vat);
+    return vat;
+  });
   const crowd = new EnemyCrowd(
-    enemyModels.map((model) => bakeVat(model, [WALK_CLIP, PUNCH_CLIP, IDLE_CLIP], VAT_FPS)),
+    vats,
     data.rules.enemies.maxAlive,
     tintTable(data.enemies),
   );

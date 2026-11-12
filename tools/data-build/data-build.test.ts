@@ -125,7 +125,7 @@ describe("data-build", () => {
       },
     ]);
     expect(data.abilities.map((a) => a.id)).toEqual(["pulse", "focus", "spark", "echo"]);
-    expect(data.enemies.map((e) => e.id)).toEqual(["grunt"]);
+    expect(data.enemies.map((e) => e.id)).toEqual(["grunt", "warlord"]);
     expect(data.abilities[2]).toStrictEqual({
       id: "spark",
       name: { en: "Spark", cs: "Jiskra" },
@@ -238,6 +238,18 @@ describe("data-build", () => {
     expect(enemy.charge).toStrictEqual(charge);
     expect(enemy.aura).toStrictEqual({ radius: 400, moveSpeed: 0.25, damage: 0.25 });
     expect(Object.keys(enemy).slice(-4)).toEqual(["xp", "heal", "charge", "aura"]);
+  });
+
+  it("a boss entry carries boss, model, slam and a scaled range", () => {
+    const boss = buildGameData(mapExport(), unscaledDesign(), "test").enemies[1];
+    expect(boss.id).toBe("warlord");
+    expect(boss.boss).toBe(true);
+    expect(boss.model).toBe("grunt");
+    expect(boss.slam).toStrictEqual({ radius: 350, damage: 120, windupSeconds: 1, cooldownSeconds: [7, 15] });
+    expect(boss.attack.range).toBe(135);
+    expect(boss.hp).toBe(4200);
+    expect(Object.keys(boss).slice(-4)).toEqual(["xp", "boss", "model", "slam"]);
+    expect("boss" in buildGameData(mapExport(), design(), "test").enemies[0]).toBe(false);
   });
 
   it("fails with readable error when enemy source is missing", () => {

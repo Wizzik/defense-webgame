@@ -3,12 +3,23 @@
     "hero": "stonehorn"
   },
   "run": {
-    "durationSeconds": 300,
+    "durationSeconds": 1000,
     "phaseSeconds": 50,
     "firstPackSeconds": 2,
     "timeScaling": {
       "seconds": 1200,
       "cap": 2
+    },
+    "rushWarningSeconds": 7,
+    "finale": {
+      "boss": "dread-regent",
+      "packScale": 0.5,
+      "enrageAfterSeconds": 200,
+      "enrage": {
+        "damage": 2,
+        "moveSpeed": 1.3,
+        "slamCooldown": 0.5
+      }
     }
   },
   "arena": {
@@ -58,7 +69,8 @@
       "ability": 90,
       "seconds": 0.15
     },
-    "elite": "captain"
+    "elite": "captain",
+    "bossStunScale": 0.25
   },
   "phases": [
     {
@@ -103,7 +115,7 @@
         "max": 12,
         "everySeconds": 6
       },
-      "packs": 2,
+      "packs": 1,
       "hunterShare": 0.3,
       "elites": 1
     },
@@ -114,6 +126,40 @@
         "musketeer": 3,
         "chaplain": 2,
         "lancer": 2
+      },
+      "pack": {
+        "min": 8,
+        "max": 12,
+        "everySeconds": 6
+      },
+      "packs": 2,
+      "hunterShare": 0.3,
+      "elites": 1
+    },
+    {
+      "mix": {
+        "shieldbearer": 4,
+        "scout": 2,
+        "musketeer": 3,
+        "chaplain": 2,
+        "lancer": 3
+      },
+      "pack": {
+        "min": 9,
+        "max": 13,
+        "everySeconds": 6
+      },
+      "packs": 2,
+      "hunterShare": 0.35,
+      "elites": 1
+    },
+    {
+      "mix": {
+        "shieldbearer": 4,
+        "scout": 3,
+        "musketeer": 3,
+        "chaplain": 2,
+        "lancer": 3
       },
       "pack": {
         "min": 10,
@@ -127,7 +173,58 @@
     {
       "mix": {
         "shieldbearer": 4,
-        "scout": 2,
+        "scout": 3,
+        "musketeer": 3,
+        "chaplain": 2,
+        "lancer": 3
+      },
+      "pack": {
+        "min": 10,
+        "max": 14,
+        "everySeconds": 6
+      },
+      "packs": 2,
+      "hunterShare": 0.35,
+      "elites": 1
+    },
+    {
+      "mix": {
+        "shieldbearer": 4,
+        "scout": 3,
+        "musketeer": 3,
+        "chaplain": 2,
+        "lancer": 3
+      },
+      "pack": {
+        "min": 10,
+        "max": 14,
+        "everySeconds": 6
+      },
+      "packs": 2,
+      "hunterShare": 0.35,
+      "elites": 1
+    },
+    {
+      "mix": {
+        "shieldbearer": 3,
+        "scout": 3,
+        "musketeer": 3,
+        "chaplain": 2,
+        "lancer": 3
+      },
+      "pack": {
+        "min": 9,
+        "max": 13,
+        "everySeconds": 5
+      },
+      "packs": 2,
+      "hunterShare": 0.35,
+      "elites": 2
+    },
+    {
+      "mix": {
+        "shieldbearer": 3,
+        "scout": 3,
         "musketeer": 3,
         "chaplain": 2,
         "lancer": 3
@@ -154,14 +251,248 @@
         "max": 15,
         "everySeconds": 5
       },
+      "packs": 2,
+      "hunterShare": 0.4,
+      "elites": 2
+    },
+    {
+      "mix": {
+        "shieldbearer": 3,
+        "scout": 3,
+        "musketeer": 3,
+        "chaplain": 2,
+        "lancer": 3
+      },
+      "pack": {
+        "min": 11,
+        "max": 15,
+        "everySeconds": 5
+      },
+      "packs": 2,
+      "hunterShare": 0.4,
+      "elites": 2
+    },
+    {
+      "mix": {
+        "shieldbearer": 3,
+        "scout": 3,
+        "musketeer": 3,
+        "chaplain": 2,
+        "lancer": 3
+      },
+      "pack": {
+        "min": 11,
+        "max": 15,
+        "everySeconds": 5
+      },
+      "packs": 2,
+      "hunterShare": 0.4,
+      "elites": 2
+    },
+    {
+      "mix": {
+        "shieldbearer": 3,
+        "scout": 3,
+        "musketeer": 4,
+        "chaplain": 2,
+        "lancer": 3
+      },
+      "pack": {
+        "min": 10,
+        "max": 14,
+        "everySeconds": 5
+      },
       "packs": 3,
       "hunterShare": 0.4,
       "elites": 2
+    },
+    {
+      "mix": {
+        "shieldbearer": 3,
+        "scout": 3,
+        "musketeer": 4,
+        "chaplain": 2,
+        "lancer": 3
+      },
+      "pack": {
+        "min": 10,
+        "max": 14,
+        "everySeconds": 5
+      },
+      "packs": 3,
+      "hunterShare": 0.4,
+      "elites": 2
+    },
+    {
+      "mix": {
+        "shieldbearer": 3,
+        "scout": 3,
+        "musketeer": 4,
+        "chaplain": 2,
+        "lancer": 4
+      },
+      "pack": {
+        "min": 11,
+        "max": 15,
+        "everySeconds": 5
+      },
+      "packs": 3,
+      "hunterShare": 0.4,
+      "elites": 2
+    },
+    {
+      "mix": {
+        "shieldbearer": 3,
+        "scout": 3,
+        "musketeer": 4,
+        "chaplain": 2,
+        "lancer": 4
+      },
+      "pack": {
+        "min": 11,
+        "max": 15,
+        "everySeconds": 5
+      },
+      "packs": 3,
+      "hunterShare": 0.4,
+      "elites": 2
+    },
+    {
+      "mix": {
+        "shieldbearer": 3,
+        "scout": 3,
+        "musketeer": 4,
+        "chaplain": 2,
+        "lancer": 4
+      },
+      "pack": {
+        "min": 11,
+        "max": 15,
+        "everySeconds": 5
+      },
+      "packs": 3,
+      "hunterShare": 0.4,
+      "elites": 2
+    },
+    {
+      "mix": {
+        "shieldbearer": 2,
+        "scout": 3,
+        "musketeer": 4,
+        "chaplain": 2,
+        "lancer": 4
+      },
+      "pack": {
+        "min": 12,
+        "max": 16,
+        "everySeconds": 5
+      },
+      "packs": 3,
+      "hunterShare": 0.4,
+      "elites": 3
+    },
+    {
+      "mix": {
+        "shieldbearer": 2,
+        "scout": 3,
+        "musketeer": 4,
+        "chaplain": 2,
+        "lancer": 4
+      },
+      "pack": {
+        "min": 12,
+        "max": 16,
+        "everySeconds": 5
+      },
+      "packs": 3,
+      "hunterShare": 0.4,
+      "elites": 3
     }
   ],
+  "events": [
+    {
+      "atSeconds": 180,
+      "kind": "rush",
+      "units": {
+        "captain": 3,
+        "lancer": 4
+      }
+    },
+    {
+      "atSeconds": 250,
+      "kind": "boss",
+      "enemy": "iron-marshal"
+    },
+    {
+      "atSeconds": 360,
+      "kind": "rush",
+      "units": {
+        "captain": 4,
+        "lancer": 6
+      }
+    },
+    {
+      "atSeconds": 500,
+      "kind": "boss",
+      "enemy": "pale-abbot"
+    },
+    {
+      "atSeconds": 540,
+      "kind": "rush",
+      "units": {
+        "captain": 5,
+        "lancer": 8
+      }
+    },
+    {
+      "atSeconds": 720,
+      "kind": "rush",
+      "units": {
+        "captain": 6,
+        "lancer": 10
+      }
+    },
+    {
+      "atSeconds": 750,
+      "kind": "boss",
+      "enemy": "gunmaster"
+    },
+    {
+      "atSeconds": 900,
+      "kind": "rush",
+      "units": {
+        "captain": 8,
+        "lancer": 12
+      }
+    }
+  ],
+  "debug": {
+    "phaseXp": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
   "progression": {
     "xpFirst": 10,
-    "xpStep": 8,
+    "xpStep": 14,
     "magnetRadius": 300,
     "crystalSpeed": 900,
     "pickupRadius": 56,

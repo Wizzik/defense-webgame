@@ -1,6 +1,7 @@
 import type { GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ModelCache } from "./models";
+import enemies from "../../data/generated/enemies.json";
+import { enemyModelId, ModelCache } from "./models";
 
 const model = (name: string) => ({ name }) as unknown as GLTF;
 
@@ -37,5 +38,16 @@ describe("ModelCache", () => {
     load.mockResolvedValueOnce(model("a"));
     await expect(cache.get("a.glb")).resolves.toEqual(model("a"));
     expect(load).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("enemyModelId", () => {
+  it("a boss uses the model of its source type", () => {
+    const ids = Object.fromEntries(enemies.map((e) => [e.id, enemyModelId(e)]));
+    expect(ids["lancer"]).toBe("lancer");
+    expect(ids["iron-marshal"]).toBe("lancer");
+    expect(ids["pale-abbot"]).toBe("chaplain");
+    expect(ids["gunmaster"]).toBe("musketeer");
+    expect(ids["dread-regent"]).toBe("captain");
   });
 });
