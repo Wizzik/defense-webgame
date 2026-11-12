@@ -69,8 +69,9 @@
   source: hkni
   mapName: Knight
   name: { en: Captain, cs: Kapitán }
-  # elite-boss-threat (2026-11-12): the elite hunts the hero, keeps up with it and charges (hp 3 -> 6, damage 0.75 -> 1, moveSpeed 0.8 -> 1.1)
-  multipliers: { hp: 6, damage: 1, collision: 1.5, moveSpeed: 1.1 }
+  # elite-boss-threat (2026-11-12): the elite hunts the hero and charges (hp 3 -> 5, moveSpeed 0.8 -> 1.0: a little slower
+  # than a hero on foot, the charge closes the gap). hp 6, damage 1 and moveSpeed 1.1 left the autopilot 1-3 wins of 20.
+  multipliers: { hp: 5, damage: 0.75, collision: 1.5, moveSpeed: 1.0 }
   behavior: charge
   hunter: true
   xp: 12

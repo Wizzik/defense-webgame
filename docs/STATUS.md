@@ -1,8 +1,20 @@
 # Status
 
-Updated 2026-11-12 (phase 2b-3, the full run with a boss, is built on its branch and waits for Petr's merge and playtest). Read this first when you resume work.
+Updated 2026-11-12 (the elite and boss threat pass is on its branch and waits for Petr's merge and playtest; phase 2b-3 is merged). Read this first when you resume work.
 
-## Phase 2b-3 (full run with a boss): done on branch `phase-2b3-full-run`, PR #10 open, waits for Petr
+## Elite and boss threat: done on branch `elite-boss-threat`, PR open, waits for Petr
+
+- Why: Petr's playtest of 2b-3 (elites too weak, running away kills everything, bosses cannot reach or catch the hero). Spec: `docs/superpowers/specs/2026-11-12-elite-boss-threat-design.md`; numbers and the balance table: `docs/DECISIONS.md`, section Elite and boss threat.
+- What it brings: elites hunt the hero and charge; minibosses hunt the hero; every boss strikes from afar with a 1 s warning circle on the hero (three of them leap into it, the Gunmaster shoots). `npm run check`, the build and the e2e project `webgl2-fallback` pass.
+- What Petr checks in the playtest: is running away still safe; is 1 s enough to leave the circle; are the elites and the first boss (4:10) too hard now; do minibosses still die too fast (about 20 s for the autopilot, their hp did not change). Quick links: `?debug=1&phase=6` (first miniboss), `&phase=4` (elite rush after 30 s), `&phase=21` (finale).
+- Open: the Tidecaller fell from 14 to 2 autopilot wins of 20; Sparkshot still wins none.
+
+## Next (agreed with Petr 2026-11-12, each with its own design and plan, in new chats)
+
+1. **Items in the run:** gold drops from enemies; chests lie on the map, the hero pays gold to open one and picks 1 of 3, and every next chest costs more (Petr chose chests on the map over a shop at the castle and over chests dropped by elites). This replaces the castle shop of the first spec (section 3.5).
+2. **Permanent gear** between runs, as in Azeroth Survivors (wow.aethus.pl): new against the first spec, which had only talents and perks between runs.
+
+## Phase 2b-3 (full run with a boss): merged (PR #10, 2026-11-12)
 
 - All 8 tasks of `docs/superpowers/plans/2026-11-12-phase-2b3-full-run-boss.md` are done (executed inline in one chat with one final review). `npm run check`, the build and the e2e project `webgl2-fallback` pass.
 - What it brings: a run of 20 phases (16:40), five elite rushes announced 7 s ahead, three minibosses (Iron Marshal 4:10, Pale Abbot 8:20, Gunmaster 12:30) and the final boss Dread Regent at 16:40 with an enrage 200 s later; the run is won when the final boss falls. Bosses slam the ground after a red warning circle. The HUD shows the phase, news and the boss's hp bar. `?debug=1&phase=N` starts at a phase.
@@ -14,7 +26,7 @@ Updated 2026-11-12 (phase 2b-3, the full run with a boss, is built on its branch
   - quick links: https://wizzik.github.io/defense-webgame/?debug=1&phase=6 (first miniboss at once), `&phase=4` (elite rush after 30 s), `&phase=21` (finale).
 - **Open for Petr 1 (balance spread):** on 20 seeds the autopilot wins 10 (Stonehorn), 12 (Nightglaive), 7 (Mistwarden), but 17 (Serpent Shaman), 15 (Redcleaver), 14 (Tidecaller) and 0 (Sparkshot: its castle is almost gone when the finale starts). The run-wide numbers cannot close this spread; it needs kit work or a look at how the autopilot plays a ranged hero in the finale. Gravecaller still wins everything.
 - **Open for Petr 2 (XP curve):** the full kit comes in phases 7-9 (the spec wanted 12-14) and a won run ends at level 49-50 (wanted 35-45). A slower curve made the heroes die between 2:00 and 6:00; it needs the early phases retuned with it. Numbers: `docs/DECISIONS.md`, section Phase 2b-3.
-- Next: Petr merges PR #10 (https://github.com/Wizzik/defense-webgame/pull/10) and plays. Then, in a new chat: the two open balance points, or the next plan (2c economy, or factions and difficulties).
+- Merged as `a684417`. The two open balance points stay open.
 
 ## Ward rework: merged (PR #9, 2026-11-12)
 
