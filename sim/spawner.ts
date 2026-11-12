@@ -20,7 +20,8 @@ export function timeScale(rules: Rules, tick: number): number {
  * `arena.spawn.radius` around the castle (the packs of one interval are spread evenly around it), its
  * own size and its own role; its members come all at once in a square around the pack's centre, clamped
  * to the arena. The elites of a phase come with the first pack of its first interval, ahead of the
- * others. At the cap a pack fills only the free slots and the rest is dropped.
+ * others. At the cap a pack fills only the free slots and the rest is dropped. In the finale the packs of the
+ * last phase come at `finale.packScale` of their size.
  * The order of the rng draws is part of the determinism.
  */
 export function spawnEnemies(run: Run): void {
@@ -36,12 +37,14 @@ export function spawnEnemies(run: Run): void {
   const elites = run.elitePhase !== phaseIndex ? phase.elites : 0;
   run.elitePhase = phaseIndex;
   const scale = timeScale(rules, run.tick);
+  const finale = run.inFinale;
   randomDirection(rng);
   const baseX = dirX;
   const baseY = dirY;
   for (let p = 0; p < phase.packs; p++) {
     rotatedDirection(baseX, baseY, p, phase.packs);
-    const size = phase.pack.min + Math.floor(rng.next() * (phase.pack.max - phase.pack.min + 1));
+    const rolled = phase.pack.min + Math.floor(rng.next() * (phase.pack.max - phase.pack.min + 1));
+    const size = finale ? Math.max(1, Math.round(rolled * rules.run.finale.packScale)) : rolled;
     const role = rng.next() < phase.hunterShare ? Role.Hunter : Role.Sieger;
     const cx = arena.castle.x + dirX * arena.spawn.radius;
     const cy = arena.castle.y + dirY * arena.spawn.radius;

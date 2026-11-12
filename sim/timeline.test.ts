@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { TICKS_PER_SECOND } from "./constants";
+import { killEnemy } from "./combat";
 import { Role } from "./enemies";
+import { updateEnemies } from "./enemy-ai";
 import { EventKind } from "./events";
 import { stateHash } from "./hash";
 import { NO_INPUT } from "./input";
 import { createRun, type Run } from "./run";
 import { timeScale } from "./spawner";
-import { updateTimeline } from "./timeline";
+import { spawnBoss, updateTimeline } from "./timeline";
+import { enemyRun } from "./testing/enemy-run";
 import { gameData } from "./testing/game-data";
 
 const newRun = (seed = 1) => createRun(gameData(), { seed, durationSeconds: 100000 });
@@ -174,5 +177,86 @@ describe("timeline", () => {
     expect(a.next).toBe(2);
     expect(play(7)).toEqual(a);
     expect(play(8).hash).not.toBe(a.hash);
+  });
+
+  describe("finale", () => {
+    /** No timed events, so only the finale speaks. */
+    const finaleRun = () => {
+      const data = gameData();
+      data.rules.events = [];
+      return createRun(data, { seed: 1, durationSeconds: 5 });
+    };
+
+    it("the final boss comes at the duration as a hunter", () => {
+      const run = finaleRun();
+      expect(at(run, 4.9)).toEqual([]);
+      expect(run.inFinale).toBe(false);
+      const came = at(run, 5);
+      const regent = typeOf(run, "dread-regent");
+      expect(run.finalBossType).toBe(regent);
+      expect(came.map((e) => [e.kind, e.value])).toEqual([[EventKind.BossSpawn, regent]]);
+      expect(run.finalBossSlot).toBe(came[0]!.a);
+      expect(run.enemies.role[run.finalBossSlot]).toBe(Role.Hunter);
+      expect(run.inFinale).toBe(true);
+      expect(at(run, 5 + 1 / TICKS_PER_SECOND)).toEqual([]);
+      expect(aliveOfType(run, regent)).toHaveLength(1);
+    });
+
+    it("the final boss enrages 200 s after it came", () => {
+      const run = finaleRun();
+      at(run, 5);
+      const slot = run.finalBossSlot;
+      const before = run.enemies.damageScale[slot]!;
+      expect(at(run, 204.9)).toEqual([]);
+      expect(run.enraged).toBe(false);
+      const seen = at(run, 205);
+      expect(seen.map((e) => [e.kind, e.a])).toEqual([[EventKind.Enrage, slot]]);
+      expect(run.enraged).toBe(true);
+      expect(run.enemies.damageScale[slot]).toBe(before * 2);
+      expect(run.slamCooldownScale).toBe(0.5);
+      expect(at(run, 205 + 1 / TICKS_PER_SECOND)).toEqual([]);
+      expect(run.enemies.damageScale[slot]).toBe(before * 2);
+    });
+
+    it("an enraged final boss walks faster", () => {
+      const walked = (enraged: boolean) => {
+        const run = enemyRun();
+        const slot = spawnBoss(run, run.finalBossType, Role.Hunter);
+        run.finalBossSlot = slot;
+        run.enraged = enraged;
+        run.enemies.x[slot] = 3000;
+        run.enemies.y[slot] = 0;
+        updateEnemies(run);
+        return 3000 - run.enemies.x[slot]!;
+      };
+      expect(walked(false)).toBeGreaterThan(1);
+      expect(walked(true)).toBeCloseTo(walked(false) * 1.3, 6);
+    });
+
+    it("a dead final boss never enrages", () => {
+      const run = finaleRun();
+      at(run, 5);
+      killEnemy(run, run.finalBossSlot);
+      expect(run.finalBossDead).toBe(true);
+      expect(run.finalBossSlot).toBe(-1);
+      expect(at(run, 205)).toEqual([]);
+      expect(run.enraged).toBe(false);
+      expect(run.slamCooldownScale).toBe(1);
+    });
+
+    it("bossLog records spawn and death ticks", () => {
+      const run = newRun();
+      expect(run.bossLog).toHaveLength(4);
+      expect(run.bossLogCount).toBe(0);
+      at(run, 180);
+      const came = at(run, 250);
+      const marshal = typeOf(run, "iron-marshal");
+      expect(run.bossLogCount).toBe(1);
+      expect(run.bossLog[0]).toEqual({ type: marshal, spawnTick: 250 * 30, deathTick: -1 });
+      run.tick = 260 * 30;
+      killEnemy(run, came[0]!.a);
+      expect(run.bossLog[0]).toEqual({ type: marshal, spawnTick: 250 * 30, deathTick: 260 * 30 });
+      expect(run.bossCount).toBe(0);
+    });
   });
 });

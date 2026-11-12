@@ -98,7 +98,20 @@ export function killEnemy(run: Run, slot: number): void {
     const slam = run.data.enemies[e.type[slot]].slam;
     run.events.push(EventKind.Slam, slot, SlamEvent.Cancelled, e.slamX[slot], e.slamY[slot], slam === undefined ? 0 : slam.radius, 0);
   }
-  if (run.isBoss[e.type[slot]] === 1) run.bossCount--;
+  if (run.isBoss[e.type[slot]] === 1) {
+    run.bossCount--;
+    for (let b = 0; b < run.bossLogCount; b++) {
+      const record = run.bossLog[b];
+      if (record.type === e.type[slot] && record.spawnTick === e.spawnTick[slot] && record.deathTick < 0) {
+        record.deathTick = run.tick;
+        break;
+      }
+    }
+    if (slot === run.finalBossSlot) {
+      run.finalBossSlot = -1;
+      run.finalBossDead = true;
+    }
+  }
   e.kill(slot);
   if (run.crystals.drop(x, y, xp) < 0) gainXp(run, xp);
 }

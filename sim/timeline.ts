@@ -39,15 +39,16 @@ export function buildTimeline(data: GameData): TimedEvent[] {
 }
 
 /**
- * Fires the timed events of the run (`rules.events`): elite rushes and minibosses. A rush is announced
+ * Fires the timed events of the run (`rules.events`): elite rushes and minibosses, and runs the finale. A rush is announced
  * `rushWarningSeconds` ahead with the side it will come from; only the next rush on the list is announced,
  * and a run that starts after the warning step draws the side when the rush comes. Events of one step fire
  * in the order of the list. The order of the rng draws is part of the determinism.
  */
 export function updateTimeline(run: Run): void {
   const timeline = run.timeline;
-  if (run.nextEvent >= timeline.length) return;
   const { rules } = run.data;
+  updateFinale(run);
+  if (run.nextEvent >= timeline.length) return;
   if (!run.rushWarned) {
     for (let i = run.nextEvent; i < timeline.length; i++) {
       const event = timeline[i];
@@ -75,6 +76,22 @@ export function updateTimeline(run: Run): void {
       spawnRush(run, event);
     }
   }
+}
+
+/** Brings the final boss at `durationTicks` as a hunter and enrages it `finale.enrageAfterSeconds` later. */
+function updateFinale(run: Run): void {
+  if (run.tick < run.durationTicks || run.finalBossDead) return;
+  const { finale } = run.data.rules.run;
+  if (run.finalBossSlot < 0) {
+    run.finalBossSlot = spawnBoss(run, run.finalBossType, Role.Hunter);
+    return;
+  }
+  if (run.enraged || run.tick < run.durationTicks + Math.round(finale.enrageAfterSeconds * TICKS_PER_SECOND)) return;
+  run.enraged = true;
+  run.enemies.damageScale[run.finalBossSlot] *= finale.enrage.damage;
+  run.slamCooldownScale = finale.enrage.slamCooldown;
+  const slot = run.finalBossSlot;
+  run.events.push(EventKind.Enrage, slot, 0, run.enemies.x[slot], run.enemies.y[slot], 0, 0);
 }
 
 function spawnRush(run: Run, event: TimedEvent): void {
@@ -124,6 +141,12 @@ export function spawnBoss(run: Run, type: number, role: number): number {
   if (def.slam) store.slamCooldown[slot] = Math.round(def.slam.cooldownSeconds[0] * TICKS_PER_SECOND);
   run.stats.spawned++;
   run.bossCount++;
+  if (run.bossLogCount < run.bossLog.length) {
+    const record = run.bossLog[run.bossLogCount++];
+    record.type = type;
+    record.spawnTick = run.tick;
+    record.deathTick = -1;
+  }
   run.events.push(EventKind.BossSpawn, slot, type, x, y, 0, 0);
   return slot;
 }

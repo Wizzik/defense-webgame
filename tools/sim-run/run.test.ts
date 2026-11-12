@@ -78,14 +78,15 @@ describe("bot run speed", () => {
     const run = createRun(gameData(), { seed: 1, durationSeconds: 300 });
     const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
     const start = performance.now();
-    // the hero and the castle cannot fall, so the run lasts its 300 s
+    // the hero and the castle cannot fall, so the run lasts its 300 s and the fight with the final boss
     while (run.state !== "won" && run.state !== "lost") {
       botInput(run, input);
       run.hero.hp = run.hero.stats.maxHp;
       run.castle.hp = run.castle.maxHp;
       run.step(input);
     }
-    expect(run.tick).toBe(300 * 30);
+    expect(run.state).toBe("won");
+    expect(run.tick).toBeGreaterThan(300 * 30);
     expect(performance.now() - start).toBeLessThan(8000);
   });
 });

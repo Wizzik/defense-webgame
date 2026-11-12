@@ -46,6 +46,7 @@ export function updateEnemies(run: Run): void {
 
     // Slow lowers walking speed only (not knockback) and runs down even while stunned.
     let walk = buffed ? def.moveSpeed * auraSpeed : def.moveSpeed;
+    if (run.enraged && i === run.finalBossSlot) walk *= rules.run.finale.enrage.moveSpeed;
     if (e.slowTicks[i] > 0) {
       walk *= 1 - e.slowFactor[i];
       e.slowTicks[i]--;

@@ -22,6 +22,7 @@ export function refreshHeroStats(run: Run): void {
 export function gainXp(run: Run, amount: number): void {
   const { hero, data } = run;
   hero.xp += amount;
+  run.stats.xpGained += amount;
   let leveled = false;
   while (hero.xp >= xpToNext(data.rules, hero.level)) {
     hero.xp -= xpToNext(data.rules, hero.level);

@@ -59,6 +59,16 @@ export function stateHash(run: Run): number {
   mixFloat(run.rushDirY);
   mixInt(run.bossCount);
   mixFloat(run.slamCooldownScale);
+  mixInt(run.finalBossSlot);
+  mixInt(run.finalBossDead ? 1 : 0);
+  mixInt(run.enraged ? 1 : 0);
+  mixFloat(run.stats.xpGained);
+  mixInt(run.bossLogCount);
+  for (let b = 0; b < run.bossLogCount; b++) {
+    mixInt(run.bossLog[b].type);
+    mixInt(run.bossLog[b].spawnTick);
+    mixInt(run.bossLog[b].deathTick);
+  }
   for (const slot of run.abilities) {
     mixInt(slot.level);
     mixInt(slot.cooldown);

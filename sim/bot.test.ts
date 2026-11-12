@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { debugSetAbilityLevel } from "./abilities/slots";
 import { EventKind } from "./events";
-import { botInput, CHASE_DISTANCE, DEFEND_RADIUS, HOME_OFFSET, LEASH_DISTANCE } from "./bot";
+import { botCard, botInput, CHASE_DISTANCE, DEFEND_RADIUS, HOME_OFFSET, LEASH_DISTANCE } from "./bot";
 import { Charge } from "./enemy-charge";
 import { stateHash } from "./hash";
 import { InputAction, NO_INPUT } from "./input";
@@ -19,7 +19,7 @@ function play(seed: number, onStep?: (run: Run) => void, record?: TickInput[], h
     if (record) record.push({ ...input });
     run.step(input);
     onStep?.(run);
-    if (++guard > run.durationTicks * 4) throw new Error("run did not end");
+    if (++guard > run.durationTicks + 400 * 30) throw new Error("run did not end");
   }
   return run;
 }
@@ -28,7 +28,7 @@ const rangedHero = gameData().heroes.find((h) => h.baseAttack.kind !== "melee")!
 const meleeHero = gameData().heroes.find((h) => h.baseAttack.kind === "melee")!;
 
 describe("autopilot", () => {
-  it("bot run ends within the duration", () => {
+  it("a bot run ends by a loss or by the fall of the final boss", () => {
     const run = play(1, (r) => {
       expect(r.enemies.aliveCount).toBeLessThanOrEqual(r.data.rules.enemies.maxAlive);
       expect(r.hero.hp).toBeLessThanOrEqual(r.hero.stats.maxHp);
@@ -39,7 +39,8 @@ describe("autopilot", () => {
       }
     });
     expect(["won", "lost"]).toContain(run.state);
-    expect(run.tick).toBeLessThanOrEqual(run.durationTicks);
+    expect(run.tick).toBeLessThanOrEqual(run.durationTicks + 400 * 30);
+    if (run.state === "won") expect(run.finalBossDead).toBe(true);
   });
 
   it("replaying recorded inputs gives the same hash", () => {
@@ -176,6 +177,13 @@ describe("autopilot", () => {
     const run = createRun(gameData(), { seed: 1 });
     run.state = "levelUp";
     expect(botInput(run, { moveX: 1, moveY: 1, card: -1, actions: 0 })).toEqual({ moveX: 0, moveY: 0, card: 0, actions: 0 });
+  });
+
+  it("botCard picks the first spell card, else the first card", () => {
+    const attribute = { kind: "attribute", attribute: "str", amount: 10 } as const;
+    const ability = { kind: "ability", slot: 1, fromLevel: 0, toLevel: 1 } as const;
+    expect(botCard({ cards: [attribute, ability, ability] })).toBe(1);
+    expect(botCard({ cards: [attribute, attribute] })).toBe(0);
   });
 
   it("takes a spell card before an attribute card", () => {

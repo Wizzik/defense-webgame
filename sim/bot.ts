@@ -1,3 +1,4 @@
+import type { CardOffer } from "./cards";
 import { Charge } from "./enemy-charge";
 import { InputAction } from "./input";
 import type { TickInput } from "./input";
@@ -26,6 +27,14 @@ const AXIS_DEADZONE = 30;
 /** Share of a unit vector under which an axis is not pressed (between sin 22.5° and cos 67.5°). */
 const AXIS_SHARE = 0.38;
 
+/** As a player would: a spell before an attribute. The first spell card of the offer, else the first card. */
+export function botCard(offer: CardOffer): number {
+  for (let c = 0; c < offer.cards.length; c++) {
+    if (offer.cards[c].kind === "ability") return c;
+  }
+  return 0;
+}
+
 /** The fixed autopilot rules. Writes the input into `out` and returns it; allocates nothing. */
 export function botInput(run: Run, out: TickInput): TickInput {
   out.moveX = 0;
@@ -33,17 +42,7 @@ export function botInput(run: Run, out: TickInput): TickInput {
   out.card = -1;
   out.actions = 0;
   if (run.state === "levelUp") {
-    // As a player would: a spell before an attribute. The first spell card of the offer, else the first card.
-    out.card = 0;
-    const cards = run.offer?.cards;
-    if (cards) {
-      for (let c = 0; c < cards.length; c++) {
-        if (cards[c].kind === "ability") {
-          out.card = c;
-          break;
-        }
-      }
-    }
+    out.card = run.offer ? botCard(run.offer) : 0;
     return out;
   }
   const { hero, castle, enemies } = run;

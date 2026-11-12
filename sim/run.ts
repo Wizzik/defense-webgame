@@ -18,6 +18,7 @@ import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import type { TickInput } from "./input";
 import { Rng } from "./rng";
 import { spawnEnemies } from "./spawner";
+import { applyStartPhase } from "./start-phase";
 import { buildTimeline, type TimedEvent, updateTimeline } from "./timeline";
 import { buildPhaseTables, enemyType, type PhaseTable } from "./spawn-tables";
 import { SpatialHash } from "./spatial-grid";
@@ -30,6 +31,16 @@ export interface RunOptions {
   durationSeconds?: number;
   /** Hero id; defaults to rules.start.hero. */
   hero?: string;
+  /** Debug: start at this phase (1 to phases + 1, the last is the finale); see sim/start-phase.ts. */
+  startPhase?: number;
+}
+
+/** One boss of the run, for run summaries. */
+export interface BossRecord {
+  type: number;
+  spawnTick: number;
+  /** -1 while it lives. */
+  deathTick: number;
 }
 
 const EVENT_CAPACITY = 1024;
@@ -68,13 +79,25 @@ export class Run {
   readonly isBoss: Uint8Array;
   /** Living bosses. */
   bossCount = 0;
+  /** Type index of the final boss (`rules.run.finale.boss`). */
+  readonly finalBossType: number;
+  /** Slot of the living final boss; -1 before it comes and after it falls. */
+  finalBossSlot = -1;
+  /** The final boss fell: the run is won at the end of the step. */
+  finalBossDead = false;
+  /** The final boss is enraged (`rules.run.finale.enrage`). */
+  enraged = false;
+  /** Every boss that came, in the order of arrival; the first `bossLogCount` entries are used. */
+  readonly bossLog: BossRecord[];
+  bossLogCount = 0;
   /** Multiplies the cooldown drawn after a slam (the enrage of the final boss lowers it). */
   slamCooldownScale = 1;
   /** The step in which the next pack comes. */
   nextPackTick: number;
   /** The last phase whose elites were sent (-1: none yet). */
   elitePhase = -1;
-  readonly stats: RunStats = { kills: 0, spawned: 0, damageDealt: 0 };
+  readonly stats: RunStats = { kills: 0, spawned: 0, damageDealt: 0, xpGained: 0 };
+  /** The step in which the final boss comes. The run goes on until it falls. */
   readonly durationTicks: number;
   /** The ultimate casts by itself; the player can switch this off (Task 7). */
   ultimateAuto = true;
@@ -97,6 +120,11 @@ export class Run {
     this.isBoss = Uint8Array.from(data.enemies, (e) => (e.boss ? 1 : 0));
     this.phaseTables = buildPhaseTables(data);
     this.timeline = buildTimeline(data);
+    this.finalBossType = enemyType(data, rules.run.finale.boss, "rules.run.finale.boss");
+    this.bossLog = Array.from(
+      { length: this.timeline.filter((event) => event.boss >= 0).length + 1 },
+      () => ({ type: -1, spawnTick: -1, deathTick: -1 }),
+    );
     this.eliteType = enemyType(data, rules.enemies.elite, "rules.enemies.elite");
     this.nextPackTick = Math.round(rules.run.firstPackSeconds * TICKS_PER_SECOND);
     this.durationTicks = Math.round(
@@ -132,6 +160,12 @@ export class Run {
       x: rules.arena.castle.x, y: rules.arena.castle.y, radius: rules.castle.radius,
       hp: rules.castle.hp, maxHp: rules.castle.hp, lastHitTick: -1,
     };
+    if (options.startPhase !== undefined) applyStartPhase(this, options.startPhase);
+  }
+
+  /** The time of the final boss has come. */
+  get inFinale(): boolean {
+    return this.tick >= this.durationTicks;
   }
 
   get timeSeconds(): number {
@@ -140,6 +174,7 @@ export class Run {
 
   get phaseIndex(): number {
     const { run, phases } = this.data.rules;
+    if (this.inFinale) return phases.length - 1;
     return Math.min(Math.floor(this.tick / (run.phaseSeconds * TICKS_PER_SECOND)), phases.length - 1);
   }
 
@@ -163,7 +198,7 @@ export class Run {
    *   updateCrystals(this);       // Task 7
    *   regenCastle(this);          // Task 4
    *   this.tick++;
-   *   checkEnd(this);             // castle (Task 4) -> hero (Task 5) -> time (Task 3); a loss wins over a win
+   *   checkEnd(this);             // castle (Task 4) -> hero (Task 5) -> the final boss fell (phase 2b-3); a loss wins over a win
    *   if (state === "playing" && hero.pendingLevelUps > 0) openOffer(this);   // Task 7
    */
   step(input: TickInput): void {
@@ -231,7 +266,7 @@ function checkEnd(run: Run): void {
     run.events.push(EventKind.RunEnd, 2, 0, 0, 0, 0, 0);
     return;
   }
-  if (run.tick >= run.durationTicks) {
+  if (run.finalBossDead) {
     run.state = "won";
     run.result = "won";
     run.events.push(EventKind.RunEnd, 0, 0, 0, 0, 0, 0);

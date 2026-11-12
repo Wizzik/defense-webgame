@@ -24,6 +24,8 @@ export const EventKind = {
   /** A slam: a = slot, value = 0 the warning starts / 1 it hits / 2 it was cancelled, x/y = the centre of the
    *  circle, u = its radius, v = steps of the warning (0 for values 1 and 2). */
   Slam: 17,
+  /** The final boss is enraged: a = slot, x/y = where. */
+  Enrage: 18,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

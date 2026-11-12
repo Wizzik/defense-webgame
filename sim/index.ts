@@ -6,7 +6,7 @@ export {
 } from "./abilities/slots";
 export { countEnemiesWithin, densestCluster, nearestEnemy } from "./abilities/targeting";
 export type { AbilitySlot } from "./abilities/slots";
-export { botInput } from "./bot";
+export { botCard, botInput } from "./bot";
 export { chooseCard, openOffer } from "./cards";
 export type { Card, CardOffer } from "./cards";
 export { debugSpawnEach } from "./debug-spawn";
@@ -24,7 +24,8 @@ export { InputAction } from "./input";
 export type { TickInput } from "./input";
 export { Rng } from "./rng";
 export { createRun, Run } from "./run";
-export type { RunOptions, RunResult, RunState } from "./run";
+export type { BossRecord, RunOptions, RunResult, RunState } from "./run";
+export { Slam, SlamEvent } from "./enemy-slam";
 export { SpatialHash } from "./spatial-grid";
 export { spawnBoss, updateTimeline } from "./timeline";
 export type { CastleState, HeroState, HeroStats, RunStats } from "./world";

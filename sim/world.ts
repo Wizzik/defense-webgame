@@ -59,4 +59,6 @@ export interface RunStats {
   /** Enemies created by the spawner. */
   spawned: number;
   damageDealt: number;
+  /** All XP the hero gained, level-ups included. */
+  xpGained: number;
 }
