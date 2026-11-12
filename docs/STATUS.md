@@ -2,7 +2,7 @@
 
 Updated 2026-11-12 (phase 2b-3, the full run with a boss, is built on its branch and waits for Petr's merge and playtest). Read this first when you resume work.
 
-## Phase 2b-3 (full run with a boss): done on branch `phase-2b3-full-run`, PR open, waits for Petr
+## Phase 2b-3 (full run with a boss): done on branch `phase-2b3-full-run`, PR #10 open, waits for Petr
 
 - All 8 tasks of `docs/superpowers/plans/2026-11-12-phase-2b3-full-run-boss.md` are done (executed inline in one chat with one final review). `npm run check`, the build and the e2e project `webgl2-fallback` pass.
 - What it brings: a run of 20 phases (16:40), five elite rushes announced 7 s ahead, three minibosses (Iron Marshal 4:10, Pale Abbot 8:20, Gunmaster 12:30) and the final boss Dread Regent at 16:40 with an enrage 200 s later; the run is won when the final boss falls. Bosses slam the ground after a red warning circle. The HUD shows the phase, news and the boss's hp bar. `?debug=1&phase=N` starts at a phase.
@@ -14,7 +14,7 @@ Updated 2026-11-12 (phase 2b-3, the full run with a boss, is built on its branch
   - quick links: https://wizzik.github.io/defense-webgame/?debug=1&phase=6 (first miniboss at once), `&phase=4` (elite rush after 30 s), `&phase=21` (finale).
 - **Open for Petr 1 (balance spread):** on 20 seeds the autopilot wins 10 (Stonehorn), 12 (Nightglaive), 7 (Mistwarden), but 17 (Serpent Shaman), 15 (Redcleaver), 14 (Tidecaller) and 0 (Sparkshot: its castle is almost gone when the finale starts). The run-wide numbers cannot close this spread; it needs kit work or a look at how the autopilot plays a ranged hero in the finale. Gravecaller still wins everything.
 - **Open for Petr 2 (XP curve):** the full kit comes in phases 7-9 (the spec wanted 12-14) and a won run ends at level 49-50 (wanted 35-45). A slower curve made the heroes die between 2:00 and 6:00; it needs the early phases retuned with it. Numbers: `docs/DECISIONS.md`, section Phase 2b-3.
-- Next: Petr merges the PR and plays. Then, in a new chat: the two open balance points, or the next plan (2c economy, or factions and difficulties).
+- Next: Petr merges PR #10 (https://github.com/Wizzik/defense-webgame/pull/10) and plays. Then, in a new chat: the two open balance points, or the next plan (2c economy, or factions and difficulties).
 
 ## Ward rework: merged (PR #9, 2026-11-12)
 
