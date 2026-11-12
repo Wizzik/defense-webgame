@@ -2,7 +2,8 @@ import { armorReduction, damageCastle, damageHero, rollDamage } from "./combat";
 import { TICK_SECONDS, TICKS_PER_SECOND } from "./constants";
 import { Action, Role } from "./enemies";
 import { updateEnemyAuras } from "./enemy-aura";
-import { cancelCharge, chargeVX, chargeVY, updateCharge } from "./enemy-charge";
+import { cancelCharge, Charge, chargeVX, chargeVY, updateCharge } from "./enemy-charge";
+import { cancelSlam, updateSlam } from "./enemy-slam";
 import { Behavior, steer, steerHold, steerX, steerY } from "./enemy-steer";
 import type { Run } from "./run";
 
@@ -40,10 +41,12 @@ export function updateEnemies(run: Run): void {
     const y = e.y[i];
     if (e.attackCooldown[i] > 0) e.attackCooldown[i]--;
     if (e.chargeCooldown[i] > 0) e.chargeCooldown[i]--;
+    if (e.slamCooldown[i] > 0) e.slamCooldown[i]--;
     const buffed = e.buffed[i] === 1;
 
     // Slow lowers walking speed only (not knockback) and runs down even while stunned.
     let walk = buffed ? def.moveSpeed * auraSpeed : def.moveSpeed;
+    if (run.enraged && i === run.finalBossSlot) walk *= rules.run.finale.enrage.moveSpeed;
     if (e.slowTicks[i] > 0) {
       walk *= 1 - e.slowFactor[i];
       e.slowTicks[i]--;
@@ -59,6 +62,7 @@ export function updateEnemies(run: Run): void {
       e.stunTicks[i]--;
       e.action[i] = Action.Stunned;
       cancelCharge(run, i);
+      cancelSlam(run, i);
     } else {
       const hx = hero.x - x;
       const hy = hero.y - y;
@@ -68,8 +72,12 @@ export function updateEnemies(run: Run): void {
         else if (heroDist > rules.enemies.leashRange) e.aggro[i] = 0;
       }
       const targetsHero = e.role[i] === Role.Hunter || e.aggro[i] === 1 || run.enemyBehavior[e.type[i]] === Behavior.Flank;
-      charging = updateCharge(run, i, targetsHero, heroDist, walk);
-      if (charging) {
+      // a slam comes before a charge and never starts in the middle of one
+      const slamming = e.chargeState[i] === Charge.None && updateSlam(run, i, heroDist);
+      if (!slamming) charging = updateCharge(run, i, targetsHero, heroDist, walk);
+      if (slamming) {
+        e.action[i] = Action.Attack;
+      } else if (charging) {
         e.action[i] = Action.Move;
         vx = chargeVX;
         vy = chargeVY;

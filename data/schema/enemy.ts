@@ -44,6 +44,20 @@ export const EnemySchema = z.object({
     moveSpeed: z.number().min(0),
     damage: z.number().min(0),
   }).strict().optional(),
+  /** A boss: it cannot be knocked back, stuns are shorter on it and it always gets a slot. */
+  boss: z.literal(true).optional(),
+  /** Id of the enemy type whose model this type is drawn with (its own id when missing). */
+  model: Slug.optional(),
+  /** A slam: the boss stops, a circle of `radius` warns for `windupSeconds`, then the hero and the castle inside take `damage`. */
+  slam: z.object({
+    radius: z.number().positive(),
+    damage: z.number().positive(),
+    windupSeconds: z.number().positive(),
+    /** The next slam comes after a random time between the two values. */
+    cooldownSeconds: z.tuple([z.number().positive(), z.number().positive()]),
+  }).strict().refine((s) => s.cooldownSeconds[0] <= s.cooldownSeconds[1], {
+    path: ["cooldownSeconds"], message: "min is above max",
+  }).optional(),
 }).strict();
 
 export type Enemy = z.infer<typeof EnemySchema>;

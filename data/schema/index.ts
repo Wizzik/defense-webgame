@@ -86,6 +86,33 @@ export function validateGameData(data: unknown): GameData {
     }
   });
 
+  const byId = new Map(enemies.map((e) => [e.id, e]));
+  enemies.forEach((e, i) => {
+    if (e.model === undefined) return;
+    const model = byId.get(e.model);
+    if (!model) errors.push(`enemies.${i} (${e.id}).model: unknown enemy "${e.model}"`);
+    else if (model.model !== undefined || model === e) {
+      errors.push(`enemies.${i} (${e.id}).model: "${e.model}" has no model of its own`);
+    }
+  });
+  const checkBoss = (path: string, id: string) => {
+    const enemy = byId.get(id);
+    if (!enemy) errors.push(`${path}: unknown enemy "${id}"`);
+    else if (!enemy.boss) errors.push(`${path}: "${id}" is not a boss`);
+  };
+  checkBoss("rules.run.finale.boss", rules.run.finale.boss);
+  rules.events.forEach((event, i) => {
+    if (event.kind === "boss") checkBoss(`rules.events.${i}.enemy`, event.enemy);
+    else {
+      for (const id of Object.keys(event.units)) {
+        if (!enemyIds.has(id)) errors.push(`rules.events.${i}.units: unknown enemy "${id}"`);
+      }
+    }
+  });
+  if (rules.debug.phaseXp.length !== rules.phases.length) {
+    errors.push(`rules.debug.phaseXp: ${rules.debug.phaseXp.length} values for ${rules.phases.length} phases`);
+  }
+
   if (!heroIds.has(rules.start.hero)) {
     errors.push(`rules.start.hero: unknown hero "${rules.start.hero}"`);
   }

@@ -120,12 +120,15 @@ export interface EnemyEntry {
   /** How the type walks (design value, copied as it is). */
   behavior: Enemy["behavior"];
   /** A variant of the map unit: applied to the map's numbers before scaling.yaml. */
-  multipliers?: { hp?: number; damage?: number; moveSpeed?: number; collision?: number };
+  multipliers?: { hp?: number; damage?: number; moveSpeed?: number; collision?: number; range?: number };
   /** Design value, copied as it is. */
   heal?: { amount: number; range: number; cooldown: number };
   /** Design values, copied as they are. */
   charge?: NonNullable<Enemy["charge"]>;
   aura?: NonNullable<Enemy["aura"]>;
+  boss?: true;
+  model?: string;
+  slam?: NonNullable<Enemy["slam"]>;
 }
 
 export interface Design {

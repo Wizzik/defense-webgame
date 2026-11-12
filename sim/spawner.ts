@@ -20,12 +20,13 @@ export function timeScale(rules: Rules, tick: number): number {
  * `arena.spawn.radius` around the castle (the packs of one interval are spread evenly around it), its
  * own size and its own role; its members come all at once in a square around the pack's centre, clamped
  * to the arena. The elites of a phase come with the first pack of its first interval, ahead of the
- * others. At the cap a pack fills only the free slots and the rest is dropped.
+ * others. At the cap a pack fills only the free slots and the rest is dropped. In the finale the packs of the
+ * last phase come at `finale.packScale` of their size.
  * The order of the rng draws is part of the determinism.
  */
 export function spawnEnemies(run: Run): void {
   if (run.tick < run.nextPackTick) return;
-  const { rules, enemies: defs } = run.data;
+  const { rules } = run.data;
   const phaseIndex = run.phaseIndex;
   const phase = rules.phases[phaseIndex];
   const table = run.phaseTables[phaseIndex];
@@ -36,33 +37,49 @@ export function spawnEnemies(run: Run): void {
   const elites = run.elitePhase !== phaseIndex ? phase.elites : 0;
   run.elitePhase = phaseIndex;
   const scale = timeScale(rules, run.tick);
-  const edgeX = arena.width / 2;
-  const edgeY = arena.height / 2;
+  const finale = run.inFinale;
   randomDirection(rng);
   const baseX = dirX;
   const baseY = dirY;
   for (let p = 0; p < phase.packs; p++) {
     rotatedDirection(baseX, baseY, p, phase.packs);
-    const size = phase.pack.min + Math.floor(rng.next() * (phase.pack.max - phase.pack.min + 1));
+    const rolled = phase.pack.min + Math.floor(rng.next() * (phase.pack.max - phase.pack.min + 1));
+    const size = finale ? Math.max(1, Math.round(rolled * rules.run.finale.packScale)) : rolled;
     const role = rng.next() < phase.hunterShare ? Role.Hunter : Role.Sieger;
     const cx = arena.castle.x + dirX * arena.spawn.radius;
     const cy = arena.castle.y + dirY * arena.spawn.radius;
     const packElites = p === 0 ? elites : 0;
     const n = size + packElites;
-    const half = arena.spawn.spread * Math.max(1, Math.sqrt(n / PACK_AT_SPREAD));
+    const half = packHalf(rules, n);
     let spawned = 0;
     for (let k = 0; k < n; k++) {
       if (store.aliveCount >= store.capacity) break;
       const type = k < packElites ? run.eliteType : pickType(table, rng.next());
-      const collision = defs[type].collision;
-      const x = clamp(cx + (rng.next() * 2 - 1) * half, edgeX - collision);
-      const y = clamp(cy + (rng.next() * 2 - 1) * half, edgeY - collision);
-      store.spawn(type, role, x, y, defs[type].hp * scale, scale, run.tick);
-      run.stats.spawned++;
+      scatterMember(run, type, role, cx, cy, half, scale);
       spawned++;
     }
     if (spawned > 0) run.events.push(EventKind.PackSpawn, role, spawned, cx, cy, 0, 0);
   }
+}
+
+/** Half the side of the square a pack of `members` is scattered in. */
+export function packHalf(rules: Rules, members: number): number {
+  return rules.arena.spawn.spread * Math.max(1, Math.sqrt(members / PACK_AT_SPREAD));
+}
+
+/**
+ * Spawns one pack member at a random point of the square around (cx, cy), clamped into the arena.
+ * Draws two rng values (x, then y). The caller checks that a slot is free.
+ */
+export function scatterMember(
+  run: Run, type: number, role: number, cx: number, cy: number, half: number, scale: number,
+): number {
+  const { arena } = run.data.rules;
+  const def = run.data.enemies[type];
+  const x = clamp(cx + (run.rng.next() * 2 - 1) * half, arena.width / 2 - def.collision);
+  const y = clamp(cy + (run.rng.next() * 2 - 1) * half, arena.height / 2 - def.collision);
+  run.stats.spawned++;
+  return run.enemies.spawn(type, role, x, y, def.hp * scale, scale, run.tick);
 }
 
 function clamp(value: number, limit: number): number {

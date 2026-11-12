@@ -58,7 +58,7 @@ test("shot: types", async ({ page }) => {
   await startRun(page, "seed=7&hero=stonehorn&debug=1");
   await page.evaluate(() => window.__game!.debug!.spawnEach());
   await page.waitForTimeout(500);
-  // the six hunters stand in a row north of the hero, who is at the middle of the screen
+  // the six common types stand in a row north of the hero, who is at the middle of the screen
   await page.screenshot({ path: join(shotsDir, "types.png"), clip: { x: 400, y: 90, width: 480, height: 270 } });
 });
 
@@ -74,6 +74,25 @@ test("shot: corner", async ({ page }) => {
   await page.evaluate(() => window.__game!.debug!.teleport(2900, 2900));
   await page.waitForTimeout(1_000);
   await shot(page, "corner");
+});
+
+test("shot: boss", async ({ page }) => {
+  await startRun(page, "seed=7&hero=stonehorn&debug=1&phase=6");
+  await page.waitForFunction(() => window.__game?.boss !== null && window.__game?.boss !== undefined, undefined, { timeout: 30_000, polling: 50 });
+  // stand next to the boss until its slam winds up (7 s after it came), then shoot half-way through the warning
+  for (let i = 0; i < 600; i++) {
+    const slams = await page.evaluate(() => {
+      const g = window.__game!;
+      if (g.screen === "levelUp") return -1;
+      if (g.boss && g.slams === 0) g.debug!.teleport(g.boss.x - 200, g.boss.y - 60);
+      return g.slams;
+    });
+    if (slams === -1) await page.keyboard.press("1");
+    else if (slams > 0) break;
+    await page.waitForTimeout(50);
+  }
+  await page.waitForTimeout(500);
+  await shot(page, "boss");
 });
 
 /** Hero ids from the generated data, so adding a hero adds a shot. */

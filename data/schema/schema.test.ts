@@ -40,10 +40,20 @@ function fixture(): any {
         collision: 31, acquireRange: 500,
         attack: { kind: "melee", range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 }, behavior: "siege", xp: 1,
       },
+      {
+        id: "warlord", name: names("Warlord"), level: 5, hp: 9000, hpRegen: 0, armor: 3, moveSpeed: 200,
+        collision: 80, acquireRange: 500,
+        attack: { kind: "melee", range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 }, behavior: "siege", xp: 1,
+        boss: true, model: "grunt", slam: { radius: 350, damage: 120, windupSeconds: 1, cooldownSeconds: [7, 15] },
+      },
     ],
     rules: {
       start: { hero: "hero-one" },
-      run: { durationSeconds: 180, phaseSeconds: 50, firstPackSeconds: 2, timeScaling: { seconds: 1200, cap: 2 } },
+      run: {
+        durationSeconds: 180, phaseSeconds: 50, firstPackSeconds: 2, timeScaling: { seconds: 1200, cap: 2 },
+        rushWarningSeconds: 7,
+        finale: { boss: "warlord", packScale: 0.5, enrageAfterSeconds: 200, enrage: { damage: 2, moveSpeed: 1.3, slamCooldown: 0.5 } },
+      },
       arena: {
         width: 6000, height: 5000, castle: { x: 0, y: -2000 }, heroStart: { x: 0, y: -1500 },
         spawn: { radius: 2000, spread: 150 },
@@ -52,7 +62,12 @@ function fixture(): any {
       hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
         dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 } },
       autocast: { novaMinEnemies: 1, healBelow: 0.6, shieldBelow: 0.35 },
-      enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 }, elite: "grunt" },
+      enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 }, elite: "grunt", bossStunScale: 0.25 },
+      events: [
+        { atSeconds: 60, kind: "rush", units: { grunt: 3 } },
+        { atSeconds: 100, kind: "boss", enemy: "warlord" },
+      ],
+      debug: { phaseXp: [0, 10, 20, 30] },
       phases: [
         { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.2, elites: 0 },
         { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.25, elites: 0 },
@@ -340,6 +355,68 @@ describe("game data schemas", () => {
     const d = fixture();
     d.enemies[0].attack.damageMax = 13;
     expect(errorMessage(d)).toContain("enemies.0 (grunt).attack.damageMax");
+  });
+
+  it("rules accept events and a finale", () => {
+    const rules = validateGameData(fixture()).rules;
+    expect(rules.events).toHaveLength(2);
+    expect(rules.run.finale.boss).toBe("warlord");
+    expect(rules.enemies.bossStunScale).toBe(0.25);
+  });
+
+  it("events must ascend by atSeconds", () => {
+    const d = fixture();
+    d.rules.events = [
+      { atSeconds: 250, kind: "boss", enemy: "warlord" },
+      { atSeconds: 180, kind: "rush", units: { grunt: 3 } },
+    ];
+    expect(errorMessage(d)).toContain("rules.events.1.atSeconds: below the event before it");
+  });
+
+  it("a rush needs at least one unit", () => {
+    const d = fixture();
+    d.rules.events[0].units = {};
+    expect(errorMessage(d)).toContain("rules.events.0.units");
+    d.rules.events[0].units = { grunt: 0 };
+    expect(errorMessage(d)).toContain("rules.events.0.units.grunt");
+  });
+
+  it("slam cooldown min must not exceed max", () => {
+    const d = fixture();
+    d.enemies[1].slam.cooldownSeconds = [15, 7];
+    expect(errorMessage(d)).toContain("enemies.1 (warlord).slam.cooldownSeconds");
+  });
+
+  it("debug.phaseXp has one value per phase", () => {
+    const d = fixture();
+    d.rules.debug.phaseXp = [0, 10, 20];
+    expect(errorMessage(d)).toContain("rules.debug.phaseXp: 3 values for 4 phases");
+    d.rules.debug.phaseXp = [0, 30, 20, 40];
+    expect(errorMessage(d)).toContain("rules.debug.phaseXp.2: below the value before it");
+  });
+
+  it("event and finale enemies must exist and be bosses, rush units must exist", () => {
+    let d = fixture();
+    d.rules.events[1].enemy = "grunt";
+    expect(errorMessage(d)).toContain('rules.events.1.enemy: "grunt" is not a boss');
+    d = fixture();
+    d.rules.run.finale.boss = "nobody";
+    expect(errorMessage(d)).toContain('rules.run.finale.boss: unknown enemy "nobody"');
+    d = fixture();
+    d.rules.events[0].units = { nobody: 2 };
+    expect(errorMessage(d)).toContain('rules.events.0.units: unknown enemy "nobody"');
+  });
+
+  it("a model must name another enemy that has no model of its own", () => {
+    let d = fixture();
+    d.enemies[1].model = "nobody";
+    expect(errorMessage(d)).toContain('enemies.1 (warlord).model: unknown enemy "nobody"');
+    d = fixture();
+    d.enemies[1].model = "warlord";
+    expect(errorMessage(d)).toContain("enemies.1 (warlord).model");
+    d = fixture();
+    d.enemies[0].model = "warlord";
+    expect(errorMessage(d)).toContain("model");
   });
 
   it("renders root issues as (root)", () => {

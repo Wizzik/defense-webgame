@@ -13,11 +13,13 @@ function newRun(maxAlive?: number) {
 }
 
 describe("debugSpawnEach", () => {
-  it("spawns one hunter of every type north of the hero", () => {
+  it("spawns one hunter of every common type north of the hero, and no boss", () => {
     const run = newRun();
     debugSpawnEach(run);
     const e = run.enemies;
-    const types = run.data.enemies.length;
+    const types = run.data.enemies.filter((d) => !d.boss).length;
+    expect(types).toBe(6);
+    expect(run.bossCount).toBe(0);
     expect(e.aliveCount).toBe(types);
     for (let i = 0; i < types; i++) {
       expect(e.type[i]).toBe(i);

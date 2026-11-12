@@ -1,4 +1,5 @@
-import { debugGrantXp, debugSetAbilityLevel, debugSpawnEach, type Run } from "../../sim";
+import { debugGrantXp, debugSetAbilityLevel, debugSpawnEach, killEnemy, type Run } from "../../sim";
+import { latestBoss, runPhase } from "./boss";
 import type { Backend, GpuInfo } from "../render/gpu";
 
 /** Read by the e2e tests; refreshed every frame. */
@@ -28,16 +29,24 @@ export interface GameSnapshot {
   packArrows: number;
   /** Enemies in a charge (windup or run). */
   charging: number;
-  /** What the renderer built: `heroModels` is how many hero figures stand in the scene (refreshed every frame). */
-  render: { enemyMeshes: number; heroModels: number; shadows: boolean };
+  /** Phase of the run from 1; the finale is one past the last phase (21). */
+  phase: number;
+  /** The living boss that came last; `x`, `y` are simulation coordinates. */
+  boss: { id: string; hp: number; maxHp: number; x: number; y: number } | null;
+  /** Slams winding up (warning circles on the ground). */
+  slams: number;
+  /** What the renderer built: `heroModels` is how many hero figures stand in the scene (refreshed every frame), `slamRings` how many slam circles lie on the floor. */
+  render: { enemyMeshes: number; heroModels: number; shadows: boolean; slamRings: number };
   /** Only with ?debug=1. */
   debug?: {
     grantXp(amount: number): void;
     setAbilityLevel(slot: number, level: number): void;
-    /** One hunter of every enemy type, in a row north of the hero. */
+    /** One hunter of every common enemy type, in a row north of the hero. */
     spawnEach(): void;
     /** Moves the hero to simulation coordinates, clamped to the arena. */
     teleport(x: number, y: number): void;
+    /** Kills every living boss; the fall of the final boss wins the run in the next step. */
+    killBoss(): void;
   };
 }
 
@@ -52,8 +61,8 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
   const snapshot: GameSnapshot = {
     backend, gpu, frames: 0, screen: "menu", tick: 0, level: 0, kills: 0, heroHp: 0, castleHp: 0, enemies: 0, enemyTypes: 0,
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], ultimateAuto: true, allies: 0,
-    projectiles: 0, packArrows: 0, charging: 0,
-    render: { enemyMeshes: 0, heroModels: 0, shadows: false },
+    projectiles: 0, packArrows: 0, charging: 0, phase: 1, boss: null, slams: 0,
+    render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0 },
   };
   window.__game = snapshot;
   return snapshot;
@@ -83,6 +92,14 @@ export function addDebugHooks(snapshot: GameSnapshot, getRun: () => Run | null):
       const limitY = arena.height / 2 - hero.stats.collision;
       hero.x = hero.prevX = Math.max(-limitX, Math.min(limitX, x));
       hero.y = hero.prevY = Math.max(-limitY, Math.min(limitY, y));
+    },
+    killBoss(): void {
+      const run = getRun();
+      if (!run) return;
+      const { enemies } = run;
+      for (let i = 0; i < enemies.capacity; i++) {
+        if (enemies.alive[i] === 1 && run.isBoss[enemies.type[i]!] === 1) killEnemy(run, i);
+      }
     },
   };
 }
@@ -136,9 +153,26 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
   snapshot.projectiles = run.projectiles.count;
   snapshot.packArrows = packArrows;
   let charging = 0;
+  let slams = 0;
   const { enemies } = run;
   for (let i = 0; i < enemies.capacity; i++) {
-    if (enemies.alive[i] === 1 && enemies.chargeState[i] !== 0) charging++;
+    if (enemies.alive[i] === 0) continue;
+    if (enemies.chargeState[i] !== 0) charging++;
+    if (enemies.slamState[i] !== 0) slams++;
   }
   snapshot.charging = charging;
+  snapshot.slams = slams;
+  snapshot.phase = runPhase(run);
+  const boss = latestBoss(run);
+  if (boss < 0) {
+    snapshot.boss = null;
+  } else {
+    // one object, filled in place while a boss lives
+    const info = snapshot.boss ?? (snapshot.boss = { id: "", hp: 0, maxHp: 0, x: 0, y: 0 });
+    info.id = run.data.enemies[enemies.type[boss]!]!.id;
+    info.hp = enemies.hp[boss]!;
+    info.maxHp = enemies.maxHp[boss]!;
+    info.x = enemies.x[boss]!;
+    info.y = enemies.y[boss]!;
+  }
 }

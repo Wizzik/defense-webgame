@@ -10,6 +10,10 @@ export const ENEMY_TINTS: Readonly<Record<string, number>> = {
   chaplain: 0xe6e6f2,
   lancer: 0x7a8296,
   captain: 0xb84ad8,
+  "iron-marshal": 0x9aa3b8,
+  "pale-abbot": 0xd9f0e8,
+  gunmaster: 0x2f5fb0,
+  "dread-regent": 0x8a1f3c,
 };
 
 /** Colour of an enemy type; an unknown type is red. */

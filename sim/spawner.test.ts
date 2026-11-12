@@ -366,4 +366,24 @@ describe("spawner", () => {
     expect(Array.from(a.enemies.y)).toEqual(Array.from(b.enemies.y));
     expect(Array.from(a.enemies.x)).not.toEqual(Array.from(c.enemies.x));
   });
+
+  it("packs in the finale are half the size of the last phase", () => {
+    const finale = (min: number, at: number) => {
+      const data = gameData();
+      data.rules.run.firstPackSeconds = 0;
+      data.rules.run.finale.packScale = 0.5;
+      data.rules.phases = [phase({ pack: { min: 4, max: 4, everySeconds: 5 } }), phase({ pack: { min, max: min, everySeconds: 5 } })];
+      data.rules.debug.phaseXp = [0, 0];
+      const run = createRun(data, { seed: 1, durationSeconds: 10 });
+      run.tick = at;
+      run.nextPackTick = at;
+      return spawnPacks(run, 1).map((p) => p.count);
+    };
+    expect(finale(10, 0)).toEqual([4]);
+    expect(finale(10, 299)).toEqual([4]);
+    // the finale uses the last phase, whatever the clock says
+    expect(finale(10, 300)).toEqual([5]);
+    expect(finale(7, 300)).toEqual([4]);
+    expect(finale(1, 300)).toEqual([1]);
+  });
 });

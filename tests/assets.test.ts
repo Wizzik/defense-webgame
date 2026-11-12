@@ -61,7 +61,9 @@ describe("hero models", () => {
 });
 
 describe("enemy models", () => {
-  for (const id of ids("enemies")) {
+  const enemies = JSON.parse(readFileSync("data/generated/enemies.json", "utf8")) as { id: string; model?: string }[];
+  // the same rule as enemyModelId in client/render/models.ts (client code is outside this TypeScript project)
+  for (const id of new Set(enemies.map((e) => e.model ?? e.id))) {
     it(id, () => {
       const info = readGlbInfo(`${ASSETS}/models/enemies/${id}.glb`);
       expect(sorted(info.clips)).toEqual(["Idle", "Punch", "Walking"]);

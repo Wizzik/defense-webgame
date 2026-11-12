@@ -53,6 +53,22 @@ export function stateHash(run: Run): number {
   mixFloat(run.castle.hp);
   mixInt(run.nextPackTick);
   mixInt(run.elitePhase);
+  mixInt(run.nextEvent);
+  mixInt(run.rushWarned ? 1 : 0);
+  mixFloat(run.rushDirX);
+  mixFloat(run.rushDirY);
+  mixInt(run.bossCount);
+  mixFloat(run.slamCooldownScale);
+  mixInt(run.finalBossSlot);
+  mixInt(run.finalBossDead ? 1 : 0);
+  mixInt(run.enraged ? 1 : 0);
+  mixFloat(run.stats.xpGained);
+  mixInt(run.bossLogCount);
+  for (let b = 0; b < run.bossLogCount; b++) {
+    mixInt(run.bossLog[b].type);
+    mixInt(run.bossLog[b].spawnTick);
+    mixInt(run.bossLog[b].deathTick);
+  }
   for (const slot of run.abilities) {
     mixInt(slot.level);
     mixInt(slot.cooldown);
@@ -90,6 +106,11 @@ export function stateHash(run: Run): number {
     mixFloat(e.chargeDirX[i]);
     mixFloat(e.chargeDirY[i]);
     mixInt(e.buffed[i]);
+    mixInt(e.slamState[i]);
+    mixInt(e.slamTicks[i]);
+    mixInt(e.slamCooldown[i]);
+    mixFloat(e.slamX[i]);
+    mixFloat(e.slamY[i]);
   }
   const c = run.crystals;
   for (let i = 0; i < c.capacity; i++) {

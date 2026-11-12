@@ -1,10 +1,10 @@
-import { damageEnemy } from "../combat";
+import { damageEnemy, stunEnemy } from "../combat";
 import { applySlow } from "../enemies";
 import type { Run } from "../run";
 
 /**
  * Hits every live enemy whose centre is within radius + collision of (x, y) with spell damage (source 1, ref `index`).
- * Survivors get stunTicks = max(current, stunTicks) and the slow. Returns the number of hits.
+ * Survivors get the stun (stunEnemy) and the slow. Returns the number of hits.
  */
 export function hitEnemiesAround(
   run: Run, index: number, x: number, y: number, radius: number,
@@ -21,7 +21,7 @@ export function hitEnemiesAround(
     hits++;
     damageEnemy(run, i, damage, 1, index);
     if (e.alive[i] === 0) continue;
-    if (stunTicks > e.stunTicks[i]) e.stunTicks[i] = stunTicks;
+    stunEnemy(run, i, stunTicks);
     if (slowTicks > 0) applySlow(e, i, slow, slowTicks);
   }
   return hits;

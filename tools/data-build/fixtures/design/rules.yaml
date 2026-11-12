@@ -5,6 +5,8 @@ run:
   phaseSeconds: 50
   firstPackSeconds: 2
   timeScaling: { seconds: 1200, cap: 2 }
+  rushWarningSeconds: 7
+  finale: { boss: warlord, packScale: 0.5, enrageAfterSeconds: 200, enrage: { damage: 2, moveSpeed: 1.3, slamCooldown: 0.5 } }
 arena:
   width: 6000
   height: 5000
@@ -15,7 +17,11 @@ castle: { hp: 3000, radius: 180, regenPercentPerMinute: 2 }
 hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
         dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 } }
 autocast: { novaMinEnemies: 1, healBelow: 0.6, shieldBelow: 0.35 }
-enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 }, elite: grunt }
+enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 }, elite: grunt, bossStunScale: 0.25 }
+events:
+  - { atSeconds: 30, kind: rush, units: { grunt: 3 } }
+  - { atSeconds: 60, kind: boss, enemy: warlord }
+debug: { phaseXp: [0, 10] }
 phases:
   - { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.2, elites: 0 }
   - { mix: { grunt: 1 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 1, hunterShare: 0.3, elites: 1 }

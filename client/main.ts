@@ -26,8 +26,8 @@ import { SunShadow, shadowsEnabled } from "./render/shadows";
 import { createLighting } from "./render/lighting";
 import { createArena } from "./render/scene";
 import { PROP_MODELS } from "./render/props";
-import { ModelCache, modelUrl } from "./render/models";
-import { bakeVat } from "./render/vat";
+import { enemyModelId, ModelCache, modelUrl } from "./render/models";
+import { type BakedVat, bakeVat } from "./render/vat";
 import { Cards } from "./ui/cards";
 import { CastlePointer } from "./ui/castle-pointer";
 import { EndScreen } from "./ui/end-screen";
@@ -127,7 +127,7 @@ async function start(): Promise<void> {
   const models = new ModelCache();
   const env = (id: string) => models.get(modelUrl("env", id));
   const [enemyModels, castle, tower, flag, props] = await Promise.all([
-    Promise.all(data.enemies.map((enemy) => models.get(modelUrl("enemies", enemy.id)))),
+    Promise.all(data.enemies.map((enemy) => models.get(modelUrl("enemies", enemyModelId(enemy))))),
     env("castle"),
     env("tower"),
     env("flag"),
@@ -146,8 +146,18 @@ async function start(): Promise<void> {
   session.seed = params.seed;
   const heroView = new HeroView();
   scene.add(heroView.object);
+  // one bake per model: a type that borrows a model shares its texture and gets its own copy of the geometry
+  const bakedByModel = new Map<string, BakedVat>();
+  const vats = data.enemies.map((enemy, type) => {
+    const id = enemyModelId(enemy);
+    const baked = bakedByModel.get(id);
+    if (baked) return { ...baked, geometry: baked.geometry.clone() };
+    const vat = bakeVat(enemyModels[type], [WALK_CLIP, PUNCH_CLIP, IDLE_CLIP], VAT_FPS);
+    bakedByModel.set(id, vat);
+    return vat;
+  });
   const crowd = new EnemyCrowd(
-    enemyModels.map((model) => bakeVat(model, [WALK_CLIP, PUNCH_CLIP, IDLE_CLIP], VAT_FPS)),
+    vats,
     data.rules.enemies.maxAlive,
     tintTable(data.enemies),
   );
@@ -190,7 +200,7 @@ async function start(): Promise<void> {
   session.frame(0);
   await renderer.compileAsync(scene, followCamera.camera);
 
-  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows, heroView, sunShadow);
+  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows, heroView, enemyFx, sunShadow);
 }
 
 /** Switches the run to a hero: `useHero(id, seed)` returns when the hero's model is in place (or its loading failed and the error is shown). */
@@ -294,6 +304,8 @@ function createUi(
     }
   });
   const hud = new Hud(root);
+  // the HUD reads the events of every step for its news line
+  session.views.push({ update: () => {}, onEvents: (run) => hud.onEvents(run, lang), dispose: () => {} });
   const pointer = new CastlePointer(root);
   const cards = new Cards(root, (index) => session.setCard(index));
   const end = new EndScreen(root, () => {
@@ -339,6 +351,7 @@ function runLoop(
   ui: Ui,
   packArrows: PackArrows,
   heroView: HeroView,
+  enemyFx: EnemyFx,
   sunShadow: SunShadow,
 ): void {
   let last = -1;
@@ -352,6 +365,7 @@ function runLoop(
       ui.update(innerWidth, innerHeight);
       updateSnapshot(snapshot, session.run, ui.menuOpen, packArrows.visible);
       snapshot.render.heroModels = heroView.modelCount;
+      snapshot.render.slamRings = enemyFx.slamRingCount;
       sunShadow.follow(followCamera.targetX, followCamera.targetZ);
       renderer.render(scene, followCamera.camera);
     } catch (error) {

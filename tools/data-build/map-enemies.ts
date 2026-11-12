@@ -45,7 +45,7 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
     acquireRange: num("acquire_range"),
     attack: {
       kind,
-      range: num("range"),
+      range: Math.round(num("range") * (m.range ?? 1)),
       cooldown: num("cooldown"),
       damageMin: Math.round(num("damage_min") * (m.damage ?? 1)),
       damageMax: Math.round(num("damage_max") * (m.damage ?? 1)),
@@ -62,5 +62,14 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
     };
   }
   if (entry.aura) enemy.aura = { radius: entry.aura.radius, moveSpeed: entry.aura.moveSpeed, damage: entry.aura.damage };
+  if (entry.boss) enemy.boss = true;
+  if (entry.model !== undefined) enemy.model = entry.model;
+  if (entry.slam) {
+    const s = entry.slam;
+    enemy.slam = {
+      radius: s.radius, damage: s.damage, windupSeconds: s.windupSeconds,
+      cooldownSeconds: [s.cooldownSeconds[0], s.cooldownSeconds[1]],
+    };
+  }
   return enemy;
 }

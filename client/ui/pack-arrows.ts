@@ -2,6 +2,7 @@ import { type PerspectiveCamera, Vector3 } from "three/webgpu";
 import { EventKind, Role, type Run, TICKS_PER_SECOND } from "../../sim";
 import type { RunView } from "../game/session";
 import { SCENE_SCALE } from "../render/coords";
+import { enemyTint } from "../render/enemy-tints";
 import { el } from "./dom";
 
 export const ARROW_SECONDS = 4;
@@ -10,6 +11,29 @@ const ARROWS = 6;
 const ELLIPSE = 0.42;
 
 const placement = { x: 0, y: 0, angle: 0 };
+
+export type ArrowLook = "sieger" | "hunter" | "rush" | "boss";
+const spec: { seconds: number; look: ArrowLook } = { seconds: 0, look: "sieger" };
+
+/**
+ * The arrow an event asks for, or null: a pack (by its role) and a boss for ARROW_SECONDS, the warning of an
+ * elite rush for its warning time. `a` and `value` are the event's fields. Returns a shared object (no allocation).
+ */
+export function arrowFor(kind: number, a: number, value: number): { seconds: number; look: ArrowLook } | null {
+  if (kind === EventKind.PackSpawn) {
+    spec.seconds = ARROW_SECONDS;
+    spec.look = a === Role.Hunter ? "hunter" : "sieger";
+  } else if (kind === EventKind.RushWarning) {
+    spec.seconds = value;
+    spec.look = "rush";
+  } else if (kind === EventKind.BossSpawn) {
+    spec.seconds = ARROW_SECONDS;
+    spec.look = "boss";
+  } else {
+    return null;
+  }
+  return spec;
+}
 
 /**
  * Screen position of an arrow for a pack at world offset (dx, dy) from the hero: on an ellipse
@@ -31,7 +55,8 @@ export function arrowPlacement(dx: number, dy: number, width: number, height: nu
 
 /**
  * Arrows at the screen edge that point to the packs that just arrived: red for siegers, purple for
- * hunters. An arrow lasts ARROW_SECONDS and hides while the centre of its pack is on screen.
+ * hunters; to the side an elite rush will come from (larger, purple, for the warning time); and to a boss that
+ * just arrived (larger, in the boss's colour). An arrow hides while its point is on screen.
  * The elements are created once; a frame allocates nothing.
  */
 export class PackArrows implements RunView {
@@ -42,7 +67,7 @@ export class PackArrows implements RunView {
   private readonly x = new Float64Array(ARROWS);
   private readonly y = new Float64Array(ARROWS);
   private readonly until = new Int32Array(ARROWS).fill(-1);
-  private readonly hunter = new Uint8Array(ARROWS);
+  private readonly look: (ArrowLook | "")[] = new Array<ArrowLook | "">(ARROWS).fill("");
   private readonly point = new Vector3();
   private next = 0;
   private lastRun: Run | null = null;
@@ -61,17 +86,20 @@ export class PackArrows implements RunView {
     this.sync(run);
     const { events } = run;
     for (let i = 0; i < events.count; i++) {
-      if (events.kind[i] !== EventKind.PackSpawn) continue;
+      const wanted = arrowFor(events.kind[i]!, events.a[i]!, events.value[i]!);
+      if (!wanted) continue;
       const k = this.next;
       this.next = (k + 1) % ARROWS;
       this.x[k] = events.x[i]!;
       this.y[k] = events.y[i]!;
-      this.until[k] = run.tick + ARROW_SECONDS * TICKS_PER_SECOND;
-      const hunter = events.a[i] === Role.Hunter ? 1 : 0;
-      if (this.hunter[k] !== hunter || this.arrows[k]!.className === "pack-arrow") {
-        this.hunter[k] = hunter;
-        this.arrows[k]!.className = hunter === 1 ? "pack-arrow hunter" : "pack-arrow sieger";
+      this.until[k] = run.tick + Math.round(wanted.seconds * TICKS_PER_SECOND);
+      const arrow = this.arrows[k]!;
+      if (this.look[k] !== wanted.look) {
+        this.look[k] = wanted.look;
+        arrow.className = `pack-arrow ${wanted.look}`;
       }
+      // a boss arrow takes the colour of its type; the others take theirs from the stylesheet
+      arrow.style.borderLeftColor = wanted.look === "boss" ? cssColor(enemyTint(run.data.enemies[events.value[i]!]!.id)) : "";
     }
   }
 
@@ -112,4 +140,8 @@ export class PackArrows implements RunView {
     this.until.fill(-1);
     this.next = 0;
   }
+}
+
+function cssColor(hex: number): string {
+  return `#${hex.toString(16).padStart(6, "0")}`;
 }

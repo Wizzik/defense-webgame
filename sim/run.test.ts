@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { killEnemy } from "./combat";
+import { Role } from "./enemies";
 import { EventKind } from "./events";
 import { stateHash } from "./hash";
 import { NO_INPUT } from "./input";
+import { gainXp } from "./level-up";
 import { createRun } from "./run";
+import { spawnBoss } from "./timeline";
 import { gameData } from "./testing/game-data";
 import { silenceSpawns } from "./testing/silence";
 
@@ -55,26 +59,95 @@ describe("Run", () => {
     expect(run.hero.y).toBe(-(2500 - 32));
   });
 
-  it("run is won when the duration ends", () => {
+  it("the run goes on after the duration until the final boss falls", () => {
     const run = newRun(2);
-    for (let i = 0; i < 59; i++) run.step(NO_INPUT);
+    for (let i = 0; i < 60; i++) run.step(NO_INPUT);
+    expect(run.state).toBe("playing");
+    expect(run.inFinale).toBe(true);
+    expect(run.finalBossSlot).toBe(-1);
+    run.step(NO_INPUT);
+    expect(run.finalBossSlot).toBeGreaterThanOrEqual(0);
+    expect(run.enemies.type[run.finalBossSlot]).toBe(run.finalBossType);
+    for (let i = 0; i < 100; i++) run.step(NO_INPUT);
+    expect(run.state).toBe("playing");
+    expect(run.result).toBeNull();
+  });
+
+  /** A run in its finale: the final boss has come and stands far from the hero. */
+  function finaleRun() {
+    const run = newRun(1);
+    for (let i = 0; i < 31; i++) run.step(NO_INPUT);
+    expect(run.finalBossSlot).toBeGreaterThanOrEqual(0);
+    return run;
+  }
+
+  it("killing the final boss wins the run", () => {
+    const run = finaleRun();
+    killEnemy(run, run.finalBossSlot);
+    expect(run.finalBossDead).toBe(true);
     expect(run.state).toBe("playing");
     run.step(NO_INPUT);
     expect(run.state).toBe("won");
     expect(run.result).toBe("won");
-    expect(run.tick).toBe(60);
-    expect(run.events.count).toBe(1);
-    expect(run.events.kind[0]).toBe(EventKind.RunEnd);
-    expect(run.events.a[0]).toBe(0);
+    const ends = [];
+    for (let k = 0; k < run.events.count; k++) if (run.events.kind[k] === EventKind.RunEnd) ends.push(run.events.a[k]);
+    expect(ends).toEqual([0]);
+  });
+
+  it("a level-up in the step the final boss dies does not open an offer", () => {
+    const run = finaleRun();
+    killEnemy(run, run.finalBossSlot);
+    gainXp(run, 1000);
+    expect(run.hero.pendingLevelUps).toBeGreaterThan(0);
+    run.step(NO_INPUT);
+    expect(run.state).toBe("won");
+    expect(run.offer).toBeNull();
+  });
+
+  it("a castle that falls in the step the final boss dies loses the run", () => {
+    const run = finaleRun();
+    killEnemy(run, run.finalBossSlot);
+    run.castle.hp = 0;
+    run.step(NO_INPUT);
+    expect(run.state).toBe("lost");
+    expect(run.result).toBe("castle");
+  });
+
+  it("a hero who falls in the step the final boss dies loses the run", () => {
+    const run = finaleRun();
+    killEnemy(run, run.finalBossSlot);
+    run.hero.hp = -1000;
+    run.step(NO_INPUT);
+    expect(run.state).toBe("lost");
+    expect(run.result).toBe("hero");
+  });
+
+  it("a living miniboss does not block the win", () => {
+    const run = finaleRun();
+    const mini = spawnBoss(run, run.data.enemies.findIndex((e) => e.id === "iron-marshal"), Role.Sieger);
+    killEnemy(run, run.finalBossSlot);
+    run.step(NO_INPUT);
+    expect(run.enemies.alive[mini]).toBe(1);
+    expect(run.state).toBe("won");
+  });
+
+  it("killing a miniboss does not win the run", () => {
+    const run = finaleRun();
+    const mini = spawnBoss(run, run.data.enemies.findIndex((e) => e.id === "iron-marshal"), Role.Sieger);
+    killEnemy(run, mini);
+    run.step(NO_INPUT);
+    expect(run.state).toBe("playing");
   });
 
   it("step after the end does nothing", () => {
-    const run = newRun(1);
-    for (let i = 0; i < 30; i++) run.step(NO_INPUT);
+    const run = finaleRun();
+    killEnemy(run, run.finalBossSlot);
+    run.step(NO_INPUT);
+    expect(run.state).toBe("won");
     const before = stateHash(run);
     run.step({ moveX: 1, moveY: 1, card: -1, actions: 0 });
     expect(stateHash(run)).toBe(before);
-    expect(run.tick).toBe(30);
+    expect(run.tick).toBe(32);
   });
 
   it("saves previous positions for interpolation", () => {

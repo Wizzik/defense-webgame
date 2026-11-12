@@ -94,13 +94,40 @@ describe("generated game data", () => {
     expect(xp(JSON.parse(read("enemies.json")))).toEqual(xp(designEntries("enemies.yaml") as { id: string; xp?: number }[]));
   });
 
-  it("enemies have six types with their attack kinds", () => {
-    const enemies = JSON.parse(read("enemies.json")) as { id: string; attack: { kind: string }; heal?: unknown }[];
-    expect(enemies.map((e) => e.id)).toEqual(["shieldbearer", "scout", "musketeer", "chaplain", "lancer", "captain"]);
+  it("enemies have six common types and four bosses with their attack kinds", () => {
+    const enemies = JSON.parse(read("enemies.json")) as { id: string; attack: { kind: string }; heal?: unknown; boss?: true }[];
+    expect(enemies.map((e) => e.id)).toEqual([
+      "shieldbearer", "scout", "musketeer", "chaplain", "lancer", "captain",
+      "iron-marshal", "pale-abbot", "gunmaster", "dread-regent",
+    ]);
+    expect(enemies.filter((e) => e.boss).map((e) => e.id)).toEqual(["iron-marshal", "pale-abbot", "gunmaster", "dread-regent"]);
     const ranged = enemies.filter((e) => e.attack.kind === "ranged").map((e) => e.id);
-    expect(ranged).toEqual(["musketeer", "chaplain"]);
+    expect(ranged).toEqual(["musketeer", "chaplain", "pale-abbot", "gunmaster"]);
     expect(enemies.filter((e) => e.attack.kind !== "ranged").every((e) => e.attack.kind === "melee")).toBe(true);
-    expect(enemies.filter((e) => e.heal !== undefined).map((e) => e.id)).toEqual(["chaplain"]);
+    expect(enemies.filter((e) => e.heal !== undefined).map((e) => e.id)).toEqual(["chaplain", "pale-abbot"]);
+  });
+
+  it("there are 20 phases and the final boss comes at 1000 s", () => {
+    const rules = JSON.parse(read("rules.json")) as { phases: unknown[]; run: { durationSeconds: number; phaseSeconds: number; finale: { boss: string } }; events: { atSeconds: number }[] };
+    expect(rules.phases).toHaveLength(20);
+    expect(rules.run.durationSeconds).toBe(1000);
+    expect(rules.run.phaseSeconds).toBe(50);
+    expect(rules.run.finale.boss).toBe("dread-regent");
+    expect(rules.events.map((e) => e.atSeconds)).toEqual([180, 250, 360, 500, 540, 720, 750, 900]);
+  });
+
+  it("boss hp matches the design targets", () => {
+    const enemies = JSON.parse(read("enemies.json")) as { id: string; hp: number; boss?: true }[];
+    const targets: Record<string, number> = { "iron-marshal": 12000, "pale-abbot": 20000, gunmaster: 30000, "dread-regent": 257000 };
+    for (const boss of enemies.filter((e) => e.boss)) {
+      const target = targets[boss.id]!;
+      expect(Math.abs(boss.hp - target) / target, boss.id).toBeLessThanOrEqual(0.01);
+    }
+  });
+
+  it("bosses have collision 80, 80, 80, 96", () => {
+    const enemies = JSON.parse(read("enemies.json")) as { collision: number; boss?: true }[];
+    expect(enemies.filter((e) => e.boss).map((e) => e.collision)).toEqual([80, 80, 80, 96]);
   });
 
   it("there are eight heroes, each with three signature abilities and an ultimate that exist", () => {
@@ -128,13 +155,14 @@ describe("generated game data", () => {
     const enemies = JSON.parse(read("enemies.json")) as { id: string; behavior: string }[];
     expect(Object.fromEntries(enemies.map((e) => [e.id, e.behavior]))).toEqual({
       shieldbearer: "siege", scout: "flank", musketeer: "skirmish", chaplain: "support", lancer: "charge", captain: "siege",
+      "iron-marshal": "charge", "pale-abbot": "siege", gunmaster: "skirmish", "dread-regent": "charge",
     });
   });
 
   it("the lancer charges and the captain has an aura", () => {
     const enemies = JSON.parse(read("enemies.json")) as { id: string; charge?: unknown; aura?: unknown }[];
-    expect(enemies.filter((e) => e.charge !== undefined).map((e) => e.id)).toEqual(["lancer"]);
-    expect(enemies.filter((e) => e.aura !== undefined).map((e) => e.id)).toEqual(["captain"]);
+    expect(enemies.filter((e) => e.charge !== undefined).map((e) => e.id)).toEqual(["lancer", "iron-marshal", "dread-regent"]);
+    expect(enemies.filter((e) => e.aura !== undefined).map((e) => e.id)).toEqual(["captain", "dread-regent"]);
   });
 
   it("carries the phase 2a mechanics", () => {

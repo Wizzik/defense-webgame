@@ -15,6 +15,17 @@ export const RulesSchema = z.object({
     /** The first pack of the run comes at this time. */
     firstPackSeconds: nonNegative,
     timeScaling: z.object({ seconds: positive, cap: z.number().min(1) }).strict(),
+    /** An elite rush is announced this long before it comes. */
+    rushWarningSeconds: nonNegative,
+    /** The final boss comes at `durationSeconds`; the run is won when it falls. */
+    finale: z.object({
+      boss: Slug,
+      /** Pack sizes of the last phase are multiplied by this while the finale lasts. */
+      packScale: positive.max(1),
+      /** Counted from the arrival of the final boss. */
+      enrageAfterSeconds: positive,
+      enrage: z.object({ damage: positive, moveSpeed: positive, slamCooldown: positive }).strict(),
+    }).strict(),
   }).strict(),
   arena: z.object({
     width: positive,
@@ -50,6 +61,32 @@ export const RulesSchema = z.object({
     knockback: z.object({ attack: nonNegative, ability: nonNegative, seconds: positive }).strict(),
     /** The enemy type that comes as the elite of a phase. */
     elite: Slug,
+    /** A stun lasts this share of its time on a boss. */
+    bossStunScale: z.number().min(0).max(1),
+  }).strict(),
+  /** Timed events of the run, in the order of their time: elite rushes and minibosses. */
+  events: z.array(z.discriminatedUnion("kind", [
+    z.object({
+      atSeconds: nonNegative,
+      kind: z.literal("rush"),
+      /** Enemy id to count; the members come in the order of the keys. */
+      units: z.record(Slug, z.number().int().min(1)).refine((u) => Object.keys(u).length > 0, "needs at least one unit"),
+    }).strict(),
+    z.object({ atSeconds: nonNegative, kind: z.literal("boss"), enemy: Slug }).strict(),
+  ])).superRefine((events, ctx) => {
+    for (let i = 1; i < events.length; i++) {
+      if (events[i]!.atSeconds < events[i - 1]!.atSeconds) {
+        ctx.addIssue({ code: "custom", path: [i, "atSeconds"], message: "below the event before it" });
+      }
+    }
+  }),
+  /** Values for debug tools only. `phaseXp[n]` is the XP a hero has at the start of phase n + 1 (`?phase`). */
+  debug: z.object({
+    phaseXp: z.array(nonNegative).superRefine((xp, ctx) => {
+      for (let i = 1; i < xp.length; i++) {
+        if (xp[i]! < xp[i - 1]!) ctx.addIssue({ code: "custom", path: [i], message: "below the value before it" });
+      }
+    }),
   }).strict(),
   /** Enemies come in packs: one pack is one direction and one role. */
   phases: z.array(z.object({

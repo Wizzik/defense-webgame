@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { arrowPlacement } from "./pack-arrows";
+import { EventKind, Role } from "../../sim";
+import { ARROW_SECONDS, arrowFor, arrowPlacement } from "./pack-arrows";
 
 describe("pack arrows", () => {
   it("arrowPlacement points east for a pack to the east", () => {
@@ -24,5 +25,21 @@ describe("pack arrows", () => {
 
   it("a zero offset does not divide by zero", () => {
     expect(arrowPlacement(0, 0, 1000, 600)).toEqual({ x: 500, y: 300, angle: 0 });
+  });
+
+  it("a rush warning shows an arrow for the warning time", () => {
+    expect(arrowFor(EventKind.RushWarning, 0, 7)).toEqual({ seconds: 7, look: "rush" });
+    expect(arrowFor(EventKind.RushWarning, 0, 3.5)).toEqual({ seconds: 3.5, look: "rush" });
+  });
+
+  it("a pack shows an arrow in the colour of its role, a boss in its own", () => {
+    expect(arrowFor(EventKind.PackSpawn, Role.Sieger, 9)).toEqual({ seconds: ARROW_SECONDS, look: "sieger" });
+    expect(arrowFor(EventKind.PackSpawn, Role.Hunter, 9)).toEqual({ seconds: ARROW_SECONDS, look: "hunter" });
+    expect(arrowFor(EventKind.BossSpawn, 12, 6)).toEqual({ seconds: ARROW_SECONDS, look: "boss" });
+  });
+
+  it("other events show no arrow", () => {
+    expect(arrowFor(EventKind.Death, 0, 0)).toBeNull();
+    expect(arrowFor(EventKind.Slam, 0, 1)).toBeNull();
   });
 });

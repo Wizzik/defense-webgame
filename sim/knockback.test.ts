@@ -95,4 +95,12 @@ describe("knockback", () => {
       Math.abs(run.enemies.knockVX[a]) + Math.abs(run.enemies.knockVY[a]),
     );
   });
+
+  it("a boss is not knocked back", () => {
+    const run = newRun();
+    const boss = run.enemies.spawn(run.data.enemies.findIndex((e) => e.boss), Role.Sieger, 300, 0, 1000, 1, 0);
+    damageEnemy(run, boss, 10, 1);
+    expect(run.enemies.knockTicks[boss]).toBe(0);
+    expect(run.enemies.knockVX[boss]).toBe(0);
+  });
 });

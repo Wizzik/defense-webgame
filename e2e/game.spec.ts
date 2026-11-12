@@ -18,10 +18,11 @@ const xpFirst = (
   }
 ).progression.xpFirst;
 
-/** Enemy ids from the generated data, so adding a type extends the test. */
-const enemyIds = (
-  JSON.parse(readFileSync(join(import.meta.dirname, "..", "data", "generated", "enemies.json"), "utf8")) as { id: string }[]
-).map((e) => e.id);
+const enemies = JSON.parse(
+  readFileSync(join(import.meta.dirname, "..", "data", "generated", "enemies.json"), "utf8"),
+) as { id: string; boss?: true }[];
+/** Common enemy ids from the generated data, so adding a type extends the test. Bosses come by the timeline. */
+const enemyIds = enemies.filter((e) => !e.boss).map((e) => e.id);
 
 /** Hero ids from the generated data, so adding a hero extends the test. */
 const heroIds = (
@@ -46,6 +47,27 @@ async function pickCard(page: Page): Promise<void> {
     .catch(() => undefined);
 }
 
+/**
+ * Plays a debug run to its end: picks cards, and kills the final boss once it has come (the run is won only
+ * when it falls). Needs `debug=1`. Returns the last screen it saw.
+ */
+async function playToEnd(page: Page, timeoutMs = 60_000, pollMs = 250): Promise<Screen | undefined> {
+  const deadline = Date.now() + timeoutMs;
+  let screen = await page.evaluate(() => window.__game?.screen);
+  while (screen !== "won" && screen !== "lost" && Date.now() < deadline) {
+    if (screen === "levelUp") await pickCard(page);
+    else {
+      await page.evaluate(() => {
+        const g = window.__game!;
+        if (g.phase === 21 && g.boss !== null) g.debug!.killBoss();
+      });
+    }
+    await page.waitForTimeout(pollMs);
+    screen = await page.evaluate(() => window.__game?.screen);
+  }
+  return screen;
+}
+
 test("menu starts a run on the available backend", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&lang=en");
   const start = page.locator("#start");
@@ -59,7 +81,7 @@ test("menu starts a run on the available backend", async ({ page }, testInfo) =>
   const expected = testInfo.project.name === "webgpu-swiftshader" ? "WebGPU" : "WebGL2";
   expect(await page.evaluate(() => window.__game?.backend)).toBe(expected);
   expect(await page.evaluate(() => window.__game?.screen)).toBe("playing");
-  expect(await page.evaluate(() => window.__game?.render.enemyMeshes)).toBe(6);
+  expect(await page.evaluate(() => window.__game?.render.enemyMeshes)).toBe(enemies.length);
 
   // enemies spawn a few seconds into the run
   await page.waitForFunction(() => (window.__game?.enemies ?? 0) > 0, undefined, {
@@ -136,11 +158,15 @@ test("level-up shows three cards and a pick resumes the run", async ({ page }, t
 });
 
 test("run ends with the end screen", async ({ page }, testInfo) => {
-  await page.goto("/?seed=1&duration=10&speed=8&lang=en");
+  await page.goto("/?seed=1&duration=10&speed=8&debug=1&lang=en");
   await page.locator("#start").click();
-  await waitForScreen(page, "won");
+  // the duration brings the final boss; the run is won when it falls
+  await page.waitForFunction(() => window.__game?.boss?.id === "dread-regent", undefined, { timeout: 90_000, polling: 100 });
+  expect(await page.evaluate(() => window.__game?.screen)).not.toBe("won");
+  expect(await playToEnd(page)).toBe("won");
 
   await expect(page.getByText("You held the castle!")).toBeVisible();
+  await expect(page.getByText(/^Final boss fell at \d+:\d\d$/)).toBeVisible();
   await testInfo.attach(`end-${testInfo.project.name}`, {
     body: await page.screenshot({ type: "png" }),
     contentType: "image/png",
@@ -203,20 +229,14 @@ test.describe("a missing hero model", () => {
 test("the menu lists eight heroes and starts each of the new ones", async ({ page }) => {
   test.setTimeout(5 * 60_000);
   for (const hero of ["mistwarden", "sparkshot", "redcleaver", "tidecaller"]) {
-    await page.goto(`/?hero=${hero}&seed=1&speed=4&duration=20&lang=en`);
+    await page.goto(`/?hero=${hero}&seed=1&speed=4&duration=20&debug=1&lang=en`);
     await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
     await expect(page.locator("button.hero-button")).toHaveCount(8);
     await expect(page.locator(`button.hero-button[data-hero="${hero}"]`)).toHaveAttribute("aria-pressed", "true");
     await page.locator("#start").click();
     await waitForScreen(page, "playing");
     expect(await page.evaluate(() => window.__game?.hero)).toBe(hero);
-    const deadline = Date.now() + 60_000;
-    let screen = await page.evaluate(() => window.__game?.screen);
-    while (screen !== "won" && screen !== "lost" && Date.now() < deadline) {
-      if (screen === "levelUp") await pickCard(page);
-      await page.waitForTimeout(200);
-      screen = await page.evaluate(() => window.__game?.screen);
-    }
+    const screen = await playToEnd(page, 60_000, 200);
     expect(["won", "lost"], `${hero} ended`).toContain(screen);
   }
 });
@@ -250,14 +270,8 @@ test("every hero plays without errors", async ({ page }, testInfo) => {
       body: await page.screenshot({ type: "png" }),
       contentType: "image/png",
     });
-    // a level-up pauses the run; pick a card until the run ends (within 60 s)
-    const deadline = Date.now() + 60_000;
-    let screen = await page.evaluate(() => window.__game?.screen);
-    while (screen !== "won" && screen !== "lost" && Date.now() < deadline) {
-      if (screen === "levelUp") await pickCard(page);
-      await page.waitForTimeout(250);
-      screen = await page.evaluate(() => window.__game?.screen);
-    }
+    // a level-up pauses the run and the final boss ends it: play until the run ends (within 60 s)
+    const screen = await playToEnd(page);
     expect(["won", "lost"], `${hero} ended`).toContain(screen);
   }
 });
@@ -338,4 +352,127 @@ test("Space dashes", async ({ page }) => {
     before,
     { timeout: 10_000, polling: 50 },
   );
+});
+
+test("a miniboss shows its bar and name", async ({ page }, testInfo) => {
+  await page.goto("/?seed=1&debug=1&phase=6&speed=4&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  // the run behind the menu already stands at the start of the phase
+  await page.waitForFunction(() => window.__game?.phase === 6, undefined, { timeout: 30_000 });
+  await page.locator("#start").click();
+  await page.waitForFunction(() => window.__game?.boss?.id === "iron-marshal", undefined, { timeout: 30_000, polling: 50 });
+  const bar = page.locator("#boss-bar");
+  await expect(bar).toBeVisible();
+  await expect(bar.locator(".boss-name")).toHaveText("Iron Marshal");
+  await expect(page.locator(".hud-phase")).toHaveText("Phase 6/20");
+  const boss = await page.evaluate(() => window.__game!.boss!);
+  expect(boss.hp).toBeGreaterThan(0);
+  expect(boss.hp).toBeLessThanOrEqual(boss.maxHp);
+  await testInfo.attach(`miniboss-${testInfo.project.name}`, { body: await page.screenshot({ type: "png" }), contentType: "image/png" });
+});
+
+test("an elite rush is announced", async ({ page }) => {
+  // phase 4 starts at 2:30; the rush of 3:00 is announced 7 s ahead
+  await page.goto("/?seed=1&debug=1&phase=4&duration=1200&speed=8&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await page.waitForFunction(() => window.__game?.phase === 4, undefined, { timeout: 30_000 });
+  // a full kit, so the hero lives to see the rush whatever XP the phase start gives
+  await page.evaluate(() => {
+    for (let slot = 0; slot < 4; slot++) window.__game!.debug!.setAbilityLevel(slot, 5);
+  });
+  await page.locator("#start").click();
+  const announce = page.locator("#announce");
+  const deadline = Date.now() + 90_000;
+  let seen = false;
+  while (!seen && Date.now() < deadline) {
+    const screen = await page.evaluate(() => window.__game?.screen);
+    expect(screen, "the run ended before the rush was announced").not.toBe("lost");
+    if (screen === "levelUp") await pickCard(page);
+    seen = (await announce.textContent()) === "An elite rush is coming" && (await announce.isVisible());
+    if (!seen) await page.waitForTimeout(50);
+  }
+  expect(seen).toBe(true);
+  // within 30 s of game time from the start of the phase
+  expect(await page.evaluate(() => window.__game!.tick)).toBeLessThanOrEqual((150 + 30) * 30);
+});
+
+test("the finale shows the final boss and ends with a win", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&phase=21&lang=cs");
+  await expect(page.locator("#start")).toHaveText("Hrát", { timeout: 90_000 });
+  await page.waitForFunction(() => window.__game?.phase === 21, undefined, { timeout: 30_000 });
+  await page.locator("#start").click();
+  await page.waitForFunction(() => window.__game?.boss?.id === "dread-regent", undefined, { timeout: 30_000, polling: 50 });
+  await expect(page.locator(".hud-phase")).toHaveText("Finále");
+  await expect(page.locator("#boss-bar .boss-name")).toHaveText("Hrůzný regent");
+  await page.evaluate(() => window.__game!.debug!.killBoss());
+  await waitForScreen(page, "won", 30_000);
+  await expect(page.getByText(/^Finální boss padl v 16:4\d$/)).toBeVisible();
+});
+
+test("phase without debug starts a normal run", async ({ page }) => {
+  for (const query of ["phase=21", "debug=1&phase=22", "debug=1&phase=abc"]) {
+    await page.goto(`/?seed=1&lang=en&${query}`);
+    await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+    await page.waitForFunction(() => window.__game?.hero !== "", undefined, { timeout: 30_000 });
+    expect(await page.evaluate(() => window.__game?.tick), query).toBe(0);
+    expect(await page.evaluate(() => window.__game?.phase), query).toBe(1);
+    await page.locator("#start").click();
+    await waitForScreen(page, "playing");
+    await page.waitForFunction(() => (window.__game?.tick ?? 0) > 10, undefined, { timeout: 30_000 });
+    expect(await page.evaluate(() => window.__game?.boss), query).toBeNull();
+    expect(await page.evaluate(() => window.__game?.tick), query).toBeLessThan(600);
+  }
+});
+
+test("a restart clears the boss bar", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&phase=21&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await page.locator("#start").click();
+  await page.waitForFunction(() => window.__game?.boss !== null, undefined, { timeout: 30_000, polling: 50 });
+  await expect(page.locator("#boss-bar")).toBeVisible();
+  await expect(page.locator("#announce")).toHaveText("Dread Regent has arrived");
+  await page.evaluate(() => window.__game!.debug!.killBoss());
+  await waitForScreen(page, "won", 30_000);
+  await page.locator("#again").click();
+  await waitForScreen(page, "menu", 10_000);
+  // the new run waits behind the menu: its boss has not come yet
+  await page.waitForFunction(() => window.__game?.boss === null, undefined, { timeout: 30_000 });
+  await expect(page.locator("#boss-bar")).toBeHidden();
+  await expect(page.locator("#announce")).toBeHidden();
+  // and the new run brings its own boss and news
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await page.locator("#start").click();
+  await page.waitForFunction(() => window.__game?.boss !== null, undefined, { timeout: 30_000, polling: 50 });
+  await expect(page.locator("#boss-bar")).toBeVisible();
+});
+
+test("a slam shows a ring and hides it after the hit", async ({ page }, testInfo) => {
+  await page.goto("/?seed=1&debug=1&phase=6&speed=4&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await page.waitForFunction(() => window.__game?.phase === 6, undefined, { timeout: 30_000 });
+  expect(await page.evaluate(() => window.__game!.render.slamRings)).toBe(0);
+  await page.locator("#start").click();
+  await page.waitForFunction(() => window.__game?.boss?.id === "iron-marshal", undefined, { timeout: 30_000, polling: 50 });
+  // stay next to the boss until its slam is ready (7 s after it came) and it winds up
+  const deadline = Date.now() + 60_000;
+  let rings = 0;
+  while (rings === 0 && Date.now() < deadline) {
+    rings = await page.evaluate(() => {
+      const g = window.__game!;
+      if (g.screen === "playing" && g.boss && g.slams === 0) g.debug!.teleport(g.boss.x - 150, g.boss.y);
+      return g.render.slamRings;
+    });
+    if ((await page.evaluate(() => window.__game?.screen)) === "levelUp") await pickCard(page);
+    if (rings === 0) await page.waitForTimeout(30);
+  }
+  expect(rings).toBe(1);
+  expect(await page.evaluate(() => window.__game!.slams)).toBeLessThanOrEqual(1);
+  await testInfo.attach(`slam-${testInfo.project.name}`, { body: await page.screenshot({ type: "png" }), contentType: "image/png" });
+  // the windup is 1 s and the flash 0.2 s of game time; a level-up card would freeze both
+  const gone = Date.now() + 30_000;
+  while ((await page.evaluate(() => window.__game!.render.slamRings)) !== 0 && Date.now() < gone) {
+    if ((await page.evaluate(() => window.__game?.screen)) === "levelUp") await pickCard(page);
+    await page.waitForTimeout(50);
+  }
+  expect(await page.evaluate(() => window.__game!.render.slamRings)).toBe(0);
 });

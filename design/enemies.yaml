@@ -13,6 +13,11 @@
 # aura: design value. Enemies near the captain walk and hit harder (sim/enemy-aura.ts).
 # heal: design value. The map's Priest uses the default WC3 Heal (25 hp for mana);
 #   8 = 25 x 0.3, the same factor scaling.yaml gives enemy hp.
+# boss: a boss of phase 2b-3: a variant of a map unit with its own name. The hp multiplier is the target hp
+#   (12 000, 20 000, 30 000 and 257 000 for the final boss, tuned up from 60 000 so the last fight takes 40-90 s)
+#   divided by the generated hp of the source.
+# model: id of the enemy type whose model the type is drawn with.
+# slam: design value (sim/enemy-slam.ts). The cooldown range is the map's Thunder Clap of the final golems (7-15 s).
 
 - id: shieldbearer
   source: hfoo
@@ -66,3 +71,51 @@
   behavior: siege
   xp: 12
   aura: { radius: 400, moveSpeed: 0.25, damage: 0.25 }
+
+- id: iron-marshal
+  source: hkni
+  mapName: Knight
+  name: { en: Iron Marshal, cs: Železný maršál }
+  multipliers: { hp: 18.7, collision: 2.5, damage: 1.0 }
+  behavior: charge
+  xp: 150
+  charge: { minRange: 300, maxRange: 700, windupSeconds: 0.5, speedMultiplier: 2.5, damageMultiplier: 1.5, distance: 900, cooldownSeconds: 6 }
+  boss: true
+  model: lancer
+  slam: { radius: 350, damage: 120, windupSeconds: 1, cooldownSeconds: [7, 15] }
+
+- id: pale-abbot
+  source: hmpr
+  mapName: Priest
+  name: { en: Pale Abbot, cs: Bledý opat }
+  multipliers: { hp: 153.8, collision: 5, damage: 0.65 }
+  behavior: siege
+  xp: 300
+  heal: { amount: 40, range: 600, cooldown: 1 }
+  boss: true
+  model: chaplain
+  slam: { radius: 400, damage: 180, windupSeconds: 1, cooldownSeconds: [7, 15] }
+
+- id: gunmaster
+  source: hrif
+  mapName: Rifleman
+  name: { en: Gunmaster, cs: Mistr střelby }
+  multipliers: { hp: 160.4, collision: 2.5, damage: 0.6, range: 1.75 }
+  behavior: skirmish
+  xp: 450
+  boss: true
+  model: musketeer
+  slam: { radius: 400, damage: 240, windupSeconds: 1, cooldownSeconds: [7, 15] }
+
+- id: dread-regent
+  source: hkni
+  mapName: Knight
+  name: { en: Dread Regent, cs: Hrůzný regent }
+  multipliers: { hp: 400, collision: 3, damage: 1.5, moveSpeed: 0.8 }
+  behavior: charge
+  xp: 1
+  charge: { minRange: 300, maxRange: 700, windupSeconds: 0.5, speedMultiplier: 2.5, damageMultiplier: 1.5, distance: 900, cooldownSeconds: 6 }
+  aura: { radius: 400, moveSpeed: 0.25, damage: 0.25 }
+  boss: true
+  model: captain
+  slam: { radius: 500, damage: 350, windupSeconds: 1, cooldownSeconds: [7, 15] }

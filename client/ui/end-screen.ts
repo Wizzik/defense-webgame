@@ -33,7 +33,8 @@ export class EndScreen {
     this.title.textContent = t(lang, RESULT_KEYS[result]);
     this.stats.replaceChildren();
     const lines = [
-      t(lang, "end.time", { time: formatTime(run.timeSeconds) }),
+      // a win ends in the step the final boss falls
+      t(lang, result === "won" ? "end.bossTime" : "end.time", { time: formatTime(run.timeSeconds) }),
       t(lang, "end.kills", { n: run.stats.kills }),
       t(lang, "end.level", { n: run.hero.level }),
       t(lang, "end.seed", { seed }),

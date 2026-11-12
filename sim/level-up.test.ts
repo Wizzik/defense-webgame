@@ -33,6 +33,14 @@ describe("level-up", () => {
     expect(run.events.x[k]).toBe(hero.x);
   });
 
+  it("the run counts the xp gained", () => {
+    const run = progressionRun();
+    expect(run.stats.xpGained).toBe(0);
+    gainXp(run, 5);
+    gainXp(run, 2.5);
+    expect(run.stats.xpGained).toBe(7.5);
+  });
+
   it("debugGrantXp behaves like gainXp", () => {
     const a = progressionRun();
     const b = progressionRun();
@@ -78,7 +86,7 @@ describe("level-up", () => {
     expect(run.tick).toBe(tick);
   });
 
-  it("duration does not pass during level-up", () => {
+  it("time stands still during a level-up", () => {
     const run = progressionRun({ durationSeconds: 2 });
     for (let i = 0; i < 58; i++) run.step(NO_INPUT);
     gainXp(run, 4);
@@ -90,8 +98,11 @@ describe("level-up", () => {
     expect(run.tick).toBe(59);
     run.step({ moveX: 0, moveY: 0, card: 0, actions: 0 });
     expect(run.state).toBe("playing");
+    expect(run.inFinale).toBe(false);
     run.step(NO_INPUT);
-    expect(run.state).toBe("won");
+    expect(run.tick).toBe(60);
+    expect(run.inFinale).toBe(true);
+    expect(run.state).toBe("playing");
   });
 
   it("a level-up does not revive a dead hero", () => {
