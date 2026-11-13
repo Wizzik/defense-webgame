@@ -22,6 +22,7 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 | `data/schema/` | zod schemas and `validateGameData`, shared by the game and the tools | |
 | `data/generated/` | game data the client bundles | generated only; carries no map codes (from phase 1 Task 1) |
 | `sim/` | simulation | pure and deterministic (AGENTS.md) |
+| `meta/` | what a player keeps between runs: the item collection, the dolls, boss drops, reading saved data | pure like `sim/` (no DOM, no storage); the client stores the data |
 | `client/` | browser code; `client/spike/` is the crowd benchmark | texts only via `client/ui/messages-*.ts` |
 | `e2e/` | Playwright, projects `webgl2-fallback` and `webgpu-swiftshader` | |
 | `tests/` | repository guards (map files, `sim/` purity) | |

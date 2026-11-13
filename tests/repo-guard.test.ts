@@ -41,9 +41,9 @@ describe("repo guard", () => {
     expect(files.filter((f) => /^(data-source|xhero)\/|\.w3x$|(^|\/)war3map\./i.test(f))).toEqual([]);
   });
 
-  it("keeps sim/ free of three, client/ and DOM", () => {
+  it("keeps sim/ and meta/ free of three, client/ and DOM", () => {
     const offenders: string[] = [];
-    for (const file of listTs(join(root, "sim"))) {
+    for (const file of [...listTs(join(root, "sim")), ...listTs(join(root, "meta"))]) {
       const src = readFileSync(file, "utf8");
       const importsThree = /(from\s+|import\s+|import\()\s*["']three(\/[^"']*)?["']/.test(src);
       const importsClient = /(from\s+|import\s+|import\()\s*["'][^"']*client(\/[^"']*)?["']/.test(src);
@@ -53,7 +53,7 @@ describe("repo guard", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("keeps sim/ deterministic", () => {
+  it("keeps sim/ and meta/ deterministic", () => {
     const banned: RegExp[] = [
       /\bMath\.random\b/,
       /\bDate\b/,
@@ -63,7 +63,7 @@ describe("repo guard", () => {
       /[\w)\]]\s*\*\*(?!\/)/,
     ];
     const offenders: string[] = [];
-    for (const file of listTs(join(root, "sim"))) {
+    for (const file of [...listTs(join(root, "sim")), ...listTs(join(root, "meta"))]) {
       const src = readFileSync(file, "utf8");
       for (const pattern of banned) {
         if (pattern.test(src)) offenders.push(`${file.slice(root.length + 1)}: ${pattern}`);
@@ -72,7 +72,7 @@ describe("repo guard", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("keeps map identifiers out of client/ and sim/", () => {
+  it("keeps map identifiers out of client/, sim/ and meta/", () => {
     const names = new Set<string>();
     for (const file of readdirSync(join(root, "design")).filter((f) => f.endsWith(".yaml"))) {
       const doc = parse(readFileSync(join(root, "design", file), "utf8")) as unknown;
@@ -80,7 +80,7 @@ describe("repo guard", () => {
     }
     expect(names.size).toBeGreaterThan(0);
     const offenders: string[] = [];
-    for (const dir of ["client", "sim"]) {
+    for (const dir of ["client", "sim", "meta"]) {
       for (const file of listFiles(join(root, dir), /\.(ts|html|css|json)$/)) {
         const src = readFileSync(file, "utf8");
         for (const name of names) {
