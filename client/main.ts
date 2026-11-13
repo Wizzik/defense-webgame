@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { Scene, type WebGPURenderer } from "three/webgpu";
 import type { GameData } from "../data/schema";
-import { ALLY_CAPACITY, CRYSTAL_CAPACITY } from "../sim";
+import { ALLY_CAPACITY, COIN_CAPACITY, CRYSTAL_CAPACITY } from "../sim";
 import { Sfx } from "./audio/sfx";
 import { SoundView } from "./audio/sound-view";
 import { loadGameData } from "./game/data";
@@ -12,7 +12,8 @@ import { Session } from "./game/session";
 import { Overlay } from "./perf/overlay";
 import { FollowCamera } from "./render/camera";
 import { createRenderer, describeGpu, NoGpuError } from "./render/gpu";
-import { CrystalView } from "./render/crystal-view";
+import { ChestView } from "./render/chest-view";
+import { coinLook, crystalLook, CrystalView } from "./render/crystal-view";
 import { DamageNumbers } from "./render/damage-numbers";
 import { AbilityFx } from "./render/ability-fx";
 import { Effects } from "./render/effects";
@@ -30,6 +31,7 @@ import { enemyModelId, ModelCache, modelUrl } from "./render/models";
 import { type BakedVat, bakeVat } from "./render/vat";
 import { Cards } from "./ui/cards";
 import { CastlePointer } from "./ui/castle-pointer";
+import { ChestPointer } from "./ui/chest-pointer";
 import { EndScreen } from "./ui/end-screen";
 import { Hud } from "./ui/hud";
 import { type Lang, pickLang, t } from "./ui/i18n";
@@ -161,18 +163,20 @@ async function start(): Promise<void> {
     data.rules.enemies.maxAlive,
     tintTable(data.enemies),
   );
-  const crystals = new CrystalView(CRYSTAL_CAPACITY);
+  const crystals = new CrystalView(CRYSTAL_CAPACITY, (run) => run.crystals, crystalLook());
+  const coins = new CrystalView(COIN_CAPACITY, (run) => run.coins, coinLook());
+  const chestView = new ChestView(document.getElementById("ui")!, followCamera.camera);
   const effects = new Effects(data);
   const abilityFx = new AbilityFx();
   const enemyFx = new EnemyFx(data);
   const allyView = new AllyView(ALLY_CAPACITY);
   const blobShadows = new BlobShadows(data.rules.enemies.maxAlive + ALLY_CAPACITY);
-  scene.add(blobShadows.mesh, crowd.object, crystals.mesh, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
+  scene.add(blobShadows.mesh, crowd.object, crystals.mesh, coins.mesh, chestView.object, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
   const sfx = new Sfx();
   sfx.setMuted(readStoredMuted());
   const packArrows = new PackArrows(document.getElementById("ui")!, followCamera.camera);
-  session.views.push(heroView, allyView, blobShadows, crowd, crystals, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(sfx));
+  session.views.push(heroView, allyView, blobShadows, crowd, crystals, coins, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(sfx));
 
   addEventListener("resize", () => {
     renderer.setSize(innerWidth, innerHeight);
@@ -200,7 +204,7 @@ async function start(): Promise<void> {
   session.frame(0);
   await renderer.compileAsync(scene, followCamera.camera);
 
-  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows, heroView, enemyFx, sunShadow);
+  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows, heroView, enemyFx, sunShadow, chestView);
 }
 
 /** Switches the run to a hero: `useHero(id, seed)` returns when the hero's model is in place (or its loading failed and the error is shown). */
@@ -307,6 +311,7 @@ function createUi(
   // the HUD reads the events of every step for its news line
   session.views.push({ update: () => {}, onEvents: (run) => hud.onEvents(run, lang), dispose: () => {} });
   const pointer = new CastlePointer(root);
+  const chestPointer = new ChestPointer(root);
   const cards = new Cards(root, (index) => session.setCard(index));
   const end = new EndScreen(root, () => {
     void useHero(heroId, nextSeed());
@@ -328,11 +333,13 @@ function createUi(
         ended = false;
         cards.hide();
         pointer.hide();
+        chestPointer.hide();
         return;
       }
       hud.update(run, lang);
       cards.update(run, lang);
       pointer.update(run, followCamera.camera, width, height);
+      chestPointer.update(run, followCamera.camera, width, height);
       if ((run.state === "won" || run.state === "lost") && !ended) {
         ended = true;
         end.show(run, session.seed, lang);
@@ -353,6 +360,7 @@ function runLoop(
   heroView: HeroView,
   enemyFx: EnemyFx,
   sunShadow: SunShadow,
+  chestView: ChestView,
 ): void {
   let last = -1;
   renderer.setAnimationLoop((now) => {
@@ -362,6 +370,7 @@ function runLoop(
         overlay?.frame(now - last, now, session.run?.enemies.aliveCount ?? 0);
       }
       last = now;
+      chestView.labelsVisible = !ui.menuOpen;
       ui.update(innerWidth, innerHeight);
       updateSnapshot(snapshot, session.run, ui.menuOpen, packArrows.visible);
       snapshot.render.heroModels = heroView.modelCount;

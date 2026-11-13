@@ -55,7 +55,7 @@ async function playToEnd(page: Page, timeoutMs = 60_000, pollMs = 250): Promise<
   const deadline = Date.now() + timeoutMs;
   let screen = await page.evaluate(() => window.__game?.screen);
   while (screen !== "won" && screen !== "lost" && Date.now() < deadline) {
-    if (screen === "levelUp") await pickCard(page);
+    if (screen === "levelUp" || screen === "chest") await pickCard(page);
     else {
       await page.evaluate(() => {
         const g = window.__game!;
@@ -476,4 +476,42 @@ test("a slam shows a ring and hides it after the hit", async ({ page }, testInfo
     await page.waitForTimeout(50);
   }
   expect(await page.evaluate(() => window.__game!.render.slamRings)).toBe(0);
+});
+
+test("a chest takes gold and offers three gear slots; the pick lands in the gear", async ({ page }, testInfo) => {
+  await page.goto("/?seed=1&debug=1&lang=cs");
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  const before = await page.evaluate(() => {
+    const g = window.__game!;
+    return { chests: g.chests.length, price: g.chestPrice, gold: g.gold, worn: g.gear.filter((slot) => slot !== null).length };
+  });
+  expect(before).toEqual({ chests: 3, price: 40, gold: 0, worn: 0 });
+  await expect(page.locator(".chest-label")).toHaveCount(3);
+
+  await page.evaluate(() => {
+    const g = window.__game!;
+    g.debug!.grantGold(1000);
+    g.debug!.teleport(g.chests[0]!.x, g.chests[0]!.y);
+  });
+  await waitForScreen(page, "chest");
+  await expect(page.locator("button.card")).toHaveCount(3);
+  await expect(page.locator(".cards-title")).toHaveText("Truhla: vyber, co vylepšíš");
+  await expect(page.locator("#hud-gold")).toContainText("960");
+  await testInfo.attach(`chest-${testInfo.project.name}`, {
+    body: await page.screenshot({ type: "png" }),
+    contentType: "image/png",
+  });
+
+  await page.locator("button.card").first().click();
+  await waitForScreen(page, "playing");
+  const after = await page.evaluate(() => {
+    const g = window.__game!;
+    return { opened: g.chestsOpened, gold: g.gold, price: g.chestPrice, worn: g.gear.filter((slot) => slot !== null) };
+  });
+  expect(after.opened).toBe(1);
+  expect(after.gold).toBeLessThan(1000);
+  expect(after.price).toBe(47);
+  expect(after.worn).toHaveLength(1);
+  expect(after.worn[0]).toMatchObject({ base: 0, temp: 1 });
 });

@@ -1,4 +1,4 @@
-import { EventKind, TICKS_PER_SECOND, type Run, ULTIMATE_SLOT, xpToNext } from "../../sim";
+import { chestPrice, EventKind, TICKS_PER_SECOND, type Run, ULTIMATE_SLOT, xpToNext } from "../../sim";
 import { Announcer } from "./announcer";
 import { BossBar } from "./boss-bar";
 import { el, formatTime, setText } from "./dom";
@@ -51,6 +51,7 @@ export class Hud {
   private readonly root: HTMLElement;
   private readonly heroHp: Bar;
   private readonly heroXp: Bar;
+  private readonly gold: HTMLElement;
   private readonly time: HTMLElement;
   private readonly phase: HTMLElement;
   private readonly castle: Bar;
@@ -69,6 +70,8 @@ export class Hud {
     const left = el("div", "hud-corner hud-left", this.root);
     this.heroHp = bar(left, "hp");
     this.heroXp = bar(left, "xp");
+    this.gold = el("div", "hud-gold", left);
+    this.gold.id = "hud-gold";
     const center = el("div", "hud-center", this.root);
     this.time = el("div", "hud-time", center);
     this.phase = el("div", "hud-phase", center);
@@ -127,6 +130,7 @@ export class Hud {
     const next = xpToNext(data.rules, hero.level);
     setText(this.heroXp.label, `${t(lang, "hud.level", { n: hero.level })}  ${Math.floor(hero.xp)} / ${next}`);
     this.heroXp.fill.style.width = fraction(hero.xp, next);
+    setText(this.gold, `${t(lang, "hud.gold", { n: run.gold })} · ${t(lang, "hud.chestPrice", { n: chestPrice(run) })}`);
 
     const total = Math.round(run.durationTicks / TICKS_PER_SECOND);
     setText(this.time, `${formatTime(run.timeSeconds)} / ${formatTime(total)}`);

@@ -537,3 +537,69 @@
   font-size: 14px;
   line-height: 1.35;
 }
+
+/* gold and chests */
+:root {
+  --gold: #e8c860;
+  --rarity-common: #e8ecf2;
+  --rarity-rare: #5aa0ff;
+  --rarity-epic: #b07cff;
+  --rarity-legendary: #e8c860;
+  --rarity-mythic: #d8405c;
+}
+.hud-gold {
+  font-weight: 600;
+  color: var(--gold);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+.chest-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 1px 7px;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  background: rgba(14, 20, 32, 0.78);
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  pointer-events: none;
+}
+.chest-label.afford {
+  color: #ffffff;
+  border-color: var(--gold);
+}
+.chest-pointer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 18px solid #6f7f9c;
+  opacity: 0.7;
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.9));
+}
+.chest-pointer.afford {
+  border-left-color: var(--gold);
+  opacity: 1;
+}
+.card.chest {
+  border-color: var(--rarity-common);
+}
+.card.chest .card-name {
+  color: var(--rarity-common);
+}
+.card.chest.rarity-rare { border-color: var(--rarity-rare); }
+.card.chest.rarity-rare .card-name { color: var(--rarity-rare); }
+.card.chest.rarity-epic { border-color: var(--rarity-epic); }
+.card.chest.rarity-epic .card-name { color: var(--rarity-epic); }
+.card.chest.rarity-legendary { border-color: var(--rarity-legendary); }
+.card.chest.rarity-legendary .card-name { color: var(--rarity-legendary); }
+.card.chest.rarity-mythic { border-color: var(--rarity-mythic); }
+.card.chest.rarity-mythic .card-name { color: var(--rarity-mythic); }
+.card .item-line {
+  font-variant-numeric: tabular-nums;
+}
