@@ -126,4 +126,29 @@ describe("gold", () => {
     expect(run.bossesKilled).toBe(2);
     expect(stateHash(run)).not.toBe(before);
   });
+
+  it("a finished run hands out the events of its last step once: later steps have none", () => {
+    for (const end of ["won", "lost"] as const) {
+      const run = progressionRun();
+      const type = run.finalBossType;
+      const boss = run.enemies.spawn(type, Role.Hunter, run.hero.x + 60, run.hero.y, 1, 1, 0);
+      run.finalBossSlot = boss;
+      run.enemies.hp[boss] = 1;
+      run.hero.stats.damageMin = 500;
+      run.hero.stats.damageMax = 500;
+      if (end === "lost") run.castle.hp = 0;
+      let guard = 0;
+      while (run.state === "playing" && guard++ < 200) run.step(NO_INPUT);
+      expect(run.state).toBe(end);
+      const deaths = () => {
+        let n = 0;
+        for (let k = 0; k < run.events.count; k++) if (run.events.kind[k] === EventKind.BossDeath) n++;
+        return n;
+      };
+      if (end === "won") expect(deaths()).toBe(1);
+      run.step(NO_INPUT);
+      expect(run.events.count).toBe(0);
+      expect(deaths()).toBe(0);
+    }
+  });
 });

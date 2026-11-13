@@ -73,6 +73,19 @@ describe("GearSession", () => {
     expect(await backend.read()).toEqual(stored);
   });
 
+  it("a save file with nothing this game knows is refused and the gear stays", async () => {
+    const stored = { version: 1 as const, items: { [helm]: 2 }, loadouts: { stonehorn: { head: helm } } };
+    const backend = memoryBackend(stored);
+    const gear = await GearSession.load(data, backend);
+    const foreign = JSON.stringify({ version: 1, items: { "sword-of-another-game": 3, "other-ring": 1 }, loadouts: {} });
+    for (const text of [JSON.stringify({ version: 1 }), JSON.stringify({ version: 1, items: {}, loadouts: {} }), foreign]) {
+      expect(gear.importText(text), text).toEqual({ ok: false, reason: "invalid" });
+      expect(gear.save).toEqual(stored);
+    }
+    await gear.flushed();
+    expect(await backend.read()).toEqual(stored);
+  });
+
   it("a valid export comes back through import and replaces the data", async () => {
     const source = await GearSession.load(data, memoryBackend({ version: 1, items: { [helm]: 4 }, loadouts: { stonehorn: { head: helm } } }));
     const backend = memoryBackend({ version: 1, items: { "tin-ring": 1 }, loadouts: {} });

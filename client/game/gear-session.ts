@@ -98,8 +98,8 @@ export class GearSession {
   }
 
   /**
-   * Replaces the gear by an exported file's text. Text that is not a save of version 1 is refused and nothing
-   * changes; entries of a save that do not fit the game data are left out and counted in `dropped`.
+   * Replaces the gear by an exported file's text. Text that is not a save of version 1, or a save without a
+   * single item this game knows, is refused and nothing changes; entries of a save that do not fit the game data are left out and counted in `dropped`.
    */
   importText(text: string): { ok: true; dropped: number } | { ok: false; reason: "invalid" } {
     let raw: unknown;
@@ -112,6 +112,8 @@ export class GearSession {
       return { ok: false, reason: "invalid" };
     }
     const { save, dropped } = parseSave(raw, this.data);
+    // a file with no item this game knows is someone else's file: it must not replace the collection
+    if (Object.keys(save.items).length === 0) return { ok: false, reason: "invalid" };
     this.commit(save);
     return { ok: true, dropped };
   }

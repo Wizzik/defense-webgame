@@ -246,8 +246,10 @@ export class Run {
    * In the "chest" state only chooseChestSlot runs, like chooseCard in "levelUp".
    */
   step(input: TickInput): void {
-    if (this.state === "won" || this.state === "lost") return;
+    // first, also for a finished run: the client keeps stepping it, and the events of its last step
+    // (a boss's death and so its drop) must reach the views once
     this.events.clear();
+    if (this.state === "won" || this.state === "lost") return;
     if (this.state === "levelUp") {
       chooseCard(this, input.card);
       return;
