@@ -98,11 +98,15 @@ export function addDebugHooks(
       const run = getRun();
       if (run) debugGrantXp(run, amount);
     },
+    // the snapshot's collection is refreshed once a frame; a test that reads it right after a change must not
+    // depend on a frame having passed (a slow software renderer), so these two publish at once
     grantItem(id: string, level: number): void {
       gear.grant(id, level);
+      snapshot.collection = gear.save.items;
     },
     clearGear(): void {
       gear.clear();
+      snapshot.collection = gear.save.items;
     },
     grantGold(amount: number): void {
       const run = getRun();

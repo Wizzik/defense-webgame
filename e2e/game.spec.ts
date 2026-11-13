@@ -565,6 +565,8 @@ test("a boss that falls drops an item into the collection and the end screen lis
   await page.evaluate(() => window.__game!.debug!.killBoss());
   await expect(page.locator("#announce")).toContainText("Kořist:");
   await expect(page.locator("#announce")).toHaveClass(/loot rarity-(common|rare)/);
+  // the snapshot follows the collection once a frame
+  await page.waitForFunction(() => Object.keys(window.__game!.collection).length === 1);
   const collection = await page.evaluate(() => window.__game!.collection);
   expect(Object.values(collection)).toEqual([1]);
 
