@@ -1,4 +1,5 @@
 import type { Hero } from "../data/schema";
+import type { GearBonus } from "./gear";
 
 export interface HeroStats {
   maxHp: number;
@@ -33,6 +34,8 @@ export interface HeroState {
   stats: HeroStats;
   /** Sum of the learned auras (fractions, 0 = none); filled by auraBonuses before every stat recomputation. */
   bonus: { damage: number; moveSpeed: number; attackSpeed: number };
+  /** Sum of the worn items' stats; filled by recomputeGear (sim/gear.ts). */
+  gear: GearBonus;
   /** Steps of the dash left; the hero moves along (dashDirX, dashDirY) while > 0. */
   dashTicks: number;
   /** Steps until the next dash may start. */

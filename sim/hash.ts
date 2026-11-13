@@ -47,6 +47,11 @@ export function stateHash(run: Run): number {
   mixFloat(hero.bonus.damage);
   mixFloat(hero.bonus.moveSpeed);
   mixFloat(hero.bonus.attackSpeed);
+  for (let i = 0; i < run.gear.item.length; i++) {
+    mixInt(run.gear.item[i]! + 1);
+    mixInt(run.gear.base[i]!);
+    mixInt(run.gear.temp[i]!);
+  }
   mixInt(run.shieldTicks);
   mixInt(run.stats.kills);
   mixInt(run.stats.spawned);

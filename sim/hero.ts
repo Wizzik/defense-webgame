@@ -8,23 +8,28 @@ import type { TickInput } from "./input";
 import type { Run } from "./run";
 import type { HeroState, HeroStats } from "./world";
 
-/** Derives the hero's combat stats from attributes (map formulas plus run rules). Writes into `out`. */
+/** Derives the hero's combat stats from attributes plus gear (map formulas plus run rules). Writes into `out`. */
 export function heroStats(data: GameData, hero: HeroState, out: HeroStats): HeroStats {
   const { constants: c, rules } = data;
   const def = hero.def;
-  const primary = def.primary === "str" ? hero.str : def.primary === "agi" ? hero.agi : hero.int;
+  const gear = hero.gear;
+  const str = hero.str + gear.str;
+  const agi = hero.agi + gear.agi;
+  const int = hero.int + gear.int;
+  const primary = def.primary === "str" ? str : def.primary === "agi" ? agi : int;
   const bonus = primary * c.primaryAttackBonus;
-  out.maxHp = def.hp + hero.str * c.strHitPointBonus;
-  out.regenPerSecond = rules.hero.baseRegen + hero.str * rules.hero.regenPerStr;
-  out.armor = def.armor + hero.agi * c.agiDefenseBonus;
+  const damage = 1 + hero.bonus.damage + gear.damage;
+  out.maxHp = def.hp + str * c.strHitPointBonus + gear.hp;
+  out.regenPerSecond = rules.hero.baseRegen + str * rules.hero.regenPerStr + gear.regen;
+  out.armor = def.armor + agi * c.agiDefenseBonus + gear.armor;
   out.attackIntervalSeconds =
     def.baseAttack.cooldown
-    / Math.min(1 + hero.agi * c.agiAttackSpeedBonus + hero.bonus.attackSpeed, 1 + c.attackSpeedCap);
-  out.damageMin = (def.baseAttack.damageMin + bonus) * (1 + hero.bonus.damage);
-  out.damageMax = (def.baseAttack.damageMax + bonus) * (1 + hero.bonus.damage);
-  out.spellPower = 1 + hero.int * rules.hero.spellPowerPerInt;
-  out.cooldownScale = 1 / (1 + hero.int * rules.hero.cooldownSpeedPerInt);
-  out.moveSpeed = def.moveSpeed * (1 + hero.bonus.moveSpeed);
+    / Math.min(1 + agi * c.agiAttackSpeedBonus + hero.bonus.attackSpeed + gear.attackSpeed, 1 + c.attackSpeedCap);
+  out.damageMin = (def.baseAttack.damageMin + bonus) * damage;
+  out.damageMax = (def.baseAttack.damageMax + bonus) * damage;
+  out.spellPower = (1 + int * rules.hero.spellPowerPerInt) * (1 + gear.spellPower);
+  out.cooldownScale = 1 / (1 + int * rules.hero.cooldownSpeedPerInt);
+  out.moveSpeed = def.moveSpeed * (1 + hero.bonus.moveSpeed + gear.moveSpeed);
   out.collision = rules.hero.collision;
   return out;
 }

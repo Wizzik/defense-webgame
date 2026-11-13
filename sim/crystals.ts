@@ -57,7 +57,8 @@ export function updateCrystals(run: Run): void {
   const { crystals: c, hero } = run;
   if (c.count === 0) return;
   const { magnetRadius, crystalSpeed, pickupRadius } = run.data.rules.progression;
-  const magnetSq = magnetRadius * magnetRadius;
+  const reach = magnetRadius + hero.gear.magnet;
+  const magnetSq = reach * reach;
   const pickupSq = pickupRadius * pickupRadius;
   const stepLen = crystalSpeed * TICK_SECONDS;
   for (let i = 0; i < c.capacity; i++) {

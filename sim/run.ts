@@ -13,6 +13,7 @@ import { BEHAVIOR_IDS } from "./enemy-steer";
 import { healEnemies } from "./enemy-heal";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
+import { emptyGearBonus, GearState, loadGear, type LoadoutEntry, recomputeGear } from "./gear";
 import { refreshHeroStats } from "./level-up";
 import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import type { TickInput } from "./input";
@@ -33,6 +34,8 @@ export interface RunOptions {
   hero?: string;
   /** Debug: start at this phase (1 to phases + 1, the last is the finale); see sim/start-phase.ts. */
   startPhase?: number;
+  /** Permanent items the hero wears; entries that do not fit are skipped (sim/gear.ts). */
+  loadout?: readonly LoadoutEntry[];
 }
 
 /** One boss of the run, for run summaries. */
@@ -58,6 +61,8 @@ export class Run {
   readonly crystals = new CrystalStore(CRYSTAL_CAPACITY);
   readonly projectiles = new ProjectileStore(PROJECTILE_CAPACITY);
   readonly allies = new AllyStore(ALLY_CAPACITY);
+  /** What the hero wears: the loadout plus what chests gave in this run. */
+  readonly gear = new GearState();
   offer: CardOffer | null = null;
   /** Weighted enemy types per phase, built once here so a step does not allocate. */
   readonly phaseTables: PhaseTable[];
@@ -149,7 +154,7 @@ export class Run {
       facingX: 0, facingY: 1, moving: false,
       level: 1, xp: 0,
       str: def.attributes.str.base, agi: def.attributes.agi.base, int: def.attributes.int.base,
-      hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, attackCooldown: 0, pendingLevelUps: 0,
+      hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, gear: emptyGearBonus(), attackCooldown: 0, pendingLevelUps: 0,
       dashTicks: 0, dashCooldown: 0, dashDirX: 0, dashDirY: 0,
     };
     heroStats(data, hero, stats);
@@ -158,6 +163,8 @@ export class Run {
 
     this.abilities = createAbilitySlots(this);
     refreshHeroStats(this); // the same path as every later refresh, so a starting aura counts
+    if (options.loadout !== undefined) loadGear(this, options.loadout);
+    recomputeGear(this); // a living hero's hp grows with maxHp, so the hero starts full
 
     this.castle = {
       x: rules.arena.castle.x, y: rules.arena.castle.y, radius: rules.castle.radius,
