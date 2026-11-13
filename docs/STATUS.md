@@ -1,11 +1,11 @@
 # Status
 
-Updated 2026-11-13 (gear, boss drops and chests are built on the branch `items-gear-chests`, PR #12 open; it sits on top of PR #11, which still waits for Petr's merge). Read this first when you resume work.
+Updated 2026-11-13 evening (PR #11 is in `main`; the gear work was merged by PR #12 into `elite-boss-threat` by mistake of the stacked base and reaches `main` with PR #13). Read this first when you resume work.
 
-## Gear, boss drops and chests: done on branch `items-gear-chests`, PR #12 open, waits for Petr
+## Gear, boss drops and chests: merged (PR #12 into `elite-boss-threat`, PR #13 into `main`, 2026-11-13); waits for Petr's playtest
 
 - All 11 tasks of `docs/superpowers/plans/2026-11-13-items-gear-chests.md` are done (executed inline in one chat with one final review). `npm run check`, the build and the e2e project `webgl2-fallback` pass. Spec: `docs/superpowers/specs/2026-11-13-items-gear-chests-design.md` (section 12: what the build made precise). Numbers and the table of wins: `docs/DECISIONS.md`, section Gear, drops and chests.
-- **Merge order:** PR #12 (https://github.com/Wizzik/defense-webgame/pull/12) targets `elite-boss-threat`, so it shows only this plan. Petr merges PR #11 first (https://github.com/Wizzik/defense-webgame/pull/11), then PR #12 (GitHub moves it to `main` when the branch of #11 is deleted; otherwise change its base to `main`). The game is playable from `main` only after both merges.
+- Merged at Petr's request (2026-11-13 evening). Lesson: a PR stacked on another PR's branch is merged into that branch, not into `main`, when the lower PR is merged first without deleting its branch; open PRs against `main`, one after another.
 - What it brings:
   - gold coins from kills, gold and the next chest's price in the HUD;
   - 3 chests on the map (a pointer at the screen edge shows the nearest one, bright when the gold is there): pay, pick 1 of 3 gear slots; an empty slot gets a common item for this run, a worn one a level for this run;
@@ -20,7 +20,7 @@ Updated 2026-11-13 (gear, boss drops and chests are built on the branch `items-g
   - the gear screen: readability, the icons (own simple glyphs), the doll (one blue-grey figure for every hero), the tooltip;
   - the names of the 70 items (EN and CS) and the texts of the eight effects;
   - how strong gear feels: a rare item in every slot already wins most autopilot runs; the best gear at level 5 is about 2x hp, attack and spells at hero level 25.
-- Quick links (after the merges; with `debug=1` the collection starts empty and nothing is stored):
+- Quick links (with `debug=1` the collection starts empty and nothing is stored):
   - https://wizzik.github.io/defense-webgame/?debug=1&phase=6 : first miniboss at once; kill it for a drop, or `window.__game.debug.killBoss()` in the console;
   - console helpers: `__game.debug.grantGold(2000)`, `__game.debug.grantItem("skysplitter", 5)` (ids are in `design/items.yaml`), `__game.debug.clearGear()`.
 - **Open for Petr 1 (balance without gear):** with chests the autopilot wins about as before for six heroes; Nightglaive swings (2 and 9 of 20 on the two seed sets, 8 and 4 before) and the Tidecaller gains (7 and 5, before 2 and 3). Sparkshot still wins none without gear.
@@ -28,12 +28,12 @@ Updated 2026-11-13 (gear, boss drops and chests are built on the branch `items-g
 - Left from the final review as minor notes (not fixed): the drop rides on the event buffer (a full buffer of 1024 events would lose it); stored data of another version loads as empty and the first drop overwrites it; a write that fails later in a session turns saving off without a word; the export revokes its link right after the click; pack arrows hide while a chest slot is chosen; the gear screen builds a whole run for the totals on every click; a chest's fallback place skips the spacing check; a chest can put the same common ring into both ring slots.
 - Later, not in this plan: difficulties as a combination of another environment and a chosen difficulty (Petr, 2026-11-12); they are meant to take up the power of gear.
 
-## Elite and boss threat: done on branch `elite-boss-threat`, PR #11 open, waits for Petr
+## Elite and boss threat: merged (PR #11, 2026-11-13); waits for Petr's playtest
 
 - Why: Petr's playtest of 2b-3 (elites too weak, running away kills everything, bosses cannot reach or catch the hero). Spec: `docs/superpowers/specs/2026-11-12-elite-boss-threat-design.md`; numbers and the balance table: `docs/DECISIONS.md`, section Elite and boss threat.
 - What it brings: elites hunt the hero and charge; minibosses hunt the hero; every boss strikes from afar with a 1 s warning circle on the hero (three of them leap into it, the Gunmaster shoots). `npm run check`, the build and the e2e project `webgl2-fallback` pass.
 - What Petr checks in the playtest: is running away still safe; is 1 s enough to leave the circle; are the elites and the first boss (4:10) too hard now; do minibosses still die too fast (about 20 s for the autopilot, their hp did not change). Quick links: `?debug=1&phase=6` (first miniboss), `&phase=4` (elite rush after 30 s), `&phase=21` (finale).
-- Next: Petr merges PR #11 (https://github.com/Wizzik/defense-webgame/pull/11), then the gear PR, and plays.
+- Next: Petr plays.
 - Open: the Tidecaller fell from 14 to 2 autopilot wins of 20; Sparkshot still wins none.
 
 ## Phase 2b-3 (full run with a boss): merged (PR #10, 2026-11-12)
@@ -114,7 +114,7 @@ Updated 2026-11-13 (gear, boss drops and chests are built on the branch `items-g
 **Order after 2b-2 (approved by Petr 2026-11-10; 2b-2 was put in front on 2026-11-11):**
 1. **Visual pass A, no external tools**: merged, see the top of this file.
 2. **Visual pass B, own hero models** (needs Petr's computer): Tripo (text or image to 3D with auto-rig; check the licence of his plan before anything is committed, the repo is public) or Blender. Blender MCP install problem: Petr pastes the error into a chat on the computer with Blender. Constraints: hero <= 5000 triangles, enemy <= 3000 (see docs/DECISIONS.md), clips Idle, Running/Walking, Punch, Death, every asset in `assets/LICENSES.md`.
-3. Then the rest of 2b: 20 phases, elites and bosses are done (2b-3); factions and difficulties remain. Gold, chests, items and the collection (parts of 2c economy and 2e meta progression) are built on `items-gear-chests`. Then the rest of 2c, 2d shared abilities, the rest of 2e.
+3. Then the rest of 2b: 20 phases, elites and bosses are done (2b-3); factions and difficulties remain. Gold, chests, items and the collection (parts of 2c economy and 2e meta progression) are merged. Then the rest of 2c, 2d shared abilities, the rest of 2e.
 4. Propose the second skill (project development rules).
 
 **Fps test links for Petr** (play about 2 minutes, read the overlay: average and 1% low, and the backend it names):
