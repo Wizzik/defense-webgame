@@ -1,11 +1,11 @@
 # Status
 
-Updated 2026-11-13 (gear, boss drops and chests are built on the branch `items-gear-chests`, PR open; it sits on top of PR #11, which still waits for Petr's merge). Read this first when you resume work.
+Updated 2026-11-13 (gear, boss drops and chests are built on the branch `items-gear-chests`, PR #12 open; it sits on top of PR #11, which still waits for Petr's merge). Read this first when you resume work.
 
-## Gear, boss drops and chests: done on branch `items-gear-chests`, PR open, waits for Petr
+## Gear, boss drops and chests: done on branch `items-gear-chests`, PR #12 open, waits for Petr
 
 - All 11 tasks of `docs/superpowers/plans/2026-11-13-items-gear-chests.md` are done (executed inline in one chat with one final review). `npm run check`, the build and the e2e project `webgl2-fallback` pass. Spec: `docs/superpowers/specs/2026-11-13-items-gear-chests-design.md` (section 12: what the build made precise). Numbers and the table of wins: `docs/DECISIONS.md`, section Gear, drops and chests.
-- **Merge order:** the PR targets `elite-boss-threat`, so it shows only this plan. Petr merges PR #11 first (https://github.com/Wizzik/defense-webgame/pull/11), then this PR (GitHub moves it to `main` when the branch of #11 is deleted; otherwise change its base to `main`). The game is playable from `main` only after both merges.
+- **Merge order:** PR #12 (https://github.com/Wizzik/defense-webgame/pull/12) targets `elite-boss-threat`, so it shows only this plan. Petr merges PR #11 first (https://github.com/Wizzik/defense-webgame/pull/11), then PR #12 (GitHub moves it to `main` when the branch of #11 is deleted; otherwise change its base to `main`). The game is playable from `main` only after both merges.
 - What it brings:
   - gold coins from kills, gold and the next chest's price in the HUD;
   - 3 chests on the map (a pointer at the screen edge shows the nearest one, bright when the gold is there): pay, pick 1 of 3 gear slots; an empty slot gets a common item for this run, a worn one a level for this run;
@@ -25,6 +25,7 @@ Updated 2026-11-13 (gear, boss drops and chests are built on the branch `items-g
   - console helpers: `__game.debug.grantGold(2000)`, `__game.debug.grantItem("skysplitter", 5)` (ids are in `design/items.yaml`), `__game.debug.clearGear()`.
 - **Open for Petr 1 (balance without gear):** with chests the autopilot wins about as before for six heroes; Nightglaive swings (2 and 9 of 20 on the two seed sets, 8 and 4 before) and the Tidecaller gains (7 and 5, before 2 and 3). Sparkshot still wins none without gear.
 - **Open for Petr 2 (chest power):** see above.
+- Left from the final review as minor notes (not fixed): the drop rides on the event buffer (a full buffer of 1024 events would lose it); stored data of another version loads as empty and the first drop overwrites it; a write that fails later in a session turns saving off without a word; the export revokes its link right after the click; pack arrows hide while a chest slot is chosen; the gear screen builds a whole run for the totals on every click; a chest's fallback place skips the spacing check; a chest can put the same common ring into both ring slots.
 - Later, not in this plan: difficulties as a combination of another environment and a chosen difficulty (Petr, 2026-11-12); they are meant to take up the power of gear.
 
 ## Elite and boss threat: done on branch `elite-boss-threat`, PR #11 open, waits for Petr
