@@ -52,6 +52,11 @@ export function stateHash(run: Run): number {
     mixInt(run.gear.base[i]!);
     mixInt(run.gear.temp[i]!);
   }
+  const fx = run.gear.fx;
+  mixInt(fx.chainCount);
+  mixInt(fx.shieldWait);
+  mixInt(fx.hasteLeft);
+  mixFloat(fx.hasteCarry);
   mixInt(run.shieldTicks);
   mixInt(run.stats.kills);
   mixInt(run.stats.spawned);

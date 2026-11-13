@@ -18,7 +18,7 @@ export type { Point, Rules } from "./rules";
 export { HeroSchema } from "./hero";
 export type { Hero } from "./hero";
 export { ItemSchema, RARITIES, RARITY_ROWS, SLOT_TYPES, STAT_IDS } from "./item";
-export type { Item, Rarity, SlotType, StatId } from "./item";
+export type { Effect, EffectKind, Item, Rarity, SlotType, StatId } from "./item";
 
 export const GameDataSchema = z.object({
   heroes: z.array(HeroSchema),

@@ -14,6 +14,7 @@ import { BEHAVIOR_IDS } from "./enemy-steer";
 import { healEnemies } from "./enemy-heal";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
+import { updateGearEffects } from "./gear-effects";
 import { basicItemIndex, emptyGearBonus, GearState, loadGear, type LoadoutEntry, recomputeGear, SLOT_COUNT, slotTypeOf } from "./gear";
 import { refreshHeroStats } from "./level-up";
 import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
@@ -82,7 +83,7 @@ export class Run {
   readonly projectiles = new ProjectileStore(PROJECTILE_CAPACITY);
   readonly allies = new AllyStore(ALLY_CAPACITY);
   /** What the hero wears: the loadout plus what chests gave in this run. */
-  readonly gear = new GearState();
+  readonly gear: GearState;
   offer: CardOffer | null = null;
   /** Weighted enemy types per phase, built once here so a step does not allocate. */
   readonly phaseTables: PhaseTable[];
@@ -141,6 +142,7 @@ export class Run {
     this.data = data;
     this.rng = new Rng(options.seed);
     this.enemies = new EnemyStore(rules.enemies.maxAlive);
+    this.gear = new GearState(rules.enemies.maxAlive);
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);
     this.enemyBehavior = Uint8Array.from(data.enemies, (e) => BEHAVIOR_IDS.indexOf(e.behavior));
     this.enemyHunter = Uint8Array.from(data.enemies, (e) => (e.hunter ? 1 : 0));
@@ -228,6 +230,7 @@ export class Run {
    *   healEnemies(this);          // phase 2b-1 (reads the grid built by updateEnemies)
    *   updateHeroCombat(this);     // Task 5
    *   updateAbilities(this);      // Task 6
+   *   updateGearEffects(this);    // gear plan, Task 7 (shield, haste and aura of worn items)
    *   updateProjectiles(this);    // phase 2a, Task 4
    *   updateAllies(this);         // phase 2a, Task 6
    *   updatePickups(this, crystals, 0);   // Task 7
@@ -260,6 +263,7 @@ export class Run {
     healEnemies(this);
     updateHeroCombat(this);
     updateAbilities(this);
+    updateGearEffects(this);
     updateProjectiles(this);
     updateAllies(this);
     updatePickups(this, this.crystals, 0);

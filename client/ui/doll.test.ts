@@ -59,6 +59,14 @@ describe("item tooltip", () => {
     expect(lower.lines[0]).toEqual({ text: "+14 Strength (−4.2)", tone: "worse" });
   });
 
+  it("a special effect gets its own line after the stats", () => {
+    const item = data.items.find((i) => i.id === "frostbound-lantern")!;
+    const tip = tooltipLines("cs", data, item, 1, 1);
+    expect(tip.lines.map((line) => line.tone)).toEqual(["plain", "plain", "plain", "plain", "effect", "temp"]);
+    expect(tip.lines[4]!.text).toBe("Nepřátelé poblíž tebe chodí o 25 % pomaleji.");
+    expect(tooltipLines("en", data, item, 1, 0).lines[4]!.text).toBe("Enemies near you walk 25 % slower.");
+  });
+
   it("names the bosses whose drop table holds the rarity", () => {
     const names = (id: string, lang: "en" | "cs") => data.enemies.find((e) => e.id === id)!.name[lang];
     expect(tooltipLines("en", data, helm, 1, 0).source).toBe(`Drops from: ${names("iron-marshal", "en")}, ${names("pale-abbot", "en")}`);

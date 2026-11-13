@@ -30,7 +30,7 @@ function tempLine(lang: Lang, temp: number): string {
 /**
  * The text of an item's tooltip. `level` is the permanent level (0 for an item a chest gave), `temp` the levels
  * from chests; the stat rows show the numbers at `level + temp`. With `compare` (the worn item) every row says
- * how it differs, and rows only the worn item has are listed as lost.
+ * how it differs, and rows only the worn item has are listed as lost. A special effect gets one line after the stats.
  */
 export function tooltipLines(
   lang: Lang, data: GameData, item: Item, level: number, temp: number, compare?: { item: Item; level: number },
@@ -59,6 +59,7 @@ export function tooltipLines(
   for (const [stat, value] of other) {
     lines.push({ text: `${statValue(stat, 0)} ${statLabel(lang, stat)} ${delta(stat, -value)}`, tone: "worse" });
   }
+  if (item.effect) lines.push({ text: item.effect.text[lang], tone: "effect" });
   if (temp > 0) lines.push({ text: tempLine(lang, temp), tone: "temp" });
   const bosses = data.rules.drops
     .filter((drop) => drop.weights[item.rarity] !== undefined)

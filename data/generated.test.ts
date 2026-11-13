@@ -191,4 +191,68 @@ describe("generated game data", () => {
       expect(forbiddenKeyPaths(JSON.parse(text), file)).toEqual([]);
     }
   });
+
+  describe("item catalogue", () => {
+    type Row = { stat: string; value: number };
+    type CatalogueItem = { id: string; slotType: string; rarity: string; stats: Row[]; effect?: { kind: string } };
+    const items = JSON.parse(read("items.json")) as CatalogueItem[];
+    const rules = JSON.parse(read("rules.json")) as { drops: { boss: string; weights: Record<string, number> }[] };
+    /** Points per unit of a stat: 1 attribute = 12 hp = 0.25 armor = 0.1 regen = 1 % = 10 magnet. */
+    const UNIT: Record<string, number> = {
+      str: 1, agi: 1, int: 1, hp: 12, armor: 0.25, regen: 0.1,
+      damage: 0.01, attackSpeed: 0.01, moveSpeed: 0.01, spellPower: 0.01, goldFind: 0.01, magnet: 10,
+    };
+    const BUDGET: Record<string, number> = { common: 6, rare: 12, epic: 20, legendary: 30, mythic: 42 };
+    const of = (rarity: string) => items.filter((item) => item.rarity === rarity);
+
+    it("has 14 common, 24 rare, 24 epic, 5 legendary and 3 mythic items", () => {
+      expect(["common", "rare", "epic", "legendary", "mythic"].map((r) => of(r).length)).toEqual([14, 24, 24, 5, 3]);
+    });
+
+    it("every slot type has a rare and an epic item", () => {
+      for (const rarity of ["rare", "epic"]) {
+        expect(new Set(of(rarity).map((item) => item.slotType)).size, rarity).toBe(14);
+      }
+    });
+
+    it("legendary and mythic items carry an effect, the lower rarities none", () => {
+      for (const item of items) {
+        const special = item.rarity === "legendary" || item.rarity === "mythic";
+        expect(item.effect !== undefined, item.id).toBe(special);
+      }
+      expect(of("legendary").map((item) => item.effect!.kind).sort()).toEqual(
+        ["chain_on_attack", "haste_on_elite_kill", "low_hp_shield", "slow_aura", "splash_on_attack"],
+      );
+      expect(of("mythic").map((item) => item.effect!.kind).sort()).toEqual(["chain_on_attack", "gold_heals_castle", "low_hp_shield"]);
+      for (const item of [...of("legendary"), ...of("mythic")]) {
+        expect(["mainHand", "offHand", "trinket"], item.id).toContain(item.slotType);
+      }
+    });
+
+    it("the stats of every item are within 10 % of the budget of its rarity", () => {
+      for (const item of items) {
+        const points = item.stats.reduce((sum, row) => sum + row.value / UNIT[row.stat]!, 0);
+        const budget = BUDGET[item.rarity]!;
+        expect(points, `${item.id}: ${points} points`).toBeGreaterThanOrEqual(budget * 0.9 - 1e-9);
+        expect(points, `${item.id}: ${points} points`).toBeLessThanOrEqual(budget * 1.1 + 1e-9);
+      }
+    });
+
+    it("an item names a stat once", () => {
+      for (const item of items) expect(new Set(item.stats.map((row) => row.stat)).size, item.id).toBe(item.stats.length);
+    });
+
+    it("the main attributes are spread evenly over the rare and the epic items", () => {
+      for (const rarity of ["rare", "epic"]) {
+        const lean = (attr: string) => of(rarity).filter((item) => item.stats.some((row) => row.stat === attr)).length;
+        expect([lean("str"), lean("agi"), lean("int")], rarity).toEqual([8, 8, 8]);
+      }
+    });
+
+    it("every rarity a boss drops has an item", () => {
+      for (const drop of rules.drops) {
+        for (const rarity of Object.keys(drop.weights)) expect(of(rarity).length, `${drop.boss}: ${rarity}`).toBeGreaterThan(0);
+      }
+    });
+  });
 });

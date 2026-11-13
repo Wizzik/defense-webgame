@@ -1,5 +1,6 @@
 import { TICK_SECONDS } from "./constants";
 import { EventKind } from "./events";
+import { onGearGold } from "./gear-effects";
 import { gainXp } from "./level-up";
 import type { Run } from "./run";
 
@@ -110,6 +111,7 @@ export function updatePickups(run: Run, c: CrystalStore, kind: 0 | 1): void {
         gainXp(run, value);
       } else {
         run.events.push(EventKind.Pickup, i, gainGold(run, value), x, y, 1, 0);
+        onGearGold(run, value);
       }
     }
   }

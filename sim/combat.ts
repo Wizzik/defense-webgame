@@ -3,6 +3,7 @@ import { Role } from "./enemies";
 import { Slam, SlamEvent, windupRadius } from "./enemy-slam";
 import { EventKind } from "./events";
 import { gainGold } from "./crystals";
+import { onGearEliteKill } from "./gear-effects";
 import { gainXp } from "./level-up";
 import type { Rng } from "./rng";
 import type { Run } from "./run";
@@ -105,6 +106,7 @@ export function killEnemy(run: Run, slot: number): void {
   if (e.slamState[slot] !== Slam.None) {
     run.events.push(EventKind.Slam, slot, SlamEvent.Cancelled, e.slamX[slot], e.slamY[slot], windupRadius(run, slot), 0);
   }
+  if (run.isBoss[e.type[slot]] === 1 || e.type[slot] === run.eliteType) onGearEliteKill(run);
   if (run.isBoss[e.type[slot]] === 1) {
     run.bossCount--;
     for (let b = 0; b < run.bossLogCount; b++) {

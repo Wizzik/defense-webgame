@@ -1,4 +1,5 @@
 import type { GameData, SlotType, StatId } from "../data/schema";
+import { GearFx, loadEffects } from "./gear-effects";
 import { refreshHeroStats } from "./level-up";
 import type { Run } from "./run";
 
@@ -47,6 +48,12 @@ export class GearState {
   readonly base = new Uint8Array(SLOT_COUNT);
   /** Levels added by chests in this run. */
   readonly temp = new Uint16Array(SLOT_COUNT);
+  /** Special effects of the worn items and their counters (sim/gear-effects.ts). */
+  readonly fx: GearFx;
+
+  constructor(maxEnemies = 0) {
+    this.fx = new GearFx(maxEnemies);
+  }
 }
 
 /** An item number at an item level: value x (1 + levelStep x (level - 1)). */
@@ -105,5 +112,6 @@ export function recomputeGear(run: Run): void {
       bonus[row.stat] += itemStatAt(row.value, level, step);
     }
   }
+  loadEffects(run);
   refreshHeroStats(run);
 }

@@ -46,6 +46,7 @@ function mapItem(entry: ItemEntry): Item {
     slotType: entry.slotType,
     rarity: entry.rarity,
     stats: (entry.stats ?? []).map((row) => ({ stat: row.stat, value: row.value })),
+    ...(entry.effect ? { effect: entry.effect } : {}),
   };
 }
 

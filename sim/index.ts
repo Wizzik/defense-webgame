@@ -20,6 +20,7 @@ export { Action, EnemyStore, Role } from "./enemies";
 export { EventKind, EventLog } from "./events";
 export { PROJECTILE_CAPACITY, ProjectileStore, RETARGET_RANGE, updateProjectiles } from "./projectiles";
 export { stateHash } from "./hash";
+export { GearFx } from "./gear-effects";
 export { basicItemIndex, GearState, itemStatAt, recomputeGear, SLOT_COUNT, SLOT_IDS, slotTypeOf } from "./gear";
 export type { GearBonus, LoadoutEntry, SlotId } from "./gear";
 export { debugGrantXp, gainXp, xpToNext } from "./level-up";

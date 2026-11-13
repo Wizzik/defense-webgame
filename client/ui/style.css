@@ -761,7 +761,7 @@
 .tooltip-line.better { color: var(--good); }
 .tooltip-line.worse { color: var(--bad); }
 .tooltip-line.temp { color: #7fe0d0; }
-.tooltip-line.effect { margin-top: 4px; }
+.tooltip-line.effect { margin-top: 4px; color: #9fd0ff; }
 .tooltip-source {
   margin-top: 6px;
   color: var(--muted);
