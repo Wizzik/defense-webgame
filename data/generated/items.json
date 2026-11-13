@@ -10,7 +10,7 @@
     "stats": [
       {
         "stat": "int",
-        "value": 6
+        "value": 3
       }
     ]
   },
@@ -40,7 +40,7 @@
     "stats": [
       {
         "stat": "str",
-        "value": 6
+        "value": 3
       }
     ]
   },
@@ -55,7 +55,7 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 6
+        "value": 3
       }
     ]
   },
@@ -85,7 +85,7 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 6
+        "value": 3
       }
     ]
   },
@@ -100,7 +100,7 @@
     "stats": [
       {
         "stat": "str",
-        "value": 6
+        "value": 3
       }
     ]
   },
@@ -115,7 +115,7 @@
     "stats": [
       {
         "stat": "int",
-        "value": 6
+        "value": 3
       }
     ]
   },
@@ -175,7 +175,7 @@
     "stats": [
       {
         "stat": "int",
-        "value": 6
+        "value": 3
       }
     ]
   },
@@ -190,7 +190,7 @@
     "stats": [
       {
         "stat": "damage",
-        "value": 0.06
+        "value": 0.03
       }
     ]
   },
@@ -205,7 +205,7 @@
     "stats": [
       {
         "stat": "str",
-        "value": 6
+        "value": 3
       }
     ]
   },
@@ -220,7 +220,7 @@
     "stats": [
       {
         "stat": "str",
-        "value": 7
+        "value": 3.5
       },
       {
         "stat": "hp",
@@ -239,11 +239,11 @@
     "stats": [
       {
         "stat": "int",
-        "value": 7
+        "value": 3.5
       },
       {
         "stat": "spellPower",
-        "value": 0.05
+        "value": 0.025
       }
     ]
   },
@@ -258,7 +258,7 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 7
+        "value": 3.5
       },
       {
         "stat": "magnet",
@@ -277,7 +277,7 @@
     "stats": [
       {
         "stat": "str",
-        "value": 6
+        "value": 3
       },
       {
         "stat": "armor",
@@ -296,7 +296,7 @@
     "stats": [
       {
         "stat": "int",
-        "value": 8
+        "value": 4
       },
       {
         "stat": "regen",
@@ -315,7 +315,7 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 7
+        "value": 3.5
       },
       {
         "stat": "moveSpeed",
@@ -338,7 +338,7 @@
       },
       {
         "stat": "str",
-        "value": 5
+        "value": 2.5
       }
     ]
   },
@@ -357,7 +357,7 @@
       },
       {
         "stat": "int",
-        "value": 6
+        "value": 3
       }
     ]
   },
@@ -372,11 +372,11 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 7
+        "value": 3.5
       },
       {
         "stat": "attackSpeed",
-        "value": 0.05
+        "value": 0.025
       }
     ]
   },
@@ -391,11 +391,11 @@
     "stats": [
       {
         "stat": "str",
-        "value": 7
+        "value": 3.5
       },
       {
         "stat": "damage",
-        "value": 0.05
+        "value": 0.025
       }
     ]
   },
@@ -410,11 +410,11 @@
     "stats": [
       {
         "stat": "attackSpeed",
-        "value": 0.06
+        "value": 0.03
       },
       {
         "stat": "agi",
-        "value": 6
+        "value": 3
       }
     ]
   },
@@ -429,7 +429,7 @@
     "stats": [
       {
         "stat": "int",
-        "value": 8
+        "value": 4
       },
       {
         "stat": "hp",
@@ -452,7 +452,7 @@
       },
       {
         "stat": "str",
-        "value": 5
+        "value": 2.5
       }
     ]
   },
@@ -467,7 +467,7 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 7
+        "value": 3.5
       },
       {
         "stat": "hp",
@@ -490,7 +490,7 @@
       },
       {
         "stat": "agi",
-        "value": 5
+        "value": 2.5
       }
     ]
   },
@@ -509,7 +509,7 @@
       },
       {
         "stat": "int",
-        "value": 6
+        "value": 3
       }
     ]
   },
@@ -524,7 +524,7 @@
     "stats": [
       {
         "stat": "str",
-        "value": 7
+        "value": 3.5
       },
       {
         "stat": "goldFind",
@@ -543,7 +543,7 @@
     "stats": [
       {
         "stat": "int",
-        "value": 7
+        "value": 3.5
       },
       {
         "stat": "goldFind",
@@ -562,7 +562,7 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 6
+        "value": 3
       },
       {
         "stat": "magnet",
@@ -581,11 +581,11 @@
     "stats": [
       {
         "stat": "int",
-        "value": 7
+        "value": 3.5
       },
       {
         "stat": "spellPower",
-        "value": 0.05
+        "value": 0.025
       }
     ]
   },
@@ -600,11 +600,11 @@
     "stats": [
       {
         "stat": "damage",
-        "value": 0.07
+        "value": 0.035
       },
       {
         "stat": "str",
-        "value": 5
+        "value": 2.5
       }
     ]
   },
@@ -619,11 +619,11 @@
     "stats": [
       {
         "stat": "damage",
-        "value": 0.06
+        "value": 0.03
       },
       {
         "stat": "agi",
-        "value": 6
+        "value": 3
       }
     ]
   },
@@ -638,11 +638,11 @@
     "stats": [
       {
         "stat": "spellPower",
-        "value": 0.07
+        "value": 0.035
       },
       {
         "stat": "int",
-        "value": 5
+        "value": 2.5
       }
     ]
   },
@@ -661,7 +661,7 @@
       },
       {
         "stat": "str",
-        "value": 5
+        "value": 2.5
       }
     ]
   },
@@ -676,7 +676,7 @@
     "stats": [
       {
         "stat": "str",
-        "value": 9
+        "value": 4.5
       },
       {
         "stat": "hp",
@@ -699,11 +699,11 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 9
+        "value": 4.5
       },
       {
         "stat": "attackSpeed",
-        "value": 0.06
+        "value": 0.03
       },
       {
         "stat": "hp",
@@ -722,11 +722,11 @@
     "stats": [
       {
         "stat": "int",
-        "value": 9
+        "value": 4.5
       },
       {
         "stat": "spellPower",
-        "value": 0.06
+        "value": 0.03
       },
       {
         "stat": "magnet",
@@ -745,7 +745,7 @@
     "stats": [
       {
         "stat": "str",
-        "value": 9
+        "value": 4.5
       },
       {
         "stat": "regen",
@@ -768,11 +768,11 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 9
+        "value": 4.5
       },
       {
         "stat": "damage",
-        "value": 0.06
+        "value": 0.03
       },
       {
         "stat": "moveSpeed",
@@ -791,11 +791,11 @@
     "stats": [
       {
         "stat": "int",
-        "value": 9
+        "value": 4.5
       },
       {
         "stat": "spellPower",
-        "value": 0.06
+        "value": 0.03
       },
       {
         "stat": "hp",
@@ -814,7 +814,7 @@
     "stats": [
       {
         "stat": "str",
-        "value": 8
+        "value": 4
       },
       {
         "stat": "hp",
@@ -837,7 +837,7 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 9
+        "value": 4.5
       },
       {
         "stat": "hp",
@@ -845,7 +845,7 @@
       },
       {
         "stat": "attackSpeed",
-        "value": 0.05
+        "value": 0.025
       }
     ]
   },
@@ -864,7 +864,7 @@
       },
       {
         "stat": "str",
-        "value": 6
+        "value": 3
       },
       {
         "stat": "armor",
@@ -883,11 +883,11 @@
     "stats": [
       {
         "stat": "int",
-        "value": 9
+        "value": 4.5
       },
       {
         "stat": "spellPower",
-        "value": 0.06
+        "value": 0.03
       },
       {
         "stat": "regen",
@@ -906,11 +906,11 @@
     "stats": [
       {
         "stat": "str",
-        "value": 9
+        "value": 4.5
       },
       {
         "stat": "damage",
-        "value": 0.06
+        "value": 0.03
       },
       {
         "stat": "hp",
@@ -929,15 +929,15 @@
     "stats": [
       {
         "stat": "int",
-        "value": 9
+        "value": 4.5
       },
       {
         "stat": "spellPower",
-        "value": 0.07
+        "value": 0.035
       },
       {
         "stat": "attackSpeed",
-        "value": 0.04
+        "value": 0.02
       }
     ]
   },
@@ -952,7 +952,7 @@
     "stats": [
       {
         "stat": "str",
-        "value": 9
+        "value": 4.5
       },
       {
         "stat": "hp",
@@ -975,11 +975,11 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 9
+        "value": 4.5
       },
       {
         "stat": "damage",
-        "value": 0.06
+        "value": 0.03
       },
       {
         "stat": "goldFind",
@@ -998,7 +998,7 @@
     "stats": [
       {
         "stat": "int",
-        "value": 9
+        "value": 4.5
       },
       {
         "stat": "hp",
@@ -1006,7 +1006,7 @@
       },
       {
         "stat": "spellPower",
-        "value": 0.05
+        "value": 0.025
       }
     ]
   },
@@ -1025,7 +1025,7 @@
       },
       {
         "stat": "str",
-        "value": 8
+        "value": 4
       },
       {
         "stat": "hp",
@@ -1048,11 +1048,11 @@
       },
       {
         "stat": "agi",
-        "value": 8
+        "value": 4
       },
       {
         "stat": "attackSpeed",
-        "value": 0.04
+        "value": 0.02
       }
     ]
   },
@@ -1067,11 +1067,11 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 8
+        "value": 4
       },
       {
         "stat": "damage",
-        "value": 0.06
+        "value": 0.03
       },
       {
         "stat": "goldFind",
@@ -1090,11 +1090,11 @@
     "stats": [
       {
         "stat": "int",
-        "value": 8
+        "value": 4
       },
       {
         "stat": "spellPower",
-        "value": 0.06
+        "value": 0.03
       },
       {
         "stat": "goldFind",
@@ -1113,11 +1113,11 @@
     "stats": [
       {
         "stat": "int",
-        "value": 8
+        "value": 4
       },
       {
         "stat": "spellPower",
-        "value": 0.07
+        "value": 0.035
       },
       {
         "stat": "hp",
@@ -1136,7 +1136,7 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 8
+        "value": 4
       },
       {
         "stat": "moveSpeed",
@@ -1159,11 +1159,11 @@
     "stats": [
       {
         "stat": "damage",
-        "value": 0.09
+        "value": 0.045
       },
       {
         "stat": "str",
-        "value": 7
+        "value": 3.5
       },
       {
         "stat": "hp",
@@ -1182,11 +1182,11 @@
     "stats": [
       {
         "stat": "spellPower",
-        "value": 0.09
+        "value": 0.045
       },
       {
         "stat": "int",
-        "value": 7
+        "value": 3.5
       },
       {
         "stat": "regen",
@@ -1205,11 +1205,11 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 8
+        "value": 4
       },
       {
         "stat": "attackSpeed",
-        "value": 0.07
+        "value": 0.035
       },
       {
         "stat": "armor",
@@ -1228,15 +1228,15 @@
     "stats": [
       {
         "stat": "damage",
-        "value": 0.1
+        "value": 0.05
       },
       {
         "stat": "agi",
-        "value": 9
+        "value": 4.5
       },
       {
         "stat": "attackSpeed",
-        "value": 0.06
+        "value": 0.03
       },
       {
         "stat": "hp",
@@ -1268,11 +1268,11 @@
     "stats": [
       {
         "stat": "damage",
-        "value": 0.1
+        "value": 0.05
       },
       {
         "stat": "str",
-        "value": 10
+        "value": 5
       },
       {
         "stat": "hp",
@@ -1311,7 +1311,7 @@
       },
       {
         "stat": "str",
-        "value": 8
+        "value": 4
       },
       {
         "stat": "hp",
@@ -1346,11 +1346,11 @@
     "stats": [
       {
         "stat": "int",
-        "value": 10
+        "value": 5
       },
       {
         "stat": "spellPower",
-        "value": 0.09
+        "value": 0.045
       },
       {
         "stat": "hp",
@@ -1384,7 +1384,7 @@
     "stats": [
       {
         "stat": "agi",
-        "value": 10
+        "value": 5
       },
       {
         "stat": "moveSpeed",
@@ -1392,7 +1392,7 @@
       },
       {
         "stat": "attackSpeed",
-        "value": 0.07
+        "value": 0.035
       },
       {
         "stat": "hp",
@@ -1426,11 +1426,11 @@
       },
       {
         "stat": "str",
-        "value": 8
+        "value": 4
       },
       {
         "stat": "int",
-        "value": 8
+        "value": 4
       },
       {
         "stat": "hp",
@@ -1463,19 +1463,19 @@
     "stats": [
       {
         "stat": "damage",
-        "value": 0.12
+        "value": 0.06
       },
       {
         "stat": "agi",
-        "value": 10
+        "value": 5
       },
       {
         "stat": "attackSpeed",
-        "value": 0.08
+        "value": 0.04
       },
       {
         "stat": "spellPower",
-        "value": 0.06
+        "value": 0.03
       },
       {
         "stat": "hp",
@@ -1511,7 +1511,7 @@
       },
       {
         "stat": "str",
-        "value": 10
+        "value": 5
       },
       {
         "stat": "hp",
@@ -1523,7 +1523,7 @@
       },
       {
         "stat": "damage",
-        "value": 0.04
+        "value": 0.02
       }
     ],
     "effect": {

@@ -197,10 +197,10 @@ describe("generated game data", () => {
     type CatalogueItem = { id: string; slotType: string; rarity: string; stats: Row[]; effect?: { kind: string } };
     const items = JSON.parse(read("items.json")) as CatalogueItem[];
     const rules = JSON.parse(read("rules.json")) as { drops: { boss: string; weights: Record<string, number> }[] };
-    /** Points per unit of a stat: 1 attribute = 12 hp = 0.25 armor = 0.1 regen = 1 % = 10 magnet. */
+    /** What one point buys: 0.5 attribute, 0.5 % of an offensive share, 12 hp, 0.25 armor, 0.1 regen, 1 % move speed or gold, 10 magnet. */
     const UNIT: Record<string, number> = {
-      str: 1, agi: 1, int: 1, hp: 12, armor: 0.25, regen: 0.1,
-      damage: 0.01, attackSpeed: 0.01, moveSpeed: 0.01, spellPower: 0.01, goldFind: 0.01, magnet: 10,
+      str: 0.5, agi: 0.5, int: 0.5, hp: 12, armor: 0.25, regen: 0.1,
+      damage: 0.005, attackSpeed: 0.005, spellPower: 0.005, moveSpeed: 0.01, goldFind: 0.01, magnet: 10,
     };
     const BUDGET: Record<string, number> = { common: 6, rare: 12, epic: 20, legendary: 30, mythic: 42 };
     const of = (rarity: string) => items.filter((item) => item.rarity === rarity);

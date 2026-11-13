@@ -2,6 +2,40 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Gear, drops and chests (2026-11-13; Petr chose the design, the numbers and the catalogue are Claude's)
+
+Spec: `docs/superpowers/specs/2026-11-13-items-gear-chests-design.md` (its section 12 lists what the build made precise). Plan: `docs/superpowers/plans/2026-11-13-items-gear-chests.md`.
+
+- **Item numbers.** One budget point buys 0.5 attribute, 0.5 % of attack damage, attack speed or spell power, 12 hp, 0.25 armor, 0.1 regen, 1 % move speed or gold, or 10 pickup range. Budgets at level 1: common 6, rare 12, epic 20, legendary 30, mythic 42 (`data/generated.test.ts` checks every item within 10 %). The plan's first table gave 1 attribute and 1 % per point; with it the best gear at the top level multiplied attack by 3.2 to 3.7 and spells by 2.7 to 4 on a level-25 hero, against the spec's "about 2x". Halving attributes and the three offensive shares gives, on a level-25 hero: best gear hp x1.5 to 1.9, attack x1.9 to 2.1, spells x1.7 to 2.3; a rare item in every slot hp x1.15 to 1.2, attack x1.25 to 1.3.
+- **Levels.** An item's numbers at level L are the level-1 numbers x (1 + 0.15 x (L - 1)); a duplicate from a boss raises the permanent level to at most 5; chest levels have no cap. Special effects do not grow with the level.
+- **Chests.** 3 on the map, 700 to 2000 from the castle, 600 apart, pick 1 of 3 slots. The n-th chest costs 200 x 1.12^(n - 1) gold (first tries: 40 x 1.18, 150 x 1.13). Gold per type: shieldbearer and scout 1, musketeer and chaplain 2, lancer 3, captain 10, minibosses 100, 150 and 200. A won run brings about 9000 gold, so the autopilot opens 12 to 16 chests in a run it wins.
+- **Chest places and offers use their own generator** (`run.chestRng`), so the enemies of a seed are what they were before this plan and the old balance numbers stay comparable.
+- **Autopilot.** It walks to the nearest chest when it has the gold, the hero has at least 30 % hp, the castle at least 50 % and the final boss is not alive; it picks the offered slot with the lowest level. The plan said 60 % hero hp: the autopilot fights below that almost the whole run and then opened 2 to 4 chests in a won run.
+- **Drops.** Tables per boss give rarity weights (`rules.drops`); the item is drawn from the rarity: first one the player does not own, then one more level of an owned one, then the boss's other rarities from the highest down, then nothing. The draw depends only on the run's seed, the order of the boss's death in the run and the collection.
+- **Effects.** Six kinds on eight items (`sim/gear-effects.ts`): chain lightning on every n-th attack, splash on attack, a shield under low hp, faster cooldowns after an elite or a boss falls, a slowing aura, gold that heals the castle (2 hp per gold: about 18 000 hp in a won run, a third of the castle). Two worn items with the same kind do not stack; the later slot counts.
+- **Saved data.** IndexedDB `defense-webgame`, store `save`, key `gear`: `{ version: 1, items: { itemId: level }, loadouts: { heroId: { slot: itemId } } }`. Data that does not fit the game is left out when it is read, never an error. A session with `?debug=1` starts from an empty collection and stores nothing.
+- **Look.** Own SVG glyphs per slot type (no icon set, no licence), procedural chest and coin, one blue-grey figure on the doll for every hero (stonehorn's hero colour is orange), rarity colours white, blue, purple, pale gold, crimson.
+
+Autopilot wins of 20, without gear. "Before" is the branch `elite-boss-threat` (the same as chests nobody can pay for):
+
+| Hero | before, seeds 1-20 | with chests, 1-20 | before, 21-40 | with chests, 21-40 | chests in a won run |
+|---|---|---|---|---|---|
+| Stonehorn | 8 | 8 | 6 | 6 | 13 |
+| Nightglaive | 8 | 2 | 4 | 9 | 13 to 15 |
+| Gravecaller | 20 | 20 | 20 | 20 | 16 |
+| Serpent Shaman | 17 | 17 | 18 | 18 | 16 |
+| Mistwarden | 4 | 4 | 6 | 7 | 16 |
+| Sparkshot | 0 | 0 | 0 | 0 | - |
+| Redcleaver | 14 | 12 | 11 | 9 | 16 |
+| Tidecaller | 2 | 7 | 3 | 5 | 12 |
+
+With gear, seeds 1-20: a rare item of level 1 in every slot (`--gear mid`) wins 19, 18, 20, 19, 16, 2, 20, 17; the best gear at level 5 (`--gear full`) wins 20 of 20 with every hero, also on seeds 21-40.
+
+Open after the tuning:
+- The plan's bar was "within 3 wins of before" per hero. Nightglaive (-6 on seeds 1-20, +5 on 21-40; 12 and 11 of 40 in sum) and the Tidecaller (+5, +2) are outside it. Both lose or win on a knife edge between 2:00 and 6:00, so one chest trip changes the run; the sum over 40 seeds moved only for the Tidecaller (5 -> 12).
+- Chests give less than the spec's "+50 % at the end of a run": 16 chests on a hero without gear are about +10 % hp, attack and spells at level 25 (a common item of level 1 per slot). Stronger chests made the run without gear easier at once (40 x 1.18: Nightglaive 8 -> 14, Tidecaller 2 -> 8). The knobs: `rules.gear.levelStep`, the price curve, or a chest that gives more than one level. Petr's call after a playtest.
+- A rare item in every slot already lifts most heroes to 16 to 20 wins of 20: the losses of a bare hero come in the first six minutes, where flat item numbers weigh most. The difficulties planned later are meant to take this up.
+
 ## Elite and boss threat (2026-11-12; Petr chose the direction, the numbers are Claude's)
 
 - Petr's playtest of 2b-3: elites are not strong enough, a player who runs kills everything easily, and bosses near the castle have neither the range nor the speed to hurt or catch him. He chose "they catch you, with attacks you can dodge" over "raw speed" and over "the boss locks you in an arena". Spec: `docs/superpowers/specs/2026-11-12-elite-boss-threat-design.md`.

@@ -27,8 +27,11 @@ const LOW_HP = 0.3;
 const LOW_HP_DISTANCE = 350;
 /** The bot leaves a slam circle when it stands nearer than the radius plus this to its centre. */
 const SLAM_MARGIN = 60;
-/** The bot goes for a chest only with at least this share of the hero's and of the castle's hp. */
-const CHEST_HERO_HP = 0.6;
+/**
+ * The bot goes for a chest only with at least this share of the hero's and of the castle's hp. The hero's share is
+ * low on purpose: the autopilot fights below half of its hp most of the run (docs/DECISIONS.md, Gear, drops and chests).
+ */
+const CHEST_HERO_HP = 0.3;
 const CHEST_CASTLE_HP = 0.5;
 const AXIS_DEADZONE = 30;
 /** Share of a unit vector under which an axis is not pressed (between sin 22.5° and cos 67.5°). */

@@ -2,10 +2,11 @@ import { pathToFileURL } from "node:url";
 import { botInput } from "../../sim/bot";
 import { TICKS_PER_SECOND } from "../../sim/constants";
 import { createRun } from "../../sim/index";
-import type { Run, RunResult } from "../../sim/index";
+import type { LoadoutEntry, Run, RunResult } from "../../sim/index";
 import type { TickInput } from "../../sim/input";
 import { gameData } from "../../sim/testing/game-data";
 import type { GameData } from "../../data/schema";
+import { GEAR_PRESETS, type GearPresetName, gearPreset } from "./gear-presets";
 
 export interface RunSummary {
   hero: string;
@@ -47,8 +48,9 @@ export function idleInput(run: Run, out: TickInput): TickInput {
 /** Plays one run with the autopilot, or with no input at all when `idle` is set. */
 export function playBot(
   data: GameData, seed: number, durationSeconds?: number, hero?: string, idle = false, startPhase?: number,
+  loadout: readonly LoadoutEntry[] = [],
 ): RunSummary {
-  const run = createRun(data, { seed, durationSeconds, hero, startPhase });
+  const run = createRun(data, { seed, durationSeconds, hero, startPhase, loadout });
   const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   const phaseTicks = data.rules.run.phaseSeconds * TICKS_PER_SECOND;
   const phaseXp: number[] = [];
@@ -181,12 +183,14 @@ interface Args {
   phase?: number;
   /** Print the average XP at the start of each phase over all runs. */
   phaseXp: boolean;
+  /** The loadout every hero wears (tools/sim-run/gear-presets.ts). */
+  gear: GearPresetName;
 }
 
 const SWITCHES = new Set(["--idle", "--phase-xp"]);
 
 export function parseArgs(argv: string[]): Args {
-  const out: Args = { hero: "all", seed: 1, runs: 1, idle: false, phaseXp: false };
+  const out: Args = { hero: "all", seed: 1, runs: 1, idle: false, phaseXp: false, gear: "none" };
   for (let i = 0; i < argv.length; i += 2) {
     const flag = argv[i];
     if (SWITCHES.has(flag)) {
@@ -200,6 +204,11 @@ export function parseArgs(argv: string[]): Args {
     if (flag === "--hero") {
       if (!raw) throw new Error("sim:run: --hero needs a hero id or all");
       out.hero = raw;
+      continue;
+    }
+    if (flag === "--gear") {
+      if (!(GEAR_PRESETS as readonly string[]).includes(raw ?? "")) throw new Error("sim:run: --gear needs none, mid or full");
+      out.gear = raw as GearPresetName;
       continue;
     }
     if (flag === "--seeds") {
@@ -228,7 +237,7 @@ function main(): void {
   for (const hero of ids) {
     const summaries: RunSummary[] = [];
     for (let i = 0; i < args.runs; i++) {
-      const s = playBot(data, args.seed + i, args.duration, hero, args.idle, args.phase);
+      const s = playBot(data, args.seed + i, args.duration, hero, args.idle, args.phase, gearPreset(data, hero, args.gear));
       summaries.push(s);
       console.log(formatSummary(s));
     }

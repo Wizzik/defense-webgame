@@ -496,8 +496,8 @@
   },
   "chests": {
     "count": 3,
-    "basePrice": 40,
-    "priceGrowth": 1.18,
+    "basePrice": 200,
+    "priceGrowth": 1.12,
     "minCastleDistance": 700,
     "maxCastleDistance": 2000,
     "minSpacing": 600,

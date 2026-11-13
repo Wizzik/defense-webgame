@@ -67,7 +67,7 @@ debug: { phaseXp: [0, 45, 105, 207, 374, 580, 975, 1235, 1561, 1922, 2314, 3086,
 gear: { levelStep: 0.15, maxPermanentLevel: 5 }
 # chests: `count` chests lie between min and maxCastleDistance from the castle and minSpacing apart. The n-th chest
 #   opened costs basePrice x priceGrowth^(n - 1) gold and offers slotsPerOffer gear slots.
-chests: { count: 3, basePrice: 40, priceGrowth: 1.18, minCastleDistance: 700, maxCastleDistance: 2000, minSpacing: 600, pickupRadius: 80, slotsPerOffer: 3 }
+chests: { count: 3, basePrice: 200, priceGrowth: 1.12, minCastleDistance: 700, maxCastleDistance: 2000, minSpacing: 600, pickupRadius: 80, slotsPerOffer: 3 }
 # drops: every boss drops one item; its rarity is drawn by these weights (meta/drop.ts).
 drops:
   - { boss: iron-marshal, weights: { common: 60, rare: 40 } }

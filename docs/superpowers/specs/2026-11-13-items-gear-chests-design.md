@@ -210,3 +210,22 @@ Efekt je v tooltipu jeden řádek v barvě rarity.
 - Volba CC0 sady ikon a řešení hrdiny na panence.
 - Pravidla autopilota pro truhly.
 - Rozdělení plánu na úkoly (viz důsledek v oddílu 4).
+
+## 12. Zpřesnění při stavbě (2026-11-13)
+
+Co plán a stavba určily nad rámec oddílů 1–11. Čísla a tabulka výher jsou v `docs/DECISIONS.md`, oddíl Gear, drops and chests.
+
+- **Ikony:** vlastní SVG glyfy, jeden na typ pozice; raritu nese barva rámečku. Žádná CC0 sada.
+- **Truhla a mince:** procedurální geometrie, bez modelu.
+- **Hrdina na panence:** jedna modrošedá silueta pro všechny hrdiny (barva Kamenorohého je oranžová).
+- **Drop:** tabulka bosse losuje raritu; item se vybere z rarity (nejdřív nevlastněný, potom úroveň navíc, potom jiná rarita bosse, nakonec nic). Los závisí jen na seedu běhu, pořadí bosse a sbírce.
+- **Cena truhly:** n-tá truhla stojí 200 × 1,12^(n − 1) zlata.
+- **Level-up a truhla zároveň:** nejdřív karty; truhla se otevře v dalším kroku. Truhla se vyhodnocuje na konci kroku, takže prohra ve stejném kroku má přednost a zlato se nestrhne.
+- **Úroveň slotu:** trvalá (`base`, 0 u itemu z truhly) + dočasná (`temp`).
+- **Body rozpočtu:** 1 bod = 0,5 atributu = 0,5 % poškození, rychlosti útoku nebo síly kouzel = 12 HP = 0,25 brnění = 0,1 regenerace = 1 % rychlosti pohybu nebo zlata = 10 dosahu sbírání.
+- **Efekty:** šest druhů na osmi itemech; s úrovní itemu nerostou; dva nasazené itemy se stejným druhem se nesčítají.
+- **Stejný item** smí nosit víc hrdinů, ale jeden hrdina ho má jen v jednom slotu.
+- **Autopilot:** jde pro truhlu se zlatem, aspoň 30 % HP hrdiny a 50 % HP hradu, ne během finále.
+- **Uložená data:** IndexedDB `defense-webgame`, store `save`, klíč `gear`; export a import souboru `.json` na obrazovce výbavy.
+- **Nesplněný cíl oddílu 9:** truhly dávají hrdinovi bez výbavy zhruba +10 % síly, ne +50 %; silnější truhly hned zlehčily běh bez výbavy. Rozhodne Petr po playtestu.
+

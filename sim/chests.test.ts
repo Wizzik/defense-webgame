@@ -11,6 +11,8 @@ import type { Run } from "./run";
 import { gameData } from "./testing/game-data";
 import { silenceSpawns } from "./testing/silence";
 
+const { basePrice: BASE, priceGrowth: GROWTH } = gameData().rules.chests;
+
 function quietRun(seed = 3): Run {
   const data = gameData();
   silenceSpawns(data);
@@ -73,18 +75,19 @@ describe("chests", () => {
   it("a hero without the gold stands on a chest and nothing happens", () => {
     const run = quietRun();
     standOnChest(run);
-    run.gold = chestPrice(run) - 1;
+    const price = chestPrice(run);
+    run.gold = price - 1;
     run.step(NO_INPUT);
     expect(run.state).toBe("playing");
-    expect(run.gold).toBe(39);
+    expect(run.gold).toBe(price - 1);
     expect(run.chestsOpened).toBe(0);
   });
 
   it("a hero with the gold opens the chest: the price is paid and three different slots are offered", () => {
     const run = quietRun();
     standOnChest(run);
-    run.gold = 100;
-    expect(chestPrice(run)).toBe(40);
+    run.gold = BASE + 60;
+    expect(chestPrice(run)).toBe(BASE);
     run.step(NO_INPUT);
     expect(run.state).toBe("chest");
     expect(run.gold).toBe(60);
@@ -103,7 +106,7 @@ describe("chests", () => {
   it("an empty slot gets the common item of its type as a temporary level 1", () => {
     const run = quietRun();
     standOnChest(run);
-    run.gold = 100;
+    run.gold = BASE + 60;
     const hpBefore = run.hero.stats.maxHp;
     const where = { x: run.chests.x[0]!, y: run.chests.y[0]! };
     run.step(NO_INPUT);
@@ -123,7 +126,7 @@ describe("chests", () => {
     const dx = run.chests.x[0]! - where.x;
     const dy = run.chests.y[0]! - where.y;
     expect(Math.sqrt(dx * dx + dy * dy)).toBeGreaterThanOrEqual(run.data.rules.chests.minSpacing);
-    expect(chestPrice(run)).toBe(Math.round(40 * 1.18));
+    expect(chestPrice(run)).toBe(Math.round(BASE * GROWTH));
   });
 
   it("a worn slot gains a temporary level and the stats follow", () => {
@@ -134,7 +137,7 @@ describe("chests", () => {
     const run = createRun(data, { seed: 3, durationSeconds: 100000, loadout: [{ slot: "feet", item: boots.id, level: 2 }] });
     const speed = run.hero.stats.moveSpeed;
     standOnChest(run);
-    run.gold = 100;
+    run.gold = BASE + 60;
     run.step(NO_INPUT);
     const feet = 9;
     run.step(pick(run.chestOffer!.slots.indexOf(feet)));
@@ -154,14 +157,14 @@ describe("chests", () => {
       run.step(NO_INPUT);
       run.step(pick(0));
     }
-    expect(prices).toEqual([40, Math.round(40 * 1.18), Math.round(40 * 1.18 * 1.18), Math.round(40 * 1.18 * 1.18 * 1.18)]);
+    expect(prices).toEqual([BASE, Math.round(BASE * GROWTH), Math.round(BASE * GROWTH * GROWTH), Math.round(BASE * GROWTH * GROWTH * GROWTH)]);
     expect(run.gold).toBe(100000 - prices.reduce((a, b) => a + b, 0));
   });
 
   it("a choice that is not an offered index changes nothing", () => {
     const run = quietRun();
     standOnChest(run);
-    run.gold = 100;
+    run.gold = BASE + 60;
     run.step(NO_INPUT);
     const hash = stateHash(run);
     for (const bad of [-1, 3, 1.5, Number.NaN]) {
@@ -174,16 +177,16 @@ describe("chests", () => {
   it("a level-up comes first: the chest opens after the cards are done", () => {
     const run = quietRun();
     standOnChest(run);
-    run.gold = 100;
+    run.gold = BASE + 60;
     run.hero.pendingLevelUps = 2;
     run.step(NO_INPUT);
     expect(run.state).toBe("levelUp");
-    expect(run.gold).toBe(100);
+    expect(run.gold).toBe(BASE + 60);
     run.step(pick(0));
     expect(run.state).toBe("levelUp");
     run.step(pick(0));
     expect(run.state).toBe("playing");
-    expect(run.gold).toBe(100);
+    expect(run.gold).toBe(BASE + 60);
     run.step(NO_INPUT);
     expect(run.state).toBe("chest");
     expect(run.gold).toBe(60);
@@ -192,19 +195,19 @@ describe("chests", () => {
   it("a hero who dies on a chest loses the run and pays nothing", () => {
     const run = quietRun();
     standOnChest(run);
-    run.gold = 100;
+    run.gold = BASE + 60;
     run.hero.hp = 0;
     run.step(NO_INPUT);
     expect(run.state).toBe("lost");
     expect(run.result).toBe("hero");
     expect(run.chestOffer).toBeNull();
-    expect(run.gold).toBe(100);
+    expect(run.gold).toBe(BASE + 60);
   });
 
   it("a castle that falls in the step of a chest loses the run", () => {
     const run = quietRun();
     standOnChest(run);
-    run.gold = 100;
+    run.gold = BASE + 60;
     run.castle.hp = 0;
     run.step(NO_INPUT);
     expect(run.state).toBe("lost");
@@ -222,7 +225,7 @@ describe("chests", () => {
     const d = quietRun();
     for (const run of [c, d]) {
       standOnChest(run);
-      run.gold = 100;
+      run.gold = BASE + 60;
       run.step(NO_INPUT);
     }
     expect(stateHash(c)).toBe(stateHash(d));
