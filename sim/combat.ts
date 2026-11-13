@@ -108,6 +108,7 @@ export function killEnemy(run: Run, slot: number): void {
   }
   if (run.isBoss[e.type[slot]] === 1 || e.type[slot] === run.eliteType) onGearEliteKill(run);
   if (run.isBoss[e.type[slot]] === 1) {
+    run.events.push(EventKind.BossDeath, e.type[slot], run.bossesKilled++, x, y, 0, 0);
     run.bossCount--;
     for (let b = 0; b < run.bossLogCount; b++) {
       const record = run.bossLog[b];

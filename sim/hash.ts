@@ -134,6 +134,7 @@ export function stateHash(run: Run): number {
   }
   mixInt(run.chestRng.state);
   mixInt(run.chestsOpened);
+  mixInt(run.bossesKilled);
   mixFloat(run.chestPriceRaw);
   mixInt(run.openChest + 1);
   for (let i = 0; i < run.chests.x.length; i++) {

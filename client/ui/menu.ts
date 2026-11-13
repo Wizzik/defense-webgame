@@ -21,6 +21,7 @@ export class Menu {
   private readonly languageLabel: HTMLElement;
   private readonly sound: HTMLButtonElement;
   private readonly gpuWarning: HTMLElement;
+  private readonly saveWarning: HTMLElement;
   private soundOn = true;
   private loading = false;
   private failed = false;
@@ -53,6 +54,9 @@ export class Menu {
     this.gpuWarning = el("p", "menu-warning", panel);
     this.gpuWarning.id = "gpu-warning";
     this.gpuWarning.hidden = true;
+    this.saveWarning = el("p", "menu-warning", panel);
+    this.saveWarning.id = "save-warning";
+    this.saveWarning.hidden = true;
     this.start = el("button", "button primary", panel);
     this.start.id = "start";
     this.start.addEventListener("click", handlers.onStart);
@@ -77,6 +81,7 @@ export class Menu {
     this.controls.textContent = t(lang, "menu.controls");
     this.languageLabel.textContent = t(lang, "menu.language");
     this.gpuWarning.textContent = t(lang, "menu.gpuWarning");
+    this.saveWarning.textContent = t(lang, "menu.noSave");
     this.renderHero();
     this.renderSound();
     for (const [code, button] of this.langButtons) button.setAttribute("aria-pressed", String(code === lang));
@@ -130,6 +135,11 @@ export class Menu {
   /** Shows the warning that the browser draws without the graphics card. */
   setGpuWarning(software: boolean): void {
     this.gpuWarning.hidden = !software;
+  }
+
+  /** Shows the sentence that this window does not store the gear. */
+  setSaveWarning(shown: boolean): void {
+    this.saveWarning.hidden = !shown;
   }
 
   setVisible(visible: boolean): void {

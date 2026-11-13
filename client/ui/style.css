@@ -766,3 +766,17 @@
   margin-top: 6px;
   color: var(--muted);
 }
+
+/* loot: the news line and the end screen name items in the colour of their rarity */
+.hud-announce.loot.rarity-common, .end-drop.rarity-common { color: var(--rarity-common); }
+.hud-announce.loot.rarity-rare, .end-drop.rarity-rare { color: var(--rarity-rare); }
+.hud-announce.loot.rarity-epic, .end-drop.rarity-epic { color: var(--rarity-epic); }
+.hud-announce.loot.rarity-legendary, .end-drop.rarity-legendary { color: var(--rarity-legendary); }
+.hud-announce.loot.rarity-mythic, .end-drop.rarity-mythic { color: var(--rarity-mythic); }
+.end-drops-title {
+  margin-top: 10px;
+  color: var(--muted);
+}
+.end-drop {
+  font-weight: 700;
+}

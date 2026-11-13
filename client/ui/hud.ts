@@ -2,6 +2,8 @@ import { chestPrice, EventKind, TICKS_PER_SECOND, type Run, ULTIMATE_SLOT, xpToN
 import { Announcer } from "./announcer";
 import { BossBar } from "./boss-bar";
 import { el, formatTime, setText } from "./dom";
+import type { Drop } from "../../meta";
+import { dropLine } from "./drop-lines";
 import { type Lang, t } from "./i18n";
 
 /** How long the news of a boss or of an enrage stays (a rush stays for its warning time). */
@@ -64,6 +66,8 @@ export class Hud {
   private readonly announcer = new Announcer();
   private readonly bossBar: BossBar;
   private lastRun: Run | null = null;
+  /** What a boss that just fell dropped (boss id, its order in the run); main.ts sets it. */
+  dropFor: ((bossId: string, order: number) => Drop) | null = null;
 
   constructor(parent: HTMLElement) {
     this.root = el("div", "hud", parent);
@@ -108,6 +112,9 @@ export class Hud {
       } else if (kind === EventKind.BossSpawn) {
         const name = run.data.enemies[events.value[i]!]!.name[lang];
         this.announcer.push(t(lang, "announce.boss", { name }), ANNOUNCE_TICKS);
+      } else if (kind === EventKind.BossDeath && this.dropFor) {
+        const line = dropLine(lang, this.dropFor(run.data.enemies[events.a[i]!]!.id, events.value[i]!));
+        this.announcer.push(line.text, ANNOUNCE_TICKS, line.tone);
       } else if (kind === EventKind.Enrage) {
         const name = run.data.enemies[run.finalBossType]!.name[lang];
         this.announcer.push(t(lang, "announce.enrage", { name }), ANNOUNCE_TICKS);
@@ -140,6 +147,11 @@ export class Hud {
     );
     const news = this.announcer.text;
     setText(this.announce, news);
+    const tone = this.announcer.tone;
+    if (this.announce.dataset.tone !== tone) {
+      this.announce.dataset.tone = tone;
+      this.announce.className = tone === "" ? "hud-announce" : `hud-announce loot ${tone}`;
+    }
     this.announce.hidden = news === "";
     this.bossBar.update(run, lang);
     const attacked = castle.lastHitTick >= 0 && run.tick - castle.lastHitTick <= ATTACK_BANNER_TICKS;

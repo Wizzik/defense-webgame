@@ -6,6 +6,8 @@ import { Sfx } from "./audio/sfx";
 import { SoundView } from "./audio/sound-view";
 import { loadGameData } from "./game/data";
 import { addDebugHooks, publishSnapshot, updateSnapshot } from "./game/debug";
+import { GearSession } from "./game/gear-session";
+import { indexedDbBackend, memoryBackend } from "./game/save-store";
 import { Keyboard } from "./game/keyboard";
 import { readGameParams } from "./game/params";
 import { Session } from "./game/session";
@@ -124,6 +126,8 @@ async function start(): Promise<void> {
   document.documentElement.lang = lang;
 
   const data = loadGameData();
+  // a debugging session starts from an empty collection and stores nothing
+  const gear = await GearSession.load(data, params.debug ? memoryBackend() : await indexedDbBackend(), { persistent: !params.debug });
   const hero = pickHero(data, params.hero, readStoredHero());
   const { renderer, backend } = await createRenderer(params.renderer, document.body);
   const gpu = describeGpu(renderer.backend, backend);
@@ -187,8 +191,20 @@ async function start(): Promise<void> {
   const snapshot = publishSnapshot(backend, gpu);
   snapshot.render.enemyMeshes = crowd.meshCount;
   snapshot.render.shadows = sunShadow.enabled;
-  if (params.debug) addDebugHooks(snapshot, () => session.run);
-  const ui = createUi(data, session, followCamera, sfx, randomSeed, hero, gpu.software, (setLoading) =>
+  session.loadoutFor = (heroId) => gear.loadout(heroId);
+  session.onStart = () => gear.startRun();
+  if (params.debug) {
+    addDebugHooks(snapshot, () => session.run, gear, (run) => {
+      for (const view of session.views) view.onEvents?.(run);
+    });
+  }
+  const publishGear = (): void => {
+    snapshot.collection = gear.save.items;
+    snapshot.gearSaved = gear.persistent;
+  };
+  publishGear();
+  session.views.push({ update: publishGear, onEvents: () => {}, dispose: () => {} });
+  const ui = createUi(data, gear, !params.debug && !gear.persistent, session, followCamera, sfx, randomSeed, hero, gpu.software, (setLoading) =>
     heroLoader(models, session, heroView, allyView, setLoading),
   );
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
@@ -254,6 +270,8 @@ interface Ui {
 /** Builds the menu, HUD, cards, end screen and castle pointer, and wires them to the session. */
 function createUi(
   data: GameData,
+  gear: GearSession,
+  noSave: boolean,
   session: Session,
   followCamera: FollowCamera,
   sfx: Sfx,
@@ -303,12 +321,14 @@ function createUi(
   };
   menu.setSound(!muted);
   menu.setGpuWarning(softwareGpu);
+  menu.setSaveWarning(noSave);
   addEventListener("keydown", (event) => {
     if (event.code === "KeyM" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
       setMuted(!muted);
     }
   });
   const hud = new Hud(root);
+  hud.dropFor = (bossId, order) => gear.onBossDeath(bossId, session.seed, order);
   // the HUD reads the events of every step for its news line
   session.views.push({ update: () => {}, onEvents: (run) => hud.onEvents(run, lang), dispose: () => {} });
   const pointer = new CastlePointer(root);
@@ -344,7 +364,7 @@ function createUi(
       chestPointer.update(run, followCamera.camera, width, height);
       if ((run.state === "won" || run.state === "lost") && !ended) {
         ended = true;
-        end.show(run, session.seed, lang);
+        end.show(run, session.seed, lang, gear.drops);
       }
     },
   };

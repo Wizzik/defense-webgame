@@ -1,3 +1,4 @@
+import type { GearSession } from "./gear-session";
 import { chestPrice, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, killEnemy, type Run } from "../../sim";
 import { latestBoss, runPhase } from "./boss";
 import type { Backend, GpuInfo } from "../render/gpu";
@@ -46,10 +47,18 @@ export interface GameSnapshot {
   chestsOpened: number;
   /** The 16 gear slots in the order of `SLOT_IDS`: item id and levels, or null for an empty slot. */
   gear: ({ item: string; base: number; temp: number } | null)[];
+  /** The player's collection: item id to its permanent level. */
+  collection: Record<string, number>;
+  /** Whether the gear is stored in this browser (false with ?debug=1 and without storage). */
+  gearSaved: boolean;
   /** Only with ?debug=1. */
   debug?: {
     grantXp(amount: number): void;
     grantGold(amount: number): void;
+    /** Puts an item into the collection at a permanent level. */
+    grantItem(id: string, level: number): void;
+    /** Empties the collection and the dolls. */
+    clearGear(): void;
     setAbilityLevel(slot: number, level: number): void;
     /** One hunter of every common enemy type, in a row north of the hero. */
     spawnEach(): void;
@@ -73,18 +82,27 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], ultimateAuto: true, allies: 0,
     projectiles: 0, packArrows: 0, charging: 0, phase: 1, boss: null, slams: 0,
     render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0 },
-    gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, gear: [],
+    gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, gear: [], collection: {}, gearSaved: false,
   };
   window.__game = snapshot;
   return snapshot;
 }
 
 /** Adds `window.__game.debug`; `getRun` is read at call time because the run is replaced on every start. */
-export function addDebugHooks(snapshot: GameSnapshot, getRun: () => Run | null): void {
+/** `deliver` hands the run's events to the views, as the session does after a step. */
+export function addDebugHooks(
+  snapshot: GameSnapshot, getRun: () => Run | null, gear: GearSession, deliver: (run: Run) => void,
+): void {
   snapshot.debug = {
     grantXp(amount: number): void {
       const run = getRun();
       if (run) debugGrantXp(run, amount);
+    },
+    grantItem(id: string, level: number): void {
+      gear.grant(id, level);
+    },
+    clearGear(): void {
+      gear.clear();
     },
     grantGold(amount: number): void {
       const run = getRun();
@@ -112,9 +130,12 @@ export function addDebugHooks(snapshot: GameSnapshot, getRun: () => Run | null):
       const run = getRun();
       if (!run) return;
       const { enemies } = run;
+      // the kill happens between two steps: its events (death, boss death and the drop) are delivered here
+      run.events.clear();
       for (let i = 0; i < enemies.capacity; i++) {
         if (enemies.alive[i] === 1 && run.isBoss[enemies.type[i]!] === 1) killEnemy(run, i);
       }
+      deliver(run);
     },
   };
 }

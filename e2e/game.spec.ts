@@ -553,3 +553,52 @@ test("C opens the gear panel and pauses the run; C closes it; C does nothing und
   await expect(page.locator("#gear-panel")).toBeHidden();
   await page.waitForFunction((t) => window.__game!.tick > t, tick);
 });
+
+test("a boss that falls drops an item into the collection and the end screen lists it", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&phase=6&lang=cs");
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  await expect(page.locator("#save-warning")).toBeHidden();
+  expect(await page.evaluate(() => ({ collection: window.__game!.collection, saved: window.__game!.gearSaved })))
+    .toEqual({ collection: {}, saved: false });
+  await page.waitForFunction(() => window.__game!.boss !== null);
+  await page.evaluate(() => window.__game!.debug!.killBoss());
+  await expect(page.locator("#announce")).toContainText("Kořist:");
+  await expect(page.locator("#announce")).toHaveClass(/loot rarity-(common|rare)/);
+  const collection = await page.evaluate(() => window.__game!.collection);
+  expect(Object.values(collection)).toEqual([1]);
+
+  // the item is kept when the run is lost, and the end screen names it
+  await page.evaluate(() => window.__game!.debug!.grantItem("oaken-shield", 9));
+  expect(await page.evaluate(() => window.__game!.collection["oaken-shield"])).toBe(5);
+  await page.goto("/?seed=1&debug=1&phase=21&lang=cs");
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  await page.waitForFunction(() => window.__game!.boss !== null);
+  await page.evaluate(() => window.__game!.debug!.killBoss());
+  await waitForScreen(page, "won");
+  await expect(page.locator("#end .end-drops-title")).toHaveText("Kořist z tohoto běhu");
+  await expect(page.locator("#end .end-drop")).toHaveCount(1);
+});
+
+test("the collection is stored in the browser and read again after a reload", async ({ page }) => {
+  await page.goto("/?seed=1");
+  await page.waitForFunction(() => window.__game?.screen === "menu");
+  expect(await page.evaluate(() => window.__game!.gearSaved)).toBe(true);
+  await expect(page.locator("#save-warning")).toBeHidden();
+  await page.evaluate(() => new Promise<void>((resolve, reject) => {
+    const open = indexedDB.open("defense-webgame", 1);
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const save = { version: 1, items: { "oaken-shield": 3, "no-such-item": 2 }, loadouts: { stonehorn: { offHand: "oaken-shield" } } };
+      const put = open.result.transaction("save", "readwrite").objectStore("save").put(save, "gear");
+      put.onerror = () => reject(put.error);
+      put.onsuccess = () => resolve();
+    };
+  }));
+  await page.reload();
+  await page.waitForFunction(() => window.__game?.screen === "menu");
+  expect(await page.evaluate(() => window.__game!.collection)).toEqual({ "oaken-shield": 3 });
+  // the paused run behind the menu already wears the stored doll
+  await page.waitForFunction(() => window.__game!.gear.some((slot) => slot?.item === "oaken-shield" && slot.base === 3));
+});

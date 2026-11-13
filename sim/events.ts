@@ -34,6 +34,8 @@ export const EventKind = {
   /** A slot of the open chest was chosen: a = slot, value = its new level (permanent + temporary), x/y = the hero,
    *  u = index of the item in the slot. */
   ChestPick: 21,
+  /** A boss fell: a = enemy type index, value = how many bosses fell in the run before it (0 for the first), x/y = where. */
+  BossDeath: 22,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

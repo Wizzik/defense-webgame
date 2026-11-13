@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { COIN_CAPACITY, debugGrantGold, updatePickups } from "./crystals";
+import { killEnemy } from "./combat";
 import { Role } from "./enemies";
 import { EventKind } from "./events";
 import { stateHash } from "./hash";
@@ -105,5 +106,24 @@ describe("gold", () => {
     expect(run.coins.x[slot]).toBeLessThan(run.hero.x + 200);
     run.step(NO_INPUT);
     expect(run.coins.prevX[slot]).toBeLessThan(run.hero.x + 200);
+  });
+
+  it("a boss that falls sends BossDeath with its type and its order in the run", () => {
+    const run = progressionRun();
+    const type = run.data.enemies.findIndex((e) => e.boss === true);
+    const deaths = () => {
+      const out: { type: number; order: number }[] = [];
+      for (let k = 0; k < run.events.count; k++) {
+        if (run.events.kind[k] === EventKind.BossDeath) out.push({ type: run.events.a[k]!, order: run.events.value[k]! });
+      }
+      return out;
+    };
+    const before = stateHash(run);
+    killEnemy(run, run.enemies.spawn(type, Role.Hunter, 900, 900, 1, 1, 0));
+    killEnemy(run, run.enemies.spawn(0, Role.Hunter, 900, 900, 1, 1, 0));
+    killEnemy(run, run.enemies.spawn(type, Role.Hunter, 900, 900, 1, 1, 0));
+    expect(deaths()).toEqual([{ type, order: 0 }, { type, order: 1 }]);
+    expect(run.bossesKilled).toBe(2);
+    expect(stateHash(run)).not.toBe(before);
   });
 });

@@ -70,6 +70,8 @@ export class Run {
   /** Places of chests and their offers come from this generator, so chests do not shift the enemies of a seed. */
   readonly chestRng: Rng;
   chestsOpened = 0;
+  /** Bosses that fell in this run; the order of a boss's death picks its drop (meta/drop.ts). */
+  bossesKilled = 0;
   /** Price of the next chest before rounding: basePrice x priceGrowth for every chest opened. */
   chestPriceRaw: number;
   /** The slots of the chest that is open; null outside the "chest" state. */
