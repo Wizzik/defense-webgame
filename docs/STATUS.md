@@ -1,6 +1,14 @@
 # Status
 
-Updated 2026-11-12 (the elite and boss threat pass is on its branch and waits for Petr's merge and playtest; phase 2b-3 is merged). Read this first when you resume work.
+Updated 2026-11-13 (gear, boss drops and chests: design approved and plan written, execution has not started; the elite and boss threat pass still waits for Petr's merge of PR #11). Read this first when you resume work.
+
+## Gear, boss drops and chests: plan written, execute it in a new chat
+
+- Spec (approved by Petr 2026-11-13): `docs/superpowers/specs/2026-11-13-items-gear-chests-design.md`. Plan (11 tasks): `docs/superpowers/plans/2026-11-13-items-gear-chests.md`. Both are on the branch `items-gear-chests`, which starts from `elite-boss-threat`.
+- What it is: gold from kills, three chests on the map that raise one of 16 gear slots for the run (pick 1 of 3, rising price), permanent items in five rarities dropped by bosses, saved in the browser and equipped in the menu. Petr chose one plan for all of it; the tasks are ordered so chests with temporary items are playable before the catalogue of 70 items is written.
+- Before the PR: PR #11 must be in `main`, then rebase this branch onto it. Petr has not said yet whether he merges PR #11 or Claude does: ask him.
+- Petr has not chosen the execution method yet (subagent-driven or native with one final review).
+- Later, not in this plan: difficulties as a combination of another environment and a chosen difficulty (Petr, 2026-11-12).
 
 ## Elite and boss threat: done on branch `elite-boss-threat`, PR #11 open, waits for Petr
 
@@ -9,11 +17,6 @@ Updated 2026-11-12 (the elite and boss threat pass is on its branch and waits fo
 - What Petr checks in the playtest: is running away still safe; is 1 s enough to leave the circle; are the elites and the first boss (4:10) too hard now; do minibosses still die too fast (about 20 s for the autopilot, their hp did not change). Quick links: `?debug=1&phase=6` (first miniboss), `&phase=4` (elite rush after 30 s), `&phase=21` (finale).
 - Next: Petr merges PR #11 (https://github.com/Wizzik/defense-webgame/pull/11) and plays.
 - Open: the Tidecaller fell from 14 to 2 autopilot wins of 20; Sparkshot still wins none.
-
-## Next (agreed with Petr 2026-11-12, each with its own design and plan, in new chats)
-
-1. **Items in the run:** gold drops from enemies; chests lie on the map, the hero pays gold to open one and picks 1 of 3, and every next chest costs more (Petr chose chests on the map over a shop at the castle and over chests dropped by elites). This replaces the castle shop of the first spec (section 3.5).
-2. **Permanent gear** between runs, as in Azeroth Survivors (wow.aethus.pl): new against the first spec, which had only talents and perks between runs.
 
 ## Phase 2b-3 (full run with a boss): merged (PR #10, 2026-11-12)
 

@@ -1,6 +1,6 @@
 # Výbava, drop z bossů a truhly: návrh
 
-- **Stav:** návrh k Petrovu schválení (13. 11. 2026). Rozhodnutí v části „Co rozhodl Petr“ padla v chatu 12.–13. 11. 2026.
+- **Stav:** schváleno Petrem 13. 11. 2026 („ano, skvělé“). Rozhodnutí v části „Co rozhodl Petr“ padla v chatu 12.–13. 11. 2026.
 - **Nahrazuje:** oddíl 3.5 první specifikace (obchod u hradu, 6 slotů, recepty) a oba body „Next“ ve `docs/STATUS.md` (itemy v běhu, trvalá výbava). Staví se jako jeden plán.
 - **Staví na:** větvi `elite-boss-threat` (PR #11). Návrh počítá s elitami a bossy, kteří hrdinu loví.
 
