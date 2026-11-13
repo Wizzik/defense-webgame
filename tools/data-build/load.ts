@@ -129,6 +129,8 @@ export interface EnemyEntry {
   boss?: true;
   model?: string;
   slam?: NonNullable<Enemy["slam"]>;
+  strike?: NonNullable<Enemy["strike"]>;
+  hunter?: true;
 }
 
 export interface Design {

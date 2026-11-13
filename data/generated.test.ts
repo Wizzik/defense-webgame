@@ -154,14 +154,17 @@ describe("generated game data", () => {
   it("every enemy type has its behavior", () => {
     const enemies = JSON.parse(read("enemies.json")) as { id: string; behavior: string }[];
     expect(Object.fromEntries(enemies.map((e) => [e.id, e.behavior]))).toEqual({
-      shieldbearer: "siege", scout: "flank", musketeer: "skirmish", chaplain: "support", lancer: "charge", captain: "siege",
+      shieldbearer: "siege", scout: "flank", musketeer: "skirmish", chaplain: "support", lancer: "charge", captain: "charge",
       "iron-marshal": "charge", "pale-abbot": "siege", gunmaster: "skirmish", "dread-regent": "charge",
     });
   });
 
   it("the lancer charges and the captain has an aura", () => {
-    const enemies = JSON.parse(read("enemies.json")) as { id: string; charge?: unknown; aura?: unknown }[];
-    expect(enemies.filter((e) => e.charge !== undefined).map((e) => e.id)).toEqual(["lancer", "iron-marshal", "dread-regent"]);
+    const enemies = JSON.parse(read("enemies.json")) as { id: string; charge?: unknown; aura?: unknown; hunter?: true; boss?: true; strike?: { leap: boolean } }[];
+    expect(enemies.filter((e) => e.charge !== undefined).map((e) => e.id)).toEqual(["lancer", "captain", "iron-marshal", "dread-regent"]);
+    expect(enemies.filter((e) => e.hunter).map((e) => e.id)).toEqual(["captain"]);
+    expect(enemies.filter((e) => e.strike !== undefined).map((e) => e.id)).toEqual(enemies.filter((e) => e.boss).map((e) => e.id));
+    expect(enemies.filter((e) => e.strike?.leap === false).map((e) => e.id)).toEqual(["gunmaster"]);
     expect(enemies.filter((e) => e.aura !== undefined).map((e) => e.id)).toEqual(["captain", "dread-regent"]);
   });
 

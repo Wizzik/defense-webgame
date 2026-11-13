@@ -447,7 +447,8 @@ test("a restart clears the boss bar", async ({ page }) => {
 });
 
 test("a slam shows a ring and hides it after the hit", async ({ page }, testInfo) => {
-  await page.goto("/?seed=1&debug=1&phase=6&speed=4&lang=en");
+  // the Mistwarden: Stonehorn, standing next to the boss, killed it in about 8 s, before or right at its first slam (7 s)
+  await page.goto("/?seed=1&debug=1&phase=6&speed=4&lang=en&hero=mistwarden");
   await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
   await page.waitForFunction(() => window.__game?.phase === 6, undefined, { timeout: 30_000 });
   expect(await page.evaluate(() => window.__game!.render.slamRings)).toBe(0);

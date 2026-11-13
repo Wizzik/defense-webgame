@@ -58,6 +58,21 @@ export const EnemySchema = z.object({
   }).strict().refine((s) => s.cooldownSeconds[0] <= s.cooldownSeconds[1], {
     path: ["cooldownSeconds"], message: "min is above max",
   }).optional(),
+  /**
+   * A strike from afar (sim/enemy-strike.ts): a circle of `radius` warns where the hero stands for `windupSeconds`,
+   * then the hero and the castle inside take `damage`. With `leap` the enemy jumps into the circle during the warning.
+   */
+  strike: z.object({
+    minRange: z.number().positive(),
+    maxRange: z.number().positive(),
+    radius: z.number().positive(),
+    damage: z.number().positive(),
+    windupSeconds: z.number().positive(),
+    cooldownSeconds: z.number().positive(),
+    leap: z.boolean(),
+  }).strict().refine((s) => s.minRange < s.maxRange, "minRange is not below maxRange").optional(),
+  /** Goes for the hero whatever the role of its pack is. */
+  hunter: z.literal(true).optional(),
 }).strict();
 
 export type Enemy = z.infer<typeof EnemySchema>;

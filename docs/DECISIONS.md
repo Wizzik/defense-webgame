@@ -2,6 +2,14 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Elite and boss threat (2026-11-12; Petr chose the direction, the numbers are Claude's)
+
+- Petr's playtest of 2b-3: elites are not strong enough, a player who runs kills everything easily, and bosses near the castle have neither the range nor the speed to hurt or catch him. He chose "they catch you, with attacks you can dodge" over "raw speed" and over "the boss locks you in an arena". Spec: `docs/superpowers/specs/2026-11-12-elite-boss-threat-design.md`.
+- The elite (captain) hunts the hero (`hunter: true`) and charges like a lancer; hp 3 -> 5, moveSpeed 0.8 -> 1.0 (396 against a hero's 420-448). A harder elite (hp 6, damage 1, moveSpeed 1.1) left the autopilot 1-3 wins of 20.
+- Minibosses come as hunters. Every boss has a strike from afar (`strike`): a warning circle of 1 s where the hero stands, range 450-1300 (Gunmaster 1500); Iron Marshal, Pale Abbot and Dread Regent leap into it, the Gunmaster shoots and stays. Lancers of a rush stay siegers so the castle keeps its pressure.
+- Miniboss hp stayed: the autopilot kills each in about 20 s, but with hp x1.5 it lost more runs. Open for Petr's playtest.
+- Autopilot wins of 20 seeds, before -> after: Stonehorn 10 -> 8, Nightglaive 12 -> 8, Gravecaller 20 -> 20, Serpent Shaman 17 -> 17, Mistwarden 7 -> 4, Sparkshot 0 -> 0, Redcleaver 15 -> 14, Tidecaller 14 -> 2. Most new losses fall between 2:00 and 6:00 (the first elites and the Iron Marshal at 4:10). The autopilot defends the castle and does not kite, so a player should do better; the Tidecaller is the one to watch.
+
 ## Phase 2b-3: the full run with a boss (2026-11-12, the plan's and Claude's choices unless Petr is named)
 
 - Scope (Petr, 2026-11-12): 20 phases (16:40) with the six enemy types, five elite rushes, three minibosses, a final boss with an enrage; the run is won when the final boss falls. Factions, difficulties and the minimap come later.

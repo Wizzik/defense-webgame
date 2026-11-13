@@ -71,7 +71,7 @@ export function updateTimeline(run: Run): void {
   while (run.nextEvent < timeline.length && run.tick >= timeline[run.nextEvent].tick) {
     const event = timeline[run.nextEvent++];
     if (event.boss >= 0) {
-      spawnBoss(run, event.boss, Role.Sieger);
+      spawnBoss(run, event.boss, Role.Hunter);
     } else {
       spawnRush(run, event);
     }
@@ -139,6 +139,7 @@ export function spawnBoss(run: Run, type: number, role: number): number {
   const scale = timeScale(rules, run.tick);
   const slot = store.spawn(type, role, x, y, def.hp * scale, scale, run.tick);
   if (def.slam) store.slamCooldown[slot] = Math.round(def.slam.cooldownSeconds[0] * TICKS_PER_SECOND);
+  if (def.strike) store.strikeCooldown[slot] = Math.round(def.strike.cooldownSeconds * TICKS_PER_SECOND);
   run.stats.spawned++;
   run.bossCount++;
   if (run.bossLogCount < run.bossLog.length) {

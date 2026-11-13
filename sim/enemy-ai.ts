@@ -4,6 +4,7 @@ import { Action, Role } from "./enemies";
 import { updateEnemyAuras } from "./enemy-aura";
 import { cancelCharge, Charge, chargeVX, chargeVY, updateCharge } from "./enemy-charge";
 import { cancelSlam, updateSlam } from "./enemy-slam";
+import { strikeVX, strikeVY, updateStrike } from "./enemy-strike";
 import { Behavior, steer, steerHold, steerX, steerY } from "./enemy-steer";
 import type { Run } from "./run";
 
@@ -57,6 +58,7 @@ export function updateEnemies(run: Run): void {
     let tx = castle.x;
     let ty = castle.y;
     let charging = false;
+    let leaping = false;
 
     if (e.stunTicks[i] > 0) {
       e.stunTicks[i]--;
@@ -71,11 +73,20 @@ export function updateEnemies(run: Run): void {
         if (heroDist < rules.enemies.siegerAggroRange) e.aggro[i] = 1;
         else if (heroDist > rules.enemies.leashRange) e.aggro[i] = 0;
       }
-      const targetsHero = e.role[i] === Role.Hunter || e.aggro[i] === 1 || run.enemyBehavior[e.type[i]] === Behavior.Flank;
-      // a slam comes before a charge and never starts in the middle of one
-      const slamming = e.chargeState[i] === Charge.None && updateSlam(run, i, heroDist);
-      if (!slamming) charging = updateCharge(run, i, targetsHero, heroDist, walk);
-      if (slamming) {
+      const targetsHero = e.role[i] === Role.Hunter || e.aggro[i] === 1 || run.enemyHunter[e.type[i]] === 1 ||
+        run.enemyBehavior[e.type[i]] === Behavior.Flank;
+      // a strike from afar and a slam come before a charge and never start in the middle of one
+      const free = e.chargeState[i] === Charge.None;
+      const striking = free && updateStrike(run, i, targetsHero, heroDist);
+      const slamming = !striking && free && updateSlam(run, i, heroDist);
+      if (!striking && !slamming) charging = updateCharge(run, i, targetsHero, heroDist, walk);
+      if (striking) {
+        // a leap: nobody pushes it aside, like a charge
+        leaping = strikeVX !== 0 || strikeVY !== 0;
+        e.action[i] = leaping ? Action.Move : Action.Attack;
+        vx = strikeVX;
+        vy = strikeVY;
+      } else if (slamming) {
         e.action[i] = Action.Attack;
       } else if (charging) {
         e.action[i] = Action.Move;
@@ -124,7 +135,7 @@ export function updateEnemies(run: Run): void {
     // Separation: push away from neighbours, linearly from 0 at 2 * collision to moveSpeed on overlap.
     // A charging enemy holds its line: nobody pushes it aside.
     const sepRadius = 2 * def.collision;
-    const found = charging ? 0 : grid.query(x, y, sepRadius, neighbours);
+    const found = charging || leaping ? 0 : grid.query(x, y, sepRadius, neighbours);
     for (let k = 0; k < found; k++) {
       const j = neighbours[k];
       if (j === i) continue;

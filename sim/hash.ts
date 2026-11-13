@@ -111,6 +111,7 @@ export function stateHash(run: Run): number {
     mixInt(e.slamCooldown[i]);
     mixFloat(e.slamX[i]);
     mixFloat(e.slamY[i]);
+    mixInt(e.strikeCooldown[i]);
   }
   const c = run.crystals;
   for (let i = 0; i < c.capacity; i++) {
