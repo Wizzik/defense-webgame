@@ -6,7 +6,7 @@ import { heroStats } from "./hero";
 import { NO_INPUT } from "./input";
 import { createRun } from "./run";
 import { gameData } from "./testing/game-data";
-import { updateCrystals } from "./crystals";
+import { updatePickups } from "./crystals";
 
 /** Game data whose common item of `type` has the single stat row `stat: value`. */
 function dataWith(type: string, stat: string, value: number): { data: GameData; id: string } {
@@ -101,7 +101,7 @@ describe("gear", () => {
     const attracted = (loadout: LoadoutEntry[]) => {
       const run = createRun(data, { seed: 1, loadout });
       const slot = run.crystals.drop(run.hero.x + reach + 30, run.hero.y, 1);
-      updateCrystals(run);
+      updatePickups(run, run.crystals, 0);
       return run.crystals.attracted[slot];
     };
     expect(attracted([])).toBe(0);

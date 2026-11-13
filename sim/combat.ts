@@ -2,6 +2,7 @@ import { TICKS_PER_SECOND } from "./constants";
 import { Role } from "./enemies";
 import { Slam, SlamEvent, windupRadius } from "./enemy-slam";
 import { EventKind } from "./events";
+import { gainGold } from "./crystals";
 import { gainXp } from "./level-up";
 import type { Rng } from "./rng";
 import type { Run } from "./run";
@@ -85,13 +86,20 @@ export function stunEnemy(run: Run, slot: number, ticks: number): void {
   if (scaled > e.stunTicks[slot]) e.stunTicks[slot] = scaled;
 }
 
-/** Emits Death, counts the kill, frees the slot and drops an XP crystal (XP goes straight to the hero when the store is full). */
+/** A coin falls this far east of the crystal, so the two do not hide each other. */
+const COIN_OFFSET = 24;
+
+/**
+ * Emits Death, counts the kill, frees the slot and drops an XP crystal and, for a type with gold, a coin
+ * (XP and gold go straight to the hero when their store is full).
+ */
 export function killEnemy(run: Run, slot: number): void {
   const e = run.enemies;
   if (e.alive[slot] === 0) return;
   run.events.push(EventKind.Death, slot, 0, e.x[slot], e.y[slot], 0, 0);
   run.stats.kills++;
   const xp = run.data.enemies[e.type[slot]].xp;
+  const gold = run.data.enemies[e.type[slot]].gold;
   const x = e.x[slot];
   const y = e.y[slot];
   if (e.slamState[slot] !== Slam.None) {
@@ -113,4 +121,5 @@ export function killEnemy(run: Run, slot: number): void {
   }
   e.kill(slot);
   if (run.crystals.drop(x, y, xp) < 0) gainXp(run, xp);
+  if (gold > 0 && run.coins.drop(x + COIN_OFFSET, y, gold) < 0) gainGold(run, gold);
 }

@@ -64,4 +64,6 @@ export interface RunStats {
   damageDealt: number;
   /** All XP the hero gained, level-ups included. */
   xpGained: number;
+  /** All gold the hero gained. */
+  goldGained: number;
 }

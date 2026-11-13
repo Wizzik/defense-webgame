@@ -7,7 +7,7 @@ import type { CardOffer } from "./cards";
 import { regenCastle } from "./castle";
 import { ALLY_CAPACITY, AllyStore, updateAllies } from "./allies";
 import { PROJECTILE_CAPACITY, ProjectileStore, updateProjectiles } from "./projectiles";
-import { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
+import { COIN_CAPACITY, CRYSTAL_CAPACITY, CrystalStore, updatePickups } from "./crystals";
 import { updateEnemies } from "./enemy-ai";
 import { BEHAVIOR_IDS } from "./enemy-steer";
 import { healEnemies } from "./enemy-heal";
@@ -59,6 +59,10 @@ export class Run {
   readonly heroIndex: number;
   readonly abilities: AbilitySlot[];
   readonly crystals = new CrystalStore(CRYSTAL_CAPACITY);
+  /** Gold coins on the ground. */
+  readonly coins = new CrystalStore(COIN_CAPACITY);
+  /** Gold the hero holds; it pays for chests and is gone after the run. */
+  gold = 0;
   readonly projectiles = new ProjectileStore(PROJECTILE_CAPACITY);
   readonly allies = new AllyStore(ALLY_CAPACITY);
   /** What the hero wears: the loadout plus what chests gave in this run. */
@@ -103,7 +107,7 @@ export class Run {
   nextPackTick: number;
   /** The last phase whose elites were sent (-1: none yet). */
   elitePhase = -1;
-  readonly stats: RunStats = { kills: 0, spawned: 0, damageDealt: 0, xpGained: 0 };
+  readonly stats: RunStats = { kills: 0, spawned: 0, damageDealt: 0, xpGained: 0, goldGained: 0 };
   /** The step in which the final boss comes. The run goes on until it falls. */
   readonly durationTicks: number;
   /** The ultimate casts by itself; the player can switch this off (Task 7). */
@@ -205,7 +209,8 @@ export class Run {
    *   updateAbilities(this);      // Task 6
    *   updateProjectiles(this);    // phase 2a, Task 4
    *   updateAllies(this);         // phase 2a, Task 6
-   *   updateCrystals(this);       // Task 7
+   *   updatePickups(this, crystals, 0);   // Task 7
+   *   updatePickups(this, coins, 1);      // gear plan, Task 3
    *   regenCastle(this);          // Task 4
    *   this.tick++;
    *   checkEnd(this);             // castle (Task 4) -> hero (Task 5) -> the final boss fell (phase 2b-3); a loss wins over a win
@@ -229,7 +234,8 @@ export class Run {
     updateAbilities(this);
     updateProjectiles(this);
     updateAllies(this);
-    updateCrystals(this);
+    updatePickups(this, this.crystals, 0);
+    updatePickups(this, this.coins, 1);
     regenCastle(this);
     this.tick++;
     checkEnd(this);
@@ -238,13 +244,18 @@ export class Run {
 }
 
 function savePrevious(run: Run): void {
-  const { hero, enemies, crystals, projectiles, allies } = run;
+  const { hero, enemies, crystals, coins, projectiles, allies } = run;
   hero.prevX = hero.x;
   hero.prevY = hero.y;
   for (let i = 0; i < crystals.capacity; i++) {
     if (crystals.alive[i] === 0) continue;
     crystals.prevX[i] = crystals.x[i];
     crystals.prevY[i] = crystals.y[i];
+  }
+  for (let i = 0; i < coins.capacity; i++) {
+    if (coins.alive[i] === 0) continue;
+    coins.prevX[i] = coins.x[i];
+    coins.prevY[i] = coins.y[i];
   }
   for (let i = 0; i < projectiles.capacity; i++) {
     if (projectiles.alive[i] === 0) continue;

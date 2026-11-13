@@ -127,6 +127,17 @@ export function stateHash(run: Run): number {
     mixFloat(c.x[i]);
     mixFloat(c.y[i]);
   }
+  mixFloat(run.gold);
+  mixFloat(run.stats.goldGained);
+  const coins = run.coins;
+  for (let i = 0; i < coins.capacity; i++) {
+    if (coins.alive[i] === 0) continue;
+    mixInt(i);
+    mixInt(coins.attracted[i]);
+    mixInt(coins.value[i]);
+    mixFloat(coins.x[i]);
+    mixFloat(coins.y[i]);
+  }
   const pr = run.projectiles;
   for (let i = 0; i < pr.capacity; i++) {
     if (pr.alive[i] === 0) continue;
