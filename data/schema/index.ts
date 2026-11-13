@@ -3,6 +3,7 @@ import { AbilitySchema } from "./ability";
 import { ConstantsSchema } from "./constants";
 import { EnemySchema } from "./enemy";
 import { HeroSchema } from "./hero";
+import { ItemSchema, SLOT_TYPES } from "./item";
 import { RulesSchema } from "./rules";
 
 export { AbilityKind, AbilitySchema, Targeting } from "./ability";
@@ -16,12 +17,15 @@ export { PointSchema, RulesSchema } from "./rules";
 export type { Point, Rules } from "./rules";
 export { HeroSchema } from "./hero";
 export type { Hero } from "./hero";
+export { ItemSchema, RARITIES, RARITY_ROWS, SLOT_TYPES, STAT_IDS } from "./item";
+export type { Item, Rarity, SlotType, StatId } from "./item";
 
 export const GameDataSchema = z.object({
   heroes: z.array(HeroSchema),
   abilities: z.array(AbilitySchema),
   enemies: z.array(EnemySchema),
   rules: RulesSchema,
+  items: z.array(ItemSchema),
   constants: ConstantsSchema,
 }).strict();
 
@@ -54,7 +58,7 @@ export function validateGameData(data: unknown): GameData {
       parsed.error.issues.map((i) => `${describePath(data, i.path)}: ${i.message}`),
     );
   }
-  const { heroes, abilities, enemies, rules } = parsed.data;
+  const { heroes, abilities, enemies, rules, items } = parsed.data;
   const errors: string[] = [];
 
   const abilityIds = new Set<string>();
@@ -109,6 +113,19 @@ export function validateGameData(data: unknown): GameData {
       }
     }
   });
+  rules.drops.forEach((drop, i) => checkBoss(`rules.drops.${i}.boss`, drop.boss));
+
+  const itemIds = new Set<string>();
+  items.forEach((item, i) => {
+    if (itemIds.has(item.id)) errors.push(`items.${i}.id: duplicate item id "${item.id}"`);
+    itemIds.add(item.id);
+  });
+  // A chest fills an empty slot with the common item of its type, so every type needs exactly one.
+  for (const type of SLOT_TYPES) {
+    const count = items.filter((item) => item.rarity === "common" && item.slotType === type).length;
+    if (count !== 1) errors.push(`items: ${count} common items of type ${type}, expected 1`);
+  }
+
   if (rules.debug.phaseXp.length !== rules.phases.length) {
     errors.push(`rules.debug.phaseXp: ${rules.debug.phaseXp.length} values for ${rules.phases.length} phases`);
   }

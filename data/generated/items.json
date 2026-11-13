@@ -1,0 +1,212 @@
+[
+  {
+    "id": "travelers-hood",
+    "name": {
+      "en": "Traveler's Hood",
+      "cs": "Poutníkova kápě"
+    },
+    "slotType": "head",
+    "rarity": "common",
+    "stats": [
+      {
+        "stat": "int",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "id": "copper-pendant",
+    "name": {
+      "en": "Copper Pendant",
+      "cs": "Měděný přívěsek"
+    },
+    "slotType": "neck",
+    "rarity": "common",
+    "stats": [
+      {
+        "stat": "magnet",
+        "value": 60
+      }
+    ]
+  },
+  {
+    "id": "padded-mantle",
+    "name": {
+      "en": "Padded Mantle",
+      "cs": "Vycpané nárameníky"
+    },
+    "slotType": "shoulders",
+    "rarity": "common",
+    "stats": [
+      {
+        "stat": "str",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "id": "road-cloak",
+    "name": {
+      "en": "Road Cloak",
+      "cs": "Cestovní plášť"
+    },
+    "slotType": "back",
+    "rarity": "common",
+    "stats": [
+      {
+        "stat": "agi",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "id": "quilted-vest",
+    "name": {
+      "en": "Quilted Vest",
+      "cs": "Prošívaná vesta"
+    },
+    "slotType": "chest",
+    "rarity": "common",
+    "stats": [
+      {
+        "stat": "hp",
+        "value": 72
+      }
+    ]
+  },
+  {
+    "id": "leather-bracers",
+    "name": {
+      "en": "Leather Bracers",
+      "cs": "Kožené nátepníky"
+    },
+    "slotType": "wrist",
+    "rarity": "common",
+    "stats": [
+      {
+        "stat": "agi",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "id": "work-gloves",
+    "name": {
+      "en": "Work Gloves",
+      "cs": "Pracovní rukavice"
+    },
+    "slotType": "hands",
+    "rarity": "common",
+    "stats": [
+      {
+        "stat": "str",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "id": "rope-belt",
+    "name": {
+      "en": "Rope Belt",
+      "cs": "Provazový opasek"
+    },
+    "slotType": "waist",
+    "rarity": "common",
+    "stats": [
+      {
+        "stat": "int",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "id": "patched-trousers",
+    "name": {
+      "en": "Patched Trousers",
+      "cs": "Záplatované kalhoty"
+    },
+    "slotType": "legs",
+    "rarity": "common",
+    "stats": [
+      {
+        "stat": "hp",
+        "value": 72
+      }
+    ]
+  },
+  {
+    "id": "walking-boots",
+    "name": {
+      "en": "Walking Boots",
+      "cs": "Pochodové boty"
+    },
+    "slotType": "feet",
+    "rarity": "common",
+    "stats": [
+      {
+        "stat": "moveSpeed",
+        "value": 0.06
+      }
+    ]
+  },
+  {
+    "id": "tin-ring",
+    "name": {
+      "en": "Tin Ring",
+      "cs": "Cínový prsten"
+    },
+    "slotType": "ring",
+    "rarity": "common",
+    "stats": [
+      {
+        "stat": "goldFind",
+        "value": 0.06
+      }
+    ]
+  },
+  {
+    "id": "lucky-pebble",
+    "name": {
+      "en": "Lucky Pebble",
+      "cs": "Oblázek pro štěstí"
+    },
+    "slotType": "trinket",
+    "rarity": "common",
+    "stats": [
+      {
+        "stat": "int",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "id": "militia-blade",
+    "name": {
+      "en": "Militia Blade",
+      "cs": "Domobranecká čepel"
+    },
+    "slotType": "mainHand",
+    "rarity": "common",
+    "stats": [
+      {
+        "stat": "damage",
+        "value": 0.06
+      }
+    ]
+  },
+  {
+    "id": "plank-buckler",
+    "name": {
+      "en": "Plank Buckler",
+      "cs": "Prkenný štítek"
+    },
+    "slotType": "offHand",
+    "rarity": "common",
+    "stats": [
+      {
+        "stat": "str",
+        "value": 6
+      }
+    ]
+  }
+]

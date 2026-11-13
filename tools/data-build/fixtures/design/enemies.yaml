@@ -5,6 +5,7 @@
   name: { en: Grunt, cs: Pěšák }
   behavior: siege
   xp: 1
+  gold: 2
 
 - id: warlord
   source: U001

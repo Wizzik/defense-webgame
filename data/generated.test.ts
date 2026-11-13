@@ -4,7 +4,7 @@ import { parse } from "yaml";
 import { describe, expect, it } from "vitest";
 import { validateGameData } from "./schema";
 
-const FILES = ["heroes.json", "abilities.json", "enemies.json", "rules.json", "constants.json"] as const;
+const FILES = ["heroes.json", "abilities.json", "enemies.json", "rules.json", "items.json", "constants.json"] as const;
 /** Keys that carry map texts (tooltips) or design-only lookups (mapName). */
 const FORBIDDEN_KEYS = new Set(["tooltip", "ubertip", "tip", "mapName", "source", "review", "jassFunctions"]);
 
@@ -51,6 +51,7 @@ describe("generated game data", () => {
         abilities: JSON.parse(read("abilities.json")),
         enemies: JSON.parse(read("enemies.json")),
         rules: JSON.parse(read("rules.json")),
+        items: JSON.parse(read("items.json")),
         constants: JSON.parse(read("constants.json")),
       }),
     ).not.toThrow();
@@ -78,6 +79,7 @@ describe("generated game data", () => {
       ["heroes.json", "heroes.yaml"],
       ["abilities.json", "abilities.yaml"],
       ["enemies.json", "enemies.yaml"],
+      ["items.json", "items.yaml"],
     ] as const;
     for (const [json, yaml] of pairs) {
       const pick = ({ id, name, description, role }: Entry) => ({ id, name, description, role });
@@ -90,8 +92,12 @@ describe("generated game data", () => {
   it("matches design rules and enemy xp", () => {
     const rules = parse(readFileSync(join(import.meta.dirname, "..", "design", "rules.yaml"), "utf8"));
     expect(JSON.parse(read("rules.json")), "rules.json differs from design/rules.yaml: run npm run data:build").toEqual(rules);
-    const xp = (list: { id: string; xp?: number }[]) => list.map(({ id, xp }) => ({ id, xp }));
-    expect(xp(JSON.parse(read("enemies.json")))).toEqual(xp(designEntries("enemies.yaml") as { id: string; xp?: number }[]));
+    type Loot = { id: string; xp?: number; gold?: number };
+    const loot = (list: Loot[]) => list.map(({ id, xp, gold }) => ({ id, xp, gold: gold ?? 0 }));
+    expect(loot(JSON.parse(read("enemies.json")))).toEqual(loot(designEntries("enemies.yaml") as Loot[]));
+    type Row = { id: string; slotType: string; rarity: string; stats: unknown };
+    const rows = (list: Row[]) => list.map(({ id, slotType, rarity, stats }) => ({ id, slotType, rarity, stats }));
+    expect(rows(JSON.parse(read("items.json")))).toEqual(rows(designEntries("items.yaml") as unknown as Row[]));
   });
 
   it("enemies have six common types and four bosses with their attack kinds", () => {

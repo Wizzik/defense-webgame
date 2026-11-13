@@ -2,8 +2,8 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import { type Constants, type GameData, validateGameData } from "../../data/schema";
-import { ABILITIES_YAML, type Design, ENEMIES_YAML, HEROES_YAML, loadDesign, loadMapExport, type MapExport } from "./load";
+import { type Constants, type GameData, type Item, validateGameData } from "../../data/schema";
+import { ABILITIES_YAML, type Design, ENEMIES_YAML, HEROES_YAML, type ItemEntry, loadDesign, loadMapExport, type MapExport } from "./load";
 import { mapAbility } from "./map-abilities";
 import { mapEnemy } from "./map-enemies";
 import { mapHero } from "./map-heroes";
@@ -30,6 +30,7 @@ export function buildGameData(src: MapExport, design: Design, mapVersion: string
     abilities,
     enemies,
     rules: design.rules,
+    items: design.items.map(mapItem),
     constants: mapConstants(src.mapInfo.misc_constants, mapVersion),
   };
   // Throws GameDataError. The parsed copy is not kept because zod reorders the keys.
@@ -37,7 +38,18 @@ export function buildGameData(src: MapExport, design: Design, mapVersion: string
   return data;
 }
 
-/** Writes heroes, abilities, enemies, rules and constants as JSON: indent 2, keys in mapping order. */
+/** Copies the game fields of an item entry; `source` and `review` stay in the design file. */
+function mapItem(entry: ItemEntry): Item {
+  return {
+    id: entry.id,
+    name: entry.name,
+    slotType: entry.slotType,
+    rarity: entry.rarity,
+    stats: (entry.stats ?? []).map((row) => ({ stat: row.stat, value: row.value })),
+  };
+}
+
+/** Writes heroes, abilities, enemies, rules, items and constants as JSON: indent 2, keys in mapping order. */
 export function writeGameData(data: GameData, outDir: string): void {
   mkdirSync(outDir, { recursive: true });
   const files: [string, unknown][] = [
@@ -45,6 +57,7 @@ export function writeGameData(data: GameData, outDir: string): void {
     ["abilities.json", data.abilities],
     ["enemies.json", data.enemies],
     ["rules.json", data.rules],
+    ["items.json", data.items],
     ["constants.json", data.constants],
   ];
   for (const [file, value] of files) {
@@ -99,7 +112,7 @@ function main(): void {
   const data = buildGameData(loadMapExport(values.source), loadDesign(DESIGN_DIR), mapVersion);
   writeGameData(data, values.out);
   console.log(
-    `data:build: ${data.heroes.length} heroes, ${data.abilities.length} abilities, ${data.enemies.length} enemies (${mapVersion}) -> ${values.out}`,
+    `data:build: ${data.heroes.length} heroes, ${data.abilities.length} abilities, ${data.enemies.length} enemies, ${data.items.length} items (${mapVersion}) -> ${values.out}`,
   );
 }
 
