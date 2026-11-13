@@ -29,6 +29,10 @@ export interface RunSummary {
   enraged: boolean;
   /** XP gained up to the start of each phase the run reached (index 0 is phase 1). */
   phaseXp: number[];
+  /** Chests opened. */
+  chests: number;
+  /** Gold gained in the run. */
+  gold: number;
 }
 
 /** A player who does nothing: no movement, no action; at a level-up the attribute card, so the first ability stays alone. */
@@ -36,7 +40,7 @@ export function idleInput(run: Run, out: TickInput): TickInput {
   out.moveX = 0;
   out.moveY = 0;
   out.actions = 0;
-  out.card = run.offer ? Math.max(0, run.offer.cards.findIndex((c) => c.kind === "attribute")) : -1;
+  out.card = run.offer ? Math.max(0, run.offer.cards.findIndex((c) => c.kind === "attribute")) : run.chestOffer ? 0 : -1;
   return out;
 }
 
@@ -79,6 +83,8 @@ export function playBot(
     })),
     enraged: run.enraged,
     phaseXp,
+    chests: run.chestsOpened,
+    gold: run.stats.goldGained,
   };
 }
 
@@ -91,7 +97,7 @@ export function formatSummary(s: RunSummary): string {
     .join(", ");
   return (
     `${s.hero} seed ${s.seed}: ${outcome} at ${m}:${sec}, kills ${s.kills}, spawned ${s.spawned}, level ${s.level}, ` +
-    `castle ${s.castleHpPercent}%, hero ${s.heroHp}/${s.heroMaxHp}, hero low ${s.minHeroHpPercent}%` +
+    `castle ${s.castleHpPercent}%, hero ${s.heroHp}/${s.heroMaxHp}, hero low ${s.minHeroHpPercent}%, chests ${s.chests}, gold ${s.gold}` +
     (bosses ? `, bosses: ${bosses}` : "") +
     (s.enraged ? ", enraged" : "")
   );
@@ -157,7 +163,9 @@ export function formatHeroSummary(hero: string, summaries: RunSummary[], idle: b
     `  boss kill median: ${kills.length > 0 ? kills.join(", ") : "-"}; ` +
     `final boss fight median ${fights.length > 0 ? `${median(fights)} s` : "-"}; ` +
     `enraged in ${summaries.filter((s) => s.enraged).length}; losses by minutes: ${lossWindows(summaries)}`;
-  return `${head}\n${tail}`;
+  const wonChests = wonRuns.length > 0 ? (wonRuns.reduce((a, s) => a + s.chests, 0) / wonRuns.length).toFixed(1) : "-";
+  const gear = `  chests avg ${avg((s) => s.chests).toFixed(1)} (won runs ${wonChests}), gold avg ${Math.round(avg((s) => s.gold))}`;
+  return `${head}\n${tail}\n${gear}`;
 }
 
 /** Below this share of max hp the hero counts as in danger (tuning target). */

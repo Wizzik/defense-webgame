@@ -11,10 +11,10 @@ describe("formatSummary", () => {
       formatSummary({
         hero: "stonehorn", seed: 1, result: "castle", seconds: 134, kills: 63, spawned: 320, level: 7,
         castleHp: 0, castleMaxHp: 3000, castleHpPercent: 0, heroHp: 812, heroMaxHp: 1555, minHeroHpPercent: 42,
-        bosses: [], enraged: false, phaseXp: [0],
+        bosses: [], enraged: false, phaseXp: [0], chests: 4, gold: 321,
       }),
     ).toBe(
-      "stonehorn seed 1: lost (castle) at 2:14, kills 63, spawned 320, level 7, castle 0%, hero 812/1555, hero low 42%",
+      "stonehorn seed 1: lost (castle) at 2:14, kills 63, spawned 320, level 7, castle 0%, hero 812/1555, hero low 42%, chests 4, gold 321",
     );
   });
 
@@ -23,16 +23,16 @@ describe("formatSummary", () => {
       formatSummary({
         hero: "nightglaive", seed: 2, result: "won", seconds: 180, kills: 5, spawned: 9, level: 2,
         castleHp: 1860, castleMaxHp: 3000, castleHpPercent: 62, heroHp: 1, heroMaxHp: 2, minHeroHpPercent: 0,
-        bosses: [], enraged: false, phaseXp: [0],
+        bosses: [], enraged: false, phaseXp: [0], chests: 4, gold: 321,
       }),
-    ).toBe("nightglaive seed 2: won at 3:00, kills 5, spawned 9, level 2, castle 62%, hero 1/2, hero low 0%");
+    ).toBe("nightglaive seed 2: won at 3:00, kills 5, spawned 9, level 2, castle 62%, hero 1/2, hero low 0%, chests 4, gold 321");
   });
 });
 
 const summary = (over: Partial<RunSummary>): RunSummary => ({
   hero: "stonehorn", seed: 1, result: "won", seconds: 1040, kills: 1, spawned: 2, level: 3,
   castleHp: 1, castleMaxHp: 2, castleHpPercent: 50, heroHp: 1, heroMaxHp: 2, minHeroHpPercent: 10,
-  bosses: [], enraged: false, phaseXp: [0], ...over,
+  bosses: [], enraged: false, phaseXp: [0], chests: 0, gold: 0, ...over,
 });
 
 describe("summaries of the full run", () => {
@@ -156,5 +156,29 @@ describe("bot run speed", () => {
     expect(run.state).toBe("won");
     expect(run.tick).toBeGreaterThan(300 * 30);
     expect(performance.now() - start).toBeLessThan(8000);
+  });
+});
+
+describe("chests in the summaries", () => {
+  it("a hero summary gives the average chests of all and of won runs, and the average gold", () => {
+    const text = formatHeroSummary("stonehorn", [
+      summary({ chests: 10, gold: 900 }),
+      summary({ chests: 14, gold: 1100 }),
+      summary({ result: "castle", chests: 3, gold: 400 }),
+    ], false, "dread-regent");
+    expect(text).toContain("chests avg 9.0 (won runs 12.0), gold avg 800");
+  });
+
+  it("a played run reports its chests and gold", () => {
+    const s = playBot(gameData(), 4, 120);
+    expect(s.gold).toBeGreaterThan(0);
+    expect(s.chests).toBeGreaterThan(0);
+  });
+
+  it("idle input takes the first slot of a chest", () => {
+    const run = createRun(gameData(), { seed: 1 });
+    run.chestOffer = { slots: [1, 2, 3] };
+    run.state = "chest";
+    expect(idleInput(run, { moveX: 0, moveY: 0, card: -1, actions: 0 }).card).toBe(0);
   });
 });

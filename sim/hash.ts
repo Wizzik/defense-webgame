@@ -15,7 +15,7 @@ function mixFloat(n: number): void {
   mixInt(u32[1]);
 }
 
-const STATES = { playing: 0, levelUp: 1, won: 2, lost: 3 } as const;
+const STATES = { playing: 0, levelUp: 1, won: 2, lost: 3, chest: 4 } as const;
 const RESULTS = { won: 1, castle: 2, hero: 3 } as const;
 
 /** FNV-1a (32 bit) over the simulation state, for determinism and replay tests. */
@@ -127,6 +127,15 @@ export function stateHash(run: Run): number {
     mixFloat(c.x[i]);
     mixFloat(c.y[i]);
   }
+  mixInt(run.chestRng.state);
+  mixInt(run.chestsOpened);
+  mixFloat(run.chestPriceRaw);
+  mixInt(run.openChest + 1);
+  for (let i = 0; i < run.chests.x.length; i++) {
+    mixFloat(run.chests.x[i]!);
+    mixFloat(run.chests.y[i]!);
+  }
+  if (run.chestOffer) for (const slot of run.chestOffer.slots) mixInt(slot + 1);
   mixFloat(run.gold);
   mixFloat(run.stats.goldGained);
   const coins = run.coins;

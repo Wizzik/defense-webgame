@@ -7,7 +7,7 @@ export interface GameSnapshot {
   backend: Backend;
   gpu: GpuInfo;
   frames: number;
-  screen: "menu" | "playing" | "levelUp" | "won" | "lost";
+  screen: "menu" | "playing" | "levelUp" | "chest" | "won" | "lost";
   tick: number;
   level: number;
   kills: number;

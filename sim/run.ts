@@ -4,6 +4,7 @@ import type { AbilitySlot } from "./abilities/slots";
 import { TICKS_PER_SECOND } from "./constants";
 import { chooseCard, openOffer } from "./cards";
 import type { CardOffer } from "./cards";
+import { type ChestOffer, ChestStore, chooseChestSlot, placeChest, updateChests } from "./chests";
 import { regenCastle } from "./castle";
 import { ALLY_CAPACITY, AllyStore, updateAllies } from "./allies";
 import { PROJECTILE_CAPACITY, ProjectileStore, updateProjectiles } from "./projectiles";
@@ -13,7 +14,7 @@ import { BEHAVIOR_IDS } from "./enemy-steer";
 import { healEnemies } from "./enemy-heal";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
-import { emptyGearBonus, GearState, loadGear, type LoadoutEntry, recomputeGear } from "./gear";
+import { basicItemIndex, emptyGearBonus, GearState, loadGear, type LoadoutEntry, recomputeGear, SLOT_COUNT, slotTypeOf } from "./gear";
 import { refreshHeroStats } from "./level-up";
 import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import type { TickInput } from "./input";
@@ -25,7 +26,7 @@ import { buildPhaseTables, enemyType, type PhaseTable } from "./spawn-tables";
 import { SpatialHash } from "./spatial-grid";
 import type { CastleState, HeroState, HeroStats, RunStats } from "./world";
 
-export type RunState = "playing" | "levelUp" | "won" | "lost";
+export type RunState = "playing" | "levelUp" | "chest" | "won" | "lost";
 export type RunResult = "won" | "castle" | "hero";
 export interface RunOptions {
   seed: number;
@@ -63,6 +64,21 @@ export class Run {
   readonly coins = new CrystalStore(COIN_CAPACITY);
   /** Gold the hero holds; it pays for chests and is gone after the run. */
   gold = 0;
+  /** The chests on the map (sim/chests.ts). */
+  readonly chests: ChestStore;
+  /** Places of chests and their offers come from this generator, so chests do not shift the enemies of a seed. */
+  readonly chestRng: Rng;
+  chestsOpened = 0;
+  /** Price of the next chest before rounding: basePrice x priceGrowth for every chest opened. */
+  chestPriceRaw: number;
+  /** The slots of the chest that is open; null outside the "chest" state. */
+  chestOffer: ChestOffer | null = null;
+  /** Index of the chest that is open; -1 outside the "chest" state. */
+  openChest = -1;
+  /** Scratch for drawing the offer. */
+  readonly chestOrder = new Uint8Array(SLOT_COUNT);
+  /** Slot to the index of the common item of its type. */
+  readonly basicItems: Int16Array;
   readonly projectiles = new ProjectileStore(PROJECTILE_CAPACITY);
   readonly allies = new AllyStore(ALLY_CAPACITY);
   /** What the hero wears: the loadout plus what chests gave in this run. */
@@ -174,6 +190,11 @@ export class Run {
       x: rules.arena.castle.x, y: rules.arena.castle.y, radius: rules.castle.radius,
       hp: rules.castle.hp, maxHp: rules.castle.hp, lastHitTick: -1,
     };
+    this.basicItems = Int16Array.from({ length: SLOT_COUNT }, (_, slot) => basicItemIndex(data, slotTypeOf(slot)));
+    this.chestRng = new Rng((options.seed ^ 0x5bd1e995) >>> 0);
+    this.chestPriceRaw = rules.chests.basePrice;
+    this.chests = new ChestStore(rules.chests.count);
+    for (let i = 0; i < rules.chests.count; i++) placeChest(this, i, true);
     if (options.startPhase !== undefined) applyStartPhase(this, options.startPhase);
   }
 
@@ -215,12 +236,19 @@ export class Run {
    *   this.tick++;
    *   checkEnd(this);             // castle (Task 4) -> hero (Task 5) -> the final boss fell (phase 2b-3); a loss wins over a win
    *   if (state === "playing" && hero.pendingLevelUps > 0) openOffer(this);   // Task 7
+   *   else if (state === "playing") updateChests(this);   // gear plan, Task 4: after the end check and the cards
+   *
+   * In the "chest" state only chooseChestSlot runs, like chooseCard in "levelUp".
    */
   step(input: TickInput): void {
     if (this.state === "won" || this.state === "lost") return;
     this.events.clear();
     if (this.state === "levelUp") {
       chooseCard(this, input.card);
+      return;
+    }
+    if (this.state === "chest") {
+      chooseChestSlot(this, input.card);
       return;
     }
     savePrevious(this);
@@ -239,7 +267,9 @@ export class Run {
     regenCastle(this);
     this.tick++;
     checkEnd(this);
-    if (this.state === "playing" && this.hero.pendingLevelUps > 0) openOffer(this);
+    if (this.state !== "playing") return;
+    if (this.hero.pendingLevelUps > 0) openOffer(this);
+    else updateChests(this);
   }
 }
 

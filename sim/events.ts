@@ -4,6 +4,7 @@ export const EventKind = {
   Cast: 3,
   HeroHit: 4,
   CastleHit: 5,
+  /** A crystal or a coin was collected: value = XP or gold gained, u = 0 crystal / 1 coin. */
   Pickup: 6,
   LevelUp: 7,
   RunEnd: 8,
@@ -26,6 +27,13 @@ export const EventKind = {
   Slam: 17,
   /** The final boss is enraged: a = slot, x/y = where. */
   Enrage: 18,
+  /** A chest appeared at a new place: a = chest index, x/y = where. */
+  ChestSpawn: 19,
+  /** The hero opened a chest: a = chest index, value = gold paid, x/y = the chest. */
+  ChestOpen: 20,
+  /** A slot of the open chest was chosen: a = slot, value = its new level (permanent + temporary), x/y = the hero,
+   *  u = index of the item in the slot. */
+  ChestPick: 21,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */
