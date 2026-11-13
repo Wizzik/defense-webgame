@@ -4,15 +4,18 @@ import type { AbilitySlot } from "./abilities/slots";
 import { TICKS_PER_SECOND } from "./constants";
 import { chooseCard, openOffer } from "./cards";
 import type { CardOffer } from "./cards";
+import { type ChestOffer, ChestStore, chooseChestSlot, placeChest, updateChests } from "./chests";
 import { regenCastle } from "./castle";
 import { ALLY_CAPACITY, AllyStore, updateAllies } from "./allies";
 import { PROJECTILE_CAPACITY, ProjectileStore, updateProjectiles } from "./projectiles";
-import { CRYSTAL_CAPACITY, CrystalStore, updateCrystals } from "./crystals";
+import { COIN_CAPACITY, CRYSTAL_CAPACITY, CrystalStore, updatePickups } from "./crystals";
 import { updateEnemies } from "./enemy-ai";
 import { BEHAVIOR_IDS } from "./enemy-steer";
 import { healEnemies } from "./enemy-heal";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
+import { updateGearEffects } from "./gear-effects";
+import { basicItemIndex, emptyGearBonus, GearState, loadGear, type LoadoutEntry, recomputeGear, SLOT_COUNT, slotTypeOf } from "./gear";
 import { refreshHeroStats } from "./level-up";
 import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import type { TickInput } from "./input";
@@ -24,7 +27,7 @@ import { buildPhaseTables, enemyType, type PhaseTable } from "./spawn-tables";
 import { SpatialHash } from "./spatial-grid";
 import type { CastleState, HeroState, HeroStats, RunStats } from "./world";
 
-export type RunState = "playing" | "levelUp" | "won" | "lost";
+export type RunState = "playing" | "levelUp" | "chest" | "won" | "lost";
 export type RunResult = "won" | "castle" | "hero";
 export interface RunOptions {
   seed: number;
@@ -33,6 +36,8 @@ export interface RunOptions {
   hero?: string;
   /** Debug: start at this phase (1 to phases + 1, the last is the finale); see sim/start-phase.ts. */
   startPhase?: number;
+  /** Permanent items the hero wears; entries that do not fit are skipped (sim/gear.ts). */
+  loadout?: readonly LoadoutEntry[];
 }
 
 /** One boss of the run, for run summaries. */
@@ -56,8 +61,31 @@ export class Run {
   readonly heroIndex: number;
   readonly abilities: AbilitySlot[];
   readonly crystals = new CrystalStore(CRYSTAL_CAPACITY);
+  /** Gold coins on the ground. */
+  readonly coins = new CrystalStore(COIN_CAPACITY);
+  /** Gold the hero holds; it pays for chests and is gone after the run. */
+  gold = 0;
+  /** The chests on the map (sim/chests.ts). */
+  readonly chests: ChestStore;
+  /** Places of chests and their offers come from this generator, so chests do not shift the enemies of a seed. */
+  readonly chestRng: Rng;
+  chestsOpened = 0;
+  /** Bosses that fell in this run; the order of a boss's death picks its drop (meta/drop.ts). */
+  bossesKilled = 0;
+  /** Price of the next chest before rounding: basePrice x priceGrowth for every chest opened. */
+  chestPriceRaw: number;
+  /** The slots of the chest that is open; null outside the "chest" state. */
+  chestOffer: ChestOffer | null = null;
+  /** Index of the chest that is open; -1 outside the "chest" state. */
+  openChest = -1;
+  /** Scratch for drawing the offer. */
+  readonly chestOrder = new Uint8Array(SLOT_COUNT);
+  /** Slot to the index of the common item of its type. */
+  readonly basicItems: Int16Array;
   readonly projectiles = new ProjectileStore(PROJECTILE_CAPACITY);
   readonly allies = new AllyStore(ALLY_CAPACITY);
+  /** What the hero wears: the loadout plus what chests gave in this run. */
+  readonly gear: GearState;
   offer: CardOffer | null = null;
   /** Weighted enemy types per phase, built once here so a step does not allocate. */
   readonly phaseTables: PhaseTable[];
@@ -98,7 +126,7 @@ export class Run {
   nextPackTick: number;
   /** The last phase whose elites were sent (-1: none yet). */
   elitePhase = -1;
-  readonly stats: RunStats = { kills: 0, spawned: 0, damageDealt: 0, xpGained: 0 };
+  readonly stats: RunStats = { kills: 0, spawned: 0, damageDealt: 0, xpGained: 0, goldGained: 0 };
   /** The step in which the final boss comes. The run goes on until it falls. */
   readonly durationTicks: number;
   /** The ultimate casts by itself; the player can switch this off (Task 7). */
@@ -116,6 +144,7 @@ export class Run {
     this.data = data;
     this.rng = new Rng(options.seed);
     this.enemies = new EnemyStore(rules.enemies.maxAlive);
+    this.gear = new GearState(rules.enemies.maxAlive);
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);
     this.enemyBehavior = Uint8Array.from(data.enemies, (e) => BEHAVIOR_IDS.indexOf(e.behavior));
     this.enemyHunter = Uint8Array.from(data.enemies, (e) => (e.hunter ? 1 : 0));
@@ -149,7 +178,7 @@ export class Run {
       facingX: 0, facingY: 1, moving: false,
       level: 1, xp: 0,
       str: def.attributes.str.base, agi: def.attributes.agi.base, int: def.attributes.int.base,
-      hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, attackCooldown: 0, pendingLevelUps: 0,
+      hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, gear: emptyGearBonus(), attackCooldown: 0, pendingLevelUps: 0,
       dashTicks: 0, dashCooldown: 0, dashDirX: 0, dashDirY: 0,
     };
     heroStats(data, hero, stats);
@@ -158,11 +187,18 @@ export class Run {
 
     this.abilities = createAbilitySlots(this);
     refreshHeroStats(this); // the same path as every later refresh, so a starting aura counts
+    if (options.loadout !== undefined) loadGear(this, options.loadout);
+    recomputeGear(this); // a living hero's hp grows with maxHp, so the hero starts full
 
     this.castle = {
       x: rules.arena.castle.x, y: rules.arena.castle.y, radius: rules.castle.radius,
       hp: rules.castle.hp, maxHp: rules.castle.hp, lastHitTick: -1,
     };
+    this.basicItems = Int16Array.from({ length: SLOT_COUNT }, (_, slot) => basicItemIndex(data, slotTypeOf(slot)));
+    this.chestRng = new Rng((options.seed ^ 0x5bd1e995) >>> 0);
+    this.chestPriceRaw = rules.chests.basePrice;
+    this.chests = new ChestStore(rules.chests.count);
+    for (let i = 0; i < rules.chests.count; i++) placeChest(this, i, true);
     if (options.startPhase !== undefined) applyStartPhase(this, options.startPhase);
   }
 
@@ -196,19 +232,30 @@ export class Run {
    *   healEnemies(this);          // phase 2b-1 (reads the grid built by updateEnemies)
    *   updateHeroCombat(this);     // Task 5
    *   updateAbilities(this);      // Task 6
+   *   updateGearEffects(this);    // gear plan, Task 7 (shield, haste and aura of worn items)
    *   updateProjectiles(this);    // phase 2a, Task 4
    *   updateAllies(this);         // phase 2a, Task 6
-   *   updateCrystals(this);       // Task 7
+   *   updatePickups(this, crystals, 0);   // Task 7
+   *   updatePickups(this, coins, 1);      // gear plan, Task 3
    *   regenCastle(this);          // Task 4
    *   this.tick++;
    *   checkEnd(this);             // castle (Task 4) -> hero (Task 5) -> the final boss fell (phase 2b-3); a loss wins over a win
    *   if (state === "playing" && hero.pendingLevelUps > 0) openOffer(this);   // Task 7
+   *   else if (state === "playing") updateChests(this);   // gear plan, Task 4: after the end check and the cards
+   *
+   * In the "chest" state only chooseChestSlot runs, like chooseCard in "levelUp".
    */
   step(input: TickInput): void {
-    if (this.state === "won" || this.state === "lost") return;
+    // first, also for a finished run: the client keeps stepping it, and the events of its last step
+    // (a boss's death and so its drop) must reach the views once
     this.events.clear();
+    if (this.state === "won" || this.state === "lost") return;
     if (this.state === "levelUp") {
       chooseCard(this, input.card);
+      return;
+    }
+    if (this.state === "chest") {
+      chooseChestSlot(this, input.card);
       return;
     }
     savePrevious(this);
@@ -220,24 +267,33 @@ export class Run {
     healEnemies(this);
     updateHeroCombat(this);
     updateAbilities(this);
+    updateGearEffects(this);
     updateProjectiles(this);
     updateAllies(this);
-    updateCrystals(this);
+    updatePickups(this, this.crystals, 0);
+    updatePickups(this, this.coins, 1);
     regenCastle(this);
     this.tick++;
     checkEnd(this);
-    if (this.state === "playing" && this.hero.pendingLevelUps > 0) openOffer(this);
+    if (this.state !== "playing") return;
+    if (this.hero.pendingLevelUps > 0) openOffer(this);
+    else updateChests(this);
   }
 }
 
 function savePrevious(run: Run): void {
-  const { hero, enemies, crystals, projectiles, allies } = run;
+  const { hero, enemies, crystals, coins, projectiles, allies } = run;
   hero.prevX = hero.x;
   hero.prevY = hero.y;
   for (let i = 0; i < crystals.capacity; i++) {
     if (crystals.alive[i] === 0) continue;
     crystals.prevX[i] = crystals.x[i];
     crystals.prevY[i] = crystals.y[i];
+  }
+  for (let i = 0; i < coins.capacity; i++) {
+    if (coins.alive[i] === 0) continue;
+    coins.prevX[i] = coins.x[i];
+    coins.prevY[i] = coins.y[i];
   }
   for (let i = 0; i < projectiles.capacity; i++) {
     if (projectiles.alive[i] === 0) continue;

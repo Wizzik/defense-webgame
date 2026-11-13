@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Slug } from "./common";
+import { RaritySchema } from "./item";
 
 export const PointSchema = z.object({ x: z.number(), y: z.number() }).strict();
 export type Point = z.infer<typeof PointSchema>;
@@ -104,6 +105,24 @@ export const RulesSchema = z.object({
     /** Elites that come once, with the first pack of the first interval of the phase. */
     elites: z.number().int().min(0),
   }).strict()).min(1),
+  /** Item numbers at level L are the level-1 numbers x (1 + levelStep x (L - 1)). */
+  gear: z.object({ levelStep: nonNegative, maxPermanentLevel: z.number().int().min(1) }).strict(),
+  /** `count` chests lie on the map; the n-th one opened costs basePrice x priceGrowth^(n - 1) gold. */
+  chests: z.object({
+    count: z.number().int().min(1).max(8),
+    basePrice: positive,
+    priceGrowth: z.number().min(1),
+    minCastleDistance: nonNegative,
+    maxCastleDistance: positive,
+    minSpacing: nonNegative,
+    pickupRadius: positive,
+    slotsPerOffer: z.number().int().min(1).max(16),
+  }).strict().refine((c) => c.minCastleDistance < c.maxCastleDistance, "minCastleDistance is not below maxCastleDistance"),
+  /** What a boss drops: the rarity is drawn by these weights. */
+  drops: z.array(z.object({
+    boss: Slug,
+    weights: z.partialRecord(RaritySchema, positive).refine((w) => Object.keys(w).length > 0, "needs at least one rarity"),
+  }).strict()),
   progression: z.object({
     xpFirst: positive,
     xpStep: nonNegative,

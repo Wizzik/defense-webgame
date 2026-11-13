@@ -1,0 +1,20 @@
+# Synthetic items for the data-build tests: one common item per slot type.
+- id: plain-head
+  source: I001
+  name: { en: Plain Hat, cs: Prostý klobouk }
+  slotType: head
+  rarity: common
+  stats: [{ stat: int, value: 6 }]
+- { id: plain-neck, name: { en: Plain neck, cs: Prostý neck }, slotType: neck, rarity: common, stats: [{ stat: str, value: 6 }] }
+- { id: plain-shoulders, name: { en: Plain shoulders, cs: Prostý shoulders }, slotType: shoulders, rarity: common, stats: [{ stat: str, value: 6 }] }
+- { id: plain-back, name: { en: Plain back, cs: Prostý back }, slotType: back, rarity: common, stats: [{ stat: str, value: 6 }] }
+- { id: plain-chest, name: { en: Plain chest, cs: Prostý chest }, slotType: chest, rarity: common, stats: [{ stat: str, value: 6 }] }
+- { id: plain-wrist, name: { en: Plain wrist, cs: Prostý wrist }, slotType: wrist, rarity: common, stats: [{ stat: str, value: 6 }] }
+- { id: plain-hands, name: { en: Plain hands, cs: Prostý hands }, slotType: hands, rarity: common, stats: [{ stat: str, value: 6 }] }
+- { id: plain-waist, name: { en: Plain waist, cs: Prostý waist }, slotType: waist, rarity: common, stats: [{ stat: str, value: 6 }] }
+- { id: plain-legs, name: { en: Plain legs, cs: Prostý legs }, slotType: legs, rarity: common, stats: [{ stat: str, value: 6 }] }
+- { id: plain-feet, name: { en: Plain feet, cs: Prostý feet }, slotType: feet, rarity: common, stats: [{ stat: str, value: 6 }] }
+- { id: plain-ring, name: { en: Plain ring, cs: Prostý ring }, slotType: ring, rarity: common, stats: [{ stat: str, value: 6 }] }
+- { id: plain-trinket, name: { en: Plain trinket, cs: Prostý trinket }, slotType: trinket, rarity: common, stats: [{ stat: str, value: 6 }] }
+- { id: plain-mainhand, name: { en: Plain mainHand, cs: Prostý mainHand }, slotType: mainHand, rarity: common, stats: [{ stat: str, value: 6 }] }
+- { id: plain-offhand, name: { en: Plain offHand, cs: Prostý offHand }, slotType: offHand, rarity: common, stats: [{ stat: str, value: 6 }] }

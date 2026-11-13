@@ -22,6 +22,8 @@ export const EnemySchema = z.object({
   /** How the type walks: see sim/enemy-steer.ts and sim/enemy-charge.ts. */
   behavior: z.enum(["siege", "flank", "skirmish", "support", "charge"]),
   xp: z.number().int().positive(),
+  /** Value of the coin the enemy drops; 0 drops none. */
+  gold: z.number().int().min(0).default(0),
   /** Heals the most wounded enemy in `range` (itself too) by `amount` every `cooldown` seconds. */
   heal: z.object({
     amount: z.number().positive(),

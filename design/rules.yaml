@@ -61,5 +61,18 @@ events:
   - { atSeconds: 900, kind: rush, units: { captain: 8, lancer: 12 } }
 # XP a hero has at the start of each phase, for ?phase=N. Filled from `npm run sim:run -- --phase-xp`.
 debug: { phaseXp: [0, 45, 105, 207, 374, 580, 975, 1235, 1561, 1922, 2314, 3086, 3663, 4176, 4822, 5623, 6708, 7628, 8513, 9579] }
+# Gear (items, chests, boss drops). Tuned in docs/DECISIONS.md, section Gear, drops and chests.
+# gear: an item's numbers at level L are its level-1 numbers x (1 + levelStep x (L - 1)); a duplicate from a boss
+#   raises the permanent level up to maxPermanentLevel, chests add temporary levels without a cap.
+gear: { levelStep: 0.15, maxPermanentLevel: 5 }
+# chests: `count` chests lie between min and maxCastleDistance from the castle and minSpacing apart. The n-th chest
+#   opened costs basePrice x priceGrowth^(n - 1) gold and offers slotsPerOffer gear slots.
+chests: { count: 3, basePrice: 200, priceGrowth: 1.12, minCastleDistance: 700, maxCastleDistance: 2000, minSpacing: 600, pickupRadius: 80, slotsPerOffer: 3 }
+# drops: every boss drops one item; its rarity is drawn by these weights (meta/drop.ts).
+drops:
+  - { boss: iron-marshal, weights: { common: 60, rare: 40 } }
+  - { boss: pale-abbot, weights: { rare: 60, epic: 40 } }
+  - { boss: gunmaster, weights: { epic: 75, legendary: 25 } }
+  - { boss: dread-regent, weights: { epic: 50, legendary: 40, mythic: 10 } }
 progression: { xpFirst: 10, xpStep: 9, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3,
   ultimateFromLevel: 6, ultimateLevelStep: 6 }   # map: ultimates need hero level 10

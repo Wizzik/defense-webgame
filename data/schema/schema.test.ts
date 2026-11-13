@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { GameDataError, validateGameData } from "./index";
 
+const SLOT_TYPES = [
+  "head", "neck", "shoulders", "back", "chest", "wrist", "hands", "waist", "legs", "feet", "ring", "trinket", "mainHand", "offHand",
+];
+
 function fixture(): any {
   const names = (n: string) => ({ en: n, cs: n });
   const base = { levels: 3, cooldown: [5, 4, 3] };
@@ -74,11 +78,19 @@ function fixture(): any {
         { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.3, elites: 0 },
         { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.35, elites: 0 },
       ],
+      gear: { levelStep: 0.15, maxPermanentLevel: 5 },
+      chests: { count: 3, basePrice: 40, priceGrowth: 1.18, minCastleDistance: 700, maxCastleDistance: 2000,
+        minSpacing: 600, pickupRadius: 80, slotsPerOffer: 3 },
+      drops: [{ boss: "warlord", weights: { common: 60, rare: 40 } }],
       progression: {
         xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56,
         attributeCardAmount: 10, cardsPerOffer: 3, ultimateFromLevel: 6, ultimateLevelStep: 6,
       },
     },
+    items: SLOT_TYPES.map((slotType) => ({
+      id: `plain-${slotType.toLowerCase()}`, name: names(slotType), slotType, rarity: "common",
+      stats: [{ stat: "str", value: 6 }],
+    })),
     constants: {
       strHitPointBonus: 19,
       agiAttackSpeedBonus: 0.02,
@@ -421,5 +433,51 @@ describe("game data schemas", () => {
 
   it("renders root issues as (root)", () => {
     expect(errorMessage(42)).toMatch(/^\(root\): /);
+  });
+});
+
+describe("item and gear schemas", () => {
+  it("rejects an item whose stat rows do not match its rarity", () => {
+    const rows = { common: 1, rare: 2, epic: 3, legendary: 4, mythic: 5 };
+    for (const [rarity, count] of Object.entries(rows)) {
+      const stats = Array.from({ length: count }, () => ({ stat: "str", value: 3 }));
+      const good = fixture();
+      good.items.push({ id: "extra", name: { en: "Extra", cs: "Navíc" }, slotType: "head", rarity, stats });
+      if (rarity !== "common") expect(() => validateGameData(good)).not.toThrow();
+      const bad = fixture();
+      bad.items.push({ id: "extra", name: { en: "Extra", cs: "Navíc" }, slotType: "head", rarity, stats: [...stats, { stat: "agi", value: 1 }] });
+      expect(errorMessage(bad)).toContain("items.14 (extra)");
+    }
+  });
+
+  it("rejects duplicate item ids", () => {
+    const data = fixture();
+    data.items.push({ ...data.items[0], rarity: "rare", stats: [{ stat: "str", value: 6 }, { stat: "hp", value: 72 }] });
+    expect(errorMessage(data)).toContain('duplicate item id "plain-head"');
+  });
+
+  it("rejects a drop table of an unknown boss or of a common enemy", () => {
+    const data = fixture();
+    data.rules.drops.push({ boss: "nobody", weights: { rare: 1 } });
+    expect(errorMessage(data)).toContain('rules.drops.1.boss: unknown enemy "nobody"');
+    const other = fixture();
+    other.rules.drops[0].boss = "grunt";
+    expect(errorMessage(other)).toContain('"grunt" is not a boss');
+  });
+
+  it("needs exactly one common item for every slot type", () => {
+    const missing = fixture();
+    missing.items.pop();
+    expect(errorMessage(missing)).toContain("items: 0 common items of type offHand, expected 1");
+    const twice = fixture();
+    twice.items.push({ ...twice.items[0], id: "second-head" });
+    expect(errorMessage(twice)).toContain("items: 2 common items of type head, expected 1");
+  });
+
+  it("enemy gold defaults to 0 and must not be negative", () => {
+    const data = fixture();
+    expect(validateGameData(data).enemies[0]!.gold).toBe(0);
+    data.enemies[0].gold = -1;
+    expect(errorMessage(data)).toContain("enemies.0 (grunt).gold");
   });
 });

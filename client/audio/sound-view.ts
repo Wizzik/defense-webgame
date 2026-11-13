@@ -39,7 +39,11 @@ export class SoundView implements RunView {
           this.sfx.castleHit();
           break;
         case EventKind.Pickup:
-          this.sfx.pickup();
+          if (events.u[i] === 1) this.sfx.coin();
+          else this.sfx.pickup();
+          break;
+        case EventKind.ChestOpen:
+          this.sfx.chest();
           break;
         case EventKind.LevelUp:
           this.sfx.levelUp();

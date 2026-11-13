@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { debugSetAbilityLevel } from "./abilities/slots";
 import { EventKind } from "./events";
-import { botCard, botInput, CHASE_DISTANCE, DEFEND_RADIUS, HOME_OFFSET, LEASH_DISTANCE } from "./bot";
+import { botCard, botChestChoice, botInput, CHASE_DISTANCE, DEFEND_RADIUS, HOME_OFFSET, LEASH_DISTANCE } from "./bot";
+import { chestPrice } from "./chests";
+import { silenceSpawns } from "./testing/silence";
 import { Charge } from "./enemy-charge";
 import { stateHash } from "./hash";
 import { InputAction, NO_INPUT } from "./input";
@@ -326,4 +328,74 @@ describe("balance", () => {
       }
     });
   }
+
+  describe("chests", () => {
+    const quiet = (hero?: string) => {
+      const data = gameData();
+      silenceSpawns(data);
+      return createRun(data, { seed: 3, durationSeconds: 100000, hero });
+    };
+    const nearestChest = (run: Run) => {
+      let best = 0;
+      let bestSq = Infinity;
+      for (let i = 0; i < run.chests.x.length; i++) {
+        const dx = run.chests.x[i]! - run.hero.x;
+        const dy = run.chests.y[i]! - run.hero.y;
+        if (dx * dx + dy * dy < bestSq) {
+          bestSq = dx * dx + dy * dy;
+          best = i;
+        }
+      }
+      return best;
+    };
+
+    it("with the gold and a healthy hero the bot walks to the nearest chest", () => {
+      const run = quiet();
+      run.gold = chestPrice(run);
+      const input = botInput(run, { moveX: 0, moveY: 0, card: -1, actions: 0 });
+      const chest = nearestChest(run);
+      const dx = run.chests.x[chest]! - run.hero.x;
+      const dy = run.chests.y[chest]! - run.hero.y;
+      expect(input.moveX !== 0 || input.moveY !== 0).toBe(true);
+      expect(input.moveX * dx + input.moveY * dy).toBeGreaterThan(0);
+      let guard = 0;
+      while (run.state !== "chest" && guard++ < 3000) run.step(botInput(run, input));
+      expect(run.state).toBe("chest");
+    });
+
+    it("without the gold, with a hurt hero or a hurt castle the bot stays at its post", () => {
+      const poor = quiet();
+      poor.gold = chestPrice(poor) - 1;
+      const hurt = quiet();
+      hurt.gold = 1000;
+      hurt.hero.hp = hurt.hero.stats.maxHp * 0.29;
+      const siege = quiet();
+      siege.gold = 1000;
+      siege.castle.hp = siege.castle.maxHp * 0.49;
+      for (const run of [poor, hurt, siege]) {
+        const input = botInput(run, { moveX: 0, moveY: 0, card: -1, actions: 0 });
+        // The hero starts next to its post: with no chest to go for it does not walk away from the castle.
+        const before = Math.abs(run.hero.x - run.castle.x) + Math.abs(run.hero.y - run.castle.y);
+        for (let i = 0; i < 90; i++) run.step(botInput(run, input));
+        const after = Math.abs(run.hero.x - run.castle.x) + Math.abs(run.hero.y - run.castle.y);
+        expect(after).toBeLessThanOrEqual(before + 1);
+      }
+    });
+
+    it("picks the offered slot with the lowest level, the first one on a tie", () => {
+      const run = quiet();
+      run.chestOffer = { slots: [4, 7, 2] };
+      run.state = "chest";
+      expect(botChestChoice(run)).toBe(0);
+      run.gear.item[4] = 0;
+      run.gear.temp[4] = 2;
+      run.gear.item[7] = 0;
+      run.gear.base[7] = 1;
+      expect(botChestChoice(run)).toBe(2);
+      run.gear.item[2] = 0;
+      run.gear.temp[2] = 3;
+      expect(botChestChoice(run)).toBe(1);
+      expect(botInput(run, { moveX: 1, moveY: 1, card: -1, actions: 0 })).toEqual({ moveX: 0, moveY: 0, card: 1, actions: 0 });
+    });
+  });
 });

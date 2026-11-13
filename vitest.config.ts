@@ -11,6 +11,7 @@ export default defineConfig({
       "tools/**/*.test.ts",
       "client/**/*.test.ts",
       "sim/**/*.test.ts",
+      "meta/**/*.test.ts",
     ],
   },
 });

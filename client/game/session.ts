@@ -1,5 +1,5 @@
 import type { GameData } from "../../data/schema";
-import { createRun, EventKind, NO_INPUT, type Run, SlamEvent, TICK_SECONDS, type TickInput, ULTIMATE_SLOT } from "../../sim";
+import { createRun, EventKind, type LoadoutEntry, NO_INPUT, type Run, SlamEvent, TICK_SECONDS, type TickInput, ULTIMATE_SLOT } from "../../sim";
 import { SCENE_SCALE } from "../render/coords";
 import type { FollowCamera } from "../render/camera";
 import type { Scene } from "three/webgpu";
@@ -53,11 +53,18 @@ export class Session {
     this.keyboard = deps.keyboard;
   }
 
+  /** The permanent items a hero wears into a run; main.ts sets it to the player's doll. */
+  loadoutFor: (heroId: string) => readonly LoadoutEntry[] = () => [];
+  /** Called when a run starts. */
+  onStart: () => void = () => {};
+
   start(seed: number, paused = false, hero?: string): void {
     const { startPhase, durationSeconds } = this.params;
     // a phase the data does not have is ignored: the run starts normally
     const phase = startPhase !== undefined && startPhase <= this.data.rules.phases.length + 1 ? startPhase : undefined;
-    this.run = createRun(this.data, { seed, hero, durationSeconds, startPhase: phase });
+    const loadout = this.loadoutFor(hero ?? this.data.rules.start.hero);
+    this.run = createRun(this.data, { seed, hero, durationSeconds, startPhase: phase, loadout });
+    this.onStart();
     this.seed = seed;
     this.paused = paused;
     this.pendingCard = -1;

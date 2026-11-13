@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
-import type { Ability, Enemy, Hero, Rules } from "../../data/schema";
+import type { Ability, Enemy, Hero, Item, Rules } from "../../data/schema";
 import { parseScaling, SCALING_YAML, type Scaling } from "./scaling";
 
 /** Design files as they are named in error messages. */
@@ -9,6 +9,7 @@ export const HEROES_YAML = "design/heroes.yaml";
 export const ABILITIES_YAML = "design/abilities.yaml";
 export const ENEMIES_YAML = "design/enemies.yaml";
 export const RULES_YAML = "design/rules.yaml";
+export const ITEMS_YAML = "design/items.yaml";
 
 /** Object data fields of one export ability level. */
 export const DATA_FIELDS = [
@@ -117,6 +118,8 @@ export interface EnemyEntry {
   mapName?: string;
   name: Hero["name"];
   xp: number;
+  /** Value of the coin the type drops (design value); missing means none. */
+  gold?: number;
   /** How the type walks (design value, copied as it is). */
   behavior: Enemy["behavior"];
   /** A variant of the map unit: applied to the map's numbers before scaling.yaml. */
@@ -133,11 +136,19 @@ export interface EnemyEntry {
   hunter?: true;
 }
 
+/** One entry of design/items.yaml. Items have no record in the export: they are validated and copied. */
+export interface ItemEntry extends Item {
+  /** The map's item category that inspired the item. Never written to data/generated. */
+  source?: string;
+  review?: { notes?: string };
+}
+
 export interface Design {
   heroes: HeroEntry[];
   enemies: EnemyEntry[];
   rules: Rules;
   abilities: AbilityEntry[];
+  items: ItemEntry[];
   scaling: Scaling;
 }
 
@@ -152,13 +163,14 @@ export function loadMapExport(dir: string): MapExport {
   };
 }
 
-/** Reads heroes.yaml, abilities.yaml, enemies.yaml and rules.yaml from a design folder. */
+/** Reads heroes.yaml, abilities.yaml, enemies.yaml, items.yaml and rules.yaml from a design folder. */
 export function loadDesign(dir: string): Design {
   return {
     heroes: list(readYaml(join(dir, "heroes.yaml")), HEROES_YAML) as HeroEntry[],
     abilities: list(readYaml(join(dir, "abilities.yaml")), ABILITIES_YAML) as AbilityEntry[],
     enemies: list(readYaml(join(dir, "enemies.yaml")), ENEMIES_YAML) as EnemyEntry[],
     rules: readYaml(join(dir, "rules.yaml")) as Rules,
+    items: list(readYaml(join(dir, "items.yaml")), ITEMS_YAML) as ItemEntry[],
     scaling: loadScaling(dir),
   };
 }
