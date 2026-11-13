@@ -33,6 +33,7 @@ import { Cards } from "./ui/cards";
 import { CastlePointer } from "./ui/castle-pointer";
 import { ChestPointer } from "./ui/chest-pointer";
 import { EndScreen } from "./ui/end-screen";
+import { GearPanel } from "./ui/gear-panel";
 import { Hud } from "./ui/hud";
 import { type Lang, pickLang, t } from "./ui/i18n";
 import { Menu } from "./ui/menu";
@@ -313,6 +314,7 @@ function createUi(
   const pointer = new CastlePointer(root);
   const chestPointer = new ChestPointer(root);
   const cards = new Cards(root, (index) => session.setCard(index));
+  new GearPanel(root, { data, session, getLang: () => lang, menuOpen: () => menuOpen });
   const end = new EndScreen(root, () => {
     void useHero(heroId, nextSeed());
     showMenu();
@@ -370,7 +372,7 @@ function runLoop(
         overlay?.frame(now - last, now, session.run?.enemies.aliveCount ?? 0);
       }
       last = now;
-      chestView.labelsVisible = !ui.menuOpen;
+      chestView.labelsVisible = !ui.menuOpen && !session.paused;
       ui.update(innerWidth, innerHeight);
       updateSnapshot(snapshot, session.run, ui.menuOpen, packArrows.visible);
       snapshot.render.heroModels = heroView.modelCount;

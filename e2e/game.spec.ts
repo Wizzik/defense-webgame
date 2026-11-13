@@ -515,3 +515,41 @@ test("a chest takes gold and offers three gear slots; the pick lands in the gear
   expect(after.worn).toHaveLength(1);
   expect(after.worn[0]).toMatchObject({ base: 0, temp: 1 });
 });
+
+test("C opens the gear panel and pauses the run; C closes it; C does nothing under the cards", async ({ page }, testInfo) => {
+  await page.goto("/?seed=1&debug=1&lang=cs");
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  await expect(page.locator("#gear-panel")).toBeHidden();
+
+  // a chest pick first, so the doll has something to show
+  await page.evaluate(() => {
+    const g = window.__game!;
+    g.debug!.grantGold(1000);
+    g.debug!.teleport(g.chests[0]!.x, g.chests[0]!.y);
+  });
+  await waitForScreen(page, "chest");
+  await page.keyboard.press("KeyC");
+  await expect(page.locator("#gear-panel")).toBeHidden();
+  await page.locator("button.card").first().click();
+  await waitForScreen(page, "playing");
+
+  await page.keyboard.press("KeyC");
+  await expect(page.locator("#gear-panel")).toBeVisible();
+  await expect(page.locator("#gear-panel .doll-slot")).toHaveCount(16);
+  await expect(page.locator("#gear-panel .doll-slot:not(.empty)")).toHaveCount(1);
+  await expect(page.locator("#gear-panel .gear-title")).toHaveText("Výbava");
+  const tick = await page.evaluate(() => window.__game!.tick);
+  await page.locator("#gear-panel .doll-slot:not(.empty)").hover();
+  await expect(page.locator("#gear-panel .item-tooltip")).toContainText("jen na tento běh");
+  await testInfo.attach(`gear-panel-${testInfo.project.name}`, {
+    body: await page.screenshot({ type: "png" }),
+    contentType: "image/png",
+  });
+  await page.waitForTimeout(500);
+  expect(await page.evaluate(() => window.__game!.tick)).toBe(tick);
+
+  await page.keyboard.press("KeyC");
+  await expect(page.locator("#gear-panel")).toBeHidden();
+  await page.waitForFunction((t) => window.__game!.tick > t, tick);
+});

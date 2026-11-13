@@ -603,3 +603,166 @@
 .card .item-line {
   font-variant-numeric: tabular-nums;
 }
+
+/* gear: the doll, its slots and the tooltip. Deep navy and blue-grey, nothing orange. */
+.gear-panel {
+  background: rgba(8, 12, 20, 0.72);
+}
+.gear-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 28px;
+  background: linear-gradient(180deg, #162034, #0e1626);
+  border: 2px solid #3a4a66;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px #0a101c, 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+.gear-title {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: #c9d6ea;
+}
+.doll {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.doll-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c9d6ea;
+}
+.doll-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+.doll-column {
+  display: grid;
+  grid-template-columns: 52px;
+  gap: 8px;
+}
+.doll-column.wide {
+  grid-template-columns: 52px 52px;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(4, 52px);
+}
+.doll-figure {
+  width: 120px;
+  align-self: center;
+  fill: #2a3852;
+  stroke: #46597c;
+  stroke-width: 1.5;
+}
+.doll-bottom {
+  display: flex;
+  gap: 8px;
+}
+.doll-slot {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  padding: 9px;
+  box-sizing: border-box;
+  color: #9fb0cc;
+  background: #0b1220;
+  border: 2px solid #2c3a54;
+  border-radius: 4px;
+  cursor: default;
+}
+.doll-slot.empty {
+  color: #3c4c6a;
+}
+.doll-slot svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.doll-slot:hover,
+.doll-slot:focus-visible {
+  background: #131d31;
+  outline: none;
+}
+.doll-slot.rarity-common { border-color: var(--rarity-common); color: var(--rarity-common); }
+.doll-slot.rarity-rare { border-color: var(--rarity-rare); color: var(--rarity-rare); }
+.doll-slot.rarity-epic { border-color: var(--rarity-epic); color: var(--rarity-epic); }
+.doll-slot.rarity-legendary { border-color: var(--rarity-legendary); color: var(--rarity-legendary); }
+.doll-slot.rarity-mythic { border-color: var(--rarity-mythic); color: var(--rarity-mythic); }
+.slot-temp,
+.slot-level {
+  position: absolute;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 3px #000, 0 0 3px #000;
+}
+.slot-temp {
+  top: 3px;
+  right: 4px;
+  color: #7fe0d0;
+}
+.slot-level {
+  bottom: 3px;
+  left: 4px;
+  color: #e8ecf2;
+}
+.doll-totals {
+  display: flex;
+  gap: 16px;
+  padding-top: 8px;
+  border-top: 1px solid #2c3a54;
+}
+.doll-total-label {
+  margin-right: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.doll-total-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.item-tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 20;
+  min-width: 190px;
+  max-width: 280px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
+  background: #0a101c;
+  border: 1px solid #46597c;
+  border-radius: 4px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+.tooltip-name {
+  font-size: 15px;
+  font-weight: 700;
+}
+.tooltip-name.rarity-common { color: var(--rarity-common); }
+.tooltip-name.rarity-rare { color: var(--rarity-rare); }
+.tooltip-name.rarity-epic { color: var(--rarity-epic); }
+.tooltip-name.rarity-legendary { color: var(--rarity-legendary); }
+.tooltip-name.rarity-mythic { color: var(--rarity-mythic); }
+.tooltip-sub {
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+.tooltip-line.better { color: var(--good); }
+.tooltip-line.worse { color: var(--bad); }
+.tooltip-line.temp { color: #7fe0d0; }
+.tooltip-line.effect { margin-top: 4px; }
+.tooltip-source {
+  margin-top: 6px;
+  color: var(--muted);
+}
