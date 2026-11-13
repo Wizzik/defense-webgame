@@ -1,5 +1,7 @@
+import type { Drop } from "../../meta";
 import type { Run } from "../../sim";
 import { el, formatTime } from "./dom";
+import { dropLine } from "./drop-lines";
 import { type Lang, type MessageKey, t } from "./i18n";
 
 const RESULT_KEYS: Record<NonNullable<Run["result"]>, MessageKey> = {
@@ -27,7 +29,8 @@ export class EndScreen {
     this.again.addEventListener("click", onAgain);
   }
 
-  show(run: Run, seed: number, lang: Lang): void {
+  /** `drops`: what the bosses of the run dropped; the items are kept whatever the result is. */
+  show(run: Run, seed: number, lang: Lang, drops: readonly Drop[] = []): void {
     const result = run.result ?? "castle";
     this.root.dataset.result = result;
     this.title.textContent = t(lang, RESULT_KEYS[result]);
@@ -40,6 +43,14 @@ export class EndScreen {
       t(lang, "end.seed", { seed }),
     ];
     for (const line of lines) el("p", "end-line", this.stats, line);
+    const loot = drops.filter((drop) => drop.kind !== "none");
+    if (loot.length > 0) {
+      el("p", "end-line end-drops-title", this.stats, t(lang, "end.drops"));
+      for (const drop of loot) {
+        const line = dropLine(lang, drop);
+        el("p", `end-line end-drop ${line.tone}`, this.stats, line.text.replace(/^[^:]+:\s*/, ""));
+      }
+    }
     this.again.textContent = t(lang, "end.again");
     this.root.hidden = false;
     this.again.focus();

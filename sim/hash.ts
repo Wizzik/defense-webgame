@@ -15,7 +15,7 @@ function mixFloat(n: number): void {
   mixInt(u32[1]);
 }
 
-const STATES = { playing: 0, levelUp: 1, won: 2, lost: 3 } as const;
+const STATES = { playing: 0, levelUp: 1, won: 2, lost: 3, chest: 4 } as const;
 const RESULTS = { won: 1, castle: 2, hero: 3 } as const;
 
 /** FNV-1a (32 bit) over the simulation state, for determinism and replay tests. */
@@ -47,6 +47,16 @@ export function stateHash(run: Run): number {
   mixFloat(hero.bonus.damage);
   mixFloat(hero.bonus.moveSpeed);
   mixFloat(hero.bonus.attackSpeed);
+  for (let i = 0; i < run.gear.item.length; i++) {
+    mixInt(run.gear.item[i]! + 1);
+    mixInt(run.gear.base[i]!);
+    mixInt(run.gear.temp[i]!);
+  }
+  const fx = run.gear.fx;
+  mixInt(fx.chainCount);
+  mixInt(fx.shieldWait);
+  mixInt(fx.hasteLeft);
+  mixFloat(fx.hasteCarry);
   mixInt(run.shieldTicks);
   mixInt(run.stats.kills);
   mixInt(run.stats.spawned);
@@ -121,6 +131,27 @@ export function stateHash(run: Run): number {
     mixInt(c.value[i]);
     mixFloat(c.x[i]);
     mixFloat(c.y[i]);
+  }
+  mixInt(run.chestRng.state);
+  mixInt(run.chestsOpened);
+  mixInt(run.bossesKilled);
+  mixFloat(run.chestPriceRaw);
+  mixInt(run.openChest + 1);
+  for (let i = 0; i < run.chests.x.length; i++) {
+    mixFloat(run.chests.x[i]!);
+    mixFloat(run.chests.y[i]!);
+  }
+  if (run.chestOffer) for (const slot of run.chestOffer.slots) mixInt(slot + 1);
+  mixFloat(run.gold);
+  mixFloat(run.stats.goldGained);
+  const coins = run.coins;
+  for (let i = 0; i < coins.capacity; i++) {
+    if (coins.alive[i] === 0) continue;
+    mixInt(i);
+    mixInt(coins.attracted[i]);
+    mixInt(coins.value[i]);
+    mixFloat(coins.x[i]);
+    mixFloat(coins.y[i]);
   }
   const pr = run.projectiles;
   for (let i = 0; i < pr.capacity; i++) {

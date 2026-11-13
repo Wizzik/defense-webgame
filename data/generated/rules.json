@@ -490,6 +490,51 @@
       9579
     ]
   },
+  "gear": {
+    "levelStep": 0.15,
+    "maxPermanentLevel": 5
+  },
+  "chests": {
+    "count": 3,
+    "basePrice": 200,
+    "priceGrowth": 1.12,
+    "minCastleDistance": 700,
+    "maxCastleDistance": 2000,
+    "minSpacing": 600,
+    "pickupRadius": 80,
+    "slotsPerOffer": 3
+  },
+  "drops": [
+    {
+      "boss": "iron-marshal",
+      "weights": {
+        "common": 60,
+        "rare": 40
+      }
+    },
+    {
+      "boss": "pale-abbot",
+      "weights": {
+        "rare": 60,
+        "epic": 40
+      }
+    },
+    {
+      "boss": "gunmaster",
+      "weights": {
+        "epic": 75,
+        "legendary": 25
+      }
+    },
+    {
+      "boss": "dread-regent",
+      "weights": {
+        "epic": 50,
+        "legendary": 40,
+        "mythic": 10
+      }
+    }
+  ],
   "progression": {
     "xpFirst": 10,
     "xpStep": 9,

@@ -109,3 +109,27 @@ test("shot: heroes", async ({ page }) => {
     await page.screenshot({ path: join(shotsDir, `hero-${hero}.png`), clip: { x: 520, y: 240, width: 240, height: 200 } });
   }
 });
+
+test("shot: gear", async ({ page }) => {
+  await page.goto("/?seed=7&lang=cs&debug=1&hero=stonehorn");
+  await page.locator("#start").waitFor({ timeout: 90_000 });
+  await page.evaluate(() => {
+    const debug = window.__game!.debug!;
+    const own: [string, number][] = [
+      ["travelers-hood", 1], ["tin-ring", 2], ["walking-boots", 1], ["wardens-helm", 2], ["bastion-pauldrons", 1],
+      ["guardsmans-cuirass", 3], ["masons-grip", 1], ["band-of-resolve", 1], ["moonlit-signet", 1], ["soldiers-longsword", 2],
+      ["oaken-shield", 1], ["bulwark-plate", 1], ["girdle-of-the-mountain", 2], ["treads-of-the-vanguard", 1],
+      ["astrolabe-shard", 1], ["greatblade-of-the-keep", 1], ["quakemaul", 1], ["last-rampart", 2], ["frostbound-lantern", 1],
+      ["seal-of-the-royal-treasury", 1],
+    ];
+    for (const [id, level] of own) debug.grantItem(id, level);
+  });
+  await page.locator("#gear").click();
+  for (const id of ["wardens-helm", "bastion-pauldrons", "bulwark-plate", "masons-grip", "girdle-of-the-mountain",
+    "treads-of-the-vanguard", "band-of-resolve", "tin-ring", "frostbound-lantern", "seal-of-the-royal-treasury", "quakemaul", "last-rampart"]) {
+    await page.locator(`#gear-screen .gear-grid [data-item="${id}"]`).click();
+  }
+  await page.locator('#gear-screen .gear-grid [data-item="greatblade-of-the-keep"]').hover();
+  await page.waitForTimeout(300);
+  await shot(page, "gear");
+});

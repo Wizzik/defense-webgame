@@ -1,4 +1,5 @@
 import type { CardOffer } from "./cards";
+import { chestPrice } from "./chests";
 import { Charge } from "./enemy-charge";
 import { Slam, windupRadius } from "./enemy-slam";
 import { InputAction } from "./input";
@@ -26,6 +27,12 @@ const LOW_HP = 0.3;
 const LOW_HP_DISTANCE = 350;
 /** The bot leaves a slam circle when it stands nearer than the radius plus this to its centre. */
 const SLAM_MARGIN = 60;
+/**
+ * The bot goes for a chest only with at least this share of the hero's and of the castle's hp. The hero's share is
+ * low on purpose: the autopilot fights below half of its hp most of the run (docs/DECISIONS.md, Gear, drops and chests).
+ */
+const CHEST_HERO_HP = 0.3;
+const CHEST_CASTLE_HP = 0.5;
 const AXIS_DEADZONE = 30;
 /** Share of a unit vector under which an axis is not pressed (between sin 22.5° and cos 67.5°). */
 const AXIS_SHARE = 0.38;
@@ -38,6 +45,23 @@ export function botCard(offer: CardOffer): number {
   return 0;
 }
 
+/** The offered slot with the lowest level (permanent + temporary); the first one on a tie. */
+export function botChestChoice(run: Run): number {
+  const offer = run.chestOffer;
+  if (!offer) return 0;
+  let best = 0;
+  let bestLevel = Infinity;
+  for (let i = 0; i < offer.slots.length; i++) {
+    const slot = offer.slots[i]!;
+    const level = run.gear.base[slot]! + run.gear.temp[slot]!;
+    if (level < bestLevel) {
+      bestLevel = level;
+      best = i;
+    }
+  }
+  return best;
+}
+
 /** The fixed autopilot rules. Writes the input into `out` and returns it; allocates nothing. */
 export function botInput(run: Run, out: TickInput): TickInput {
   out.moveX = 0;
@@ -46,6 +70,10 @@ export function botInput(run: Run, out: TickInput): TickInput {
   out.actions = 0;
   if (run.state === "levelUp") {
     out.card = run.offer ? botCard(run.offer) : 0;
+    return out;
+  }
+  if (run.state === "chest") {
+    out.card = botChestChoice(run);
     return out;
   }
   const { hero, castle, enemies } = run;
@@ -106,6 +134,30 @@ export function botInput(run: Run, out: TickInput): TickInput {
     out.moveX = axis(-uy);
     out.moveY = axis(ux);
     if (hero.dashCooldown === 0 && hero.dashTicks === 0) out.actions |= InputAction.Dash;
+    return out;
+  }
+
+  if (
+    run.finalBossSlot < 0 && run.gold >= chestPrice(run)
+    && hero.hp >= hero.stats.maxHp * CHEST_HERO_HP && castle.hp >= castle.maxHp * CHEST_CASTLE_HP
+  ) {
+    // Gold for a chest, a healthy hero and a safe castle: walk to the nearest chest (it may lie beyond the leash).
+    const { chests } = run;
+    let cx = 0;
+    let cy = 0;
+    let chestSq = Infinity;
+    for (let i = 0; i < chests.x.length; i++) {
+      const tx = chests.x[i]! - hero.x;
+      const ty = chests.y[i]! - hero.y;
+      const sq = tx * tx + ty * ty;
+      if (sq < chestSq) {
+        chestSq = sq;
+        cx = tx;
+        cy = ty;
+      }
+    }
+    out.moveX = Math.abs(cx) > AXIS_DEADZONE ? Math.sign(cx) : 0;
+    out.moveY = Math.abs(cy) > AXIS_DEADZONE ? Math.sign(cy) : 0;
     return out;
   }
 

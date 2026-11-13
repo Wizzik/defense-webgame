@@ -2,14 +2,21 @@
 export class Announcer {
   private line = "";
   private left = 0;
+  private lineTone = "";
 
   /** The line to show now; empty when there is none. */
   get text(): string {
     return this.left > 0 ? this.line : "";
   }
 
-  push(text: string, ticks: number): void {
+  /** CSS class of the line to show now (a rarity colour for loot); empty for plain news. */
+  get tone(): string {
+    return this.left > 0 ? this.lineTone : "";
+  }
+
+  push(text: string, ticks: number, tone = ""): void {
     this.line = text;
+    this.lineTone = tone;
     this.left = ticks;
   }
 

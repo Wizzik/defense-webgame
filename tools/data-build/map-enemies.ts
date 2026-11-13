@@ -52,6 +52,7 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
     },
     behavior: entry.behavior,
     xp: entry.xp,
+    gold: entry.gold ?? 0,
   };
   if (entry.heal) enemy.heal = { amount: entry.heal.amount, range: entry.heal.range, cooldown: entry.heal.cooldown };
   if (entry.charge) {

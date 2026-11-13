@@ -537,3 +537,355 @@
   font-size: 14px;
   line-height: 1.35;
 }
+
+/* gold and chests */
+:root {
+  --gold: #e8c860;
+  --rarity-common: #e8ecf2;
+  --rarity-rare: #5aa0ff;
+  --rarity-epic: #b07cff;
+  --rarity-legendary: #e8c860;
+  --rarity-mythic: #d8405c;
+}
+.hud-gold {
+  font-weight: 600;
+  color: var(--gold);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+.chest-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 1px 7px;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  background: rgba(14, 20, 32, 0.78);
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  pointer-events: none;
+}
+.chest-label.afford {
+  color: #ffffff;
+  border-color: var(--gold);
+}
+.chest-pointer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 18px solid #6f7f9c;
+  opacity: 0.7;
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.9));
+}
+.chest-pointer.afford {
+  border-left-color: var(--gold);
+  opacity: 1;
+}
+.card.chest {
+  border-color: var(--rarity-common);
+}
+.card.chest .card-name {
+  color: var(--rarity-common);
+}
+.card.chest.rarity-rare { border-color: var(--rarity-rare); }
+.card.chest.rarity-rare .card-name { color: var(--rarity-rare); }
+.card.chest.rarity-epic { border-color: var(--rarity-epic); }
+.card.chest.rarity-epic .card-name { color: var(--rarity-epic); }
+.card.chest.rarity-legendary { border-color: var(--rarity-legendary); }
+.card.chest.rarity-legendary .card-name { color: var(--rarity-legendary); }
+.card.chest.rarity-mythic { border-color: var(--rarity-mythic); }
+.card.chest.rarity-mythic .card-name { color: var(--rarity-mythic); }
+.card .item-line {
+  font-variant-numeric: tabular-nums;
+}
+
+/* gear: the doll, its slots and the tooltip. Deep navy and blue-grey, nothing orange. */
+.gear-panel {
+  background: rgba(8, 12, 20, 0.72);
+}
+.gear-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 28px;
+  background: linear-gradient(180deg, #162034, #0e1626);
+  border: 2px solid #3a4a66;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px #0a101c, 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+.gear-title {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: #c9d6ea;
+}
+.doll {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.doll-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c9d6ea;
+}
+.doll-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+.doll-column {
+  display: grid;
+  grid-template-columns: 52px;
+  gap: 8px;
+}
+.doll-column.wide {
+  grid-template-columns: 52px 52px;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(4, 52px);
+}
+.doll-figure {
+  width: 120px;
+  align-self: center;
+  fill: #2a3852;
+  stroke: #46597c;
+  stroke-width: 1.5;
+}
+.doll-bottom {
+  display: flex;
+  gap: 8px;
+}
+.doll-slot {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  padding: 9px;
+  box-sizing: border-box;
+  color: #9fb0cc;
+  background: #0b1220;
+  border: 2px solid #2c3a54;
+  border-radius: 4px;
+  cursor: default;
+}
+.doll-slot.empty {
+  color: #3c4c6a;
+}
+.doll-slot svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.doll-slot:hover,
+.doll-slot:focus-visible {
+  background: #131d31;
+  outline: none;
+}
+.doll-slot.rarity-common { border-color: var(--rarity-common); color: var(--rarity-common); }
+.doll-slot.rarity-rare { border-color: var(--rarity-rare); color: var(--rarity-rare); }
+.doll-slot.rarity-epic { border-color: var(--rarity-epic); color: var(--rarity-epic); }
+.doll-slot.rarity-legendary { border-color: var(--rarity-legendary); color: var(--rarity-legendary); }
+.doll-slot.rarity-mythic { border-color: var(--rarity-mythic); color: var(--rarity-mythic); }
+.slot-temp,
+.slot-level {
+  position: absolute;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 3px #000, 0 0 3px #000;
+}
+.slot-temp {
+  top: 3px;
+  right: 4px;
+  color: #7fe0d0;
+}
+.slot-level {
+  bottom: 3px;
+  left: 4px;
+  color: #e8ecf2;
+}
+.doll-totals {
+  display: flex;
+  gap: 16px;
+  padding-top: 8px;
+  border-top: 1px solid #2c3a54;
+}
+.doll-total-label {
+  margin-right: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.doll-total-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.item-tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 20;
+  min-width: 190px;
+  max-width: 280px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
+  background: #0a101c;
+  border: 1px solid #46597c;
+  border-radius: 4px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+.tooltip-name {
+  font-size: 15px;
+  font-weight: 700;
+}
+.tooltip-name.rarity-common { color: var(--rarity-common); }
+.tooltip-name.rarity-rare { color: var(--rarity-rare); }
+.tooltip-name.rarity-epic { color: var(--rarity-epic); }
+.tooltip-name.rarity-legendary { color: var(--rarity-legendary); }
+.tooltip-name.rarity-mythic { color: var(--rarity-mythic); }
+.tooltip-sub {
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+.tooltip-line.better { color: var(--good); }
+.tooltip-line.worse { color: var(--bad); }
+.tooltip-line.temp { color: #7fe0d0; }
+.tooltip-line.effect { margin-top: 4px; color: #9fd0ff; }
+.tooltip-source {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+/* loot: the news line and the end screen name items in the colour of their rarity */
+.hud-announce.loot.rarity-common, .end-drop.rarity-common { color: var(--rarity-common); }
+.hud-announce.loot.rarity-rare, .end-drop.rarity-rare { color: var(--rarity-rare); }
+.hud-announce.loot.rarity-epic, .end-drop.rarity-epic { color: var(--rarity-epic); }
+.hud-announce.loot.rarity-legendary, .end-drop.rarity-legendary { color: var(--rarity-legendary); }
+.hud-announce.loot.rarity-mythic, .end-drop.rarity-mythic { color: var(--rarity-mythic); }
+.end-drops-title {
+  margin-top: 10px;
+  color: var(--muted);
+}
+.end-drop {
+  font-weight: 700;
+}
+
+/* the gear screen of the menu */
+.gear-screen {
+  z-index: 5;
+  background: rgba(8, 12, 20, 0.9);
+}
+.gear-frame.wide {
+  max-width: min(1040px, 100%);
+}
+.gear-columns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 28px;
+}
+.gear-right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 520px;
+}
+.gear-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.gear-filter {
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 12px;
+  color: #9fb0cc;
+  background: #0b1220;
+  border: 1px solid #2c3a54;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.gear-filter[data-filter="all"] {
+  width: auto;
+  padding: 5px 10px;
+}
+.gear-filter svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.gear-filter[aria-pressed="true"] {
+  color: #ffffff;
+  border-color: #7f95bd;
+  background: #1b2740;
+}
+.gear-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 44px);
+  gap: 6px;
+  align-content: start;
+  min-height: 344px;
+}
+.gear-grid .doll-slot {
+  width: 44px;
+  height: 44px;
+  padding: 7px;
+  cursor: pointer;
+}
+.gear-grid .doll-slot.missing {
+  cursor: default;
+  border-style: dashed;
+}
+.gear-grid .doll-slot.equipped {
+  box-shadow: 0 0 0 2px #0e1626, 0 0 0 4px #7fe0d0;
+}
+.gear-left .doll-slot:not(.empty) {
+  cursor: pointer;
+}
+.gear-count,
+.gear-message {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.gear-message[data-ok="false"] {
+  color: var(--bad);
+}
+.gear-message[data-ok="true"] {
+  color: var(--good);
+}
+.gear-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+@media (max-width: 620px) {
+  .gear-grid {
+    grid-template-columns: repeat(6, 44px);
+  }
+}
+/* the gear screen keeps to navy and blue-grey: its main button is not the menu's amber one */
+.gear-bottom .button.primary {
+  color: #ffffff;
+  background: #2d4a7a;
+  border-color: #7f95bd;
+}
+.gear-bottom .button.primary:hover {
+  background: #37598f;
+}

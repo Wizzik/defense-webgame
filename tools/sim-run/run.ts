@@ -2,10 +2,11 @@ import { pathToFileURL } from "node:url";
 import { botInput } from "../../sim/bot";
 import { TICKS_PER_SECOND } from "../../sim/constants";
 import { createRun } from "../../sim/index";
-import type { Run, RunResult } from "../../sim/index";
+import type { LoadoutEntry, Run, RunResult } from "../../sim/index";
 import type { TickInput } from "../../sim/input";
 import { gameData } from "../../sim/testing/game-data";
 import type { GameData } from "../../data/schema";
+import { GEAR_PRESETS, type GearPresetName, gearPreset } from "./gear-presets";
 
 export interface RunSummary {
   hero: string;
@@ -29,6 +30,10 @@ export interface RunSummary {
   enraged: boolean;
   /** XP gained up to the start of each phase the run reached (index 0 is phase 1). */
   phaseXp: number[];
+  /** Chests opened. */
+  chests: number;
+  /** Gold gained in the run. */
+  gold: number;
 }
 
 /** A player who does nothing: no movement, no action; at a level-up the attribute card, so the first ability stays alone. */
@@ -36,15 +41,16 @@ export function idleInput(run: Run, out: TickInput): TickInput {
   out.moveX = 0;
   out.moveY = 0;
   out.actions = 0;
-  out.card = run.offer ? Math.max(0, run.offer.cards.findIndex((c) => c.kind === "attribute")) : -1;
+  out.card = run.offer ? Math.max(0, run.offer.cards.findIndex((c) => c.kind === "attribute")) : run.chestOffer ? 0 : -1;
   return out;
 }
 
 /** Plays one run with the autopilot, or with no input at all when `idle` is set. */
 export function playBot(
   data: GameData, seed: number, durationSeconds?: number, hero?: string, idle = false, startPhase?: number,
+  loadout: readonly LoadoutEntry[] = [],
 ): RunSummary {
-  const run = createRun(data, { seed, durationSeconds, hero, startPhase });
+  const run = createRun(data, { seed, durationSeconds, hero, startPhase, loadout });
   const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   const phaseTicks = data.rules.run.phaseSeconds * TICKS_PER_SECOND;
   const phaseXp: number[] = [];
@@ -79,6 +85,8 @@ export function playBot(
     })),
     enraged: run.enraged,
     phaseXp,
+    chests: run.chestsOpened,
+    gold: run.stats.goldGained,
   };
 }
 
@@ -91,7 +99,7 @@ export function formatSummary(s: RunSummary): string {
     .join(", ");
   return (
     `${s.hero} seed ${s.seed}: ${outcome} at ${m}:${sec}, kills ${s.kills}, spawned ${s.spawned}, level ${s.level}, ` +
-    `castle ${s.castleHpPercent}%, hero ${s.heroHp}/${s.heroMaxHp}, hero low ${s.minHeroHpPercent}%` +
+    `castle ${s.castleHpPercent}%, hero ${s.heroHp}/${s.heroMaxHp}, hero low ${s.minHeroHpPercent}%, chests ${s.chests}, gold ${s.gold}` +
     (bosses ? `, bosses: ${bosses}` : "") +
     (s.enraged ? ", enraged" : "")
   );
@@ -157,7 +165,9 @@ export function formatHeroSummary(hero: string, summaries: RunSummary[], idle: b
     `  boss kill median: ${kills.length > 0 ? kills.join(", ") : "-"}; ` +
     `final boss fight median ${fights.length > 0 ? `${median(fights)} s` : "-"}; ` +
     `enraged in ${summaries.filter((s) => s.enraged).length}; losses by minutes: ${lossWindows(summaries)}`;
-  return `${head}\n${tail}`;
+  const wonChests = wonRuns.length > 0 ? (wonRuns.reduce((a, s) => a + s.chests, 0) / wonRuns.length).toFixed(1) : "-";
+  const gear = `  chests avg ${avg((s) => s.chests).toFixed(1)} (won runs ${wonChests}), gold avg ${Math.round(avg((s) => s.gold))}`;
+  return `${head}\n${tail}\n${gear}`;
 }
 
 /** Below this share of max hp the hero counts as in danger (tuning target). */
@@ -173,12 +183,14 @@ interface Args {
   phase?: number;
   /** Print the average XP at the start of each phase over all runs. */
   phaseXp: boolean;
+  /** The loadout every hero wears (tools/sim-run/gear-presets.ts). */
+  gear: GearPresetName;
 }
 
 const SWITCHES = new Set(["--idle", "--phase-xp"]);
 
 export function parseArgs(argv: string[]): Args {
-  const out: Args = { hero: "all", seed: 1, runs: 1, idle: false, phaseXp: false };
+  const out: Args = { hero: "all", seed: 1, runs: 1, idle: false, phaseXp: false, gear: "none" };
   for (let i = 0; i < argv.length; i += 2) {
     const flag = argv[i];
     if (SWITCHES.has(flag)) {
@@ -192,6 +204,11 @@ export function parseArgs(argv: string[]): Args {
     if (flag === "--hero") {
       if (!raw) throw new Error("sim:run: --hero needs a hero id or all");
       out.hero = raw;
+      continue;
+    }
+    if (flag === "--gear") {
+      if (!(GEAR_PRESETS as readonly string[]).includes(raw ?? "")) throw new Error("sim:run: --gear needs none, mid or full");
+      out.gear = raw as GearPresetName;
       continue;
     }
     if (flag === "--seeds") {
@@ -220,7 +237,7 @@ function main(): void {
   for (const hero of ids) {
     const summaries: RunSummary[] = [];
     for (let i = 0; i < args.runs; i++) {
-      const s = playBot(data, args.seed + i, args.duration, hero, args.idle, args.phase);
+      const s = playBot(data, args.seed + i, args.duration, hero, args.idle, args.phase, gearPreset(data, hero, args.gear));
       summaries.push(s);
       console.log(formatSummary(s));
     }

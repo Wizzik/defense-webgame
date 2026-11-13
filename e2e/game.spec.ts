@@ -55,7 +55,7 @@ async function playToEnd(page: Page, timeoutMs = 60_000, pollMs = 250): Promise<
   const deadline = Date.now() + timeoutMs;
   let screen = await page.evaluate(() => window.__game?.screen);
   while (screen !== "won" && screen !== "lost" && Date.now() < deadline) {
-    if (screen === "levelUp") await pickCard(page);
+    if (screen === "levelUp" || screen === "chest") await pickCard(page);
     else {
       await page.evaluate(() => {
         const g = window.__game!;
@@ -476,4 +476,205 @@ test("a slam shows a ring and hides it after the hit", async ({ page }, testInfo
     await page.waitForTimeout(50);
   }
   expect(await page.evaluate(() => window.__game!.render.slamRings)).toBe(0);
+});
+
+test("a chest takes gold and offers three gear slots; the pick lands in the gear", async ({ page }, testInfo) => {
+  await page.goto("/?seed=1&debug=1&lang=cs");
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  const before = await page.evaluate(() => {
+    const g = window.__game!;
+    return { chests: g.chests.length, price: g.chestPrice, gold: g.gold, worn: g.gear.filter((slot) => slot !== null).length };
+  });
+  expect(before).toEqual({ chests: 3, price: 200, gold: 0, worn: 0 });
+  await expect(page.locator(".chest-label")).toHaveCount(3);
+
+  await page.evaluate(() => {
+    const g = window.__game!;
+    g.debug!.grantGold(1000);
+    g.debug!.teleport(g.chests[0]!.x, g.chests[0]!.y);
+  });
+  await waitForScreen(page, "chest");
+  await expect(page.locator("button.card")).toHaveCount(3);
+  await expect(page.locator(".cards-title")).toHaveText("Truhla: vyber, co vylepšíš");
+  await expect(page.locator("#hud-gold")).toContainText("800");
+  await testInfo.attach(`chest-${testInfo.project.name}`, {
+    body: await page.screenshot({ type: "png" }),
+    contentType: "image/png",
+  });
+
+  await page.locator("button.card").first().click();
+  await waitForScreen(page, "playing");
+  const after = await page.evaluate(() => {
+    const g = window.__game!;
+    return { opened: g.chestsOpened, gold: g.gold, price: g.chestPrice, worn: g.gear.filter((slot) => slot !== null) };
+  });
+  expect(after.opened).toBe(1);
+  expect(after.gold).toBeLessThan(1000);
+  expect(after.price).toBe(224);
+  expect(after.worn).toHaveLength(1);
+  expect(after.worn[0]).toMatchObject({ base: 0, temp: 1 });
+});
+
+test("C opens the gear panel and pauses the run; C closes it; C does nothing under the cards", async ({ page }, testInfo) => {
+  await page.goto("/?seed=1&debug=1&lang=cs");
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  await expect(page.locator("#gear-panel")).toBeHidden();
+
+  // a chest pick first, so the doll has something to show
+  await page.evaluate(() => {
+    const g = window.__game!;
+    g.debug!.grantGold(1000);
+    g.debug!.teleport(g.chests[0]!.x, g.chests[0]!.y);
+  });
+  await waitForScreen(page, "chest");
+  await page.keyboard.press("KeyC");
+  await expect(page.locator("#gear-panel")).toBeHidden();
+  await page.locator("button.card").first().click();
+  await waitForScreen(page, "playing");
+
+  await page.keyboard.press("KeyC");
+  await expect(page.locator("#gear-panel")).toBeVisible();
+  await expect(page.locator("#gear-panel .doll-slot")).toHaveCount(16);
+  await expect(page.locator("#gear-panel .doll-slot:not(.empty)")).toHaveCount(1);
+  await expect(page.locator("#gear-panel .gear-title")).toHaveText("Výbava");
+  const tick = await page.evaluate(() => window.__game!.tick);
+  await page.locator("#gear-panel .doll-slot:not(.empty)").hover();
+  await expect(page.locator("#gear-panel .item-tooltip")).toContainText("jen na tento běh");
+  await testInfo.attach(`gear-panel-${testInfo.project.name}`, {
+    body: await page.screenshot({ type: "png" }),
+    contentType: "image/png",
+  });
+  await page.waitForTimeout(500);
+  expect(await page.evaluate(() => window.__game!.tick)).toBe(tick);
+
+  await page.keyboard.press("KeyC");
+  await expect(page.locator("#gear-panel")).toBeHidden();
+  await page.waitForFunction((t) => window.__game!.tick > t, tick);
+});
+
+test("a boss that falls drops an item into the collection and the end screen lists it", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&phase=6&lang=cs");
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  await expect(page.locator("#save-warning")).toBeHidden();
+  expect(await page.evaluate(() => ({ collection: window.__game!.collection, saved: window.__game!.gearSaved })))
+    .toEqual({ collection: {}, saved: false });
+  await page.waitForFunction(() => window.__game!.boss !== null);
+  await page.evaluate(() => window.__game!.debug!.killBoss());
+  await expect(page.locator("#announce")).toContainText("Kořist:");
+  await expect(page.locator("#announce")).toHaveClass(/loot rarity-(common|rare)/);
+  // the snapshot follows the collection once a frame
+  await page.waitForFunction(() => Object.keys(window.__game!.collection).length === 1);
+  const collection = await page.evaluate(() => window.__game!.collection);
+  expect(Object.values(collection)).toEqual([1]);
+
+  // the item is kept when the run is lost, and the end screen names it
+  await page.evaluate(() => window.__game!.debug!.grantItem("oaken-shield", 9));
+  expect(await page.evaluate(() => window.__game!.collection["oaken-shield"])).toBe(5);
+  await page.goto("/?seed=1&debug=1&phase=21&lang=cs");
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  await page.waitForFunction(() => window.__game!.boss !== null);
+  await page.evaluate(() => window.__game!.debug!.killBoss());
+  await waitForScreen(page, "won");
+  await expect(page.locator("#end .end-drops-title")).toHaveText("Kořist z tohoto běhu");
+  await expect(page.locator("#end .end-drop")).toHaveCount(1);
+});
+
+test("the collection is stored in the browser and read again after a reload", async ({ page }) => {
+  await page.goto("/?seed=1");
+  await page.waitForFunction(() => window.__game?.screen === "menu");
+  expect(await page.evaluate(() => window.__game!.gearSaved)).toBe(true);
+  await expect(page.locator("#save-warning")).toBeHidden();
+  await page.evaluate(() => new Promise<void>((resolve, reject) => {
+    const open = indexedDB.open("defense-webgame", 1);
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const save = { version: 1, items: { "oaken-shield": 3, "no-such-item": 2 }, loadouts: { stonehorn: { offHand: "oaken-shield" } } };
+      const put = open.result.transaction("save", "readwrite").objectStore("save").put(save, "gear");
+      put.onerror = () => reject(put.error);
+      put.onsuccess = () => resolve();
+    };
+  }));
+  await page.reload();
+  await page.waitForFunction(() => window.__game?.screen === "menu");
+  expect(await page.evaluate(() => window.__game!.collection)).toEqual({ "oaken-shield": 3 });
+  // the paused run behind the menu already wears the stored doll
+  await page.waitForFunction(() => window.__game!.gear.some((slot) => slot?.item === "oaken-shield" && slot.base === 3));
+});
+
+test("the gear screen equips an item for one hero; the run starts with it", async ({ page }, testInfo) => {
+  await page.goto("/?seed=1&debug=1&lang=cs&hero=stonehorn");
+  await page.waitForFunction(() => window.__game?.screen === "menu");
+  await page.evaluate(() => {
+    const debug = window.__game!.debug!;
+    debug.grantItem("oaken-shield", 3);
+    debug.grantItem("band-of-resolve", 1);
+    debug.grantItem("moonlit-signet", 2);
+  });
+  await page.locator("#gear").click();
+  await expect(page.locator("#gear-screen")).toBeVisible();
+  await expect(page.locator("#gear-screen .gear-title")).toHaveText("Výbava");
+  await expect(page.locator("#gear-screen .gear-grid .doll-slot")).toHaveCount(70);
+  await expect(page.locator("#gear-screen .gear-grid .doll-slot:not(.missing)")).toHaveCount(3);
+  await expect(page.locator("#gear-screen .gear-count")).toHaveText("Sbírka: 3 z 70");
+  const hp = Number(await page.locator("#gear-screen .doll-total-value").nth(3).textContent());
+
+  await page.locator('#gear-screen .gear-filter[data-filter="ring"]').click();
+  await expect(page.locator("#gear-screen .gear-grid .doll-slot")).toHaveCount(5);
+  await page.locator('#gear-screen .gear-filter[data-filter="all"]').click();
+
+  await page.locator('#gear-screen .gear-grid [data-item="oaken-shield"]').click();
+  await page.locator('#gear-screen .gear-grid [data-item="band-of-resolve"]').click();
+  await page.locator('#gear-screen .gear-grid [data-item="moonlit-signet"]').click();
+  await expect(page.locator("#gear-screen .gear-left .doll-slot:not(.empty)")).toHaveCount(3);
+  await expect(page.locator("#gear-screen .gear-grid .doll-slot.equipped")).toHaveCount(3);
+  // the shield and the ring carry strength, so the hero's hp grew
+  expect(Number(await page.locator("#gear-screen .doll-total-value").nth(3).textContent())).toBeGreaterThan(hp);
+  await page.locator('#gear-screen .gear-grid [data-item="helm-of-the-unbroken-line"]').hover();
+  await expect(page.locator("#gear-screen .item-tooltip")).toContainText("nevlastníš");
+  await expect(page.locator("#gear-screen .item-tooltip")).toContainText("Padá:");
+  await testInfo.attach(`gear-screen-${testInfo.project.name}`, { body: await page.screenshot({ type: "png" }), contentType: "image/png" });
+
+  // a click on a doll slot takes the item off
+  await page.locator('#gear-screen .gear-left .doll-slot[data-slot="ring2"]').click();
+  await expect(page.locator("#gear-screen .gear-left .doll-slot:not(.empty)")).toHaveCount(2);
+
+  // a file that is not an export changes nothing; an export of this game comes back
+  await page.locator("#gear-import-file").setInputFiles({ name: "bad.json", mimeType: "application/json", buffer: Buffer.from("{ not json") });
+  await expect(page.locator("#gear-message")).toHaveText("Tento soubor není export výbavy. Nic se nezměnilo.");
+  expect(Object.keys(await page.evaluate(() => window.__game!.collection))).toHaveLength(3);
+  const [download] = await Promise.all([page.waitForEvent("download"), page.locator("#gear-export").click()]);
+  expect(download.suggestedFilename()).toBe("defense-webgame-gear.json");
+
+  await page.locator("#gear-back").click();
+  await expect(page.locator("#gear-screen")).toBeHidden();
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  const worn = await page.evaluate(() => window.__game!.gear.filter((slot) => slot !== null));
+  expect(worn).toEqual([
+    { item: "band-of-resolve", base: 1, temp: 0 },
+    { item: "oaken-shield", base: 3, temp: 0 },
+  ]);
+});
+
+test("every hero has its own doll", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&lang=cs&hero=stonehorn");
+  await page.waitForFunction(() => window.__game?.screen === "menu");
+  await page.evaluate(() => window.__game!.debug!.grantItem("oaken-shield", 1));
+  await page.locator("#gear").click();
+  await page.locator('#gear-screen .gear-grid [data-item="oaken-shield"]').click();
+  await page.locator("#gear-back").click();
+  await page.locator('button[data-hero="sparkshot"]').click();
+  await page.locator("#gear").click();
+  await expect(page.locator("#gear-screen .doll-title")).toHaveText("Jiskrostřelec");
+  await expect(page.locator("#gear-screen .gear-left .doll-slot:not(.empty)")).toHaveCount(0);
+  await expect(page.locator("#gear-screen .gear-grid .doll-slot:not(.missing)")).toHaveCount(1);
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#gear-screen")).toBeHidden();
+  await page.locator('button[data-hero="stonehorn"]').click();
+  await page.locator("#gear").click();
+  await expect(page.locator("#gear-screen .gear-left .doll-slot:not(.empty)")).toHaveCount(1);
 });

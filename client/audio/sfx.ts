@@ -76,6 +76,21 @@ export class Sfx {
     });
   }
 
+  /** A coin: a short high clink. */
+  coin(): void {
+    this.play("coin", (at) => {
+      this.tone(at, "square", 1560, 2090, 0.05, 0.14);
+    });
+  }
+
+  /** A chest opens: a low knock and a rising chime. */
+  chest(): void {
+    this.play("chest", (at) => {
+      this.tone(at, "sine", 160, 90, 0.12, 0.5);
+      this.tone(at + 0.08, "triangle", 660, 990, 0.2, 0.35);
+    });
+  }
+
   levelUp(): void {
     this.play("levelUp", (at) => {
       ARPEGGIO.forEach((freq, i) => this.tone(at + i * 0.08, "triangle", freq, freq, 0.12, 0.35));

@@ -25,4 +25,8 @@ debug: { phaseXp: [0, 10] }
 phases:
   - { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.2, elites: 0 }
   - { mix: { grunt: 1 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 1, hunterShare: 0.3, elites: 1 }
+gear: { levelStep: 0.15, maxPermanentLevel: 5 }
+chests: { count: 3, basePrice: 40, priceGrowth: 1.18, minCastleDistance: 700, maxCastleDistance: 2000, minSpacing: 600, pickupRadius: 80, slotsPerOffer: 3 }
+drops:
+  - { boss: warlord, weights: { common: 60, rare: 40 } }
 progression: { xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3, ultimateFromLevel: 6, ultimateLevelStep: 6 }

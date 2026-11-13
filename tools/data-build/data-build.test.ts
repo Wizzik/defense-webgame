@@ -176,6 +176,7 @@ describe("data-build", () => {
       attack: { kind: "melee", range: 90, cooldown: 1.35, damageMin: 14, damageMax: 15 },
       behavior: "siege",
       xp: 1,
+      gold: 2,
     });
   });
 
@@ -224,7 +225,7 @@ describe("data-build", () => {
     d.enemies[0].heal = { amount: 8, range: 450, cooldown: 1 };
     const enemy = buildGameData(mapExport(), d, "test").enemies[0];
     expect(enemy.heal).toStrictEqual({ amount: 8, range: 450, cooldown: 1 });
-    expect(Object.keys(enemy).slice(-2)).toEqual(["xp", "heal"]);
+    expect(Object.keys(enemy).slice(-2)).toEqual(["gold", "heal"]);
     expect(Object.keys(enemy)).not.toContain("multipliers");
   });
 
@@ -237,7 +238,7 @@ describe("data-build", () => {
     const enemy = buildGameData(mapExport(), d, "test").enemies[0];
     expect(enemy.charge).toStrictEqual(charge);
     expect(enemy.aura).toStrictEqual({ radius: 400, moveSpeed: 0.25, damage: 0.25 });
-    expect(Object.keys(enemy).slice(-4)).toEqual(["xp", "heal", "charge", "aura"]);
+    expect(Object.keys(enemy).slice(-4)).toEqual(["gold", "heal", "charge", "aura"]);
   });
 
   it("a boss entry carries boss, model, slam and a scaled range", () => {
@@ -248,7 +249,7 @@ describe("data-build", () => {
     expect(boss.slam).toStrictEqual({ radius: 350, damage: 120, windupSeconds: 1, cooldownSeconds: [7, 15] });
     expect(boss.attack.range).toBe(135);
     expect(boss.hp).toBe(4200);
-    expect(Object.keys(boss).slice(-4)).toEqual(["xp", "boss", "model", "slam"]);
+    expect(Object.keys(boss).slice(-4)).toEqual(["gold", "boss", "model", "slam"]);
     expect("boss" in buildGameData(mapExport(), design(), "test").enemies[0]).toBe(false);
   });
 
@@ -302,7 +303,7 @@ describe("data-build", () => {
       "id", "name", "role", "primary", "hp", "armor", "moveSpeed", "attributes", "baseAttack", "signatureAbilities", "ultimate",
     ]);
     expect(Object.keys(data.enemies[0])).toEqual([
-      "id", "name", "level", "hp", "hpRegen", "armor", "moveSpeed", "collision", "acquireRange", "attack", "behavior", "xp",
+      "id", "name", "level", "hp", "hpRegen", "armor", "moveSpeed", "collision", "acquireRange", "attack", "behavior", "xp", "gold",
     ]);
   });
 
@@ -326,5 +327,22 @@ describe("data-build", () => {
     const message = errorMessage(() => resolveParam(exportAbility("A002"), "DataB", 3));
     expect(message).toContain("DataB");
     expect(message).toContain("level 1");
+  });
+
+  it("copies items in the order of the design file, without source or review", () => {
+    const d = design();
+    const data = buildGameData(mapExport(), d, "test");
+    expect(data.items.map((item) => item.id)).toEqual(d.items.map((item) => item.id));
+    expect(d.items[0]!.source).toBe("I001");
+    expect(data.items[0]).toStrictEqual({
+      id: "plain-head", name: { en: "Plain Hat", cs: "Prostý klobouk" }, slotType: "head", rarity: "common",
+      stats: [{ stat: "int", value: 6 }],
+    });
+    for (const item of data.items) expect(Object.keys(item)).toEqual(["id", "name", "slotType", "rarity", "stats"]);
+  });
+
+  it("copies enemy gold and defaults it to 0", () => {
+    const data = buildGameData(mapExport(), design(), "test");
+    expect(data.enemies.map((e) => e.gold)).toEqual([2, 0]);
   });
 });
