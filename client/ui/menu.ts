@@ -17,6 +17,7 @@ export class Menu {
   private readonly heroes: readonly Hero[];
   private heroId: string;
   private readonly start: HTMLButtonElement;
+  private readonly gear: HTMLButtonElement;
   private readonly controls: HTMLElement;
   private readonly languageLabel: HTMLElement;
   private readonly sound: HTMLButtonElement;
@@ -32,7 +33,7 @@ export class Menu {
     parent: HTMLElement,
     heroes: readonly Hero[],
     heroId: string,
-    handlers: { onStart(): void; onLang(lang: Lang): void; onSound(): void; onHero(id: string): void },
+    handlers: { onStart(): void; onLang(lang: Lang): void; onSound(): void; onHero(id: string): void; onGear(): void },
   ) {
     this.heroes = heroes;
     this.heroId = heroId;
@@ -60,6 +61,9 @@ export class Menu {
     this.start = el("button", "button primary", panel);
     this.start.id = "start";
     this.start.addEventListener("click", handlers.onStart);
+    this.gear = el("button", "button", panel);
+    this.gear.id = "gear";
+    this.gear.addEventListener("click", handlers.onGear);
     this.controls = el("p", "menu-controls", panel);
     this.sound = el("button", "button small", panel);
     this.sound.addEventListener("click", handlers.onSound);
@@ -78,6 +82,7 @@ export class Menu {
     this.heroTitle.textContent = t(lang, "menu.chooseHero");
     this.lang = lang;
     this.renderStart();
+    this.gear.textContent = t(lang, "menu.gear");
     this.controls.textContent = t(lang, "menu.controls");
     this.languageLabel.textContent = t(lang, "menu.language");
     this.gpuWarning.textContent = t(lang, "menu.gpuWarning");

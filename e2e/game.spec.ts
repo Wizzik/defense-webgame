@@ -602,3 +602,77 @@ test("the collection is stored in the browser and read again after a reload", as
   // the paused run behind the menu already wears the stored doll
   await page.waitForFunction(() => window.__game!.gear.some((slot) => slot?.item === "oaken-shield" && slot.base === 3));
 });
+
+test("the gear screen equips an item for one hero; the run starts with it", async ({ page }, testInfo) => {
+  await page.goto("/?seed=1&debug=1&lang=cs&hero=stonehorn");
+  await page.waitForFunction(() => window.__game?.screen === "menu");
+  await page.evaluate(() => {
+    const debug = window.__game!.debug!;
+    debug.grantItem("oaken-shield", 3);
+    debug.grantItem("band-of-resolve", 1);
+    debug.grantItem("moonlit-signet", 2);
+  });
+  await page.locator("#gear").click();
+  await expect(page.locator("#gear-screen")).toBeVisible();
+  await expect(page.locator("#gear-screen .gear-title")).toHaveText("Výbava");
+  await expect(page.locator("#gear-screen .gear-grid .doll-slot")).toHaveCount(70);
+  await expect(page.locator("#gear-screen .gear-grid .doll-slot:not(.missing)")).toHaveCount(3);
+  await expect(page.locator("#gear-screen .gear-count")).toHaveText("Sbírka: 3 z 70");
+  const hp = Number(await page.locator("#gear-screen .doll-total-value").nth(3).textContent());
+
+  await page.locator('#gear-screen .gear-filter[data-filter="ring"]').click();
+  await expect(page.locator("#gear-screen .gear-grid .doll-slot")).toHaveCount(5);
+  await page.locator('#gear-screen .gear-filter[data-filter="all"]').click();
+
+  await page.locator('#gear-screen .gear-grid [data-item="oaken-shield"]').click();
+  await page.locator('#gear-screen .gear-grid [data-item="band-of-resolve"]').click();
+  await page.locator('#gear-screen .gear-grid [data-item="moonlit-signet"]').click();
+  await expect(page.locator("#gear-screen .gear-left .doll-slot:not(.empty)")).toHaveCount(3);
+  await expect(page.locator("#gear-screen .gear-grid .doll-slot.equipped")).toHaveCount(3);
+  // the shield and the ring carry strength, so the hero's hp grew
+  expect(Number(await page.locator("#gear-screen .doll-total-value").nth(3).textContent())).toBeGreaterThan(hp);
+  await page.locator('#gear-screen .gear-grid [data-item="helm-of-the-unbroken-line"]').hover();
+  await expect(page.locator("#gear-screen .item-tooltip")).toContainText("nevlastníš");
+  await expect(page.locator("#gear-screen .item-tooltip")).toContainText("Padá:");
+  await testInfo.attach(`gear-screen-${testInfo.project.name}`, { body: await page.screenshot({ type: "png" }), contentType: "image/png" });
+
+  // a click on a doll slot takes the item off
+  await page.locator('#gear-screen .gear-left .doll-slot[data-slot="ring2"]').click();
+  await expect(page.locator("#gear-screen .gear-left .doll-slot:not(.empty)")).toHaveCount(2);
+
+  // a file that is not an export changes nothing; an export of this game comes back
+  await page.locator("#gear-import-file").setInputFiles({ name: "bad.json", mimeType: "application/json", buffer: Buffer.from("{ not json") });
+  await expect(page.locator("#gear-message")).toHaveText("Tento soubor není export výbavy. Nic se nezměnilo.");
+  expect(Object.keys(await page.evaluate(() => window.__game!.collection))).toHaveLength(3);
+  const [download] = await Promise.all([page.waitForEvent("download"), page.locator("#gear-export").click()]);
+  expect(download.suggestedFilename()).toBe("defense-webgame-gear.json");
+
+  await page.locator("#gear-back").click();
+  await expect(page.locator("#gear-screen")).toBeHidden();
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  const worn = await page.evaluate(() => window.__game!.gear.filter((slot) => slot !== null));
+  expect(worn).toEqual([
+    { item: "band-of-resolve", base: 1, temp: 0 },
+    { item: "oaken-shield", base: 3, temp: 0 },
+  ]);
+});
+
+test("every hero has its own doll", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&lang=cs&hero=stonehorn");
+  await page.waitForFunction(() => window.__game?.screen === "menu");
+  await page.evaluate(() => window.__game!.debug!.grantItem("oaken-shield", 1));
+  await page.locator("#gear").click();
+  await page.locator('#gear-screen .gear-grid [data-item="oaken-shield"]').click();
+  await page.locator("#gear-back").click();
+  await page.locator('button[data-hero="sparkshot"]').click();
+  await page.locator("#gear").click();
+  await expect(page.locator("#gear-screen .doll-title")).toHaveText("Jiskrostřelec");
+  await expect(page.locator("#gear-screen .gear-left .doll-slot:not(.empty)")).toHaveCount(0);
+  await expect(page.locator("#gear-screen .gear-grid .doll-slot:not(.missing)")).toHaveCount(1);
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#gear-screen")).toBeHidden();
+  await page.locator('button[data-hero="stonehorn"]').click();
+  await page.locator("#gear").click();
+  await expect(page.locator("#gear-screen .gear-left .doll-slot:not(.empty)")).toHaveCount(1);
+});

@@ -27,7 +27,7 @@ The repository is public (decided 2026-11-04): never commit anything that must n
 - `npm run check` - typecheck + tests (must pass before every commit)
 - `npm run build` - production build into `dist/`
 - `npm run e2e` - Playwright end-to-end tests
-- `npm run shots` - writes 1280x720 screenshots (`menu`, `start`, `fight`, `types`, `castle`, `corner`, `boss`, and `hero-<id>`, a 240x200 clip around each of the eight heroes; `types` is a clip of the six common enemy types, `boss` shows the first miniboss with its slam circle) to `test-results/shots/` for visual review; `?debug=1` adds `window.__game.debug.teleport(x, y)` to move the hero (clamped to the arena)
+- `npm run shots` - writes 1280x720 screenshots (`menu`, `start`, `fight`, `types`, `castle`, `corner`, `boss`, `gear` (the gear screen of the menu with a part of the collection owned), and `hero-<id>`, a 240x200 clip around each of the eight heroes; `types` is a clip of the six common enemy types, `boss` shows the first miniboss with its slam circle) to `test-results/shots/` for visual review; `?debug=1` adds `window.__game.debug.teleport(x, y)` to move the hero (clamped to the arena)
 - `npm run map:extract` - local map extraction toolkit (output stays untracked)
 - `npm run data:build` - build game data from validated sources
 - `npm run sim:run -- --hero all --seeds 1-20` - autopilot run summaries per hero for balance tuning (results, boss kill times, losses per two minutes); `--seed N --runs M` works too; add `--idle` for runs with no input, `--phase N` to start at a phase, `--phase-xp` to print the average XP at the start of each phase

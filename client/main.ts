@@ -36,6 +36,7 @@ import { CastlePointer } from "./ui/castle-pointer";
 import { ChestPointer } from "./ui/chest-pointer";
 import { EndScreen } from "./ui/end-screen";
 import { GearPanel } from "./ui/gear-panel";
+import { GearScreen } from "./ui/gear-screen";
 import { Hud } from "./ui/hud";
 import { type Lang, pickLang, t } from "./ui/i18n";
 import { Menu } from "./ui/menu";
@@ -310,6 +311,15 @@ function createUi(
     },
     onLang: applyLang,
     onSound: () => setMuted(!muted),
+    onGear: () => gearScreen.open(heroId, lang),
+  });
+  // the paused run behind the menu wears the old doll: after a change it is started again
+  const gearScreen = new GearScreen(root, {
+    data, gear,
+    onClose: (changed) => {
+      if (changed) void useHero(heroId);
+      menu.setVisible(true);
+    },
   });
   const useHero = makeUseHero((loading, failed) => menu.setLoading(loading, failed));
   let muted = readStoredMuted();

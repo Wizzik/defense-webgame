@@ -780,3 +780,112 @@
 .end-drop {
   font-weight: 700;
 }
+
+/* the gear screen of the menu */
+.gear-screen {
+  z-index: 5;
+  background: rgba(8, 12, 20, 0.9);
+}
+.gear-frame.wide {
+  max-width: min(1040px, 100%);
+}
+.gear-columns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 28px;
+}
+.gear-right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 520px;
+}
+.gear-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.gear-filter {
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 12px;
+  color: #9fb0cc;
+  background: #0b1220;
+  border: 1px solid #2c3a54;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.gear-filter[data-filter="all"] {
+  width: auto;
+  padding: 5px 10px;
+}
+.gear-filter svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.gear-filter[aria-pressed="true"] {
+  color: #ffffff;
+  border-color: #7f95bd;
+  background: #1b2740;
+}
+.gear-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 44px);
+  gap: 6px;
+  align-content: start;
+  min-height: 344px;
+}
+.gear-grid .doll-slot {
+  width: 44px;
+  height: 44px;
+  padding: 7px;
+  cursor: pointer;
+}
+.gear-grid .doll-slot.missing {
+  cursor: default;
+  border-style: dashed;
+}
+.gear-grid .doll-slot.equipped {
+  box-shadow: 0 0 0 2px #0e1626, 0 0 0 4px #7fe0d0;
+}
+.gear-left .doll-slot:not(.empty) {
+  cursor: pointer;
+}
+.gear-count,
+.gear-message {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.gear-message[data-ok="false"] {
+  color: var(--bad);
+}
+.gear-message[data-ok="true"] {
+  color: var(--good);
+}
+.gear-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+@media (max-width: 620px) {
+  .gear-grid {
+    grid-template-columns: repeat(6, 44px);
+  }
+}
+/* the gear screen keeps to navy and blue-grey: its main button is not the menu's amber one */
+.gear-bottom .button.primary {
+  color: #ffffff;
+  background: #2d4a7a;
+  border-color: #7f95bd;
+}
+.gear-bottom .button.primary:hover {
+  background: #37598f;
+}
