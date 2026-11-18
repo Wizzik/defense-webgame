@@ -108,6 +108,8 @@ export interface HeroEntry {
   role: Hero["role"];
   signatureAbilities: Hero["signatureAbilities"];
   ultimate: string;
+  /** Design value, copied as it is when present. */
+  damageTaken?: number;
 }
 
 /** One entry of design/enemies.yaml. */

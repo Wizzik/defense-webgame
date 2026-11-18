@@ -1,6 +1,6 @@
 # Sdílená kouzla a pasivky: návrh
 
-- **Stav:** návrh ke schválení (18. 11. 2026). Petr řekl „jeď“ bez dalších otázek, takže rozhodnutí v části 4 jsou Claudova a Petr je může změnit.
+- **Stav:** schváleno 18. 11. 2026 (Petr přenechal schválení Claudovi: „vše si schval“). Rozhodnutí v části 4 jsou Claudova a Petr je může změnit. Plán: `docs/superpowers/plans/2026-11-18-shared-spells-passives.md`.
 - **Doplňuje:** oddíl 3.3 první specifikace („Sloty a pooly“: 6 aktivních kouzel a 4 pasivky, sdílený pool zhruba 10 kouzel a 6 pasivek) a oddíl 3.4 (karty). Je to fáze 2d bez evolucí.
 - **Staví na:** `main` po PR #14 (multishot Sparkshota; `extraTargets` u `on_hit`). Plán musí počítat s tím, že #14 může být sloučen dřív nebo později; kód tohoto návrhu na něm nezávisí.
 

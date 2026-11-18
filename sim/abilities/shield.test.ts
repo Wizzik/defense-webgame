@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { damageCastle, damageHero } from "../combat";
+import { damageCastle, damageHero, heroDamageScale } from "../combat";
 import { EventKind } from "../events";
 import { NO_INPUT } from "../input";
 import { abilityCooldownTicks, debugSetAbilityLevel } from "./slots";
@@ -41,7 +41,7 @@ describe("shield", () => {
     expect(run.shieldTicks).toBe(0);
     damageHero(run, 50, -1);
     damageCastle(run, 50, -1);
-    expect(run.hero.hp).toBe(0.3 * max - 50);
+    expect(run.hero.hp).toBe(0.3 * max - 50 * heroDamageScale(run));
     expect(run.castle.hp).toBe(castleHp - 50);
   });
 

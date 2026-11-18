@@ -29,23 +29,23 @@ function tempLine(lang: Lang, temp: number): string {
 
 /**
  * The text of an item's tooltip. `level` is the permanent level (0 for an item a chest gave), `temp` the levels
- * from chests; the stat rows show the numbers at `level + temp`. With `compare` (the worn item) every row says
+ * from chests; the stat rows show the numbers with both (itemStatAt). With `compare` (the worn item) every row says
  * how it differs, and rows only the worn item has are listed as lost. A special effect gets one line after the stats.
  */
 export function tooltipLines(
-  lang: Lang, data: GameData, item: Item, level: number, temp: number, compare?: { item: Item; level: number },
+  lang: Lang, data: GameData, item: Item, level: number, temp: number,
+  compare?: { item: Item; level: number; temp?: number },
 ): TooltipInfo {
-  const step = data.rules.gear.levelStep;
-  const total = Math.max(1, level + temp);
+  const gear = data.rules.gear;
   const lines: TooltipInfo["lines"] = [];
   const other = new Map<StatId, number>();
   if (compare) {
     for (const row of compare.item.stats) {
-      other.set(row.stat, (other.get(row.stat) ?? 0) + itemStatAt(row.value, compare.level, step));
+      other.set(row.stat, (other.get(row.stat) ?? 0) + itemStatAt(row.value, compare.level, compare.temp ?? 0, gear));
     }
   }
   for (const row of item.stats) {
-    const value = itemStatAt(row.value, total, step);
+    const value = itemStatAt(row.value, level, temp, gear);
     const base = `${statValue(row.stat, value)} ${statLabel(lang, row.stat)}`;
     if (!compare) {
       lines.push({ text: base, tone: "plain" });

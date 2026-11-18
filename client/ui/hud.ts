@@ -3,7 +3,7 @@ import { Announcer } from "./announcer";
 import { BossBar } from "./boss-bar";
 import { el, formatTime, setText } from "./dom";
 import type { Drop } from "../../meta";
-import { dropLine } from "./drop-lines";
+import { chestLootLine, dropLine } from "./drop-lines";
 import { type Lang, t } from "./i18n";
 
 /** How long the news of a boss or of an enrage stays (a rush stays for its warning time). */
@@ -67,7 +67,8 @@ export class Hud {
   private readonly bossBar: BossBar;
   private lastRun: Run | null = null;
   /** What a boss that just fell dropped (boss id, its order in the run); main.ts sets it. */
-  dropFor: ((bossId: string, order: number) => Drop) | null = null;
+  /** The drop of a fallen boss; `magicFind` is the hero's magic find at that moment. */
+  dropFor: ((bossId: string, order: number, magicFind: number) => Drop) | null = null;
 
   constructor(parent: HTMLElement) {
     this.root = el("div", "hud", parent);
@@ -113,8 +114,11 @@ export class Hud {
         const name = run.data.enemies[events.value[i]!]!.name[lang];
         this.announcer.push(t(lang, "announce.boss", { name }), ANNOUNCE_TICKS);
       } else if (kind === EventKind.BossDeath && this.dropFor) {
-        const line = dropLine(lang, this.dropFor(run.data.enemies[events.a[i]!]!.id, events.value[i]!));
+        const line = dropLine(lang, this.dropFor(run.data.enemies[events.a[i]!]!.id, events.value[i]!, run.hero.gear.magicFind));
         this.announcer.push(line.text, ANNOUNCE_TICKS, line.tone);
+      } else if (kind === EventKind.ChestPick) {
+        const line = chestLootLine(lang, run.data, events.u[i]!, events.v[i]!);
+        if (line) this.announcer.push(line.text, ANNOUNCE_TICKS, line.tone);
       } else if (kind === EventKind.Enrage) {
         const name = run.data.enemies[run.finalBossType]!.name[lang];
         this.announcer.push(t(lang, "announce.enrage", { name }), ANNOUNCE_TICKS);

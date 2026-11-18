@@ -8,6 +8,11 @@ export type Point = z.infer<typeof PointSchema>;
 const positive = z.number().positive();
 const nonNegative = z.number().min(0);
 
+/** Weights of rarities for a draw; at least one rarity. */
+export const RarityWeightsSchema = z.partialRecord(RaritySchema, positive)
+  .refine((w) => Object.keys(w).length > 0, "needs at least one rarity");
+export type RarityWeights = z.infer<typeof RarityWeightsSchema>;
+
 export const RulesSchema = z.object({
   start: z.object({ hero: Slug }).strict(),
   run: z.object({
@@ -105,8 +110,13 @@ export const RulesSchema = z.object({
     /** Elites that come once, with the first pack of the first interval of the phase. */
     elites: z.number().int().min(0),
   }).strict()).min(1),
-  /** Item numbers at level L are the level-1 numbers x (1 + levelStep x (L - 1)). */
-  gear: z.object({ levelStep: nonNegative, maxPermanentLevel: z.number().int().min(1) }).strict(),
+  /** Multiplier on all damage enemies deal to the hero (not to the castle). */
+  threat: z.object({ heroDamageTaken: positive }).strict(),
+  /**
+   * Item numbers with permanent level B and chest levels T: the level-1 numbers x
+   * (1 + levelStep x max(B - 1, 0) + chestLevelStep x T); an item a chest gave has B = 0.
+   */
+  gear: z.object({ levelStep: nonNegative, chestLevelStep: nonNegative, maxPermanentLevel: z.number().int().min(1) }).strict(),
   /** `count` chests lie on the map; the n-th one opened costs basePrice x priceGrowth^(n - 1) gold. */
   chests: z.object({
     count: z.number().int().min(1).max(8),
@@ -117,11 +127,21 @@ export const RulesSchema = z.object({
     minSpacing: nonNegative,
     pickupRadius: positive,
     slotsPerOffer: z.number().int().min(1).max(16),
+    /** Weights of the rarity each card of an offer rolls, before magic find. */
+    rarityWeights: RarityWeightsSchema,
   }).strict().refine((c) => c.minCastleDistance < c.maxCastleDistance, "minCastleDistance is not below maxCastleDistance"),
+  /**
+   * Magic find: effective = MF x limit / (MF + limit); every rarity above the lowest of a weight table is
+   * multiplied by (1 + effective x rarityFactor[rarity]) (sim/magic-find.ts).
+   */
+  magicFind: z.object({
+    limit: positive,
+    rarityFactor: z.object({ rare: nonNegative, epic: nonNegative, legendary: nonNegative, mythic: nonNegative }).strict(),
+  }).strict(),
   /** What a boss drops: the rarity is drawn by these weights. */
   drops: z.array(z.object({
     boss: Slug,
-    weights: z.partialRecord(RaritySchema, positive).refine((w) => Object.keys(w).length > 0, "needs at least one rarity"),
+    weights: RarityWeightsSchema,
   }).strict()),
   progression: z.object({
     xpFirst: positive,

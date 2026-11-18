@@ -1,6 +1,6 @@
 import type { GameData, Item, Rarity } from "../data/schema";
 import { RARITIES } from "../data/schema";
-import { Rng } from "../sim";
+import { drawRarity, magicFindWeights, Rng } from "../sim";
 import type { SaveData } from "./save";
 
 export type Drop =
@@ -25,24 +25,17 @@ function dropOfRarity(data: GameData, save: SaveData, rarity: Rarity, rng: Rng):
  * of one below the top level. When the whole rarity is at the top level, the other rarities of the boss are
  * tried from the highest down; when those are full too, nothing drops.
  * `seed` is the run's seed and `order` counts the bosses killed in the run before this one, so a run gives the
- * same drops whenever it is replayed with the same collection.
+ * same drops whenever it is replayed with the same collection. `magicFind` is the hero's magic find when the boss
+ * fell: it raises the weights above the lowest rarity of the table (sim/magic-find.ts).
  */
-export function rollDrop(data: GameData, save: SaveData, bossId: string, seed: number, order: number): Drop {
+export function rollDrop(
+  data: GameData, save: SaveData, bossId: string, seed: number, order: number, magicFind = 0,
+): Drop {
   const table = data.rules.drops.find((drop) => drop.boss === bossId);
   if (!table) return { kind: "none" };
   const rng = new Rng((seed ^ Math.imul(order + 1, 0x9e3779b1)) >>> 0);
   const rarities = RARITIES.filter((rarity) => table.weights[rarity] !== undefined);
-  let total = 0;
-  for (const rarity of rarities) total += table.weights[rarity]!;
-  let roll = rng.next() * total;
-  let drawn = rarities[rarities.length - 1]!;
-  for (const rarity of rarities) {
-    roll -= table.weights[rarity]!;
-    if (roll < 0) {
-      drawn = rarity;
-      break;
-    }
-  }
+  const drawn = drawRarity(magicFindWeights(table.weights, magicFind, data.rules.magicFind), rng);
   const tries = [drawn, ...rarities.filter((rarity) => rarity !== drawn).reverse()];
   for (const rarity of tries) {
     const drop = dropOfRarity(data, save, rarity, rng);

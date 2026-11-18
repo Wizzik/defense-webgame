@@ -39,7 +39,8 @@
       "enhanced-totem",
       "seismic-echo"
     ],
-    "ultimate": "groundbreaker"
+    "ultimate": "groundbreaker",
+    "damageTaken": 0.75
   },
   {
     "id": "nightglaive",
@@ -291,7 +292,8 @@
       "blood-fan",
       "swift-pace"
     ],
-    "ultimate": "rot-field"
+    "ultimate": "rot-field",
+    "damageTaken": 0.75
   },
   {
     "id": "tidecaller",

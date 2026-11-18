@@ -3,6 +3,7 @@
 # mapName: the hero's name in the map, kept here only to look the hero up.
 #   data-build never writes it to data/generated.
 # signatureAbilities (in order) and ultimate are ability ids from design/abilities.yaml.
+# damageTaken: optional multiplier on the damage enemies deal to the hero (missing = 1).
 
 - id: stonehorn
   source: O00C
@@ -11,6 +12,7 @@
   role: { en: "Melee bruiser. Stuns with stone and quakes.", cs: "Rváč na blízko. Omračuje kamenem a otřesy." }
   signatureAbilities: [rock-rupture, enhanced-totem, seismic-echo]
   ultimate: groundbreaker
+  damageTaken: 0.75   # melee: stands in the crowd
 
 - id: nightglaive
   source: O008
@@ -61,6 +63,7 @@
   role: { en: "Melee butcher. Wide blows at close range.", cs: "Řezník na blízko. Široké rány zblízka." }
   signatureAbilities: [cleaver-toss, blood-fan, swift-pace]
   ultimate: rot-field
+  damageTaken: 0.75   # melee: stands in the crowd
 
 - id: tidecaller
   source: O00N

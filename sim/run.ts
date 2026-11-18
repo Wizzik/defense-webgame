@@ -4,7 +4,7 @@ import type { AbilitySlot } from "./abilities/slots";
 import { TICKS_PER_SECOND } from "./constants";
 import { chooseCard, openOffer } from "./cards";
 import type { CardOffer } from "./cards";
-import { type ChestOffer, ChestStore, chooseChestSlot, placeChest, updateChests } from "./chests";
+import { type ChestOffer, ChestStore, chooseChestCard, placeChest, updateChests } from "./chests";
 import { regenCastle } from "./castle";
 import { ALLY_CAPACITY, AllyStore, updateAllies } from "./allies";
 import { PROJECTILE_CAPACITY, ProjectileStore, updateProjectiles } from "./projectiles";
@@ -15,7 +15,7 @@ import { healEnemies } from "./enemy-heal";
 import { EnemyStore } from "./enemies";
 import { EventKind, EventLog } from "./events";
 import { updateGearEffects } from "./gear-effects";
-import { basicItemIndex, emptyGearBonus, GearState, loadGear, type LoadoutEntry, recomputeGear, SLOT_COUNT, slotTypeOf } from "./gear";
+import { emptyGearBonus, GearState, loadGear, type LoadoutEntry, recomputeGear } from "./gear";
 import { refreshHeroStats } from "./level-up";
 import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import type { TickInput } from "./input";
@@ -74,14 +74,10 @@ export class Run {
   bossesKilled = 0;
   /** Price of the next chest before rounding: basePrice x priceGrowth for every chest opened. */
   chestPriceRaw: number;
-  /** The slots of the chest that is open; null outside the "chest" state. */
+  /** The cards of the chest that is open; null outside the "chest" state. */
   chestOffer: ChestOffer | null = null;
   /** Index of the chest that is open; -1 outside the "chest" state. */
   openChest = -1;
-  /** Scratch for drawing the offer. */
-  readonly chestOrder = new Uint8Array(SLOT_COUNT);
-  /** Slot to the index of the common item of its type. */
-  readonly basicItems: Int16Array;
   readonly projectiles = new ProjectileStore(PROJECTILE_CAPACITY);
   readonly allies = new AllyStore(ALLY_CAPACITY);
   /** What the hero wears: the loadout plus what chests gave in this run. */
@@ -194,7 +190,6 @@ export class Run {
       x: rules.arena.castle.x, y: rules.arena.castle.y, radius: rules.castle.radius,
       hp: rules.castle.hp, maxHp: rules.castle.hp, lastHitTick: -1,
     };
-    this.basicItems = Int16Array.from({ length: SLOT_COUNT }, (_, slot) => basicItemIndex(data, slotTypeOf(slot)));
     this.chestRng = new Rng((options.seed ^ 0x5bd1e995) >>> 0);
     this.chestPriceRaw = rules.chests.basePrice;
     this.chests = new ChestStore(rules.chests.count);
@@ -243,7 +238,7 @@ export class Run {
    *   if (state === "playing" && hero.pendingLevelUps > 0) openOffer(this);   // Task 7
    *   else if (state === "playing") updateChests(this);   // gear plan, Task 4: after the end check and the cards
    *
-   * In the "chest" state only chooseChestSlot runs, like chooseCard in "levelUp".
+   * In the "chest" state only chooseChestCard runs, like chooseCard in "levelUp".
    */
   step(input: TickInput): void {
     // first, also for a finished run: the client keeps stepping it, and the events of its last step
@@ -255,7 +250,7 @@ export class Run {
       return;
     }
     if (this.state === "chest") {
-      chooseChestSlot(this, input.card);
+      chooseChestCard(this, input.card);
       return;
     }
     savePrevious(this);

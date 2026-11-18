@@ -69,6 +69,7 @@ export class GearPanel {
     this.doll.setHeroName(hero.def.name[lang]);
     this.doll.render(runSlots(run), {
       ...hero.stats, str: hero.str + hero.gear.str, agi: hero.agi + hero.gear.agi, int: hero.int + hero.gear.int,
+      magicFind: hero.gear.magicFind,
     });
     this.session.paused = true;
     this.root.hidden = false;
