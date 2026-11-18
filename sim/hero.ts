@@ -1,9 +1,10 @@
 import type { GameData } from "../data/schema";
-import { consumeEmpower, onHitBonus, onHitStunTicks } from "./abilities/on-hit";
+import { consumeEmpower, extraTargets, onHitBonus, onHitStunTicks } from "./abilities/on-hit";
 import { armorReduction, damageEnemy, rollDamage, stunEnemy } from "./combat";
 import { TICKS_PER_SECOND, TICK_SECONDS } from "./constants";
 import { EventKind } from "./events";
 import { onGearAttack } from "./gear-effects";
+import { hitExtraTargets } from "./hero-multishot";
 import { InputAction } from "./input";
 import type { TickInput } from "./input";
 import type { Run } from "./run";
@@ -140,7 +141,9 @@ export function updateHeroCombat(run: Run): void {
   hero.attackCooldown = Math.round(stats.attackIntervalSeconds * TICKS_PER_SECOND);
   const targetX = e.x[best];
   const targetY = e.y[best];
+  const extra = extraTargets(run);
   damageEnemy(run, best, amount, 0);
   if (e.alive[best] === 1) stunEnemy(run, best, stun);
+  hitExtraTargets(run, best, extra, stun);
   onGearAttack(run, best, targetX, targetY, amount);
 }

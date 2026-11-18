@@ -48,3 +48,16 @@ export function onHitBonus(run: Run, x: number, y: number): number {
   }
   return bonus;
 }
+
+/** Extra enemies a base attack also hits: the highest `extraTargets` of the learned on_hit slots (0: none). */
+export function extraTargets(run: Run): number {
+  let most = 0;
+  for (let i = 0; i < run.abilities.length; i++) {
+    const slot = run.abilities[i];
+    const def = slot.def;
+    if (def.kind !== "on_hit" || slot.level < 1) continue;
+    const n = def.params.extraTargets?.[slot.level - 1] ?? 0;
+    if (n > most) most = n;
+  }
+  return most;
+}

@@ -927,8 +927,8 @@
       "cs": "Žhavé náboje"
     },
     "description": {
-      "en": "Every shot burns for extra damage.",
-      "cs": "Každý výstřel pálí a dává poškození navíc."
+      "en": "Every shot burns for extra damage and splits off shots at more enemies in range.",
+      "cs": "Každý výstřel pálí a dává poškození navíc a odštěpí střely na další nepřátele v dosahu."
     },
     "kind": "on_hit",
     "targeting": "on_attack",
@@ -947,6 +947,13 @@
         900,
         1200,
         1500
+      ],
+      "extraTargets": [
+        1,
+        1,
+        2,
+        2,
+        3
       ]
     }
   },

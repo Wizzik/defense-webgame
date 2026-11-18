@@ -1,6 +1,13 @@
 # Status
 
-Updated 2026-11-13 evening (PR #11 is in `main`; the gear work was merged by PR #12 into `elite-boss-threat` by mistake of the stacked base and reaches `main` with PR #13). Read this first when you resume work.
+Updated 2026-11-18 (Sparkshot multishot PR open; next: the design of shared spells and passives). Read this first when you resume work.
+
+## Sparkshot multishot: PR open (branch `sparkshot-multishot`, 2026-11-18)
+
+- Petr's wish (2026-11-18): Searing Rounds shoots more enemies. Each base attack also hits 1, 1, 2, 2, 3 other enemies in reach (by the spell's level); the split shots deal the base attack without the burn. Rule and numbers: `docs/DECISIONS.md`, section Sparkshot multishot.
+- Autopilot wins of the Sparkshot: 0 -> 10 of 20 (seeds 21-40: 1 -> 13). The other heroes are unchanged.
+- What Petr checks in the playtest: does it feel like a multishot (the bolts), is the Sparkshot fun now, does it die too often (below 50 % hp in 19 of 20 autopilot runs).
+- Next after the merge: the design of shared spells and passives (spec section 3.8: about 10 shared spells, 6 passives, later evolutions). Petr said "go" on 2026-11-18; they fill the cards after the kit is full (phases 7-20 offer only attributes now).
 
 ## Gear, boss drops and chests: merged (PR #12 into `elite-boss-threat`, PR #13 into `main`, 2026-11-13); waits for Petr's playtest
 
@@ -23,7 +30,7 @@ Updated 2026-11-13 evening (PR #11 is in `main`; the gear work was merged by PR 
 - Quick links (with `debug=1` the collection starts empty and nothing is stored):
   - https://wizzik.github.io/defense-webgame/?debug=1&phase=6 : first miniboss at once; kill it for a drop, or `window.__game.debug.killBoss()` in the console;
   - console helpers: `__game.debug.grantGold(2000)`, `__game.debug.grantItem("skysplitter", 5)` (ids are in `design/items.yaml`), `__game.debug.clearGear()`.
-- **Open for Petr 1 (balance without gear):** with chests the autopilot wins about as before for six heroes; Nightglaive swings (2 and 9 of 20 on the two seed sets, 8 and 4 before) and the Tidecaller gains (7 and 5, before 2 and 3). Sparkshot still wins none without gear.
+- **Open for Petr 1 (balance without gear):** with chests the autopilot wins about as before for six heroes; Nightglaive swings (2 and 9 of 20 on the two seed sets, 8 and 4 before) and the Tidecaller gains (7 and 5, before 2 and 3). Sparkshot still won none without gear (closed by the multishot, 2026-11-18).
 - **Open for Petr 2 (chest power):** see above.
 - Left from the final review as minor notes (not fixed): the drop rides on the event buffer (a full buffer of 1024 events would lose it); stored data of another version loads as empty and the first drop overwrites it; a write that fails later in a session turns saving off without a word; the export revokes its link right after the click; pack arrows hide while a chest slot is chosen; the gear screen builds a whole run for the totals on every click; a chest's fallback place skips the spacing check; a chest can put the same common ring into both ring slots.
 - Later, not in this plan: difficulties as a combination of another environment and a chosen difficulty (Petr, 2026-11-12); they are meant to take up the power of gear.

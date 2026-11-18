@@ -78,7 +78,7 @@ export const AbilitySchema = z
     variant("ticking_area", params(["tickDamage", "ticksPerSecond", "radius", "duration"], ["hitRadius"])),
     variant("aura", paramsAnyOf(["damageBonus", "moveSpeedBonus", "attackSpeedBonus"])),
     variant("summon", summonParams()),
-    variant("on_hit", paramsAnyOf(["chance", "splashRadius", "bonusDamage", "empower"], ["splashPercent", "stunSeconds"])),
+    variant("on_hit", paramsAnyOf(["chance", "splashRadius", "bonusDamage", "empower"], ["splashPercent", "stunSeconds", "extraTargets"])),
     variant("heal", params(["amount", "maxTargets", "range"])),
     variant("shield", params(["duration", "radius"])),
   ])
