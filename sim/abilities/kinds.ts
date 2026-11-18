@@ -35,4 +35,6 @@ export const UPDATERS: Partial<Record<Ability["kind"], AbilityUpdate>> = {
   heal: updateHeal,
   shield: updateShield,
   summon: updateSummon,
+  // Bonuses come from passiveBonuses (passive.ts) when the stats are recomputed; nothing to do per step.
+  passive: () => {},
 };

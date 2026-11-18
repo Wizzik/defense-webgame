@@ -1,5 +1,5 @@
 import { UPDATERS } from "./abilities/kinds";
-import { ULTIMATE_SLOT } from "./abilities/slots";
+import { isEmptySlot, ULTIMATE_SLOT } from "./abilities/slots";
 import { refreshHeroStats } from "./level-up";
 import type { Run } from "./run";
 
@@ -19,7 +19,7 @@ export function openOffer(run: Run): void {
   const { ultimateFromLevel, ultimateLevelStep } = progression;
   for (let i = 0; i < run.abilities.length; i++) {
     const slot = run.abilities[i];
-    if (slot.level >= slot.def.levels || !UPDATERS[slot.def.kind]) continue;
+    if (isEmptySlot(slot) || slot.level >= slot.def.levels || !UPDATERS[slot.def.kind]) continue;
     if (i === ULTIMATE_SLOT && hero.level < ultimateFromLevel + slot.level * ultimateLevelStep) continue;
     candidates.push({ kind: "ability", slot: i, fromLevel: slot.level, toLevel: slot.level + 1 });
   }

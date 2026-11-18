@@ -281,7 +281,8 @@ describe("abilities of every hero", () => {
       run.abilities.forEach((slot, i) => {
         const def = slot.def;
         // auras and on_hit bonuses work on every attack without a cast
-        const passive = def.kind === "aura" || (def.kind === "on_hit" && def.params.empower === undefined);
+        const passive = def.kind === "aura" || def.kind === "passive"
+          || (def.kind === "on_hit" && def.params.empower === undefined);
         if (!passive) expect(casts[i], `${hero}: ${def.id}`).toBeGreaterThan(0);
       });
     });

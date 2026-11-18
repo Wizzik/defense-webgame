@@ -10,28 +10,30 @@ import type { TickInput } from "./input";
 import type { Run } from "./run";
 import type { HeroState, HeroStats } from "./world";
 
-/** Derives the hero's combat stats from attributes plus gear (map formulas plus run rules). Writes into `out`. */
+/** Derives the hero's combat stats from attributes plus gear and passives (map formulas plus run rules). Writes into `out`. */
 export function heroStats(data: GameData, hero: HeroState, out: HeroStats): HeroStats {
   const { constants: c, rules } = data;
   const def = hero.def;
   const gear = hero.gear;
+  const passive = hero.passive;
   const str = hero.str + gear.str;
   const agi = hero.agi + gear.agi;
   const int = hero.int + gear.int;
   const primary = def.primary === "str" ? str : def.primary === "agi" ? agi : int;
   const bonus = primary * c.primaryAttackBonus;
-  const damage = 1 + hero.bonus.damage + gear.damage;
-  out.maxHp = def.hp + str * c.strHitPointBonus + gear.hp;
-  out.regenPerSecond = rules.hero.baseRegen + str * rules.hero.regenPerStr + gear.regen;
+  const damage = 1 + hero.bonus.damage + gear.damage + passive.attack;
+  out.maxHp = (def.hp + str * c.strHitPointBonus + gear.hp) * (1 + passive.hp);
+  out.regenPerSecond = rules.hero.baseRegen + str * rules.hero.regenPerStr + gear.regen + passive.regen;
   out.armor = def.armor + agi * c.agiDefenseBonus + gear.armor;
   out.attackIntervalSeconds =
     def.baseAttack.cooldown
-    / Math.min(1 + agi * c.agiAttackSpeedBonus + hero.bonus.attackSpeed + gear.attackSpeed, 1 + c.attackSpeedCap);
+    / Math.min(1 + agi * c.agiAttackSpeedBonus + hero.bonus.attackSpeed + gear.attackSpeed + passive.attackSpeed,
+      1 + c.attackSpeedCap);
   out.damageMin = (def.baseAttack.damageMin + bonus) * damage;
   out.damageMax = (def.baseAttack.damageMax + bonus) * damage;
-  out.spellPower = (1 + int * rules.hero.spellPowerPerInt) * (1 + gear.spellPower);
-  out.cooldownScale = 1 / (1 + int * rules.hero.cooldownSpeedPerInt);
-  out.moveSpeed = def.moveSpeed * (1 + hero.bonus.moveSpeed + gear.moveSpeed);
+  out.spellPower = (1 + int * rules.hero.spellPowerPerInt) * (1 + gear.spellPower + passive.spellPower);
+  out.cooldownScale = 1 / (1 + int * rules.hero.cooldownSpeedPerInt + passive.cooldown);
+  out.moveSpeed = def.moveSpeed * (1 + hero.bonus.moveSpeed + gear.moveSpeed + passive.moveSpeed);
   out.collision = rules.hero.collision;
   return out;
 }

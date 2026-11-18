@@ -80,6 +80,7 @@ export function stateHash(run: Run): number {
     mixInt(run.bossLog[b].deathTick);
   }
   for (const slot of run.abilities) {
+    mixInt(run.data.abilities.indexOf(slot.def)); // -1 for an empty slot
     mixInt(slot.level);
     mixInt(slot.cooldown);
     mixInt(slot.active ? 1 : 0);

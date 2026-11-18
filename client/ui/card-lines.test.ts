@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createRun } from "../../sim";
+import { createRun, isEmptySlot } from "../../sim";
 import { gameData } from "../../sim/testing/game-data";
 import { cardLines } from "./card-lines";
 
@@ -78,6 +78,7 @@ describe("cardLines", () => {
     for (const hero of data.heroes) {
       const run = createRun(data, { seed: 1, hero: hero.id });
       run.abilities.forEach((slot, i) => {
+        if (isEmptySlot(slot)) return;
         const lines = cardLines(run, { kind: "ability", slot: i, fromLevel: 0, toLevel: 1 });
         expect(lines.length, slot.def.id).toBeGreaterThan(0);
       });

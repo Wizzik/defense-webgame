@@ -67,8 +67,10 @@ function statsWith(run: Run, attribute: "str" | "agi" | "int", amount: number): 
   const { hero, data } = run;
   const blank = (): HeroStats => ({ ...hero.stats });
   // The copy carries the aura bonuses so the preview uses the same formulas as the sim.
-  const before = heroStats(data, { ...hero, bonus: { ...hero.bonus } }, blank());
-  const after = heroStats(data, { ...hero, bonus: { ...hero.bonus }, [attribute]: hero[attribute] + amount }, blank());
+  const before = heroStats(data, { ...hero, bonus: { ...hero.bonus }, passive: { ...hero.passive } }, blank());
+  const after = heroStats(
+    data, { ...hero, bonus: { ...hero.bonus }, passive: { ...hero.passive }, [attribute]: hero[attribute] + amount }, blank(),
+  );
   return [before, after];
 }
 

@@ -1,7 +1,8 @@
 export { UPDATERS } from "./abilities/kinds";
 export type { AbilityUpdate } from "./abilities/kinds";
 export {
-  abilityCooldownTicks, CastMode, castMode, createAbilitySlots, debugSetAbilityLevel, startCast, ULTIMATE_SLOT,
+  abilityCooldownTicks, CastMode, castMode, createAbilitySlots, debugSetAbilityLevel, EMPTY_ABILITY, firstEmptySlot,
+  hasAbility, isEmptySlot, learnAbility, passiveSlotRange, sharedSlotRange, startCast, ULTIMATE_SLOT,
   updateAbilities,
 } from "./abilities/slots";
 export { countEnemiesWithin, densestCluster, nearestEnemy } from "./abilities/targeting";

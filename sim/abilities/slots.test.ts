@@ -5,7 +5,11 @@ import { NO_INPUT } from "../input";
 import { createRun } from "../run";
 import { gameData } from "../testing/game-data";
 import { UPDATERS } from "./kinds";
-import { CastMode, castMode, debugSetAbilityLevel, startCast, ULTIMATE_SLOT } from "./slots";
+import { stateHash } from "../hash";
+import {
+  CastMode, castMode, debugSetAbilityLevel, EMPTY_ABILITY, firstEmptySlot, hasAbility, isEmptySlot, learnAbility,
+  passiveSlotRange, sharedSlotRange, startCast, ULTIMATE_SLOT,
+} from "./slots";
 import { silenceSpawns } from "../testing/silence";
 
 function quietData() {
@@ -43,8 +47,10 @@ afterEach(() => {
 describe("ability slots", () => {
   it("createRun picks the chosen hero", () => {
     const run = createRun(quietData(), { seed: 1, hero: "gravecaller" });
-    expect(run.abilities.map((s) => s.def.id)).toEqual(["grave-grasp", "skull-ring", "soul-bolt", "bone-stampede"]);
-    expect(run.abilities.map((s) => s.level)).toEqual([1, 0, 0, 0]);
+    expect(run.abilities.map((s) => s.def.id)).toEqual(
+      ["grave-grasp", "skull-ring", "soul-bolt", "bone-stampede", "", "", "", "", "", ""],
+    );
+    expect(run.abilities.map((s) => s.level)).toEqual([1, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
   });
 
   it("the default hero comes from rules.start", () => {
@@ -94,5 +100,63 @@ describe("ability slots", () => {
     run.step(NO_INPUT);
     expect(castSlots(run)).toContain(3);
     expect(run.ultimateRequested).toBe(false);
+  });
+});
+
+describe("shared spell and passive slots", () => {
+  const index = (run: ReturnType<typeof createRun>, id: string) => run.data.abilities.findIndex((a) => a.id === id);
+
+  it("a run starts with 10 slots; 4-5 are shared spells, 6-9 passives, all empty and silent", () => {
+    const run = createRun(quietData(), { seed: 1 });
+    expect(run.abilities).toHaveLength(10);
+    expect(sharedSlotRange(run)).toEqual([4, 6]);
+    expect(passiveSlotRange(run)).toEqual([6, 10]);
+    for (let i = 4; i < 10; i++) {
+      expect(isEmptySlot(run.abilities[i])).toBe(true);
+      expect(run.abilities[i].def).toBe(EMPTY_ABILITY);
+      expect(run.abilities[i].hit.length).toBe(run.enemies.capacity);
+    }
+    for (let t = 0; t < 60; t++) run.step(NO_INPUT);
+    expect(castSlots(run).filter((s) => s >= 4)).toEqual([]);
+  });
+
+  it("learnAbility fills an empty slot at level 1 with a ready cooldown", () => {
+    const run = createRun(quietData(), { seed: 1 });
+    learnAbility(run, 4, index(run, "arc-lightning"));
+    learnAbility(run, 6, index(run, "might"));
+    expect(run.abilities[4].def.id).toBe("arc-lightning");
+    expect([run.abilities[4].level, run.abilities[4].cooldown]).toEqual([1, 0]);
+    expect(run.abilities[6].def.id).toBe("might");
+    expect(hasAbility(run, run.abilities[6].def)).toBe(true);
+    expect(firstEmptySlot(run, sharedSlotRange(run))).toBe(5);
+    expect(firstEmptySlot(run, passiveSlotRange(run))).toBe(7);
+  });
+
+  it("learnAbility refuses a taken slot, a spell outside the pool, a second copy and the wrong slot range", () => {
+    const run = createRun(quietData(), { seed: 1 });
+    learnAbility(run, 4, index(run, "smite"));
+    expect(() => learnAbility(run, 4, index(run, "meteor"))).toThrow("not an empty slot");
+    expect(() => learnAbility(run, 0, index(run, "meteor"))).toThrow("not an empty slot");
+    expect(() => learnAbility(run, 5, index(run, "rock-rupture"))).toThrow("not in the shared spell pool");
+    expect(() => learnAbility(run, 5, index(run, "smite"))).toThrow("already has");
+    expect(() => learnAbility(run, 6, index(run, "meteor"))).toThrow("cannot hold");
+    expect(() => learnAbility(run, 5, index(run, "might"))).toThrow("cannot hold");
+    expect(() => learnAbility(run, 5, 9999)).toThrow("unknown ability");
+  });
+
+  it("debugSetAbilityLevel leaves an empty slot empty", () => {
+    const run = createRun(quietData(), { seed: 1 });
+    debugSetAbilityLevel(run, 5, 3);
+    expect(run.abilities[5].level).toBe(0);
+    expect(isEmptySlot(run.abilities[5])).toBe(true);
+  });
+
+  it("the state hash changes when a slot is learned", () => {
+    const a = createRun(quietData(), { seed: 1 });
+    const b = createRun(quietData(), { seed: 1 });
+    expect(stateHash(a)).toBe(stateHash(b));
+    learnAbility(b, 6, index(b, "haste"));
+    b.abilities[6].level = 0; // the ability alone, not its level, must change the hash
+    expect(stateHash(a)).not.toBe(stateHash(b));
   });
 });

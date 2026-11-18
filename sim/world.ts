@@ -14,6 +14,23 @@ export interface HeroStats {
   collision: number;
 }
 
+/** Sum of the learned passives at their levels (fractions, except regen in hp/s and magnet in world units). */
+export interface PassiveBonus {
+  attack: number;
+  spellPower: number;
+  cooldown: number;
+  hp: number;
+  regen: number;
+  moveSpeed: number;
+  attackSpeed: number;
+  gold: number;
+  magnet: number;
+}
+
+export function emptyPassiveBonus(): PassiveBonus {
+  return { attack: 0, spellPower: 0, cooldown: 0, hp: 0, regen: 0, moveSpeed: 0, attackSpeed: 0, gold: 0, magnet: 0 };
+}
+
 export interface HeroState {
   def: Hero;
   x: number;
@@ -36,6 +53,8 @@ export interface HeroState {
   bonus: { damage: number; moveSpeed: number; attackSpeed: number };
   /** Sum of the worn items' stats; filled by recomputeGear (sim/gear.ts). */
   gear: GearBonus;
+  /** Sum of the learned passives; filled by passiveBonuses (sim/abilities/passive.ts) before every stat recomputation. */
+  passive: PassiveBonus;
   /** Steps of the dash left; the hero moves along (dashDirX, dashDirY) while > 0. */
   dashTicks: number;
   /** Steps until the next dash may start. */
