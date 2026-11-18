@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { armorReduction } from "./combat";
+import { armorReduction, heroDamageScale } from "./combat";
 import { Role } from "./enemies";
 import { Charge } from "./enemy-charge";
 import { EventKind } from "./events";
@@ -62,7 +62,7 @@ describe("lancer charge", () => {
       hits = heroHits(run, l);
     }
     expect(hits).toBe(1);
-    const k = 1 - armorReduction(run.hero.stats.armor, run.data.constants.defenseArmor);
+    const k = (1 - armorReduction(run.hero.stats.armor, run.data.constants.defenseArmor)) * heroDamageScale(run);
     const hit = eventsOf(run, EventKind.HeroHit)[0]!;
     expect(run.events.value[hit]).toBeCloseTo(DAMAGE * CHARGE.damageMultiplier * k, 9);
     expect(before - run.hero.hp).toBeCloseTo(DAMAGE * CHARGE.damageMultiplier * k, 0); // the hero regenerates a little

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { heroDamageScale } from "./combat";
 import { Action, Role } from "./enemies";
 import { EventKind } from "./events";
 import { updateEnemies } from "./enemy-ai";
@@ -164,7 +165,7 @@ describe("enemy AI", () => {
     expect(run.events.x[0]).toBe(50);
     expect(run.events.y[0]).toBe(0);
     const dealt = before - run.hero.hp;
-    const f = 1 - 0.14 / 1.14;
+    const f = (1 - 0.14 / 1.14) * heroDamageScale(run);
     expect(dealt).toBeGreaterThanOrEqual(14 * f - 1e-9);
     expect(dealt).toBeLessThanOrEqual(15 * f + 1e-9);
   });

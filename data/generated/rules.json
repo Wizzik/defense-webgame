@@ -490,6 +490,9 @@
       9579
     ]
   },
+  "threat": {
+    "heroDamageTaken": 2
+  },
   "gear": {
     "levelStep": 0.15,
     "maxPermanentLevel": 5

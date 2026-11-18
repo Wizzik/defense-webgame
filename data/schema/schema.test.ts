@@ -78,6 +78,7 @@ function fixture(): any {
         { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.3, elites: 0 },
         { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.35, elites: 0 },
       ],
+      threat: { heroDamageTaken: 2 },
       gear: { levelStep: 0.15, maxPermanentLevel: 5 },
       chests: { count: 3, basePrice: 40, priceGrowth: 1.18, minCastleDistance: 700, maxCastleDistance: 2000,
         minSpacing: 600, pickupRadius: 80, slotsPerOffer: 3 },

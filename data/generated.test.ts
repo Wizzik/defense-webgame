@@ -100,6 +100,15 @@ describe("generated game data", () => {
     expect(rows(JSON.parse(read("items.json")))).toEqual(rows(designEntries("items.yaml") as unknown as Row[]));
   });
 
+  it("melee heroes take a quarter less and enemies hit the hero twice as hard", () => {
+    const heroes = JSON.parse(read("heroes.json")) as { id: string; damageTaken?: number }[];
+    for (const hero of heroes) {
+      if (hero.id === "stonehorn" || hero.id === "redcleaver") expect(hero.damageTaken, hero.id).toBe(0.75);
+      else expect(hero, hero.id).not.toHaveProperty("damageTaken");
+    }
+    expect(JSON.parse(read("rules.json")).threat).toEqual({ heroDamageTaken: 2 });
+  });
+
   it("enemies have six common types and four bosses with their attack kinds", () => {
     const enemies = JSON.parse(read("enemies.json")) as { id: string; attack: { kind: string }; heal?: unknown; boss?: true }[];
     expect(enemies.map((e) => e.id)).toEqual([

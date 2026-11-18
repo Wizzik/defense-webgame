@@ -105,6 +105,8 @@ export const RulesSchema = z.object({
     /** Elites that come once, with the first pack of the first interval of the phase. */
     elites: z.number().int().min(0),
   }).strict()).min(1),
+  /** Multiplier on all damage enemies deal to the hero (not to the castle). */
+  threat: z.object({ heroDamageTaken: positive }).strict(),
   /** Item numbers at level L are the level-1 numbers x (1 + levelStep x (L - 1)). */
   gear: z.object({ levelStep: nonNegative, maxPermanentLevel: z.number().int().min(1) }).strict(),
   /** `count` chests lie on the map; the n-th one opened costs basePrice x priceGrowth^(n - 1) gold. */

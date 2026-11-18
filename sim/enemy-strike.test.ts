@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { armorReduction, killEnemy, stunEnemy } from "./combat";
+import { armorReduction, heroDamageScale, killEnemy, stunEnemy } from "./combat";
 import { Role } from "./enemies";
 import { Slam, SlamEvent } from "./enemy-slam";
 import { EventKind } from "./events";
@@ -58,7 +58,7 @@ describe("boss strike from afar", () => {
     expect(heroDamage(run)).toBe(0);
     step(run);
     expect(slamEvents(run).map((s) => s.value)).toEqual([SlamEvent.Hit]);
-    const k = 1 - armorReduction(run.hero.stats.armor, run.data.constants.defenseArmor);
+    const k = (1 - armorReduction(run.hero.stats.armor, run.data.constants.defenseArmor)) * heroDamageScale(run);
     expect(heroDamage(run)).toBeCloseTo(DAMAGE * 1.5 * k, 6);
     // the boss landed next to the hero (their circles touch)
     expect(distance(run.enemies.x[b]!, run.enemies.y[b]!, 0, 0)).toBeLessThan(80 + 32 + 5);

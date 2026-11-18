@@ -61,6 +61,9 @@ events:
   - { atSeconds: 900, kind: rush, units: { captain: 8, lancer: 12 } }
 # XP a hero has at the start of each phase, for ?phase=N. Filled from `npm run sim:run -- --phase-xp`.
 debug: { phaseXp: [0, 45, 105, 207, 374, 580, 975, 1235, 1561, 1922, 2314, 3086, 3663, 4176, 4822, 5623, 6708, 7628, 8513, 9579] }
+# threat: multiplies all damage enemies deal to the hero (sim/combat.ts damageHero: hits, shots, charges, boss
+#   strikes, slams), times the hero's own damageTaken (heroes.yaml). The castle takes damage as before.
+threat: { heroDamageTaken: 2 }
 # Gear (items, chests, boss drops). Tuned in docs/DECISIONS.md, section Gear, drops and chests.
 # gear: an item's numbers at level L are its level-1 numbers x (1 + levelStep x (L - 1)); a duplicate from a boss
 #   raises the permanent level up to maxPermanentLevel, chests add temporary levels without a cap.
