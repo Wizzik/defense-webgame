@@ -13,7 +13,7 @@ Updated 2026-11-18 (Petr approved the spec for chest loot, Magic Find and enemy 
 ## Shared spells and passives: design written, waits for Petr's approval (branch `shared-spells`, 2026-11-18)
 
 - Spec: `docs/superpowers/specs/2026-11-18-shared-spells-passives-design.md` (also `claude/specs/` in the project). Six new slots (2 shared spells from a pool of 10, 4 passives from 6), card groups with weights, new kinds `chain` and `instant`, the autopilot's card order, balance band 6-12 of 20. Petr said "go" without further questions, so section 4 holds Claude's calls; a builder check ran and its answers are in section 4.8.
-- Next: Petr approves (or changes) the spec, then a new chat writes the plan.
+- Next: Petr approves (or changes) the spec, then a new chat writes the plan (after the chest-loot plan is merged).
 
 ## Sparkshot multishot: merged (PR #14, 2026-11-18)
 
