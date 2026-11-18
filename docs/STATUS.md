@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-18 evening (shared spells and passives: all 9 tasks done on branch `shared-spells`, PR against `main` to merge after green CI; chest loot and threat (PR #15) wait for Petr's playtest on the live game). Read this first when you resume work.
+Updated 2026-11-18 evening (shared spells and passives are merged: PR #16 as `d66d9a0`, Pages deployed; it and chest loot and threat (PR #15) wait for Petr's playtest on the live game). Read this first when you resume work.
 
 ## Chest loot, Magic Find and enemy threat: merged (PR #15 as `dd88ff5`, 2026-11-18); waits for Petr's playtest
 
@@ -24,7 +24,7 @@ Updated 2026-11-18 evening (shared spells and passives: all 9 tasks done on bran
 - Merged at Petr's request after halving the chest price (2026-11-18 evening), CI green.
 - Next: Petr plays the live game.
 
-## Shared spells and passives: done (branch `shared-spells`, 2026-11-18); waits for Petr's playtest
+## Shared spells and passives: merged (PR #16 as `d66d9a0`, 2026-11-18); waits for Petr's playtest
 
 - All 9 tasks of `docs/superpowers/plans/2026-11-18-shared-spells-passives.md` are done (inline in one chat, one final self-review of the whole diff against spec 4.1-4.8 and `AGENTS.md`). `npm run check`, the build and the e2e project `webgl2-fallback` (31 of 31) pass. Approved and merged by Claude at Petr's word ("vše si schval, sluč a nasaď"). Numbers, sources from the map, rulings and the win table: `docs/DECISIONS.md`, section Shared spells and passives.
 - What it brings:
@@ -43,7 +43,8 @@ Updated 2026-11-18 evening (shared spells and passives: all 9 tasks done on bran
   - quick links: https://wizzik.github.io/defense-webgame/?debug=1 then in the console `__game.debug.learn(4, "arc-lightning")`, `__game.debug.learn(5, "smite")`, `__game.debug.learn(6, "might")` (passives into slots 6-9), `__game.debug.setAbilityLevel(4, 5)`; `__game.abilityIds` lists the slots.
 - **Open for Petr (balance band 6-12 of 20):** Serpent Shaman reads 15 and 16 on the two seed sets, but over 100 seeds it moves only 63 -> 69 % (it already won about 13 of 20 on `main`; 9 on seeds 1-20 was luck). Nightglaive, Mistwarden, Sparkshot and Tidecaller come closer but stay under 6 on at least one set: Nightglaive and Mistwarden die at 2-4 minutes under the doubled enemy damage, before shared spells matter; closing that needs their kits. Redcleaver stays in the band but loses over 100 seeds (45 -> 35 %). Gravecaller still wins everything. Tried and dropped: weaker Arcane Focus, shared spells +30 %, signature weight 6.
 - Minor notes from the final review (not fixed): the client keeps the chain's last bolt point per slot in a small growing array; `botCard` builds the slot range per card (only at offers); the spec's `move_direction` for Blade Fan and `around_self` for Sentry Ward were changed to what the updaters read (`nearest`, `densest_cluster`).
-- Next: merge after green CI, Pages deploy, then Petr plays.
+- Merged by Claude after green CI (Petr's word: approve, merge and deploy), Pages deployed.
+- Next: Petr plays the live game (both PR #15 and PR #16).
 
 ## Sparkshot multishot: merged (PR #14, 2026-11-18)
 
