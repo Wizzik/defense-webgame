@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-18 evening (shared spells and passives are merged: PR #16 as `d66d9a0`, Pages deployed; it and chest loot and threat (PR #15) wait for Petr's playtest on the live game). Read this first when you resume work.
+Updated 2026-11-19 (Petr playtested PR #15 and #16; the spec for spell scaling, multishot on every arrow and the chest compare waits for his approval on branch `spell-scaling`). Read this first when you resume work.
 
 ## Spell scaling, multishot on every arrow, chest compare: spec waits for Petr's approval (branch `spell-scaling`, 2026-11-19)
 
