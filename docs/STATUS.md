@@ -10,6 +10,7 @@ Updated 2026-11-18 (chest loot, Magic Find and enemy threat are built on branch 
   - a chest offers 3 rolled items in all five rarities (glyph, name in the rarity colour, rarity, "new for this run" / "replaces X for this run" / "level 3 -> 4", stat rows compared with the worn item); a higher rarity replaces the worn item for the run, the permanent item comes back after the run;
   - a new stat Magic Find on 10 items (rings, necks, trinkets, a belt): raises the odds of better rarities in chests and boss drops, with diminishing returns; shown in tooltips and in the totals under the doll (gear screen and panel C);
   - a legendary or mythic from a chest is named on the news line in its colour;
+  - chests cost half (Petr, before the merge): 100, 112, 125, ...; without gear the autopilot wins 94 instead of 70 of 320 runs and opens almost twice as many chests;
   - chest levels count 0.25 each (permanent levels 0.15), also the first level of an item a chest gave; `npm run sim:chests` measures chest power: 15 chests give a bare level-25 hero x1.46 (hp 1.44, attack 1.48, spells 1.45).
 - What Petr checks in the playtest:
   - do chests feel worth the walk now, and do the cards and rarities read (colours, the replace line);

@@ -507,7 +507,7 @@ test("a chest takes gold and offers three rolled items; the pick lands in the ge
     const g = window.__game!;
     return { chests: g.chests.length, price: g.chestPrice, gold: g.gold, worn: g.gear.filter((slot) => slot !== null).length };
   });
-  expect(before).toEqual({ chests: 3, price: 200, gold: 0, worn: 0 });
+  expect(before).toEqual({ chests: 3, price: 100, gold: 0, worn: 0 });
   await expect(page.locator(".chest-label")).toHaveCount(3);
 
   await page.evaluate(() => {
@@ -525,7 +525,7 @@ test("a chest takes gold and offers three rolled items; the pick lands in the ge
   expect(first.rarity).toBe(cards![0]!.rarity);
   await expect(page.locator("button.card").first().locator(".card-name")).toHaveText(first.name.cs);
   await expect(page.locator("button.card").first()).toHaveClass(new RegExp(`rarity-${first.rarity}`));
-  await expect(page.locator("#hud-gold")).toContainText("800");
+  await expect(page.locator("#hud-gold")).toContainText("900");
   await testInfo.attach(`chest-${testInfo.project.name}`, {
     body: await page.screenshot({ type: "png" }),
     contentType: "image/png",
@@ -539,7 +539,7 @@ test("a chest takes gold and offers three rolled items; the pick lands in the ge
   });
   expect(after.opened).toBe(1);
   expect(after.gold).toBeLessThan(1000);
-  expect(after.price).toBe(224);
+  expect(after.price).toBe(112);
   expect(after.worn).toHaveLength(1);
   expect(after.worn[0]).toMatchObject({ item: cards![0]!.item, base: 0, temp: 1 });
   expect(await page.evaluate(() => window.__game!.chestCards)).toBeNull();
