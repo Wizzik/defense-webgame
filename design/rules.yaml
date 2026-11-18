@@ -71,6 +71,11 @@ gear: { levelStep: 0.15, maxPermanentLevel: 5 }
 # chests: `count` chests lie between min and maxCastleDistance from the castle and minSpacing apart. The n-th chest
 #   opened costs basePrice x priceGrowth^(n - 1) gold and offers slotsPerOffer gear slots.
 chests: { count: 3, basePrice: 200, priceGrowth: 1.12, minCastleDistance: 700, maxCastleDistance: 2000, minSpacing: 600, pickupRadius: 80, slotsPerOffer: 3 }
+# magicFind: the hero's magic find MF (sum over worn items, 0.12 = 12 %) has diminishing returns:
+#   effective = MF x limit / (MF + limit) (50 % -> 37.5 %, 100 % -> 60 %, 300 % -> 100 %). Every rarity above the
+#   lowest one of a weight table (chests, boss drops) gets its weight x (1 + effective x rarityFactor); the lowest
+#   keeps its weight (sim/magic-find.ts).
+magicFind: { limit: 1.5, rarityFactor: { rare: 1, epic: 1.5, legendary: 2, mythic: 2.5 } }
 # drops: every boss drops one item; its rarity is drawn by these weights (meta/drop.ts).
 drops:
   - { boss: iron-marshal, weights: { common: 60, rare: 40 } }

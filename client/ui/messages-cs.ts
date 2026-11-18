@@ -90,6 +90,7 @@ export const messagesCs = {
   "gear.stat.spellPower": "síla kouzel",
   "gear.stat.magnet": "dosah sbírání",
   "gear.stat.goldFind": "zlata",
+  "gear.stat.magicFind": "magický nález",
   "slot.head": "Hlava",
   "slot.neck": "Krk",
   "slot.shoulders": "Ramena",

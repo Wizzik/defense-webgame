@@ -3,7 +3,7 @@ import { itemStatAt } from "../../sim";
 import { type Lang, type MessageKey, t } from "./i18n";
 
 /** Stats whose values are shares shown as percent. */
-const PERCENT_STATS: ReadonlySet<StatId> = new Set(["damage", "attackSpeed", "moveSpeed", "spellPower", "goldFind"]);
+const PERCENT_STATS: ReadonlySet<StatId> = new Set(["damage", "attackSpeed", "moveSpeed", "spellPower", "goldFind", "magicFind"]);
 
 /** Whole numbers stay whole; anything else gets one decimal. */
 function num(value: number): string {

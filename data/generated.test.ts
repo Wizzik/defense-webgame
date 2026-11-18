@@ -209,7 +209,7 @@ describe("generated game data", () => {
     /** What one point buys: 0.5 attribute, 0.5 % of an offensive share, 12 hp, 0.25 armor, 0.1 regen, 1 % move speed or gold, 10 magnet. */
     const UNIT: Record<string, number> = {
       str: 0.5, agi: 0.5, int: 0.5, hp: 12, armor: 0.25, regen: 0.1,
-      damage: 0.005, attackSpeed: 0.005, spellPower: 0.005, moveSpeed: 0.01, goldFind: 0.01, magnet: 10,
+      damage: 0.005, attackSpeed: 0.005, spellPower: 0.005, moveSpeed: 0.01, goldFind: 0.01, magnet: 10, magicFind: 0.02,
     };
     const BUDGET: Record<string, number> = { common: 6, rare: 12, epic: 20, legendary: 30, mythic: 42 };
     const of = (rarity: string) => items.filter((item) => item.rarity === rarity);
@@ -245,6 +245,28 @@ describe("generated game data", () => {
         expect(points, `${item.id}: ${points} points`).toBeGreaterThanOrEqual(budget * 0.9 - 1e-9);
         expect(points, `${item.id}: ${points} points`).toBeLessThanOrEqual(budget * 1.1 + 1e-9);
       }
+    });
+
+    it("ten items carry magic find", () => {
+      const mf = items.filter((item) => item.stats.some((row) => row.stat === "magicFind")).map((item) => item.id).sort();
+      expect(mf).toEqual([
+        "band-of-resolve", "belt-of-many-knives", "compass-of-the-lost-scout", "falcon-charm", "hourglass-of-the-hunt",
+        "hunters-whistle", "pendant-of-the-deep-well", "ring-of-the-keen-eye", "seal-of-the-archivist", "tin-ring",
+      ]);
+    });
+
+    it("the best epic-or-better magic find build gives about 100 % at level 5", () => {
+      const build = [
+        "pendant-of-the-deep-well", "ring-of-the-keen-eye", "seal-of-the-archivist", "belt-of-many-knives",
+        "compass-of-the-lost-scout", "hourglass-of-the-hunt",
+      ];
+      const sum = build.reduce((total, id) => {
+        const row = items.find((item) => item.id === id)!.stats.find((r) => r.stat === "magicFind")!;
+        return total + row.value;
+      }, 0);
+      const atFive = sum * (1 + 0.15 * 4);
+      expect(atFive).toBeGreaterThan(0.95);
+      expect(atFive).toBeLessThan(1.15);
     });
 
     it("an item names a stat once", () => {

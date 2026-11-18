@@ -130,7 +130,7 @@ describe("gear", () => {
     expect(items.filter((i) => i >= 0).length).toBe(1);
     expect(run.gear.item[SLOT_IDS.indexOf("ring1")]).toBe(data.items.findIndex((i) => i.id === ring));
     expect(run.gear.base[SLOT_IDS.indexOf("ring1")]).toBe(2);
-    expect(run.hero.gear.goldFind).toBeCloseTo(0.06 * 1.15, 9);
+    expect(run.hero.gear.magicFind).toBeCloseTo(0.12 * 1.15, 9); // tin-ring carries magic find
   });
 
   it("the same seed and gear give the same hash, other gear another", () => {

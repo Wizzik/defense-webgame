@@ -2,10 +2,10 @@
 # before a release that may drop saved loadouts by index; saved data uses ids, so the order is free otherwise.
 # slotType: one of the 14 types (a ring fits ring1 and ring2, a trinket trinket1 and trinket2).
 # rarity: common (1 stat row), rare (2), epic (3), legendary (4), mythic (5).
-# stats: values at item level 1. damage, attackSpeed, moveSpeed, spellPower and goldFind are shares (0.05 = 5 %).
+# stats: values at item level 1. damage, attackSpeed, moveSpeed, spellPower, goldFind and magicFind are shares (0.05 = 5 %).
 #   Budget per item at level 1, summed over the rows: common 6, rare 12, epic 20, legendary 30, mythic 42 points;
 #   1 point = 0.5 attribute = 0.5 % damage, attack speed or spell power = 12 hp = 0.25 armor = 0.1 regen
-#   = 1 % move speed or gold = 10 magnet (tuned in docs/DECISIONS.md, section Gear, drops and chests).
+#   = 1 % move speed or gold = 10 magnet = 2 % magic find (tuned in docs/DECISIONS.md, section Gear, drops and chests).
 # source: optional, the map's item category that inspired the item (traceability only, never written to data/generated).
 # Names are our own; nothing is copied from the map.
 
@@ -20,7 +20,7 @@
 - { id: rope-belt, name: { en: "Rope Belt", cs: "Provazový opasek" }, slotType: waist, rarity: common, stats: [{ stat: int, value: 3 }] }
 - { id: patched-trousers, name: { en: "Patched Trousers", cs: "Záplatované kalhoty" }, slotType: legs, rarity: common, stats: [{ stat: hp, value: 72 }] }
 - { id: walking-boots, name: { en: "Walking Boots", cs: "Pochodové boty" }, slotType: feet, rarity: common, stats: [{ stat: moveSpeed, value: 0.06 }] }
-- { id: tin-ring, name: { en: "Tin Ring", cs: "Cínový prsten" }, slotType: ring, rarity: common, stats: [{ stat: goldFind, value: 0.06 }] }
+- { id: tin-ring, name: { en: "Tin Ring", cs: "Cínový prsten" }, slotType: ring, rarity: common, stats: [{ stat: magicFind, value: 0.12 }] }
 - { id: lucky-pebble, name: { en: "Lucky Pebble", cs: "Oblázek pro štěstí" }, slotType: trinket, rarity: common, stats: [{ stat: int, value: 3 }] }
 - { id: militia-blade, name: { en: "Militia Blade", cs: "Domobranecká čepel" }, slotType: mainHand, rarity: common, stats: [{ stat: damage, value: 0.03 }] }
 - { id: plank-buckler, name: { en: "Plank Buckler", cs: "Prkenný štítek" }, slotType: offHand, rarity: common, stats: [{ stat: str, value: 3 }] }
@@ -28,7 +28,7 @@
 # Rare: two stat rows, 12 points.
 - { id: wardens-helm, name: { en: "Warden's Helm", cs: "Strážcova přilba" }, slotType: head, rarity: rare, stats: [{ stat: str, value: 3.5 }, { stat: hp, value: 60 }] }
 - { id: scholars-circlet, name: { en: "Scholar's Circlet", cs: "Učencova čelenka" }, slotType: head, rarity: rare, stats: [{ stat: int, value: 3.5 }, { stat: spellPower, value: 0.025 }] }
-- { id: falcon-charm, name: { en: "Falcon Charm", cs: "Sokolí amulet" }, slotType: neck, rarity: rare, stats: [{ stat: agi, value: 3.5 }, { stat: magnet, value: 50 }] }
+- { id: falcon-charm, name: { en: "Falcon Charm", cs: "Sokolí amulet" }, slotType: neck, rarity: rare, stats: [{ stat: agi, value: 3.5 }, { stat: magicFind, value: 0.10 }] }
 - { id: bastion-pauldrons, name: { en: "Bastion Pauldrons", cs: "Baštové nárameníky" }, slotType: shoulders, rarity: rare, stats: [{ stat: str, value: 3 }, { stat: armor, value: 1.5 }] }
 - { id: starwoven-mantle, name: { en: "Starwoven Mantle", cs: "Hvězdný přehoz" }, slotType: shoulders, rarity: rare, stats: [{ stat: int, value: 4 }, { stat: regen, value: 0.4 }] }
 - { id: windrunner-cloak, name: { en: "Cloak of the Tailwind", cs: "Plášť příznivého větru" }, slotType: back, rarity: rare, stats: [{ stat: agi, value: 3.5 }, { stat: moveSpeed, value: 0.05 }] }
@@ -42,9 +42,9 @@
 - { id: trackers-leggings, name: { en: "Tracker's Leggings", cs: "Stopařovy nohavice" }, slotType: legs, rarity: rare, stats: [{ stat: agi, value: 3.5 }, { stat: hp, value: 60 }] }
 - { id: swiftstep-boots, name: { en: "Boots of the Quick Mile", cs: "Boty rychlé míle" }, slotType: feet, rarity: rare, stats: [{ stat: moveSpeed, value: 0.07 }, { stat: agi, value: 2.5 }] }
 - { id: pilgrims-sandals, name: { en: "Pilgrim's Sandals", cs: "Poutnické sandály" }, slotType: feet, rarity: rare, stats: [{ stat: moveSpeed, value: 0.06 }, { stat: int, value: 3 }] }
-- { id: band-of-resolve, name: { en: "Band of Resolve", cs: "Prsten odhodlání" }, slotType: ring, rarity: rare, stats: [{ stat: str, value: 3.5 }, { stat: goldFind, value: 0.05 }] }
+- { id: band-of-resolve, name: { en: "Band of Resolve", cs: "Prsten odhodlání" }, slotType: ring, rarity: rare, stats: [{ stat: str, value: 3.5 }, { stat: magicFind, value: 0.10 }] }
 - { id: moonlit-signet, name: { en: "Moonlit Signet", cs: "Pečeť měsíčního svitu" }, slotType: ring, rarity: rare, stats: [{ stat: int, value: 3.5 }, { stat: goldFind, value: 0.05 }] }
-- { id: hunters-whistle, name: { en: "Hunter's Whistle", cs: "Lovecká píšťalka" }, slotType: trinket, rarity: rare, stats: [{ stat: agi, value: 3 }, { stat: magnet, value: 60 }] }
+- { id: hunters-whistle, name: { en: "Hunter's Whistle", cs: "Lovecká píšťalka" }, slotType: trinket, rarity: rare, stats: [{ stat: agi, value: 3 }, { stat: magicFind, value: 0.12 }] }
 - { id: vial-of-clear-thought, name: { en: "Vial of Clear Thought", cs: "Lahvička jasné mysli" }, slotType: trinket, rarity: rare, stats: [{ stat: int, value: 3.5 }, { stat: spellPower, value: 0.025 }] }
 - { id: soldiers-longsword, name: { en: "Soldier's Longsword", cs: "Vojákův dlouhý meč" }, slotType: mainHand, rarity: rare, stats: [{ stat: damage, value: 0.035 }, { stat: str, value: 2.5 }] }
 - { id: twin-edged-glaive, name: { en: "Twin-edged Glaive", cs: "Dvoubřitá glévie" }, slotType: mainHand, rarity: rare, stats: [{ stat: damage, value: 0.03 }, { stat: agi, value: 3 }] }
@@ -54,7 +54,7 @@
 # Epic: three stat rows, 20 points.
 - { id: helm-of-the-unbroken-line, name: { en: "Helm of the Unbroken Line", cs: "Přilba neprolomené linie" }, slotType: head, rarity: epic, stats: [{ stat: str, value: 4.5 }, { stat: hp, value: 72 }, { stat: armor, value: 1.25 }] }
 - { id: hood-of-the-night-watch, name: { en: "Hood of the Night Watch", cs: "Kápě noční hlídky" }, slotType: head, rarity: epic, stats: [{ stat: agi, value: 4.5 }, { stat: attackSpeed, value: 0.03 }, { stat: hp, value: 60 }] }
-- { id: pendant-of-the-deep-well, name: { en: "Pendant of the Deep Well", cs: "Přívěsek hluboké studny" }, slotType: neck, rarity: epic, stats: [{ stat: int, value: 4.5 }, { stat: spellPower, value: 0.03 }, { stat: magnet, value: 50 }] }
+- { id: pendant-of-the-deep-well, name: { en: "Pendant of the Deep Well", cs: "Přívěsek hluboké studny" }, slotType: neck, rarity: epic, stats: [{ stat: int, value: 4.5 }, { stat: spellPower, value: 0.03 }, { stat: magicFind, value: 0.10 }] }
 - { id: torc-of-the-old-guard, name: { en: "Torc of the Old Guard", cs: "Nákrčník staré gardy" }, slotType: neck, rarity: epic, stats: [{ stat: str, value: 4.5 }, { stat: regen, value: 0.6 }, { stat: hp, value: 60 }] }
 - { id: raven-feather-spaulders, name: { en: "Raven-feather Spaulders", cs: "Nárameníky z havraního peří" }, slotType: shoulders, rarity: epic, stats: [{ stat: agi, value: 4.5 }, { stat: damage, value: 0.03 }, { stat: moveSpeed, value: 0.05 }] }
 - { id: cloak-of-falling-stars, name: { en: "Cloak of Falling Stars", cs: "Plášť padajících hvězd" }, slotType: back, rarity: epic, stats: [{ stat: int, value: 4.5 }, { stat: spellPower, value: 0.03 }, { stat: hp, value: 60 }] }
@@ -65,14 +65,14 @@
 - { id: siegebreaker-vambraces, name: { en: "Siegebreaker Vambraces", cs: "Nátepníky lamače obležení" }, slotType: wrist, rarity: epic, stats: [{ stat: str, value: 4.5 }, { stat: damage, value: 0.03 }, { stat: hp, value: 60 }] }
 - { id: weavers-gloves, name: { en: "Weaver's Gloves", cs: "Tkalcovy rukavice" }, slotType: hands, rarity: epic, stats: [{ stat: int, value: 4.5 }, { stat: spellPower, value: 0.035 }, { stat: attackSpeed, value: 0.02 }] }
 - { id: girdle-of-the-mountain, name: { en: "Girdle of the Mountain", cs: "Horský pás" }, slotType: waist, rarity: epic, stats: [{ stat: str, value: 4.5 }, { stat: hp, value: 84 }, { stat: armor, value: 1 }] }
-- { id: belt-of-many-knives, name: { en: "Belt of Many Knives", cs: "Opasek mnoha nožů" }, slotType: waist, rarity: epic, stats: [{ stat: agi, value: 4.5 }, { stat: damage, value: 0.03 }, { stat: goldFind, value: 0.05 }] }
+- { id: belt-of-many-knives, name: { en: "Belt of Many Knives", cs: "Opasek mnoha nožů" }, slotType: waist, rarity: epic, stats: [{ stat: agi, value: 4.5 }, { stat: damage, value: 0.03 }, { stat: magicFind, value: 0.10 }] }
 - { id: leggings-of-the-moon-court, name: { en: "Leggings of the Moon Court", cs: "Nohavice měsíčního dvora" }, slotType: legs, rarity: epic, stats: [{ stat: int, value: 4.5 }, { stat: hp, value: 72 }, { stat: spellPower, value: 0.025 }] }
 - { id: treads-of-the-vanguard, name: { en: "Treads of the Vanguard", cs: "Boty předvoje" }, slotType: feet, rarity: epic, stats: [{ stat: moveSpeed, value: 0.07 }, { stat: str, value: 4 }, { stat: hp, value: 60 }] }
 - { id: boots-of-the-silent-road, name: { en: "Boots of the Silent Road", cs: "Boty tiché cesty" }, slotType: feet, rarity: epic, stats: [{ stat: moveSpeed, value: 0.08 }, { stat: agi, value: 4 }, { stat: attackSpeed, value: 0.02 }] }
-- { id: ring-of-the-keen-eye, name: { en: "Ring of the Keen Eye", cs: "Prsten bystrého oka" }, slotType: ring, rarity: epic, stats: [{ stat: agi, value: 4 }, { stat: damage, value: 0.03 }, { stat: goldFind, value: 0.06 }] }
-- { id: seal-of-the-archivist, name: { en: "Seal of the Archivist", cs: "Pečeť archiváře" }, slotType: ring, rarity: epic, stats: [{ stat: int, value: 4 }, { stat: spellPower, value: 0.03 }, { stat: goldFind, value: 0.06 }] }
+- { id: ring-of-the-keen-eye, name: { en: "Ring of the Keen Eye", cs: "Prsten bystrého oka" }, slotType: ring, rarity: epic, stats: [{ stat: agi, value: 4 }, { stat: damage, value: 0.03 }, { stat: magicFind, value: 0.12 }] }
+- { id: seal-of-the-archivist, name: { en: "Seal of the Archivist", cs: "Pečeť archiváře" }, slotType: ring, rarity: epic, stats: [{ stat: int, value: 4 }, { stat: spellPower, value: 0.03 }, { stat: magicFind, value: 0.12 }] }
 - { id: astrolabe-shard, name: { en: "Astrolabe Shard", cs: "Úlomek astrolábu" }, slotType: trinket, rarity: epic, stats: [{ stat: int, value: 4 }, { stat: spellPower, value: 0.035 }, { stat: hp, value: 60 }] }
-- { id: compass-of-the-lost-scout, name: { en: "Compass of the Lost Scout", cs: "Kompas ztraceného zvěda" }, slotType: trinket, rarity: epic, stats: [{ stat: agi, value: 4 }, { stat: moveSpeed, value: 0.06 }, { stat: magnet, value: 60 }] }
+- { id: compass-of-the-lost-scout, name: { en: "Compass of the Lost Scout", cs: "Kompas ztraceného zvěda" }, slotType: trinket, rarity: epic, stats: [{ stat: agi, value: 4 }, { stat: moveSpeed, value: 0.06 }, { stat: magicFind, value: 0.12 }] }
 - { id: greatblade-of-the-keep, name: { en: "Greatblade of the Keep", cs: "Velký meč tvrze" }, slotType: mainHand, rarity: epic, stats: [{ stat: damage, value: 0.045 }, { stat: str, value: 3.5 }, { stat: hp, value: 48 }] }
 - { id: staff-of-the-low-tide, name: { en: "Staff of the Low Tide", cs: "Hůl odlivu" }, slotType: mainHand, rarity: epic, stats: [{ stat: spellPower, value: 0.045 }, { stat: int, value: 3.5 }, { stat: regen, value: 0.4 }] }
 - { id: parrying-dagger, name: { en: "Parrying Dagger", cs: "Krycí dýka" }, slotType: offHand, rarity: epic, stats: [{ stat: agi, value: 4 }, { stat: attackSpeed, value: 0.035 }, { stat: armor, value: 1.25 }] }
@@ -116,7 +116,7 @@
   name: { en: "Hourglass of the Hunt", cs: "Přesýpací hodiny lovu" }
   slotType: trinket
   rarity: legendary
-  stats: [{ stat: int, value: 5 }, { stat: spellPower, value: 0.045 }, { stat: hp, value: 72 }, { stat: magnet, value: 50 }]
+  stats: [{ stat: int, value: 5 }, { stat: spellPower, value: 0.045 }, { stat: hp, value: 72 }, { stat: magicFind, value: 0.10 }]
   effect:
     kind: haste_on_elite_kill
     params: { cooldownSpeed: 1.5, seconds: 8 }

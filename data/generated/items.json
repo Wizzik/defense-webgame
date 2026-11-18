@@ -159,8 +159,8 @@
     "rarity": "common",
     "stats": [
       {
-        "stat": "goldFind",
-        "value": 0.06
+        "stat": "magicFind",
+        "value": 0.12
       }
     ]
   },
@@ -261,8 +261,8 @@
         "value": 3.5
       },
       {
-        "stat": "magnet",
-        "value": 50
+        "stat": "magicFind",
+        "value": 0.1
       }
     ]
   },
@@ -527,8 +527,8 @@
         "value": 3.5
       },
       {
-        "stat": "goldFind",
-        "value": 0.05
+        "stat": "magicFind",
+        "value": 0.1
       }
     ]
   },
@@ -565,8 +565,8 @@
         "value": 3
       },
       {
-        "stat": "magnet",
-        "value": 60
+        "stat": "magicFind",
+        "value": 0.12
       }
     ]
   },
@@ -729,8 +729,8 @@
         "value": 0.03
       },
       {
-        "stat": "magnet",
-        "value": 50
+        "stat": "magicFind",
+        "value": 0.1
       }
     ]
   },
@@ -982,8 +982,8 @@
         "value": 0.03
       },
       {
-        "stat": "goldFind",
-        "value": 0.05
+        "stat": "magicFind",
+        "value": 0.1
       }
     ]
   },
@@ -1074,8 +1074,8 @@
         "value": 0.03
       },
       {
-        "stat": "goldFind",
-        "value": 0.06
+        "stat": "magicFind",
+        "value": 0.12
       }
     ]
   },
@@ -1097,8 +1097,8 @@
         "value": 0.03
       },
       {
-        "stat": "goldFind",
-        "value": 0.06
+        "stat": "magicFind",
+        "value": 0.12
       }
     ]
   },
@@ -1143,8 +1143,8 @@
         "value": 0.06
       },
       {
-        "stat": "magnet",
-        "value": 60
+        "stat": "magicFind",
+        "value": 0.12
       }
     ]
   },
@@ -1357,8 +1357,8 @@
         "value": 72
       },
       {
-        "stat": "magnet",
-        "value": 50
+        "stat": "magicFind",
+        "value": 0.1
       }
     ],
     "effect": {

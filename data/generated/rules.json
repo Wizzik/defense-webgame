@@ -507,6 +507,15 @@
     "pickupRadius": 80,
     "slotsPerOffer": 3
   },
+  "magicFind": {
+    "limit": 1.5,
+    "rarityFactor": {
+      "rare": 1,
+      "epic": 1.5,
+      "legendary": 2,
+      "mythic": 2.5
+    }
+  },
   "drops": [
     {
       "boss": "iron-marshal",

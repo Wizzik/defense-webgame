@@ -88,6 +88,7 @@ export const messagesEn = {
   "gear.stat.spellPower": "spell power",
   "gear.stat.magnet": "pickup range",
   "gear.stat.goldFind": "gold",
+  "gear.stat.magicFind": "magic find",
   "slot.head": "Head",
   "slot.neck": "Neck",
   "slot.shoulders": "Shoulders",
