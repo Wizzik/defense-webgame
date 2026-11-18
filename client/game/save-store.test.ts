@@ -31,7 +31,7 @@ describe("save backends", () => {
     const gear = await GearSession.load(data, broken);
     expect(gear.save).toEqual(emptySave());
     expect(gear.persistent).toBe(false);
-    expect(gear.onBossDeath("iron-marshal", 1, 0).kind).toBe("new");
+    expect(gear.onBossDeath("iron-marshal", 1, 0, 0).kind).toBe("new");
   });
 
   it("no backend at all gives an empty collection that is not persistent", async () => {
@@ -44,7 +44,7 @@ describe("save backends", () => {
     const backend: SaveBackend = { read: () => Promise.resolve(null), write: () => Promise.reject(new Error("full")) };
     const gear = await GearSession.load(data, backend);
     expect(gear.persistent).toBe(true);
-    gear.onBossDeath("iron-marshal", 1, 0);
+    gear.onBossDeath("iron-marshal", 1, 0, 0);
     await gear.flushed();
     expect(gear.persistent).toBe(false);
     expect(Object.keys(gear.save.items)).toHaveLength(1);

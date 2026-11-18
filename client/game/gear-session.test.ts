@@ -17,10 +17,23 @@ describe("GearSession", () => {
     expect(gear.droppedOnLoad).toBe(0);
   });
 
+  it("passes the hero's magic find on to the drop", async () => {
+    const high = async (magicFind: number) => {
+      let count = 0;
+      for (let seed = 1; seed <= 200; seed++) {
+        const gear = await GearSession.load(data, memoryBackend());
+        const drop = gear.onBossDeath("dread-regent", seed, 0, magicFind);
+        if (drop.kind !== "none" && (drop.item.rarity === "legendary" || drop.item.rarity === "mythic")) count++;
+      }
+      return count;
+    };
+    expect(await high(3)).toBeGreaterThan(await high(0));
+  });
+
   it("a boss's drop is in the save and written to the backend at once", async () => {
     const backend = memoryBackend();
     const gear = await GearSession.load(data, backend);
-    const drop = gear.onBossDeath("iron-marshal", 5, 0);
+    const drop = gear.onBossDeath("iron-marshal", 5, 0, 0);
     expect(drop.kind).toBe("new");
     if (drop.kind === "none") return;
     expect(gear.save.items).toEqual({ [drop.item.id]: 1 });
@@ -30,8 +43,8 @@ describe("GearSession", () => {
 
   it("keeps the drops of a run in order and forgets them when the next run starts", async () => {
     const gear = await GearSession.load(data, memoryBackend());
-    const first = gear.onBossDeath("iron-marshal", 5, 0);
-    const second = gear.onBossDeath("pale-abbot", 5, 1);
+    const first = gear.onBossDeath("iron-marshal", 5, 0, 0);
+    const second = gear.onBossDeath("pale-abbot", 5, 1, 0);
     expect(gear.drops).toEqual([first, second]);
     expect(Object.keys(gear.save.items)).toHaveLength(2);
     gear.startRun();
@@ -43,7 +56,7 @@ describe("GearSession", () => {
     const backend = memoryBackend();
     const gear = await GearSession.load(data, backend, { persistent: false });
     expect(gear.persistent).toBe(false);
-    gear.onBossDeath("iron-marshal", 5, 0);
+    gear.onBossDeath("iron-marshal", 5, 0, 0);
     gear.grant(helm, 3);
     await gear.flushed();
     expect(await backend.read()).toBeNull();

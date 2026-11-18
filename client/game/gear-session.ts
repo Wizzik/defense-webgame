@@ -61,8 +61,8 @@ export class GearSession {
   }
 
   /** A boss fell: its drop goes into the collection at once, so it is kept even when the run is lost. */
-  onBossDeath(bossId: string, seed: number, order: number): Drop {
-    const drop = rollDrop(this.data, this.save, bossId, seed, order);
+  onBossDeath(bossId: string, seed: number, order: number, magicFind: number): Drop {
+    const drop = rollDrop(this.data, this.save, bossId, seed, order, magicFind);
     this.drops.push(drop);
     this.commit(applyDrop(this.save, drop));
     return drop;

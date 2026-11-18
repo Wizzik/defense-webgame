@@ -338,7 +338,7 @@ function createUi(
     }
   });
   const hud = new Hud(root);
-  hud.dropFor = (bossId, order) => gear.onBossDeath(bossId, session.seed, order);
+  hud.dropFor = (bossId, order, magicFind) => gear.onBossDeath(bossId, session.seed, order, magicFind);
   // the HUD reads the events of every step for its news line
   session.views.push({ update: () => {}, onEvents: (run) => hud.onEvents(run, lang), dispose: () => {} });
   const pointer = new CastlePointer(root);

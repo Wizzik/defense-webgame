@@ -67,7 +67,8 @@ export class Hud {
   private readonly bossBar: BossBar;
   private lastRun: Run | null = null;
   /** What a boss that just fell dropped (boss id, its order in the run); main.ts sets it. */
-  dropFor: ((bossId: string, order: number) => Drop) | null = null;
+  /** The drop of a fallen boss; `magicFind` is the hero's magic find at that moment. */
+  dropFor: ((bossId: string, order: number, magicFind: number) => Drop) | null = null;
 
   constructor(parent: HTMLElement) {
     this.root = el("div", "hud", parent);
@@ -113,7 +114,7 @@ export class Hud {
         const name = run.data.enemies[events.value[i]!]!.name[lang];
         this.announcer.push(t(lang, "announce.boss", { name }), ANNOUNCE_TICKS);
       } else if (kind === EventKind.BossDeath && this.dropFor) {
-        const line = dropLine(lang, this.dropFor(run.data.enemies[events.a[i]!]!.id, events.value[i]!));
+        const line = dropLine(lang, this.dropFor(run.data.enemies[events.a[i]!]!.id, events.value[i]!, run.hero.gear.magicFind));
         this.announcer.push(line.text, ANNOUNCE_TICKS, line.tone);
       } else if (kind === EventKind.Enrage) {
         const name = run.data.enemies[run.finalBossType]!.name[lang];
