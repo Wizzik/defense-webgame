@@ -112,8 +112,11 @@ export const RulesSchema = z.object({
   }).strict()).min(1),
   /** Multiplier on all damage enemies deal to the hero (not to the castle). */
   threat: z.object({ heroDamageTaken: positive }).strict(),
-  /** Item numbers at level L are the level-1 numbers x (1 + levelStep x (L - 1)). */
-  gear: z.object({ levelStep: nonNegative, maxPermanentLevel: z.number().int().min(1) }).strict(),
+  /**
+   * Item numbers with permanent level B and chest levels T: the level-1 numbers x
+   * (1 + levelStep x max(B - 1, 0) + chestLevelStep x T); an item a chest gave has B = 0.
+   */
+  gear: z.object({ levelStep: nonNegative, chestLevelStep: nonNegative, maxPermanentLevel: z.number().int().min(1) }).strict(),
   /** `count` chests lie on the map; the n-th one opened costs basePrice x priceGrowth^(n - 1) gold. */
   chests: z.object({
     count: z.number().int().min(1).max(8),

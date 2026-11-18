@@ -159,7 +159,8 @@ describe("chests", () => {
     run.step(pick(index));
     expect(run.gear.base[feet]).toBe(2);
     expect(run.gear.temp[feet]).toBe(1);
-    expect(run.hero.gear.moveSpeed).toBeCloseTo(boots.stats[0]!.value * (1 + 0.15 * 2), 9);
+    const { levelStep, chestLevelStep } = data.rules.gear;
+    expect(run.hero.gear.moveSpeed).toBeCloseTo(boots.stats[0]!.value * (1 + levelStep + chestLevelStep), 9);
     expect(run.hero.stats.moveSpeed).toBeGreaterThan(speed);
   });
 
@@ -356,7 +357,8 @@ describe("chests", () => {
     const high = (magicFind: number) => {
       let count = 0;
       for (let seed = 1; seed <= 300; seed++) {
-        const run = quietRun(seed);
+        // fixed weights, so tuning rules.chests.rarityWeights does not move this test
+        const run = quietRun(seed, chestData({ common: 55, rare: 30, epic: 12, legendary: 2.5, mythic: 0.5 }));
         run.hero.gear.magicFind = magicFind;
         for (const card of rollChestOffer(run).cards) if (rank(run.data.items[card.item]!.rarity) >= rank("epic")) count++;
       }

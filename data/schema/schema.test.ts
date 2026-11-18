@@ -80,7 +80,7 @@ function fixture(): any {
       ],
       threat: { heroDamageTaken: 2 },
       magicFind: { limit: 1.5, rarityFactor: { rare: 1, epic: 1.5, legendary: 2, mythic: 2.5 } },
-      gear: { levelStep: 0.15, maxPermanentLevel: 5 },
+      gear: { levelStep: 0.15, chestLevelStep: 0.3, maxPermanentLevel: 5 },
       chests: { count: 3, basePrice: 40, priceGrowth: 1.18, minCastleDistance: 700, maxCastleDistance: 2000,
         minSpacing: 600, pickupRadius: 80, slotsPerOffer: 3, rarityWeights: { common: 55, rare: 30, epic: 12 } },
       drops: [{ boss: "warlord", weights: { common: 60, rare: 40 } }],

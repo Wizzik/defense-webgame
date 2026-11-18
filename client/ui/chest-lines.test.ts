@@ -7,6 +7,7 @@ import { tooltipLines } from "./item-tooltip";
 
 function setup() {
   const data = gameData();
+  data.rules.gear.chestLevelStep = 0.3; // the numbers below are worked out with this step
   data.items.push({
     id: "test-helm", name: { en: "Test Helm", cs: "Zkušební přilba" }, slotType: "head", rarity: "rare",
     stats: [{ stat: "str", value: 14 }, { stat: "hp", value: 120 }],
@@ -24,7 +25,7 @@ describe("chest lines", () => {
     expect(chestLines("en", data, gear, card)).toEqual({
       title: data.items[boots]!.name.en, slot: "Feet", slotType: "feet", rarity: "common", rarityName: "Common",
       action: "new for this run",
-      lines: itemLines("en", data.items[boots]!, 1, 0.15).map((text) => ({ text, tone: "plain" })),
+      lines: itemLines("en", data.items[boots]!, 0, 1, data.rules.gear).map((text) => ({ text, tone: "plain" })),
     });
     expect(chestLines("cs", data, gear, card).action).toBe("nové na tento běh");
   });
@@ -46,7 +47,7 @@ describe("chest lines", () => {
     expect(info.rarity).toBe("epic");
     expect(info.action).toBe("nahradí Zkušební přilba do konce běhu");
     expect(info.lines).toEqual(
-      tooltipLines("cs", data, data.items[epic]!, 0, 4, { item: data.items[helm]!, level: 3 }).lines,
+      tooltipLines("cs", data, data.items[epic]!, 0, 4, { item: data.items[helm]!, level: 2, temp: 1 }).lines,
     );
     expect(info.lines.some((line) => line.tone === "better" || line.tone === "worse")).toBe(true);
   });
@@ -60,8 +61,8 @@ describe("chest lines", () => {
     expect(info.title).toBe("Zkušební přilba");
     expect(info.action).toBe("úroveň 3 → 4");
     expect(info.lines).toEqual([
-      { text: "+18.2 → +20.3 síla", tone: "better" },
-      { text: "+156 → +174 HP", tone: "better" },
+      { text: "+20.3 → +24.5 síla", tone: "better" },
+      { text: "+174 → +210 HP", tone: "better" },
     ]);
   });
 

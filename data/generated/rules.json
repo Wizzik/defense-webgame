@@ -495,6 +495,7 @@
   },
   "gear": {
     "levelStep": 0.15,
+    "chestLevelStep": 0.25,
     "maxPermanentLevel": 5
   },
   "chests": {
@@ -507,11 +508,11 @@
     "pickupRadius": 80,
     "slotsPerOffer": 3,
     "rarityWeights": {
-      "common": 55,
+      "common": 25,
       "rare": 30,
-      "epic": 12,
-      "legendary": 2.5,
-      "mythic": 0.5
+      "epic": 37,
+      "legendary": 6,
+      "mythic": 2
     }
   },
   "magicFind": {

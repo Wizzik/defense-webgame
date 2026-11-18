@@ -1,4 +1,4 @@
-import type { GameData, SlotType, StatId } from "../data/schema";
+import type { GameData, Rules, SlotType, StatId } from "../data/schema";
 import { GearFx, loadEffects } from "./gear-effects";
 import { refreshHeroStats } from "./level-up";
 import type { Run } from "./run";
@@ -56,9 +56,12 @@ export class GearState {
   }
 }
 
-/** An item number at an item level: value x (1 + levelStep x (level - 1)). */
-export function itemStatAt(value: number, level: number, levelStep: number): number {
-  return value * (1 + levelStep * (level - 1));
+/**
+ * An item number with permanent level `base` and chest levels `temp`:
+ * value x (1 + levelStep x max(base - 1, 0) + chestLevelStep x temp). An item a chest gave has base 0.
+ */
+export function itemStatAt(value: number, base: number, temp: number, gear: Rules["gear"]): number {
+  return value * (1 + gear.levelStep * Math.max(base - 1, 0) + gear.chestLevelStep * temp);
 }
 
 /** Index in `data.items` of the common item of a slot type (the one a chest puts into an empty slot). */
@@ -102,15 +105,16 @@ export function recomputeGear(run: Run): void {
   bonus.magnet = 0;
   bonus.goldFind = 0;
   bonus.magicFind = 0;
-  const step = data.rules.gear.levelStep;
+  const rules = data.rules.gear;
   for (let slot = 0; slot < SLOT_COUNT; slot++) {
     const index = gear.item[slot]!;
     if (index < 0) continue;
-    const level = gear.base[slot]! + gear.temp[slot]!;
+    const base = gear.base[slot]!;
+    const temp = gear.temp[slot]!;
     const stats = data.items[index]!.stats;
     for (let k = 0; k < stats.length; k++) {
       const row = stats[k]!;
-      bonus[row.stat] += itemStatAt(row.value, level, step);
+      bonus[row.stat] += itemStatAt(row.value, base, temp, rules);
     }
   }
   loadEffects(run);

@@ -23,24 +23,26 @@ export interface ChestLines {
 export function chestLines(lang: Lang, data: GameData, gear: GearState, card: ChestCard): ChestLines {
   const type = slotTypeOf(card.slot);
   const item = data.items[card.item]!;
-  const step = data.rules.gear.levelStep;
+  const rules = data.rules.gear;
   const worn = gear.item[card.slot]!;
-  const from = gear.base[card.slot]! + gear.temp[card.slot]!;
+  const base = gear.base[card.slot]!;
+  const temp = gear.temp[card.slot]!;
+  const from = base + temp;
   let action: string;
   let lines: ChestLines["lines"];
   if (card.action === ChestAction.New) {
     action = t(lang, "chest.new");
-    lines = itemLines(lang, item, 1, step).map((text) => ({ text, tone: "plain" as LineTone }));
+    lines = itemLines(lang, item, 0, 1, rules).map((text) => ({ text, tone: "plain" as LineTone }));
     if (item.effect) lines.push({ text: item.effect.text[lang], tone: "effect" });
   } else if (card.action === ChestAction.Replace) {
     const old = data.items[worn]!;
     action = t(lang, "chest.replace", { name: old.name[lang] });
-    lines = tooltipLines(lang, data, item, 0, from + 1, { item: old, level: from }).lines;
+    lines = tooltipLines(lang, data, item, 0, from + 1, { item: old, level: base, temp }).lines;
   } else {
     action = t(lang, "chest.level", { from, to: from + 1 });
     lines = item.stats.map((row) => ({
-      text: `${statValue(row.stat, itemStatAt(row.value, from, step))} → ` +
-        `${statValue(row.stat, itemStatAt(row.value, from + 1, step))} ${statLabel(lang, row.stat)}`,
+      text: `${statValue(row.stat, itemStatAt(row.value, base, temp, rules))} → ` +
+        `${statValue(row.stat, itemStatAt(row.value, base, temp + 1, rules))} ${statLabel(lang, row.stat)}`,
       tone: "better" as LineTone,
     }));
   }

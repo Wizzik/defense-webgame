@@ -1,4 +1,4 @@
-import type { Item, StatId } from "../../data/schema";
+import type { Item, Rules, StatId } from "../../data/schema";
 import { itemStatAt } from "../../sim";
 import { type Lang, type MessageKey, t } from "./i18n";
 
@@ -21,7 +21,7 @@ export function statValue(stat: StatId, value: number): string {
   return PERCENT_STATS.has(stat) ? `+${num(value * 100)} %` : `+${num(value)}`;
 }
 
-/** One line per stat row of an item at an item level: "+14 Strength", "+6 % move speed". */
-export function itemLines(lang: Lang, item: Item, level: number, levelStep: number): string[] {
-  return item.stats.map((row) => `${statValue(row.stat, itemStatAt(row.value, level, levelStep))} ${statLabel(lang, row.stat)}`);
+/** The stat rows of an item with permanent level `base` and chest levels `temp`, as "+14 Strength". */
+export function itemLines(lang: Lang, item: Item, base: number, temp: number, gear: Rules["gear"]): string[] {
+  return item.stats.map((row) => `${statValue(row.stat, itemStatAt(row.value, base, temp, gear))} ${statLabel(lang, row.stat)}`);
 }

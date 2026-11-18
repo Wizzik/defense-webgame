@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { GameData } from "../data/schema";
-import { basicItemIndex, itemStatAt, type LoadoutEntry, SLOT_COUNT, SLOT_IDS, slotTypeOf } from "./gear";
+import { basicItemIndex, itemStatAt, type LoadoutEntry, recomputeGear, SLOT_COUNT, SLOT_IDS, slotTypeOf } from "./gear";
 import { stateHash } from "./hash";
 import { heroStats } from "./hero";
 import { NO_INPUT } from "./input";
@@ -25,9 +25,25 @@ describe("gear", () => {
     expect(new Set(SLOT_IDS.map((_, i) => slotTypeOf(i))).size).toBe(14);
   });
 
-  it("an item's numbers grow by levelStep per level", () => {
-    expect(itemStatAt(10, 1, 0.15)).toBe(10);
-    expect(itemStatAt(10, 3, 0.15)).toBeCloseTo(13, 9);
+  it("an item's numbers grow by levelStep per permanent level and by chestLevelStep per chest level", () => {
+    const gear = { levelStep: 0.15, chestLevelStep: 0.3, maxPermanentLevel: 5 };
+    expect(itemStatAt(10, 1, 0, gear)).toBe(10);
+    expect(itemStatAt(10, 3, 0, gear)).toBeCloseTo(13, 9);
+    expect(itemStatAt(10, 0, 1, gear)).toBeCloseTo(13, 9); // an item a chest gave: its first chest level counts
+    expect(itemStatAt(10, 0, 3, gear)).toBeCloseTo(19, 9);
+    expect(itemStatAt(10, 2, 1, gear)).toBeCloseTo(14.5, 9);
+  });
+
+  it("an item a chest gave is summed with its chest levels", () => {
+    const data = gameData();
+    data.rules.gear.chestLevelStep = 0.3;
+    const run = createRun(data, { seed: 1, durationSeconds: 100000 });
+    const feet = SLOT_IDS.indexOf("feet");
+    run.gear.item[feet] = basicItemIndex(data, "feet");
+    run.gear.temp[feet] = 2;
+    recomputeGear(run);
+    const boots = data.items[basicItemIndex(data, "feet")]!;
+    expect(run.hero.gear.moveSpeed).toBeCloseTo(boots.stats[0]!.value * 1.6, 9);
   });
 
   it("finds the common item of a slot type", () => {

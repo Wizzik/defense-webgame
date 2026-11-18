@@ -65,16 +65,18 @@ debug: { phaseXp: [0, 45, 105, 207, 374, 580, 975, 1235, 1561, 1922, 2314, 3086,
 #   strikes, slams), times the hero's own damageTaken (heroes.yaml). The castle takes damage as before.
 threat: { heroDamageTaken: 2 }
 # Gear (items, chests, boss drops). Tuned in docs/DECISIONS.md, section Gear, drops and chests.
-# gear: an item's numbers at level L are its level-1 numbers x (1 + levelStep x (L - 1)); a duplicate from a boss
-#   raises the permanent level up to maxPermanentLevel, chests add temporary levels without a cap.
-gear: { levelStep: 0.15, maxPermanentLevel: 5 }
+# gear: an item's numbers with permanent level B and chest levels T are its level-1 numbers
+#   x (1 + levelStep x max(B - 1, 0) + chestLevelStep x T); an item a chest gave has B = 0, so its first chest level
+#   counts too. A duplicate from a boss raises the permanent level up to maxPermanentLevel, chests add levels without
+#   a cap. chestLevelStep is tuned with `npm run sim:chests` (docs/DECISIONS.md, section Chest loot).
+gear: { levelStep: 0.15, chestLevelStep: 0.25, maxPermanentLevel: 5 }
 # chests: `count` chests lie between min and maxCastleDistance from the castle and minSpacing apart. The n-th chest
 #   opened costs basePrice x priceGrowth^(n - 1) gold and offers slotsPerOffer cards. Each card rolls a rarity by
 #   rarityWeights (raised by the hero's magic find), then a free slot whose type has an item of that rarity (one
 #   rarity lower when none is free) and an item of it (sim/chests.ts). An empty slot takes the item at chest level 1,
 #   a higher rarity replaces the worn item with the slot's whole level + 1, else the worn item gains a level.
 chests: { count: 3, basePrice: 200, priceGrowth: 1.12, minCastleDistance: 700, maxCastleDistance: 2000, minSpacing: 600, pickupRadius: 80, slotsPerOffer: 3,
-  rarityWeights: { common: 55, rare: 30, epic: 12, legendary: 2.5, mythic: 0.5 } }
+  rarityWeights: { common: 25, rare: 30, epic: 37, legendary: 6, mythic: 2 } }
 # magicFind: the hero's magic find MF (sum over worn items, 0.12 = 12 %) has diminishing returns:
 #   effective = MF x limit / (MF + limit) (50 % -> 37.5 %, 100 % -> 60 %, 300 % -> 100 %). Every rarity above the
 #   lowest one of a weight table (chests, boss drops) gets its weight x (1 + effective x rarityFactor); the lowest
