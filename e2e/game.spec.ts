@@ -48,6 +48,23 @@ async function pickCard(page: Page): Promise<void> {
 }
 
 /**
+ * Waits for `screen` and picks the first card of every level-up offer on the way: XP the hero collected can open
+ * an offer right before or after a chest (slow software rendering leaves more time for it).
+ */
+async function waitForScreenPickingLevelUps(page: Page, screen: Screen, timeout = 90_000): Promise<void> {
+  const deadline = Date.now() + timeout;
+  for (;;) {
+    await page.waitForFunction(
+      (s) => window.__game?.screen === s || window.__game?.screen === "levelUp",
+      screen,
+      { timeout: Math.max(1, deadline - Date.now()), polling: 250 },
+    );
+    if ((await page.evaluate(() => window.__game?.screen)) === screen) return;
+    await pickCard(page);
+  }
+}
+
+/**
  * Plays a debug run to its end: picks cards, and kills the final boss once it has come (the run is won only
  * when it falls). Needs `debug=1`. Returns the last screen it saw.
  */
@@ -528,11 +545,11 @@ test("C opens the gear panel and pauses the run; C closes it; C does nothing und
     g.debug!.grantGold(1000);
     g.debug!.teleport(g.chests[0]!.x, g.chests[0]!.y);
   });
-  await waitForScreen(page, "chest");
+  await waitForScreenPickingLevelUps(page, "chest");
   await page.keyboard.press("KeyC");
   await expect(page.locator("#gear-panel")).toBeHidden();
   await page.locator("button.card").first().click();
-  await waitForScreen(page, "playing");
+  await waitForScreenPickingLevelUps(page, "playing");
 
   await page.keyboard.press("KeyC");
   await expect(page.locator("#gear-panel")).toBeVisible();
