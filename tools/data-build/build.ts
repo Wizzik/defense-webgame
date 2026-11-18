@@ -4,7 +4,7 @@ import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { type Constants, type GameData, type Item, validateGameData } from "../../data/schema";
 import { ABILITIES_YAML, type Design, ENEMIES_YAML, HEROES_YAML, type ItemEntry, loadDesign, loadMapExport, type MapExport } from "./load";
-import { mapAbility } from "./map-abilities";
+import { mapAbility, mapDesignAbility } from "./map-abilities";
 import { mapEnemy } from "./map-enemies";
 import { mapHero } from "./map-heroes";
 import { scaleAbility, scaleEnemy, scaleHero } from "./scaling";
@@ -20,7 +20,12 @@ export function buildGameData(src: MapExport, design: Design, mapVersion: string
     scaleHero(mapHero(findSource(src.heroes, entry, HEROES_YAML, "heroes.json"), entry), design.scaling),
   );
   const abilities = design.abilities.map((entry) =>
-    scaleAbility(mapAbility(findSource(src.abilities, entry, ABILITIES_YAML, "abilities.json"), entry), design.scaling),
+    scaleAbility(
+      entry.source === undefined
+        ? mapDesignAbility(entry)
+        : mapAbility(findSource(src.abilities, { ...entry, source: entry.source }, ABILITIES_YAML, "abilities.json"), entry),
+      design.scaling,
+    ),
   );
   const enemies = design.enemies.map((entry) =>
     scaleEnemy(mapEnemy(findSource(src.units, entry, ENEMIES_YAML, "units.json"), entry), design.scaling),

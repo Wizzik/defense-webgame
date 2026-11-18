@@ -3,6 +3,7 @@ import type { Card, CardOffer, ChestCard, ChestOffer, Run } from "../../sim";
 import { cardLines } from "./card-lines";
 import { chestLines } from "./chest-lines";
 import { el } from "./dom";
+import { abilityIconSvg } from "./ability-icons";
 import { iconSvg } from "./item-icons";
 import { type Lang, type MessageKey, t } from "./i18n";
 
@@ -97,6 +98,14 @@ export class Cards {
       if (card.slot === ULTIMATE_SLOT) el("span", "card-badge", button, t(lang, "cards.ultimate"));
       el("span", "card-name", button, name);
       if (learn) el("span", "card-desc", button, def.description[lang]);
+    } else if (card.kind === "learn") {
+      const def = run.data.abilities[card.ability];
+      const badge = el("span", "card-badge card-new", button);
+      badge.innerHTML = abilityIconSvg(def.id);
+      el("span", "", badge, t(lang, "cards.new"));
+      name = def.name[lang];
+      el("span", "card-name", button, name);
+      el("span", "card-desc", button, def.description[lang]);
     } else {
       name = t(lang, ATTRIBUTE_KEYS[card.attribute], { n: card.amount });
       el("span", "card-name", button, name);

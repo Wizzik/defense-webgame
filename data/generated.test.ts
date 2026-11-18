@@ -157,6 +157,28 @@ describe("generated game data", () => {
     }
   });
 
+  it("the pools hold 10 shared spells and 6 passives with 2 and 4 slots", () => {
+    const rules = JSON.parse(read("rules.json")) as {
+      progression: { sharedSpells: string[]; passives: string[]; sharedSpellSlots: number; passiveSlots: number };
+    };
+    const abilities = new Map((JSON.parse(read("abilities.json")) as { id: string; kind: string; levels: number }[])
+      .map((a) => [a.id, a]));
+    const p = rules.progression;
+    expect(p.sharedSpells).toHaveLength(10);
+    expect(p.passives).toHaveLength(6);
+    expect([p.sharedSpellSlots, p.passiveSlots]).toEqual([2, 4]);
+    for (const id of p.sharedSpells) {
+      expect(abilities.get(id)?.kind, id).not.toBe("passive");
+      expect(abilities.get(id)?.levels, id).toBe(5);
+    }
+    for (const id of p.passives) {
+      expect(abilities.get(id)?.kind, id).toBe("passive");
+      expect(abilities.get(id)?.levels, id).toBe(5);
+    }
+    expect(new Set(p.sharedSpells.map((id) => abilities.get(id)?.kind))).toContain("chain");
+    expect(new Set(p.sharedSpells.map((id) => abilities.get(id)?.kind))).toContain("instant");
+  });
+
   it("the new on_hit abilities carry a bonus, and the chance is a share of 1", () => {
     const abilities = JSON.parse(read("abilities.json")) as { id: string; params: Record<string, number[]> }[];
     const of = (id: string) => abilities.find((a) => a.id === id)!.params;

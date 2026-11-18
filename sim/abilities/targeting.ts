@@ -57,3 +57,30 @@ export function densestCluster(run: Run, x: number, y: number, range: number, ra
   }
   return best;
 }
+
+/**
+ * The strongest live enemy whose centre is at most `range` from (x, y): a boss or an elite (a hunter type) comes
+ * first; among them, or among all when none is in range, the one with the most hp. Ties go to the lower slot.
+ */
+export function strongestEnemy(run: Run, x: number, y: number, range: number): number {
+  const e = run.enemies;
+  const types = run.data.enemies;
+  const maxSq = range * range;
+  let best = -1;
+  let bestElite = false;
+  let bestHp = 0;
+  for (let i = 0; i < e.capacity; i++) {
+    if (e.alive[i] === 0) continue;
+    const dx = e.x[i] - x;
+    const dy = e.y[i] - y;
+    if (dx * dx + dy * dy > maxSq) continue;
+    const type = types[e.type[i]];
+    const elite = type.boss === true || type.hunter === true;
+    const hp = e.hp[i];
+    if (best >= 0 && (bestElite && !elite || (bestElite === elite && hp <= bestHp))) continue;
+    best = i;
+    bestElite = elite;
+    bestHp = hp;
+  }
+  return best;
+}

@@ -13,6 +13,7 @@ function offered(run: ReturnType<typeof progressionRun>) {
 }
 
 // These tests set their own rules for which kinds exist: only `line` keeps its updater (stubs are added per test).
+// They run without the shared-spell and passive slots (cards-groups.test.ts covers those).
 const savedUpdaters = new Map<string, unknown>();
 beforeEach(() => {
   const updaters = UPDATERS as Record<string, unknown>;
@@ -31,7 +32,7 @@ afterEach(() => {
 describe("cards", () => {
   it("choosing a card applies it and resumes", () => {
     for (let index = 0; index < 3; index++) {
-      const run = progressionRun();
+      const run = progressionRun({ pools: false });
       const cards = offered(run);
       const card = cards[index];
       const before = { str: run.hero.str, agi: run.hero.agi, int: run.hero.int, max: run.hero.stats.maxHp, hp: run.hero.hp };
@@ -43,6 +44,8 @@ describe("cards", () => {
         expect(run.abilities[card.slot].level).toBe(card.toLevel);
         expect(card.fromLevel).toBe(1);
         expect(card.toLevel).toBe(2);
+      } else if (card.kind === "learn") {
+        throw new Error("no learn cards without pools");
       } else {
         expect(run.hero[card.attribute]).toBe(before[card.attribute] + 10);
         if (card.attribute === "str") {
@@ -54,7 +57,7 @@ describe("cards", () => {
   });
 
   it("invalid card index is ignored", () => {
-    const run = progressionRun();
+    const run = progressionRun({ pools: false });
     offered(run);
     const hash = stateHash(run);
     for (const card of [-1, 3, 99, 1.5, NaN]) {
@@ -62,14 +65,14 @@ describe("cards", () => {
       expect(run.state).toBe("levelUp");
       expect(stateHash(run)).toBe(hash);
     }
-    const idle = progressionRun();
+    const idle = progressionRun({ pools: false });
     chooseCard(idle, 0);
     expect(idle.state).toBe("playing");
     expect(idle.hero.pendingLevelUps).toBe(0);
   });
 
   it("ability card disappears at max level", () => {
-    const run = progressionRun();
+    const run = progressionRun({ pools: false });
     run.abilities[0].level = run.abilities[0].def.levels;
     for (let n = 0; n < 20; n++) {
       run.hero.pendingLevelUps = 1;
@@ -82,7 +85,7 @@ describe("cards", () => {
   });
 
   it("offer has fewer cards when fewer candidates exist", () => {
-    const run = progressionRun({ cardsPerOffer: 4 });
+    const run = progressionRun({ cardsPerOffer: 4, pools: false });
     run.abilities[0].level = run.abilities[0].def.levels;
     run.hero.pendingLevelUps = 1;
     openOffer(run);
@@ -92,7 +95,7 @@ describe("cards", () => {
   it("ability card can be offered", () => {
     let seen = false;
     for (let n = 0; n < 30 && !seen; n++) {
-      const run = progressionRun();
+      const run = progressionRun({ pools: false });
       run.rng.next();
       for (let i = 0; i < n; i++) run.rng.next();
       run.hero.pendingLevelUps = 1;
@@ -118,13 +121,13 @@ describe("cards", () => {
     });
 
     function offerAt(level: number, ultimateLevel = 0) {
-      const run = progressionRun({ cardsPerOffer: 10 });
+      const run = progressionRun({ cardsPerOffer: 10, pools: false });
       run.hero.level = level;
       run.abilities[3].level = ultimateLevel;
       run.hero.pendingLevelUps = 1;
       openOffer(run);
       return run.offer!.cards.map((c) =>
-        c.kind === "ability" ? `${c.slot}:${c.fromLevel}>${c.toLevel}` : c.attribute,
+        c.kind === "ability" ? `${c.slot}:${c.fromLevel}>${c.toLevel}` : c.kind === "attribute" ? c.attribute : "learn",
       ).sort();
     }
 
@@ -147,7 +150,7 @@ describe("cards", () => {
 
     it("learning an ability makes it ready", () => {
       stub("on_hit", "on_cast", "nova");
-      const run = progressionRun({ cardsPerOffer: 10 });
+      const run = progressionRun({ cardsPerOffer: 10, pools: false });
       run.hero.level = 2;
       run.hero.pendingLevelUps = 1;
       openOffer(run);

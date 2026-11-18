@@ -54,9 +54,9 @@ export class CrystalStore {
   }
 }
 
-/** Adds gold to the hero's purse: the coin's value times (1 + goldFind), rounded. Returns the gold gained. */
+/** Adds gold to the hero's purse: the coin's value times (1 + goldFind + the gold passive), rounded. Returns the gold gained. */
 export function gainGold(run: Run, value: number): number {
-  const amount = Math.round(value * (1 + run.hero.gear.goldFind));
+  const amount = Math.round(value * (1 + run.hero.gear.goldFind + run.hero.passive.gold));
   run.gold += amount;
   run.stats.goldGained += amount;
   return amount;
@@ -76,7 +76,7 @@ export function updatePickups(run: Run, c: CrystalStore, kind: 0 | 1): void {
   const hero = run.hero;
   if (c.count === 0) return;
   const { magnetRadius, crystalSpeed, pickupRadius } = run.data.rules.progression;
-  const reach = magnetRadius + hero.gear.magnet;
+  const reach = magnetRadius + hero.gear.magnet + hero.passive.magnet;
   const magnetSq = reach * reach;
   const pickupSq = pickupRadius * pickupRadius;
   const stepLen = crystalSpeed * TICK_SECONDS;

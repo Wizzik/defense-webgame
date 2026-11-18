@@ -178,8 +178,8 @@ describe("line ability", () => {
   it("an unsupported ability kind throws when stepped", () => {
     const data = gameData();
     const run = createRun(data, { seed: 1 });
-    // No hero uses chain, so no updater exists for it.
-    run.abilities[0].def = { ...run.abilities[0].def, kind: "chain" } as never;
-    expect(() => run.step(NO_INPUT)).toThrow("sim: ability kind chain is not implemented");
+    // Every kind of the schema has an updater now; a made-up kind has none.
+    run.abilities[0].def = { ...run.abilities[0].def, kind: "warp" } as never;
+    expect(() => run.step(NO_INPUT)).toThrow("sim: ability kind warp is not implemented");
   });
 });

@@ -6,6 +6,8 @@ import { silenceSpawns } from "./silence";
 export interface ProgressionOptions {
   durationSeconds?: number;
   cardsPerOffer?: number;
+  /** false: no shared-spell and passive slots, so offers hold only the kit and attributes. Default true. */
+  pools?: boolean;
 }
 
 export function progressionRun(options: ProgressionOptions = {}) {
@@ -20,9 +22,14 @@ export function progressionRun(options: ProgressionOptions = {}) {
   };
   silenceSpawns(data);
   data.rules.progression = {
+    ...data.rules.progression,
     xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56,
     attributeCardAmount: 10, cardsPerOffer: options.cardsPerOffer ?? 3,
     ultimateFromLevel: 6, ultimateLevelStep: 6,
   };
+  if (options.pools === false) {
+    data.rules.progression.sharedSpellSlots = 0;
+    data.rules.progression.passiveSlots = 0;
+  }
   return createRun(data, { seed: 7, durationSeconds: options.durationSeconds ?? 100000 });
 }

@@ -1,5 +1,6 @@
 import type { Rules } from "../data/schema";
 import { auraBonuses } from "./abilities/aura";
+import { passiveBonuses } from "./abilities/passive";
 import { EventKind } from "./events";
 import { heroStats } from "./hero";
 import type { Run } from "./run";
@@ -14,6 +15,7 @@ export function refreshHeroStats(run: Run): void {
   const { hero, data } = run;
   const before = hero.stats.maxHp;
   auraBonuses(run, hero.bonus);
+  passiveBonuses(run, hero.passive);
   heroStats(data, hero, hero.stats);
   if (hero.hp > 0) hero.hp += hero.stats.maxHp - before;
 }

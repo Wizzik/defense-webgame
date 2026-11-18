@@ -89,4 +89,10 @@ drops:
   - { boss: gunmaster, weights: { epic: 75, legendary: 25 } }
   - { boss: dread-regent, weights: { epic: 50, legendary: 40, mythic: 10 } }
 progression: { xpFirst: 10, xpStep: 9, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3,
-  ultimateFromLevel: 6, ultimateLevelStep: 6 }   # map: ultimates need hero level 10
+  ultimateFromLevel: 6, ultimateLevelStep: 6,   # map: ultimates need hero level 10
+  # Shared spells and passives (docs/DECISIONS.md, section Shared spells and passives): the pools, the
+  # number of slots, and the weights of the four card groups (a group is drawn by weight, then a card in it).
+  sharedSpells: [arc-lightning, smite, fire-bolt, frost-ring, meteor, holy-ground, blade-fan, shock-wave, sentry-ward, second-wind],
+  passives: [might, arcane-focus, haste, vigor, fleet-foot, fortune],
+  sharedSpellSlots: 2, passiveSlots: 4,
+  cardWeights: { signature: 4, sharedUpgrade: 3, newSpell: 2, newPassive: 2 } }

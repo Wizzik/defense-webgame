@@ -1,4 +1,8 @@
-import { chestPrice, EventKind, TICKS_PER_SECOND, type Run, ULTIMATE_SLOT, xpToNext } from "../../sim";
+import {
+  chestPrice, EventKind, isEmptySlot, passiveSlotRange, sharedSlotRange, TICKS_PER_SECOND, type Run, ULTIMATE_SLOT,
+  xpToNext,
+} from "../../sim";
+import { abilityIconSvg } from "./ability-icons";
 import { Announcer } from "./announcer";
 import { BossBar } from "./boss-bar";
 import { el, formatTime, setText } from "./dom";
@@ -29,6 +33,8 @@ function fraction(value: number, max: number): string {
 
 /** One cell of the ability bar: name, state line, cooldown bar, and for the ultimate a key and the auto switch. */
 interface Cell {
+  /** The ability slot it shows (-1 for the dash). */
+  slot: number;
   root: HTMLElement;
   name: HTMLElement;
   state: HTMLElement;
@@ -37,7 +43,7 @@ interface Cell {
   mode?: HTMLElement;
 }
 
-function cell(parent: HTMLElement, extra: string, key?: string, withMode = false): Cell {
+function cell(parent: HTMLElement, slot: number, extra: string, key?: string, withMode = false): Cell {
   const root = el("div", `cell ${extra}`, parent);
   if (key) el("span", "cell-key", root, key);
   const name = el("div", "cell-name", root);
@@ -45,7 +51,17 @@ function cell(parent: HTMLElement, extra: string, key?: string, withMode = false
   const mode = withMode ? el("div", "cell-mode", root) : undefined;
   const track = el("div", "cell-track", root);
   const fill = el("div", "bar-fill", track);
-  return { root, name, state, fill, mode };
+  return { slot, root, name, state, fill, mode };
+}
+
+/** A small cell of the passive row: the glyph and the level; a muted frame while the slot is empty. */
+interface PassiveCell {
+  slot: number;
+  root: HTMLElement;
+  icon: HTMLElement;
+  level: HTMLElement;
+  /** The ability id the icon shows ("" for an empty slot). */
+  shown: string;
 }
 
 /** In-run display: hero, time and phase, news line, boss bar, castle and kills, ability bar, castle-under-attack banner. */
@@ -59,7 +75,12 @@ export class Hud {
   private readonly castle: Bar;
   private readonly kills: HTMLElement;
   private readonly cells: Cell[] = [];
-  private readonly dash: Cell;
+  private readonly passives: PassiveCell[] = [];
+  private readonly abilityRow: HTMLElement;
+  private readonly passiveRow: HTMLElement;
+  /** Slot count the rows were built for (0 = not built yet). */
+  private builtFor = 0;
+  private dash!: Cell;
   private readonly banner: HTMLElement;
   private readonly muteKey: HTMLElement;
   private readonly announce: HTMLElement;
@@ -90,11 +111,43 @@ export class Hud {
     this.kills = el("div", "hud-kills", right);
     this.muteKey = el("div", "hud-mute", right);
     const abilities = el("div", "hud-abilities", this.root);
-    for (let i = 0; i <= ULTIMATE_SLOT; i++) {
-      const ultimate = i === ULTIMATE_SLOT;
-      this.cells.push(cell(abilities, ultimate ? "ultimate" : "spell", ultimate ? "R" : undefined, ultimate));
+    abilities.id = "hud-abilities";
+    this.abilityRow = el("div", "hud-ability-row", abilities);
+    this.passiveRow = el("div", "hud-passive-row", abilities);
+  }
+
+  /**
+   * Builds the rows for the slots of `run`: the signature spells, the shared spells and the ultimate (with R and
+   * the auto switch), then the dash; under them the passives.
+   */
+  private build(run: Run): void {
+    if (this.builtFor === run.abilities.length) return;
+    this.builtFor = run.abilities.length;
+    this.cells.length = 0;
+    this.passives.length = 0;
+    this.abilityRow.replaceChildren();
+    this.passiveRow.replaceChildren();
+    const [sharedFirst, sharedEnd] = sharedSlotRange(run);
+    const order: number[] = [];
+    for (let i = 0; i < ULTIMATE_SLOT; i++) order.push(i);
+    for (let i = sharedFirst; i < sharedEnd; i++) order.push(i);
+    order.push(ULTIMATE_SLOT);
+    for (const slot of order) {
+      const ultimate = slot === ULTIMATE_SLOT;
+      const extra = ultimate ? "ultimate" : slot >= sharedFirst ? "spell shared" : "spell";
+      const view = cell(this.abilityRow, slot, extra, ultimate ? "R" : undefined, ultimate);
+      view.root.dataset.slot = String(slot);
+      this.cells.push(view);
     }
-    this.dash = cell(abilities, "dash");
+    this.dash = cell(this.abilityRow, -1, "dash");
+    const [passiveFirst, passiveEnd] = passiveSlotRange(run);
+    for (let slot = passiveFirst; slot < passiveEnd; slot++) {
+      const root = el("div", "passive-cell empty", this.passiveRow);
+      root.dataset.slot = String(slot);
+      const icon = el("span", "passive-icon", root);
+      const level = el("span", "passive-level", root);
+      this.passives.push({ slot, root, icon, level, shown: "" });
+    }
   }
 
   setVisible(visible: boolean): void {
@@ -170,16 +223,19 @@ export class Hud {
     this.updateAbilities(run, lang);
   }
   private updateAbilities(run: Run, lang: Lang): void {
+    this.build(run);
     for (let i = 0; i < this.cells.length; i++) {
       const view = this.cells[i]!;
-      const slot = run.abilities[i]!;
+      const slot = run.abilities[view.slot]!;
       const learned = slot.level >= 1;
+      const empty = isEmptySlot(slot);
       view.root.classList.toggle("dim", !learned);
+      view.root.classList.toggle("empty", empty);
       // a charged empowered strike (an armed on_hit ability) lights the frame
       view.root.classList.toggle("charged", learned && slot.def.kind === "on_hit" && slot.active);
-      setText(view.name, slot.def.name[lang]);
+      setText(view.name, empty ? t(lang, "hud.emptySlot") : slot.def.name[lang]);
       if (!learned) {
-        setText(view.state, t(lang, "hud.notLearned"));
+        setText(view.state, empty ? "" : t(lang, "hud.notLearned"));
         view.fill.style.width = "0%";
       } else {
         const ready = slot.cooldown <= 0;
@@ -198,6 +254,18 @@ export class Hud {
           `${t(lang, run.ultimateAuto ? "hud.auto" : "hud.manual")} · ${t(lang, "hud.toggleKey")}`,
         );
       }
+    }
+    for (const view of this.passives) {
+      const slot = run.abilities[view.slot]!;
+      const empty = isEmptySlot(slot);
+      if (view.shown !== slot.def.id) {
+        view.shown = slot.def.id;
+        view.icon.innerHTML = empty ? "" : abilityIconSvg(slot.def.id);
+        view.root.classList.toggle("empty", empty);
+      }
+      setText(view.level, empty ? "" : String(slot.level));
+      const title = empty ? t(lang, "hud.emptySlot") : `${slot.def.name[lang]} · ${t(lang, "hud.level", { n: slot.level })}`;
+      if (view.root.title !== title) view.root.title = title;
     }
     const { hero } = run;
     const total = Math.round(run.data.rules.hero.dash.cooldownSeconds * TICKS_PER_SECOND);

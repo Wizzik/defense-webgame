@@ -86,7 +86,8 @@ export type ParamSpec = DataField | LevelField | { design: number[] };
 /** One entry of design/abilities.yaml. */
 export interface AbilityEntry {
   id: string;
-  source: string;
+  /** Map ability the numbers come from. Without it every param and the cooldown are `{ design: [...] }`. */
+  source?: string;
   name: Ability["name"];
   description: Ability["description"];
   kind: Ability["kind"];

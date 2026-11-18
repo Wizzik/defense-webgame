@@ -40,3 +40,25 @@
     count: DataA
     duration: duration
     damageDealt: DataB
+
+# Design-only entries (no export record).
+- id: zap
+  name: { en: Zap, cs: Zásah }
+  description: { en: Zap text, cs: Zásah text }
+  kind: chain
+  targeting: nearest
+  cooldown: { design: [5, 4, 3] }
+  params:
+    damage: { design: [10, 20, 30] }
+    range: { design: [500, 500, 500] }
+    bounces: { design: [2, 3, 4] }
+    bounceRange: { design: [300, 300, 300] }
+
+- id: boon
+  name: { en: Boon, cs: Přízeň }
+  description: { en: Boon text, cs: Přízeň text }
+  kind: passive
+  targeting: self
+  cooldown: { design: [0, 0, 0] }
+  params:
+    attackBonus: { design: [0.1, 0.2, 0.3] }

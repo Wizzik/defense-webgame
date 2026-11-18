@@ -1328,5 +1328,709 @@
         10
       ]
     }
+  },
+  {
+    "id": "arc-lightning",
+    "name": {
+      "en": "Arc Lightning",
+      "cs": "Jiskrový řetěz"
+    },
+    "description": {
+      "en": "Lightning strikes the nearest enemy and leaps from foe to foe.",
+      "cs": "Blesk udeří do nejbližšího nepřítele a přeskakuje na další."
+    },
+    "kind": "chain",
+    "targeting": "nearest",
+    "levels": 5,
+    "cooldown": [
+      3.96,
+      3.96,
+      3.96,
+      3.96,
+      3.96
+    ],
+    "params": {
+      "damage": [
+        90,
+        180,
+        300,
+        450,
+        600
+      ],
+      "range": [
+        900,
+        900,
+        900,
+        900,
+        900
+      ],
+      "bounces": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "bounceRange": [
+        500,
+        500,
+        500,
+        500,
+        500
+      ]
+    }
+  },
+  {
+    "id": "smite",
+    "name": {
+      "en": "Smite",
+      "cs": "Úder shůry"
+    },
+    "description": {
+      "en": "A bolt from above strikes the strongest foe in reach; bosses and elites first.",
+      "cs": "Rána shůry zasáhne nejsilnějšího nepřítele v dosahu; bossové a elity mají přednost."
+    },
+    "kind": "instant",
+    "targeting": "strongest",
+    "levels": 5,
+    "cooldown": [
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64
+    ],
+    "params": {
+      "damage": [
+        150,
+        300,
+        540,
+        840,
+        1200
+      ],
+      "range": [
+        1000,
+        1000,
+        1000,
+        1000,
+        1000
+      ]
+    }
+  },
+  {
+    "id": "fire-bolt",
+    "name": {
+      "en": "Fire Bolt",
+      "cs": "Ohnivá střela"
+    },
+    "description": {
+      "en": "Hurls a bolt of fire at the nearest enemy; elites are hit first.",
+      "cs": "Vrhne ohnivou střelu na nejbližšího nepřítele; elity mají přednost."
+    },
+    "kind": "projectile",
+    "targeting": "nearest_elite_first",
+    "levels": 5,
+    "cooldown": [
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64
+    ],
+    "params": {
+      "damage": [
+        90,
+        180,
+        360,
+        600,
+        900
+      ],
+      "range": [
+        1500,
+        1500,
+        1500,
+        1500,
+        1500
+      ],
+      "speed": [
+        1300,
+        1300,
+        1300,
+        1300,
+        1300
+      ]
+    }
+  },
+  {
+    "id": "frost-ring",
+    "name": {
+      "en": "Frost Ring",
+      "cs": "Mrazivý kruh"
+    },
+    "description": {
+      "en": "A ring of frost bursts around you and slows everything it touches.",
+      "cs": "Kolem tebe vybuchne mrazivý kruh a zpomalí vše, co zasáhne."
+    },
+    "kind": "nova",
+    "targeting": "around_self",
+    "levels": 5,
+    "cooldown": [
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64
+    ],
+    "params": {
+      "damage": [
+        90,
+        180,
+        300,
+        480,
+        720
+      ],
+      "radius": [
+        400,
+        450,
+        500,
+        550,
+        600
+      ],
+      "slow": [
+        0.3,
+        0.35,
+        0.4,
+        0.45,
+        0.5
+      ],
+      "slowSeconds": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    }
+  },
+  {
+    "id": "meteor",
+    "name": {
+      "en": "Meteor",
+      "cs": "Meteor"
+    },
+    "description": {
+      "en": "A meteor falls on the thickest crowd of enemies.",
+      "cs": "Meteor dopadne do nejhustšího hloučku nepřátel."
+    },
+    "kind": "area",
+    "targeting": "densest_cluster",
+    "levels": 5,
+    "cooldown": [
+      4.95,
+      4.95,
+      4.95,
+      4.95,
+      4.95
+    ],
+    "params": {
+      "damage": [
+        300,
+        750,
+        1050,
+        1500,
+        1950
+      ],
+      "radius": [
+        300,
+        325,
+        350,
+        375,
+        400
+      ],
+      "range": [
+        1000,
+        1000,
+        1000,
+        1000,
+        1000
+      ]
+    }
+  },
+  {
+    "id": "holy-ground",
+    "name": {
+      "en": "Holy Ground",
+      "cs": "Svatá půda"
+    },
+    "description": {
+      "en": "The ground around you burns with light for a few seconds.",
+      "cs": "Půda kolem tebe na pár sekund plane světlem."
+    },
+    "kind": "ticking_area",
+    "targeting": "around_self",
+    "levels": 5,
+    "cooldown": [
+      3.96,
+      3.96,
+      3.96,
+      3.96,
+      3.96
+    ],
+    "params": {
+      "tickDamage": [
+        30,
+        54,
+        81,
+        108,
+        135
+      ],
+      "ticksPerSecond": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "radius": [
+        300,
+        300,
+        300,
+        300,
+        300
+      ],
+      "hitRadius": [
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "duration": [
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  },
+  {
+    "id": "blade-fan",
+    "name": {
+      "en": "Blade Fan",
+      "cs": "Vějíř dýk"
+    },
+    "description": {
+      "en": "Throws a fan of blades towards the nearest enemy.",
+      "cs": "Vrhne vějíř dýk směrem k nejbližšímu nepříteli."
+    },
+    "kind": "cone",
+    "targeting": "nearest",
+    "levels": 5,
+    "cooldown": [
+      3.3,
+      3.3,
+      3.3,
+      3.3,
+      3.3
+    ],
+    "params": {
+      "damage": [
+        120,
+        240,
+        360,
+        480,
+        600
+      ],
+      "length": [
+        800,
+        800,
+        800,
+        800,
+        800
+      ],
+      "endWidth": [
+        500,
+        550,
+        600,
+        650,
+        700
+      ],
+      "maxTargets": [
+        8,
+        10,
+        12,
+        14,
+        16
+      ]
+    }
+  },
+  {
+    "id": "shock-wave",
+    "name": {
+      "en": "Shock Wave",
+      "cs": "Rázová vlna"
+    },
+    "description": {
+      "en": "A wave rolls out where you walk and hits everything in its path.",
+      "cs": "Vlna se valí tam, kam jdeš, a zasáhne vše v cestě."
+    },
+    "kind": "line",
+    "targeting": "move_direction",
+    "levels": 5,
+    "cooldown": [
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64
+    ],
+    "params": {
+      "damage": [
+        90,
+        180,
+        300,
+        450,
+        600
+      ],
+      "length": [
+        1000,
+        1000,
+        1000,
+        1000,
+        1000
+      ],
+      "width": [
+        300,
+        300,
+        300,
+        300,
+        300
+      ],
+      "waveSpeed": [
+        1600,
+        1600,
+        1600,
+        1600,
+        1600
+      ]
+    }
+  },
+  {
+    "id": "sentry-ward",
+    "name": {
+      "en": "Sentry Ward",
+      "cs": "Strážní totem"
+    },
+    "description": {
+      "en": "Plants a ward by the crowd that shoots at enemies around it.",
+      "cs": "Postaví u hloučku nepřátel totem, který po nich střílí."
+    },
+    "kind": "summon",
+    "targeting": "densest_cluster",
+    "levels": 5,
+    "cooldown": [
+      3.3,
+      3.3,
+      3.3,
+      3.3,
+      3.3
+    ],
+    "params": {
+      "count": [
+        1,
+        1,
+        1,
+        1,
+        2
+      ],
+      "duration": [
+        30,
+        30,
+        30,
+        30,
+        30
+      ],
+      "range": [
+        600,
+        600,
+        600,
+        600,
+        600
+      ],
+      "damage": [
+        12,
+        15,
+        18,
+        21,
+        24
+      ],
+      "attackRange": [
+        600,
+        600,
+        600,
+        600,
+        600
+      ],
+      "attackInterval": [
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "maxAlive": [
+        1,
+        2,
+        2,
+        3,
+        3
+      ]
+    }
+  },
+  {
+    "id": "second-wind",
+    "name": {
+      "en": "Second Wind",
+      "cs": "Druhý dech"
+    },
+    "description": {
+      "en": "Heals you when your health runs low.",
+      "cs": "Uzdraví tě, když ti dochází zdraví."
+    },
+    "kind": "heal",
+    "targeting": "self",
+    "levels": 5,
+    "cooldown": [
+      4.95,
+      4.95,
+      4.95,
+      4.95,
+      4.95
+    ],
+    "params": {
+      "amount": [
+        180,
+        300,
+        450,
+        660,
+        900
+      ],
+      "maxTargets": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "range": [
+        700,
+        700,
+        700,
+        700,
+        700
+      ]
+    }
+  },
+  {
+    "id": "might",
+    "name": {
+      "en": "Might",
+      "cs": "Síla paže"
+    },
+    "description": {
+      "en": "Your basic attacks hit harder.",
+      "cs": "Tvé základní útoky udeří silněji."
+    },
+    "kind": "passive",
+    "targeting": "self",
+    "levels": 5,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "attackBonus": [
+        0.08,
+        0.16,
+        0.24,
+        0.32,
+        0.4
+      ]
+    }
+  },
+  {
+    "id": "arcane-focus",
+    "name": {
+      "en": "Arcane Focus",
+      "cs": "Soustředění"
+    },
+    "description": {
+      "en": "All your spells deal more damage and heal more.",
+      "cs": "Všechna tvá kouzla dávají větší poškození a víc léčí."
+    },
+    "kind": "passive",
+    "targeting": "self",
+    "levels": 5,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "spellPowerBonus": [
+        0.08,
+        0.16,
+        0.24,
+        0.32,
+        0.4
+      ]
+    }
+  },
+  {
+    "id": "haste",
+    "name": {
+      "en": "Haste",
+      "cs": "Spěch"
+    },
+    "description": {
+      "en": "Your spells come back faster.",
+      "cs": "Tvá kouzla se rychleji obnovují."
+    },
+    "kind": "passive",
+    "targeting": "self",
+    "levels": 5,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "cooldownBonus": [
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25
+      ]
+    }
+  },
+  {
+    "id": "vigor",
+    "name": {
+      "en": "Vigor",
+      "cs": "Houževnatost"
+    },
+    "description": {
+      "en": "More health, and it comes back faster.",
+      "cs": "Víc zdraví, které se rychleji obnovuje."
+    },
+    "kind": "passive",
+    "targeting": "self",
+    "levels": 5,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "hpBonus": [
+        0.08,
+        0.16,
+        0.24,
+        0.32,
+        0.4
+      ],
+      "regenBonus": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "id": "fleet-foot",
+    "name": {
+      "en": "Fleet Foot",
+      "cs": "Lehký krok"
+    },
+    "description": {
+      "en": "You move and attack faster.",
+      "cs": "Pohybuješ se a útočíš rychleji."
+    },
+    "kind": "passive",
+    "targeting": "self",
+    "levels": 5,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "moveSpeedBonus": [
+        0.04,
+        0.08,
+        0.12,
+        0.16,
+        0.2
+      ],
+      "attackSpeedBonus": [
+        0.06,
+        0.12,
+        0.18,
+        0.24,
+        0.3
+      ]
+    }
+  },
+  {
+    "id": "fortune",
+    "name": {
+      "en": "Fortune",
+      "cs": "Štěstěna"
+    },
+    "description": {
+      "en": "More gold from every coin, and pickups fly to you from farther away.",
+      "cs": "Víc zlata z každé mince a věci k tobě létají z větší dálky."
+    },
+    "kind": "passive",
+    "targeting": "self",
+    "levels": 5,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "goldBonus": [
+        0.08,
+        0.16,
+        0.24,
+        0.32,
+        0.4
+      ],
+      "magnetBonus": [
+        40,
+        80,
+        120,
+        160,
+        200
+      ]
+    }
   }
 ]

@@ -7,6 +7,7 @@ import { BoltFx } from "./fx/bolts";
 import { Bubbles } from "./fx/bubbles";
 import { ProjectileView } from "./fx/projectile-view";
 import { type Rgb, rgb } from "./fx/instances";
+import { PillarFx } from "./fx/pillars";
 import { RingFx } from "./fx/rings";
 import { heroAccent } from "./hero-tints";
 
@@ -19,6 +20,11 @@ const ATTACK_BOLT_COLOR = rgb(0xfff1b3);
 const ATTACK_BOLT_LIFE = 0.1;
 const WARD_BOLT_COLOR = rgb(0x7fffe6);
 const ALLY_BOLT_LIFE = 0.18;
+const CHAIN_BOLT_COLOR = rgb(0x8fc7ff);
+const CHAIN_BOLT_LIFE = 0.18;
+const SMITE_COLOR = rgb(0xd6e6ff);
+/** Width of the strike from above, in scene units. */
+const SMITE_WIDTH = 0.7;
 
 /** Rings, blasts, bolts, projectiles and bubbles for every ability kind. Events create effects; `update` draws them. */
 export class AbilityFx implements RunView {
@@ -28,13 +34,19 @@ export class AbilityFx implements RunView {
   private readonly bolts = new BoltFx();
   private readonly projectiles: ProjectileView;
   private readonly bubbles = new Bubbles();
+  private readonly pillars = new PillarFx(SMITE_COLOR);
+  /** Per slot: where the bolt of a chain spell stands now (scene x, z); a Cast puts it on the hero. */
+  private readonly chainX: number[] = [];
+  private readonly chainZ: number[] = [];
   private lastRun: Run | null = null;
   /** The hero's effect colour, computed when the run changes. */
   private heroColor: Rgb = rgb(0);
 
   constructor() {
     this.projectiles = new ProjectileView(PROJECTILE_CAPACITY);
-    this.object.add(...this.rings.meshes, this.blasts.mesh, this.bolts.mesh, this.projectiles.mesh, this.bubbles.object);
+    this.object.add(
+      ...this.rings.meshes, this.blasts.mesh, this.bolts.mesh, this.projectiles.mesh, this.bubbles.object, this.pillars.mesh,
+    );
   }
 
   onEvents(run: Run): void {
@@ -52,7 +64,7 @@ export class AbilityFx implements RunView {
           this.onHit(run, i, now, x, z);
           break;
         case EventKind.Blast:
-          this.blasts.add(now, x, z, 2 * events.value[i]! * SCENE_SCALE);
+          this.onBlast(run, i, now, x, z);
           break;
         case EventKind.Heal:
           this.rings.addHeal(now, x, z);
@@ -69,6 +81,7 @@ export class AbilityFx implements RunView {
     this.bolts.write(now);
     this.projectiles.update(run, alpha, dt);
     this.bubbles.update(run, alpha, now);
+    this.pillars.write(now);
   }
 
   dispose(): void {
@@ -78,6 +91,7 @@ export class AbilityFx implements RunView {
     this.bolts.dispose();
     this.projectiles.dispose();
     this.bubbles.dispose();
+    this.pillars.dispose();
   }
 
   /** A new run starts with no effects. */
@@ -88,6 +102,22 @@ export class AbilityFx implements RunView {
     this.rings.reset();
     this.blasts.reset();
     this.bolts.reset();
+    this.pillars.reset();
+  }
+
+  /** A chain leaps from the last point of its bolt; an instant strikes from above; any other blast pops. */
+  private onBlast(run: Run, event: number, now: number, x: number, z: number): void {
+    const slot = run.events.a[event]!;
+    const kind = slot >= 0 ? run.abilities[slot]?.def.kind : undefined;
+    if (kind === "chain") {
+      this.bolts.add(now, this.chainX[slot] ?? x, this.chainZ[slot] ?? z, x, z, CHAIN_BOLT_COLOR, CHAIN_BOLT_LIFE);
+      this.chainX[slot] = x;
+      this.chainZ[slot] = z;
+    } else if (kind === "instant") {
+      this.pillars.add(now, x, z, SMITE_WIDTH);
+    } else {
+      this.blasts.add(now, x, z, 2 * run.events.value[event]! * SCENE_SCALE);
+    }
   }
 
   private onCast(run: Run, event: number, now: number, x: number, z: number): void {
@@ -103,6 +133,12 @@ export class AbilityFx implements RunView {
       case "area":
         this.rings.addRing(now, x, z, radius, AREA_COLOR, true);
         break;
+      case "chain": {
+        const slot = events.a[event]!;
+        this.chainX[slot] = x;
+        this.chainZ[slot] = z;
+        break;
+      }
     }
   }
 
