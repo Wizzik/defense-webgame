@@ -1,8 +1,8 @@
 # Status
 
-Updated 2026-11-18 (chest loot, Magic Find and enemy threat are built on branch `chest-loot`, PR open, waits for Petr's playtest and merge; the shared-spells spec still waits for his approval on branch `shared-spells`). Read this first when you resume work.
+Updated 2026-11-18 (chest loot, Magic Find and enemy threat are built on branch `chest-loot`, PR #15 open, waits for Petr's playtest and merge; the shared-spells spec still waits for his approval on branch `shared-spells`). Read this first when you resume work.
 
-## Chest loot, Magic Find and enemy threat: built (2026-11-18), PR against `main` waits for Petr (branch `chest-loot`)
+## Chest loot, Magic Find and enemy threat: built (2026-11-18), PR #15 against `main` waits for Petr (branch `chest-loot`)
 
 - All 7 tasks of `docs/superpowers/plans/2026-11-18-chest-loot-threat.md` are done (executed inline in one chat, one final self-review: the chat could not start a separate reviewer). `npm run check` and the build pass; the e2e project `webgl2-fallback` passed 30 of 30 after Task 5 and 29 of 30 at the end ("pack arrows point at a new pack" ran out of its 5 s on this container's ~2.5 fps software rendering, the same timing on `main`; CI decides). Numbers, rulings and the win table: `docs/DECISIONS.md`, section Chest loot, Magic Find and enemy threat.
 - What it brings:
