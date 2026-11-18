@@ -1,13 +1,14 @@
 # Status
 
-Updated 2026-11-18 (the spec for chest loot, Magic Find and enemy threat waits for Petr's approval on branch `chest-loot`; it comes before shared spells, whose spec also waits on branch `shared-spells`). Read this first when you resume work.
+Updated 2026-11-18 (Petr approved the spec for chest loot, Magic Find and enemy threat; its plan is written on branch `chest-loot` and the next chat executes it. The shared-spells spec still waits for his approval on branch `shared-spells`). Read this first when you resume work.
 
-## Chest loot, Magic Find and enemy threat: spec written, waits for Petr's approval (branch `chest-loot`, 2026-11-18)
+## Chest loot, Magic Find and enemy threat: plan written (2026-11-18), next: execute it (branch `chest-loot`)
 
 - Petr's wishes (2026-11-18): chests much stronger so collecting them makes sense (closes "Open for Petr 2 (chest power)" below); enemy damage on the hero +100 % (running away was too safe), the castle unchanged; melee heroes (Stonehorn, Redcleaver) take 25 % less; chest rarity rolls at random (a chest offers 3 items with rolled rarities); a new item stat Magic Find raises the odds of better rarities from chests and boss drops.
-- Spec: `docs/superpowers/specs/2026-11-18-chest-loot-threat-design.md` (also `claude/specs/` in the project). A builder check ran; its three points are settled in the spec as Claude's calls.
+- Spec: `docs/superpowers/specs/2026-11-18-chest-loot-threat-design.md` (also `claude/specs/` in the project). A builder check ran; its three points are settled in the spec as Claude's calls. **Approved by Petr on 2026-11-18 without changes.**
+- Plan: `docs/superpowers/plans/2026-11-18-chest-loot-threat.md` (also `claude/plans/` in the project), 7 tasks: hero damage x2 and melee 0.75; the Magic Find stat on 10 items; Magic Find for boss drops; chest cards with a rolled rarity (sim and autopilot); chest cards in the UI; `npm run sim:chests` and tuning of the rarity weights (`rules.gear.chestLevelStep` only if the weights cannot reach +45 %); balance, docs and the PR.
 - Order: this plan first, then shared spells and passives (their win band 6-12 of 20 is tuned against the state after this plan).
-- Next: Petr approves the spec, then a new chat writes the plan.
+- Next: a new chat executes the plan (native execution with one final review was recommended: 7 tasks that build on each other's interfaces). `data:build` needs the map export (Environment notes).
 
 ## Shared spells and passives: design written, waits for Petr's approval (branch `shared-spells`, 2026-11-18)
 
