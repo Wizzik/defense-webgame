@@ -1,20 +1,25 @@
 # Status
 
-Updated 2026-11-18 (the spec for chest loot, Magic Find and enemy threat waits for Petr's approval on branch `chest-loot`; it comes before shared spells). Read this first when you resume work.
+Updated 2026-11-18 (the spec for chest loot, Magic Find and enemy threat waits for Petr's approval on branch `chest-loot`; it comes before shared spells, whose spec also waits on branch `shared-spells`). Read this first when you resume work.
 
 ## Chest loot, Magic Find and enemy threat: spec written, waits for Petr's approval (branch `chest-loot`, 2026-11-18)
 
-- Petr's wishes (2026-11-18): chests much stronger so collecting them makes sense; enemy damage on the hero +100 % (running away was too safe); melee heroes (Stonehorn, Redcleaver) take 25 % less; chest rarity rolls at random; a new item stat Magic Find raises the odds of rare and better rarities from chests and boss drops.
+- Petr's wishes (2026-11-18): chests much stronger so collecting them makes sense (closes "Open for Petr 2 (chest power)" below); enemy damage on the hero +100 % (running away was too safe), the castle unchanged; melee heroes (Stonehorn, Redcleaver) take 25 % less; chest rarity rolls at random (a chest offers 3 items with rolled rarities); a new item stat Magic Find raises the odds of better rarities from chests and boss drops.
 - Spec: `docs/superpowers/specs/2026-11-18-chest-loot-threat-design.md` (also `claude/specs/` in the project). A builder check ran; its three points are settled in the spec as Claude's calls.
-- Order: this plan first, then shared spells and passives (their win band is tuned against the state after this plan).
+- Order: this plan first, then shared spells and passives (their win band 6-12 of 20 is tuned against the state after this plan).
 - Next: Petr approves the spec, then a new chat writes the plan.
 
-## Sparkshot multishot: PR open (branch `sparkshot-multishot`, 2026-11-18)
+## Shared spells and passives: design written, waits for Petr's approval (branch `shared-spells`, 2026-11-18)
+
+- Spec: `docs/superpowers/specs/2026-11-18-shared-spells-passives-design.md` (also `claude/specs/` in the project). Six new slots (2 shared spells from a pool of 10, 4 passives from 6), card groups with weights, new kinds `chain` and `instant`, the autopilot's card order, balance band 6-12 of 20. Petr said "go" without further questions, so section 4 holds Claude's calls; a builder check ran and its answers are in section 4.8.
+- Next: Petr approves (or changes) the spec, then a new chat writes the plan.
+
+## Sparkshot multishot: merged (PR #14, 2026-11-18)
 
 - Petr's wish (2026-11-18): Searing Rounds shoots more enemies. Each base attack also hits 1, 1, 2, 2, 3 other enemies in reach (by the spell's level); the split shots deal the base attack without the burn. Rule and numbers: `docs/DECISIONS.md`, section Sparkshot multishot.
 - Autopilot wins of the Sparkshot: 0 -> 10 of 20 (seeds 21-40: 1 -> 13). The other heroes are unchanged.
 - What Petr checks in the playtest: does it feel like a multishot (the bolts), is the Sparkshot fun now, does it die too often (below 50 % hp in 19 of 20 autopilot runs).
-- Next after the merge: the design of shared spells and passives (spec section 3.8: about 10 shared spells, 6 passives, later evolutions). Petr said "go" on 2026-11-18; they fill the cards after the kit is full (phases 7-20 offer only attributes now).
+- Merged as `cd54f2e`, Pages deployed. The PR also fixed the e2e test of the gear panel: a level-up offer can open right after a chest pick (it failed once on software WebGPU in CI).
 
 ## Gear, boss drops and chests: merged (PR #12 into `elite-boss-threat`, PR #13 into `main`, 2026-11-13); waits for Petr's playtest
 
