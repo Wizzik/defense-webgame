@@ -133,7 +133,10 @@ export class GearScreen {
   /** The hero at level 1 with the doll on: a scratch run gives exactly the numbers a run starts with. */
   private totals(): DollTotals {
     const { hero } = createRun(this.data, { seed: 0, hero: this.heroId, loadout: this.gear.loadout(this.heroId) });
-    return { ...hero.stats, str: hero.str + hero.gear.str, agi: hero.agi + hero.gear.agi, int: hero.int + hero.gear.int };
+    return {
+      ...hero.stats, str: hero.str + hero.gear.str, agi: hero.agi + hero.gear.agi, int: hero.int + hero.gear.int,
+      magicFind: hero.gear.magicFind,
+    };
   }
 
   private render(): void {

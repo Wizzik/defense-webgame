@@ -1,8 +1,9 @@
 import { ULTIMATE_SLOT } from "../../sim";
-import type { Card, CardOffer, ChestOffer, Run } from "../../sim";
+import type { Card, CardOffer, ChestCard, ChestOffer, Run } from "../../sim";
 import { cardLines } from "./card-lines";
 import { chestLines } from "./chest-lines";
 import { el } from "./dom";
+import { iconSvg } from "./item-icons";
 import { type Lang, type MessageKey, t } from "./i18n";
 
 const ATTRIBUTE_KEYS: Record<"str" | "agi" | "int", MessageKey> = {
@@ -53,19 +54,23 @@ export class Cards {
     this.title.textContent = t(lang, chest ? "chest.title" : "cards.title");
     this.hint.textContent = t(lang, "cards.keys");
     this.row.replaceChildren();
-    if (chest) chest.cards.forEach((card, i) => this.row.appendChild(this.renderChest(run, card.slot, i, lang)));
+    if (chest) chest.cards.forEach((card, i) => this.row.appendChild(this.renderChest(run, card, i, lang)));
     else if (run.offer) run.offer.cards.forEach((card, i) => this.row.appendChild(this.render(run, card, i, lang)));
   }
 
-  /** A chest card: the item, its slot, the level change and the stat rows. */
-  private renderChest(run: Run, slot: number, index: number, lang: Lang): HTMLElement {
-    const info = chestLines(lang, run.data, run.gear, slot);
+  /** A chest card: the slot's glyph, the item in its rarity colour, the rarity, what the pick does and the stat rows. */
+  private renderChest(run: Run, card: ChestCard, index: number, lang: Lang): HTMLElement {
+    const info = chestLines(lang, run.data, run.gear, card);
     const button = el("button", `card chest rarity-${info.rarity}`);
     el("span", "card-key", button, String(index + 1));
     el("span", "card-badge", button, info.slot);
-    el("span", "card-name", button, info.title);
-    el("span", "card-desc", button, info.from === 0 ? t(lang, "chest.new") : t(lang, "chest.level", { from: info.from, to: info.to }));
-    for (const line of info.lines) el("span", "card-line item-line", button, line);
+    const head = el("span", "chest-head", button);
+    const glyph = el("span", "chest-glyph", head);
+    glyph.innerHTML = iconSvg(info.slotType);
+    el("span", "card-name", head, info.title);
+    el("span", "chest-rarity", button, info.rarityName);
+    el("span", "card-desc", button, info.action);
+    for (const line of info.lines) el("span", `card-line item-line tooltip-line ${line.tone}`, button, line.text);
     button.addEventListener("click", () => this.pick(index));
     return button;
   }

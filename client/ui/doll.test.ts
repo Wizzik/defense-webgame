@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { Item } from "../../data/schema";
+import { createRun } from "../../sim";
 import { gameData } from "../../sim/testing/game-data";
+import { totalTexts } from "./doll";
 import { iconSvg } from "./item-icons";
 import { tooltipLines } from "./item-tooltip";
 
@@ -87,5 +89,16 @@ describe("item icons", () => {
       expect(glyph).toContain("currentColor");
     }
     expect(new Set(glyphs).size).toBe(14);
+  });
+});
+
+describe("doll totals", () => {
+  it("shows the stats rounded and magic find in percent", () => {
+    const totals = { ...createRun(gameData(), { seed: 1 }).hero.stats, str: 20.4, agi: 11.6, int: 9, magicFind: 0.12 };
+    totals.maxHp = 640.4;
+    totals.armor = 3.26;
+    expect(totalTexts(totals)).toEqual({ str: "20", agi: "12", int: "9", hp: "640", armor: "3.3", magicFind: "12 %" });
+    expect(totalTexts({ ...totals, magicFind: 0 }).magicFind).toBe("0 %");
+    expect(totalTexts({ ...totals, magicFind: 0.1725 }).magicFind).toBe("17.3 %");
   });
 });

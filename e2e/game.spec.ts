@@ -28,6 +28,10 @@ const enemyIds = enemies.filter((e) => !e.boss).map((e) => e.id);
 const heroIds = (
   JSON.parse(readFileSync(join(import.meta.dirname, "..", "data", "generated", "heroes.json"), "utf8")) as { id: string }[]
 ).map((h) => h.id);
+/** The item catalogue, for names and rarities of chest cards. */
+const ITEMS = JSON.parse(readFileSync(join(import.meta.dirname, "..", "data", "generated", "items.json"), "utf8")) as {
+  id: string; rarity: string; name: { en: string; cs: string };
+}[];
 
 type Screen = GameSnapshot["screen"];
 
@@ -495,7 +499,7 @@ test("a slam shows a ring and hides it after the hit", async ({ page }, testInfo
   expect(await page.evaluate(() => window.__game!.render.slamRings)).toBe(0);
 });
 
-test("a chest takes gold and offers three gear slots; the pick lands in the gear", async ({ page }, testInfo) => {
+test("a chest takes gold and offers three rolled items; the pick lands in the gear", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&debug=1&lang=cs");
   await page.locator("#start").click();
   await waitForScreen(page, "playing");
@@ -513,7 +517,14 @@ test("a chest takes gold and offers three gear slots; the pick lands in the gear
   });
   await waitForScreen(page, "chest");
   await expect(page.locator("button.card")).toHaveCount(3);
-  await expect(page.locator(".cards-title")).toHaveText("Truhla: vyber, co vylepšíš");
+  await expect(page.locator(".cards-title")).toHaveText("Truhla: vyber si kořist");
+  const cards = await page.evaluate(() => window.__game!.chestCards);
+  expect(cards).toHaveLength(3);
+  expect(cards!.every((card) => card.action === "new")).toBe(true);
+  const first = ITEMS.find((item) => item.id === cards![0]!.item)!;
+  expect(first.rarity).toBe(cards![0]!.rarity);
+  await expect(page.locator("button.card").first().locator(".card-name")).toHaveText(first.name.cs);
+  await expect(page.locator("button.card").first()).toHaveClass(new RegExp(`rarity-${first.rarity}`));
   await expect(page.locator("#hud-gold")).toContainText("800");
   await testInfo.attach(`chest-${testInfo.project.name}`, {
     body: await page.screenshot({ type: "png" }),
@@ -530,7 +541,8 @@ test("a chest takes gold and offers three gear slots; the pick lands in the gear
   expect(after.gold).toBeLessThan(1000);
   expect(after.price).toBe(224);
   expect(after.worn).toHaveLength(1);
-  expect(after.worn[0]).toMatchObject({ base: 0, temp: 1 });
+  expect(after.worn[0]).toMatchObject({ item: cards![0]!.item, base: 0, temp: 1 });
+  expect(await page.evaluate(() => window.__game!.chestCards)).toBeNull();
 });
 
 test("C opens the gear panel and pauses the run; C closes it; C does nothing under the cards", async ({ page }, testInfo) => {
