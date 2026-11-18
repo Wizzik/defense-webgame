@@ -2,6 +2,12 @@
 
 Updated 2026-11-18 evening (shared spells and passives are merged: PR #16 as `d66d9a0`, Pages deployed; it and chest loot and threat (PR #15) wait for Petr's playtest on the live game). Read this first when you resume work.
 
+## Spell scaling, multishot on every arrow, chest compare: spec waits for Petr's approval (branch `spell-scaling`, 2026-11-19)
+
+- Petr's playtest of PR #15 and #16 (2026-11-19): spell scaling far too strong (the Serpent Shaman, but globally); Searing Rounds gives its bonus to one arrow only, every arrow should get it (extra arrows stay 1, 1, 2, 2, 3); swapping an item from a chest is unreadable, he wants both items' stats side by side and to keep or take.
+- Petr chose direction A: tame the spell curves (growth from level 1 raised to an exponent, start 0.5) and Int's spell power (0.01 -> 0.005 per point), enemies unchanged. Spec: `docs/superpowers/specs/2026-11-19-spell-scaling-chest-compare-design.md` (also `claude/specs/` in the project).
+- Next: Petr approves (or changes) the spec, then a new chat writes the plan on branch `spell-scaling`.
+
 ## Chest loot, Magic Find and enemy threat: merged (PR #15 as `dd88ff5`, 2026-11-18); waits for Petr's playtest
 
 - All 7 tasks of `docs/superpowers/plans/2026-11-18-chest-loot-threat.md` are done (executed inline in one chat, one final self-review: the chat could not start a separate reviewer). `npm run check` and the build pass; the e2e project `webgl2-fallback` passed 30 of 30 after Task 5 and 29 of 30 at the end ("pack arrows point at a new pack" ran out of its 5 s on this container's ~2.5 fps software rendering, the same timing on `main`; CI decides). Numbers, rulings and the win table: `docs/DECISIONS.md`, section Chest loot, Magic Find and enemy threat.
