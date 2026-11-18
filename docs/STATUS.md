@@ -1,19 +1,31 @@
 # Status
 
-Updated 2026-11-18 (Petr approved the spec for chest loot, Magic Find and enemy threat; its plan is written on branch `chest-loot` and the next chat executes it. The shared-spells spec still waits for his approval on branch `shared-spells`). Read this first when you resume work.
+Updated 2026-11-18 (chest loot, Magic Find and enemy threat are built on branch `chest-loot`, PR open, waits for Petr's playtest and merge; the shared-spells spec still waits for his approval on branch `shared-spells`). Read this first when you resume work.
 
-## Chest loot, Magic Find and enemy threat: plan written (2026-11-18), next: execute it (branch `chest-loot`)
+## Chest loot, Magic Find and enemy threat: built (2026-11-18), PR against `main` waits for Petr (branch `chest-loot`)
 
-- Petr's wishes (2026-11-18): chests much stronger so collecting them makes sense (closes "Open for Petr 2 (chest power)" below); enemy damage on the hero +100 % (running away was too safe), the castle unchanged; melee heroes (Stonehorn, Redcleaver) take 25 % less; chest rarity rolls at random (a chest offers 3 items with rolled rarities); a new item stat Magic Find raises the odds of better rarities from chests and boss drops.
-- Spec: `docs/superpowers/specs/2026-11-18-chest-loot-threat-design.md` (also `claude/specs/` in the project). A builder check ran; its three points are settled in the spec as Claude's calls. **Approved by Petr on 2026-11-18 without changes.**
-- Plan: `docs/superpowers/plans/2026-11-18-chest-loot-threat.md` (also `claude/plans/` in the project), 7 tasks: hero damage x2 and melee 0.75; the Magic Find stat on 10 items; Magic Find for boss drops; chest cards with a rolled rarity (sim and autopilot); chest cards in the UI; `npm run sim:chests` and tuning of the rarity weights (`rules.gear.chestLevelStep` only if the weights cannot reach +45 %); balance, docs and the PR.
-- Order: this plan first, then shared spells and passives (their win band 6-12 of 20 is tuned against the state after this plan).
-- Next: a new chat executes the plan (native execution with one final review was recommended: 7 tasks that build on each other's interfaces). `data:build` needs the map export (Environment notes).
+- All 7 tasks of `docs/superpowers/plans/2026-11-18-chest-loot-threat.md` are done (executed inline in one chat, one final self-review: the chat could not start a separate reviewer). `npm run check` and the build pass; the e2e project `webgl2-fallback` passed 30 of 30 after Task 5 and 29 of 30 at the end ("pack arrows point at a new pack" ran out of its 5 s on this container's ~2.5 fps software rendering, the same timing on `main`; CI decides). Numbers, rulings and the win table: `docs/DECISIONS.md`, section Chest loot, Magic Find and enemy threat.
+- What it brings:
+  - enemies hit the hero twice as hard; Stonehorn and Redcleaver take a quarter less (x1.5); the castle as before;
+  - a chest offers 3 rolled items in all five rarities (glyph, name in the rarity colour, rarity, "new for this run" / "replaces X for this run" / "level 3 -> 4", stat rows compared with the worn item); a higher rarity replaces the worn item for the run, the permanent item comes back after the run;
+  - a new stat Magic Find on 10 items (rings, necks, trinkets, a belt): raises the odds of better rarities in chests and boss drops, with diminishing returns; shown in tooltips and in the totals under the doll (gear screen and panel C);
+  - a legendary or mythic from a chest is named on the news line in its colour;
+  - chest levels count 0.25 each (permanent levels 0.15), also the first level of an item a chest gave; `npm run sim:chests` measures chest power: 15 chests give a bare level-25 hero x1.46 (hp 1.44, attack 1.48, spells 1.45).
+- What Petr checks in the playtest:
+  - do chests feel worth the walk now, and do the cards and rarities read (colours, the replace line);
+  - does a mistake hurt now: running away should no longer be safe; is x2 too much early (the autopilot dies at 2-4 minutes, before the first miniboss);
+  - the news line for a legendary or mythic from a chest;
+  - Magic Find: is the stat clear in tooltips and under the doll.
+- Quick links (with `debug=1` the collection starts empty and nothing is stored): https://wizzik.github.io/defense-webgame/?debug=1 after the merge; in the console `__game.debug.grantGold(5000)`, then walk to a chest; `__game.chestCards` lists the offer; `__game.debug.grantItem("seal-of-the-archivist", 5)` for Magic Find.
+- **Open for Petr (wins without gear):** five heroes win 0 or 1 of 20 on both seed sets: Stonehorn, Nightglaive, Mistwarden, Sparkshot, Tidecaller (table in `docs/DECISIONS.md`). Not tuned here (spec 5.2); the shared-spells plan tunes kits to 6-12 of 20 against this state. Gravecaller still wins 20 of 20. With a rare item in every slot wins fell less (e.g. Nightglaive 18 -> 4, Sparkshot 10 -> 19); full gear wins everything.
+- **Open for Petr (rulings):** chest levels count also the first level of a chest item (the plan's formula would have needed a step of about 1.25); weights common 25, rare 30, epic 37, legendary 6, mythic 2. Both are his to change in `design/rules.yaml`.
+- Minor notes from the final review (not fixed): `basicItemIndex` is no longer used by the game; two cards of one offer can show the same ring or trinket; the debug snapshot caches `chestCards` per offer.
+- Next: Petr plays the PR (or the live game after the merge) and merges it; then a new chat writes the plan for shared spells and passives (their spec waits for his approval).
 
 ## Shared spells and passives: design written, waits for Petr's approval (branch `shared-spells`, 2026-11-18)
 
 - Spec: `docs/superpowers/specs/2026-11-18-shared-spells-passives-design.md` (also `claude/specs/` in the project). Six new slots (2 shared spells from a pool of 10, 4 passives from 6), card groups with weights, new kinds `chain` and `instant`, the autopilot's card order, balance band 6-12 of 20. Petr said "go" without further questions, so section 4 holds Claude's calls; a builder check ran and its answers are in section 4.8.
-- Next: Petr approves (or changes) the spec, then a new chat writes the plan (after the chest-loot plan is merged).
+- Next: Petr approves (or changes) the spec, then a new chat writes the plan (after the chest-loot PR is merged; its band of 6-12 wins is tuned against the state after it, see the open point above).
 
 ## Sparkshot multishot: merged (PR #14, 2026-11-18)
 
