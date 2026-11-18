@@ -1,6 +1,13 @@
 # Status
 
-Updated 2026-11-18 (Sparkshot multishot PR open; next: the design of shared spells and passives). Read this first when you resume work.
+Updated 2026-11-18 (the spec for chest loot, Magic Find and enemy threat waits for Petr's approval on branch `chest-loot`; it comes before shared spells). Read this first when you resume work.
+
+## Chest loot, Magic Find and enemy threat: spec written, waits for Petr's approval (branch `chest-loot`, 2026-11-18)
+
+- Petr's wishes (2026-11-18): chests much stronger so collecting them makes sense; enemy damage on the hero +100 % (running away was too safe); melee heroes (Stonehorn, Redcleaver) take 25 % less; chest rarity rolls at random; a new item stat Magic Find raises the odds of rare and better rarities from chests and boss drops.
+- Spec: `docs/superpowers/specs/2026-11-18-chest-loot-threat-design.md` (also `claude/specs/` in the project). A builder check ran; its three points are settled in the spec as Claude's calls.
+- Order: this plan first, then shared spells and passives (their win band is tuned against the state after this plan).
+- Next: Petr approves the spec, then a new chat writes the plan.
 
 ## Sparkshot multishot: PR open (branch `sparkshot-multishot`, 2026-11-18)
 
