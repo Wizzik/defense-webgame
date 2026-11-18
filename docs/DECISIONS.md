@@ -2,6 +2,13 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Sparkshot multishot (2026-11-18; Petr asked for multishot on Searing Rounds, the numbers are Claude's)
+
+- **Rule.** An `on_hit` spell may carry `extraTargets` (per level). The hero's base attack then also shoots that many other enemies in attack reach, nearest first (equal distance: lower slot; at most 8, `sim/hero-multishot.ts`). A split shot rolls its own base damage against its target's armor and carries the main shot's stun; the on_hit bonus damage, an empowered hit and the gear effects (splash, chain) stay with the main shot. The client draws every shot as a bolt (one `Hit` event of source 0 each).
+- **Searing Rounds:** 1, 1, 2, 2, 3 extra targets.
+- **Why the burn stays on the main shot.** Autopilot wins of 20 (seeds 1-20, before 0): split shots with the full burn and 1, 1, 2, 2, 3 targets 17 (21-40: 16); with the full burn and 1 target on every level 12; with half the burn and 1, 1, 2, 2, 3 targets 16; without the burn and 1, 1, 2, 2, 3 targets **10 (21-40: 13)**, chosen: it reads as a real multishot (four shots at level 5) and lands in the band of the other heroes. The hero drops below 50 % hp in 19 of 20 runs (5 with the full burn), so the Sparkshot is now a hero who wins by killing fast and has to watch its health.
+- The other heroes are unchanged: none of their spells has `extraTargets`, so their runs draw the same random numbers as before.
+
 ## Gear, drops and chests (2026-11-13; Petr chose the design, the numbers and the catalogue are Claude's)
 
 Spec: `docs/superpowers/specs/2026-11-13-items-gear-chests-design.md` (its section 12 lists what the build made precise). Plan: `docs/superpowers/plans/2026-11-13-items-gear-chests.md`.

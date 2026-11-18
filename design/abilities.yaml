@@ -353,11 +353,16 @@
 - id: searing-rounds
   source: A06M
   name: { en: Searing Rounds, cs: Žhavé náboje }
-  description: { en: "Every shot burns for extra damage.", cs: "Každý výstřel pálí a dává poškození navíc." }
+  description:
+    en: "Every shot burns for extra damage and splits off shots at more enemies in range."
+    cs: "Každý výstřel pálí a dává poškození navíc a odštěpí střely na další nepřátele v dosahu."
   kind: on_hit
   targeting: on_attack
   params:
     bonusDamage: DataA
+    # Petr's wish of 2026-11-18 (multishot); the map's spell has no extra targets. Design values: split shots
+    # deal the base attack without the burn (sim/hero-multishot.ts, docs/DECISIONS.md).
+    extraTargets: { design: [1, 1, 2, 2, 3] }
 
 - id: quickstep
   source: A06N

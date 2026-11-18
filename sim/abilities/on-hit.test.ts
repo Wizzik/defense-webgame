@@ -86,6 +86,50 @@ describe("on_hit empowered strike", () => {
   });
 });
 
+describe("on_hit extra targets", () => {
+  const five = (n: number) => [n, n, n, n, n];
+
+  it("a base attack also hits the nearest other enemies in reach; only the main shot gets the bonus", () => {
+    const { data, run, enemy } = bonusRun({ bonusDamage: five(300), extraTargets: five(2) });
+    const second = addEnemy(run, -45, 0);
+    const third = addEnemy(run, 0, 50);
+    const fourth = addEnemy(run, 0, -55);
+    const far = addEnemy(run, 3000, 0);
+    const k = 1 - armorReduction(data.enemies[0].armor, data.constants.defenseArmor);
+    nextAttack(run);
+    const hits = attackHits(run);
+    expect(hits.map((h) => run.events.a[h])).toEqual([enemy, second, third]);
+    const stats = run.hero.stats;
+    expect(run.events.value[hits[0]!]!).toBeGreaterThanOrEqual((Math.round(stats.damageMin) + 300) * k - 1e-9);
+    for (const h of hits.slice(1)) {
+      expect(run.events.value[h]!).toBeGreaterThanOrEqual(Math.round(stats.damageMin) * k - 1e-9);
+      expect(run.events.value[h]!).toBeLessThanOrEqual(Math.round(stats.damageMax) * k + 1e-9);
+    }
+    expect(hits.map((h) => run.events.a[h])).not.toContain(fourth);
+    expect(hits.map((h) => run.events.a[h])).not.toContain(far);
+  });
+
+  it("with fewer enemies in reach it hits only those", () => {
+    const { run, enemy } = bonusRun({ bonusDamage: five(0), extraTargets: five(3) });
+    const second = addEnemy(run, -45, 0);
+    nextAttack(run);
+    expect(attackHits(run).map((h) => run.events.a[h])).toEqual([enemy, second]);
+  });
+
+  it("an unlearned slot adds no targets", () => {
+    const data = quietData();
+    const ab = data.abilities.find((a) => a.id === "enhanced-totem");
+    if (!ab || ab.kind !== "on_hit") throw new Error("test setup");
+    ab.params = { bonusDamage: five(0), extraTargets: five(3) };
+    const run = abilityRun("stonehorn", {}, data);
+    addEnemy(run, 40, 0);
+    addEnemy(run, -45, 0);
+    expect(attackHits(run).length).toBe(0);
+    nextAttack(run);
+    expect(attackHits(run).length).toBe(1);
+  });
+});
+
 /** A Stonehorn whose totem is rewritten to the given on_hit params (level 1 learned), with an enemy in reach. */
 function bonusRun(params: Record<string, number[]>) {
   const data = quietData();

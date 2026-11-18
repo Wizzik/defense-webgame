@@ -61,6 +61,7 @@ export const messagesEn = {
   "stat.healPerHit": "Heal per hit",
   "stat.empower": "Empowered hit",
   "stat.bonusDamage": "Bonus damage",
+  "stat.extraTargets": "Extra targets",
   "stat.chance": "Chance",
   "stat.maxAlive": "Max totems",
   "stat.maxTargets": "Max targets",
