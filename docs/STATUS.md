@@ -36,7 +36,7 @@ Updated 2026-11-18 (Petr approved the spec for chest loot, Magic Find and enemy 
   - the gear is stored in the browser (IndexedDB), never with `?debug=1`.
 - What Petr checks in the playtest:
   - chests: is the price curve right (200, 224, 251, ...; about 12 to 16 chests in a won run), is a chest worth the walk, do the chest and its price read on the ground;
-  - **chests are weak on purpose for now:** 16 chests give a hero without gear about +10 % (the spec wanted +50 % at the end of a run); stronger chests made the run without gear easier at once. Stronger chests, or keep them and make gear the main source of power?
+  - **chests are weak on purpose for now:** 16 chests give a hero without gear about +10 % (the spec wanted +50 % at the end of a run); stronger chests made the run without gear easier at once. Stronger chests, or keep them and make gear the main source of power? (Answered 2026-11-18: stronger chests, see the chest-loot spec at the top.)
   - the gear screen: readability, the icons (own simple glyphs), the doll (one blue-grey figure for every hero), the tooltip;
   - the names of the 70 items (EN and CS) and the texts of the eight effects;
   - how strong gear feels: a rare item in every slot already wins most autopilot runs; the best gear at level 5 is about 2x hp, attack and spells at hero level 25.
@@ -44,7 +44,7 @@ Updated 2026-11-18 (Petr approved the spec for chest loot, Magic Find and enemy 
   - https://wizzik.github.io/defense-webgame/?debug=1&phase=6 : first miniboss at once; kill it for a drop, or `window.__game.debug.killBoss()` in the console;
   - console helpers: `__game.debug.grantGold(2000)`, `__game.debug.grantItem("skysplitter", 5)` (ids are in `design/items.yaml`), `__game.debug.clearGear()`.
 - **Open for Petr 1 (balance without gear):** with chests the autopilot wins about as before for six heroes; Nightglaive swings (2 and 9 of 20 on the two seed sets, 8 and 4 before) and the Tidecaller gains (7 and 5, before 2 and 3). Sparkshot still won none without gear (closed by the multishot, 2026-11-18).
-- **Open for Petr 2 (chest power):** see above.
+- **Open for Petr 2 (chest power):** answered by the chest-loot spec (2026-11-18).
 - Left from the final review as minor notes (not fixed): the drop rides on the event buffer (a full buffer of 1024 events would lose it); stored data of another version loads as empty and the first drop overwrites it; a write that fails later in a session turns saving off without a word; the export revokes its link right after the click; pack arrows hide while a chest slot is chosen; the gear screen builds a whole run for the totals on every click; a chest's fallback place skips the spacing check; a chest can put the same common ring into both ring slots.
 - Later, not in this plan: difficulties as a combination of another environment and a chosen difficulty (Petr, 2026-11-12); they are meant to take up the power of gear.
 
