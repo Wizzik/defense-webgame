@@ -361,6 +361,44 @@ test("R casts the ultimate and T switches auto", async ({ page }) => {
   await page.waitForFunction(() => (window.__game?.abilityCooldowns[3] ?? 0) > 0, undefined, { timeout: 10_000 });
 });
 
+test("a new run has ten slots; a shared spell and a passive learned by debug show in the HUD and the spell casts", async ({ page }, testInfo) => {
+  await page.goto("/?seed=1&hero=stonehorn&debug=1&lang=en");
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  const ids = await page.evaluate(() => window.__game!.abilityIds.slice());
+  expect(ids).toHaveLength(10);
+  expect(ids.slice(4)).toEqual(["", "", "", "", "", ""]);
+  expect(await page.evaluate(() => window.__game!.abilityLevels.slice(4))).toEqual([0, 0, 0, 0, 0, 0]);
+  await expect(page.locator('.cell[data-slot="4"]')).toContainText("Empty slot");
+  await expect(page.locator(".passive-cell.empty")).toHaveCount(4);
+
+  await page.evaluate(() => {
+    window.__game!.debug!.learn(4, "arc-lightning");
+    window.__game!.debug!.learn(6, "might");
+    window.__game!.debug!.spawnEach();
+  });
+  await page.waitForFunction(() => window.__game?.abilityIds[4] === "arc-lightning" && window.__game?.abilityIds[6] === "might");
+  await expect(page.locator('.cell[data-slot="4"]')).toContainText("Arc Lightning");
+  await expect(page.locator('.passive-cell[data-slot="6"]:not(.empty) svg')).toHaveCount(1);
+  await expect(page.locator(".passive-cell.empty")).toHaveCount(3);
+  // the spell casts on its own once an enemy comes in range
+  await page.waitForFunction(() => (window.__game?.abilityCooldowns[4] ?? 0) > 0, undefined, { timeout: 15_000, polling: 50 });
+  await testInfo.attach(`shared-spells-${testInfo.project.name}`, {
+    body: await page.screenshot({ type: "png" }),
+    contentType: "image/png",
+  });
+  // the rules refuse a passive in a spell slot
+  const error = await page.evaluate(() => {
+    try {
+      window.__game!.debug!.learn(5, "haste");
+      return "";
+    } catch (e) {
+      return (e as Error).message;
+    }
+  });
+  expect(error).toContain("cannot hold");
+});
+
 test("Space dashes", async ({ page }) => {
   await page.goto("/?seed=1&lang=en");
   await page.locator("#start").click(); // the Start button hides; keyboard focus then falls back to the page, so Space reaches the game

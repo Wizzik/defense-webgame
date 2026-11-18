@@ -247,12 +247,74 @@
 }
 .hud-abilities {
   position: absolute;
-  bottom: 18px;
+  bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  max-width: 98vw;
+}
+.hud-ability-row {
+  display: flex;
   gap: 8px;
   max-width: 98vw;
+}
+.hud-passive-row {
+  display: flex;
+  gap: 6px;
+}
+.passive-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  box-sizing: border-box;
+  color: #a9c3e0;
+  background: linear-gradient(160deg, rgba(30, 44, 68, 0.92), rgba(16, 22, 34, 0.92));
+  border: 2px solid #46607f;
+  border-radius: 7px;
+}
+.passive-cell.empty {
+  background: rgba(18, 22, 27, 0.55);
+  border: 2px dashed rgba(154, 167, 180, 0.35);
+}
+.passive-icon {
+  display: flex;
+  width: 22px;
+  height: 22px;
+}
+.passive-icon svg,
+.card-new svg {
+  width: 100%;
+  height: 100%;
+}
+.passive-level {
+  position: absolute;
+  right: -5px;
+  bottom: -6px;
+  min-width: 14px;
+  padding: 0 3px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+  color: #0c1522;
+  background: #8fb3d9;
+  border-radius: 4px;
+}
+.passive-cell.empty .passive-level {
+  display: none;
+}
+.cell.shared {
+  border-color: #46607f;
+  background: linear-gradient(160deg, rgba(30, 44, 68, 0.9), rgba(18, 22, 27, 0.9));
+}
+.cell.empty {
+  border-style: dashed;
 }
 .cell {
   position: relative;
@@ -469,6 +531,21 @@
 }
 .card-name {
   overflow-wrap: anywhere;
+}
+.card.learn {
+  border-color: #5f86b3;
+}
+.card-badge.card-new {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #a9c8ec;
+  border-color: #5f86b3;
+  background: rgba(30, 44, 68, 0.9);
+}
+.card-new svg {
+  width: 18px;
+  height: 18px;
 }
 .card-line {
   display: flex;

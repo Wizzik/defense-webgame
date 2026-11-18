@@ -1,7 +1,8 @@
 import type { GearSession } from "./gear-session";
 import type { Rarity } from "../../data/schema";
 import {
-  type ChestOffer, chestPrice, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, killEnemy, type Run,
+  type ChestOffer, chestPrice, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, killEnemy, learnAbility,
+  type Run,
   SLOT_IDS, type SlotId,
 } from "../../sim";
 import { latestBoss, runPhase } from "./boss";
@@ -28,9 +29,12 @@ export interface GameSnapshot {
   hero: string;
   heroX: number;
   heroY: number;
+  /** Level per slot (10 slots: 0-2 signature, 3 ultimate, 4-5 shared spells, 6-9 passives; 0 = not learned). */
   abilityLevels: number[];
   /** Ticks left per slot. */
   abilityCooldowns: number[];
+  /** Ability id per slot, "" for an empty shared-spell or passive slot. */
+  abilityIds: string[];
   ultimateAuto: boolean;
   allies: number;
   projectiles: number;
@@ -70,6 +74,8 @@ export interface GameSnapshot {
     /** Empties the collection and the dolls. */
     clearGear(): void;
     setAbilityLevel(slot: number, level: number): void;
+    /** Learns a shared spell or passive (by id) into an empty slot; throws an Error when the rules refuse it. */
+    learn(slot: number, abilityId: string): void;
     /** One hunter of every common enemy type, in a row north of the hero. */
     spawnEach(): void;
     /** Moves the hero to simulation coordinates, clamped to the arena. */
@@ -89,7 +95,7 @@ declare global {
 export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
   const snapshot: GameSnapshot = {
     backend, gpu, frames: 0, screen: "menu", tick: 0, level: 0, kills: 0, heroHp: 0, castleHp: 0, enemies: 0, enemyTypes: 0,
-    hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], ultimateAuto: true, allies: 0,
+    hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], abilityIds: [], ultimateAuto: true, allies: 0,
     projectiles: 0, packArrows: 0, charging: 0, phase: 1, boss: null, slams: 0,
     render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0 },
     gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, gear: [], collection: {}, gearSaved: false,
@@ -125,6 +131,13 @@ export function addDebugHooks(
     setAbilityLevel(slot: number, level: number): void {
       const run = getRun();
       if (run) debugSetAbilityLevel(run, slot, level);
+    },
+    learn(slot: number, abilityId: string): void {
+      const run = getRun();
+      if (!run) return;
+      const index = run.data.abilities.findIndex((a) => a.id === abilityId);
+      if (index < 0) throw new Error(`debug.learn: unknown ability "${abilityId}"`);
+      learnAbility(run, slot, index);
     },
     spawnEach(): void {
       const run = getRun();
@@ -190,13 +203,15 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
   snapshot.hero = run.hero.def.id;
   snapshot.heroX = run.hero.x;
   snapshot.heroY = run.hero.y;
-  // the slot count is fixed (4), so these arrays are filled in place after the first frame
+  // the slot count is fixed (10), so these arrays are filled in place after the first frame
   const { abilities } = run;
   snapshot.abilityLevels.length = abilities.length;
   snapshot.abilityCooldowns.length = abilities.length;
+  snapshot.abilityIds.length = abilities.length;
   for (let i = 0; i < abilities.length; i++) {
     snapshot.abilityLevels[i] = abilities[i]!.level;
     snapshot.abilityCooldowns[i] = abilities[i]!.cooldown;
+    snapshot.abilityIds[i] = abilities[i]!.def.id;
   }
   snapshot.ultimateAuto = run.ultimateAuto;
   snapshot.allies = run.allies.count;
