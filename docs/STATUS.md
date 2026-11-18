@@ -1,13 +1,39 @@
 # Status
 
-Updated 2026-11-18 (Sparkshot multishot PR open; next: the design of shared spells and passives). Read this first when you resume work.
+Updated 2026-11-18 (chest loot, Magic Find and enemy threat are built on branch `chest-loot`, PR #15 open, waits for Petr's playtest and merge; the shared-spells spec still waits for his approval on branch `shared-spells`). Read this first when you resume work.
 
-## Sparkshot multishot: PR open (branch `sparkshot-multishot`, 2026-11-18)
+## Chest loot, Magic Find and enemy threat: built (2026-11-18), PR #15 against `main` waits for Petr (branch `chest-loot`)
+
+- All 7 tasks of `docs/superpowers/plans/2026-11-18-chest-loot-threat.md` are done (executed inline in one chat, one final self-review: the chat could not start a separate reviewer). `npm run check` and the build pass; the e2e project `webgl2-fallback` passed 30 of 30 after Task 5 and 29 of 30 at the end ("pack arrows point at a new pack" ran out of its 5 s on this container's ~2.5 fps software rendering, the same timing on `main`; CI decides). Numbers, rulings and the win table: `docs/DECISIONS.md`, section Chest loot, Magic Find and enemy threat.
+- What it brings:
+  - enemies hit the hero twice as hard; Stonehorn and Redcleaver take a quarter less (x1.5); the castle as before;
+  - a chest offers 3 rolled items in all five rarities (glyph, name in the rarity colour, rarity, "new for this run" / "replaces X for this run" / "level 3 -> 4", stat rows compared with the worn item); a higher rarity replaces the worn item for the run, the permanent item comes back after the run;
+  - a new stat Magic Find on 10 items (rings, necks, trinkets, a belt): raises the odds of better rarities in chests and boss drops, with diminishing returns; shown in tooltips and in the totals under the doll (gear screen and panel C);
+  - a legendary or mythic from a chest is named on the news line in its colour;
+  - chests cost half (Petr, before the merge): 100, 112, 125, ...; without gear the autopilot wins 94 instead of 70 of 320 runs and opens almost twice as many chests;
+  - chest levels count 0.25 each (permanent levels 0.15), also the first level of an item a chest gave; `npm run sim:chests` measures chest power: 15 chests give a bare level-25 hero x1.46 (hp 1.44, attack 1.48, spells 1.45).
+- What Petr checks in the playtest:
+  - do chests feel worth the walk now, and do the cards and rarities read (colours, the replace line);
+  - does a mistake hurt now: running away should no longer be safe; is x2 too much early (the autopilot dies at 2-4 minutes, before the first miniboss);
+  - the news line for a legendary or mythic from a chest;
+  - Magic Find: is the stat clear in tooltips and under the doll.
+- Quick links (with `debug=1` the collection starts empty and nothing is stored): https://wizzik.github.io/defense-webgame/?debug=1 after the merge; in the console `__game.debug.grantGold(5000)`, then walk to a chest; `__game.chestCards` lists the offer; `__game.debug.grantItem("seal-of-the-archivist", 5)` for Magic Find.
+- **Open for Petr (wins without gear):** five heroes win 0 or 1 of 20 on both seed sets: Stonehorn, Nightglaive, Mistwarden, Sparkshot, Tidecaller (table in `docs/DECISIONS.md`). Not tuned here (spec 5.2); the shared-spells plan tunes kits to 6-12 of 20 against this state. Gravecaller still wins 20 of 20. With a rare item in every slot wins fell less (e.g. Nightglaive 18 -> 4, Sparkshot 10 -> 19); full gear wins everything.
+- **Open for Petr (rulings):** chest levels count also the first level of a chest item (the plan's formula would have needed a step of about 1.25); weights common 25, rare 30, epic 37, legendary 6, mythic 2. Both are his to change in `design/rules.yaml`.
+- Minor notes from the final review (not fixed): `basicItemIndex` is no longer used by the game; two cards of one offer can show the same ring or trinket; the debug snapshot caches `chestCards` per offer.
+- Next: Petr plays the PR (or the live game after the merge) and merges it; then a new chat writes the plan for shared spells and passives (their spec waits for his approval).
+
+## Shared spells and passives: design written, waits for Petr's approval (branch `shared-spells`, 2026-11-18)
+
+- Spec: `docs/superpowers/specs/2026-11-18-shared-spells-passives-design.md` (also `claude/specs/` in the project). Six new slots (2 shared spells from a pool of 10, 4 passives from 6), card groups with weights, new kinds `chain` and `instant`, the autopilot's card order, balance band 6-12 of 20. Petr said "go" without further questions, so section 4 holds Claude's calls; a builder check ran and its answers are in section 4.8.
+- Next: Petr approves (or changes) the spec, then a new chat writes the plan (after the chest-loot PR is merged; its band of 6-12 wins is tuned against the state after it, see the open point above).
+
+## Sparkshot multishot: merged (PR #14, 2026-11-18)
 
 - Petr's wish (2026-11-18): Searing Rounds shoots more enemies. Each base attack also hits 1, 1, 2, 2, 3 other enemies in reach (by the spell's level); the split shots deal the base attack without the burn. Rule and numbers: `docs/DECISIONS.md`, section Sparkshot multishot.
 - Autopilot wins of the Sparkshot: 0 -> 10 of 20 (seeds 21-40: 1 -> 13). The other heroes are unchanged.
 - What Petr checks in the playtest: does it feel like a multishot (the bolts), is the Sparkshot fun now, does it die too often (below 50 % hp in 19 of 20 autopilot runs).
-- Next after the merge: the design of shared spells and passives (spec section 3.8: about 10 shared spells, 6 passives, later evolutions). Petr said "go" on 2026-11-18; they fill the cards after the kit is full (phases 7-20 offer only attributes now).
+- Merged as `cd54f2e`, Pages deployed. The PR also fixed the e2e test of the gear panel: a level-up offer can open right after a chest pick (it failed once on software WebGPU in CI).
 
 ## Gear, boss drops and chests: merged (PR #12 into `elite-boss-threat`, PR #13 into `main`, 2026-11-13); waits for Petr's playtest
 
@@ -23,7 +49,7 @@ Updated 2026-11-18 (Sparkshot multishot PR open; next: the design of shared spel
   - the gear is stored in the browser (IndexedDB), never with `?debug=1`.
 - What Petr checks in the playtest:
   - chests: is the price curve right (200, 224, 251, ...; about 12 to 16 chests in a won run), is a chest worth the walk, do the chest and its price read on the ground;
-  - **chests are weak on purpose for now:** 16 chests give a hero without gear about +10 % (the spec wanted +50 % at the end of a run); stronger chests made the run without gear easier at once. Stronger chests, or keep them and make gear the main source of power?
+  - **chests are weak on purpose for now:** 16 chests give a hero without gear about +10 % (the spec wanted +50 % at the end of a run); stronger chests made the run without gear easier at once. Stronger chests, or keep them and make gear the main source of power? (Answered 2026-11-18: stronger chests, see the chest-loot spec at the top.)
   - the gear screen: readability, the icons (own simple glyphs), the doll (one blue-grey figure for every hero), the tooltip;
   - the names of the 70 items (EN and CS) and the texts of the eight effects;
   - how strong gear feels: a rare item in every slot already wins most autopilot runs; the best gear at level 5 is about 2x hp, attack and spells at hero level 25.
@@ -31,7 +57,7 @@ Updated 2026-11-18 (Sparkshot multishot PR open; next: the design of shared spel
   - https://wizzik.github.io/defense-webgame/?debug=1&phase=6 : first miniboss at once; kill it for a drop, or `window.__game.debug.killBoss()` in the console;
   - console helpers: `__game.debug.grantGold(2000)`, `__game.debug.grantItem("skysplitter", 5)` (ids are in `design/items.yaml`), `__game.debug.clearGear()`.
 - **Open for Petr 1 (balance without gear):** with chests the autopilot wins about as before for six heroes; Nightglaive swings (2 and 9 of 20 on the two seed sets, 8 and 4 before) and the Tidecaller gains (7 and 5, before 2 and 3). Sparkshot still won none without gear (closed by the multishot, 2026-11-18).
-- **Open for Petr 2 (chest power):** see above.
+- **Open for Petr 2 (chest power):** answered by the chest-loot spec (2026-11-18).
 - Left from the final review as minor notes (not fixed): the drop rides on the event buffer (a full buffer of 1024 events would lose it); stored data of another version loads as empty and the first drop overwrites it; a write that fails later in a session turns saving off without a word; the export revokes its link right after the click; pack arrows hide while a chest slot is chosen; the gear screen builds a whole run for the totals on every click; a chest's fallback place skips the spacing check; a chest can put the same common ring into both ring slots.
 - Later, not in this plan: difficulties as a combination of another environment and a chosen difficulty (Petr, 2026-11-12); they are meant to take up the power of gear.
 

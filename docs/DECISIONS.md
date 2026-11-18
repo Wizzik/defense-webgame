@@ -2,6 +2,48 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Chest loot, Magic Find and enemy threat (2026-11-18; Petr chose the direction, the numbers are Claude's)
+
+Spec: `docs/superpowers/specs/2026-11-18-chest-loot-threat-design.md`. Plan: `docs/superpowers/plans/2026-11-18-chest-loot-threat.md`.
+
+- **Threat.** Every enemy hit on the hero goes through `damageHero` (`sim/combat.ts`) and is multiplied there by `rules.threat.heroDamageTaken` (2) and the hero's `damageTaken` (`design/heroes.yaml`: 0.75 for Stonehorn and Redcleaver, missing = 1). Melee heroes take x1.5, the others x2. The castle takes damage as before; the shield still blocks everything.
+- **Magic Find.** A new item stat `magicFind` (a share; 1 budget point = 2 %). The hero sums it over the worn items, chest items included. Effective MF = MF x 1.5 / (MF + 1.5) (50 % -> 37.5 %, 100 % -> 60 %, 300 % -> 100 %; only a division, `sim/magic-find.ts`). Every rarity above the lowest one of a weight table gets its weight x (1 + effective MF x factor), factor 1 rare, 1.5 epic, 2 legendary, 2.5 mythic; the lowest keeps its weight. Used by chest cards and by boss drops (`rollDrop` gets the hero's MF when the boss falls; MF 0 draws exactly as before).
+- **Ten items carry Magic Find** in place of a gold find or pickup range row of the same points: tin-ring 12 %, band-of-resolve 10 %, falcon-charm 10 %, hunters-whistle 12 %, pendant-of-the-deep-well 10 %, ring-of-the-keen-eye 12 %, seal-of-the-archivist 12 %, belt-of-many-knives 10 %, compass-of-the-lost-scout 12 %, hourglass-of-the-hunt 10 %. The best epic-or-better MF build (neck, both rings, waist, both trinkets) has 66 % at level 1 and 106 % at level 5 (effective 62 %). Gold find stays on moonlit-signet and seal-of-the-royal-treasury.
+- **Chest cards.** A chest offers 3 cards. Each rolls a rarity by `rules.chests.rarityWeights` raised by the hero's MF, then a slot not yet in the offer whose type has an item of that rarity (one rarity lower when none is free; legendary and mythic exist only for main hand, off hand and trinkets), then an item of that rarity and type, preferring one the twin slot (ring, trinket) does not wear. The pick: an empty slot takes the item at chest level 1 (**New**); a higher rarity than the worn item replaces it for the run and takes the slot's whole level + 1 as chest levels (**Replace**; the loadout given to the run is not touched, so a permanent item comes back after the run); else the worn item gains a chest level (**Level**). Effects of a legendary or mythic chest item work at once; picking one puts "Chest: <name>" on the news line in its rarity colour.
+- **Chest levels.** An item's numbers with permanent level B and chest levels T are its level-1 numbers x (1 + 0.15 x max(B - 1, 0) + chestLevelStep x T) with `rules.gear.chestLevelStep` = 0.25; an item a chest gave has B = 0, so its first chest level counts too. This replaces "level L = B + T, x (1 + 0.15 x (L - 1))" of the gear section below for chest levels; permanent numbers are unchanged. Why: with the plan's weights (common 55, rare 30, epic 12, legendary 2.5, mythic 0.5) 15 chests gave x1.25, and at the plan's weight limits (common at least 25, legendary at most 6, mythic at most 2) at most x1.38. The plan's fallback formula left a chest item's first level out; 12 of 15 picks are new items, so it needed a step of about 1.25 (one chest level = +125 %, far above a permanent level). Counting every chest level reaches the band at 0.25.
+- **Weights.** `rules.chests.rarityWeights`: common 25, rare 30, epic 37, legendary 6, mythic 2 (the plan's limits for common, legendary and mythic; the smallest chestLevelStep in the band).
+- **Chest price halved** (Petr, 2026-11-18, before the merge): `rules.chests.basePrice` 200 -> 100, growth stays x1.12 (100, 112, 125, ...). Autopilot wins without gear, seeds 1-20 / 21-40, price 200 -> 100: Stonehorn 1 -> 3 / 1 -> 3, Nightglaive 0 -> 0 / 0 -> 0, Gravecaller 20 / 20, Serpent Shaman 7 -> 9 / 11 -> 10, Mistwarden 0 -> 0 / 0 -> 2, Sparkshot 0 -> 1 / 0 -> 5, Redcleaver 5 -> 8 / 5 -> 12, Tidecaller 0 -> 0 / 0 -> 1; over all 320 runs 70 -> 94 wins and 1310 -> 2448 chests opened. The table below is at the price of 200.
+- **Autopilot.** A replacement with the highest rarity first, then a new item with the highest rarity, then a level for the offered slot with the lowest level; the first card on a tie.
+- **Measure:** `npm run sim:chests -- --seeds 1-200` (a hero at level 25 from XP alone, no cards, 15 offers picked by the autopilot):
+
+```
+stonehorn: hp x1.39, attack x1.47, spells x1.48, mean x1.45 | picks new 11.8, replace 2.2, level 1.0 | rarities common 0.9, rare 2.8, epic 8.5, legendary 2.0, mythic 0.9
+nightglaive: hp x1.50, attack x1.47, spells x1.48, mean x1.48 | picks new 11.8, replace 2.2, level 1.0 | rarities common 0.9, rare 2.8, epic 8.5, legendary 2.0, mythic 0.9
+gravecaller: hp x1.50, attack x1.49, spells x1.41, mean x1.47 | picks new 11.8, replace 2.2, level 1.0 | rarities common 0.9, rare 2.8, epic 8.5, legendary 2.0, mythic 0.9
+serpent-shaman: hp x1.46, attack x1.51, spells x1.43, mean x1.47 | picks new 11.8, replace 2.2, level 1.0 | rarities common 0.9, rare 2.8, epic 8.5, legendary 2.0, mythic 0.9
+mistwarden: hp x1.48, attack x1.51, spells x1.43, mean x1.47 | picks new 11.8, replace 2.2, level 1.0 | rarities common 0.9, rare 2.8, epic 8.5, legendary 2.0, mythic 0.9
+sparkshot: hp x1.41, attack x1.45, spells x1.48, mean x1.45 | picks new 11.8, replace 2.2, level 1.0 | rarities common 0.9, rare 2.8, epic 8.5, legendary 2.0, mythic 0.9
+redcleaver: hp x1.35, attack x1.45, spells x1.48, mean x1.43 | picks new 11.8, replace 2.2, level 1.0 | rarities common 0.9, rare 2.8, epic 8.5, legendary 2.0, mythic 0.9
+tidecaller: hp x1.42, attack x1.50, spells x1.43, mean x1.45 | picks new 11.8, replace 2.2, level 1.0 | rarities common 0.9, rare 2.8, epic 8.5, legendary 2.0, mythic 0.9
+all: hp x1.44, attack x1.48, spells x1.45, mean x1.46 | picks new 11.8, replace 2.2, level 1.0 | rarities common 0.9, rare 2.8, epic 8.5, legendary 2.0, mythic 0.9
+```
+
+Autopilot wins of 20, before (`main` at `cd54f2e`) -> after:
+
+| hero | none 1-20 | none 21-40 | mid 1-20 | mid 21-40 | full 1-20 | full 21-40 |
+|---|---|---|---|---|---|---|
+| stonehorn | 8 → 1 | 6 → 1 | 19 → 13 | 20 → 16 | 20 → 20 | 20 → 20 |
+| nightglaive | 2 → 0 | 9 → 0 | 18 → 4 | 17 → 4 | 20 → 20 | 20 → 20 |
+| gravecaller | 20 → 20 | 20 → 20 | 20 → 20 | 20 → 20 | 20 → 20 | 20 → 20 |
+| serpent-shaman | 17 → 7 | 18 → 11 | 19 → 16 | 19 → 20 | 20 → 20 | 20 → 20 |
+| mistwarden | 4 → 0 | 7 → 0 | 16 → 10 | 14 → 13 | 20 → 20 | 20 → 20 |
+| sparkshot | 10 → 0 | 13 → 0 | 10 → 19 | 18 → 18 | 20 → 20 | 20 → 20 |
+| redcleaver | 12 → 5 | 9 → 5 | 20 → 17 | 17 → 15 | 20 → 20 | 20 → 20 |
+| tidecaller | 7 → 0 | 5 → 0 | 17 → 12 | 18 → 11 | 20 → 20 | 20 → 20 |
+
+- **Losses** (8 heroes x 40 runs = 320 per loadout). Without gear: before 167 wins, 99 hero deaths, 54 castle losses; after 70 wins, 249 hero deaths, 1 castle loss. Mid gear: before 282, 7, 31; after 228, 91, 1. Full gear: 320 wins before and after. The castle does not fall more often (it falls less: the hero dies first). Median time of a hero death without gear after the change: 1:50 (Serpent Shaman) to 4:16 (Sparkshot), most before the first miniboss (4:10) and before most chests (the first costs 200 gold).
+- **Open for Petr.** Five heroes win 0 or 1 of 20 on both seed sets without gear: Stonehorn (1, 1), Nightglaive (0, 0), Mistwarden (0, 0), Sparkshot (0, 0), Tidecaller (0, 0). Not tuned here (spec 5.2); the shared-spells plan tunes kits to its band of 6-12 against this state. The autopilot does not kite, so x2 hits it harder than a player. Gravecaller still wins 20 of 20.
+
 ## Sparkshot multishot (2026-11-18; Petr asked for multishot on Searing Rounds, the numbers are Claude's)
 
 - **Rule.** An `on_hit` spell may carry `extraTargets` (per level). The hero's base attack then also shoots that many other enemies in attack reach, nearest first (equal distance: lower slot; at most 8, `sim/hero-multishot.ts`). A split shot rolls its own base damage against its target's armor and carries the main shot's stun; the on_hit bonus damage, an empowered hit and the gear effects (splash, chain) stay with the main shot. The client draws every shot as a bolt (one `Hit` event of source 0 each).

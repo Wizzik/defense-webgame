@@ -14,6 +14,37 @@ function owning(filter: (rarity: string) => boolean, level = 1): SaveData {
 }
 
 describe("boss drops", () => {
+  /** Share of drops of `rarities` over seeds 1..n with an empty collection and the given magic find. */
+  const shareOf = (boss: string, rarities: string[], magicFind: number, n = 2000) => {
+    let hits = 0;
+    for (let seed = 1; seed <= n; seed++) {
+      const drop = rollDrop(data, emptySave(), boss, seed, 0, magicFind);
+      if (drop.kind !== "none" && rarities.includes(drop.item.rarity)) hits++;
+    }
+    return hits / n;
+  };
+
+  it("magic find makes the higher rarities of a boss more likely", () => {
+    const before = shareOf("dread-regent", ["legendary", "mythic"], 0); // 50 / 100
+    const after = shareOf("dread-regent", ["legendary", "mythic"], 1); // 113 / 163
+    expect(before).toBeGreaterThan(0.45);
+    expect(before).toBeLessThan(0.55);
+    expect(after).toBeGreaterThan(0.64);
+    expect(after).toBeLessThan(0.74);
+  });
+
+  it("the lowest rarity of the table keeps its weight", () => {
+    const common = shareOf("iron-marshal", ["common"], 1); // 60 / (60 + 64)
+    expect(common).toBeGreaterThan(0.44);
+    expect(common).toBeLessThan(0.53);
+  });
+
+  it("a magic find of 0 draws exactly as the call without it", () => {
+    for (let seed = 1; seed <= 100; seed++) {
+      expect(rollDrop(data, emptySave(), "gunmaster", seed, 1, 0)).toEqual(rollDrop(data, emptySave(), "gunmaster", seed, 1));
+    }
+  });
+
   it("an empty collection always gets a new item of a rarity of the boss's table", () => {
     for (let seed = 1; seed <= 200; seed++) {
       const drop = rollDrop(data, emptySave(), "iron-marshal", seed, 0);

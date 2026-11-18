@@ -22,12 +22,21 @@ export function rollDamage(rng: Rng, min: number, max: number): number {
   return lo + Math.floor(rng.next() * (hi - lo + 1));
 }
 
-/** Subtracts `amount` from the hero (nothing while the shield runs). `attacker` is the enemy slot (-1 for none). */
+/** Multiplier on every enemy hit on the hero: rules.threat.heroDamageTaken x the hero's damageTaken (default 1). */
+export function heroDamageScale(run: Run): number {
+  return run.data.rules.threat.heroDamageTaken * (run.hero.def.damageTaken ?? 1);
+}
+
+/**
+ * Subtracts `amount` x heroDamageScale from the hero (nothing while the shield runs).
+ * `attacker` is the enemy slot (-1 for none).
+ */
 export function damageHero(run: Run, amount: number, attacker: number): void {
   if (run.shieldTicks > 0) return;
   const hero = run.hero;
-  hero.hp -= amount;
-  run.events.push(EventKind.HeroHit, attacker, amount, hero.x, hero.y, 0, 0);
+  const dealt = amount * heroDamageScale(run);
+  hero.hp -= dealt;
+  run.events.push(EventKind.HeroHit, attacker, dealt, hero.x, hero.y, 0, 0);
 }
 
 /** Subtracts `amount` from the castle (nothing while the shield runs) and records the hit tick. */

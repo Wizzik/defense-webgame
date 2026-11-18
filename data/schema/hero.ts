@@ -21,6 +21,8 @@ export const HeroSchema = z.object({
   }).strict(),
   signatureAbilities: z.tuple([Slug, Slug, Slug]),
   ultimate: Slug,
+  /** Multiplier on the damage enemies deal to this hero (melee heroes stand in the crowd); missing means 1. */
+  damageTaken: z.number().positive().max(1).optional(),
 }).strict();
 
 export type Hero = z.infer<typeof HeroSchema>;

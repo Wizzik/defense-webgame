@@ -13,8 +13,24 @@ export interface DollSlotView {
   temp: number;
 }
 
-/** The hero's stats with the gear on, and the attributes with the gear's share. */
-export type DollTotals = HeroStats & { str: number; agi: number; int: number };
+/** The hero's stats with the gear on, the attributes with the gear's share, and the gear's magic find. */
+export type DollTotals = HeroStats & { str: number; agi: number; int: number; magicFind: number };
+
+type TotalKey = "str" | "agi" | "int" | "hp" | "armor" | "magicFind";
+const TOTAL_KEYS: readonly TotalKey[] = ["str", "agi", "int", "hp", "armor", "magicFind"];
+
+/** The text of each total under the doll: whole attributes and hp, armor to 0.1, magic find in percent. */
+export function totalTexts(totals: DollTotals): Record<TotalKey, string> {
+  const one = (value: number): string => String(Math.round(value * 10) / 10);
+  return {
+    str: String(Math.round(totals.str)),
+    agi: String(Math.round(totals.agi)),
+    int: String(Math.round(totals.int)),
+    hp: String(Math.round(totals.maxHp)),
+    armor: one(totals.armor),
+    magicFind: `${one(totals.magicFind * 100)} %`,
+  };
+}
 
 const LEFT: readonly SlotId[] = ["head", "neck", "shoulders", "back", "chest", "wrist"];
 const RIGHT: readonly SlotId[] = ["hands", "waist", "legs", "feet", "ring1", "ring2", "trinket1", "trinket2"];
@@ -46,7 +62,7 @@ interface SlotNode {
 export class Doll {
   private readonly nodes = new Map<SlotId, SlotNode>();
   private readonly title: HTMLElement;
-  private readonly totals: Record<"str" | "agi" | "int" | "hp" | "armor", HTMLElement>;
+  private readonly totals = {} as Record<TotalKey, HTMLElement>;
   private readonly totalLabels: [HTMLElement, MessageKey][] = [];
   private readonly data: GameData;
   private readonly tooltip: ItemTooltip;
@@ -70,12 +86,11 @@ export class Doll {
       for (const slot of slots) this.nodes.set(slot, this.makeSlot(parent, slot, opts.onSlotClick));
     }
     const totals = el("div", "doll-totals", doll);
-    const total = (key: "str" | "agi" | "int" | "hp" | "armor"): HTMLElement => {
+    for (const key of TOTAL_KEYS) {
       const cell = el("div", "doll-total", totals);
       this.totalLabels.push([el("span", "doll-total-label", cell), `gear.total.${key}` as MessageKey]);
-      return el("span", "doll-total-value", cell);
-    };
-    this.totals = { str: total("str"), agi: total("agi"), int: total("int"), hp: total("hp"), armor: total("armor") };
+      this.totals[key] = el("span", "doll-total-value", cell);
+    }
     this.setLang(opts.lang);
   }
 
@@ -135,11 +150,7 @@ export class Doll {
       setText(node.temp, temp > 0 ? `+${temp}` : "");
       setText(node.level, item && level > 1 ? String(level) : "");
     }
-    const one = (value: number): string => String(Math.round(value * 10) / 10);
-    setText(this.totals.str, String(Math.round(totals.str)));
-    setText(this.totals.agi, String(Math.round(totals.agi)));
-    setText(this.totals.int, String(Math.round(totals.int)));
-    setText(this.totals.hp, String(Math.round(totals.maxHp)));
-    setText(this.totals.armor, one(totals.armor));
+    const texts = totalTexts(totals);
+    for (const key of TOTAL_KEYS) setText(this.totals[key], texts[key]);
   }
 }

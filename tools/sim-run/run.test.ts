@@ -175,9 +175,9 @@ describe("chests in the summaries", () => {
     expect(s.chests).toBeGreaterThan(0);
   });
 
-  it("idle input takes the first slot of a chest", () => {
+  it("idle input takes the first card of a chest", () => {
     const run = createRun(gameData(), { seed: 1 });
-    run.chestOffer = { slots: [1, 2, 3] };
+    run.chestOffer = { cards: [1, 2, 3].map((slot) => ({ slot, item: 0, action: 0 as const })) };
     run.state = "chest";
     expect(idleInput(run, { moveX: 0, moveY: 0, card: -1, actions: 0 }).card).toBe(0);
   });

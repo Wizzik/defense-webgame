@@ -603,6 +603,33 @@
 .card .item-line {
   font-variant-numeric: tabular-nums;
 }
+/* a chest card: the slot glyph next to the item name, then its rarity in the rarity colour */
+.chest-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.chest-glyph {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  color: var(--rarity-common);
+}
+.chest-glyph svg {
+  width: 100%;
+  height: 100%;
+}
+.chest-rarity {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--rarity-common);
+}
+.card.chest.rarity-rare :is(.chest-glyph, .chest-rarity) { color: var(--rarity-rare); }
+.card.chest.rarity-epic :is(.chest-glyph, .chest-rarity) { color: var(--rarity-epic); }
+.card.chest.rarity-legendary :is(.chest-glyph, .chest-rarity) { color: var(--rarity-legendary); }
+.card.chest.rarity-mythic :is(.chest-glyph, .chest-rarity) { color: var(--rarity-mythic); }
 
 /* gear: the doll, its slots and the tooltip. Deep navy and blue-grey, nothing orange. */
 .gear-panel {

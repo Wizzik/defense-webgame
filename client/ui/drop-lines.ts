@@ -1,4 +1,6 @@
+import type { GameData } from "../../data/schema";
 import type { Drop } from "../../meta";
+import { ChestAction } from "../../sim";
 import { type Lang, t } from "./i18n";
 
 /** The line that tells what a boss dropped, and the CSS class of its rarity ("" when nothing dropped). */
@@ -7,4 +9,14 @@ export function dropLine(lang: Lang, drop: Drop): { text: string; tone: string }
   const name = drop.item.name[lang];
   const text = drop.kind === "new" ? t(lang, "drop.new", { name }) : t(lang, "drop.level", { name, n: drop.level });
   return { text, tone: `rarity-${drop.item.rarity}` };
+}
+
+/** The news line of a chest pick that brings a legendary or mythic item (New or Replace); null for any other pick. */
+export function chestLootLine(
+  lang: Lang, data: GameData, itemIndex: number, action: number,
+): { text: string; tone: string } | null {
+  if (action !== ChestAction.New && action !== ChestAction.Replace) return null;
+  const item = data.items[itemIndex];
+  if (!item || (item.rarity !== "legendary" && item.rarity !== "mythic")) return null;
+  return { text: t(lang, "chest.loot", { name: item.name[lang] }), tone: `rarity-${item.rarity}` };
 }

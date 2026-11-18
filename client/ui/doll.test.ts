@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { Item } from "../../data/schema";
+import { createRun } from "../../sim";
 import { gameData } from "../../sim/testing/game-data";
+import { totalTexts } from "./doll";
 import { iconSvg } from "./item-icons";
 import { tooltipLines } from "./item-tooltip";
 
@@ -15,6 +17,7 @@ const hood: Item = {
 
 describe("item tooltip", () => {
   const data = gameData();
+  data.rules.gear.chestLevelStep = 0.3; // the numbers below are worked out with this step
 
   it("gives the name, the rarity and the line of rarity, slot and level", () => {
     const en = tooltipLines("en", data, helm, 2, 0);
@@ -32,8 +35,8 @@ describe("item tooltip", () => {
     const tip = tooltipLines("en", data, helm, 1, 2);
     expect(tip.sub).toBe("Rare · Head · level 1");
     expect(tip.lines).toEqual([
-      { text: "+18.2 Strength", tone: "plain" },
-      { text: "+156 HP", tone: "plain" },
+      { text: "+22.4 Strength", tone: "plain" },
+      { text: "+192 HP", tone: "plain" },
       { text: "+2 levels from chests in this run", tone: "temp" },
     ]);
     expect(tooltipLines("cs", data, helm, 1, 1).lines.at(-1)).toEqual({ text: "+1 úroveň z truhel v tomto běhu", tone: "temp" });
@@ -42,7 +45,7 @@ describe("item tooltip", () => {
   it("an item a chest gave has no permanent level", () => {
     const tip = tooltipLines("cs", data, helm, 0, 3);
     expect(tip.sub).toBe("Vzácný · Hlava · jen na tento běh");
-    expect(tip.lines[0]).toEqual({ text: "+18.2 síla", tone: "plain" });
+    expect(tip.lines[0]).toEqual({ text: "+26.6 síla", tone: "plain" });
     expect(tooltipLines("en", data, helm, 0, 1).sub).toBe("Rare · Head · this run only");
   });
 
@@ -87,5 +90,16 @@ describe("item icons", () => {
       expect(glyph).toContain("currentColor");
     }
     expect(new Set(glyphs).size).toBe(14);
+  });
+});
+
+describe("doll totals", () => {
+  it("shows the stats rounded and magic find in percent", () => {
+    const totals = { ...createRun(gameData(), { seed: 1 }).hero.stats, str: 20.4, agi: 11.6, int: 9, magicFind: 0.12 };
+    totals.maxHp = 640.4;
+    totals.armor = 3.26;
+    expect(totalTexts(totals)).toEqual({ str: "20", agi: "12", int: "9", hp: "640", armor: "3.3", magicFind: "12 %" });
+    expect(totalTexts({ ...totals, magicFind: 0 }).magicFind).toBe("0 %");
+    expect(totalTexts({ ...totals, magicFind: 0.1725 }).magicFind).toBe("17.3 %");
   });
 });

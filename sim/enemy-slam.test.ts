@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AllyKind } from "./allies";
-import { armorReduction, killEnemy, stunEnemy } from "./combat";
+import { armorReduction, heroDamageScale, killEnemy, stunEnemy } from "./combat";
 import { Action, Role } from "./enemies";
 import { EventKind } from "./events";
 import { NO_INPUT } from "./input";
@@ -58,7 +58,7 @@ describe("boss slam", () => {
     expect(slamEvents(run).map((s) => s.value)).toEqual([1]);
     const hits = eventsOf(run, EventKind.HeroHit);
     expect(hits).toHaveLength(1);
-    const k = 1 - armorReduction(run.hero.stats.armor, run.data.constants.defenseArmor);
+    const k = (1 - armorReduction(run.hero.stats.armor, run.data.constants.defenseArmor)) * heroDamageScale(run);
     expect(run.events.value[hits[0]!]).toBeCloseTo(DAMAGE * 1.5 * k, 9);
     expect(run.events.a[hits[0]!]).toBe(b);
     expect(run.enemies.slamState[b]).toBe(0);

@@ -1,5 +1,6 @@
+import { RARITIES } from "../data/schema";
 import type { CardOffer } from "./cards";
-import { chestPrice } from "./chests";
+import { ChestAction, chestPrice } from "./chests";
 import { Charge } from "./enemy-charge";
 import { Slam, windupRadius } from "./enemy-slam";
 import { InputAction } from "./input";
@@ -45,14 +46,32 @@ export function botCard(offer: CardOffer): number {
   return 0;
 }
 
-/** The offered slot with the lowest level (permanent + temporary); the first one on a tie. */
+/**
+ * The chest card a player who wants loot would take: a replacement with the highest rarity, else a new item with
+ * the highest rarity, else a level for the offered slot with the lowest level (permanent + temporary). The first
+ * card wins a tie.
+ */
 export function botChestChoice(run: Run): number {
   const offer = run.chestOffer;
   if (!offer) return 0;
+  for (const action of [ChestAction.Replace, ChestAction.New]) {
+    let best = -1;
+    let bestRank = -1;
+    for (let i = 0; i < offer.cards.length; i++) {
+      const card = offer.cards[i]!;
+      if (card.action !== action) continue;
+      const rank = RARITIES.indexOf(run.data.items[card.item]!.rarity);
+      if (rank > bestRank) {
+        bestRank = rank;
+        best = i;
+      }
+    }
+    if (best >= 0) return best;
+  }
   let best = 0;
   let bestLevel = Infinity;
-  for (let i = 0; i < offer.slots.length; i++) {
-    const slot = offer.slots[i]!;
+  for (let i = 0; i < offer.cards.length; i++) {
+    const slot = offer.cards[i]!.slot;
     const level = run.gear.base[slot]! + run.gear.temp[slot]!;
     if (level < bestLevel) {
       bestLevel = level;

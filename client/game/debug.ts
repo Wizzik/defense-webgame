@@ -1,7 +1,15 @@
 import type { GearSession } from "./gear-session";
-import { chestPrice, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, killEnemy, type Run } from "../../sim";
+import type { Rarity } from "../../data/schema";
+import {
+  type ChestOffer, chestPrice, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, killEnemy, type Run,
+  SLOT_IDS, type SlotId,
+} from "../../sim";
 import { latestBoss, runPhase } from "./boss";
 import type { Backend, GpuInfo } from "../render/gpu";
+
+const CHEST_ACTIONS = ["new", "replace", "level"] as const;
+/** The chest offer `chestCards` was built from. */
+let shownOffer: ChestOffer | null = null;
 
 /** Read by the e2e tests; refreshed every frame. */
 export interface GameSnapshot {
@@ -45,6 +53,8 @@ export interface GameSnapshot {
   /** The chests on the map, in simulation coordinates. */
   chests: { x: number; y: number }[];
   chestsOpened: number;
+  /** The cards of the open chest (slot id, item id, its rarity, what the pick does); null outside the "chest" screen. */
+  chestCards: { slot: SlotId; item: string; rarity: Rarity; action: "new" | "replace" | "level" }[] | null;
   /** The 16 gear slots in the order of `SLOT_IDS`: item id and levels, or null for an empty slot. */
   gear: ({ item: string; base: number; temp: number } | null)[];
   /** The player's collection: item id to its permanent level. */
@@ -82,7 +92,7 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], ultimateAuto: true, allies: 0,
     projectiles: 0, packArrows: 0, charging: 0, phase: 1, boss: null, slams: 0,
     render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0 },
-    gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, gear: [], collection: {}, gearSaved: false,
+    gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, gear: [], collection: {}, gearSaved: false,
   };
   window.__game = snapshot;
   return snapshot;
@@ -211,6 +221,19 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
   for (let i = 0; i < chests.x.length; i++) {
     snapshot.chests[i]!.x = chests.x[i]!;
     snapshot.chests[i]!.y = chests.y[i]!;
+  }
+  const offer = run.state === "chest" ? run.chestOffer : null;
+  if (offer !== shownOffer) {
+    // rebuilt only when the offer changes, not every frame
+    shownOffer = offer;
+    snapshot.chestCards = offer
+      ? offer.cards.map((card) => ({
+        slot: SLOT_IDS[card.slot]!,
+        item: run.data.items[card.item]!.id,
+        rarity: run.data.items[card.item]!.rarity,
+        action: CHEST_ACTIONS[card.action]!,
+      }))
+      : null;
   }
   snapshot.gear.length = gear.item.length;
   for (let slot = 0; slot < gear.item.length; slot++) {
