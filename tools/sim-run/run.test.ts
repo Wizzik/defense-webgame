@@ -3,7 +3,7 @@ import { botInput, idleCard } from "../../sim/bot";
 import { createRun } from "../../sim/index";
 import type { TickInput } from "../../sim/input";
 import { gameData } from "../../sim/testing/game-data";
-import { formatHeroSummary, formatSummary, idleInput, lossWindows, parseArgs, phaseXpLine, playBot, type RunSummary } from "./run";
+import { formatHeroSummary, formatSummary, idleInput, kitLine, lossWindows, parseArgs, phaseXpLine, playBot, type RunSummary } from "./run";
 
 describe("formatSummary", () => {
   it("formats a lost run", () => {
@@ -11,7 +11,7 @@ describe("formatSummary", () => {
       formatSummary({
         hero: "stonehorn", seed: 1, result: "castle", seconds: 134, kills: 63, spawned: 320, level: 7,
         castleHp: 0, castleMaxHp: 3000, castleHpPercent: 0, heroHp: 812, heroMaxHp: 1555, minHeroHpPercent: 42,
-        bosses: [], enraged: false, phaseXp: [0], chests: 4, gold: 321,
+        bosses: [], enraged: false, phaseXp: [0], chests: 4, gold: 321, sharedSpells: [], passives: [], fullKitPhase: null,
       }),
     ).toBe(
       "stonehorn seed 1: lost (castle) at 2:14, kills 63, spawned 320, level 7, castle 0%, hero 812/1555, hero low 42%, chests 4, gold 321",
@@ -23,7 +23,7 @@ describe("formatSummary", () => {
       formatSummary({
         hero: "nightglaive", seed: 2, result: "won", seconds: 180, kills: 5, spawned: 9, level: 2,
         castleHp: 1860, castleMaxHp: 3000, castleHpPercent: 62, heroHp: 1, heroMaxHp: 2, minHeroHpPercent: 0,
-        bosses: [], enraged: false, phaseXp: [0], chests: 4, gold: 321,
+        bosses: [], enraged: false, phaseXp: [0], chests: 4, gold: 321, sharedSpells: [], passives: [], fullKitPhase: null,
       }),
     ).toBe("nightglaive seed 2: won at 3:00, kills 5, spawned 9, level 2, castle 62%, hero 1/2, hero low 0%, chests 4, gold 321");
   });
@@ -32,7 +32,7 @@ describe("formatSummary", () => {
 const summary = (over: Partial<RunSummary>): RunSummary => ({
   hero: "stonehorn", seed: 1, result: "won", seconds: 1040, kills: 1, spawned: 2, level: 3,
   castleHp: 1, castleMaxHp: 2, castleHpPercent: 50, heroHp: 1, heroMaxHp: 2, minHeroHpPercent: 10,
-  bosses: [], enraged: false, phaseXp: [0], chests: 0, gold: 0, ...over,
+  bosses: [], enraged: false, phaseXp: [0], chests: 0, gold: 0, sharedSpells: [], passives: [], fullKitPhase: null, ...over,
 });
 
 describe("summaries of the full run", () => {
@@ -87,6 +87,26 @@ describe("summaries of the full run", () => {
     ];
     expect(lossWindows(runs)).toBe("0-2: 1, 2-4: 2");
     expect(lossWindows([summary({})])).toBe("none");
+  });
+
+  it("the kit line counts the picks and gives the median full-kit phase", () => {
+    const runs = [
+      summary({ sharedSpells: ["meteor", "smite"], passives: ["might"], fullKitPhase: 15 }),
+      summary({ sharedSpells: ["smite", "frost-ring"], passives: ["vigor", "might"], fullKitPhase: 17 }),
+      summary({ sharedSpells: ["smite"], passives: [], fullKitPhase: null }),
+    ];
+    expect(kitLine(runs)).toBe(
+      "  shared spells: smite 3, frost-ring 1, meteor 1; passives: might 2, vigor 1; full kit median phase 16 (2 of 3)",
+    );
+    expect(kitLine([summary({})])).toBe("  shared spells: -; passives: -; full kit median phase - (0 of 1)");
+    expect(formatHeroSummary("stonehorn", runs, false, "dread-regent")).toContain("full kit median phase 16");
+  });
+
+  it("a played run reports the shared spells and passives it learned", () => {
+    const s = playBot(gameData(), 1, 120, "stonehorn");
+    expect(s.sharedSpells.length + s.passives.length).toBeGreaterThan(0);
+    for (const id of s.sharedSpells) expect(gameData().rules.progression.sharedSpells).toContain(id);
+    for (const id of s.passives) expect(gameData().rules.progression.passives).toContain(id);
   });
 
   it("--phase-xp prints one value per phase", () => {

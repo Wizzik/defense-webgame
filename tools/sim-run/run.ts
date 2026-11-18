@@ -1,7 +1,7 @@
 import { pathToFileURL } from "node:url";
 import { botInput, idleCard } from "../../sim/bot";
 import { TICKS_PER_SECOND } from "../../sim/constants";
-import { createRun } from "../../sim/index";
+import { createRun, isEmptySlot, passiveSlotRange, sharedSlotRange } from "../../sim/index";
 import type { LoadoutEntry, Run, RunResult } from "../../sim/index";
 import type { TickInput } from "../../sim/input";
 import { gameData } from "../../sim/testing/game-data";
@@ -28,6 +28,12 @@ export interface RunSummary {
   bosses: { id: string; spawnSeconds: number; killSeconds: number | null }[];
   /** The final boss enraged. */
   enraged: boolean;
+  /** Shared spells (slots 4-5) the hero had at the end, in slot order. */
+  sharedSpells: string[];
+  /** Passives (slots 6-9) the hero had at the end, in slot order. */
+  passives: string[];
+  /** Phase (1-based; one past the last for the finale) in which every slot first stood at its top level, or null. */
+  fullKitPhase: number | null;
   /** XP gained up to the start of each phase the run reached (index 0 is phase 1). */
   phaseXp: number[];
   /** Chests opened. */
@@ -55,6 +61,7 @@ export function playBot(
   const phaseTicks = data.rules.run.phaseSeconds * TICKS_PER_SECOND;
   const phaseXp: number[] = [];
   let lowest = 1;
+  let fullKitPhase: number | null = null;
   while (run.state !== "won" && run.state !== "lost") {
     while (phaseXp.length < data.rules.phases.length && run.tick >= phaseXp.length * phaseTicks) {
       phaseXp.push(run.stats.xpGained);
@@ -63,7 +70,14 @@ export function playBot(
     else botInput(run, input);
     run.step(input);
     lowest = Math.min(lowest, run.hero.hp / run.hero.stats.maxHp);
+    if (fullKitPhase === null && run.abilities.every((slot) => !isEmptySlot(slot) && slot.level >= slot.def.levels)) {
+      fullKitPhase = Math.min(Math.floor(run.tick / phaseTicks) + 1, data.rules.phases.length + 1);
+    }
   }
+  const [sharedFirst, sharedEnd] = sharedSlotRange(run);
+  const [passiveFirst, passiveEnd] = passiveSlotRange(run);
+  const learned = (first: number, end: number) =>
+    run.abilities.slice(first, end).filter((slot) => !isEmptySlot(slot)).map((slot) => slot.def.id);
   return {
     hero: data.heroes[run.heroIndex].id,
     seed,
@@ -84,6 +98,9 @@ export function playBot(
       killSeconds: boss.deathTick < 0 ? null : Math.floor(boss.deathTick / TICKS_PER_SECOND),
     })),
     enraged: run.enraged,
+    sharedSpells: learned(sharedFirst, sharedEnd),
+    passives: learned(passiveFirst, passiveEnd),
+    fullKitPhase,
     phaseXp,
     chests: run.chestsOpened,
     gold: run.stats.goldGained,
@@ -167,7 +184,24 @@ export function formatHeroSummary(hero: string, summaries: RunSummary[], idle: b
     `enraged in ${summaries.filter((s) => s.enraged).length}; losses by minutes: ${lossWindows(summaries)}`;
   const wonChests = wonRuns.length > 0 ? (wonRuns.reduce((a, s) => a + s.chests, 0) / wonRuns.length).toFixed(1) : "-";
   const gear = `  chests avg ${avg((s) => s.chests).toFixed(1)} (won runs ${wonChests}), gold avg ${Math.round(avg((s) => s.gold))}`;
-  return `${head}\n${tail}\n${gear}`;
+  return `${head}\n${tail}\n${gear}\n${kitLine(summaries)}`;
+}
+
+/** How often each id appears, most first (ties by id): `meteor 7, smite 5`, or `-`. */
+function counts(lists: string[][]): string {
+  const n = new Map<string, number>();
+  for (const list of lists) for (const id of list) n.set(id, (n.get(id) ?? 0) + 1);
+  const rows = [...n].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  return rows.length > 0 ? rows.map(([id, k]) => `${id} ${k}`).join(", ") : "-";
+}
+
+/** What the autopilot took and when its whole kit stood at the top level. */
+export function kitLine(summaries: RunSummary[]): string {
+  const full = summaries.filter((s) => s.fullKitPhase !== null).map((s) => s.fullKitPhase!);
+  return (
+    `  shared spells: ${counts(summaries.map((s) => s.sharedSpells))}; passives: ${counts(summaries.map((s) => s.passives))}; ` +
+    `full kit median phase ${full.length > 0 ? median(full) : "-"} (${full.length} of ${summaries.length})`
+  );
 }
 
 /** Below this share of max hp the hero counts as in danger (tuning target). */
