@@ -1,13 +1,18 @@
 # Status
 
-Updated 2026-11-18 (Sparkshot multishot PR open; next: the design of shared spells and passives). Read this first when you resume work.
+Updated 2026-11-18 (Sparkshot multishot merged as PR #14; the design of shared spells and passives waits for Petr's approval on branch `shared-spells`). Read this first when you resume work.
 
-## Sparkshot multishot: PR open (branch `sparkshot-multishot`, 2026-11-18)
+## Shared spells and passives: design written, waits for Petr's approval (branch `shared-spells`, 2026-11-18)
+
+- Spec: `docs/superpowers/specs/2026-11-18-shared-spells-passives-design.md` (also `claude/specs/` in the project). Six new slots (2 shared spells from a pool of 10, 4 passives from 6), card groups with weights, new kinds `chain` and `instant`, the autopilot's card order, balance band 6-12 of 20. Petr said "go" without further questions, so section 4 holds Claude's calls; a builder check ran and its answers are in section 4.8.
+- Next: Petr approves (or changes) the spec, then a new chat writes the plan.
+
+## Sparkshot multishot: merged (PR #14, 2026-11-18)
 
 - Petr's wish (2026-11-18): Searing Rounds shoots more enemies. Each base attack also hits 1, 1, 2, 2, 3 other enemies in reach (by the spell's level); the split shots deal the base attack without the burn. Rule and numbers: `docs/DECISIONS.md`, section Sparkshot multishot.
 - Autopilot wins of the Sparkshot: 0 -> 10 of 20 (seeds 21-40: 1 -> 13). The other heroes are unchanged.
 - What Petr checks in the playtest: does it feel like a multishot (the bolts), is the Sparkshot fun now, does it die too often (below 50 % hp in 19 of 20 autopilot runs).
-- Next after the merge: the design of shared spells and passives (spec section 3.8: about 10 shared spells, 6 passives, later evolutions). Petr said "go" on 2026-11-18; they fill the cards after the kit is full (phases 7-20 offer only attributes now).
+- Merged as `cd54f2e`, Pages deployed. The PR also fixed the e2e test of the gear panel: a level-up offer can open right after a chest pick (it failed once on software WebGPU in CI).
 
 ## Gear, boss drops and chests: merged (PR #12 into `elite-boss-threat`, PR #13 into `main`, 2026-11-13); waits for Petr's playtest
 
