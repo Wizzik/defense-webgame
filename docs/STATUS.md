@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-18 (chest loot, Magic Find and enemy threat are merged: PR #15 as `dd88ff5`, waits for Petr's playtest on the live game; the shared-spells spec is approved and its plan is written on branch `shared-spells`, execution comes next in a new chat). Read this first when you resume work.
+Updated 2026-11-18 evening (shared spells and passives: all 9 tasks done on branch `shared-spells`, PR against `main` to merge after green CI; chest loot and threat (PR #15) wait for Petr's playtest on the live game). Read this first when you resume work.
 
 ## Chest loot, Magic Find and enemy threat: merged (PR #15 as `dd88ff5`, 2026-11-18); waits for Petr's playtest
 
@@ -24,12 +24,26 @@ Updated 2026-11-18 (chest loot, Magic Find and enemy threat are merged: PR #15 a
 - Merged at Petr's request after halving the chest price (2026-11-18 evening), CI green.
 - Next: Petr plays the live game.
 
-## Shared spells and passives: spec approved, plan written (branch `shared-spells`, 2026-11-18); execution next
+## Shared spells and passives: done (branch `shared-spells`, 2026-11-18); waits for Petr's playtest
 
-- Spec: `docs/superpowers/specs/2026-11-18-shared-spells-passives-design.md` (also `claude/specs/` in the project). Six new slots (2 shared spells from a pool of 10, 4 passives from 6), card groups with weights, new kinds `chain` and `instant`, the autopilot's card order, balance band 6-12 of 20. Section 4 holds Claude's calls; a builder check ran and its answers are in section 4.8.
-- Approved 2026-11-18: Petr left the approval to Claude ("vše si schval, uvolni": approve, merge and release without waiting for him, once `npm run check`, the build, e2e `webgl2-fallback` and CI pass).
-- Plan: `docs/superpowers/plans/2026-11-18-shared-spells-passives.md` (9 tasks, inline execution with one final review; tasks 1 and 2 end in one commit). Task 2 needs the map export: the `.w3x` is a file in the claude.ai project.
-- Next: a new chat executes the plan on this branch, opens one PR against `main` and merges it after green CI.
+- All 9 tasks of `docs/superpowers/plans/2026-11-18-shared-spells-passives.md` are done (inline in one chat, one final self-review of the whole diff against spec 4.1-4.8 and `AGENTS.md`). `npm run check`, the build and the e2e project `webgl2-fallback` (31 of 31) pass. Approved and merged by Claude at Petr's word ("vše si schval, sluč a nasaď"). Numbers, sources from the map, rulings and the win table: `docs/DECISIONS.md`, section Shared spells and passives.
+- What it brings:
+  - 10 ability slots: the kit (0-3), two shared spells (4-5) and four passives (6-9); the new slots start empty and fill from level-up cards marked **New** (glyph, name, text, level 1 values);
+  - 10 shared spells any hero can learn: Arc Lightning (a chain that leaps 2-6 times), Smite (a strike from above on the strongest enemy, bosses and elites first), Fire Bolt, Frost Ring, Meteor, Holy Ground, Blade Fan, Shock Wave, Sentry Ward, Second Wind; all cast on their own;
+  - 6 passives with 5 levels: Might, Arcane Focus, Haste, Vigor, Fleet Foot, Fortune (attack, spell power, cooldowns, hp and regen, speed, gold and pickup range);
+  - cards come from four weighted groups (signature 4, shared upgrade 3, new spell 2, new passive 2); attribute cards only when nothing else can be learned or raised;
+  - the ability bar: signature spells, the two shared spells and the ultimate in one row, a small row of four passive glyphs under it; empty slots are dashed frames;
+  - the autopilot takes the ultimate, signature, new spell, shared upgrade, new passive, passive upgrade, attribute; `sim:run` prints what it took and when the whole kit was full (median phase 19-20 of 20).
+- Wins without gear, seeds 1-20 (`main` -> branch): Stonehorn 3 -> 6, Nightglaive 0 -> 4, Gravecaller 20, Serpent Shaman 9 -> 15, Mistwarden 0 -> 4, Sparkshot 1 -> 4, Redcleaver 8, Tidecaller 0 -> 3 (seeds 21-40 and 1-100 in DECISIONS). Mid gear: 258 -> 255 of 320; full gear wins all.
+- What Petr checks in the playtest:
+  - does the second half of a run feel full now: a real choice at every level-up, a build that differs between runs of one hero;
+  - the New cards and the passive row under the ability bar (readability at 1280x720, the glyphs);
+  - the effects: the Arc Lightning bolt along its leaps, the Smite flash from above;
+  - the strength of shared spells next to the signature ones (target: a shared spell at level 5 is about a signature spell at level 3-4) and of the passives;
+  - quick links: https://wizzik.github.io/defense-webgame/?debug=1 then in the console `__game.debug.learn(4, "arc-lightning")`, `__game.debug.learn(5, "smite")`, `__game.debug.learn(6, "might")` (passives into slots 6-9), `__game.debug.setAbilityLevel(4, 5)`; `__game.abilityIds` lists the slots.
+- **Open for Petr (balance band 6-12 of 20):** Serpent Shaman reads 15 and 16 on the two seed sets, but over 100 seeds it moves only 63 -> 69 % (it already won about 13 of 20 on `main`; 9 on seeds 1-20 was luck). Nightglaive, Mistwarden, Sparkshot and Tidecaller come closer but stay under 6 on at least one set: Nightglaive and Mistwarden die at 2-4 minutes under the doubled enemy damage, before shared spells matter; closing that needs their kits. Redcleaver stays in the band but loses over 100 seeds (45 -> 35 %). Gravecaller still wins everything. Tried and dropped: weaker Arcane Focus, shared spells +30 %, signature weight 6.
+- Minor notes from the final review (not fixed): the client keeps the chain's last bolt point per slot in a small growing array; `botCard` builds the slot range per card (only at offers); the spec's `move_direction` for Blade Fan and `around_self` for Sentry Ward were changed to what the updaters read (`nearest`, `densest_cluster`).
+- Next: merge after green CI, Pages deploy, then Petr plays.
 
 ## Sparkshot multishot: merged (PR #14, 2026-11-18)
 

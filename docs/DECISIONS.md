@@ -2,6 +2,50 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Shared spells and passives (2026-11-18; Petr left the approval to Claude, the choices and numbers are Claude's)
+
+Spec: `docs/superpowers/specs/2026-11-18-shared-spells-passives-design.md`. Plan: `docs/superpowers/plans/2026-11-18-shared-spells-passives.md`.
+
+- **Slots.** 10 slots: 0-2 signature, 3 ultimate, 4-5 shared spells, 6-9 passives (`rules.progression.sharedSpellSlots` 2, `passiveSlots` 4). Shared slots start empty; a spell or passive can be in a hero's kit only once. One pool for every hero (no filter by hero).
+- **New kinds.** `chain` (nearest target, then `bounces` leaps to the nearest enemy not struck yet within `bounceRange`; at most 8 leaps), `instant` with the new targeting `strongest` (a boss or an elite in range first, then the most hp; tie: lower slot), `passive` (no cast; params `attackBonus`, `spellPowerBonus`, `cooldownBonus`, `hpBonus`, `regenBonus`, `moveSpeedBonus`, `attackSpeedBonus`, `goldBonus`, `magnetBonus`). Passives add where gear adds: attack damage to the damage multiplier, spell power to the gear's spell power (it multiplies the power from INT), cooldown speed next to INT (`1 / (1 + INT x 0.01 + cooldownBonus)`), max hp multiplies the hp sum, attack speed under the existing cap, gold next to gold find, magnet next to the gear magnet.
+- **Shared spells (map source, our names; damage, tick and heal values are map units x 0.3, cooldowns x 0.33 like every ability).** Sources are hero spells of the map none of our heroes uses; where the map's number would beat a signature spell or is missing, the value is a design value:
+
+| id | kind, targeting | source | from the map | design |
+|---|---|---|---|---|
+| arc-lightning | chain, nearest | A069 (Chain Lightning) | cooldown 12 | damage 300-2000, range 900, bounces 2-6, bounceRange 500 |
+| smite | instant, strongest | A03U (Storm Blast) | cooldown 8 | damage 500-4000, range 1000 |
+| fire-bolt | projectile, nearest_elite_first | A0B0 (Shadow Strike) | cooldown 8 | damage 300-3000, range 1500, speed 1300 |
+| frost-ring | nova, around_self | A00P (Thunder Clap) | cooldown 8, slowSeconds 2 | damage 300-2400, radius 400-600, slow 0.3-0.5 |
+| meteor | area, densest_cluster | A00W (Rock Down) | damage 1000-6500, range 1000, cooldown 15 | radius 300-400 |
+| holy-ground | ticking_area, around_self | A011 (Immolation) | radius 300 | tick 100-450, 2 per s, hit radius 200, 4 s, cooldown 12 |
+| blade-fan | cone, nearest | A0AD (Breath of Fire) | damage 400-2000, length 800, endWidth 500-700, cooldown 10 | maxTargets 8-16 |
+| shock-wave | line, move_direction | A09Z (Carrion Swarm) | length 1000, cooldown 8 | damage 300-2000, width 300, waveSpeed 1600 |
+| sentry-ward | summon, densest_cluster | AUcb (Carrion Beetles) | cooldown 10 | 1-2 wards, at most 1-3 alive, damage 40-80, 0.5 s, 30 s |
+| second-wind | heal, self | A017 (Healing Wave) | cooldown 15 | heal 600-3000 |
+
+  Blade Fan and Sentry Ward use the targeting their updaters read (`cone` aims at the nearest enemy, `summon` wards go to the densest cluster), not the spec's `move_direction` and `around_self`. At level 5 a shared spell is about a signature spell of its kind at level 3-4.
+- **Passives (design only, level 1 -> 5):** Might attack damage +8 -> +40 %; Arcane Focus spell power +8 -> +40 %; Haste cooldown speed +5 -> +25 %; Vigor max hp +8 -> +40 % and regen +1 -> +5 /s; Fleet Foot move speed +4 -> +20 % and attack speed +6 -> +30 %; Fortune gold +8 -> +40 % and pickup range +40 -> +200. The spec's values; no change in the tuning.
+- **Cards.** Each card of an offer draws a group by `rules.progression.cardWeights` (signature 4, shared upgrade 3, new spell 2, new passive 2; only groups with cards left), then a card of the group uniformly; the card leaves the group. Attribute cards (STR, AGI, INT without repeats) fill the offer only when all groups are empty. Signature 6 was tried: no hero gained, Tidecaller and Stonehorn lost wins.
+- **Autopilot.** Ultimate, signature (upgrade or learn), new shared spell, shared upgrade, new passive, passive upgrade, attribute; the earlier card on a tie. The idle player of the balance tests and `sim:run --idle` takes an attribute, else the card the autopilot wants least (attribute cards are rare now).
+- **Balance.** Autopilot wins of 20 without gear, `main` at `dd88ff5` -> this branch (seeds 1-20 / 21-40; 1-100 in wins of 100 for a steadier picture):
+
+| hero | 1-20 | 21-40 | 1-100 |
+|---|---|---|---|
+| stonehorn | 3 → 6 | 3 → 6 | 10 → 38 |
+| nightglaive | 0 → 4 | 0 → 3 | 1 → 11 |
+| gravecaller | 20 → 20 | 20 → 20 | 100 → 100 |
+| serpent-shaman | 9 → 15 | 10 → 16 | 63 → 69 |
+| mistwarden | 0 → 4 | 2 → 2 | 5 → 17 |
+| sparkshot | 1 → 4 | 5 → 7 | 16 → 26 |
+| redcleaver | 8 → 8 | 12 → 7 | 45 → 35 |
+| tidecaller | 0 → 3 | 1 → 6 | 5 → 21 |
+
+  With a rare item per slot (`--gear mid`), 1-20 / 21-40: Stonehorn 19/17 -> 19/20, Nightglaive 5/8 -> 6/7, Gravecaller 20/20, Serpent Shaman 17/20 -> 18/19, Mistwarden 12/14 -> 14/15, Sparkshot 20/20 -> 18/17, Redcleaver 17/18 -> 18/17, Tidecaller 18/13 -> 14/13 (all heroes 258 -> 255 wins). Full gear wins all 320 before and after. `sim:chests` does not change (it plays no cards).
+- **Seismic Echo** reacts to every cast, shared spells included (the plan's risk). Stonehorn rises from 3 to 6 of 20 and stays in the band, so the echo is not limited to slots 0-3.
+- **Full kit.** All 10 slots at their top level: median phase 19-20 of 20 in the runs that get there (the won ones); the target was phase 16 or later.
+- **Tuning tried and dropped:** Arcane Focus at +5 -> +25 % (Serpent Shaman 15/17, nothing else moved); shared spell damage +30 % (wins within noise, Nightglaive and Mistwarden still die at 2-4 minutes). The spec's numbers stay.
+- **Open for Petr.** Serpent Shaman leaves the band upwards on seeds 1-20 (9 -> 15), but over 100 seeds it moves only 63 -> 69 %: on `main` it already won about 13 of 20, the 9 of seeds 1-20 was early-death luck. Nightglaive, Mistwarden, Sparkshot and Tidecaller come closer to the band but stay under 6 on at least one set; Nightglaive and Mistwarden die between 2 and 4 minutes under the doubled enemy damage, before shared spells matter. Closing that needs their kits (spec: not this plan's task). Redcleaver stays in the band but loses wins over 100 seeds (45 -> 35): attribute cards (its STR) come only when the kit is full. Gravecaller still wins everything.
+
 ## Chest loot, Magic Find and enemy threat (2026-11-18; Petr chose the direction, the numbers are Claude's)
 
 Spec: `docs/superpowers/specs/2026-11-18-chest-loot-threat-design.md`. Plan: `docs/superpowers/plans/2026-11-18-chest-loot-threat.md`.
