@@ -1,3 +1,4 @@
+import type { Ability } from "../../data/schema";
 import type { Card, Run } from "../../sim";
 import { heroStats } from "../../sim";
 import type { HeroStats } from "../../sim";
@@ -27,7 +28,10 @@ function percent(ratio: number): string {
 }
 
 /** Params whose values are ratios shown as "+50 %". */
-const PERCENT_KEYS = new Set(["slow", "damageBonus", "moveSpeedBonus", "attackSpeedBonus", "damageDealt", "empower"]);
+const PERCENT_KEYS = new Set([
+  "slow", "damageBonus", "moveSpeedBonus", "attackSpeedBonus", "damageDealt", "empower",
+  "attackBonus", "spellPowerBonus", "cooldownBonus", "hpBonus", "goldBonus",
+]);
 /** Params that are damage or healing and scale with spell power. */
 const POWER_KEYS = new Set(["damage", "tickDamage", "amount", "healPerHit"]);
 
@@ -40,13 +44,12 @@ function statLabel(key: string): MessageKey | null {
   return label in messagesEn ? (label as MessageKey) : null;
 }
 
-function abilityLines(run: Run, card: Extract<Card, { kind: "ability" }>): CardLine[] {
-  const { def } = run.abilities[card.slot];
+function abilityLines(run: Run, def: Ability, fromLevel: number, toLevel: number): CardLine[] {
   const { spellPower } = run.hero.stats;
   // fromLevel 0 is learning: only the level 1 values are shown, with an empty "from".
-  const learn = card.fromLevel === 0;
-  const from = learn ? card.toLevel - 1 : card.fromLevel - 1;
-  const to = card.toLevel - 1;
+  const learn = fromLevel === 0;
+  const from = learn ? toLevel - 1 : fromLevel - 1;
+  const to = toLevel - 1;
   const lines: CardLine[] = [];
   for (const [key, values] of Object.entries(def.params as Record<string, number[]>)) {
     if (!learn && values[from] === values[to]) continue;
@@ -76,7 +79,8 @@ function statsWith(run: Run, attribute: "str" | "agi" | "int", amount: number): 
 
 /** What a card changes, as before and after values ready to show. */
 export function cardLines(run: Run, card: Card): CardLine[] {
-  if (card.kind === "ability") return abilityLines(run, card);
+  if (card.kind === "ability") return abilityLines(run, run.abilities[card.slot].def, card.fromLevel, card.toLevel);
+  if (card.kind === "learn") return abilityLines(run, run.data.abilities[card.ability], 0, 1);
   const [a, b] = statsWith(run, card.attribute, card.amount);
   const base = run.hero.def.baseAttack.cooldown;
   switch (card.attribute) {

@@ -1,5 +1,5 @@
 import { pathToFileURL } from "node:url";
-import { botInput } from "../../sim/bot";
+import { botInput, idleCard } from "../../sim/bot";
 import { TICKS_PER_SECOND } from "../../sim/constants";
 import { createRun } from "../../sim/index";
 import type { LoadoutEntry, Run, RunResult } from "../../sim/index";
@@ -36,12 +36,12 @@ export interface RunSummary {
   gold: number;
 }
 
-/** A player who does nothing: no movement, no action; at a level-up the attribute card, so the first ability stays alone. */
+/** A player who does nothing: no movement, no action; at a level-up the attribute card, else the weakest card (idleCard). */
 export function idleInput(run: Run, out: TickInput): TickInput {
   out.moveX = 0;
   out.moveY = 0;
   out.actions = 0;
-  out.card = run.offer ? Math.max(0, run.offer.cards.findIndex((c) => c.kind === "attribute")) : run.chestOffer ? 0 : -1;
+  out.card = run.offer ? idleCard(run, run.offer) : run.chestOffer ? 0 : -1;
   return out;
 }
 

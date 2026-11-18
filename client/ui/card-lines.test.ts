@@ -84,4 +84,39 @@ describe("cardLines", () => {
       });
     }
   });
+
+  it("a learn card of a shared spell lists its level 1 values and its cooldown", () => {
+    const run = stonehornRun();
+    const ability = run.data.abilities.findIndex((a) => a.id === "arc-lightning");
+    const def = run.data.abilities[ability]!;
+    const params = def.params as Record<string, number[]>;
+    const lines = cardLines(run, { kind: "learn", slot: 4, ability });
+    expect(lines).toContainEqual({ label: "stat.damage", from: "", to: String(Math.round(params.damage[0] * run.hero.stats.spellPower)) });
+    expect(lines).toContainEqual({ label: "stat.bounces", from: "", to: String(params.bounces[0]) });
+    expect(lines).toContainEqual({ label: "stat.bounceRange", from: "", to: String(params.bounceRange[0]) });
+    expect(lines).toContainEqual({ label: "stat.cooldown", from: "", to: String(Math.round(def.cooldown[0]! * 10) / 10) });
+  });
+
+  it("passives show percents and plain numbers, and no cooldown", () => {
+    const run = stonehornRun();
+    const vigor = run.data.abilities.findIndex((a) => a.id === "vigor");
+    expect(cardLines(run, { kind: "learn", slot: 6, ability: vigor })).toEqual([
+      { label: "stat.hpBonus", from: "", to: "+8 %" },
+      { label: "stat.regenBonus", from: "", to: "1" },
+    ]);
+    const fortune = run.data.abilities.findIndex((a) => a.id === "fortune");
+    expect(cardLines(run, { kind: "learn", slot: 6, ability: fortune })).toEqual([
+      { label: "stat.goldBonus", from: "", to: "+8 %" },
+      { label: "stat.magnetBonus", from: "", to: "40" },
+    ]);
+  });
+
+  it("every shared spell and passive has at least one line on its learn card", () => {
+    const run = stonehornRun();
+    const { sharedSpells, passives } = run.data.rules.progression;
+    for (const id of [...sharedSpells, ...passives]) {
+      const ability = run.data.abilities.findIndex((a) => a.id === id);
+      expect(cardLines(run, { kind: "learn", slot: 4, ability }).length, id).toBeGreaterThan(0);
+    }
+  });
 });

@@ -1,4 +1,5 @@
 import { RARITIES } from "../data/schema";
+import { sharedSlotRange, ULTIMATE_SLOT } from "./abilities/slots";
 import type { CardOffer } from "./cards";
 import { ChestAction, chestPrice } from "./chests";
 import { Charge } from "./enemy-charge";
@@ -38,12 +39,41 @@ const AXIS_DEADZONE = 30;
 /** Share of a unit vector under which an axis is not pressed (between sin 22.5° and cos 67.5°). */
 const AXIS_SHARE = 0.38;
 
-/** As a player would: a spell before an attribute. The first spell card of the offer, else the first card. */
-export function botCard(offer: CardOffer): number {
-  for (let c = 0; c < offer.cards.length; c++) {
-    if (offer.cards[c].kind === "ability") return c;
+/**
+ * The card a representative player takes (spec 4.5): the ultimate, an upgrade or the learning of a signature
+ * spell, a new shared spell, an upgrade of a shared spell, a new passive, an upgrade of a passive, an attribute.
+ * The earlier card of the offer wins a tie.
+ */
+export function botCard(run: Run, offer: CardOffer): number {
+  let best = 0;
+  for (let c = 1; c < offer.cards.length; c++) {
+    if (cardRank(run, offer.cards[c]) < cardRank(run, offer.cards[best])) best = c;
   }
-  return 0;
+  return best;
+}
+
+/**
+ * The card of a player who does nothing (balance tests, `sim:run --idle`): an attribute card when one is
+ * offered, else the card the autopilot wants least, so the kit grows as little as the offers allow.
+ * The earlier card wins a tie.
+ */
+export function idleCard(run: Run, offer: CardOffer): number {
+  let best = 0;
+  for (let c = 1; c < offer.cards.length; c++) {
+    if (cardRank(run, offer.cards[c]) > cardRank(run, offer.cards[best])) best = c;
+  }
+  return best;
+}
+
+/** The autopilot's order of spec 4.5: 1 the ultimate ... 7 an attribute. */
+function cardRank(run: Run, card: CardOffer["cards"][number]): number {
+  if (card.kind === "attribute") return 7;
+  const [sharedFirst, sharedEnd] = sharedSlotRange(run);
+  const shared = card.slot >= sharedFirst && card.slot < sharedEnd;
+  if (card.kind === "learn") return shared ? 3 : 5;
+  if (card.slot === ULTIMATE_SLOT) return 1;
+  if (card.slot < ULTIMATE_SLOT) return 2;
+  return shared ? 4 : 6;
 }
 
 /**
@@ -88,7 +118,7 @@ export function botInput(run: Run, out: TickInput): TickInput {
   out.card = -1;
   out.actions = 0;
   if (run.state === "levelUp") {
-    out.card = run.offer ? botCard(run.offer) : 0;
+    out.card = run.offer ? botCard(run, run.offer) : 0;
     return out;
   }
   if (run.state === "chest") {

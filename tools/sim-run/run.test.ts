@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { botInput } from "../../sim/bot";
+import { botInput, idleCard } from "../../sim/bot";
 import { createRun } from "../../sim/index";
 import type { TickInput } from "../../sim/input";
 import { gameData } from "../../sim/testing/game-data";
@@ -104,7 +104,7 @@ describe("playBot", () => {
     expect(s.minHeroHpPercent).toBeLessThanOrEqual(Math.ceil((100 * s.heroHp) / s.heroMaxHp));
   });
 
-  it("idle input never moves or acts and takes an attribute card", () => {
+  it("idle input never moves or acts and takes the weakest card", () => {
     const run = createRun(gameData(), { seed: 1 });
     const input: TickInput = { moveX: 1, moveY: -1, card: 2, actions: 7 };
     expect(idleInput(run, input)).toEqual({ moveX: 0, moveY: 0, card: -1, actions: 0 });
@@ -112,7 +112,7 @@ describe("playBot", () => {
     run.step(input);
     expect(run.state).toBe("levelUp");
     const card = idleInput(run, input).card;
-    expect(run.offer!.cards[card]!.kind).toBe("attribute");
+    expect(card).toBe(idleCard(run, run.offer!));
     expect(input.moveX).toBe(0);
   });
 

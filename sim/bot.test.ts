@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { debugSetAbilityLevel } from "./abilities/slots";
 import { EventKind } from "./events";
-import { botCard, botChestChoice, botInput, CHASE_DISTANCE, DEFEND_RADIUS, HOME_OFFSET, LEASH_DISTANCE } from "./bot";
+import { botCard, botChestChoice, botInput, idleCard, CHASE_DISTANCE, DEFEND_RADIUS, HOME_OFFSET, LEASH_DISTANCE } from "./bot";
 import { ChestAction, chestPrice } from "./chests";
 import { silenceSpawns } from "./testing/silence";
 import { Charge } from "./enemy-charge";
@@ -237,10 +237,11 @@ describe("autopilot", () => {
   });
 
   it("botCard picks the first spell card, else the first card", () => {
+    const run = createRun(gameData(), { seed: 1 });
     const attribute = { kind: "attribute", attribute: "str", amount: 10 } as const;
     const ability = { kind: "ability", slot: 1, fromLevel: 0, toLevel: 1 } as const;
-    expect(botCard({ cards: [attribute, ability, ability] })).toBe(1);
-    expect(botCard({ cards: [attribute, attribute] })).toBe(0);
+    expect(botCard(run, { cards: [attribute, ability, ability] })).toBe(1);
+    expect(botCard(run, { cards: [attribute, attribute] })).toBe(0);
   });
 
   it("takes a spell card before an attribute card", () => {
@@ -319,8 +320,8 @@ describe("balance", () => {
         const run = createRun(gameData(), { seed, hero });
         const input: TickInput = { ...NO_INPUT };
         while (run.state !== "won" && run.state !== "lost") {
-          // no movement and no action; at a level-up the attribute card, so the first spell stays alone
-          input.card = run.offer ? Math.max(0, run.offer.cards.findIndex((c) => c.kind === "attribute")) : -1;
+          // no movement and no action; at a level-up the attribute card, else the weakest card
+          input.card = run.offer ? idleCard(run, run.offer) : -1;
           run.step(input);
           if (run.tick > idleSeconds * 30) break;
         }

@@ -22,7 +22,7 @@ export function applyStartPhase(run: Run, phase: number): void {
   gainXp(run, rules.debug.phaseXp[Math.min(phase, count) - 1]);
   if (run.hero.pendingLevelUps > 0) {
     openOffer(run);
-    while (run.offer) chooseCard(run, botCard(run.offer));
+    while (run.offer) chooseCard(run, botCard(run, run.offer));
   }
   run.events.clear();
 }

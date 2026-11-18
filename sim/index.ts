@@ -7,8 +7,8 @@ export {
 } from "./abilities/slots";
 export { countEnemiesWithin, densestCluster, nearestEnemy, strongestEnemy } from "./abilities/targeting";
 export type { AbilitySlot } from "./abilities/slots";
-export { botCard, botChestChoice, botInput } from "./bot";
-export { chooseCard, openOffer } from "./cards";
+export { botCard, botChestChoice, botInput, idleCard } from "./bot";
+export { cardGroups, chooseCard, openOffer } from "./cards";
 export { applyChestCard, ChestAction, chestPrice, ChestStore, chooseChestCard, rollChestOffer } from "./chests";
 export type { ChestCard, ChestOffer } from "./chests";
 export { killEnemy } from "./combat";

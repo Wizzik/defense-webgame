@@ -195,6 +195,10 @@ export function stateHash(run: Run): number {
         mixInt(1);
         mixInt(card.slot);
         mixInt(card.toLevel);
+      } else if (card.kind === "learn") {
+        mixInt(5);
+        mixInt(card.slot);
+        mixInt(card.ability);
       } else {
         mixInt(card.attribute === "str" ? 2 : card.attribute === "agi" ? 3 : 4);
         mixFloat(card.amount);
