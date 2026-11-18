@@ -3,13 +3,23 @@ import { LocalizedText, Slug } from "./common";
 
 export const AbilityKind = z.enum([
   "projectile", "instant", "chain", "area", "line", "nova", "cone",
-  "ticking_area", "aura", "summon", "on_hit", "heal", "shield", "on_cast",
+  "ticking_area", "aura", "summon", "on_hit", "heal", "shield", "on_cast", "passive",
 ]);
 
 export const Targeting = z.enum([
   "nearest", "nearest_elite_first", "densest_cluster", "move_direction",
-  "around_self", "self", "on_attack", "low_hp_ally", "on_cast",
+  "around_self", "self", "on_attack", "low_hp_ally", "on_cast", "strongest",
 ]);
+
+/** Params of a passive: fractions (0.08 = 8 %), except regenBonus (hp per second) and magnetBonus (world units). */
+export const PASSIVE_KEYS = [
+  "attackBonus", "spellPowerBonus", "cooldownBonus", "hpBonus", "regenBonus",
+  "moveSpeedBonus", "attackSpeedBonus", "goldBonus", "magnetBonus",
+] as const;
+export type PassiveKey = (typeof PASSIVE_KEYS)[number];
+
+/** Upper bound of chain bounces (the chain updater keeps a scratch array of this size). */
+export const MAX_BOUNCES = 8;
 
 const PerLevel = z.array(z.number());
 
@@ -70,7 +80,11 @@ export const AbilitySchema = z
     variant("projectile", params(["damage", "range"], ["speed"])),
     variant("on_cast", params(["damage", "radius", "stunSeconds"])),
     variant("instant", params(["damage", "range"])),
-    variant("chain", params(["damage", "range", "bounces"])),
+    variant("chain", params(["damage", "range", "bounces", "bounceRange"]).superRefine((p, ctx) => {
+      if (p.bounces.some((b) => !Number.isInteger(b) || b < 0 || b > MAX_BOUNCES)) {
+        ctx.addIssue({ code: "custom", path: ["bounces"], message: `bounces must be integers 0-${MAX_BOUNCES}` });
+      }
+    })),
     variant("area", params(["damage", "radius", "range"], ["healPerHit"])),
     variant("line", params(["damage", "length", "width"], ["stunSeconds", "waveSpeed"])),
     variant("nova", params(["damage", "radius"], ["slow", "slowSeconds"])),
@@ -81,8 +95,12 @@ export const AbilitySchema = z
     variant("on_hit", paramsAnyOf(["chance", "splashRadius", "bonusDamage", "empower"], ["splashPercent", "stunSeconds", "extraTargets"])),
     variant("heal", params(["amount", "maxTargets", "range"])),
     variant("shield", params(["duration", "radius"])),
+    variant("passive", paramsAnyOf(PASSIVE_KEYS)),
   ])
   .superRefine((a, ctx) => {
+    if (a.kind === "passive" && a.cooldown.some((c) => c !== 0)) {
+      ctx.addIssue({ code: "custom", path: ["cooldown"], message: "a passive has no cooldown (all 0)" });
+    }
     if (a.cooldown.length !== a.levels) {
       ctx.addIssue({
         code: "custom",

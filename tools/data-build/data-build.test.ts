@@ -2,7 +2,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildGameData } from "./build";
 import { type AbilityEntry, type ExportAbility, loadDesign, loadMapExport, type ParamSpec } from "./load";
-import { mapAbility } from "./map-abilities";
+import { mapAbility, mapDesignAbility } from "./map-abilities";
 import { mapEnemy } from "./map-enemies";
 import { mapHero } from "./map-heroes";
 import { resolveParam } from "./resolve";
@@ -124,7 +124,7 @@ describe("data-build", () => {
         ultimate: "echo",
       },
     ]);
-    expect(data.abilities.map((a) => a.id)).toEqual(["pulse", "focus", "spark", "echo"]);
+    expect(data.abilities.map((a) => a.id)).toEqual(["pulse", "focus", "spark", "echo", "zap", "boon"]);
     expect(data.enemies.map((e) => e.id)).toEqual(["grunt", "warlord"]);
     expect(data.abilities[2]).toStrictEqual({
       id: "spark",
@@ -344,5 +344,45 @@ describe("data-build", () => {
   it("copies enemy gold and defaults it to 0", () => {
     const data = buildGameData(mapExport(), design(), "test");
     expect(data.enemies.map((e) => e.gold)).toEqual([2, 0]);
+  });
+
+  it("builds an ability without source from its design values", () => {
+    const data = buildGameData(mapExport(), unscaledDesign(), "test");
+    expect(data.abilities.find((a) => a.id === "zap")).toStrictEqual({
+      id: "zap",
+      name: { en: "Zap", cs: "Zásah" },
+      description: { en: "Zap text", cs: "Zásah text" },
+      kind: "chain",
+      targeting: "nearest",
+      levels: 3,
+      cooldown: [5, 4, 3],
+      params: { damage: [10, 20, 30], range: [500, 500, 500], bounces: [2, 3, 4], bounceRange: [300, 300, 300] },
+    });
+    expect(data.abilities.find((a) => a.id === "boon")?.cooldown).toEqual([0, 0, 0]);
+  });
+
+  it("scales the design values of an ability without source like any ability", () => {
+    const data = buildGameData(mapExport(), design(), "test");
+    const zap = data.abilities.find((a) => a.id === "zap");
+    const scale = design().scaling.abilities;
+    expect(zap?.cooldown[0]).toBeCloseTo(5 * scale.cooldown, 2);
+  });
+
+  it("rejects an ability without source whose values are not design values", () => {
+    const entry = { ...abilityEntry("zap"), params: { ...abilityEntry("zap").params, range: "range" as ParamSpec } };
+    expect(errorMessage(() => mapDesignAbility(entry))).toBe(
+      "design/abilities.yaml: zap: params.range: an ability without source needs { design: [...] }",
+    );
+    const noCooldown = { ...abilityEntry("zap"), cooldown: undefined };
+    expect(errorMessage(() => mapDesignAbility(noCooldown))).toContain("zap: cooldown: an ability without source");
+  });
+
+  it("rejects an ability without source with arrays of different lengths or review notes", () => {
+    const entry = { ...abilityEntry("zap"), params: { ...abilityEntry("zap").params, damage: { design: [1, 2] } } };
+    expect(errorMessage(() => mapDesignAbility(entry))).toContain("zap: params.damage: has 2 values, the cooldown has 3");
+    const six = { ...abilityEntry("zap"), cooldown: { design: [1, 1, 1, 1, 1, 1] } };
+    expect(errorMessage(() => mapDesignAbility(six))).toContain("needs 1-5 values");
+    const review = { ...abilityEntry("zap"), review: { notes: "x" } };
+    expect(errorMessage(() => mapDesignAbility(review))).toContain("zap: review:");
   });
 });

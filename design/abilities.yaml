@@ -523,3 +523,198 @@
       (Trig_Special_Actions, 20775-20781). The agility part is not mapped. Level 1 tickDamage is the script's 500.
       Level 2 in the script keeps 500 and triples the radius; the game keeps the object data area (500) on both
       levels and raises the tick to 900 in its place (design value, the plan's stand-in for level 2).
+
+# Shared spells (pool): any hero can learn two of them from cards (rules.progression.sharedSpells).
+# Sources are hero spells of the map that none of our eight heroes uses, of a matching kind; values the
+# map does not carry, or that would beat a signature spell, are design values (docs/DECISIONS.md,
+# section Shared spells and passives). Target: a shared spell on level 5 is about a signature spell of
+# the same kind on level 3-4.
+
+- id: arc-lightning
+  source: A069
+  name: { en: Arc Lightning, cs: Jiskrový řetěz }
+  description: { en: "Lightning strikes the nearest enemy and leaps from foe to foe.", cs: "Blesk udeří do nejbližšího nepřítele a přeskakuje na další." }
+  kind: chain
+  targeting: nearest
+  params:
+    # The map's 500 to 6000 per target hits 16 targets; ours hits far fewer, so the damage is a design value.
+    damage: { design: [300, 600, 1000, 1500, 2000] }
+    range: { design: [900, 900, 900, 900, 900] }
+    bounces: { design: [2, 3, 4, 5, 6] }
+    bounceRange: { design: [500, 500, 500, 500, 500] }
+
+- id: smite
+  source: A03U
+  name: { en: Smite, cs: Úder shůry }
+  description: { en: "A bolt from above strikes the strongest foe in reach; bosses and elites first.", cs: "Rána shůry zasáhne nejsilnějšího nepřítele v dosahu; bossové a elity mají přednost." }
+  kind: instant
+  targeting: strongest
+  params:
+    # The map's 200 to 1600 are too low for the one hit that hunts bosses.
+    damage: { design: [500, 1000, 1800, 2800, 4000] }
+    range: { design: [1000, 1000, 1000, 1000, 1000] }
+
+- id: fire-bolt
+  source: A0B0
+  name: { en: Fire Bolt, cs: Ohnivá střela }
+  description: { en: "Hurls a bolt of fire at the nearest enemy; elites are hit first.", cs: "Vrhne ohnivou střelu na nejbližšího nepřítele; elity mají přednost." }
+  kind: projectile
+  targeting: nearest_elite_first
+  params:
+    damage: { design: [300, 600, 1200, 2000, 3000] }
+    range: { design: [1500, 1500, 1500, 1500, 1500] }
+    speed: { design: [1300, 1300, 1300, 1300, 1300] }
+
+- id: frost-ring
+  source: A00P
+  name: { en: Frost Ring, cs: Mrazivý kruh }
+  description: { en: "A ring of frost bursts around you and slows everything it touches.", cs: "Kolem tebe vybuchne mrazivý kruh a zpomalí vše, co zasáhne." }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: { design: [300, 600, 1000, 1600, 2400] }
+    # The map's area (1000 to 3000) covers the whole screen; design radius.
+    radius: { design: [400, 450, 500, 550, 600] }
+    slow: { design: [0.3, 0.35, 0.4, 0.45, 0.5] }
+    slowSeconds: duration
+
+- id: meteor
+  source: A00W
+  name: { en: Meteor, cs: Meteor }
+  description: { en: "A meteor falls on the thickest crowd of enemies.", cs: "Meteor dopadne do nejhustšího hloučku nepřátel." }
+  kind: area
+  targeting: densest_cluster
+  params:
+    damage: DataB
+    # The map's area grows to 1000; design radius.
+    radius: { design: [300, 325, 350, 375, 400] }
+    range: range
+
+- id: holy-ground
+  source: A011
+  name: { en: Holy Ground, cs: Svatá půda }
+  description: { en: "The ground around you burns with light for a few seconds.", cs: "Půda kolem tebe na pár sekund plane světlem." }
+  kind: ticking_area
+  targeting: around_self
+  # The map's spell burns without a cooldown; ours lasts 4 s and comes back after about 4 s.
+  cooldown: { design: [12, 12, 12, 12, 12] }
+  params:
+    tickDamage: { design: [100, 180, 270, 360, 450] }
+    ticksPerSecond: { design: [2, 2, 2, 2, 2] }
+    radius: area
+    hitRadius: { design: [200, 200, 200, 200, 200] }
+    duration: { design: [4, 4, 4, 4, 4] }
+
+- id: blade-fan
+  source: A0AD
+  name: { en: Blade Fan, cs: Vějíř dýk }
+  description: { en: "Throws a fan of blades towards the nearest enemy.", cs: "Vrhne vějíř dýk směrem k nejbližšímu nepříteli." }
+  kind: cone
+  # The cone updater aims at the nearest enemy (like Forked Bolt).
+  targeting: nearest
+  params:
+    damage: DataA
+    length: DataC
+    endWidth: area
+    maxTargets: { design: [8, 10, 12, 14, 16] }
+
+- id: shock-wave
+  source: A09Z
+  name: { en: Shock Wave, cs: Rázová vlna }
+  description: { en: "A wave rolls out where you walk and hits everything in its path.", cs: "Vlna se valí tam, kam jdeš, a zasáhne vše v cestě." }
+  kind: line
+  targeting: move_direction
+  params:
+    # The map doubles 400 up to 6400; design damage.
+    damage: { design: [300, 600, 1000, 1500, 2000] }
+    length: DataC
+    width: { design: [300, 300, 300, 300, 300] }
+    waveSpeed: { design: [1600, 1600, 1600, 1600, 1600] }
+
+- id: sentry-ward
+  source: AUcb
+  name: { en: Sentry Ward, cs: Strážní totem }
+  description: { en: "Plants a ward by the crowd that shoots at enemies around it.", cs: "Postaví u hloučku nepřátel totem, který po nich střílí." }
+  kind: summon
+  # The summon updater plants wards at the thickest crowd in range (like Serpent Totem).
+  targeting: densest_cluster
+  params:
+    count: { design: [1, 1, 1, 1, 2] }
+    duration: { design: [30, 30, 30, 30, 30] }
+    range: { design: [600, 600, 600, 600, 600] }
+    damage: { design: [40, 50, 60, 70, 80] }
+    attackRange: { design: [600, 600, 600, 600, 600] }
+    attackInterval: { design: [0.5, 0.5, 0.5, 0.5, 0.5] }
+    maxAlive: { design: [1, 2, 2, 3, 3] }
+
+- id: second-wind
+  source: A017
+  name: { en: Second Wind, cs: Druhý dech }
+  description: { en: "Heals you when your health runs low.", cs: "Uzdraví tě, když ti dochází zdraví." }
+  kind: heal
+  targeting: self
+  params:
+    # The map's wave heals 1 point per target (scripted); design amount.
+    amount: { design: [600, 1000, 1500, 2200, 3000] }
+    maxTargets: { design: [1, 1, 1, 1, 1] }
+    range: { design: [700, 700, 700, 700, 700] }
+
+# Passives (pool): four slots filled from cards (rules.progression.passives). Design values only, no
+# map source; fractions are shares (0.08 = 8 %), regenBonus is hp per second, magnetBonus world units.
+
+- id: might
+  name: { en: Might, cs: Síla paže }
+  description: { en: "Your basic attacks hit harder.", cs: "Tvé základní útoky udeří silněji." }
+  kind: passive
+  targeting: self
+  cooldown: { design: [0, 0, 0, 0, 0] }
+  params:
+    attackBonus: { design: [0.08, 0.16, 0.24, 0.32, 0.40] }
+
+- id: arcane-focus
+  name: { en: Arcane Focus, cs: Soustředění }
+  description: { en: "All your spells deal more damage and heal more.", cs: "Všechna tvá kouzla dávají větší poškození a víc léčí." }
+  kind: passive
+  targeting: self
+  cooldown: { design: [0, 0, 0, 0, 0] }
+  params:
+    spellPowerBonus: { design: [0.08, 0.16, 0.24, 0.32, 0.40] }
+
+- id: haste
+  name: { en: Haste, cs: Spěch }
+  description: { en: "Your spells come back faster.", cs: "Tvá kouzla se rychleji obnovují." }
+  kind: passive
+  targeting: self
+  cooldown: { design: [0, 0, 0, 0, 0] }
+  params:
+    cooldownBonus: { design: [0.05, 0.10, 0.15, 0.20, 0.25] }
+
+- id: vigor
+  name: { en: Vigor, cs: Houževnatost }
+  description: { en: "More health, and it comes back faster.", cs: "Víc zdraví, které se rychleji obnovuje." }
+  kind: passive
+  targeting: self
+  cooldown: { design: [0, 0, 0, 0, 0] }
+  params:
+    hpBonus: { design: [0.08, 0.16, 0.24, 0.32, 0.40] }
+    regenBonus: { design: [1, 2, 3, 4, 5] }
+
+- id: fleet-foot
+  name: { en: Fleet Foot, cs: Lehký krok }
+  description: { en: "You move and attack faster.", cs: "Pohybuješ se a útočíš rychleji." }
+  kind: passive
+  targeting: self
+  cooldown: { design: [0, 0, 0, 0, 0] }
+  params:
+    moveSpeedBonus: { design: [0.04, 0.08, 0.12, 0.16, 0.20] }
+    attackSpeedBonus: { design: [0.06, 0.12, 0.18, 0.24, 0.30] }
+
+- id: fortune
+  name: { en: Fortune, cs: Štěstěna }
+  description: { en: "More gold from every coin, and pickups fly to you from farther away.", cs: "Víc zlata z každé mince a věci k tobě létají z větší dálky." }
+  kind: passive
+  targeting: self
+  cooldown: { design: [0, 0, 0, 0, 0] }
+  params:
+    goldBonus: { design: [0.08, 0.16, 0.24, 0.32, 0.40] }
+    magnetBonus: { design: [40, 80, 120, 160, 200] }

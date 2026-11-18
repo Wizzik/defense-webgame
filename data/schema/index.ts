@@ -6,8 +6,8 @@ import { HeroSchema } from "./hero";
 import { ItemSchema, SLOT_TYPES } from "./item";
 import { RulesSchema } from "./rules";
 
-export { AbilityKind, AbilitySchema, Targeting } from "./ability";
-export type { Ability } from "./ability";
+export { AbilityKind, AbilitySchema, MAX_BOUNCES, PASSIVE_KEYS, Targeting } from "./ability";
+export type { Ability, PassiveKey } from "./ability";
 export { LocalizedText, Slug } from "./common";
 export { ConstantsSchema } from "./constants";
 export type { Constants } from "./constants";
@@ -79,6 +79,28 @@ export function validateGameData(data: unknown): GameData {
     if (!abilityIds.has(h.ultimate)) {
       errors.push(`heroes.${i}.ultimate: unknown ability "${h.ultimate}"`);
     }
+  });
+
+  const abilityById = new Map(abilities.map((a) => [a.id, a]));
+  const heroKit = new Set(heroes.flatMap((h) => [...h.signatureAbilities, h.ultimate]));
+  for (const id of heroKit) {
+    if (abilityById.get(id)?.kind === "passive") errors.push(`heroes: "${id}" is a passive and cannot be in a hero's kit`);
+  }
+  const { progression } = rules;
+  progression.sharedSpells.forEach((id, i) => {
+    const path = `rules.progression.sharedSpells.${i}`;
+    const a = abilityById.get(id);
+    if (!a) errors.push(`${path}: unknown ability "${id}"`);
+    else if (a.kind === "passive") errors.push(`${path}: "${id}" is a passive`);
+    else if (heroKit.has(id)) errors.push(`${path}: "${id}" is in a hero's kit`);
+    if (progression.sharedSpells.indexOf(id) !== i) errors.push(`${path}: duplicate "${id}"`);
+  });
+  progression.passives.forEach((id, i) => {
+    const path = `rules.progression.passives.${i}`;
+    const a = abilityById.get(id);
+    if (!a) errors.push(`${path}: unknown ability "${id}"`);
+    else if (a.kind !== "passive") errors.push(`${path}: "${id}" is not a passive`);
+    if (progression.passives.indexOf(id) !== i) errors.push(`${path}: duplicate "${id}"`);
   });
 
   const enemyIds = new Set<string>();

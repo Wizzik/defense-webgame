@@ -37,6 +37,10 @@ function fixture(): any {
         params: { chance: [0.1, 0.2, 0.3] } },
       { ...base, id: "swarm", name: names("Swarm"), description: names("d"), kind: "summon", targeting: "self",
         params: { count: [1, 2, 3], duration: [10, 10, 10], range: [1, 1, 1], damageDealt: [1, 1, 1] } },
+      { ...base, id: "zap", name: names("Zap"), description: names("d"), kind: "chain", targeting: "nearest",
+        params: { damage: [10, 20, 30], range: [500, 500, 500], bounces: [2, 3, 4], bounceRange: [300, 300, 300] } },
+      { levels: 3, cooldown: [0, 0, 0], id: "boon", name: names("Boon"), description: names("d"), kind: "passive",
+        targeting: "self", params: { attackBonus: [0.1, 0.2, 0.3] } },
     ],
     enemies: [
       {
@@ -87,6 +91,8 @@ function fixture(): any {
       progression: {
         xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56,
         attributeCardAmount: 10, cardsPerOffer: 3, ultimateFromLevel: 6, ultimateLevelStep: 6,
+        sharedSpells: ["zap"], passives: ["boon"], sharedSpellSlots: 2, passiveSlots: 4,
+        cardWeights: { signature: 4, sharedUpgrade: 3, newSpell: 2, newPassive: 2 },
       },
     },
     items: SLOT_TYPES.map((slotType) => ({
@@ -119,7 +125,7 @@ describe("game data schemas", () => {
   it("accepts valid game data", () => {
     const data = validateGameData(fixture());
     expect(data.heroes).toHaveLength(1);
-    expect(data.abilities).toHaveLength(4);
+    expect(data.abilities).toHaveLength(6);
   });
 
   it("reports path of invalid kind", () => {
@@ -182,7 +188,7 @@ describe("game data schemas", () => {
       params: { damage: [1, 2, 3], length: [1, 2, 3], width: [1, 2, 3], stunSecond: [1, 1, 1] },
     });
     const msg = errorMessage(d);
-    expect(msg).toContain("abilities.4 (wave).params");
+    expect(msg).toContain("abilities.6 (wave).params");
     expect(msg).toContain("stunSecond");
   });
 
@@ -435,6 +441,79 @@ describe("game data schemas", () => {
 
   it("renders root issues as (root)", () => {
     expect(errorMessage(42)).toMatch(/^\(root\): /);
+  });
+});
+
+describe("shared spell and passive pools", () => {
+  it("accepts a passive and a chain with bounceRange and the strongest targeting", () => {
+    const data = fixture();
+    data.abilities[4].targeting = "strongest";
+    expect(() => validateGameData(data)).not.toThrow();
+  });
+
+  it("rejects a passive with a cooldown", () => {
+    const data = fixture();
+    data.abilities[5].cooldown = [0, 1, 0];
+    expect(errorMessage(data)).toContain("a passive has no cooldown");
+  });
+
+  it("rejects a passive without a known bonus key", () => {
+    const data = fixture();
+    data.abilities[5].params = { damage: [1, 2, 3] };
+    expect(errorMessage(data)).toContain("abilities.5 (boon).params");
+  });
+
+  it("rejects a chain without bounceRange or with too many bounces", () => {
+    const data = fixture();
+    delete data.abilities[4].params.bounceRange;
+    expect(errorMessage(data)).toContain("abilities.4 (zap).params.bounceRange");
+    const many = fixture();
+    many.abilities[4].params.bounces = [2, 3, 9];
+    expect(errorMessage(many)).toContain("bounces must be integers");
+  });
+
+  it("rejects a shared spell that is unknown, a passive or in a hero's kit", () => {
+    const unknown = fixture();
+    unknown.rules.progression.sharedSpells = ["nope"];
+    expect(errorMessage(unknown)).toContain('rules.progression.sharedSpells.0: unknown ability "nope"');
+    const passive = fixture();
+    passive.rules.progression.sharedSpells = ["boon"];
+    expect(errorMessage(passive)).toContain('"boon" is a passive');
+    const kit = fixture();
+    kit.rules.progression.sharedSpells = ["pulse"];
+    expect(errorMessage(kit)).toContain("\"pulse\" is in a hero's kit");
+  });
+
+  it("rejects a duplicate in a pool", () => {
+    const data = fixture();
+    data.rules.progression.sharedSpells = ["zap", "zap"];
+    expect(errorMessage(data)).toContain('sharedSpells.1: duplicate "zap"');
+  });
+
+  it("rejects a passive pool entry that is not a passive or unknown", () => {
+    const spell = fixture();
+    spell.rules.progression.passives = ["zap"];
+    expect(errorMessage(spell)).toContain('"zap" is not a passive');
+    const unknown = fixture();
+    unknown.rules.progression.passives = ["nope"];
+    expect(errorMessage(unknown)).toContain('passives.0: unknown ability "nope"');
+  });
+
+  it("rejects a passive in a hero's kit", () => {
+    const data = fixture();
+    data.heroes[0].signatureAbilities = ["pulse", "boon", "rend"];
+    expect(errorMessage(data)).toContain('"boon" is a passive and cannot be in a hero\'s kit');
+  });
+
+  it("requires the pool fields and card weights", () => {
+    for (const key of ["sharedSpells", "passives", "sharedSpellSlots", "passiveSlots", "cardWeights"]) {
+      const data = fixture();
+      delete data.rules.progression[key];
+      expect(errorMessage(data)).toContain(`rules.progression.${key}`);
+    }
+    const data = fixture();
+    data.rules.progression.cardWeights.newSpell = 0;
+    expect(errorMessage(data)).toContain("rules.progression.cardWeights.newSpell");
   });
 });
 

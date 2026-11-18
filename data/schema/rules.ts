@@ -153,6 +153,16 @@ export const RulesSchema = z.object({
     cardsPerOffer: z.number().int().positive(),
     ultimateFromLevel: z.number().int().min(1),
     ultimateLevelStep: z.number().int().min(1),
+    sharedSpells: z.array(Slug).min(1),
+    passives: z.array(Slug).min(1),
+    sharedSpellSlots: z.number().int().min(0),
+    passiveSlots: z.number().int().min(0),
+    cardWeights: z.object({
+      signature: positive,
+      sharedUpgrade: positive,
+      newSpell: positive,
+      newPassive: positive,
+    }).strict(),
   }).strict(),
 }).strict();
 
