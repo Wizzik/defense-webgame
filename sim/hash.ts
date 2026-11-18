@@ -141,7 +141,13 @@ export function stateHash(run: Run): number {
     mixFloat(run.chests.x[i]!);
     mixFloat(run.chests.y[i]!);
   }
-  if (run.chestOffer) for (const slot of run.chestOffer.slots) mixInt(slot + 1);
+  if (run.chestOffer) {
+    for (const card of run.chestOffer.cards) {
+      mixInt(card.slot + 1);
+      mixInt(card.item + 1);
+      mixInt(card.action);
+    }
+  }
   mixFloat(run.gold);
   mixFloat(run.stats.goldGained);
   const coins = run.coins;

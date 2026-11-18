@@ -9,7 +9,7 @@
 # source: optional, the map's item category that inspired the item (traceability only, never written to data/generated).
 # Names are our own; nothing is copied from the map.
 
-# Common: one per slot type. A chest puts these into an empty slot for the run.
+# Common: one per slot type, so a chest card of any slot can fall to common.
 - { id: travelers-hood, name: { en: "Traveler's Hood", cs: "Poutníkova kápě" }, slotType: head, rarity: common, stats: [{ stat: int, value: 3 }] }
 - { id: copper-pendant, name: { en: "Copper Pendant", cs: "Měděný přívěsek" }, slotType: neck, rarity: common, stats: [{ stat: magnet, value: 60 }] }
 - { id: padded-mantle, name: { en: "Padded Mantle", cs: "Vycpané nárameníky" }, slotType: shoulders, rarity: common, stats: [{ stat: str, value: 3 }] }

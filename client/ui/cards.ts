@@ -53,7 +53,7 @@ export class Cards {
     this.title.textContent = t(lang, chest ? "chest.title" : "cards.title");
     this.hint.textContent = t(lang, "cards.keys");
     this.row.replaceChildren();
-    if (chest) chest.slots.forEach((slot, i) => this.row.appendChild(this.renderChest(run, slot, i, lang)));
+    if (chest) chest.cards.forEach((card, i) => this.row.appendChild(this.renderChest(run, card.slot, i, lang)));
     else if (run.offer) run.offer.cards.forEach((card, i) => this.row.appendChild(this.render(run, card, i, lang)));
   }
 

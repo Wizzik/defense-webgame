@@ -8,8 +8,8 @@ export { countEnemiesWithin, densestCluster, nearestEnemy } from "./abilities/ta
 export type { AbilitySlot } from "./abilities/slots";
 export { botCard, botChestChoice, botInput } from "./bot";
 export { chooseCard, openOffer } from "./cards";
-export { chestPrice, ChestStore, chooseChestSlot } from "./chests";
-export type { ChestOffer } from "./chests";
+export { applyChestCard, ChestAction, chestPrice, ChestStore, chooseChestCard, rollChestOffer } from "./chests";
+export type { ChestCard, ChestOffer } from "./chests";
 export { killEnemy } from "./combat";
 export type { Card, CardOffer } from "./cards";
 export { debugSpawnEach } from "./debug-spawn";

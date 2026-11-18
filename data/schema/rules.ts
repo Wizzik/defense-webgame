@@ -124,6 +124,8 @@ export const RulesSchema = z.object({
     minSpacing: nonNegative,
     pickupRadius: positive,
     slotsPerOffer: z.number().int().min(1).max(16),
+    /** Weights of the rarity each card of an offer rolls, before magic find. */
+    rarityWeights: RarityWeightsSchema,
   }).strict().refine((c) => c.minCastleDistance < c.maxCastleDistance, "minCastleDistance is not below maxCastleDistance"),
   /**
    * Magic find: effective = MF x limit / (MF + limit); every rarity above the lowest of a weight table is

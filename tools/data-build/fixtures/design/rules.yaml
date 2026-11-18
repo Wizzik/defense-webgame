@@ -28,7 +28,7 @@ phases:
 threat: { heroDamageTaken: 2 }
 magicFind: { limit: 1.5, rarityFactor: { rare: 1, epic: 1.5, legendary: 2, mythic: 2.5 } }
 gear: { levelStep: 0.15, maxPermanentLevel: 5 }
-chests: { count: 3, basePrice: 40, priceGrowth: 1.18, minCastleDistance: 700, maxCastleDistance: 2000, minSpacing: 600, pickupRadius: 80, slotsPerOffer: 3 }
+chests: { count: 3, basePrice: 40, priceGrowth: 1.18, minCastleDistance: 700, maxCastleDistance: 2000, minSpacing: 600, pickupRadius: 80, slotsPerOffer: 3, rarityWeights: { common: 55, rare: 30, epic: 12 } }
 drops:
   - { boss: warlord, weights: { common: 60, rare: 40 } }
 progression: { xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3, ultimateFromLevel: 6, ultimateLevelStep: 6 }

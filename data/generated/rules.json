@@ -505,7 +505,14 @@
     "maxCastleDistance": 2000,
     "minSpacing": 600,
     "pickupRadius": 80,
-    "slotsPerOffer": 3
+    "slotsPerOffer": 3,
+    "rarityWeights": {
+      "common": 55,
+      "rare": 30,
+      "epic": 12,
+      "legendary": 2.5,
+      "mythic": 0.5
+    }
   },
   "magicFind": {
     "limit": 1.5,

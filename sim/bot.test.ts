@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { debugSetAbilityLevel } from "./abilities/slots";
 import { EventKind } from "./events";
 import { botCard, botChestChoice, botInput, CHASE_DISTANCE, DEFEND_RADIUS, HOME_OFFSET, LEASH_DISTANCE } from "./bot";
-import { chestPrice } from "./chests";
+import { ChestAction, chestPrice } from "./chests";
 import { silenceSpawns } from "./testing/silence";
 import { Charge } from "./enemy-charge";
 import { stateHash } from "./hash";
@@ -382,9 +382,39 @@ describe("balance", () => {
       }
     });
 
-    it("picks the offered slot with the lowest level, the first one on a tie", () => {
+    const idOf = (run: Run, slotType: string, rarity: string) =>
+      run.data.items.findIndex((item) => item.slotType === slotType && item.rarity === rarity);
+
+    it("takes the replacement with the highest rarity first", () => {
       const run = quiet();
-      run.chestOffer = { slots: [4, 7, 2] };
+      run.chestOffer = {
+        cards: [
+          { slot: 0, item: idOf(run, "head", "rare"), action: ChestAction.Replace },
+          { slot: 14, item: idOf(run, "mainHand", "legendary"), action: ChestAction.New },
+          { slot: 4, item: idOf(run, "chest", "epic"), action: ChestAction.Replace },
+        ],
+      };
+      run.state = "chest";
+      expect(botChestChoice(run)).toBe(2);
+    });
+
+    it("without a replacement takes the new item with the highest rarity", () => {
+      const run = quiet();
+      run.chestOffer = {
+        cards: [
+          { slot: 0, item: idOf(run, "head", "common"), action: ChestAction.New },
+          { slot: 14, item: idOf(run, "mainHand", "legendary"), action: ChestAction.New },
+          { slot: 4, item: idOf(run, "chest", "epic"), action: ChestAction.Level },
+        ],
+      };
+      run.state = "chest";
+      expect(botChestChoice(run)).toBe(1);
+    });
+
+    it("with only level cards takes the slot with the lowest level, the first one on a tie", () => {
+      const run = quiet();
+      const card = (slot: number) => ({ slot, item: 0, action: ChestAction.Level });
+      run.chestOffer = { cards: [card(4), card(7), card(2)] };
       run.state = "chest";
       expect(botChestChoice(run)).toBe(0);
       run.gear.item[4] = 0;
