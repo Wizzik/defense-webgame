@@ -80,9 +80,9 @@ describe("ability slots", () => {
   it("unsupported kind throws", () => {
     const run = createRun(quietData(), { seed: 1, hero: "stonehorn" });
     const chain = run.data.abilities.find((a) => a.kind === "line")!;
-    run.abilities[1].def = { ...chain, kind: "chain" } as unknown as typeof chain;
+    run.abilities[1].def = { ...chain, kind: "warp" } as unknown as typeof chain;
     run.abilities[1].level = 1;
-    expect(() => run.step(NO_INPUT)).toThrow("sim: ability kind chain is not implemented");
+    expect(() => run.step(NO_INPUT)).toThrow("sim: ability kind warp is not implemented");
   });
 
   it("the ultimate waits while auto is off", () => {

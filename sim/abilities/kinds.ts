@@ -1,6 +1,8 @@
 import type { Ability } from "../../data/schema";
 import type { Run } from "../run";
 import { updateArea } from "./area";
+import { updateChain } from "./chain";
+import { updateInstant } from "./instant";
 import { updateHeal } from "./heal";
 import { updateShield } from "./shield";
 import { updateCone } from "./cone";
@@ -37,4 +39,6 @@ export const UPDATERS: Partial<Record<Ability["kind"], AbilityUpdate>> = {
   summon: updateSummon,
   // Bonuses come from passiveBonuses (passive.ts) when the stats are recomputed; nothing to do per step.
   passive: () => {},
+  chain: updateChain,
+  instant: updateInstant,
 };

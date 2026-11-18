@@ -1,3 +1,4 @@
+import { chainJumps } from "./abilities/chain-hits";
 import { damageEnemy } from "./combat";
 import { TICKS_PER_SECOND } from "./constants";
 import { applySlow } from "./enemies";
@@ -121,39 +122,7 @@ export function onGearAttack(run: Run, target: number, x: number, y: number, amo
   if (++fx.chainCount < fx.chainEvery) return;
   fx.chainCount = 0;
   const damage = fx.chainDamage * run.hero.stats.spellPower;
-  const rangeSq = fx.chainRange * fx.chainRange;
-  const hit = fx.chainHit;
-  hit[0] = target;
-  let fromX = x;
-  let fromY = y;
-  for (let jump = 1; jump <= fx.chainJumps; jump++) {
-    let best = -1;
-    let bestSq = rangeSq;
-    for (let i = 0; i < e.capacity; i++) {
-      if (e.alive[i] === 0) continue;
-      let seen = false;
-      for (let h = 0; h < jump; h++) {
-        if (hit[h] === i) {
-          seen = true;
-          break;
-        }
-      }
-      if (seen) continue;
-      const dx = e.x[i]! - fromX;
-      const dy = e.y[i]! - fromY;
-      const sq = dx * dx + dy * dy;
-      if (sq <= bestSq) {
-        bestSq = sq;
-        best = i;
-      }
-    }
-    if (best < 0) return;
-    hit[jump] = best;
-    fromX = e.x[best]!;
-    fromY = e.y[best]!;
-    run.events.push(EventKind.Blast, -1, CHAIN_FLASH, fromX, fromY, 0, 0);
-    damageEnemy(run, best, damage, 1);
-  }
+  chainJumps(run, target, x, y, fx.chainJumps, fx.chainRange, damage, fx.chainHit, CHAIN_FLASH);
 }
 
 /** An elite or a boss fell: the haste starts (again). */

@@ -5,7 +5,7 @@ export {
   hasAbility, isEmptySlot, learnAbility, passiveSlotRange, sharedSlotRange, startCast, ULTIMATE_SLOT,
   updateAbilities,
 } from "./abilities/slots";
-export { countEnemiesWithin, densestCluster, nearestEnemy } from "./abilities/targeting";
+export { countEnemiesWithin, densestCluster, nearestEnemy, strongestEnemy } from "./abilities/targeting";
 export type { AbilitySlot } from "./abilities/slots";
 export { botCard, botChestChoice, botInput } from "./bot";
 export { chooseCard, openOffer } from "./cards";
