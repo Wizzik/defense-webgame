@@ -9,12 +9,12 @@ const pickedSq = new Float64Array(MAX_EXTRA_TARGETS);
 
 /**
  * Multishot: after the base attack on `main`, shoots up to `count` other enemies in attack reach, nearest first
- * (equal distance: lower slot). Each split shot rolls its own base damage and is reduced by its target's armor;
- * it carries the stun of the main shot, but on_hit bonus damage and gear effects stay with the main shot
- * (balance, 2026-11-18: with the bonus the Sparkshot won 17 of 20 autopilot runs). All targets are
- * picked before the first extra shot lands. No allocation.
+ * (equal distance: lower slot). Each split shot rolls its own base damage, adds the on_hit `bonus` the main shot
+ * got (no new chance roll, no Cast event) and is reduced by its target's armor; it carries the stun of the main
+ * shot (Petr 2026-11-19: every arrow gets the bonus). Empower and gear effects stay with the main shot.
+ * All targets are picked before the first extra shot lands. No allocation.
  */
-export function hitExtraTargets(run: Run, main: number, count: number, stunTicks: number): void {
+export function hitExtraTargets(run: Run, main: number, count: number, stunTicks: number, bonus: number): void {
   const { hero, enemies: e, data } = run;
   const n = count < MAX_EXTRA_TARGETS ? count : MAX_EXTRA_TARGETS;
   if (n <= 0) return;
@@ -42,7 +42,7 @@ export function hitExtraTargets(run: Run, main: number, count: number, stunTicks
     const slot = picked[k];
     if (e.alive[slot] === 0) continue;
     const reduction = armorReduction(data.enemies[e.type[slot]].armor, data.constants.defenseArmor);
-    const amount = rollDamage(run.rng, stats.damageMin, stats.damageMax) * (1 - reduction);
+    const amount = (rollDamage(run.rng, stats.damageMin, stats.damageMax) + bonus) * (1 - reduction);
     damageEnemy(run, slot, amount, 0);
     if (e.alive[slot] === 1) stunEnemy(run, slot, stunTicks);
   }

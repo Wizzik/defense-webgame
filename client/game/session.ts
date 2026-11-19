@@ -1,5 +1,5 @@
 import type { GameData } from "../../data/schema";
-import { createRun, EventKind, type LoadoutEntry, NO_INPUT, type Run, SlamEvent, TICK_SECONDS, type TickInput, ULTIMATE_SLOT } from "../../sim";
+import { createRun, EventKind, InputAction, type LoadoutEntry, NO_INPUT, type Run, SlamEvent, TICK_SECONDS, type TickInput, ULTIMATE_SLOT } from "../../sim";
 import { SCENE_SCALE } from "../render/coords";
 import type { FollowCamera } from "../render/camera";
 import type { Scene } from "three/webgpu";
@@ -44,6 +44,7 @@ export class Session {
   private readonly loop = new FixedStepLoop(TICK_SECONDS, MAX_STEPS_PER_FRAME);
   private readonly input: TickInput = { ...NO_INPUT };
   private pendingCard = -1;
+  private pendingKeep = false;
 
   constructor(deps: { data: GameData; params: GameParams; scene: Scene; camera: FollowCamera; keyboard: Keyboard }) {
     this.data = deps.data;
@@ -68,11 +69,13 @@ export class Session {
     this.seed = seed;
     this.paused = paused;
     this.pendingCard = -1;
+    this.pendingKeep = false;
   }
 
-  /** The next step gets `input.card = index`, once. */
-  setCard(index: number): void {
+  /** The next step gets `input.card = index`, once; `keep` adds the KeepWorn bit (keep the worn item of a chest Choice). */
+  setCard(index: number, keep = false): void {
     this.pendingCard = index;
+    this.pendingKeep = keep;
   }
 
   /** Input, then simulation steps (`onEvents` after each), then `update(alpha)` and the camera. */
@@ -85,7 +88,9 @@ export class Session {
     for (let i = 0; i < steps; i++) {
       this.keyboard.read(input);
       input.card = this.pendingCard;
+      if (this.pendingKeep) input.actions |= InputAction.KeepWorn;
       this.pendingCard = -1;
+      this.pendingKeep = false;
       run.step(input);
       for (const view of this.views) view.onEvents?.(run);
       this.shakeForEvents(run);

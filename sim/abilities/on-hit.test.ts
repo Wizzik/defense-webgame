@@ -89,7 +89,7 @@ describe("on_hit empowered strike", () => {
 describe("on_hit extra targets", () => {
   const five = (n: number) => [n, n, n, n, n];
 
-  it("a base attack also hits the nearest other enemies in reach; only the main shot gets the bonus", () => {
+  it("a base attack also hits the nearest other enemies in reach; every shot gets the bonus", () => {
     const { data, run, enemy } = bonusRun({ bonusDamage: five(300), extraTargets: five(2) });
     const second = addEnemy(run, -45, 0);
     const third = addEnemy(run, 0, 50);
@@ -102,11 +102,23 @@ describe("on_hit extra targets", () => {
     const stats = run.hero.stats;
     expect(run.events.value[hits[0]!]!).toBeGreaterThanOrEqual((Math.round(stats.damageMin) + 300) * k - 1e-9);
     for (const h of hits.slice(1)) {
-      expect(run.events.value[h]!).toBeGreaterThanOrEqual(Math.round(stats.damageMin) * k - 1e-9);
-      expect(run.events.value[h]!).toBeLessThanOrEqual(Math.round(stats.damageMax) * k + 1e-9);
+      expect(run.events.value[h]!).toBeGreaterThanOrEqual((Math.round(stats.damageMin) + 300) * k - 1e-9);
+      expect(run.events.value[h]!).toBeLessThanOrEqual((Math.round(stats.damageMax) + 300) * k + 1e-9);
     }
     expect(hits.map((h) => run.events.a[h])).not.toContain(fourth);
     expect(hits.map((h) => run.events.a[h])).not.toContain(far);
+  });
+
+  it("a bonus that fails its chance reaches no shot and casts nothing", () => {
+    const { data, run } = bonusRun({ chance: five(0), bonusDamage: five(300), extraTargets: five(2) });
+    addEnemy(run, -45, 0);
+    addEnemy(run, 0, 50);
+    const k = 1 - armorReduction(data.enemies[0].armor, data.constants.defenseArmor);
+    nextAttack(run);
+    const hits = attackHits(run);
+    expect(hits.length).toBe(3);
+    for (const h of hits) expect(run.events.value[h]!).toBeLessThanOrEqual(Math.round(run.hero.stats.damageMax) * k + 1e-9);
+    expect(eventsOf(run, EventKind.Cast).length).toBe(0);
   });
 
   it("with fewer enemies in reach it hits only those", () => {

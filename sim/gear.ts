@@ -120,3 +120,15 @@ export function recomputeGear(run: Run): void {
   loadEffects(run);
   refreshHeroStats(run);
 }
+
+/** Debug and tests: puts item `item` into gear slot `slot` of the run as a chest item (base 0, chest level 1). */
+export function debugWear(run: Run, slot: number, item: number): void {
+  if (!Number.isInteger(slot) || slot < 0 || slot >= SLOT_COUNT) throw new Error(`debugWear: bad slot ${slot}`);
+  if (!run.data.items[item] || slotTypeOf(slot) !== run.data.items[item]!.slotType) {
+    throw new Error(`debugWear: item ${item} does not fit slot ${slot}`);
+  }
+  run.gear.item[slot] = item;
+  run.gear.base[slot] = 0;
+  run.gear.temp[slot] = 1;
+  recomputeGear(run);
+}

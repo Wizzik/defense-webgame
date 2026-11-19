@@ -22,7 +22,7 @@ describe("drop lines", () => {
     const mythic = data.items.findIndex((i) => i.rarity === "mythic");
     const rare = data.items.findIndex((i) => i.rarity === "rare");
     expect(chestLootLine("en", data, sword, ChestAction.New)).toEqual({ text: `Chest: ${data.items[sword]!.name.en}`, tone: "rarity-legendary" });
-    expect(chestLootLine("cs", data, mythic, ChestAction.Replace)).toEqual({ text: `Truhla: ${data.items[mythic]!.name.cs}`, tone: "rarity-mythic" });
+    expect(chestLootLine("cs", data, mythic, ChestAction.Choice)).toEqual({ text: `Truhla: ${data.items[mythic]!.name.cs}`, tone: "rarity-mythic" });
     expect(chestLootLine("en", data, sword, ChestAction.Level)).toBeNull();
     expect(chestLootLine("en", data, rare, ChestAction.New)).toBeNull();
   });

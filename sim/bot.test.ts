@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { debugSetAbilityLevel } from "./abilities/slots";
 import { EventKind } from "./events";
-import { botCard, botChestChoice, botInput, idleCard, CHASE_DISTANCE, DEFEND_RADIUS, HOME_OFFSET, LEASH_DISTANCE } from "./bot";
+import { botCard, botChestChoice, botChestKeep, botInput, idleCard, CHASE_DISTANCE, DEFEND_RADIUS, HOME_OFFSET, LEASH_DISTANCE } from "./bot";
 import { ChestAction, chestPrice } from "./chests";
 import { silenceSpawns } from "./testing/silence";
 import { Charge } from "./enemy-charge";
@@ -387,17 +387,43 @@ describe("balance", () => {
     const idOf = (run: Run, slotType: string, rarity: string) =>
       run.data.items.findIndex((item) => item.slotType === slotType && item.rarity === rarity);
 
-    it("takes the replacement with the highest rarity first", () => {
+    it("takes the Choice of a higher rarity than the worn item with the highest rarity first", () => {
       const run = quiet();
+      run.gear.item[0] = idOf(run, "head", "common");
+      run.gear.item[4] = idOf(run, "chest", "common");
       run.chestOffer = {
         cards: [
-          { slot: 0, item: idOf(run, "head", "rare"), action: ChestAction.Replace },
+          { slot: 0, item: idOf(run, "head", "rare"), action: ChestAction.Choice },
           { slot: 14, item: idOf(run, "mainHand", "legendary"), action: ChestAction.New },
-          { slot: 4, item: idOf(run, "chest", "epic"), action: ChestAction.Replace },
+          { slot: 4, item: idOf(run, "chest", "epic"), action: ChestAction.Choice },
         ],
       };
       run.state = "chest";
       expect(botChestChoice(run)).toBe(2);
+      expect(botChestKeep(run, run.chestOffer.cards[2]!)).toBe(false);
+      const input = botInput(run, { moveX: 0, moveY: 0, card: -1, actions: 0 });
+      expect(input).toEqual({ moveX: 0, moveY: 0, card: 2, actions: 0 });
+    });
+
+    it("a Choice of a lower rarity counts as a level: the bot keeps the worn item", () => {
+      const run = quiet();
+      run.gear.item[0] = idOf(run, "head", "epic");
+      run.gear.temp[0] = 1;
+      run.gear.item[4] = idOf(run, "chest", "rare");
+      run.gear.temp[4] = 2;
+      run.chestOffer = {
+        cards: [
+          { slot: 4, item: idOf(run, "chest", "common"), action: ChestAction.Choice },
+          { slot: 0, item: idOf(run, "head", "rare"), action: ChestAction.Choice },
+        ],
+      };
+      run.state = "chest";
+      expect(botChestChoice(run)).toBe(1);
+      expect(botChestKeep(run, run.chestOffer.cards[1]!)).toBe(true);
+      expect(botChestKeep(run, run.chestOffer.cards[0]!)).toBe(true);
+      expect(botInput(run, { moveX: 0, moveY: 0, card: -1, actions: 0 })).toEqual({
+        moveX: 0, moveY: 0, card: 1, actions: InputAction.KeepWorn,
+      });
     });
 
     it("without a replacement takes the new item with the highest rarity", () => {

@@ -1,7 +1,7 @@
 import { RARITIES } from "../data/schema";
 import { sharedSlotRange, ULTIMATE_SLOT } from "./abilities/slots";
 import type { CardOffer } from "./cards";
-import { ChestAction, chestPrice } from "./chests";
+import { ChestAction, type ChestCard, chestPrice } from "./chests";
 import { Charge } from "./enemy-charge";
 import { Slam, windupRadius } from "./enemy-slam";
 import { InputAction } from "./input";
@@ -76,21 +76,31 @@ function cardRank(run: Run, card: CardOffer["cards"][number]): number {
   return shared ? 4 : 6;
 }
 
+/** Rarity rank of item `index` (common 0 .. mythic 4). */
+function rarityRank(run: Run, index: number): number {
+  return RARITIES.indexOf(run.data.items[index]!.rarity);
+}
+
+/** Whether `card` is a Choice whose rolled item has a higher rarity than the worn item. */
+function isUpgrade(run: Run, card: ChestCard): boolean {
+  return card.action === ChestAction.Choice && rarityRank(run, card.item) > rarityRank(run, run.gear.item[card.slot]!);
+}
+
 /**
- * The chest card a player who wants loot would take: a replacement with the highest rarity, else a new item with
- * the highest rarity, else a level for the offered slot with the lowest level (permanent + temporary). The first
- * card wins a tie.
+ * The chest card a player who wants loot would take: a Choice with a higher rarity than the worn item (the highest
+ * rarity first), else a new item with the highest rarity, else the offered slot with the lowest level (permanent +
+ * temporary) among Level cards and Choices without a higher rarity. The first card wins a tie.
  */
 export function botChestChoice(run: Run): number {
   const offer = run.chestOffer;
   if (!offer) return 0;
-  for (const action of [ChestAction.Replace, ChestAction.New]) {
+  for (const upgrade of [true, false]) {
     let best = -1;
     let bestRank = -1;
     for (let i = 0; i < offer.cards.length; i++) {
       const card = offer.cards[i]!;
-      if (card.action !== action) continue;
-      const rank = RARITIES.indexOf(run.data.items[card.item]!.rarity);
+      if (upgrade ? !isUpgrade(run, card) : card.action !== ChestAction.New) continue;
+      const rank = rarityRank(run, card.item);
       if (rank > bestRank) {
         bestRank = rank;
         best = i;
@@ -111,6 +121,11 @@ export function botChestChoice(run: Run): number {
   return best;
 }
 
+/** The autopilot keeps the worn item of a Choice unless the rolled item has a higher rarity. */
+export function botChestKeep(run: Run, card: ChestCard): boolean {
+  return card.action === ChestAction.Choice && !isUpgrade(run, card);
+}
+
 /** The fixed autopilot rules. Writes the input into `out` and returns it; allocates nothing. */
 export function botInput(run: Run, out: TickInput): TickInput {
   out.moveX = 0;
@@ -123,6 +138,8 @@ export function botInput(run: Run, out: TickInput): TickInput {
   }
   if (run.state === "chest") {
     out.card = botChestChoice(run);
+    const card = run.chestOffer?.cards[out.card];
+    if (card && botChestKeep(run, card)) out.actions = InputAction.KeepWorn;
     return out;
   }
   const { hero, castle, enemies } = run;

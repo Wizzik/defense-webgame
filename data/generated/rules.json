@@ -47,7 +47,7 @@
     "collision": 32,
     "baseRegen": 0.25,
     "regenPerStr": 0.05,
-    "spellPowerPerInt": 0.01,
+    "spellPowerPerInt": 0.005,
     "cooldownSpeedPerInt": 0.01,
     "dash": {
       "distance": 350,

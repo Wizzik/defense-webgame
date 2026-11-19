@@ -1,14 +1,14 @@
 import type { GearSession } from "./gear-session";
 import type { Rarity } from "../../data/schema";
 import {
-  type ChestOffer, chestPrice, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, killEnemy, learnAbility,
+  type ChestOffer, chestPrice, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, debugWear, killEnemy, learnAbility,
   type Run,
   SLOT_IDS, type SlotId,
 } from "../../sim";
 import { latestBoss, runPhase } from "./boss";
 import type { Backend, GpuInfo } from "../render/gpu";
 
-const CHEST_ACTIONS = ["new", "replace", "level"] as const;
+const CHEST_ACTIONS = ["new", "choice", "level"] as const;
 /** The chest offer `chestCards` was built from. */
 let shownOffer: ChestOffer | null = null;
 
@@ -58,7 +58,9 @@ export interface GameSnapshot {
   chests: { x: number; y: number }[];
   chestsOpened: number;
   /** The cards of the open chest (slot id, item id, its rarity, what the pick does); null outside the "chest" screen. */
-  chestCards: { slot: SlotId; item: string; rarity: Rarity; action: "new" | "replace" | "level" }[] | null;
+  chestCards: { slot: SlotId; item: string; rarity: Rarity; action: "new" | "choice" | "level" }[] | null;
+  /** Index of the chest card whose compare panel is open, or null. */
+  chestCompare: number | null;
   /** The 16 gear slots in the order of `SLOT_IDS`: item id and levels, or null for an empty slot. */
   gear: ({ item: string; base: number; temp: number } | null)[];
   /** The player's collection: item id to its permanent level. */
@@ -82,6 +84,10 @@ export interface GameSnapshot {
     teleport(x: number, y: number): void;
     /** Kills every living boss; the fall of the final boss wins the run in the next step. */
     killBoss(): void;
+    /** Picks chest card `index` through the next step's input; for a Choice card `side` keeps or takes. */
+    chooseChest(index: number, side: "keep" | "take"): void;
+    /** Puts an item (by id) into a gear slot (by id) of the run as a chest item at level 1; throws on an unknown id. */
+    wear(slotId: string, itemId: string): void;
   };
 }
 
@@ -98,16 +104,17 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], abilityIds: [], ultimateAuto: true, allies: 0,
     projectiles: 0, packArrows: 0, charging: 0, phase: 1, boss: null, slams: 0,
     render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0 },
-    gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, gear: [], collection: {}, gearSaved: false,
+    gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, gear: [], collection: {}, gearSaved: false,
   };
   window.__game = snapshot;
   return snapshot;
 }
 
 /** Adds `window.__game.debug`; `getRun` is read at call time because the run is replaced on every start. */
-/** `deliver` hands the run's events to the views, as the session does after a step. */
+/** `deliver` hands the run's events to the views, as the session does after a step; `pick` sets the next step's card. */
 export function addDebugHooks(
   snapshot: GameSnapshot, getRun: () => Run | null, gear: GearSession, deliver: (run: Run) => void,
+  pick: (index: number, keep: boolean) => void,
 ): void {
   snapshot.debug = {
     grantXp(amount: number): void {
@@ -163,6 +170,18 @@ export function addDebugHooks(
         if (enemies.alive[i] === 1 && run.isBoss[enemies.type[i]!] === 1) killEnemy(run, i);
       }
       deliver(run);
+    },
+    chooseChest(index: number, side: "keep" | "take"): void {
+      pick(index, side === "keep");
+    },
+    wear(slotId: string, itemId: string): void {
+      const run = getRun();
+      if (!run) return;
+      const slot = (SLOT_IDS as readonly string[]).indexOf(slotId);
+      if (slot < 0) throw new Error(`debug.wear: unknown slot "${slotId}"`);
+      const item = run.data.items.findIndex((i) => i.id === itemId);
+      if (item < 0) throw new Error(`debug.wear: unknown item "${itemId}"`);
+      debugWear(run, slot, item);
     },
   };
 }

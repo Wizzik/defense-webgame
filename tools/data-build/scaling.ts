@@ -5,13 +5,13 @@ export const SCALING_YAML = "design/scaling.yaml";
 /** Uniform multipliers from the map's numbers to the survivors pace (design/scaling.yaml). */
 export interface Scaling {
   heroes: { moveSpeed: number; attackCooldown: number };
-  abilities: { cooldown: number; damage: number };
+  abilities: { cooldown: number; damage: number; levelGrowthExponent: number };
   enemies: { hp: number; moveSpeed: number };
 }
 
 const SHAPE: { [G in keyof Scaling]: readonly string[] } = {
   heroes: ["moveSpeed", "attackCooldown"],
-  abilities: ["cooldown", "damage"],
+  abilities: ["cooldown", "damage", "levelGrowthExponent"],
   enemies: ["hp", "moveSpeed"],
 };
 
@@ -38,6 +38,10 @@ export function parseScaling(value: unknown): Scaling {
       }
     }
   }
+  const exponent = (value.abilities as Record<string, number>).levelGrowthExponent;
+  if (exponent > 1) {
+    throw new Error(`${SCALING_YAML}: abilities.levelGrowthExponent: expected 0 < e <= 1, got ${exponent}`);
+  }
   return value as unknown as Scaling;
 }
 
@@ -52,14 +56,29 @@ export function scaleHero(hero: Hero, s: Scaling): Hero {
   };
 }
 
-/** Param keys that `abilities.damage` multiplies: direct, per-tick, on-hit bonus and heal/shield amounts. `empower` is not one of them. */
+/**
+ * Param keys that `abilities.damage` multiplies: direct, per-tick, on-hit bonus and heal/shield amounts. `empower` is not one of them.
+ * After the multiplier their growth from level 1 is flattened by `abilities.levelGrowthExponent` (spec 2026-11-19, 4.1).
+ */
 const DAMAGE_PARAMS: readonly string[] = ["damage", "tickDamage", "amount", "bonusDamage"];
+
+/**
+ * value[L] = value[1] * (value[L] / value[1]) ^ e on the already rounded row. Level 1 never changes;
+ * a row with 0 at level 1, a 0 at level L or a single level stays as it is.
+ */
+function flattenGrowth(row: number[], exponent: number): number[] {
+  const first = row[0];
+  if (!(first > 0)) return row;
+  return row.map((v, level) => (level === 0 || !(v > 0) ? v : whole(first * Math.pow(v / first, exponent))));
+}
 
 export function scaleAbility(ability: Ability, s: Scaling): Ability {
   const params: Record<string, number[]> = {};
   for (const [key, value] of Object.entries(ability.params as Record<string, number[]>)) {
     params[key] =
-      DAMAGE_PARAMS.includes(key) && Array.isArray(value) ? value.map((v) => whole(v * s.abilities.damage)) : value;
+      DAMAGE_PARAMS.includes(key) && Array.isArray(value)
+        ? flattenGrowth(value.map((v) => whole(v * s.abilities.damage)), s.abilities.levelGrowthExponent)
+        : value;
   }
   return { ...ability, cooldown: ability.cooldown.map((c) => seconds(c * s.abilities.cooldown)), params } as Ability;
 }

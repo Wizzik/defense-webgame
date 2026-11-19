@@ -3,7 +3,7 @@
 import { pathToFileURL } from "node:url";
 import type { GameData, Rarity } from "../../data/schema";
 import { RARITIES } from "../../data/schema";
-import { botChestChoice } from "../../sim/bot";
+import { botChestChoice, botChestKeep } from "../../sim/bot";
 import { applyChestCard, rollChestOffer } from "../../sim/chests";
 import { createRun, gainXp, xpToNext } from "../../sim/index";
 import type { HeroStats } from "../../sim/index";
@@ -14,12 +14,13 @@ export interface ChestPower {
   hp: number;
   attack: number;
   spells: number;
-  /** How many picks were of each kind. */
+  /** How many picks were of each kind: a new item, a taken Choice, a level (also a kept Choice). */
   picks: Record<"new" | "replace" | "level", number>;
-  /** Rarities of the picked cards' items. */
+  /** Rarities of the items the picks left in their slots. */
   rarities: Record<Rarity, number>;
 }
 
+/** Output columns by `ChestAction` (New, Choice, Level); a taken Choice counts as "replace", a kept one as "level". */
 const ACTION_NAMES = ["new", "replace", "level"] as const;
 
 function attackPerSecond(stats: HeroStats): number {
@@ -42,9 +43,10 @@ export function chestPower(data: GameData, heroId: string, seed: number, options
   for (let i = 0; i < options.chests; i++) {
     run.chestOffer = rollChestOffer(run);
     const card = run.chestOffer.cards[botChestChoice(run)]!;
-    picks[ACTION_NAMES[card.action]]++;
-    rarities[data.items[card.item]!.rarity]++;
-    applyChestCard(run, card);
+    const keep = botChestKeep(run, card);
+    picks[keep ? "level" : ACTION_NAMES[card.action]]++;
+    applyChestCard(run, card, keep);
+    rarities[data.items[run.gear.item[card.slot]!]!.rarity]++;
     run.chestOffer = null;
   }
   const after = run.hero.stats;

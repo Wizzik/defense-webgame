@@ -19,14 +19,18 @@ export class ChestStore {
   }
 }
 
-/** What a chest card does: put a new item into an empty slot, replace the worn item, or add a level to it. */
-export const ChestAction = { New: 0, Replace: 1, Level: 2 } as const;
+/**
+ * What a chest card does: put a new item into an empty slot; offer a choice between the worn item and a different
+ * rolled one (keep: a level for the worn item, take: the rolled item replaces it); or add a level to the worn item
+ * when the rolled item is the same.
+ */
+export const ChestAction = { New: 0, Choice: 1, Level: 2 } as const;
 export type ChestAction = (typeof ChestAction)[keyof typeof ChestAction];
 
 /** One card of an open chest: a gear slot and an item (index into `data.items`). */
 export interface ChestCard {
   slot: number;
-  /** The rolled item for New and Replace, the worn item for Level. */
+  /** The rolled item for New and Choice, the worn item for Level. */
   item: number;
   action: ChestAction;
 }
@@ -123,7 +127,7 @@ function twinSlot(slot: number): number {
  * a rarity by `rules.chests.rarityWeights` raised by the hero's magic find; a slot not yet in the offer whose
  * type has an item of that rarity (one rarity lower when there is none); an item of that rarity and type,
  * preferring one the twin slot (ring, trinket) does not wear. The action follows the worn item: New for an
- * empty slot, Replace for a higher rarity, else Level with the worn item on the card.
+ * empty slot, Level when the rolled item is the worn one, else Choice (any rarity) with the rolled item on the card.
  */
 export function rollChestOffer(run: Run): ChestOffer {
   const { data, gear, chestRng: rng } = run;
@@ -159,8 +163,8 @@ export function rollChestOffer(run: Run): ChestOffer {
     const rolled = pool[rng.int(pool.length)]!;
     const worn = gear.item[slot]!;
     if (worn < 0) cards.push({ slot, item: rolled, action: ChestAction.New });
-    else if (rank > RARITIES.indexOf(data.items[worn]!.rarity)) cards.push({ slot, item: rolled, action: ChestAction.Replace });
-    else cards.push({ slot, item: worn, action: ChestAction.Level });
+    else if (rolled === worn) cards.push({ slot, item: worn, action: ChestAction.Level });
+    else cards.push({ slot, item: rolled, action: ChestAction.Choice });
   }
   return { cards };
 }
@@ -172,33 +176,40 @@ function hasItem(run: Run, rarity: Rarity, slot: number): boolean {
 }
 
 /**
- * Applies a chest card: New puts the item in at chest level 1; Replace puts it in with the slot's whole level
- * plus one as chest levels (the loadout given to the run is not touched, so a permanent item comes back after
- * the run); Level adds a chest level. Then the gear and its effects are summed again and ChestPick is recorded.
+ * Applies a chest card: New puts the item in at chest level 1; a taken Choice puts the rolled item in with the
+ * slot's whole level plus one as chest levels (the loadout given to the run is not touched, so a permanent item
+ * comes back after the run); Level and a kept Choice add a chest level to the worn item. `keep` only matters for
+ * a Choice. Then the gear and its effects are summed again and ChestPick is recorded with New, Choice (taken)
+ * or Level (a level for the worn item, a kept Choice too).
  */
-export function applyChestCard(run: Run, card: ChestCard): void {
+export function applyChestCard(run: Run, card: ChestCard, keep = false): void {
   const { gear, hero } = run;
   const slot = card.slot;
+  let done: ChestAction = card.action;
   if (card.action === ChestAction.New) {
     gear.item[slot] = card.item;
     gear.base[slot] = 0;
     gear.temp[slot] = 1;
-  } else if (card.action === ChestAction.Replace) {
+  } else if (card.action === ChestAction.Choice && !keep) {
     gear.temp[slot] = gear.base[slot]! + gear.temp[slot]! + 1;
     gear.base[slot] = 0;
     gear.item[slot] = card.item;
   } else {
     gear.temp[slot] = gear.temp[slot]! + 1;
+    done = ChestAction.Level;
   }
   recomputeGear(run);
-  run.events.push(EventKind.ChestPick, slot, gear.base[slot]! + gear.temp[slot]!, hero.x, hero.y, gear.item[slot]!, card.action);
+  run.events.push(EventKind.ChestPick, slot, gear.base[slot]! + gear.temp[slot]!, hero.x, hero.y, gear.item[slot]!, done);
 }
 
-/** Applies the chosen card of the open chest and resumes; the chest then appears elsewhere. A bad index changes nothing. */
-export function chooseChestCard(run: Run, index: number): void {
+/**
+ * Applies the chosen card of the open chest (`keep`: keep the worn item of a Choice card) and resumes; the chest
+ * then appears elsewhere. A bad index changes nothing.
+ */
+export function chooseChestCard(run: Run, index: number, keep: boolean): void {
   const offer = run.chestOffer;
   if (!offer || !Number.isInteger(index) || index < 0 || index >= offer.cards.length) return;
-  applyChestCard(run, offer.cards[index]!);
+  applyChestCard(run, offer.cards[index]!, keep);
   const { chests } = run;
   const chest = run.openChest;
   placeChest(run, chest, false);

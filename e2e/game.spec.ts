@@ -30,8 +30,14 @@ const heroIds = (
 ).map((h) => h.id);
 /** The item catalogue, for names and rarities of chest cards. */
 const ITEMS = JSON.parse(readFileSync(join(import.meta.dirname, "..", "data", "generated", "items.json"), "utf8")) as {
-  id: string; rarity: string; name: { en: string; cs: string };
+  id: string; rarity: string; slotType: string; name: { en: string; cs: string };
 }[];
+/** Gear slot ids (sim/gear.ts SLOT_IDS) with their item types. */
+const SLOTS: [string, string][] = [
+  ["head", "head"], ["neck", "neck"], ["shoulders", "shoulders"], ["back", "back"], ["chest", "chest"], ["wrist", "wrist"],
+  ["hands", "hands"], ["waist", "waist"], ["legs", "legs"], ["feet", "feet"], ["ring1", "ring"], ["ring2", "ring"],
+  ["trinket1", "trinket"], ["trinket2", "trinket"], ["mainHand", "mainHand"], ["offHand", "offHand"],
+];
 
 type Screen = GameSnapshot["screen"];
 
@@ -49,6 +55,19 @@ async function pickCard(page: Page): Promise<void> {
     .first()
     .click({ timeout: 10_000 })
     .catch(() => undefined);
+  // a chest Choice card opens the compare: take the new item (a click in the first 300 ms is ignored, so retry)
+  for (let i = 0; i < 10 && (await page.locator("#chest-compare").isVisible()); i++) {
+    await page.locator("button.compare-take-button").click({ timeout: 2_000 }).catch(() => undefined);
+    await page.waitForTimeout(150);
+  }
+}
+
+/** Wears the first common item of each type in all 16 gear slots of the run (chest items at level 1). */
+async function wearCommons(page: Page): Promise<void> {
+  const pairs = SLOTS.map(([slot, type]) => [slot, ITEMS.find((item) => item.slotType === type && item.rarity === "common")!.id]);
+  await page.evaluate((list) => {
+    for (const [slot, item] of list) window.__game!.debug!.wear(slot!, item!);
+  }, pairs);
 }
 
 /**
@@ -581,6 +600,73 @@ test("a chest takes gold and offers three rolled items; the pick lands in the ge
   expect(after.worn).toHaveLength(1);
   expect(after.worn[0]).toMatchObject({ item: cards![0]!.item, base: 0, temp: 1 });
   expect(await page.evaluate(() => window.__game!.chestCards)).toBeNull();
+});
+
+test("a chest card for a worn slot opens the compare; Esc goes back, 1 keeps, the take button takes", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&lang=cs");
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  await wearCommons(page);
+  await page.evaluate(() => {
+    const g = window.__game!;
+    g.debug!.grantGold(1000);
+    g.debug!.teleport(g.chests[0]!.x, g.chests[0]!.y);
+  });
+  await waitForScreenPickingLevelUps(page, "chest");
+  const cards = (await page.evaluate(() => window.__game!.chestCards))!;
+  const index = cards.findIndex((card) => card.action === "choice");
+  expect(index).toBeGreaterThanOrEqual(0);
+  const slot = SLOTS.findIndex(([id]) => id === cards[index]!.slot);
+  const worn = (await page.evaluate((s) => window.__game!.gear[s], slot))!;
+  expect(worn.temp).toBe(1);
+
+  await page.waitForTimeout(350);
+  await page.locator("button.card").nth(index).click();
+  await expect(page.locator("#chest-compare")).toBeVisible();
+  await expect(page.locator("#chest-compare .compare-col")).toHaveCount(2);
+  await expect(page.locator(".compare-keep .card-name")).toHaveText(ITEMS.find((i) => i.id === worn.item)!.name.cs);
+  await expect(page.locator(".compare-take .card-name")).toHaveText(ITEMS.find((i) => i.id === cards[index]!.item)!.name.cs);
+  await expect(page.locator("button.card").first()).toBeHidden();
+  expect(await page.evaluate(() => window.__game!.chestCompare)).toBe(index);
+  const tick = await page.evaluate(() => window.__game!.tick);
+  await page.waitForTimeout(400);
+  expect(await page.evaluate(() => window.__game!.tick)).toBe(tick);
+
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#chest-compare")).toBeHidden();
+  await expect(page.locator("button.card")).toHaveCount(3);
+  await expect(page.locator("button.card").first()).toBeVisible();
+  expect(await page.evaluate(() => [window.__game!.chestCompare, window.__game!.screen])).toEqual([null, "chest"]);
+
+  // click and read in one synchronous step, so no frame runs in between: the snapshot must not lag the DOM
+  await page.waitForTimeout(350);
+  expect(await page.evaluate((i) => {
+    (document.querySelectorAll("button.card")[i] as HTMLElement).click();
+    return window.__game!.chestCompare;
+  }, index)).toBe(index);
+  await expect(page.locator("#chest-compare")).toBeVisible();
+  await page.waitForTimeout(400);
+  await page.keyboard.press("Digit1");
+  await waitForScreenPickingLevelUps(page, "playing");
+  expect(await page.evaluate((s) => window.__game!.gear[s], slot)).toMatchObject({ item: worn.item, base: 0, temp: 2 });
+
+  // the second chest: take the new item with the button
+  await page.evaluate(() => {
+    const g = window.__game!;
+    g.debug!.teleport(g.chests[1]!.x, g.chests[1]!.y);
+  });
+  await waitForScreenPickingLevelUps(page, "chest");
+  const next = (await page.evaluate(() => window.__game!.chestCards))!;
+  const take = next.findIndex((card) => card.action === "choice");
+  expect(take).toBeGreaterThanOrEqual(0);
+  const takeSlot = SLOTS.findIndex(([id]) => id === next[take]!.slot);
+  await page.waitForTimeout(350);
+  await page.locator("button.card").nth(take).click();
+  await expect(page.locator("#chest-compare")).toBeVisible();
+  await page.waitForTimeout(400);
+  await page.locator("button.compare-take-button").click();
+  await waitForScreenPickingLevelUps(page, "playing");
+  expect(await page.evaluate((s) => window.__game!.gear[s], takeSlot)).toMatchObject({ item: next[take]!.item, base: 0 });
 });
 
 test("C opens the gear panel and pauses the run; C closes it; C does nothing under the cards", async ({ page }, testInfo) => {

@@ -37,15 +37,15 @@ describe("chest lines", () => {
     expect(info.lines.at(-1)).toEqual({ text: data.items[sword]!.effect!.text.en, tone: "effect" });
   });
 
-  it("a replacement compares with the worn item and names it", () => {
+  it("a choice compares with the worn item and names it", () => {
     const { data, gear, helm, epic } = setup();
     gear.item[0] = helm;
     gear.base[0] = 2;
     gear.temp[0] = 1;
-    const info = chestLines("cs", data, gear, { slot: 0, item: epic, action: ChestAction.Replace });
+    const info = chestLines("cs", data, gear, { slot: 0, item: epic, action: ChestAction.Choice });
     expect(info.title).toBe(data.items[epic]!.name.cs);
     expect(info.rarity).toBe("epic");
-    expect(info.action).toBe("nahradí Zkušební přilba do konce běhu");
+    expect(info.action).toBe("porovnat s nasazeným: Zkušební přilba");
     expect(info.lines).toEqual(
       tooltipLines("cs", data, data.items[epic]!, 0, 4, { item: data.items[helm]!, level: 2, temp: 1 }).lines,
     );
