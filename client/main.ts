@@ -8,6 +8,8 @@ import { AudioEngine } from "./audio/engine";
 import { MusicDirector, type MusicInput, musicSlot } from "./audio/music-director";
 import { MusicPlayer } from "./audio/music-player";
 import { latestBoss } from "./game/boss";
+import { loadSettings, type Settings, saveSettings } from "./settings/store";
+import { SettingsPanel } from "./ui/settings-panel";
 import { SoundView } from "./audio/sound-view";
 import { loadGameData } from "./game/data";
 import { addDebugHooks, publishSnapshot, updateSnapshot } from "./game/debug";
@@ -68,6 +70,15 @@ function storeLang(value: Lang): void {
     localStorage.setItem(LANG_KEY, value);
   } catch {
     // storage may be blocked; the choice then lasts until reload
+  }
+}
+
+/** localStorage, or null where the browser blocks it. */
+function storage(): Storage | null {
+  try {
+    return localStorage;
+  } catch {
+    return null;
   }
 }
 
@@ -192,6 +203,12 @@ async function start(): Promise<void> {
   audio.setMuted(readStoredMuted());
   const sound: Sound = {
     active: false,
+    settings: loadSettings(storage()),
+    applySettings: (s) => {
+      audio.setVolumes(s);
+      followCamera.shakeEnabled = s.shake;
+      numbers.enabled = s.numbers;
+    },
     data: audioData,
     engine: audio,
     director: new MusicDirector(),
@@ -202,6 +219,7 @@ async function start(): Promise<void> {
     audio.enable();
     void audio.preload();
   };
+  sound.applySettings(sound.settings);
   addEventListener("pointerdown", enableAudio, { once: true });
   addEventListener("keydown", enableAudio, { once: true });
   const packArrows = new PackArrows(document.getElementById("ui")!, followCamera.camera);
@@ -286,6 +304,9 @@ function heroLoader(
 }
 
 interface Sound {
+  settings: Settings;
+  /** Applies volumes, screen shake and damage numbers. */
+  applySettings(s: Settings): void;
   /** A run is on screen and not paused (the low-hp pulse beats only then); the UI keeps it current. */
   active: boolean;
   engine: AudioEngine;
@@ -297,6 +318,7 @@ interface Sound {
 interface Ui {
   update(width: number, height: number): void;
   readonly menuOpen: boolean;
+  readonly settingsOpen: boolean;
   /** The chest card whose compare is open, or null. */
   readonly chestCompare: number | null;
   useHero: UseHero;
@@ -347,6 +369,34 @@ function createUi(
     onLang: applyLang,
     onSound: () => setMuted(!muted),
     onGear: () => gearScreen.open(heroId, lang),
+    onSettings: () => openSettings(false),
+  });
+  // the settings: from the menu button, or O in a run (pauses it until the panel closes)
+  let settingsPausedRun = false;
+  const settingsPanel = new SettingsPanel(root, {
+    onChange: (s) => {
+      sound.settings = s;
+      sound.applySettings(s);
+      saveSettings(storage(), s);
+    },
+    onClose: () => closeSettings(),
+  });
+  const closeSettings = (): void => {
+    settingsPanel.close();
+    if (settingsPausedRun) session.paused = false;
+    settingsPausedRun = false;
+  };
+  const openSettings = (fromRun: boolean): void => {
+    settingsPausedRun = fromRun;
+    if (fromRun) session.paused = true;
+    settingsPanel.open(sound.settings, lang);
+  };
+  // buttons of the menu, the settings and the gear screen click
+  root.addEventListener("click", (event) => {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("button, input") && target.closest("#menu, #settings-panel, #gear-screen")) {
+      sound.engine.play(sound.data.sounds["ui.click"]);
+    }
   });
   // the paused run behind the menu wears the old doll: after a change it is started again
   const gearScreen = new GearScreen(root, {
@@ -369,8 +419,12 @@ function createUi(
   menu.setGpuWarning(softwareGpu);
   menu.setSaveWarning(noSave);
   addEventListener("keydown", (event) => {
-    if (event.code === "KeyM" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
-      setMuted(!muted);
+    if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.code === "KeyM") setMuted(!muted);
+    else if (event.code === "KeyO") {
+      if (settingsPanel.isOpen) {
+        if (settingsPausedRun) closeSettings();
+      } else if (!menuOpen && session.run?.state === "playing" && !session.paused) openSettings(true);
     }
   });
   const hud = new Hud(root);
@@ -396,6 +450,9 @@ function createUi(
     },
     get chestCompare() {
       return cards.comparing;
+    },
+    get settingsOpen() {
+      return settingsPanel.isOpen;
     },
     update(width, height) {
       const run = session.run;
@@ -447,6 +504,7 @@ function runLoop(
   // read live, not copied once a frame: a test that clicks a card and reads it at once must not depend on a frame
   // having passed (slow software rendering)
   Object.defineProperty(snapshot, "chestCompare", { get: () => ui.chestCompare, enumerable: true, configurable: true });
+  Object.defineProperty(snapshot, "settingsOpen", { get: () => ui.settingsOpen, enumerable: true, configurable: true });
   let last = -1;
   renderer.setAnimationLoop((now) => {
     try {

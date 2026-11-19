@@ -21,6 +21,8 @@ export class FollowCamera {
   private x = 0;
   private z = 0;
   private placed = false;
+  /** Off in the settings: no shake at all. */
+  shakeEnabled = true;
   private shakeAmount = 0;
   private shakeLeft = 0;
 
@@ -54,6 +56,7 @@ export class FollowCamera {
 
   /** Shakes the camera by up to `amount` scene units, fading out in 0.2 s; a stronger shake wins. */
   shake(amount: number): void {
+    if (!this.shakeEnabled) return;
     const current = this.shakeAmount * (this.shakeLeft / SHAKE_SECONDS);
     if (amount < current) return;
     this.shakeAmount = amount;

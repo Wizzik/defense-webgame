@@ -1139,3 +1139,39 @@
 .gear-bottom .button.primary:hover {
   background: #37598f;
 }
+
+/* settings: volumes and switches in the gear frame look */
+.settings-panel {
+  background: rgba(8, 12, 20, 0.72);
+  z-index: 30;
+}
+.settings-frame {
+  min-width: 380px;
+}
+.settings-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+.settings-row {
+  display: grid;
+  grid-template-columns: 1fr 170px 52px;
+  align-items: center;
+  gap: 12px;
+  color: #c9d6ea;
+}
+.settings-slider {
+  accent-color: #6f8fc4;
+}
+.settings-toggle {
+  justify-self: start;
+  width: 18px;
+  height: 18px;
+  accent-color: #6f8fc4;
+}
+.settings-value {
+  text-align: right;
+  color: #8fa3c4;
+  font-variant-numeric: tabular-nums;
+}

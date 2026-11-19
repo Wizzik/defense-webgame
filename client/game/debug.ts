@@ -65,6 +65,8 @@ export interface GameSnapshot {
   chestCards: { slot: SlotId; item: string; rarity: Rarity; action: "new" | "choice" | "level" }[] | null;
   /** Index of the chest card whose compare panel is open, or null. */
   chestCompare: number | null;
+  /** The settings panel is open. */
+  settingsOpen: boolean;
   /** The 16 gear slots in the order of `SLOT_IDS`: item id and levels, or null for an empty slot. */
   gear: ({ item: string; base: number; temp: number } | null)[];
   /** The player's collection: item id to its permanent level. */
@@ -120,7 +122,7 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], abilityIds: [], ultimateAuto: true, allies: 0,
     projectiles: 0, packArrows: 0, charging: 0, phase: 1, boss: null, slams: 0,
     render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0 },
-    gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, gear: [], collection: {}, gearSaved: false,
+    gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, settingsOpen: false, gear: [], collection: {}, gearSaved: false,
     orbs: [], hearts: 0, buffs: { boots: 0, berserk: 0, heal: 0 }, lifesteal: 0,
   };
   window.__game = snapshot;

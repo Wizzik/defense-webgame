@@ -230,7 +230,7 @@ export class Hud {
 
     setText(this.castle.label, `${t(lang, "hud.castle")} ${Math.max(0, Math.ceil(castle.hp))} / ${castle.maxHp}`);
     this.castle.fill.style.width = fraction(castle.hp, castle.maxHp);
-    setText(this.muteKey, `${t(lang, "gear.key")} · ${t(lang, "hud.muteKey")}`);
+    setText(this.muteKey, `${t(lang, "gear.key")} · ${t(lang, "settings.key")} · ${t(lang, "hud.muteKey")}`);
     setText(this.kills, t(lang, "hud.kills", { n: run.stats.kills }));
 
     this.buffBar.update(run.buffs, lang);
