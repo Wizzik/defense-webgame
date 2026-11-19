@@ -9,6 +9,7 @@ export { countEnemiesWithin, densestCluster, nearestEnemy, strongestEnemy } from
 export type { AbilitySlot } from "./abilities/slots";
 export { botCard, botChestChoice, botChestKeep, botInput, idleCard } from "./bot";
 export { BuffState, healHero, OrbKind, startBuff, updateBuffs } from "./buffs";
+export { debugSpawnOrb, OrbStore, placeOrb, updateOrbs } from "./orbs";
 export { cardGroups, chooseCard, openOffer } from "./cards";
 export { applyChestCard, ChestAction, chestPrice, ChestStore, chooseChestCard, rollChestOffer } from "./chests";
 export type { ChestCard, ChestOffer } from "./chests";

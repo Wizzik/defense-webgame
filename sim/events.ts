@@ -39,6 +39,10 @@ export const EventKind = {
   /** The hero healed: value = hp, x/y = the hero, u = 1 lifesteal (the sum of a step) / 2 the heal orb (the sum of a
    *  second). A heart reports a Pickup with u = 2. */
   HeroHeal: 23,
+  /** An orb appeared: a = its place, value = its kind (OrbKind), x/y = where. */
+  OrbSpawn: 24,
+  /** The hero picked an orb up: a = its place, value = its kind (OrbKind), x/y = the orb. */
+  OrbPickup: 25,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

@@ -66,6 +66,14 @@ export function stateHash(run: Run): number {
   mixFloat(buffs.lifestealBudget);
   mixFloat(buffs.healCarry);
   mixInt(run.sustainRng.state);
+  const orbs = run.orbs;
+  for (let i = 0; i < orbs.alive.length; i++) {
+    mixInt(orbs.alive[i]!);
+    mixInt(orbs.kind[i]!);
+    mixInt(orbs.timer[i]!);
+    mixFloat(orbs.x[i]!);
+    mixFloat(orbs.y[i]!);
+  }
   mixInt(run.stats.kills);
   mixInt(run.stats.spawned);
   mixFloat(run.castle.hp);
