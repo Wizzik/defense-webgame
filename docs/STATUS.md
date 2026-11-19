@@ -1,6 +1,13 @@
 # Status
 
-Updated 2026-11-19 (sustain merged as PR #19 and deployed; waits for Petr's playtest). Read this first when you resume work.
+Updated 2026-11-19 (Gravecaller nerf on top of the sustain merge; both wait for Petr's playtest). Read this first when you resume work.
+
+## Gravecaller nerf: smaller Bone Stampede, half the Grave Grasp heal (2026-11-19); waits for Petr's playtest
+
+- Petr's wish: the Gravecaller is so strong because its ultimate reaches much wider than other heroes' ultimates; halve its heal too.
+- Bone Stampede radius 1000/1500 -> 700/900 with bursts 20/30 -> 10/11 a second (same hits per enemy inside, the spell deals about half to a third of before); Grave Grasp heal per hit halved (1.25-7.5). Numbers: `docs/DECISIONS.md`, section Gravecaller.
+- The autopilot still wins 20 of 20 (castle 80 -> 73 %): probes show its strength is the kit (three damage spells, two of them every 1.98 s), not the ultimate or the heal. Open for Petr after he plays.
+- What Petr checks: does the ultimate feel smaller (bones fall closer around the hero, fewer of them), is the Gravecaller still too easy; quick link https://wizzik.github.io/defense-webgame/?debug=1&hero=gravecaller, `__game.debug.setAbilityLevel(3, 2)` for the ultimate at its top level (R casts it).
 
 ## Sustain: lifesteal, hearts and map orbs: merged (PR #19 as `e20da9a`, 2026-11-19); waits for Petr's playtest
 
