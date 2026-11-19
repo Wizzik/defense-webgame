@@ -45,6 +45,18 @@ export interface RunSummary {
   burst: (number | null)[];
   /** The average base attack hit at the start of each of `BURST_PHASES` (null: not reached). */
   attack: (number | null)[];
+  /** Hearts and orbs picked up and hp healed by each source of sustain (spec 2026-11-19 sustain). */
+  sustain: SustainStats;
+}
+
+export interface SustainStats {
+  hearts: number;
+  orbsBoots: number;
+  orbsBerserk: number;
+  orbsHeal: number;
+  healedLifesteal: number;
+  healedHearts: number;
+  healedOrb: number;
 }
 
 /** A player who does nothing: no movement, no action; at a level-up the attribute card, else the weakest card (idleCard). */
@@ -119,6 +131,15 @@ export function playBot(
     gold: run.stats.goldGained,
     burst,
     attack,
+    sustain: {
+      hearts: run.stats.hearts,
+      orbsBoots: run.stats.orbsBoots,
+      orbsBerserk: run.stats.orbsBerserk,
+      orbsHeal: run.stats.orbsHeal,
+      healedLifesteal: run.stats.healedLifesteal,
+      healedHearts: run.stats.healedHearts,
+      healedOrb: run.stats.healedOrb,
+    },
   };
 }
 
@@ -201,7 +222,17 @@ export function formatHeroSummary(
     `enraged in ${summaries.filter((s) => s.enraged).length}; losses by minutes: ${lossWindows(summaries)}`;
   const wonChests = wonRuns.length > 0 ? (wonRuns.reduce((a, s) => a + s.chests, 0) / wonRuns.length).toFixed(1) : "-";
   const gear = `  chests avg ${avg((s) => s.chests).toFixed(1)} (won runs ${wonChests}), gold avg ${Math.round(avg((s) => s.gold))}`;
-  return `${head}\n${tail}\n${gear}\n${kitLine(summaries)}\n${burstLine(summaries, data)}`;
+  return `${head}\n${tail}\n${gear}\n${kitLine(summaries)}\n${burstLine(summaries, data)}\n${sustainLine(summaries)}`;
+}
+
+/** Hearts, orbs by kind and hp healed by lifesteal, hearts and the heal orb: averages per run. */
+export function sustainLine(summaries: RunSummary[]): string {
+  const avg = (f: (s: SustainStats) => number) => summaries.reduce((a, s) => a + f(s.sustain), 0) / summaries.length;
+  const one = (f: (s: SustainStats) => number) => avg(f).toFixed(1);
+  const whole = (f: (s: SustainStats) => number) => String(Math.round(avg(f)));
+  return `  sustain: hearts ${one((s) => s.hearts)}, ` +
+    `orbs boots ${one((s) => s.orbsBoots)} berserk ${one((s) => s.orbsBerserk)} heal ${one((s) => s.orbsHeal)}, ` +
+    `healed lifesteal ${whole((s) => s.healedLifesteal)} hearts ${whole((s) => s.healedHearts)} orb ${whole((s) => s.healedOrb)}`;
 }
 
 /** How often each id appears, most first (ties by id): `meteor 7, smite 5`, or `-`. */
