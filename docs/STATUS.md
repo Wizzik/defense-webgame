@@ -1,8 +1,8 @@
 # Status
 
-Updated 2026-11-19 (the sustain plan is executed on branch `sustain`; PR open against `main`, merge only at Petr's word). Read this first when you resume work.
+Updated 2026-11-19 (sustain merged as PR #19 and deployed; waits for Petr's playtest). Read this first when you resume work.
 
-## Sustain: lifesteal, hearts and map orbs: done on `sustain`, PR open (2026-11-19); waits for Petr's playtest and his word to merge
+## Sustain: lifesteal, hearts and map orbs: merged (PR #19 as `e20da9a`, 2026-11-19); waits for Petr's playtest
 
 - All 7 tasks of `docs/superpowers/plans/2026-11-19-sustain.md` are done (inline in one chat, one final self-review against spec 4.1-4.7 and `AGENTS.md`: the chat starts no separate reviewer). `npm run check`, the build and the e2e project `webgl2-fallback` (33 of 33) pass. Spec: `docs/superpowers/specs/2026-11-19-sustain-design.md`. Numbers, the ten items and the win table: `docs/DECISIONS.md`, section Sustain.
 - Why: Petr played PR #18 ("it is really very hard", he died in the 3rd minute) and asked for sustain instead of turning the spell knobs back. The knobs (0.5 / 0.005) and the doubled enemy damage stay.
@@ -20,7 +20,8 @@ Updated 2026-11-19 (the sustain plan is executed on branch `sustain`; PR open ag
   - lifesteal in the tooltips and under the doll; the effect bar over the ability bar at 1280x720;
   - quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1, then in the console `__game.debug.spawnOrb("heal")` (or `"boots"`, `"berserk"`), `__game.debug.dropHeart()`, `__game.debug.wear("ring1", "moonlit-signet")` for lifesteal.
 - **Open for Petr:** full gear does not reach "almost all" (248 of 320, `main` 254); a higher lifesteal cap changed nothing, the full-gear losses are finale losses of Redcleaver, Tidecaller, Mistwarden and Sparkshot (their kits). Gravecaller still wins 20 of 20.
-- Next: Petr plays the branch after the merge (or asks for changes on the PR). Merge only at his word.
+- Merged at Petr's word after green CI, Pages deployed.
+- Next: Petr plays the live game.
 
 ## Spell scaling, multishot on every arrow, chest compare: merged (PR #18 as `4b50a8c`, 2026-11-19); Petr played it and asked for sustain (above)
 
