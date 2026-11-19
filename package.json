@@ -20,7 +20,8 @@
     "e2e": "playwright test",
     "assets:fetch": "tsx tools/assets-build/fetch.ts",
     "assets:build": "tsx tools/assets-build/build.ts",
-    "shots": "SHOTS=1 playwright test e2e/shots.spec.ts --project=webgl2-fallback"
+    "shots": "SHOTS=1 playwright test e2e/shots.spec.ts --project=webgl2-fallback",
+    "audio:build": "tsx tools/audio-build/build.ts"
   },
   "devDependencies": {
     "@gltf-transform/core": "4.5.1",

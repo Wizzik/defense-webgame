@@ -1,0 +1,404 @@
+# Sounds and music of the game. `npm run audio:build` checks this file against the game data
+# and writes data/generated/audio.json. A cue is a named sound: `files` are recorded variants
+# (paths under assets/), `synth` is the fallback tone of client/audio/sfx.ts when no file loads.
+# Defaults: gainDb 0, pitchSpread 0.06, gainSpreadDb 2, maxVoices 4, priority 1 (0-3), category sfx.
+# Hero families (spec 5.1): stone (Stonehorn), moon (Nightglaive), bone/grave (Gravecaller),
+# storm/shaman (Serpent Shaman), mist (Mistwarden), spark (Sparkshot), blood/cleaver (Redcleaver),
+# tide (Tidecaller); shared-* for the shared spells.
+
+cues:
+  - id: stone-strike
+    files: []
+    synth: hit
+    gainDb: -4
+  - id: moon-arrow
+    files: []
+    synth: hit
+    gainDb: -4
+  - id: grave-bolt
+    files: []
+    synth: hit
+    gainDb: -4
+  - id: shaman-bolt
+    files: []
+    synth: hit
+    gainDb: -4
+  - id: mist-chill
+    files: []
+    synth: hit
+    gainDb: -4
+  - id: spark-shot
+    files: []
+    synth: hit
+    gainDb: -4
+  - id: cleaver-chop
+    files: []
+    synth: hit
+    gainDb: -4
+  - id: tide-bolt
+    files: []
+    synth: hit
+    gainDb: -4
+  - id: stone-rupture
+    files: []
+    synth: cast
+  - id: stone-tap
+    files: []
+    synth: hit
+    maxVoices: 3
+  - id: stone-echo
+    files: []
+    synth: cast
+  - id: stone-quake
+    files: []
+    synth: cast
+  - id: moon-glimmer
+    files: []
+    synth: cast
+  - id: moon-starfall
+    files: []
+    synth: cast
+  - id: moon-whisper
+    files: []
+    synth: cast
+  - id: bone-grasp
+    files: []
+    synth: cast
+  - id: bone-ring
+    files: []
+    synth: cast
+  - id: bone-wail
+    files: []
+    synth: cast
+  - id: bone-stampede
+    files: []
+    synth: cast
+  - id: storm-totem
+    files: []
+    synth: cast
+  - id: storm-bolt
+    files: []
+    synth: cast
+  - id: storm-mend
+    files: []
+    synth: cast
+  - id: storm-chorus
+    files: []
+    synth: cast
+  - id: mist-burst
+    files: []
+    synth: cast
+  - id: mist-wisp
+    files: []
+    synth: cast
+  - id: mist-surge
+    files: []
+    synth: cast
+  - id: mist-wail
+    files: []
+    synth: cast
+  - id: spark-rockets
+    files: []
+    synth: cast
+  - id: spark-sear
+    files: []
+    synth: hit
+    maxVoices: 3
+  - id: spark-beams
+    files: []
+    synth: cast
+  - id: blood-toss
+    files: []
+    synth: cast
+  - id: blood-fan
+    files: []
+    synth: cast
+  - id: blood-rot
+    files: []
+    synth: cast
+  - id: tide-crush
+    files: []
+    synth: cast
+  - id: tide-splash
+    files: []
+    synth: hit
+    maxVoices: 3
+  - id: tide-rip
+    files: []
+    synth: cast
+  - id: tide-lake
+    files: []
+    synth: cast
+  - id: shared-arc
+    files: []
+    synth: cast
+  - id: shared-smite
+    files: []
+    synth: cast
+  - id: shared-firebolt
+    files: []
+    synth: cast
+  - id: shared-frost
+    files: []
+    synth: cast
+  - id: shared-meteor
+    files: []
+    synth: cast
+  - id: shared-holy
+    files: []
+    synth: cast
+  - id: shared-blades
+    files: []
+    synth: cast
+  - id: shared-shock
+    files: []
+    synth: cast
+  - id: shared-sentry
+    files: []
+    synth: cast
+  - id: shared-breath
+    files: []
+    synth: cast
+  - id: bone-rattle
+    files: []
+    synth: death
+    maxVoices: 6
+    priority: 0
+  - id: bone-rattle-heavy
+    files: []
+    synth: death
+    maxVoices: 6
+    priority: 0
+  - id: boss-fall
+    files: []
+    synth: death
+    maxVoices: 2
+    priority: 3
+  - id: pickup-xp
+    files: []
+    synth: pickup
+    priority: 0
+    gainDb: -3
+  - id: pickup-coin
+    files: []
+    synth: coin
+    priority: 0
+  - id: pickup-heart
+    files: []
+    synth: heart
+  - id: orb-boots
+    files: []
+    synth: orb
+    priority: 2
+  - id: orb-berserk
+    files: []
+    synth: orb
+    priority: 2
+  - id: orb-renewal
+    files: []
+    synth: orb
+    priority: 2
+  - id: chest-open
+    files: []
+    synth: chest
+    priority: 2
+  - id: chest-pick
+    files: []
+    synth: chest
+    priority: 2
+    category: ui
+  - id: level-up
+    files: []
+    synth: levelUp
+    priority: 3
+  - id: hero-hurt
+    files: []
+    synth: hit
+    priority: 3
+    maxVoices: 2
+    gainDb: -6
+  - id: hero-heal
+    files: []
+    synth: pickup
+    maxVoices: 1
+    gainDb: -6
+  - id: hero-dash
+    files: []
+    synth: cast
+    priority: 2
+    maxVoices: 1
+  - id: castle-thud
+    files: []
+    synth: castleHit
+    priority: 2
+    maxVoices: 2
+  - id: war-horn
+    files: []
+    synth: bossArrive
+    priority: 3
+    maxVoices: 1
+  - id: boss-collapse
+    files: []
+    synth: death
+    priority: 3
+    maxVoices: 2
+  - id: rush-horn
+    files: []
+    synth: bossArrive
+    priority: 3
+    maxVoices: 1
+  - id: slam-breath
+    files: []
+    synth: cast
+    priority: 3
+    maxVoices: 3
+    gainDb: -4
+  - id: slam-impact
+    files: []
+    synth: slam
+    priority: 3
+    maxVoices: 3
+  - id: boss-roar
+    files: []
+    synth: enrage
+    priority: 3
+    maxVoices: 1
+  - id: chaplain-mend
+    files: []
+    synth: pickup
+    priority: 0
+    gainDb: -8
+  - id: enemy-charge
+    files: []
+    synth: cast
+    priority: 1
+    gainDb: -6
+  - id: drop-legendary
+    files: []
+    synth: levelUp
+    priority: 3
+    category: ui
+  - id: drop-mythic
+    files: []
+    synth: levelUp
+    priority: 3
+    category: ui
+  - id: gear-equip
+    files: []
+    synth: chest
+    category: ui
+  - id: heartbeat
+    files: []
+    synth: heart
+    priority: 3
+    maxVoices: 1
+    gainDb: -4
+  - id: ui-click
+    files: []
+    synth: pickup
+    priority: 3
+    category: ui
+    maxVoices: 2
+
+tracks: []
+
+# Every ability: the cue of its cast and, optionally, of its hits (passives and the two speed auras: none).
+abilities:
+  rock-rupture: { cast: stone-rupture }
+  enhanced-totem: { cast: stone-tap }
+  seismic-echo: { cast: stone-echo }
+  groundbreaker: { cast: stone-quake }
+  hunters-focus: { cast: moon-glimmer }
+  falling-stars: { cast: moon-starfall }
+  swift-pace: { cast: none }
+  shadow-sisters: { cast: moon-whisper }
+  grave-grasp: { cast: bone-grasp }
+  skull-ring: { cast: bone-ring }
+  soul-bolt: { cast: bone-wail }
+  bone-stampede: { cast: bone-stampede }
+  serpent-totem: { cast: storm-totem }
+  forked-bolt: { cast: storm-bolt }
+  mending-tide: { cast: storm-mend }
+  spirit-ward: { cast: storm-chorus }
+  soul-burst: { cast: mist-burst }
+  wisp-ward: { cast: mist-wisp }
+  mist-surge: { cast: mist-surge }
+  wailing-wave: { cast: mist-wail }
+  rocket-fan: { cast: spark-rockets }
+  searing-rounds: { cast: spark-sear }
+  quickstep: { cast: none }
+  beam-swarm: { cast: spark-beams }
+  cleaver-toss: { cast: blood-toss }
+  blood-fan: { cast: blood-fan }
+  rot-field: { cast: blood-rot }
+  crushing-wave: { cast: tide-crush }
+  stunning-tide: { cast: tide-splash }
+  riptide: { cast: tide-rip }
+  drowned-lake: { cast: tide-lake }
+  arc-lightning: { cast: shared-arc }
+  smite: { cast: shared-smite }
+  fire-bolt: { cast: shared-firebolt }
+  frost-ring: { cast: shared-frost }
+  meteor: { cast: shared-meteor }
+  holy-ground: { cast: shared-holy }
+  blade-fan: { cast: shared-blades }
+  shock-wave: { cast: shared-shock }
+  sentry-ward: { cast: shared-sentry }
+  second-wind: { cast: shared-breath }
+  might: { cast: none }
+  arcane-focus: { cast: none }
+  haste: { cast: none }
+  vigor: { cast: none }
+  fleet-foot: { cast: none }
+  fortune: { cast: none }
+
+# The base attack hit of every hero.
+heroes:
+  stonehorn: { attack: stone-strike }
+  nightglaive: { attack: moon-arrow }
+  gravecaller: { attack: grave-bolt }
+  serpent-shaman: { attack: shaman-bolt }
+  mistwarden: { attack: mist-chill }
+  sparkshot: { attack: spark-shot }
+  redcleaver: { attack: cleaver-chop }
+  tidecaller: { attack: tide-bolt }
+
+enemies:
+  shieldbearer: { death: bone-rattle }
+  scout: { death: bone-rattle }
+  musketeer: { death: bone-rattle }
+  chaplain: { death: bone-rattle }
+  lancer: { death: bone-rattle }
+  captain: { death: bone-rattle-heavy }
+  iron-marshal: { death: boss-fall }
+  pale-abbot: { death: boss-fall }
+  gunmaster: { death: boss-fall }
+  dread-regent: { death: boss-fall }
+
+sounds:
+  pickup.xp: pickup-xp
+  pickup.coin: pickup-coin
+  pickup.heart: pickup-heart
+  orb.boots: orb-boots
+  orb.berserk: orb-berserk
+  orb.heal: orb-renewal
+  chest.open: chest-open
+  chest.pick: chest-pick
+  levelUp: level-up
+  heroHit: hero-hurt
+  heroHeal: hero-heal
+  dash: hero-dash
+  castleHit: castle-thud
+  bossArrive: war-horn
+  bossDeath: boss-collapse
+  rushWarning: rush-horn
+  slam.warn: slam-breath
+  slam.hit: slam-impact
+  enrage: boss-roar
+  enemy.heal: chaplain-mend
+  enemy.charge: enemy-charge
+  drop.legendary: drop-legendary
+  drop.mythic: drop-mythic
+  gear.equip: gear-equip
+  lowHp: heartbeat
+  ui.click: ui-click

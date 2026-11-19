@@ -1,0 +1,1070 @@
+{
+  "cues": [
+    {
+      "id": "stone-strike",
+      "files": [],
+      "synth": "hit",
+      "gainDb": -4,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "moon-arrow",
+      "files": [],
+      "synth": "hit",
+      "gainDb": -4,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "grave-bolt",
+      "files": [],
+      "synth": "hit",
+      "gainDb": -4,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "shaman-bolt",
+      "files": [],
+      "synth": "hit",
+      "gainDb": -4,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "mist-chill",
+      "files": [],
+      "synth": "hit",
+      "gainDb": -4,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "spark-shot",
+      "files": [],
+      "synth": "hit",
+      "gainDb": -4,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "cleaver-chop",
+      "files": [],
+      "synth": "hit",
+      "gainDb": -4,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "tide-bolt",
+      "files": [],
+      "synth": "hit",
+      "gainDb": -4,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "stone-rupture",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "stone-tap",
+      "files": [],
+      "synth": "hit",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 3,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "stone-echo",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "stone-quake",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "moon-glimmer",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "moon-starfall",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "moon-whisper",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "bone-grasp",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "bone-ring",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "bone-wail",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "bone-stampede",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "storm-totem",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "storm-bolt",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "storm-mend",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "storm-chorus",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "mist-burst",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "mist-wisp",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "mist-surge",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "mist-wail",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "spark-rockets",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "spark-sear",
+      "files": [],
+      "synth": "hit",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 3,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "spark-beams",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "blood-toss",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "blood-fan",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "blood-rot",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "tide-crush",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "tide-splash",
+      "files": [],
+      "synth": "hit",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 3,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "tide-rip",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "tide-lake",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "shared-arc",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "shared-smite",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "shared-firebolt",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "shared-frost",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "shared-meteor",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "shared-holy",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "shared-blades",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "shared-shock",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "shared-sentry",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "shared-breath",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "bone-rattle",
+      "files": [],
+      "synth": "death",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 6,
+      "priority": 0,
+      "category": "sfx"
+    },
+    {
+      "id": "bone-rattle-heavy",
+      "files": [],
+      "synth": "death",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 6,
+      "priority": 0,
+      "category": "sfx"
+    },
+    {
+      "id": "boss-fall",
+      "files": [],
+      "synth": "death",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 2,
+      "priority": 3,
+      "category": "sfx"
+    },
+    {
+      "id": "pickup-xp",
+      "files": [],
+      "synth": "pickup",
+      "gainDb": -3,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 0,
+      "category": "sfx"
+    },
+    {
+      "id": "pickup-coin",
+      "files": [],
+      "synth": "coin",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 0,
+      "category": "sfx"
+    },
+    {
+      "id": "pickup-heart",
+      "files": [],
+      "synth": "heart",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "orb-boots",
+      "files": [],
+      "synth": "orb",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 2,
+      "category": "sfx"
+    },
+    {
+      "id": "orb-berserk",
+      "files": [],
+      "synth": "orb",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 2,
+      "category": "sfx"
+    },
+    {
+      "id": "orb-renewal",
+      "files": [],
+      "synth": "orb",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 2,
+      "category": "sfx"
+    },
+    {
+      "id": "chest-open",
+      "files": [],
+      "synth": "chest",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 2,
+      "category": "sfx"
+    },
+    {
+      "id": "chest-pick",
+      "files": [],
+      "synth": "chest",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 2,
+      "category": "ui"
+    },
+    {
+      "id": "level-up",
+      "files": [],
+      "synth": "levelUp",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 3,
+      "category": "sfx"
+    },
+    {
+      "id": "hero-hurt",
+      "files": [],
+      "synth": "hit",
+      "gainDb": -6,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 2,
+      "priority": 3,
+      "category": "sfx"
+    },
+    {
+      "id": "hero-heal",
+      "files": [],
+      "synth": "pickup",
+      "gainDb": -6,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "hero-dash",
+      "files": [],
+      "synth": "cast",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 2,
+      "category": "sfx"
+    },
+    {
+      "id": "castle-thud",
+      "files": [],
+      "synth": "castleHit",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 2,
+      "priority": 2,
+      "category": "sfx"
+    },
+    {
+      "id": "war-horn",
+      "files": [],
+      "synth": "bossArrive",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 3,
+      "category": "sfx"
+    },
+    {
+      "id": "boss-collapse",
+      "files": [],
+      "synth": "death",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 2,
+      "priority": 3,
+      "category": "sfx"
+    },
+    {
+      "id": "rush-horn",
+      "files": [],
+      "synth": "bossArrive",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 3,
+      "category": "sfx"
+    },
+    {
+      "id": "slam-breath",
+      "files": [],
+      "synth": "cast",
+      "gainDb": -4,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 3,
+      "priority": 3,
+      "category": "sfx"
+    },
+    {
+      "id": "slam-impact",
+      "files": [],
+      "synth": "slam",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 3,
+      "priority": 3,
+      "category": "sfx"
+    },
+    {
+      "id": "boss-roar",
+      "files": [],
+      "synth": "enrage",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 3,
+      "category": "sfx"
+    },
+    {
+      "id": "chaplain-mend",
+      "files": [],
+      "synth": "pickup",
+      "gainDb": -8,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 0,
+      "category": "sfx"
+    },
+    {
+      "id": "enemy-charge",
+      "files": [],
+      "synth": "cast",
+      "gainDb": -6,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "drop-legendary",
+      "files": [],
+      "synth": "levelUp",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 3,
+      "category": "ui"
+    },
+    {
+      "id": "drop-mythic",
+      "files": [],
+      "synth": "levelUp",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 3,
+      "category": "ui"
+    },
+    {
+      "id": "gear-equip",
+      "files": [],
+      "synth": "chest",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 4,
+      "priority": 1,
+      "category": "ui"
+    },
+    {
+      "id": "heartbeat",
+      "files": [],
+      "synth": "heart",
+      "gainDb": -4,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 3,
+      "category": "sfx"
+    },
+    {
+      "id": "ui-click",
+      "files": [],
+      "synth": "pickup",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 2,
+      "priority": 3,
+      "category": "ui"
+    }
+  ],
+  "tracks": [],
+  "abilities": {
+    "rock-rupture": {
+      "cast": "stone-rupture"
+    },
+    "enhanced-totem": {
+      "cast": "stone-tap"
+    },
+    "seismic-echo": {
+      "cast": "stone-echo"
+    },
+    "groundbreaker": {
+      "cast": "stone-quake"
+    },
+    "hunters-focus": {
+      "cast": "moon-glimmer"
+    },
+    "falling-stars": {
+      "cast": "moon-starfall"
+    },
+    "swift-pace": {
+      "cast": "none"
+    },
+    "shadow-sisters": {
+      "cast": "moon-whisper"
+    },
+    "grave-grasp": {
+      "cast": "bone-grasp"
+    },
+    "skull-ring": {
+      "cast": "bone-ring"
+    },
+    "soul-bolt": {
+      "cast": "bone-wail"
+    },
+    "bone-stampede": {
+      "cast": "bone-stampede"
+    },
+    "serpent-totem": {
+      "cast": "storm-totem"
+    },
+    "forked-bolt": {
+      "cast": "storm-bolt"
+    },
+    "mending-tide": {
+      "cast": "storm-mend"
+    },
+    "spirit-ward": {
+      "cast": "storm-chorus"
+    },
+    "soul-burst": {
+      "cast": "mist-burst"
+    },
+    "wisp-ward": {
+      "cast": "mist-wisp"
+    },
+    "mist-surge": {
+      "cast": "mist-surge"
+    },
+    "wailing-wave": {
+      "cast": "mist-wail"
+    },
+    "rocket-fan": {
+      "cast": "spark-rockets"
+    },
+    "searing-rounds": {
+      "cast": "spark-sear"
+    },
+    "quickstep": {
+      "cast": "none"
+    },
+    "beam-swarm": {
+      "cast": "spark-beams"
+    },
+    "cleaver-toss": {
+      "cast": "blood-toss"
+    },
+    "blood-fan": {
+      "cast": "blood-fan"
+    },
+    "rot-field": {
+      "cast": "blood-rot"
+    },
+    "crushing-wave": {
+      "cast": "tide-crush"
+    },
+    "stunning-tide": {
+      "cast": "tide-splash"
+    },
+    "riptide": {
+      "cast": "tide-rip"
+    },
+    "drowned-lake": {
+      "cast": "tide-lake"
+    },
+    "arc-lightning": {
+      "cast": "shared-arc"
+    },
+    "smite": {
+      "cast": "shared-smite"
+    },
+    "fire-bolt": {
+      "cast": "shared-firebolt"
+    },
+    "frost-ring": {
+      "cast": "shared-frost"
+    },
+    "meteor": {
+      "cast": "shared-meteor"
+    },
+    "holy-ground": {
+      "cast": "shared-holy"
+    },
+    "blade-fan": {
+      "cast": "shared-blades"
+    },
+    "shock-wave": {
+      "cast": "shared-shock"
+    },
+    "sentry-ward": {
+      "cast": "shared-sentry"
+    },
+    "second-wind": {
+      "cast": "shared-breath"
+    },
+    "might": {
+      "cast": "none"
+    },
+    "arcane-focus": {
+      "cast": "none"
+    },
+    "haste": {
+      "cast": "none"
+    },
+    "vigor": {
+      "cast": "none"
+    },
+    "fleet-foot": {
+      "cast": "none"
+    },
+    "fortune": {
+      "cast": "none"
+    }
+  },
+  "heroes": {
+    "stonehorn": {
+      "attack": "stone-strike"
+    },
+    "nightglaive": {
+      "attack": "moon-arrow"
+    },
+    "gravecaller": {
+      "attack": "grave-bolt"
+    },
+    "serpent-shaman": {
+      "attack": "shaman-bolt"
+    },
+    "mistwarden": {
+      "attack": "mist-chill"
+    },
+    "sparkshot": {
+      "attack": "spark-shot"
+    },
+    "redcleaver": {
+      "attack": "cleaver-chop"
+    },
+    "tidecaller": {
+      "attack": "tide-bolt"
+    }
+  },
+  "enemies": {
+    "shieldbearer": {
+      "death": "bone-rattle"
+    },
+    "scout": {
+      "death": "bone-rattle"
+    },
+    "musketeer": {
+      "death": "bone-rattle"
+    },
+    "chaplain": {
+      "death": "bone-rattle"
+    },
+    "lancer": {
+      "death": "bone-rattle"
+    },
+    "captain": {
+      "death": "bone-rattle-heavy"
+    },
+    "iron-marshal": {
+      "death": "boss-fall"
+    },
+    "pale-abbot": {
+      "death": "boss-fall"
+    },
+    "gunmaster": {
+      "death": "boss-fall"
+    },
+    "dread-regent": {
+      "death": "boss-fall"
+    }
+  },
+  "sounds": {
+    "pickup.xp": "pickup-xp",
+    "pickup.coin": "pickup-coin",
+    "pickup.heart": "pickup-heart",
+    "orb.boots": "orb-boots",
+    "orb.berserk": "orb-berserk",
+    "orb.heal": "orb-renewal",
+    "chest.open": "chest-open",
+    "chest.pick": "chest-pick",
+    "levelUp": "level-up",
+    "heroHit": "hero-hurt",
+    "heroHeal": "hero-heal",
+    "dash": "hero-dash",
+    "castleHit": "castle-thud",
+    "bossArrive": "war-horn",
+    "bossDeath": "boss-collapse",
+    "rushWarning": "rush-horn",
+    "slam.warn": "slam-breath",
+    "slam.hit": "slam-impact",
+    "enrage": "boss-roar",
+    "enemy.heal": "chaplain-mend",
+    "enemy.charge": "enemy-charge",
+    "drop.legendary": "drop-legendary",
+    "drop.mythic": "drop-mythic",
+    "gear.equip": "gear-equip",
+    "lowHp": "heartbeat",
+    "ui.click": "ui-click"
+  }
+}
