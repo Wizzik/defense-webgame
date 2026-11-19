@@ -168,6 +168,14 @@ export function stateHash(run: Run): number {
     mixFloat(coins.x[i]);
     mixFloat(coins.y[i]);
   }
+  const hearts = run.hearts;
+  for (let i = 0; i < hearts.capacity; i++) {
+    if (hearts.alive[i] === 0) continue;
+    mixInt(i);
+    mixInt(hearts.attracted[i]);
+    mixFloat(hearts.x[i]);
+    mixFloat(hearts.y[i]);
+  }
   const pr = run.projectiles;
   for (let i = 0; i < pr.capacity; i++) {
     if (pr.alive[i] === 0) continue;

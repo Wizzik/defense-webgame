@@ -1,3 +1,4 @@
+import { healHero } from "./buffs";
 import { TICK_SECONDS } from "./constants";
 import { EventKind } from "./events";
 import { onGearGold } from "./gear-effects";
@@ -6,8 +7,10 @@ import type { Run } from "./run";
 
 export const CRYSTAL_CAPACITY = 512;
 export const COIN_CAPACITY = 512;
+/** Hearts on the ground (spec 2026-11-19 sustain); a heart that does not fit is lost. */
+export const HEART_CAPACITY = 64;
 
-/** XP crystals (and gold coins, a second store) in typed arrays of fixed capacity; a slot is stable while the crystal lives. */
+/** XP crystals (and gold coins and hearts, two more stores) in typed arrays of fixed capacity; a slot is stable while the crystal lives. */
 export class CrystalStore {
   readonly capacity: number;
   count = 0;
@@ -70,9 +73,10 @@ export function debugGrantGold(run: Run, amount: number): void {
 
 /**
  * Attracts the pickups of a store near the hero, flies them in without overshooting and collects them.
- * `kind`: 0 XP crystals, 1 gold coins. The Pickup event carries the XP or the gold gained and the kind in `u`.
+ * `kind`: 0 XP crystals, 1 gold coins, 2 hearts. The Pickup event carries the XP, the gold or the hp gained and the
+ * kind in `u`. A heart heals rules.sustain.hearts.healShare x max hp (nothing for a fallen hero).
  */
-export function updatePickups(run: Run, c: CrystalStore, kind: 0 | 1): void {
+export function updatePickups(run: Run, c: CrystalStore, kind: 0 | 1 | 2): void {
   const hero = run.hero;
   if (c.count === 0) return;
   const { magnetRadius, crystalSpeed, pickupRadius } = run.data.rules.progression;
@@ -109,10 +113,21 @@ export function updatePickups(run: Run, c: CrystalStore, kind: 0 | 1): void {
       if (kind === 0) {
         run.events.push(EventKind.Pickup, i, value, x, y, 0, 0);
         gainXp(run, value);
-      } else {
+      } else if (kind === 1) {
         run.events.push(EventKind.Pickup, i, gainGold(run, value), x, y, 1, 0);
         onGearGold(run, value);
+      } else {
+        const healed = healHero(run, run.data.rules.sustain.hearts.healShare * hero.stats.maxHp);
+        run.stats.hearts++;
+        run.stats.healedHearts += healed;
+        run.events.push(EventKind.Pickup, i, healed, x, y, 2, 0);
       }
     }
   }
+}
+
+/** Drops a heart 100 ahead of the hero; for end-to-end tests and debugging only. */
+export function debugDropHeart(run: Run): void {
+  const hero = run.hero;
+  run.hearts.drop(hero.x + hero.facingX * 100, hero.y + hero.facingY * 100, 1);
 }

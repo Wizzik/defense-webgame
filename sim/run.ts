@@ -9,7 +9,7 @@ import { type ChestOffer, ChestStore, chooseChestCard, placeChest, updateChests 
 import { regenCastle } from "./castle";
 import { ALLY_CAPACITY, AllyStore, updateAllies } from "./allies";
 import { PROJECTILE_CAPACITY, ProjectileStore, updateProjectiles } from "./projectiles";
-import { COIN_CAPACITY, CRYSTAL_CAPACITY, CrystalStore, updatePickups } from "./crystals";
+import { COIN_CAPACITY, CRYSTAL_CAPACITY, CrystalStore, HEART_CAPACITY, updatePickups } from "./crystals";
 import { updateEnemies } from "./enemy-ai";
 import { BEHAVIOR_IDS } from "./enemy-steer";
 import { healEnemies } from "./enemy-heal";
@@ -65,6 +65,8 @@ export class Run {
   readonly crystals = new CrystalStore(CRYSTAL_CAPACITY);
   /** Gold coins on the ground. */
   readonly coins = new CrystalStore(COIN_CAPACITY);
+  /** Hearts on the ground (sim/combat.ts drops them, updatePickups kind 2 heals). */
+  readonly hearts = new CrystalStore(HEART_CAPACITY);
   /** Gold the hero holds; it pays for chests and is gone after the run. */
   gold = 0;
   /** The chests on the map (sim/chests.ts). */
@@ -243,6 +245,7 @@ export class Run {
    *   updateAllies(this);         // phase 2a, Task 6
    *   updatePickups(this, crystals, 0);   // Task 7
    *   updatePickups(this, coins, 1);      // gear plan, Task 3
+   *   updatePickups(this, hearts, 2);     // sustain plan, Task 3 (a fallen hero is not healed)
    *   updateBuffs(this);          // sustain plan, Task 2: orb timers, heal over time, lifesteal budget and its event
    *   regenCastle(this);          // Task 4
    *   this.tick++;
@@ -279,6 +282,7 @@ export class Run {
     updateAllies(this);
     updatePickups(this, this.crystals, 0);
     updatePickups(this, this.coins, 1);
+    updatePickups(this, this.hearts, 2);
     updateBuffs(this);
     regenCastle(this);
     this.tick++;
@@ -290,7 +294,7 @@ export class Run {
 }
 
 function savePrevious(run: Run): void {
-  const { hero, enemies, crystals, coins, projectiles, allies } = run;
+  const { hero, enemies, crystals, coins, hearts, projectiles, allies } = run;
   hero.prevX = hero.x;
   hero.prevY = hero.y;
   for (let i = 0; i < crystals.capacity; i++) {
@@ -302,6 +306,11 @@ function savePrevious(run: Run): void {
     if (coins.alive[i] === 0) continue;
     coins.prevX[i] = coins.x[i];
     coins.prevY[i] = coins.y[i];
+  }
+  for (let i = 0; i < hearts.capacity; i++) {
+    if (hearts.alive[i] === 0) continue;
+    hearts.prevX[i] = hearts.x[i];
+    hearts.prevY[i] = hearts.y[i];
   }
   for (let i = 0; i < projectiles.capacity; i++) {
     if (projectiles.alive[i] === 0) continue;
