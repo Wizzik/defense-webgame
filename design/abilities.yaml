@@ -191,6 +191,9 @@
   description: { en: "Bones rain down around you for a while.", cs: "Kolem tebe chvíli prší kosti." }
   kind: ticking_area
   targeting: densest_cluster
+  # The map's cooldown is 60, 40 (19.8, 13.2 s in the game: with 10 s of bones it ran most of the time).
+  # Petr doubled it on 2026-11-19.
+  cooldown: { design: [120, 80] }
   params:
     tickDamage: DataC
     # Petr 2026-11-19: the map's area (1000, 1500) made it reach far wider than any other ultimate, so the
