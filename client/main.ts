@@ -399,6 +399,9 @@ function runLoop(
   sunShadow: SunShadow,
   chestView: ChestView,
 ): void {
+  // read live, not copied once a frame: a test that clicks a card and reads it at once must not depend on a frame
+  // having passed (slow software rendering)
+  Object.defineProperty(snapshot, "chestCompare", { get: () => ui.chestCompare, enumerable: true, configurable: true });
   let last = -1;
   renderer.setAnimationLoop((now) => {
     try {
@@ -410,7 +413,6 @@ function runLoop(
       chestView.labelsVisible = !ui.menuOpen && !session.paused;
       ui.update(innerWidth, innerHeight);
       updateSnapshot(snapshot, session.run, ui.menuOpen, packArrows.visible);
-      snapshot.chestCompare = ui.chestCompare;
       snapshot.render.heroModels = heroView.modelCount;
       snapshot.render.slamRings = enemyFx.slamRingCount;
       sunShadow.follow(followCamera.targetX, followCamera.targetZ);

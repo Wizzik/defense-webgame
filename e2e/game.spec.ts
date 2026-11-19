@@ -638,7 +638,12 @@ test("a chest card for a worn slot opens the compare; Esc goes back, 1 keeps, th
   await expect(page.locator("button.card").first()).toBeVisible();
   expect(await page.evaluate(() => [window.__game!.chestCompare, window.__game!.screen])).toEqual([null, "chest"]);
 
-  await page.locator("button.card").nth(index).click();
+  // click and read in one synchronous step, so no frame runs in between: the snapshot must not lag the DOM
+  await page.waitForTimeout(350);
+  expect(await page.evaluate((i) => {
+    (document.querySelectorAll("button.card")[i] as HTMLElement).click();
+    return window.__game!.chestCompare;
+  }, index)).toBe(index);
   await expect(page.locator("#chest-compare")).toBeVisible();
   await page.waitForTimeout(400);
   await page.keyboard.press("Digit1");
