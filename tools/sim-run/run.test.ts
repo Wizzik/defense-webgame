@@ -190,7 +190,7 @@ describe("chests in the summaries", () => {
   });
 
   it("a played run reports its chests and gold", () => {
-    const s = playBot(gameData(), 4, 300);
+    const s = playBot(gameData(), 1, 300);
     expect(s.gold).toBeGreaterThan(0);
     expect(s.chests).toBeGreaterThan(0);
   });

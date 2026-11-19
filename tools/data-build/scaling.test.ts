@@ -48,7 +48,7 @@ describe("scaling", () => {
   it("rounds speeds and hp to integers and cooldowns to 2 decimals", () => {
     const s = parseScaling({
       heroes: { moveSpeed: 1.4, attackCooldown: 0.5 },
-      abilities: { cooldown: 0.33, damage: 0.5 },
+      abilities: { cooldown: 0.33, damage: 0.5, levelGrowthExponent: 1 },
       enemies: { hp: 0.3, moveSpeed: 1.22 },
     });
     const enemy = scaleEnemy({ hp: 421, moveSpeed: 270 } as never, s);
@@ -64,7 +64,7 @@ describe("scaling", () => {
   it("scales damage, tickDamage and amount but not other params", () => {
     const s = parseScaling({
       heroes: { moveSpeed: 1, attackCooldown: 1 },
-      abilities: { cooldown: 1, damage: 0.5 },
+      abilities: { cooldown: 1, damage: 0.5, levelGrowthExponent: 1 },
       enemies: { hp: 1, moveSpeed: 1 },
     });
     const ability = scaleAbility(
@@ -97,17 +97,70 @@ describe("scaling", () => {
   it("rejects a missing key, an unknown key and a non-positive multiplier", () => {
     const ok = {
       heroes: { moveSpeed: 1, attackCooldown: 1 },
-      abilities: { cooldown: 1, damage: 1 },
+      abilities: { cooldown: 1, damage: 1, levelGrowthExponent: 1 },
       enemies: { hp: 1, moveSpeed: 1 },
     };
     expect(() => parseScaling(ok)).not.toThrow();
     expect(errorMessage(() => parseScaling({ ...ok, enemies: { hp: 1 } }))).toContain("design/scaling.yaml");
     expect(errorMessage(() => parseScaling({ ...ok, enemies: { hp: 1 } }))).toContain("moveSpeed");
     expect(errorMessage(() => parseScaling({ ...ok, extra: {} }))).toContain("extra");
-    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 0, damage: 1 } }))).toContain("cooldown");
-    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1, damage: 0 } }))).toContain("abilities.damage");
-    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1 } }))).toContain("damage");
-    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1, damage: -1 } }))).toContain("design/scaling.yaml");
+    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 0, damage: 1, levelGrowthExponent: 1 } }))).toContain("cooldown");
+    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1, damage: 0, levelGrowthExponent: 1 } }))).toContain("abilities.damage");
+    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1, levelGrowthExponent: 1 } }))).toContain("damage");
+    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1, damage: -1, levelGrowthExponent: 1 } }))).toContain("design/scaling.yaml");
     expect(errorMessage(() => parseScaling(null))).toContain("design/scaling.yaml");
+  });
+  describe("level growth", () => {
+    const withGrowth = (damage: number, levelGrowthExponent: unknown) =>
+      parseScaling({
+        heroes: { moveSpeed: 1, attackCooldown: 1 },
+        abilities: { cooldown: 1, damage, levelGrowthExponent },
+        enemies: { hp: 1, moveSpeed: 1 },
+      });
+
+    it("flattens the growth of damage and heal rows from level 1", () => {
+      const s = withGrowth(1, 0.5);
+      const ability = scaleAbility(
+        {
+          cooldown: [1],
+          params: {
+            damage: [90, 180, 360, 750, 1500], amount: [150, 300, 600, 1500, 3000], bonusDamage: [300, 600, 900, 1200, 1500],
+            tickDamage: [18, 18, 18, 18, 18], radius: [350, 400, 450, 500, 550], extraTargets: [1, 1, 2, 2, 3],
+          },
+        } as never,
+        s,
+      );
+      expect(ability.params).toEqual({
+        damage: [90, 127, 180, 260, 367], amount: [150, 212, 300, 474, 671], bonusDamage: [300, 424, 520, 600, 671],
+        tickDamage: [18, 18, 18, 18, 18], radius: [350, 400, 450, 500, 550], extraTargets: [1, 1, 2, 2, 3],
+      });
+    });
+
+    it("leaves a row with zero at level 1 and a one-level row alone", () => {
+      const s = withGrowth(1, 0.5);
+      const ability = scaleAbility({ cooldown: [1], params: { damage: [0, 50, 100], amount: [120], tickDamage: [10, 0, 40] } } as never, s);
+      expect(ability.params).toEqual({ damage: [0, 50, 100], amount: [120], tickDamage: [10, 0, 20] });
+      for (const row of Object.values(ability.params as Record<string, number[]>)) {
+        for (const v of row) expect(Number.isFinite(v)).toBe(true);
+      }
+    });
+
+    it("growth applies after the damage multiplier", () => {
+      const s = withGrowth(0.5, 0.5);
+      const ability = scaleAbility({ cooldown: [1], params: { damage: [180, 3000] } } as never, s);
+      expect(ability.params).toEqual({ damage: [90, 367] });
+    });
+
+    it("rejects a missing or out-of-range levelGrowthExponent", () => {
+      const missing = {
+        heroes: { moveSpeed: 1, attackCooldown: 1 },
+        abilities: { cooldown: 1, damage: 1 },
+        enemies: { hp: 1, moveSpeed: 1 },
+      };
+      expect(errorMessage(() => parseScaling(missing))).toContain("abilities.levelGrowthExponent");
+      expect(errorMessage(() => withGrowth(1, 0))).toContain("abilities.levelGrowthExponent");
+      expect(errorMessage(() => withGrowth(1, 1.5))).toContain("abilities.levelGrowthExponent");
+      expect(() => withGrowth(1, 1)).not.toThrow();
+    });
   });
 });

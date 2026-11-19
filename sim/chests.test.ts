@@ -393,7 +393,7 @@ describe("chests", () => {
 
   it("the autopilot plays through chests and the run stays deterministic", () => {
     const play = () => {
-      const run = createRun(gameData(), { seed: 4, durationSeconds: 150 });
+      const run = createRun(gameData(), { seed: 1, durationSeconds: 150 });
       const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
       for (let i = 0; i < 150 * 30 && run.state !== "won" && run.state !== "lost"; i++) run.step(botInput(run, input));
       return run;

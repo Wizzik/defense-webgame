@@ -32,7 +32,7 @@ describe("cardLines", () => {
     const run = stonehornRun();
     const lines = cardLines(run, { kind: "attribute", attribute: "int", amount: 10 });
     expect(lines).toEqual([
-      { label: "stat.spellPower", from: "+24 %", to: "+34 %" },
+      { label: "stat.spellPower", from: "+12 %", to: "+17 %" },
       { label: "stat.cooldownScale", from: "−19 %", to: "−25 %" },
     ]);
   });
