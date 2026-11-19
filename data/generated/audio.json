@@ -540,17 +540,6 @@
       "category": "sfx"
     },
     {
-      "id": "boss-fall",
-      "files": [],
-      "synth": "death",
-      "gainDb": 0,
-      "pitchSpread": 0.06,
-      "gainSpreadDb": 2,
-      "maxVoices": 2,
-      "priority": 3,
-      "category": "sfx"
-    },
-    {
       "id": "pickup-xp",
       "files": [],
       "synth": "pickup",
@@ -1027,16 +1016,16 @@
       "death": "bone-rattle-heavy"
     },
     "iron-marshal": {
-      "death": "boss-fall"
+      "death": "bone-rattle-heavy"
     },
     "pale-abbot": {
-      "death": "boss-fall"
+      "death": "bone-rattle-heavy"
     },
     "gunmaster": {
-      "death": "boss-fall"
+      "death": "bone-rattle-heavy"
     },
     "dread-regent": {
-      "death": "boss-fall"
+      "death": "bone-rattle-heavy"
     }
   },
   "sounds": {

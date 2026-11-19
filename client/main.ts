@@ -2,6 +2,7 @@
 import { Scene, type WebGPURenderer } from "three/webgpu";
 import type { GameData } from "../data/schema";
 import { ALLY_CAPACITY, COIN_CAPACITY, CRYSTAL_CAPACITY, HEART_CAPACITY } from "../sim";
+import type { AudioData } from "../data/schema/audio";
 import { loadAudioData } from "./audio/data";
 import { AudioEngine } from "./audio/engine";
 import { MusicDirector, type MusicInput, musicSlot } from "./audio/music-director";
@@ -190,6 +191,8 @@ async function start(): Promise<void> {
   const audio = new AudioEngine(audioData, import.meta.env.BASE_URL);
   audio.setMuted(readStoredMuted());
   const sound: Sound = {
+    active: false,
+    data: audioData,
     engine: audio,
     director: new MusicDirector(),
     music: new MusicPlayer(audio, audioData, import.meta.env.BASE_URL),
@@ -202,7 +205,7 @@ async function start(): Promise<void> {
   addEventListener("pointerdown", enableAudio, { once: true });
   addEventListener("keydown", enableAudio, { once: true });
   const packArrows = new PackArrows(document.getElementById("ui")!, followCamera.camera);
-  session.views.push(heroView, allyView, blobShadows, crowd, crystals, coins, hearts, orbView, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(audio, audioData));
+  session.views.push(heroView, allyView, blobShadows, crowd, crystals, coins, hearts, orbView, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(audio, audioData, sound.director, followCamera.camera, data.enemies.map((e) => e.id), () => sound.active));
 
   addEventListener("resize", () => {
     renderer.setSize(innerWidth, innerHeight);
@@ -283,7 +286,10 @@ function heroLoader(
 }
 
 interface Sound {
+  /** A run is on screen and not paused (the low-hp pulse beats only then); the UI keeps it current. */
+  active: boolean;
   engine: AudioEngine;
+  data: AudioData;
   director: MusicDirector;
   music: MusicPlayer;
 }
@@ -345,6 +351,7 @@ function createUi(
   // the paused run behind the menu wears the old doll: after a change it is started again
   const gearScreen = new GearScreen(root, {
     data, gear,
+    onEquip: () => sound.engine.play(sound.data.sounds["gear.equip"]),
     onClose: (changed) => {
       if (changed) void useHero(heroId);
       menu.setVisible(true);
@@ -367,6 +374,7 @@ function createUi(
     }
   });
   const hud = new Hud(root);
+  hud.onLoot = (tone) => sound.engine.play(sound.data.sounds[tone === "rarity-mythic" ? "drop.mythic" : "drop.legendary"]);
   hud.dropFor = (bossId, order, magicFind) => gear.onBossDeath(bossId, session.seed, order, magicFind);
   // the HUD reads the events of every step for its news line
   session.views.push({ update: () => {}, onEvents: (run) => hud.onEvents(run, lang), dispose: () => {} });
@@ -399,6 +407,7 @@ function createUi(
         finale: run.inFinale,
         panelOpen: !menuOpen && session.paused,
       };
+      sound.active = !menuOpen && !session.paused;
       sound.music.set(musicSlot(input));
       sound.music.setDuck(sound.director.duck(input, performance.now() / 1000));
       hud.setVisible(!menuOpen);

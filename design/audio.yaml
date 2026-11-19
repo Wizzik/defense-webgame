@@ -169,11 +169,6 @@ cues:
     synth: death
     maxVoices: 6
     priority: 0
-  - id: boss-fall
-    files: []
-    synth: death
-    maxVoices: 2
-    priority: 3
   - id: pickup-xp
     files: []
     synth: pickup
@@ -370,10 +365,10 @@ enemies:
   chaplain: { death: bone-rattle }
   lancer: { death: bone-rattle }
   captain: { death: bone-rattle-heavy }
-  iron-marshal: { death: boss-fall }
-  pale-abbot: { death: boss-fall }
-  gunmaster: { death: boss-fall }
-  dread-regent: { death: boss-fall }
+  iron-marshal: { death: bone-rattle-heavy }
+  pale-abbot: { death: bone-rattle-heavy }
+  gunmaster: { death: bone-rattle-heavy }
+  dread-regent: { death: bone-rattle-heavy }
 
 sounds:
   pickup.xp: pickup-xp

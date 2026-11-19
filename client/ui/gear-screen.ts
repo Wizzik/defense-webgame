@@ -33,10 +33,13 @@ export class GearScreen {
   private filter: SlotType | "all" = "all";
   private changed = false;
 
-  constructor(parent: HTMLElement, deps: { data: GameData; gear: GearSession; onClose(changed: boolean): void }) {
+  private readonly onEquip: () => void;
+
+  constructor(parent: HTMLElement, deps: { data: GameData; gear: GearSession; onClose(changed: boolean): void; onEquip?(): void }) {
     this.data = deps.data;
     this.gear = deps.gear;
     this.onClose = deps.onClose;
+    this.onEquip = deps.onEquip ?? (() => {});
     this.root = el("div", "screen gear-screen", parent);
     this.root.id = "gear-screen";
     this.root.hidden = true;
@@ -184,6 +187,7 @@ export class GearScreen {
       if (entry.owned) {
         cell.addEventListener("click", () => {
           this.gear.equip(heroId, item.id);
+          this.onEquip();
           this.changed = true;
           this.render();
         });
