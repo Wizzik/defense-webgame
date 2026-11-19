@@ -1,8 +1,16 @@
 # Status
 
-Updated 2026-11-19 (spell scaling, multishot on every arrow and the chest compare are done on branch `spell-scaling`; PR #18 waits for Petr's word and his choice of the two balance knobs). Read this first when you resume work.
+Updated 2026-11-19 (PR #18 merged and deployed; Petr played it, found the game too hard and asked for sustain; the sustain spec and plan are approved on branch `sustain`, execution is next). Read this first when you resume work.
 
-## Spell scaling, multishot on every arrow, chest compare: done, PR #18 open, waits for Petr (branch `spell-scaling`, 2026-11-19)
+## Next: execute the sustain plan (lifesteal, hearts, map orbs; spec and plan approved 2026-11-19)
+
+- Why: Petr played PR #18 ("it is really very hard", he died in the 3rd minute) and asked for sustain instead of only turning the spell knobs: a lifesteal stat on items (a low single-digit share of all damage from attacks and spells), hearts that killed enemies drop and that heal, and orbs on the map (boots +100 % move speed 15 s, berserk +50 % damage 15 s, heal 100 % hp over 15 s). Hearts and orbs must help from the first minute, without gear.
+- Petr's choices (brainstorm 2026-11-19): orbs as a regular rhythm (up to 3 on the map, each new one at a random place, respawn 30-45 s); lifesteal by rewriting one row on about 10 existing items, with a cap; orbs built as `sim/orbs.ts` + `sim/buffs.ts`.
+- Spec: `docs/superpowers/specs/2026-11-19-sustain-design.md`. Plan: `docs/superpowers/plans/2026-11-19-sustain.md` (7 tasks). Both are on the branch `sustain` (from `main` at `4b50a8c`).
+- Next in a new chat: execute the plan on `sustain` (Petr picks subagent-driven or native), then a PR against `main`; merge only at Petr's word.
+- The spell knobs of PR #18 (0.5 / 0.005) and the doubled enemy damage stay; sustain is meant to carry the first minutes.
+
+## Spell scaling, multishot on every arrow, chest compare: merged (PR #18 as `4b50a8c`, 2026-11-19); Petr played it and asked for sustain (below)
 
 - All 7 tasks of `docs/superpowers/plans/2026-11-19-spell-scaling-chest-compare.md` are done (inline in one chat, one final self-review). `npm run check`, the build and the e2e project `webgl2-fallback` pass. Spec: `docs/superpowers/specs/2026-11-19-spell-scaling-chest-compare-design.md`. Numbers, rulings and tables: `docs/DECISIONS.md`, section Spell scaling, multishot on every arrow, chest compare.
 - What it brings:
