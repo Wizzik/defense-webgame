@@ -133,3 +133,29 @@ test("shot: gear", async ({ page }) => {
   await page.waitForTimeout(300);
   await shot(page, "gear");
 });
+
+test("shot: chest-compare", async ({ page }) => {
+  const items = JSON.parse(readFileSync(join(import.meta.dirname, "..", "data", "generated", "items.json"), "utf8")) as {
+    id: string; rarity: string; slotType: string;
+  }[];
+  const slots: [string, string][] = [
+    ["head", "head"], ["neck", "neck"], ["shoulders", "shoulders"], ["back", "back"], ["chest", "chest"], ["wrist", "wrist"],
+    ["hands", "hands"], ["waist", "waist"], ["legs", "legs"], ["feet", "feet"], ["ring1", "ring"], ["ring2", "ring"],
+    ["trinket1", "trinket"], ["trinket2", "trinket"], ["mainHand", "mainHand"], ["offHand", "offHand"],
+  ];
+  const pairs = slots.map(([slot, type]) => [slot, items.find((item) => item.slotType === type && item.rarity === "common")!.id]);
+  await startRun(page, "seed=1&debug=1&lang=cs");
+  await page.evaluate((list) => {
+    const g = window.__game!;
+    for (const [slot, item] of list) g.debug!.wear(slot!, item!);
+    g.debug!.grantGold(1000);
+    g.debug!.teleport(g.chests[0]!.x, g.chests[0]!.y);
+  }, pairs);
+  await page.waitForFunction(() => window.__game?.screen === "chest", undefined, { timeout: 90_000, polling: 250 });
+  const index = await page.evaluate(() => window.__game!.chestCards!.findIndex((card) => card.action === "choice"));
+  await page.waitForTimeout(350);
+  await page.locator("button.card").nth(Math.max(0, index)).click();
+  await page.locator("#chest-compare").waitFor();
+  await page.waitForTimeout(200);
+  await shot(page, "chest-compare");
+});

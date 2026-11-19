@@ -13,7 +13,7 @@ export interface ChestLines {
   slotType: SlotType;
   rarity: Rarity;
   rarityName: string;
-  /** What the pick does: "new for this run", "replaces X for this run", "level 3 → 4". */
+  /** What the pick does: "new for this run", "compare with X", "level 3 → 4". */
   action: string;
   /** Stat rows: the item at level 1, the comparison with the worn item, or the worn item's "from → to". */
   lines: { text: string; tone: LineTone }[];
@@ -36,7 +36,7 @@ export function chestLines(lang: Lang, data: GameData, gear: GearState, card: Ch
     if (item.effect) lines.push({ text: item.effect.text[lang], tone: "effect" });
   } else if (card.action === ChestAction.Choice) {
     const old = data.items[worn]!;
-    action = t(lang, "chest.replace", { name: old.name[lang] });
+    action = t(lang, "chest.choice", { name: old.name[lang] });
     lines = tooltipLines(lang, data, item, 0, from + 1, { item: old, level: base, temp }).lines;
   } else {
     action = t(lang, "chest.level", { from, to: from + 1 });

@@ -708,6 +708,109 @@
 .card.chest.rarity-legendary :is(.chest-glyph, .chest-rarity) { color: var(--rarity-legendary); }
 .card.chest.rarity-mythic :is(.chest-glyph, .chest-rarity) { color: var(--rarity-mythic); }
 
+/* the chest compare: the worn item and the new one side by side; deep navy and blue-grey, nothing orange */
+.chest-compare {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.compare-head {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+.compare-back,
+.compare-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--ink);
+  background: rgba(30, 44, 68, 0.95);
+  border: 1px solid #5f86b3;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.compare-back:hover,
+.compare-button:hover,
+.compare-back:focus-visible,
+.compare-button:focus-visible {
+  background: rgba(46, 66, 98, 0.98);
+  border-color: #a9c8ec;
+  outline: none;
+}
+.compare-esc,
+.compare-key {
+  min-width: 22px;
+  padding: 1px 6px;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 12px;
+  color: #0e1622;
+  background: #a9c8ec;
+  border-radius: 4px;
+}
+/* both columns share one grid of 7 bands (label, name, rarity, level, stats, effect, button), so a name that
+   wraps or an effect on one side keeps the stat rows of both sides level */
+.compare-cols {
+  display: grid;
+  grid-template-columns: 320px 320px;
+  grid-template-rows: repeat(7, auto);
+  column-gap: 22px;
+}
+.card.compare-col {
+  display: grid;
+  grid-row: span 7;
+  grid-template-rows: subgrid;
+  align-items: start;
+  width: auto;
+  min-height: 0;
+  padding: 16px 18px 18px;
+  row-gap: 8px;
+  cursor: default;
+  background: rgba(14, 20, 32, 0.94);
+}
+.card.compare-col:hover {
+  transform: none;
+}
+.card.chest.compare-col.rarity-common:hover { border-color: var(--rarity-common); }
+.card.chest.compare-col.rarity-rare:hover { border-color: var(--rarity-rare); }
+.card.chest.compare-col.rarity-epic:hover { border-color: var(--rarity-epic); }
+.card.chest.compare-col.rarity-legendary:hover { border-color: var(--rarity-legendary); }
+.card.chest.compare-col.rarity-mythic:hover { border-color: var(--rarity-mythic); }
+.compare-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.compare-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 0;
+  border-top: 1px solid var(--edge);
+  border-bottom: 1px solid var(--edge);
+}
+.compare-row {
+  min-height: 1.3em;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.compare-effect {
+  font-size: 13px;
+  line-height: 1.35;
+}
+.compare-col .compare-button {
+  justify-self: center;
+  align-self: end;
+}
+
 /* gear: the doll, its slots and the tooltip. Deep navy and blue-grey, nothing orange. */
 .gear-panel {
   background: rgba(8, 12, 20, 0.72);

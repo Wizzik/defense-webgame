@@ -197,7 +197,7 @@ async function start(): Promise<void> {
   if (params.debug) {
     addDebugHooks(snapshot, () => session.run, gear, (run) => {
       for (const view of session.views) view.onEvents?.(run);
-    });
+    }, (index, keep) => session.setCard(index, keep));
   }
   const publishGear = (): void => {
     snapshot.collection = gear.save.items;
@@ -265,6 +265,8 @@ function heroLoader(
 interface Ui {
   update(width: number, height: number): void;
   readonly menuOpen: boolean;
+  /** The chest card whose compare is open, or null. */
+  readonly chestCompare: number | null;
   useHero: UseHero;
 }
 
@@ -343,7 +345,7 @@ function createUi(
   session.views.push({ update: () => {}, onEvents: (run) => hud.onEvents(run, lang), dispose: () => {} });
   const pointer = new CastlePointer(root);
   const chestPointer = new ChestPointer(root);
-  const cards = new Cards(root, (index) => session.setCard(index));
+  const cards = new Cards(root, (index, keep) => session.setCard(index, keep));
   new GearPanel(root, { data, session, getLang: () => lang, menuOpen: () => menuOpen });
   const end = new EndScreen(root, () => {
     void useHero(heroId, nextSeed());
@@ -356,6 +358,9 @@ function createUi(
     useHero,
     get menuOpen() {
       return menuOpen;
+    },
+    get chestCompare() {
+      return cards.comparing;
     },
     update(width, height) {
       const run = session.run;
@@ -405,6 +410,7 @@ function runLoop(
       chestView.labelsVisible = !ui.menuOpen && !session.paused;
       ui.update(innerWidth, innerHeight);
       updateSnapshot(snapshot, session.run, ui.menuOpen, packArrows.visible);
+      snapshot.chestCompare = ui.chestCompare;
       snapshot.render.heroModels = heroView.modelCount;
       snapshot.render.slamRings = enemyFx.slamRingCount;
       sunShadow.follow(followCamera.targetX, followCamera.targetZ);
