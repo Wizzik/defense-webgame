@@ -459,8 +459,8 @@
     "targeting": "densest_cluster",
     "levels": 2,
     "cooldown": [
-      19.8,
-      13.2
+      39.6,
+      26.4
     ],
     "params": {
       "tickDamage": [
