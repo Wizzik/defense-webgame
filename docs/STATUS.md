@@ -1,8 +1,8 @@
 # Status
 
-Updated 2026-11-19 (spell scaling, multishot on every arrow and the chest compare are done on branch `spell-scaling`; PR #18 waits for Petr's word and his choice of the two balance knobs). Read this first when you resume work.
+Updated 2026-11-19 (spell scaling, multishot on every arrow and the chest compare: merged as PR #18 at Petr's word and deployed; Petr plays it and then picks the two balance knobs). Read this first when you resume work.
 
-## Spell scaling, multishot on every arrow, chest compare: done, PR #18 open, waits for Petr (branch `spell-scaling`, 2026-11-19)
+## Spell scaling, multishot on every arrow, chest compare: merged (PR #18 as `4b50a8c`, 2026-11-19); waits for Petr's playtest
 
 - All 7 tasks of `docs/superpowers/plans/2026-11-19-spell-scaling-chest-compare.md` are done (inline in one chat, one final self-review). `npm run check`, the build and the e2e project `webgl2-fallback` pass. Spec: `docs/superpowers/specs/2026-11-19-spell-scaling-chest-compare-design.md`. Numbers, rulings and tables: `docs/DECISIONS.md`, section Spell scaling, multishot on every arrow, chest compare.
 - What it brings:
@@ -19,7 +19,18 @@ Updated 2026-11-19 (spell scaling, multishot on every arrow and the chest compar
   - the Sparkshot: does every arrow burn, does it feel strong enough;
   - the compare panel at 1280x720: readability, the lined-up rows, keys 1, 2 and Esc, the mouse;
   - quick links: https://wizzik.github.io/defense-webgame/?debug=1 after the merge; in the console `__game.debug.grantGold(5000)`, then walk to a chest (a worn slot shows a Choice after the first few chests); `__game.debug.setAbilityLevel(0, 5)` for a signature spell at its top level; `__game.debug.wear("head", "travelers-hood")` to wear an item at once.
-- Next: Petr reads the open decision, plays, and says merge (or which knob values to set first).
+- Merged at Petr's word after green CI (the CI fix: `__game.chestCompare` is read live, it lagged a frame on software WebGPU), Pages deployed. `docs/STATUS.md` on `main` still says "PR open"; correct it with the next change.
+- Next: Petr plays the live game and picks the knob values (keep 0.5 / 0.005, go to 0.7 / 0.01, or soften the early threat).
+
+## Next request: sustain (lifesteal, hearts, map orbs), brainstorm open (2026-11-19)
+
+- Petr played the merged PR #18: "it is really very hard". Instead of only turning the knobs he asks for (both, in his words "zkus zakomponovat obojí"):
+  - **lifesteal on items:** a new item stat that heals by a small share (low single-digit percent) of the **total damage done** (attacks and spells);
+  - **hearts:** a chance that a killed mob drops a heart that heals;
+  - **orbs on the map:** random orbs, a bit bigger than crystals, that must be picked up: **boots** (+100 % move speed for 15 s), **berserker** (+50 % damage for 15 s), **heal** (restores 100 % hp over 15 s).
+- What the code has today: item stats are a fixed list in `data/schema/item.ts` (`STAT_IDS`; Magic Find was the last added, on 10 items), so lifesteal fits as a new stat; crystals and coins are `CrystalStore` pickups (`sim/crystals.ts`), a heart can be a third store; chests are fixed map objects that move after use (`sim/chests.ts`), orbs can follow that pattern; the threat multiplier is `rules.threat.heroDamageTaken: 2`. The autopilot must use hearts and orbs, or the balance numbers will not show them.
+- Petr's answer (2026-11-19): **he died already in the 3rd minute.** So hearts and orbs must help from the very start of a run (not only with gear later); this matches the autopilot's losses at 2-4 minutes under the doubled enemy damage (`docs/DECISIONS.md`, Spell scaling). Next in a new chat: lay out the approaches (brainstorming), then a short spec, plan and execution.
+
 
 ## Chest loot, Magic Find and enemy threat: merged (PR #15 as `dd88ff5`, 2026-11-18); waits for Petr's playtest
 
