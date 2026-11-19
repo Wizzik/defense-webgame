@@ -18,7 +18,7 @@ import { updateGearEffects } from "./gear-effects";
 import { emptyGearBonus, GearState, loadGear, type LoadoutEntry, recomputeGear } from "./gear";
 import { refreshHeroStats } from "./level-up";
 import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
-import type { TickInput } from "./input";
+import { InputAction, type TickInput } from "./input";
 import { Rng } from "./rng";
 import { spawnEnemies } from "./spawner";
 import { applyStartPhase } from "./start-phase";
@@ -239,7 +239,7 @@ export class Run {
    *   if (state === "playing" && hero.pendingLevelUps > 0) openOffer(this);   // Task 7
    *   else if (state === "playing") updateChests(this);   // gear plan, Task 4: after the end check and the cards
    *
-   * In the "chest" state only chooseChestCard runs, like chooseCard in "levelUp".
+   * In the "chest" state only chooseChestCard runs (the KeepWorn bit keeps the worn item of a Choice), like chooseCard in "levelUp".
    */
   step(input: TickInput): void {
     // first, also for a finished run: the client keeps stepping it, and the events of its last step
@@ -251,7 +251,7 @@ export class Run {
       return;
     }
     if (this.state === "chest") {
-      chooseChestCard(this, input.card);
+      chooseChestCard(this, input.card, (input.actions & InputAction.KeepWorn) !== 0);
       return;
     }
     savePrevious(this);

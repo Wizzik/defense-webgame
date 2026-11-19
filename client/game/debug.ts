@@ -8,7 +8,7 @@ import {
 import { latestBoss, runPhase } from "./boss";
 import type { Backend, GpuInfo } from "../render/gpu";
 
-const CHEST_ACTIONS = ["new", "replace", "level"] as const;
+const CHEST_ACTIONS = ["new", "choice", "level"] as const;
 /** The chest offer `chestCards` was built from. */
 let shownOffer: ChestOffer | null = null;
 
@@ -58,7 +58,7 @@ export interface GameSnapshot {
   chests: { x: number; y: number }[];
   chestsOpened: number;
   /** The cards of the open chest (slot id, item id, its rarity, what the pick does); null outside the "chest" screen. */
-  chestCards: { slot: SlotId; item: string; rarity: Rarity; action: "new" | "replace" | "level" }[] | null;
+  chestCards: { slot: SlotId; item: string; rarity: Rarity; action: "new" | "choice" | "level" }[] | null;
   /** The 16 gear slots in the order of `SLOT_IDS`: item id and levels, or null for an empty slot. */
   gear: ({ item: string; base: number; temp: number } | null)[];
   /** The player's collection: item id to its permanent level. */

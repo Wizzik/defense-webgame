@@ -1,5 +1,5 @@
-/** Bits of `TickInput.actions`. */
-export const InputAction = { Ultimate: 1, ToggleAuto: 2, Dash: 4 } as const;
+/** Bits of `TickInput.actions`. KeepWorn: with a chest Choice card in `card`, keep the worn item instead of taking the new one. */
+export const InputAction = { Ultimate: 1, ToggleAuto: 2, Dash: 4, KeepWorn: 8 } as const;
 
 /**
  * One step of player input. `move*` is -1, 0 or 1; `card` is -1 for nothing, else 0..2;

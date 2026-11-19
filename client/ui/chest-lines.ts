@@ -6,7 +6,7 @@ import { type LineTone, tooltipLines } from "./item-tooltip";
 
 /** What a chest card shows. */
 export interface ChestLines {
-  /** Name of the card's item: the rolled one (New, Replace) or the worn one (Level). */
+  /** Name of the card's item: the rolled one (New, Choice) or the worn one (Level). */
   title: string;
   /** Name of the slot's type. */
   slot: string;
@@ -34,7 +34,7 @@ export function chestLines(lang: Lang, data: GameData, gear: GearState, card: Ch
     action = t(lang, "chest.new");
     lines = itemLines(lang, item, 0, 1, rules).map((text) => ({ text, tone: "plain" as LineTone }));
     if (item.effect) lines.push({ text: item.effect.text[lang], tone: "effect" });
-  } else if (card.action === ChestAction.Replace) {
+  } else if (card.action === ChestAction.Choice) {
     const old = data.items[worn]!;
     action = t(lang, "chest.replace", { name: old.name[lang] });
     lines = tooltipLines(lang, data, item, 0, from + 1, { item: old, level: base, temp }).lines;

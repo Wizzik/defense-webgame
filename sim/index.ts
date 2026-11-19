@@ -7,7 +7,7 @@ export {
 } from "./abilities/slots";
 export { countEnemiesWithin, densestCluster, nearestEnemy, strongestEnemy } from "./abilities/targeting";
 export type { AbilitySlot } from "./abilities/slots";
-export { botCard, botChestChoice, botInput, idleCard } from "./bot";
+export { botCard, botChestChoice, botChestKeep, botInput, idleCard } from "./bot";
 export { cardGroups, chooseCard, openOffer } from "./cards";
 export { applyChestCard, ChestAction, chestPrice, ChestStore, chooseChestCard, rollChestOffer } from "./chests";
 export type { ChestCard, ChestOffer } from "./chests";
@@ -22,7 +22,7 @@ export { EventKind, EventLog } from "./events";
 export { PROJECTILE_CAPACITY, ProjectileStore, RETARGET_RANGE, updateProjectiles } from "./projectiles";
 export { stateHash } from "./hash";
 export { GearFx } from "./gear-effects";
-export { basicItemIndex, GearState, itemStatAt, recomputeGear, SLOT_COUNT, SLOT_IDS, slotTypeOf } from "./gear";
+export { basicItemIndex, debugWear, GearState, itemStatAt, recomputeGear, SLOT_COUNT, SLOT_IDS, slotTypeOf } from "./gear";
 export type { GearBonus, LoadoutEntry, SlotId } from "./gear";
 export { debugGrantXp, gainXp, xpToNext } from "./level-up";
 export { drawRarity, effectiveMagicFind, magicFindWeights } from "./magic-find";

@@ -11,11 +11,11 @@ export function dropLine(lang: Lang, drop: Drop): { text: string; tone: string }
   return { text, tone: `rarity-${drop.item.rarity}` };
 }
 
-/** The news line of a chest pick that brings a legendary or mythic item (New or Replace); null for any other pick. */
+/** The news line of a chest pick that brings a legendary or mythic item (New or a taken Choice); null for any other pick. */
 export function chestLootLine(
   lang: Lang, data: GameData, itemIndex: number, action: number,
 ): { text: string; tone: string } | null {
-  if (action !== ChestAction.New && action !== ChestAction.Replace) return null;
+  if (action !== ChestAction.New && action !== ChestAction.Choice) return null;
   const item = data.items[itemIndex];
   if (!item || (item.rarity !== "legendary" && item.rarity !== "mythic")) return null;
   return { text: t(lang, "chest.loot", { name: item.name[lang] }), tone: `rarity-${item.rarity}` };

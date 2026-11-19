@@ -42,7 +42,7 @@ describe("chest lines", () => {
     gear.item[0] = helm;
     gear.base[0] = 2;
     gear.temp[0] = 1;
-    const info = chestLines("cs", data, gear, { slot: 0, item: epic, action: ChestAction.Replace });
+    const info = chestLines("cs", data, gear, { slot: 0, item: epic, action: ChestAction.Choice });
     expect(info.title).toBe(data.items[epic]!.name.cs);
     expect(info.rarity).toBe("epic");
     expect(info.action).toBe("nahradí Zkušební přilba do konce běhu");
