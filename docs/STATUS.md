@@ -1,12 +1,13 @@
 # Status
 
-Updated 2026-11-19 (Petr playtested PR #15 and #16; the spec for spell scaling, multishot on every arrow and the chest compare waits for his approval on branch `spell-scaling`). Read this first when you resume work.
+Updated 2026-11-19 (Petr approved the spec for spell scaling, multishot on every arrow and the chest compare; the plan is written on branch `spell-scaling` and waits for execution). Read this first when you resume work.
 
-## Spell scaling, multishot on every arrow, chest compare: spec waits for Petr's approval (branch `spell-scaling`, 2026-11-19)
+## Spell scaling, multishot on every arrow, chest compare: plan written, waits for execution (branch `spell-scaling`, 2026-11-19)
 
 - Petr's playtest of PR #15 and #16 (2026-11-19): spell scaling far too strong (the Serpent Shaman, but globally); Searing Rounds gives its bonus to one arrow only, every arrow should get it (extra arrows stay 1, 1, 2, 2, 3); swapping an item from a chest is unreadable, he wants both items' stats side by side and to keep or take.
 - Petr chose direction A: tame the spell curves (growth from level 1 raised to an exponent, start 0.5) and Int's spell power (0.01 -> 0.005 per point), enemies unchanged. Spec: `docs/superpowers/specs/2026-11-19-spell-scaling-chest-compare-design.md` (also `claude/specs/` in the project).
-- Next: Petr approves (or changes) the spec, then a new chat writes the plan on branch `spell-scaling`.
+- Petr approved the spec (2026-11-19). Plan: `docs/superpowers/plans/2026-11-19-spell-scaling-chest-compare.md` (7 tasks: spell curves and Int, the burst measurement in `sim:run`, the bonus on every multishot arrow, the chest Choice card in the sim, the compare panel, balance against 6-12 of 20, docs and PR; also `claude/plans/` in the project).
+- Next: a new chat executes the plan on `spell-scaling`.
 
 ## Chest loot, Magic Find and enemy threat: merged (PR #15 as `dd88ff5`, 2026-11-18); waits for Petr's playtest
 
