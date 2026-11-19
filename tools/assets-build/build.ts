@@ -8,6 +8,7 @@ import { type Animation, type Document, Logger, type Node, NodeIO } from "@gltf-
 import { dedup, mergeDocuments, prune, resample, simplify, weld } from "@gltf-transform/functions";
 import { MeshoptSimplifier } from "meshoptimizer";
 import { SOURCE_DIR } from "./fetch";
+import { mergeModelRows } from "./license-rows";
 import { MODELS, type ModelSpec, SOURCES, splitRef } from "./manifest";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -15,7 +16,6 @@ const MODELS_DIR = join(ROOT, "assets", "models");
 const LICENSES = join(ROOT, "assets", "LICENSES.md");
 const MAX_SIMPLIFY_PASSES = 4;
 const BASE_ERROR = 0.02;
-const GENERATED_DIRS = ["models/heroes/", "models/enemies/", "models/env/"];
 
 const io = new NodeIO();
 io.setLogger(new Logger(Logger.Verbosity.WARN));
@@ -201,10 +201,7 @@ async function licenseRow(spec: ModelSpec): Promise<string> {
 }
 
 async function writeLicenses(rows: string[]): Promise<void> {
-  const lines = (await readFile(LICENSES, "utf8")).split("\n");
-  const kept = lines.filter((l) => !GENERATED_DIRS.some((d) => l.includes(`\`${d}`)));
-  while (kept.length > 0 && kept[kept.length - 1] === "") kept.pop();
-  await writeFile(LICENSES, `${[...kept, ...rows].join("\n")}\n`);
+  await writeFile(LICENSES, mergeModelRows(await readFile(LICENSES, "utf8"), rows));
 }
 
 async function main(): Promise<void> {
