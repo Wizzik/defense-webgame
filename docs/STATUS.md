@@ -1,8 +1,8 @@
 # Status
 
-Updated 2026-11-19 (spell scaling, multishot on every arrow and the chest compare are done on branch `spell-scaling`; the PR waits for Petr's word and his choice of the two balance knobs). Read this first when you resume work.
+Updated 2026-11-19 (spell scaling, multishot on every arrow and the chest compare are done on branch `spell-scaling`; PR #18 waits for Petr's word and his choice of the two balance knobs). Read this first when you resume work.
 
-## Spell scaling, multishot on every arrow, chest compare: done, PR open, waits for Petr (branch `spell-scaling`, 2026-11-19)
+## Spell scaling, multishot on every arrow, chest compare: done, PR #18 open, waits for Petr (branch `spell-scaling`, 2026-11-19)
 
 - All 7 tasks of `docs/superpowers/plans/2026-11-19-spell-scaling-chest-compare.md` are done (inline in one chat, one final self-review). `npm run check`, the build and the e2e project `webgl2-fallback` pass. Spec: `docs/superpowers/specs/2026-11-19-spell-scaling-chest-compare-design.md`. Numbers, rulings and tables: `docs/DECISIONS.md`, section Spell scaling, multishot on every arrow, chest compare.
 - What it brings:
