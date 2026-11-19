@@ -2,6 +2,72 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Spell scaling, multishot on every arrow, chest compare (2026-11-19; Petr chose the direction, the numbers are Claude's)
+
+Spec: `docs/superpowers/specs/2026-11-19-spell-scaling-chest-compare-design.md`. Plan: `docs/superpowers/plans/2026-11-19-spell-scaling-chest-compare.md`. Petr (playtest of PR #15 and #16): spells scale far too strong, globally; every multishot arrow should get the Searing Rounds bonus; a chest swap should show both items and let him keep or take. He chose direction A: tame the spell curves and Int's spell power, enemies unchanged.
+
+- **Spell growth.** `design/scaling.yaml` `abilities.levelGrowthExponent: 0.5`. After the `abilities.damage` multiplier `data:build` (`tools/data-build/scaling.ts`) rewrites every `damage`, `tickDamage`, `amount` and `bonusDamage` row as `value[L] = value[1] x (value[L] / value[1]) ^ e` on the rounded row. Level 1 never changes; a row with 0 at level 1, a 0 at level L or a single level stays as it is; design values and ultimates go through it too. The sim gets the finished numbers (no `pow` in `sim/`). `parseScaling` requires the key, `0 < e <= 1`.
+- **Spell power from Int.** `rules.hero.spellPowerPerInt` 0.01 -> 0.005. Gear and Arcane Focus unchanged. Note: this weakens spells from the first minute too (Int at level 1 is 20-40, so about -10 to -15 %), the spell values at level 1 do not change.
+- **Spells, level 1 -> top level** (map values x 0.3, before -> after):
+
+| spell | before | after |
+|---|---|---|
+| Forked Bolt (Serpent Shaman) | 90 -> 1500 (x16.7) | 90 -> 367 (x4.1) |
+| Mending Tide (Serpent Shaman, heal) | 150 -> 3000 (x20) | 150 -> 671 (x4.5) |
+| Rock Rupture (Stonehorn) | 150 -> 1500 (x10) | 150 -> 474 (x3.2) |
+| Cleaver Toss (Redcleaver) | 61 -> 1475 (x24) | 61 -> 300 (x4.9) |
+| Stunning Tide (Tidecaller) | 30 -> 1500 (x50) | 30 -> 212 (x7.1) |
+| Searing Rounds bonus (Sparkshot) | 300 -> 1500 (x5) | 300 -> 671 (x2.2) |
+| Meteor (shared) | 300 -> 1950 (x6.5) | 300 -> 765 (x2.5) |
+| Groundbreaker (ultimate, 2 levels) | 1200 -> 2400 | 1200 -> 1697 |
+
+- **Burst measurement.** `sim:run` prints a `burst` line per hero: at the start of phases 5, 10, 15 and 20 one cast of the strongest learned signature spell (first of `damage`, `bonusDamage`, `tickDamage` at the slot's level x spell power; heals not counted; armor ignored) and the average base attack hit, as the median over the runs that reached the phase, and their ratio to the hp of a Shieldbearer (`sb`) and a Lancer (`ln`) at that phase (`hp x timeScale`). Target of spec 4.3 at phase 20 without gear: `ln` under 1 (a Lancer does not fall to one cast), `sb` at least 0.33. Seeds 1-20, no gear, phase 20 (before = this branch's code with exponent 1 and 0.01):
+
+| hero | spell before (sb / ln) | spell after (sb / ln) | attack after (ln) |
+|---|---|---|---|
+| Stonehorn | 5214 (19.8 / 4.53) | 1032 (3.92 / 0.90) | 329 (0.29) |
+| Nightglaive | 7833 (29.7 / 6.81) | 1342 (5.10 / 1.17) | 406 (0.35) |
+| Gravecaller | 14380 (54.6 / 12.5) | 2248 (8.54 / 1.95) | 335 (0.29) |
+| Serpent Shaman | 7118 (27.0 / 6.19) | 1073 (4.07 / 0.93) | 313 (0.27) |
+| Mistwarden | 2063 (7.83 / 1.79) | no run reached phase 20 | - |
+| Sparkshot | 5804 (22.0 / 5.05) | 1823 (6.92 / 1.58) | 370 (0.32) |
+| Redcleaver | 5778 (21.9 / 5.02) | 943 (3.58 / 0.82) | 336 (0.29) |
+| Tidecaller | 6949 (26.4 / 6.04) | 904 (3.43 / 0.79) | 318 (0.28) |
+
+  The base attack (spec 2: measured, not tuned) grows from about 75 at phase 5 to 310-410 at phase 20, a Lancer ratio of 0.10 -> 0.27-0.35, the same before and after.
+- **Multishot.** Every split shot of Searing Rounds gets the `bonus` the main shot got from `onHitBonus` (no new chance roll, no second `Cast` event): `(roll + bonus) x (1 - armor)`. Empower and gear effects on attack (chain, splash) stay with the main shot. Split shots stay `extraTargets` 1, 1, 2, 2, 3 (supersedes the "split shots without the burn" rule of Sparkshot multishot below). `onHitBonus` does not multiply by spell power (it never did); the spec's "including spell power" is read as "like the main shot".
+- **Chest Choice.** `ChestAction` is `New`, `Choice`, `Level` (Replace is gone). A worn slot whose rolled item differs from the worn one (any rarity) gets a `Choice` card with the rolled item; the same item is a `Level` card; an empty slot `New`. The roll and its randomness are unchanged. Keep or take travels in the step input: `InputAction.KeepWorn` (8) with `input.card`; without the bit a Choice is taken. Take = the old replace (the slot's whole level + 1 as chest levels, `base` 0, the loadout given to the run untouched); keep = a chest level for the worn item. `ChestPick` reports `New`, `Choice` (taken) or `Level` (also a kept Choice); the news line for a legendary or mythic names `New` and a taken `Choice`. Supersedes "a higher rarity replaces the worn item" of Chest loot below: a lower or equal rarity is now offered too and may be taken.
+- **Autopilot at a chest.** Index: a `Choice` whose item has a higher rarity than the worn item (the highest first), else `New` (the highest rarity), else the offered slot with the lowest level. It keeps the worn item of a `Choice` unless the rolled item has a higher rarity. Picks and outcomes are the same as before, so `npm run sim:chests -- --seeds 1-50` prints the same lines as before the change (the rarity column counts the item left in the slot).
+- **Compare panel (client).** A click or key on a `Choice` card opens `#chest-compare` inside the cards: keep (worn item, level +1) and take (new item, "level N for this run") side by side; stat rows lined up by stat (worn item's stats first, then the new item's own ones, marked "new"); green with ▲ for the better side, red with ▼ for the worse; an effect under its column; keys 1 keep, 2 take, Escape back to the three cards (the chest stays open, the run stays paused). One key listener in `Cards` decides where a key goes. Both columns share one CSS subgrid, so a long name on one side keeps the rows level. Navy and blue-grey, no orange.
+- **Tuning (spec 4.3).** Knobs: `levelGrowthExponent` 0.4-0.7, `spellPowerPerInt` 0.003-0.01. The defaults 0.5 / 0.005 stay. Autopilot wins of 20 (seeds 1-20 / 21-40; `main` at `325af0f` -> this branch):
+
+| hero | none before | none after | mid before | mid after | full before | full after |
+|---|---|---|---|---|---|---|
+| Stonehorn | 6 / 6 | 3 / 1 | 19 / 20 | 12 / 13 | 20 / 20 | 20 / 20 |
+| Nightglaive | 4 / 3 | 1 / 0 | 6 / 7 | 3 / 1 | 20 / 20 | 19 / 17 |
+| Gravecaller | 20 / 20 | 20 / 20 | 20 / 20 | 20 / 20 | 20 / 20 | 20 / 20 |
+| Serpent Shaman | 15 / 16 | 6 / 5 | 18 / 19 | 17 / 13 | 20 / 20 | 20 / 20 |
+| Mistwarden | 4 / 2 | 0 / 0 | 14 / 15 | 2 / 1 | 20 / 20 | 17 / 15 |
+| Sparkshot | 4 / 7 | 7 / 5 | 18 / 17 | 9 / 8 | 20 / 20 | 15 / 13 |
+| Redcleaver | 8 / 7 | 0 / 0 | 18 / 17 | 1 / 2 | 20 / 20 | 6 / 4 |
+| Tidecaller | 3 / 6 | 0 / 0 | 14 / 13 | 2 / 0 | 20 / 20 | 16 / 12 |
+| all (of 320) | 131 | 68 | 255 | 124 | 320 | 254 |
+
+  Sweep without gear on seeds 1-20 (wins of 20 per hero in the order above; total of 160):
+
+| exponent / per Int | wins | total | mid (of 160) | full (of 160) | burst p20 ln |
+|---|---|---|---|---|---|
+| 0.5 / 0.005 (kept) | 3 1 20 6 0 7 0 0 | 37 | 66 | 133 | 0.79-1.95 |
+| 0.5 / 0.01 | 5 2 20 10 1 4 0 0 | 42 | 82 | 149 | 0.55-2.94 |
+| 0.6 / 0.0075 | 4 3 20 13 0 8 0 0 | 48 | 82 | 148 | - |
+| 0.6 / 0.01 | 5 1 20 13 1 8 2 1 | 51 | - | - | 0.55-3.51 |
+| 0.7 / 0.01 | 5 2 20 14 3 7 3 2 | 56 | 117 | 157 | 0.91-5.27 |
+| 1 / 0.01 (old curves, this branch) | 6 4 20 15 4 13 8 3 | 73 | - | - | 1.79-12.5 |
+
+  No setting puts more than two heroes into 6-12 and Gravecaller wins 20 in every one. Losses fall at 2-4 minutes in every setting (also on `main`), under the doubled enemy damage of 2026-11-18 and before spell growth matters. The gear targets (mid: most runs, full: all) and the burst target pull in opposite directions: 0.7 / 0.01 nearly meets the gear targets and puts a phase-20 cast at 2-5 Lancers again. The defaults were kept because the burst target is Petr's complaint itself.
+- **Open for Petr (the main decision of this plan):** tamed spells cost many wins: without gear 131 -> 68 of 320, mid gear 255 -> 124, full gear 320 -> 254 (Redcleaver 6 and 4 of 20 with the best gear). Choose: keep 0.5 / 0.005 (spells tamed, the game much harder), or go up to 0.7 / 0.01 (gear wins return, a late cast kills 2-5 Lancers again), or keep the curves and soften the early threat (the deaths at 2-4 minutes come from the doubled enemy damage, not from spells). Both knobs are one number in `design/scaling.yaml` and `design/rules.yaml`.
+- **Open for Petr:** Gravecaller wins 20 of 20 in every setting (its spells still kill a Lancer twice over at phase 20); Mistwarden, Redcleaver and Tidecaller win none without gear; this needs their kits (out of scope here). The base attack grows about x4.5 over a run (from the primary attribute), measured, not tuned. `onHitBonus` (Searing Rounds and other on-hit bonuses) does not use spell power.
+
 ## Shared spells and passives (2026-11-18; Petr left the approval to Claude, the choices and numbers are Claude's)
 
 Spec: `docs/superpowers/specs/2026-11-18-shared-spells-passives-design.md`. Plan: `docs/superpowers/plans/2026-11-18-shared-spells-passives.md`.
@@ -53,7 +119,7 @@ Spec: `docs/superpowers/specs/2026-11-18-chest-loot-threat-design.md`. Plan: `do
 - **Threat.** Every enemy hit on the hero goes through `damageHero` (`sim/combat.ts`) and is multiplied there by `rules.threat.heroDamageTaken` (2) and the hero's `damageTaken` (`design/heroes.yaml`: 0.75 for Stonehorn and Redcleaver, missing = 1). Melee heroes take x1.5, the others x2. The castle takes damage as before; the shield still blocks everything.
 - **Magic Find.** A new item stat `magicFind` (a share; 1 budget point = 2 %). The hero sums it over the worn items, chest items included. Effective MF = MF x 1.5 / (MF + 1.5) (50 % -> 37.5 %, 100 % -> 60 %, 300 % -> 100 %; only a division, `sim/magic-find.ts`). Every rarity above the lowest one of a weight table gets its weight x (1 + effective MF x factor), factor 1 rare, 1.5 epic, 2 legendary, 2.5 mythic; the lowest keeps its weight. Used by chest cards and by boss drops (`rollDrop` gets the hero's MF when the boss falls; MF 0 draws exactly as before).
 - **Ten items carry Magic Find** in place of a gold find or pickup range row of the same points: tin-ring 12 %, band-of-resolve 10 %, falcon-charm 10 %, hunters-whistle 12 %, pendant-of-the-deep-well 10 %, ring-of-the-keen-eye 12 %, seal-of-the-archivist 12 %, belt-of-many-knives 10 %, compass-of-the-lost-scout 12 %, hourglass-of-the-hunt 10 %. The best epic-or-better MF build (neck, both rings, waist, both trinkets) has 66 % at level 1 and 106 % at level 5 (effective 62 %). Gold find stays on moonlit-signet and seal-of-the-royal-treasury.
-- **Chest cards.** A chest offers 3 cards. Each rolls a rarity by `rules.chests.rarityWeights` raised by the hero's MF, then a slot not yet in the offer whose type has an item of that rarity (one rarity lower when none is free; legendary and mythic exist only for main hand, off hand and trinkets), then an item of that rarity and type, preferring one the twin slot (ring, trinket) does not wear. The pick: an empty slot takes the item at chest level 1 (**New**); a higher rarity than the worn item replaces it for the run and takes the slot's whole level + 1 as chest levels (**Replace**; the loadout given to the run is not touched, so a permanent item comes back after the run); else the worn item gains a chest level (**Level**). Effects of a legendary or mythic chest item work at once; picking one puts "Chest: <name>" on the news line in its rarity colour.
+- **Chest cards.** A chest offers 3 cards. Each rolls a rarity by `rules.chests.rarityWeights` raised by the hero's MF, then a slot not yet in the offer whose type has an item of that rarity (one rarity lower when none is free; legendary and mythic exist only for main hand, off hand and trinkets), then an item of that rarity and type, preferring one the twin slot (ring, trinket) does not wear. The pick: an empty slot takes the item at chest level 1 (**New**); a higher rarity than the worn item replaces it for the run and takes the slot's whole level + 1 as chest levels (**Replace**; the loadout given to the run is not touched, so a permanent item comes back after the run); else the worn item gains a chest level (**Level**). (Superseded 2026-11-19: a worn slot now gets a **Choice** card, keep or take, see Spell scaling above.) Effects of a legendary or mythic chest item work at once; picking one puts "Chest: <name>" on the news line in its rarity colour.
 - **Chest levels.** An item's numbers with permanent level B and chest levels T are its level-1 numbers x (1 + 0.15 x max(B - 1, 0) + chestLevelStep x T) with `rules.gear.chestLevelStep` = 0.25; an item a chest gave has B = 0, so its first chest level counts too. This replaces "level L = B + T, x (1 + 0.15 x (L - 1))" of the gear section below for chest levels; permanent numbers are unchanged. Why: with the plan's weights (common 55, rare 30, epic 12, legendary 2.5, mythic 0.5) 15 chests gave x1.25, and at the plan's weight limits (common at least 25, legendary at most 6, mythic at most 2) at most x1.38. The plan's fallback formula left a chest item's first level out; 12 of 15 picks are new items, so it needed a step of about 1.25 (one chest level = +125 %, far above a permanent level). Counting every chest level reaches the band at 0.25.
 - **Weights.** `rules.chests.rarityWeights`: common 25, rare 30, epic 37, legendary 6, mythic 2 (the plan's limits for common, legendary and mythic; the smallest chestLevelStep in the band).
 - **Chest price halved** (Petr, 2026-11-18, before the merge): `rules.chests.basePrice` 200 -> 100, growth stays x1.12 (100, 112, 125, ...). Autopilot wins without gear, seeds 1-20 / 21-40, price 200 -> 100: Stonehorn 1 -> 3 / 1 -> 3, Nightglaive 0 -> 0 / 0 -> 0, Gravecaller 20 / 20, Serpent Shaman 7 -> 9 / 11 -> 10, Mistwarden 0 -> 0 / 0 -> 2, Sparkshot 0 -> 1 / 0 -> 5, Redcleaver 5 -> 8 / 5 -> 12, Tidecaller 0 -> 0 / 0 -> 1; over all 320 runs 70 -> 94 wins and 1310 -> 2448 chests opened. The table below is at the price of 200.
@@ -92,7 +158,7 @@ Autopilot wins of 20, before (`main` at `cd54f2e`) -> after:
 
 - **Rule.** An `on_hit` spell may carry `extraTargets` (per level). The hero's base attack then also shoots that many other enemies in attack reach, nearest first (equal distance: lower slot; at most 8, `sim/hero-multishot.ts`). A split shot rolls its own base damage against its target's armor and carries the main shot's stun; the on_hit bonus damage, an empowered hit and the gear effects (splash, chain) stay with the main shot. The client draws every shot as a bolt (one `Hit` event of source 0 each).
 - **Searing Rounds:** 1, 1, 2, 2, 3 extra targets.
-- **Why the burn stays on the main shot.** Autopilot wins of 20 (seeds 1-20, before 0): split shots with the full burn and 1, 1, 2, 2, 3 targets 17 (21-40: 16); with the full burn and 1 target on every level 12; with half the burn and 1, 1, 2, 2, 3 targets 16; without the burn and 1, 1, 2, 2, 3 targets **10 (21-40: 13)**, chosen: it reads as a real multishot (four shots at level 5) and lands in the band of the other heroes. The hero drops below 50 % hp in 19 of 20 runs (5 with the full burn), so the Sparkshot is now a hero who wins by killing fast and has to watch its health.
+- **Why the burn stays on the main shot** (superseded 2026-11-19: every split shot carries the burn, see Spell scaling above). Autopilot wins of 20 (seeds 1-20, before 0): split shots with the full burn and 1, 1, 2, 2, 3 targets 17 (21-40: 16); with the full burn and 1 target on every level 12; with half the burn and 1, 1, 2, 2, 3 targets 16; without the burn and 1, 1, 2, 2, 3 targets **10 (21-40: 13)**, chosen: it reads as a real multishot (four shots at level 5) and lands in the band of the other heroes. The hero drops below 50 % hp in 19 of 20 runs (5 with the full burn), so the Sparkshot is now a hero who wins by killing fast and has to watch its health.
 - The other heroes are unchanged: none of their spells has `extraTargets`, so their runs draw the same random numbers as before.
 
 ## Gear, drops and chests (2026-11-13; Petr chose the design, the numbers and the catalogue are Claude's)

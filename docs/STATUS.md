@@ -1,13 +1,25 @@
 # Status
 
-Updated 2026-11-19 (Petr approved the spec for spell scaling, multishot on every arrow and the chest compare; the plan is written on branch `spell-scaling` and waits for execution). Read this first when you resume work.
+Updated 2026-11-19 (spell scaling, multishot on every arrow and the chest compare are done on branch `spell-scaling`; the PR waits for Petr's word and his choice of the two balance knobs). Read this first when you resume work.
 
-## Spell scaling, multishot on every arrow, chest compare: plan written, waits for execution (branch `spell-scaling`, 2026-11-19)
+## Spell scaling, multishot on every arrow, chest compare: done, PR open, waits for Petr (branch `spell-scaling`, 2026-11-19)
 
-- Petr's playtest of PR #15 and #16 (2026-11-19): spell scaling far too strong (the Serpent Shaman, but globally); Searing Rounds gives its bonus to one arrow only, every arrow should get it (extra arrows stay 1, 1, 2, 2, 3); swapping an item from a chest is unreadable, he wants both items' stats side by side and to keep or take.
-- Petr chose direction A: tame the spell curves (growth from level 1 raised to an exponent, start 0.5) and Int's spell power (0.01 -> 0.005 per point), enemies unchanged. Spec: `docs/superpowers/specs/2026-11-19-spell-scaling-chest-compare-design.md` (also `claude/specs/` in the project).
-- Petr approved the spec (2026-11-19). Plan: `docs/superpowers/plans/2026-11-19-spell-scaling-chest-compare.md` (7 tasks: spell curves and Int, the burst measurement in `sim:run`, the bonus on every multishot arrow, the chest Choice card in the sim, the compare panel, balance against 6-12 of 20, docs and PR; also `claude/plans/` in the project).
-- Next: a new chat executes the plan on `spell-scaling`.
+- All 7 tasks of `docs/superpowers/plans/2026-11-19-spell-scaling-chest-compare.md` are done (inline in one chat, one final self-review). `npm run check`, the build and the e2e project `webgl2-fallback` pass. Spec: `docs/superpowers/specs/2026-11-19-spell-scaling-chest-compare-design.md`. Numbers, rulings and tables: `docs/DECISIONS.md`, section Spell scaling, multishot on every arrow, chest compare.
+- What it brings:
+  - spells grow from level 1 by the square root of their map curve (`design/scaling.yaml` `abilities.levelGrowthExponent: 0.5`): Forked Bolt 90 -> 367 instead of 1500, Mending Tide 150 -> 671 instead of 3000; level 1 is unchanged;
+  - Int gives half the spell power (`rules.hero.spellPowerPerInt` 0.01 -> 0.005);
+  - a cast at phase 20 without gear now hits for 900-2250 instead of 2000-14400: a Lancer survives one cast for four of the seven heroes that reach phase 20 (the Serpent Shaman: 7118 -> 1073; Nightglaive, Gravecaller and Sparkshot still one-shot it);
+  - every multishot arrow of Searing Rounds carries the burn (still 1, 1, 2, 2, 3 extra arrows);
+  - a chest card for a worn slot is now a choice: click it (or its key) and a panel shows the worn item (one level up) and the new one (at the slot's level + 1) side by side, stat rows lined up, better green with ▲, worse red with ▼; 1 keeps, 2 takes, Esc goes back to the three cards. A lower or equal rarity is offered too now;
+  - `sim:run` prints a `burst` line per hero (spell cast and base attack against Shieldbearer and Lancer hp at phases 5, 10, 15, 20).
+- **Open for Petr (the main decision):** tamed spells cost many autopilot wins: without gear 131 -> 68 of 320, mid gear 255 -> 124, full gear 320 -> 254 (Redcleaver 6 and 4 of 20 with the best gear). The deaths fall at 2-4 minutes under the doubled enemy damage, before spells grow, so no setting of the two knobs reaches 6-12 of 20 for most heroes. Choose: keep 0.5 / 0.005 (spells tamed, much harder game), go up to 0.7 / 0.01 (gear wins return: mid 117, full 157 of 160 on seeds 1-20, but a late cast kills 2-5 Lancers again), or keep the curves and soften the early threat. Sweep table in `docs/DECISIONS.md`.
+- **Open for Petr:** Gravecaller still wins 20 of 20 in every setting; Mistwarden, Redcleaver and Tidecaller win none without gear (their kits, out of scope); the base attack grows about x4.5 over a run (measured, not tuned); on-hit bonuses do not use spell power.
+- What Petr checks in the playtest:
+  - is the second half of a run a challenge now, is the Serpent Shaman no longer immortal, are the first minutes too hard;
+  - the Sparkshot: does every arrow burn, does it feel strong enough;
+  - the compare panel at 1280x720: readability, the lined-up rows, keys 1, 2 and Esc, the mouse;
+  - quick links: https://wizzik.github.io/defense-webgame/?debug=1 after the merge; in the console `__game.debug.grantGold(5000)`, then walk to a chest (a worn slot shows a Choice after the first few chests); `__game.debug.setAbilityLevel(0, 5)` for a signature spell at its top level; `__game.debug.wear("head", "travelers-hood")` to wear an item at once.
+- Next: Petr reads the open decision, plays, and says merge (or which knob values to set first).
 
 ## Chest loot, Magic Find and enemy threat: merged (PR #15 as `dd88ff5`, 2026-11-18); waits for Petr's playtest
 
