@@ -1,14 +1,18 @@
 import type { GearSession } from "./gear-session";
 import type { Rarity } from "../../data/schema";
 import {
-  type ChestOffer, chestPrice, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, debugWear, killEnemy, learnAbility,
+  type ChestOffer, chestPrice, debugDropHeart, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, debugSpawnOrb,
+  debugWear, killEnemy, learnAbility, OrbKind,
   type Run,
-  SLOT_IDS, type SlotId,
+  SLOT_IDS, type SlotId, TICKS_PER_SECOND,
 } from "../../sim";
 import { latestBoss, runPhase } from "./boss";
 import type { Backend, GpuInfo } from "../render/gpu";
 
 const CHEST_ACTIONS = ["new", "choice", "level"] as const;
+/** Orb kinds by OrbKind value. */
+const ORB_TYPES = ["boots", "berserk", "heal"] as const;
+type OrbType = (typeof ORB_TYPES)[number];
 /** The chest offer `chestCards` was built from. */
 let shownOffer: ChestOffer | null = null;
 
@@ -67,6 +71,14 @@ export interface GameSnapshot {
   collection: Record<string, number>;
   /** Whether the gear is stored in this browser (false with ?debug=1 and without storage). */
   gearSaved: boolean;
+  /** The living orbs on the map, in simulation coordinates. */
+  orbs: { type: OrbType; x: number; y: number }[];
+  /** Hearts on the ground. */
+  hearts: number;
+  /** Seconds left of each orb effect (0 when it does not run). */
+  buffs: { boots: number; berserk: number; heal: number };
+  /** The hero's lifesteal from gear (a share). */
+  lifesteal: number;
   /** Only with ?debug=1. */
   debug?: {
     grantXp(amount: number): void;
@@ -88,6 +100,10 @@ export interface GameSnapshot {
     chooseChest(index: number, side: "keep" | "take"): void;
     /** Puts an item (by id) into a gear slot (by id) of the run as a chest item at level 1; throws on an unknown id. */
     wear(slotId: string, itemId: string): void;
+    /** An orb of the type 150 ahead of the hero; throws on an unknown type. */
+    spawnOrb(type: string): void;
+    /** A heart 100 ahead of the hero. */
+    dropHeart(): void;
   };
 }
 
@@ -105,6 +121,7 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     projectiles: 0, packArrows: 0, charging: 0, phase: 1, boss: null, slams: 0,
     render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0 },
     gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, gear: [], collection: {}, gearSaved: false,
+    orbs: [], hearts: 0, buffs: { boots: 0, berserk: 0, heal: 0 }, lifesteal: 0,
   };
   window.__game = snapshot;
   return snapshot;
@@ -182,6 +199,16 @@ export function addDebugHooks(
       const item = run.data.items.findIndex((i) => i.id === itemId);
       if (item < 0) throw new Error(`debug.wear: unknown item "${itemId}"`);
       debugWear(run, slot, item);
+    },
+    spawnOrb(type: string): void {
+      const kind = (ORB_TYPES as readonly string[]).indexOf(type);
+      if (kind < 0) throw new Error(`debug.spawnOrb: unknown type "${type}"`);
+      const run = getRun();
+      if (run) debugSpawnOrb(run, kind as OrbKind);
+    },
+    dropHeart(): void {
+      const run = getRun();
+      if (run) debugDropHeart(run);
     },
   };
 }
@@ -281,6 +308,23 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
     entry.base = gear.base[slot]!;
     entry.temp = gear.temp[slot]!;
   }
+  // the orb objects are made once per place and filled in place; the array holds the living ones
+  const { orbs, buffs } = run;
+  let live = 0;
+  for (let i = 0; i < orbs.alive.length; i++) {
+    if (orbs.alive[i] === 0) continue;
+    const entry = snapshot.orbs[live] ?? (snapshot.orbs[live] = { type: "boots", x: 0, y: 0 });
+    entry.type = ORB_TYPES[orbs.kind[i]!] ?? "boots";
+    entry.x = orbs.x[i]!;
+    entry.y = orbs.y[i]!;
+    live++;
+  }
+  snapshot.orbs.length = live;
+  snapshot.hearts = run.hearts.count;
+  snapshot.buffs.boots = buffs.bootsTicks / TICKS_PER_SECOND;
+  snapshot.buffs.berserk = buffs.berserkTicks / TICKS_PER_SECOND;
+  snapshot.buffs.heal = buffs.healTicks / TICKS_PER_SECOND;
+  snapshot.lifesteal = run.hero.gear.lifesteal;
   snapshot.phase = runPhase(run);
   const boss = latestBoss(run);
   if (boss < 0) {

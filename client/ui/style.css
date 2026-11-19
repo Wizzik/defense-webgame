@@ -256,6 +256,44 @@
   gap: 6px;
   max-width: 98vw;
 }
+.hud-buffs {
+  display: flex;
+  gap: 6px;
+}
+.buff-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 8px 0 5px;
+  border: 2px solid var(--buff-color);
+  border-radius: 6px;
+  background: rgba(14, 22, 40, 0.88);
+  color: var(--buff-color);
+  font-weight: 700;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.buff-cell[hidden] {
+  display: none;
+}
+.buff-cell.boots {
+  --buff-color: #4fa8ff;
+}
+.buff-cell.berserk {
+  --buff-color: #e0444e;
+}
+.buff-cell.heal {
+  --buff-color: #4fd18b;
+}
+.buff-icon svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+.buff-seconds {
+  color: #e8ecf2;
+}
 .hud-ability-row {
   display: flex;
   gap: 8px;
@@ -598,6 +636,10 @@
   pointer-events: none;
   opacity: 0;
   will-change: transform, opacity;
+}
+
+.damage-number.heal {
+  color: #4fd18b;
 }
 
 .damage-number.spell {

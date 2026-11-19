@@ -83,6 +83,22 @@ export class Sfx {
     });
   }
 
+  /** A heart: a soft warm two-note rise. */
+  heart(): void {
+    this.play("heart", (at) => {
+      this.tone(at, "sine", 440, 520, 0.08, 0.3);
+      this.tone(at + 0.06, "sine", 660, 780, 0.1, 0.25);
+    });
+  }
+
+  /** An orb: a bright shimmering swell. */
+  orb(): void {
+    this.play("orb", (at) => {
+      this.tone(at, "triangle", 520, 1040, 0.25, 0.35);
+      this.tone(at + 0.05, "sine", 780, 1560, 0.3, 0.25);
+    });
+  }
+
   /** A chest opens: a low knock and a rising chime. */
   chest(): void {
     this.play("chest", (at) => {

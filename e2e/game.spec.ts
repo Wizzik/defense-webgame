@@ -831,3 +831,43 @@ test("every hero has its own doll", async ({ page }) => {
   await page.locator("#gear").click();
   await expect(page.locator("#gear-screen .gear-left .doll-slot:not(.empty)")).toHaveCount(1);
 });
+
+test("orbs lie on the map; a berserk orb shows in the HUD; a heart heals the hurt hero", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en&debug=1&speed=4&hero=stonehorn");
+  await page.locator("#start").click();
+  await waitForScreen(page, "playing");
+  // the first orb comes at 8 s; level-up cards pause the run on the way
+  for (let i = 0; i < 400; i++) {
+    const { tick, screen } = await page.evaluate(() => ({ tick: window.__game!.tick, screen: window.__game!.screen }));
+    if (screen === "levelUp") await pickCard(page);
+    else if (tick >= 300) break;
+    await page.waitForTimeout(100);
+  }
+  expect(await page.evaluate(() => window.__game!.orbs.length)).toBeGreaterThanOrEqual(1);
+
+  await page.evaluate(() => window.__game!.debug!.spawnOrb("berserk"));
+  await page.waitForFunction(() => window.__game!.orbs.some((o) => o.type === "berserk"), undefined, { timeout: 5_000 });
+  await page.evaluate(() => {
+    const g = window.__game!;
+    const orb = g.orbs.find((o) => o.type === "berserk")!;
+    g.debug!.teleport(orb.x, orb.y);
+  });
+  await page.waitForFunction(() => window.__game!.buffs.berserk > 0, undefined, { timeout: 10_000, polling: 50 });
+  await expect(page.locator(".buff-cell.berserk")).toBeVisible();
+
+  // let the hunters hurt the hero, then step away from them and drop a heart
+  const full = await page.evaluate(() => window.__game!.heroHp);
+  await page.evaluate(() => window.__game!.debug!.spawnEach());
+  for (let i = 0; i < 300; i++) {
+    const { hp, screen } = await page.evaluate(() => ({ hp: window.__game!.heroHp, screen: window.__game!.screen }));
+    if (screen === "levelUp" || screen === "chest") await pickCard(page);
+    else if (hp < full - 120) break;
+    await page.waitForTimeout(100);
+  }
+  await page.evaluate(() => window.__game!.debug!.teleport(2600, 2200));
+  await page.waitForTimeout(300);
+  const before = await page.evaluate(() => window.__game!.heroHp);
+  expect(before).toBeLessThan(full - 60);
+  await page.evaluate(() => window.__game!.debug!.dropHeart());
+  await page.waitForFunction((b) => window.__game!.heroHp >= b + 30, before, { timeout: 10_000, polling: 50 });
+});
