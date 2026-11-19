@@ -33,7 +33,7 @@ export function heroStats(data: GameData, hero: HeroState, out: HeroStats): Hero
   out.damageMax = (def.baseAttack.damageMax + bonus) * damage;
   out.spellPower = (1 + int * rules.hero.spellPowerPerInt) * (1 + gear.spellPower + passive.spellPower);
   out.cooldownScale = 1 / (1 + int * rules.hero.cooldownSpeedPerInt + passive.cooldown);
-  out.moveSpeed = def.moveSpeed * (1 + hero.bonus.moveSpeed + gear.moveSpeed + passive.moveSpeed);
+  out.moveSpeed = def.moveSpeed * (1 + hero.bonus.moveSpeed + gear.moveSpeed + passive.moveSpeed) * hero.speedScale;
   out.collision = rules.hero.collision;
   return out;
 }

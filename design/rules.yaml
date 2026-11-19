@@ -65,6 +65,20 @@ debug: { phaseXp: [0, 45, 105, 207, 374, 580, 975, 1235, 1561, 1922, 2314, 3086,
 # threat: multiplies all damage enemies deal to the hero (sim/combat.ts damageHero: hits, shots, charges, boss
 #   strikes, slams), times the hero's own damageTaken (heroes.yaml). The castle takes damage as before.
 threat: { heroDamageTaken: 2 }
+# sustain (spec 2026-11-19 sustain, sim/buffs.ts, sim/orbs.ts): lifesteal from gear heals at most capPerSecond x max hp
+#   a second; a common enemy drops a heart with hearts.chance (elites and bosses always), a heart heals healShare x
+#   max hp. Up to orbs.maxOnMap orbs lie between min and maxCastleDistance from the castle, minSpacing apart and
+#   chestSpacing from chests; place i first spawns at firstSeconds[i], then respawnSeconds after a pickup. An orb lasts
+#   buffSeconds: boots x moveSpeed, berserk x damage on everything the hero deals, heal share x max hp over the time.
+sustain:
+  buffSeconds: 15
+  lifesteal: { capPerSecond: 0.02 }
+  hearts: { chance: 0.04, healShare: 0.08 }
+  orbs: { maxOnMap: 3, firstSeconds: [8, 20, 32], respawnSeconds: { min: 30, max: 45 }, minCastleDistance: 300,
+    maxCastleDistance: 2000, minSpacing: 500, chestSpacing: 200, pickupRadius: 70 }
+  boots: { moveSpeed: 2 }
+  berserk: { damage: 1.5 }
+  heal: { share: 1 }
 # Gear (items, chests, boss drops). Tuned in docs/DECISIONS.md, section Gear, drops and chests.
 # gear: an item's numbers with permanent level B and chest levels T are its level-1 numbers
 #   x (1 + levelStep x max(B - 1, 0) + chestLevelStep x T); an item a chest gave has B = 0, so its first chest level

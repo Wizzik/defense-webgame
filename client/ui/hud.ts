@@ -5,6 +5,7 @@ import {
 import { abilityIconSvg } from "./ability-icons";
 import { Announcer } from "./announcer";
 import { BossBar } from "./boss-bar";
+import { BuffBar } from "./buff-bar";
 import { el, formatTime, setText } from "./dom";
 import type { Drop } from "../../meta";
 import { chestLootLine, dropLine } from "./drop-lines";
@@ -64,7 +65,7 @@ interface PassiveCell {
   shown: string;
 }
 
-/** In-run display: hero, time and phase, news line, boss bar, castle and kills, ability bar, castle-under-attack banner. */
+/** In-run display: hero, time and phase, news line, boss bar, castle and kills, orb effects, ability bar, castle-under-attack banner. */
 export class Hud {
   private readonly root: HTMLElement;
   private readonly heroHp: Bar;
@@ -86,6 +87,7 @@ export class Hud {
   private readonly announce: HTMLElement;
   private readonly announcer = new Announcer();
   private readonly bossBar: BossBar;
+  private readonly buffBar: BuffBar;
   private lastRun: Run | null = null;
   /** What a boss that just fell dropped (boss id, its order in the run); main.ts sets it. */
   /** The drop of a fallen boss; `magicFind` is the hero's magic find at that moment. */
@@ -112,6 +114,7 @@ export class Hud {
     this.muteKey = el("div", "hud-mute", right);
     const abilities = el("div", "hud-abilities", this.root);
     abilities.id = "hud-abilities";
+    this.buffBar = new BuffBar(abilities);
     this.abilityRow = el("div", "hud-ability-row", abilities);
     this.passiveRow = el("div", "hud-passive-row", abilities);
   }
@@ -220,6 +223,7 @@ export class Hud {
     setText(this.muteKey, `${t(lang, "gear.key")} · ${t(lang, "hud.muteKey")}`);
     setText(this.kills, t(lang, "hud.kills", { n: run.stats.kills }));
 
+    this.buffBar.update(run.buffs, lang);
     this.updateAbilities(run, lang);
   }
   private updateAbilities(run: Run, lang: Lang): void {

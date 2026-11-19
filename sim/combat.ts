@@ -1,3 +1,4 @@
+import { berserkScale, lifestealOnHit } from "./buffs";
 import { TICKS_PER_SECOND } from "./constants";
 import { Role } from "./enemies";
 import { Slam, SlamEvent, windupRadius } from "./enemy-slam";
@@ -52,18 +53,21 @@ export function damageCastle(run: Run, amount: number, attacker: number): void {
 }
 
 /**
- * Subtracts `amount` from an enemy, wakes a sieger and kills it at 0 hp.
+ * Subtracts `amount` (x the berserk orb's scale) from an enemy, wakes a sieger and kills it at 0 hp.
  * `source`: 0 base attack, 1 spell, 2 summoned unit. `ref`: spell slot (1), ally index (2), else -1.
- * Only sources 0 and 1 knock back.
+ * Only sources 0 and 1 knock back and heal the hero by lifesteal (sim/buffs.ts).
  */
-export function damageEnemy(run: Run, slot: number, amount: number, source: 0 | 1 | 2, ref = -1): void {
+export function damageEnemy(run: Run, slot: number, raw: number, source: 0 | 1 | 2, ref = -1): void {
   const e = run.enemies;
   if (e.alive[slot] === 0) return;
+  const amount = raw * berserkScale(run);
   const before = e.hp[slot];
   e.hp[slot] = before - amount;
   e.lastHitTick[slot] = run.tick;
   if (e.role[slot] === Role.Sieger) e.aggro[slot] = 1;
-  run.stats.damageDealt += Math.min(amount, before);
+  const dealt = Math.min(amount, before);
+  run.stats.damageDealt += dealt;
+  if (source !== 2) lifestealOnHit(run, dealt);
   run.events.push(EventKind.Hit, slot, amount, e.x[slot], e.y[slot], source, ref);
   if (e.hp[slot] <= 0) killEnemy(run, slot);
   else if (source !== 2) knockBack(run, slot, source);
@@ -96,12 +100,14 @@ export function stunEnemy(run: Run, slot: number, ticks: number): void {
   if (scaled > e.stunTicks[slot]) e.stunTicks[slot] = scaled;
 }
 
-/** A coin falls this far east of the crystal, so the two do not hide each other. */
+/** A coin falls this far east of the crystal and a heart this far west, so they do not hide each other. */
 const COIN_OFFSET = 24;
+const HEART_OFFSET = 24;
 
 /**
  * Emits Death, counts the kill, frees the slot and drops an XP crystal and, for a type with gold, a coin
- * (XP and gold go straight to the hero when their store is full).
+ * (XP and gold go straight to the hero when their store is full). An elite or a boss always drops a heart, a common
+ * enemy with rules.sustain.hearts.chance drawn from sustainRng; a heart that does not fit is lost.
  */
 export function killEnemy(run: Run, slot: number): void {
   const e = run.enemies;
@@ -112,6 +118,7 @@ export function killEnemy(run: Run, slot: number): void {
   const gold = run.data.enemies[e.type[slot]].gold;
   const x = e.x[slot];
   const y = e.y[slot];
+  const type = e.type[slot];
   if (e.slamState[slot] !== Slam.None) {
     run.events.push(EventKind.Slam, slot, SlamEvent.Cancelled, e.slamX[slot], e.slamY[slot], windupRadius(run, slot), 0);
   }
@@ -134,4 +141,7 @@ export function killEnemy(run: Run, slot: number): void {
   e.kill(slot);
   if (run.crystals.drop(x, y, xp) < 0) gainXp(run, xp);
   if (gold > 0 && run.coins.drop(x + COIN_OFFSET, y, gold) < 0) gainGold(run, gold);
+  if (run.isBoss[type] === 1 || type === run.eliteType || run.sustainRng.next() < run.data.rules.sustain.hearts.chance) {
+    run.hearts.drop(x - HEART_OFFSET, y, 1);
+  }
 }

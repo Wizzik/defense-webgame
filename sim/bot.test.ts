@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { debugSetAbilityLevel } from "./abilities/slots";
 import { EventKind } from "./events";
 import { botCard, botChestChoice, botChestKeep, botInput, idleCard, CHASE_DISTANCE, DEFEND_RADIUS, HOME_OFFSET, LEASH_DISTANCE } from "./bot";
+import { OrbKind } from "./buffs";
 import { ChestAction, chestPrice } from "./chests";
 import { silenceSpawns } from "./testing/silence";
 import { Charge } from "./enemy-charge";
@@ -455,5 +456,94 @@ describe("balance", () => {
       expect(botChestChoice(run)).toBe(1);
       expect(botInput(run, { moveX: 1, moveY: 1, card: -1, actions: 0 })).toEqual({ moveX: 0, moveY: 0, card: 1, actions: 0 });
     });
+  });
+});
+
+describe("orbs", () => {
+  const quietRun = () => {
+    const data = gameData();
+    silenceSpawns(data);
+    const run = createRun(data, { seed: 3, durationSeconds: 100000 });
+    run.hero.x = run.castle.x;
+    run.hero.y = run.castle.y + HOME_OFFSET;
+    for (const slot of run.abilities) slot.cooldown = 30;
+    for (let i = 0; i < run.orbs.alive.length; i++) run.orbs.timer[i] = 1_000_000;
+    return run;
+  };
+  const orbAt = (run: Run, kind: number, dx: number, dy: number) => {
+    run.orbs.alive[0] = 1;
+    run.orbs.kind[0] = kind;
+    run.orbs.x[0] = run.hero.x + dx;
+    run.orbs.y[0] = run.hero.y + dy;
+    run.orbs.timer[0] = 0;
+  };
+  const move = (run: Run) => botInput(run, { moveX: 0, moveY: 0, card: -1, actions: 0 });
+
+  it("walks to a berserk orb within 900", () => {
+    const run = quietRun();
+    orbAt(run, OrbKind.Berserk, 600, 0);
+    expect(move(run)).toMatchObject({ moveX: 1, moveY: 0 });
+  });
+
+  it("ignores a boots orb beyond 900", () => {
+    const run = quietRun();
+    orbAt(run, OrbKind.Boots, 1200, 0);
+    expect(move(run).moveX).not.toBe(1);
+  });
+
+  it("takes a heal orb only under 70 % hp", () => {
+    const run = quietRun();
+    orbAt(run, OrbKind.Heal, 500, 0);
+    run.hero.hp = run.hero.stats.maxHp * 0.8;
+    expect(move(run).moveX).not.toBe(1);
+    orbAt(run, OrbKind.Heal, 1400, 0);
+    run.hero.hp = run.hero.stats.maxHp * 0.6;
+    expect(move(run)).toMatchObject({ moveX: 1, moveY: 0 });
+  });
+
+  it("a slam circle wins over an orb", () => {
+    const run = quietRun();
+    orbAt(run, OrbKind.Berserk, 200, 0);
+    const boss = spawnBoss(run, run.data.enemies.findIndex((e) => e.id === "iron-marshal"), Role.Hunter);
+    run.enemies.x[boss] = run.hero.x + 120;
+    run.enemies.y[boss] = run.hero.y;
+    run.enemies.slamCooldown[boss] = 0;
+    run.enemies.attackCooldown[boss] = 1_000_000;
+    run.enemies.chargeCooldown[boss] = 1_000_000;
+    const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
+    run.step(botInput(run, input));
+    expect(botInput(run, input).moveX).toBe(-1);
+  });
+
+  it("goes for an orb before a chest", () => {
+    const run = quietRun();
+    run.gold = chestPrice(run);
+    let cx = 0;
+    let cy = 0;
+    let best = Infinity;
+    for (let i = 0; i < run.chests.x.length; i++) {
+      const dx = run.chests.x[i]! - run.hero.x;
+      const dy = run.chests.y[i]! - run.hero.y;
+      if (dx * dx + dy * dy < best) {
+        best = dx * dx + dy * dy;
+        cx = dx;
+        cy = dy;
+      }
+    }
+    // the orb lies straight east or west, away from the nearest chest
+    const side = cx > 0 ? -1 : 1;
+    orbAt(run, OrbKind.Berserk, side * 600, 0);
+    const input = move(run);
+    expect(input.moveX).toBe(side);
+    expect(Math.sign(cx) * input.moveX + Math.sign(cy) * input.moveY).toBeLessThan(1);
+  });
+
+  it("leaves orbs alone in the finale", () => {
+    const run = quietRun();
+    orbAt(run, OrbKind.Berserk, 600, 0);
+    run.finalBossSlot = spawnBoss(run, run.finalBossType, Role.Hunter);
+    run.enemies.x[run.finalBossSlot] = run.hero.x - 800;
+    run.enemies.y[run.finalBossSlot] = run.hero.y;
+    expect(move(run).moveX).toBe(-1);
   });
 });

@@ -493,6 +493,42 @@
   "threat": {
     "heroDamageTaken": 2
   },
+  "sustain": {
+    "buffSeconds": 15,
+    "lifesteal": {
+      "capPerSecond": 0.02
+    },
+    "hearts": {
+      "chance": 0.04,
+      "healShare": 0.08
+    },
+    "orbs": {
+      "maxOnMap": 3,
+      "firstSeconds": [
+        8,
+        20,
+        32
+      ],
+      "respawnSeconds": {
+        "min": 30,
+        "max": 45
+      },
+      "minCastleDistance": 300,
+      "maxCastleDistance": 2000,
+      "minSpacing": 500,
+      "chestSpacing": 200,
+      "pickupRadius": 70
+    },
+    "boots": {
+      "moveSpeed": 2
+    },
+    "berserk": {
+      "damage": 1.5
+    },
+    "heal": {
+      "share": 1
+    }
+  },
   "gear": {
     "levelStep": 0.15,
     "chestLevelStep": 0.25,

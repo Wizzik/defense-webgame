@@ -113,6 +113,34 @@ export const RulesSchema = z.object({
   /** Multiplier on all damage enemies deal to the hero (not to the castle). */
   threat: z.object({ heroDamageTaken: positive }).strict(),
   /**
+   * Sustain (spec 2026-11-19): lifesteal from gear with a cap per second, hearts dropped by enemies and orbs on the map
+   * whose effects last buffSeconds (sim/buffs.ts, sim/orbs.ts).
+   */
+  sustain: z.object({
+    buffSeconds: positive,
+    /** Lifesteal heals at most capPerSecond x max hp in one second. */
+    lifesteal: z.object({ capPerSecond: z.number().positive().max(1) }).strict(),
+    /** A common enemy drops a heart with `chance` (elites and bosses always); a heart heals healShare x max hp. */
+    hearts: z.object({ chance: z.number().positive().max(1), healShare: z.number().positive().max(1) }).strict(),
+    orbs: z.object({
+      maxOnMap: z.number().int().min(1).max(8),
+      /** When each orb place first spawns its orb; one value per place. */
+      firstSeconds: z.array(nonNegative),
+      respawnSeconds: z.object({ min: positive, max: positive }).strict()
+        .refine((r) => r.min <= r.max, "min is above max"),
+      minCastleDistance: nonNegative,
+      maxCastleDistance: positive,
+      minSpacing: nonNegative,
+      chestSpacing: nonNegative,
+      pickupRadius: positive,
+    }).strict()
+      .refine((o) => o.firstSeconds.length === o.maxOnMap, { path: ["firstSeconds"], message: "needs one value per orb place (maxOnMap)" })
+      .refine((o) => o.minCastleDistance < o.maxCastleDistance, { path: ["minCastleDistance"], message: "minCastleDistance is not below maxCastleDistance" }),
+    boots: z.object({ moveSpeed: positive }).strict(),
+    berserk: z.object({ damage: positive }).strict(),
+    heal: z.object({ share: positive }).strict(),
+  }).strict(),
+  /**
    * Item numbers with permanent level B and chest levels T: the level-1 numbers x
    * (1 + levelStep x max(B - 1, 0) + chestLevelStep x T); an item a chest gave has B = 0.
    */

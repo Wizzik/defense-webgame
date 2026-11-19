@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { Scene, type WebGPURenderer } from "three/webgpu";
 import type { GameData } from "../data/schema";
-import { ALLY_CAPACITY, COIN_CAPACITY, CRYSTAL_CAPACITY } from "../sim";
+import { ALLY_CAPACITY, COIN_CAPACITY, CRYSTAL_CAPACITY, HEART_CAPACITY } from "../sim";
 import { Sfx } from "./audio/sfx";
 import { SoundView } from "./audio/sound-view";
 import { loadGameData } from "./game/data";
@@ -15,8 +15,9 @@ import { Overlay } from "./perf/overlay";
 import { FollowCamera } from "./render/camera";
 import { createRenderer, describeGpu, NoGpuError } from "./render/gpu";
 import { ChestView } from "./render/chest-view";
-import { coinLook, crystalLook, CrystalView } from "./render/crystal-view";
+import { coinLook, crystalLook, CrystalView, heartLook } from "./render/crystal-view";
 import { DamageNumbers } from "./render/damage-numbers";
+import { OrbView } from "./render/orb-view";
 import { AbilityFx } from "./render/ability-fx";
 import { Effects } from "./render/effects";
 import { EnemyFx } from "./render/enemy-fx";
@@ -171,18 +172,20 @@ async function start(): Promise<void> {
   );
   const crystals = new CrystalView(CRYSTAL_CAPACITY, (run) => run.crystals, crystalLook());
   const coins = new CrystalView(COIN_CAPACITY, (run) => run.coins, coinLook());
+  const hearts = new CrystalView(HEART_CAPACITY, (run) => run.hearts, heartLook());
+  const orbView = new OrbView();
   const chestView = new ChestView(document.getElementById("ui")!, followCamera.camera);
   const effects = new Effects(data);
   const abilityFx = new AbilityFx();
   const enemyFx = new EnemyFx(data);
   const allyView = new AllyView(ALLY_CAPACITY);
   const blobShadows = new BlobShadows(data.rules.enemies.maxAlive + ALLY_CAPACITY);
-  scene.add(blobShadows.mesh, crowd.object, crystals.mesh, coins.mesh, chestView.object, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
+  scene.add(blobShadows.mesh, crowd.object, crystals.mesh, coins.mesh, hearts.mesh, orbView.object, chestView.object, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
   const sfx = new Sfx();
   sfx.setMuted(readStoredMuted());
   const packArrows = new PackArrows(document.getElementById("ui")!, followCamera.camera);
-  session.views.push(heroView, allyView, blobShadows, crowd, crystals, coins, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(sfx));
+  session.views.push(heroView, allyView, blobShadows, crowd, crystals, coins, hearts, orbView, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(sfx));
 
   addEventListener("resize", () => {
     renderer.setSize(innerWidth, innerHeight);

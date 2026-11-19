@@ -13,13 +13,13 @@ export interface DollSlotView {
   temp: number;
 }
 
-/** The hero's stats with the gear on, the attributes with the gear's share, and the gear's magic find. */
-export type DollTotals = HeroStats & { str: number; agi: number; int: number; magicFind: number };
+/** The hero's stats with the gear on, the attributes with the gear's share, and the gear's magic find and lifesteal. */
+export type DollTotals = HeroStats & { str: number; agi: number; int: number; magicFind: number; lifesteal: number };
 
-type TotalKey = "str" | "agi" | "int" | "hp" | "armor" | "magicFind";
-const TOTAL_KEYS: readonly TotalKey[] = ["str", "agi", "int", "hp", "armor", "magicFind"];
+type TotalKey = "str" | "agi" | "int" | "hp" | "armor" | "magicFind" | "lifesteal";
+const TOTAL_KEYS: readonly TotalKey[] = ["str", "agi", "int", "hp", "armor", "magicFind", "lifesteal"];
 
-/** The text of each total under the doll: whole attributes and hp, armor to 0.1, magic find in percent. */
+/** The text of each total under the doll: whole attributes and hp, armor to 0.1, magic find and lifesteal in percent. */
 export function totalTexts(totals: DollTotals): Record<TotalKey, string> {
   const one = (value: number): string => String(Math.round(value * 10) / 10);
   return {
@@ -29,6 +29,7 @@ export function totalTexts(totals: DollTotals): Record<TotalKey, string> {
     hp: String(Math.round(totals.maxHp)),
     armor: one(totals.armor),
     magicFind: `${one(totals.magicFind * 100)} %`,
+    lifesteal: `${one(totals.lifesteal * 100)} %`,
   };
 }
 

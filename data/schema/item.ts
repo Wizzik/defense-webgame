@@ -16,10 +16,10 @@ export type Rarity = z.infer<typeof RaritySchema>;
 /** Stat rows an item of a rarity has. */
 export const RARITY_ROWS: Record<Rarity, number> = { common: 1, rare: 2, epic: 3, legendary: 4, mythic: 5 };
 
-/** `damage`, `attackSpeed`, `moveSpeed`, `spellPower`, `goldFind` and `magicFind` are shares: 0.05 is 5 %. */
+/** `damage`, `attackSpeed`, `moveSpeed`, `spellPower`, `goldFind`, `magicFind` and `lifesteal` are shares: 0.05 is 5 %. */
 export const STAT_IDS = [
   "str", "agi", "int", "hp", "armor", "regen", "damage", "attackSpeed", "moveSpeed", "spellPower", "magnet", "goldFind",
-  "magicFind",
+  "magicFind", "lifesteal",
 ] as const;
 export const StatIdSchema = z.enum(STAT_IDS);
 export type StatId = z.infer<typeof StatIdSchema>;

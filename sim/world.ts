@@ -65,6 +65,8 @@ export interface HeroState {
   attackCooldown: number;
   /** Level-ups waiting for a card choice (Task 7). */
   pendingLevelUps: number;
+  /** Multiplier on the final move speed: 1, or rules.sustain.boots.moveSpeed while the boots orb runs (sim/buffs.ts). */
+  speedScale: number;
 }
 
 export interface CastleState {
@@ -85,4 +87,14 @@ export interface RunStats {
   xpGained: number;
   /** All gold the hero gained. */
   goldGained: number;
+  /** Hearts picked up. */
+  hearts: number;
+  /** Orbs picked up, by kind. */
+  orbsBoots: number;
+  orbsBerserk: number;
+  orbsHeal: number;
+  /** Hp healed by lifesteal, hearts and the heal orb. */
+  healedLifesteal: number;
+  healedHearts: number;
+  healedOrb: number;
 }

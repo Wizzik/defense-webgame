@@ -8,13 +8,15 @@ export {
 export { countEnemiesWithin, densestCluster, nearestEnemy, strongestEnemy } from "./abilities/targeting";
 export type { AbilitySlot } from "./abilities/slots";
 export { botCard, botChestChoice, botChestKeep, botInput, idleCard } from "./bot";
+export { BuffState, healHero, OrbKind, startBuff, updateBuffs } from "./buffs";
+export { debugSpawnOrb, OrbStore, placeOrb, updateOrbs } from "./orbs";
 export { cardGroups, chooseCard, openOffer } from "./cards";
 export { applyChestCard, ChestAction, chestPrice, ChestStore, chooseChestCard, rollChestOffer } from "./chests";
 export type { ChestCard, ChestOffer } from "./chests";
 export { killEnemy } from "./combat";
 export type { Card, CardOffer } from "./cards";
 export { debugSpawnEach } from "./debug-spawn";
-export { COIN_CAPACITY, CRYSTAL_CAPACITY, CrystalStore, debugGrantGold, updatePickups } from "./crystals";
+export { COIN_CAPACITY, CRYSTAL_CAPACITY, CrystalStore, debugDropHeart, debugGrantGold, HEART_CAPACITY, updatePickups } from "./crystals";
 export { TICKS_PER_SECOND, TICK_SECONDS } from "./constants";
 export { ALLY_CAPACITY, AllyKind, AllyStore, updateAllies } from "./allies";
 export { Action, EnemyStore, Role } from "./enemies";

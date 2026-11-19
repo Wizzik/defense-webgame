@@ -394,8 +394,8 @@
         "value": 3.5
       },
       {
-        "stat": "damage",
-        "value": 0.025
+        "stat": "lifesteal",
+        "value": 0.0125
       }
     ]
   },
@@ -546,8 +546,8 @@
         "value": 3.5
       },
       {
-        "stat": "goldFind",
-        "value": 0.05
+        "stat": "lifesteal",
+        "value": 0.0125
       }
     ]
   },
@@ -584,8 +584,8 @@
         "value": 3.5
       },
       {
-        "stat": "spellPower",
-        "value": 0.025
+        "stat": "lifesteal",
+        "value": 0.0125
       }
     ]
   },
@@ -656,8 +656,8 @@
     "rarity": "rare",
     "stats": [
       {
-        "stat": "armor",
-        "value": 1.75
+        "stat": "lifesteal",
+        "value": 0.0175
       },
       {
         "stat": "str",
@@ -913,8 +913,8 @@
         "value": 0.03
       },
       {
-        "stat": "hp",
-        "value": 60
+        "stat": "lifesteal",
+        "value": 0.0125
       }
     ]
   },
@@ -936,8 +936,8 @@
         "value": 0.035
       },
       {
-        "stat": "attackSpeed",
-        "value": 0.02
+        "stat": "lifesteal",
+        "value": 0.01
       }
     ]
   },
@@ -1070,8 +1070,8 @@
         "value": 4
       },
       {
-        "stat": "damage",
-        "value": 0.03
+        "stat": "lifesteal",
+        "value": 0.015
       },
       {
         "stat": "magicFind",
@@ -1120,8 +1120,8 @@
         "value": 0.035
       },
       {
-        "stat": "hp",
-        "value": 60
+        "stat": "lifesteal",
+        "value": 0.0125
       }
     ]
   },
@@ -1166,8 +1166,8 @@
         "value": 3.5
       },
       {
-        "stat": "hp",
-        "value": 48
+        "stat": "lifesteal",
+        "value": 0.01
       }
     ]
   },
@@ -1189,8 +1189,8 @@
         "value": 3.5
       },
       {
-        "stat": "regen",
-        "value": 0.4
+        "stat": "lifesteal",
+        "value": 0.01
       }
     ]
   },

@@ -58,6 +58,22 @@ export function stateHash(run: Run): number {
   mixInt(fx.hasteLeft);
   mixFloat(fx.hasteCarry);
   mixInt(run.shieldTicks);
+  mixFloat(hero.speedScale);
+  const buffs = run.buffs;
+  mixInt(buffs.bootsTicks);
+  mixInt(buffs.berserkTicks);
+  mixInt(buffs.healTicks);
+  mixFloat(buffs.lifestealBudget);
+  mixFloat(buffs.healCarry);
+  mixInt(run.sustainRng.state);
+  const orbs = run.orbs;
+  for (let i = 0; i < orbs.alive.length; i++) {
+    mixInt(orbs.alive[i]!);
+    mixInt(orbs.kind[i]!);
+    mixInt(orbs.timer[i]!);
+    mixFloat(orbs.x[i]!);
+    mixFloat(orbs.y[i]!);
+  }
   mixInt(run.stats.kills);
   mixInt(run.stats.spawned);
   mixFloat(run.castle.hp);
@@ -159,6 +175,14 @@ export function stateHash(run: Run): number {
     mixInt(coins.value[i]);
     mixFloat(coins.x[i]);
     mixFloat(coins.y[i]);
+  }
+  const hearts = run.hearts;
+  for (let i = 0; i < hearts.capacity; i++) {
+    if (hearts.alive[i] === 0) continue;
+    mixInt(i);
+    mixInt(hearts.attracted[i]);
+    mixFloat(hearts.x[i]);
+    mixFloat(hearts.y[i]);
   }
   const pr = run.projectiles;
   for (let i = 0; i < pr.capacity; i++) {

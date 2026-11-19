@@ -4,7 +4,7 @@ export const EventKind = {
   Cast: 3,
   HeroHit: 4,
   CastleHit: 5,
-  /** A crystal or a coin was collected: value = XP or gold gained, u = 0 crystal / 1 coin. */
+  /** A crystal, a coin or a heart was collected: value = XP, gold or hp gained, u = 0 crystal / 1 coin / 2 heart. */
   Pickup: 6,
   LevelUp: 7,
   RunEnd: 8,
@@ -36,6 +36,13 @@ export const EventKind = {
   ChestPick: 21,
   /** A boss fell: a = enemy type index, value = how many bosses fell in the run before it (0 for the first), x/y = where. */
   BossDeath: 22,
+  /** The hero healed: value = hp, x/y = the hero, u = 1 lifesteal (the sum of a step) / 2 the heal orb (the sum of a
+   *  second). A heart reports a Pickup with u = 2. */
+  HeroHeal: 23,
+  /** An orb appeared: a = its place, value = its kind (OrbKind), x/y = where. */
+  OrbSpawn: 24,
+  /** The hero picked an orb up: a = its place, value = its kind (OrbKind), x/y = the orb. */
+  OrbPickup: 25,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

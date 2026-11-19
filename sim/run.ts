@@ -1,5 +1,7 @@
 import type { GameData } from "../data/schema";
 import { createAbilitySlots, updateAbilities } from "./abilities/slots";
+import { BuffState, fillLifestealBudget, updateBuffs } from "./buffs";
+import { createOrbs, type OrbStore, updateOrbs } from "./orbs";
 import type { AbilitySlot } from "./abilities/slots";
 import { TICKS_PER_SECOND } from "./constants";
 import { chooseCard, openOffer } from "./cards";
@@ -8,7 +10,7 @@ import { type ChestOffer, ChestStore, chooseChestCard, placeChest, updateChests 
 import { regenCastle } from "./castle";
 import { ALLY_CAPACITY, AllyStore, updateAllies } from "./allies";
 import { PROJECTILE_CAPACITY, ProjectileStore, updateProjectiles } from "./projectiles";
-import { COIN_CAPACITY, CRYSTAL_CAPACITY, CrystalStore, updatePickups } from "./crystals";
+import { COIN_CAPACITY, CRYSTAL_CAPACITY, CrystalStore, HEART_CAPACITY, updatePickups } from "./crystals";
 import { updateEnemies } from "./enemy-ai";
 import { BEHAVIOR_IDS } from "./enemy-steer";
 import { healEnemies } from "./enemy-heal";
@@ -64,6 +66,8 @@ export class Run {
   readonly crystals = new CrystalStore(CRYSTAL_CAPACITY);
   /** Gold coins on the ground. */
   readonly coins = new CrystalStore(COIN_CAPACITY);
+  /** Hearts on the ground (sim/combat.ts drops them, updatePickups kind 2 heals). */
+  readonly hearts = new CrystalStore(HEART_CAPACITY);
   /** Gold the hero holds; it pays for chests and is gone after the run. */
   gold = 0;
   /** The chests on the map (sim/chests.ts). */
@@ -123,7 +127,16 @@ export class Run {
   nextPackTick: number;
   /** The last phase whose elites were sent (-1: none yet). */
   elitePhase = -1;
-  readonly stats: RunStats = { kills: 0, spawned: 0, damageDealt: 0, xpGained: 0, goldGained: 0 };
+  readonly stats: RunStats = {
+    kills: 0, spawned: 0, damageDealt: 0, xpGained: 0, goldGained: 0,
+    hearts: 0, orbsBoots: 0, orbsBerserk: 0, orbsHeal: 0, healedLifesteal: 0, healedHearts: 0, healedOrb: 0,
+  };
+  /** Orb effects and the lifesteal budget (sim/buffs.ts). */
+  readonly buffs = new BuffState();
+  /** Hearts and orbs draw from this generator, so they shift neither the enemies nor the chests of a seed. */
+  readonly sustainRng: Rng;
+  /** The orb places on the map (sim/orbs.ts). */
+  readonly orbs: OrbStore;
   /** The step in which the final boss comes. The run goes on until it falls. */
   readonly durationTicks: number;
   /** The ultimate casts by itself; the player can switch this off (Task 7). */
@@ -175,7 +188,7 @@ export class Run {
       facingX: 0, facingY: 1, moving: false,
       level: 1, xp: 0,
       str: def.attributes.str.base, agi: def.attributes.agi.base, int: def.attributes.int.base,
-      hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, gear: emptyGearBonus(), passive: emptyPassiveBonus(), attackCooldown: 0, pendingLevelUps: 0,
+      hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, gear: emptyGearBonus(), passive: emptyPassiveBonus(), attackCooldown: 0, pendingLevelUps: 0, speedScale: 1,
       dashTicks: 0, dashCooldown: 0, dashDirX: 0, dashDirY: 0,
     };
     heroStats(data, hero, stats);
@@ -192,10 +205,13 @@ export class Run {
       hp: rules.castle.hp, maxHp: rules.castle.hp, lastHitTick: -1,
     };
     this.chestRng = new Rng((options.seed ^ 0x5bd1e995) >>> 0);
+    this.sustainRng = new Rng((options.seed ^ 0x27d4eb2f) >>> 0);
+    this.orbs = createOrbs(this);
     this.chestPriceRaw = rules.chests.basePrice;
     this.chests = new ChestStore(rules.chests.count);
     for (let i = 0; i < rules.chests.count; i++) placeChest(this, i, true);
     if (options.startPhase !== undefined) applyStartPhase(this, options.startPhase);
+    fillLifestealBudget(this);
   }
 
   /** The time of the final boss has come. */
@@ -233,6 +249,9 @@ export class Run {
    *   updateAllies(this);         // phase 2a, Task 6
    *   updatePickups(this, crystals, 0);   // Task 7
    *   updatePickups(this, coins, 1);      // gear plan, Task 3
+   *   updatePickups(this, hearts, 2);     // sustain plan, Task 3 (a fallen hero is not healed)
+   *   updateOrbs(this);           // sustain plan, Task 4: orb spawns, respawns and pickups (no magnet)
+   *   updateBuffs(this);          // sustain plan, Task 2: orb timers, heal over time, lifesteal budget and its event
    *   regenCastle(this);          // Task 4
    *   this.tick++;
    *   checkEnd(this);             // castle (Task 4) -> hero (Task 5) -> the final boss fell (phase 2b-3); a loss wins over a win
@@ -268,6 +287,9 @@ export class Run {
     updateAllies(this);
     updatePickups(this, this.crystals, 0);
     updatePickups(this, this.coins, 1);
+    updatePickups(this, this.hearts, 2);
+    updateOrbs(this);
+    updateBuffs(this);
     regenCastle(this);
     this.tick++;
     checkEnd(this);
@@ -278,7 +300,7 @@ export class Run {
 }
 
 function savePrevious(run: Run): void {
-  const { hero, enemies, crystals, coins, projectiles, allies } = run;
+  const { hero, enemies, crystals, coins, hearts, projectiles, allies } = run;
   hero.prevX = hero.x;
   hero.prevY = hero.y;
   for (let i = 0; i < crystals.capacity; i++) {
@@ -290,6 +312,11 @@ function savePrevious(run: Run): void {
     if (coins.alive[i] === 0) continue;
     coins.prevX[i] = coins.x[i];
     coins.prevY[i] = coins.y[i];
+  }
+  for (let i = 0; i < hearts.capacity; i++) {
+    if (hearts.alive[i] === 0) continue;
+    hearts.prevX[i] = hearts.x[i];
+    hearts.prevY[i] = hearts.y[i];
   }
   for (let i = 0; i < projectiles.capacity; i++) {
     if (projectiles.alive[i] === 0) continue;

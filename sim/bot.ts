@@ -1,5 +1,6 @@
 import { RARITIES } from "../data/schema";
 import { sharedSlotRange, ULTIMATE_SLOT } from "./abilities/slots";
+import { OrbKind } from "./buffs";
 import type { CardOffer } from "./cards";
 import { ChestAction, type ChestCard, chestPrice } from "./chests";
 import { Charge } from "./enemy-charge";
@@ -35,6 +36,10 @@ const SLAM_MARGIN = 60;
  */
 const CHEST_HERO_HP = 0.3;
 const CHEST_CASTLE_HP = 0.5;
+/** The bot walks to a boots or berserk orb within ORB_DISTANCE, to a heal orb within HEAL_ORB_DISTANCE below HEAL_ORB_HP. */
+export const ORB_DISTANCE = 900;
+export const HEAL_ORB_DISTANCE = 1500;
+export const HEAL_ORB_HP = 0.7;
 const AXIS_DEADZONE = 30;
 /** Share of a unit vector under which an axis is not pressed (between sin 22.5° and cos 67.5°). */
 const AXIS_SHARE = 0.38;
@@ -201,6 +206,34 @@ export function botInput(run: Run, out: TickInput): TickInput {
     out.moveY = axis(ux);
     if (hero.dashCooldown === 0 && hero.dashTicks === 0) out.actions |= InputAction.Dash;
     return out;
+  }
+
+  if (run.finalBossSlot < 0) {
+    // The nearest orb worth the walk (spec 2026-11-19 sustain, 4.5): boots and berserk near, heal when hurt.
+    const { orbs } = run;
+    const hurt = hero.hp < hero.stats.maxHp * HEAL_ORB_HP;
+    let ox = 0;
+    let oy = 0;
+    let orbSq = Infinity;
+    for (let i = 0; i < orbs.alive.length; i++) {
+      if (orbs.alive[i] === 0) continue;
+      const heal = orbs.kind[i] === OrbKind.Heal;
+      if (heal && !hurt) continue;
+      const reach = heal ? HEAL_ORB_DISTANCE : ORB_DISTANCE;
+      const tx = orbs.x[i]! - hero.x;
+      const ty = orbs.y[i]! - hero.y;
+      const sq = tx * tx + ty * ty;
+      if (sq <= reach * reach && sq < orbSq) {
+        orbSq = sq;
+        ox = tx;
+        oy = ty;
+      }
+    }
+    if (orbSq < Infinity) {
+      out.moveX = Math.abs(ox) > AXIS_DEADZONE ? Math.sign(ox) : 0;
+      out.moveY = Math.abs(oy) > AXIS_DEADZONE ? Math.sign(oy) : 0;
+      return out;
+    }
   }
 
   if (

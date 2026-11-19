@@ -36,7 +36,7 @@ export type GearBonus = Record<StatId, number>;
 export function emptyGearBonus(): GearBonus {
   return {
     str: 0, agi: 0, int: 0, hp: 0, armor: 0, regen: 0,
-    damage: 0, attackSpeed: 0, moveSpeed: 0, spellPower: 0, magnet: 0, goldFind: 0, magicFind: 0,
+    damage: 0, attackSpeed: 0, moveSpeed: 0, spellPower: 0, magnet: 0, goldFind: 0, magicFind: 0, lifesteal: 0,
   };
 }
 
@@ -105,6 +105,7 @@ export function recomputeGear(run: Run): void {
   bonus.magnet = 0;
   bonus.goldFind = 0;
   bonus.magicFind = 0;
+  bonus.lifesteal = 0;
   const rules = data.rules.gear;
   for (let slot = 0; slot < SLOT_COUNT; slot++) {
     const index = gear.item[slot]!;

@@ -2,9 +2,11 @@ import {
   type BufferGeometry,
   CylinderGeometry,
   DynamicDrawUsage,
+  ExtrudeGeometry,
   InstancedMesh,
   MeshStandardNodeMaterial,
   OctahedronGeometry,
+  Shape,
 } from "three/webgpu";
 import { type CrystalStore, type Run, TICKS_PER_SECOND } from "../../sim";
 import type { RunView } from "../game/session";
@@ -36,7 +38,22 @@ export function coinLook(): PickupLook {
   return { geometry, color: 0xe8c860, emissive: 0xb89a3c, emissiveIntensity: 0.7 };
 }
 
-/** The pickups of one store (XP crystals or gold coins): one instanced mesh, bobbing and turning. `update` does not allocate. */
+/** Hearts: a small crimson heart, a little narrower than a crystal (spec 2026-11-19 sustain). */
+export function heartLook(): PickupLook {
+  const shape = new Shape();
+  shape.moveTo(0, -0.5);
+  shape.bezierCurveTo(-0.15, -0.3, -0.6, -0.1, -0.6, 0.25);
+  shape.bezierCurveTo(-0.6, 0.55, -0.2, 0.65, 0, 0.35);
+  shape.bezierCurveTo(0.2, 0.65, 0.6, 0.55, 0.6, 0.25);
+  shape.bezierCurveTo(0.6, -0.1, 0.15, -0.3, 0, -0.5);
+  const geometry = new ExtrudeGeometry(shape, { depth: 0.3, bevelEnabled: false, curveSegments: 8 });
+  geometry.translate(0, 0, -0.15);
+  // the shape is 1.2 wide: about 0.3 in the scene, a little narrower than a crystal (0.36)
+  geometry.scale(0.25, 0.25, 0.25);
+  return { geometry, color: 0xc8303e, emissive: 0xe0444e, emissiveIntensity: 0.8 };
+}
+
+/** The pickups of one store (XP crystals, gold coins or hearts): one instanced mesh, bobbing and turning. `update` does not allocate. */
 export class CrystalView implements RunView {
   readonly mesh: InstancedMesh;
   private readonly store: (run: Run) => CrystalStore;

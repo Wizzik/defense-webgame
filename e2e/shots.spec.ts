@@ -159,3 +159,33 @@ test("shot: chest-compare", async ({ page }) => {
   await page.waitForTimeout(200);
   await shot(page, "chest-compare");
 });
+
+test("shot: orbs", async ({ page }) => {
+  await startRun(page, "seed=7&hero=stonehorn&debug=1&lang=cs");
+  // the hero faces north at the start, so each orb comes 150 north of where the hero stands (the first natural
+  // orb comes at 8 s, after the shot)
+  await page.evaluate(() => {
+    const g = window.__game!;
+    g.debug!.spawnOrb("boots");
+    g.debug!.teleport(g.heroX, g.heroY + 150); // onto the orb: picked up, so the HUD shows its effect
+  });
+  await page.waitForFunction(() => window.__game!.buffs.boots > 0, undefined, { timeout: 10_000, polling: 50 });
+  await page.evaluate(() => {
+    const g = window.__game!;
+    const d = g.debug!;
+    const hx = g.heroX;
+    const hy = g.heroY;
+    d.teleport(hx + 260, hy - 130);
+    d.spawnOrb("heal");
+    d.teleport(hx - 260, hy - 130);
+    d.spawnOrb("berserk");
+    d.teleport(hx, hy + 110);
+    d.spawnOrb("boots");
+    // a heart beyond the magnet (300), east of the hero
+    d.teleport(hx + 330, hy - 220);
+    d.dropHeart();
+    d.teleport(hx, hy);
+  });
+  await page.waitForTimeout(400);
+  await shot(page, "orbs");
+});
