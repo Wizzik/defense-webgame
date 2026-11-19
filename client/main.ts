@@ -4,6 +4,9 @@ import type { GameData } from "../data/schema";
 import { ALLY_CAPACITY, COIN_CAPACITY, CRYSTAL_CAPACITY, HEART_CAPACITY } from "../sim";
 import { loadAudioData } from "./audio/data";
 import { AudioEngine } from "./audio/engine";
+import { MusicDirector, type MusicInput, musicSlot } from "./audio/music-director";
+import { MusicPlayer } from "./audio/music-player";
+import { latestBoss } from "./game/boss";
 import { SoundView } from "./audio/sound-view";
 import { loadGameData } from "./game/data";
 import { addDebugHooks, publishSnapshot, updateSnapshot } from "./game/debug";
@@ -186,6 +189,18 @@ async function start(): Promise<void> {
   const audioData = loadAudioData();
   const audio = new AudioEngine(audioData, import.meta.env.BASE_URL);
   audio.setMuted(readStoredMuted());
+  const sound: Sound = {
+    engine: audio,
+    director: new MusicDirector(),
+    music: new MusicPlayer(audio, audioData, import.meta.env.BASE_URL),
+  };
+  // browsers start audio only after a gesture: the first click or key in the menu enables it (the menu music starts then)
+  const enableAudio = (): void => {
+    audio.enable();
+    void audio.preload();
+  };
+  addEventListener("pointerdown", enableAudio, { once: true });
+  addEventListener("keydown", enableAudio, { once: true });
   const packArrows = new PackArrows(document.getElementById("ui")!, followCamera.camera);
   session.views.push(heroView, allyView, blobShadows, crowd, crystals, coins, hearts, orbView, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(audio, audioData));
 
@@ -210,7 +225,7 @@ async function start(): Promise<void> {
   };
   publishGear();
   session.views.push({ update: publishGear, onEvents: () => {}, dispose: () => {} });
-  const ui = createUi(data, gear, !params.debug && !gear.persistent, session, followCamera, audio, randomSeed, hero, gpu.software, (setLoading) =>
+  const ui = createUi(data, gear, !params.debug && !gear.persistent, session, followCamera, sound, randomSeed, hero, gpu.software, (setLoading) =>
     heroLoader(models, session, heroView, allyView, setLoading),
   );
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
@@ -267,6 +282,12 @@ function heroLoader(
   };
 }
 
+interface Sound {
+  engine: AudioEngine;
+  director: MusicDirector;
+  music: MusicPlayer;
+}
+
 interface Ui {
   update(width: number, height: number): void;
   readonly menuOpen: boolean;
@@ -282,7 +303,7 @@ function createUi(
   noSave: boolean,
   session: Session,
   followCamera: FollowCamera,
-  audio: AudioEngine,
+  sound: Sound,
   nextSeed: () => number,
   initialHero: string,
   softwareGpu: boolean,
@@ -304,8 +325,8 @@ function createUi(
   };
   const menu = new Menu(root, data.heroes, heroId, {
     onStart: () => {
-      audio.enable();
-      void audio.preload();
+      sound.engine.enable();
+      void sound.engine.preload();
       menuOpen = false;
       session.paused = false;
       menu.setVisible(false);
@@ -333,7 +354,7 @@ function createUi(
   let muted = readStoredMuted();
   const setMuted = (value: boolean): void => {
     muted = value;
-    audio.setMuted(value);
+    sound.engine.setMuted(value);
     storeMuted(value);
     menu.setSound(!value);
   };
@@ -371,6 +392,15 @@ function createUi(
     update(width, height) {
       const run = session.run;
       if (!run) return;
+      const input: MusicInput = {
+        menuOpen,
+        state: run.state,
+        bossAlive: latestBoss(run) >= 0,
+        finale: run.inFinale,
+        panelOpen: !menuOpen && session.paused,
+      };
+      sound.music.set(musicSlot(input));
+      sound.music.setDuck(sound.director.duck(input, performance.now() / 1000));
       hud.setVisible(!menuOpen);
       if (menuOpen) {
         ended = false;
