@@ -6,6 +6,7 @@ import type { LoadoutEntry, Run, RunResult } from "../../sim/index";
 import type { TickInput } from "../../sim/input";
 import { gameData } from "../../sim/testing/game-data";
 import type { GameData } from "../../data/schema";
+import { attackHit, BURST_PHASES, burstLine, spellBurst } from "./burst";
 import { GEAR_PRESETS, type GearPresetName, gearPreset } from "./gear-presets";
 
 export interface RunSummary {
@@ -40,6 +41,10 @@ export interface RunSummary {
   chests: number;
   /** Gold gained in the run. */
   gold: number;
+  /** One cast of the strongest signature spell at the start of each of `BURST_PHASES` (null: not reached). */
+  burst: (number | null)[];
+  /** The average base attack hit at the start of each of `BURST_PHASES` (null: not reached). */
+  attack: (number | null)[];
 }
 
 /** A player who does nothing: no movement, no action; at a level-up the attribute card, else the weakest card (idleCard). */
@@ -60,11 +65,19 @@ export function playBot(
   const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   const phaseTicks = data.rules.run.phaseSeconds * TICKS_PER_SECOND;
   const phaseXp: number[] = [];
+  const burst: (number | null)[] = BURST_PHASES.map(() => null);
+  const attack: (number | null)[] = BURST_PHASES.map(() => null);
   let lowest = 1;
   let fullKitPhase: number | null = null;
   while (run.state !== "won" && run.state !== "lost") {
     while (phaseXp.length < data.rules.phases.length && run.tick >= phaseXp.length * phaseTicks) {
       phaseXp.push(run.stats.xpGained);
+    }
+    for (let k = 0; k < BURST_PHASES.length; k++) {
+      if (burst[k] === null && run.tick >= (BURST_PHASES[k] - 1) * phaseTicks) {
+        burst[k] = spellBurst(run);
+        attack[k] = attackHit(run);
+      }
     }
     if (idle) idleInput(run, input);
     else botInput(run, input);
@@ -104,6 +117,8 @@ export function playBot(
     phaseXp,
     chests: run.chestsOpened,
     gold: run.stats.goldGained,
+    burst,
+    attack,
   };
 }
 
@@ -156,7 +171,9 @@ export function phaseXpLine(summaries: RunSummary[], phases: number): string {
 }
 
 /** The summary lines of one hero: results, then bosses and where the losses fall. */
-export function formatHeroSummary(hero: string, summaries: RunSummary[], idle: boolean, finalBoss: string): string {
+export function formatHeroSummary(
+  hero: string, summaries: RunSummary[], idle: boolean, finalBoss: string, data: GameData = gameData(),
+): string {
   const won = summaries.filter((s) => s.result === "won").length;
   const avg = (f: (s: RunSummary) => number) => summaries.reduce((a, s) => a + f(s), 0) / summaries.length;
   const inDanger = summaries.filter((s) => s.minHeroHpPercent < DANGER_PERCENT).length;
@@ -184,7 +201,7 @@ export function formatHeroSummary(hero: string, summaries: RunSummary[], idle: b
     `enraged in ${summaries.filter((s) => s.enraged).length}; losses by minutes: ${lossWindows(summaries)}`;
   const wonChests = wonRuns.length > 0 ? (wonRuns.reduce((a, s) => a + s.chests, 0) / wonRuns.length).toFixed(1) : "-";
   const gear = `  chests avg ${avg((s) => s.chests).toFixed(1)} (won runs ${wonChests}), gold avg ${Math.round(avg((s) => s.gold))}`;
-  return `${head}\n${tail}\n${gear}\n${kitLine(summaries)}`;
+  return `${head}\n${tail}\n${gear}\n${kitLine(summaries)}\n${burstLine(summaries, data)}`;
 }
 
 /** How often each id appears, most first (ties by id): `meteor 7, smite 5`, or `-`. */
@@ -276,7 +293,7 @@ function main(): void {
       console.log(formatSummary(s));
     }
     all.push(...summaries);
-    console.log(formatHeroSummary(hero, summaries, args.idle, data.rules.run.finale.boss));
+    console.log(formatHeroSummary(hero, summaries, args.idle, data.rules.run.finale.boss, data));
   }
   if (args.phaseXp) console.log(`phaseXp: ${phaseXpLine(all, data.rules.phases.length)}`);
 }

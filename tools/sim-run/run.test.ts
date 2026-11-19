@@ -11,7 +11,7 @@ describe("formatSummary", () => {
       formatSummary({
         hero: "stonehorn", seed: 1, result: "castle", seconds: 134, kills: 63, spawned: 320, level: 7,
         castleHp: 0, castleMaxHp: 3000, castleHpPercent: 0, heroHp: 812, heroMaxHp: 1555, minHeroHpPercent: 42,
-        bosses: [], enraged: false, phaseXp: [0], chests: 4, gold: 321, sharedSpells: [], passives: [], fullKitPhase: null,
+        bosses: [], enraged: false, phaseXp: [0], chests: 4, gold: 321, sharedSpells: [], passives: [], fullKitPhase: null, burst: [null, null, null, null], attack: [null, null, null, null],
       }),
     ).toBe(
       "stonehorn seed 1: lost (castle) at 2:14, kills 63, spawned 320, level 7, castle 0%, hero 812/1555, hero low 42%, chests 4, gold 321",
@@ -23,7 +23,7 @@ describe("formatSummary", () => {
       formatSummary({
         hero: "nightglaive", seed: 2, result: "won", seconds: 180, kills: 5, spawned: 9, level: 2,
         castleHp: 1860, castleMaxHp: 3000, castleHpPercent: 62, heroHp: 1, heroMaxHp: 2, minHeroHpPercent: 0,
-        bosses: [], enraged: false, phaseXp: [0], chests: 4, gold: 321, sharedSpells: [], passives: [], fullKitPhase: null,
+        bosses: [], enraged: false, phaseXp: [0], chests: 4, gold: 321, sharedSpells: [], passives: [], fullKitPhase: null, burst: [null, null, null, null], attack: [null, null, null, null],
       }),
     ).toBe("nightglaive seed 2: won at 3:00, kills 5, spawned 9, level 2, castle 62%, hero 1/2, hero low 0%, chests 4, gold 321");
   });
@@ -32,7 +32,7 @@ describe("formatSummary", () => {
 const summary = (over: Partial<RunSummary>): RunSummary => ({
   hero: "stonehorn", seed: 1, result: "won", seconds: 1040, kills: 1, spawned: 2, level: 3,
   castleHp: 1, castleMaxHp: 2, castleHpPercent: 50, heroHp: 1, heroMaxHp: 2, minHeroHpPercent: 10,
-  bosses: [], enraged: false, phaseXp: [0], chests: 0, gold: 0, sharedSpells: [], passives: [], fullKitPhase: null, ...over,
+  bosses: [], enraged: false, phaseXp: [0], chests: 0, gold: 0, sharedSpells: [], passives: [], fullKitPhase: null, burst: [null, null, null, null], attack: [null, null, null, null], ...over,
 });
 
 describe("summaries of the full run", () => {
