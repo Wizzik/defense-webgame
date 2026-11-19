@@ -2,7 +2,8 @@
 import { Scene, type WebGPURenderer } from "three/webgpu";
 import type { GameData } from "../data/schema";
 import { ALLY_CAPACITY, COIN_CAPACITY, CRYSTAL_CAPACITY, HEART_CAPACITY } from "../sim";
-import { Sfx } from "./audio/sfx";
+import { loadAudioData } from "./audio/data";
+import { AudioEngine } from "./audio/engine";
 import { SoundView } from "./audio/sound-view";
 import { loadGameData } from "./game/data";
 import { addDebugHooks, publishSnapshot, updateSnapshot } from "./game/debug";
@@ -182,10 +183,11 @@ async function start(): Promise<void> {
   const blobShadows = new BlobShadows(data.rules.enemies.maxAlive + ALLY_CAPACITY);
   scene.add(blobShadows.mesh, crowd.object, crystals.mesh, coins.mesh, hearts.mesh, orbView.object, chestView.object, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
-  const sfx = new Sfx();
-  sfx.setMuted(readStoredMuted());
+  const audioData = loadAudioData();
+  const audio = new AudioEngine(audioData, import.meta.env.BASE_URL);
+  audio.setMuted(readStoredMuted());
   const packArrows = new PackArrows(document.getElementById("ui")!, followCamera.camera);
-  session.views.push(heroView, allyView, blobShadows, crowd, crystals, coins, hearts, orbView, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(sfx));
+  session.views.push(heroView, allyView, blobShadows, crowd, crystals, coins, hearts, orbView, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(audio, audioData));
 
   addEventListener("resize", () => {
     renderer.setSize(innerWidth, innerHeight);
@@ -208,7 +210,7 @@ async function start(): Promise<void> {
   };
   publishGear();
   session.views.push({ update: publishGear, onEvents: () => {}, dispose: () => {} });
-  const ui = createUi(data, gear, !params.debug && !gear.persistent, session, followCamera, sfx, randomSeed, hero, gpu.software, (setLoading) =>
+  const ui = createUi(data, gear, !params.debug && !gear.persistent, session, followCamera, audio, randomSeed, hero, gpu.software, (setLoading) =>
     heroLoader(models, session, heroView, allyView, setLoading),
   );
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
@@ -280,7 +282,7 @@ function createUi(
   noSave: boolean,
   session: Session,
   followCamera: FollowCamera,
-  sfx: Sfx,
+  audio: AudioEngine,
   nextSeed: () => number,
   initialHero: string,
   softwareGpu: boolean,
@@ -302,7 +304,8 @@ function createUi(
   };
   const menu = new Menu(root, data.heroes, heroId, {
     onStart: () => {
-      sfx.enable();
+      audio.enable();
+      void audio.preload();
       menuOpen = false;
       session.paused = false;
       menu.setVisible(false);
@@ -330,7 +333,7 @@ function createUi(
   let muted = readStoredMuted();
   const setMuted = (value: boolean): void => {
     muted = value;
-    sfx.setMuted(value);
+    audio.setMuted(value);
     storeMuted(value);
     menu.setSound(!value);
   };

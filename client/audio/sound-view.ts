@@ -1,13 +1,20 @@
 import { EventKind, type Run, SlamEvent } from "../../sim";
 import type { RunView } from "../game/session";
-import type { Sfx } from "./sfx";
+import type { AudioData } from "../../data/schema/audio";
+import type { AudioEngine } from "./engine";
 
 /** Turns simulation events into sounds. Draws nothing. */
 export class SoundView implements RunView {
-  private readonly sfx: Sfx;
+  private readonly engine: AudioEngine;
+  private readonly sounds: AudioData["sounds"];
 
-  constructor(sfx: Sfx) {
-    this.sfx = sfx;
+  constructor(engine: AudioEngine, data: AudioData) {
+    this.engine = engine;
+    this.sounds = data.sounds;
+  }
+
+  private sound(name: keyof AudioData["sounds"]): void {
+    this.engine.play(this.sounds[name]);
   }
 
   update(): void {}
@@ -17,49 +24,49 @@ export class SoundView implements RunView {
     for (let i = 0; i < events.count; i++) {
       switch (events.kind[i]) {
         case EventKind.Hit:
-          if (events.u[i] === 0) this.sfx.hit();
+          if (events.u[i] === 0) this.engine.play("stone-strike");
           break;
         case EventKind.Death:
-          this.sfx.death();
+          this.engine.play("bone-rattle");
           break;
         case EventKind.Cast:
-          if (run.abilities[events.a[i]!]!.def.kind === "on_hit") this.sfx.hit();
-          else this.sfx.cast();
+          if (run.abilities[events.a[i]!]!.def.kind === "on_hit") this.engine.play("stone-strike");
+          else this.engine.play("stone-rupture");
           break;
         case EventKind.Blast:
-          this.sfx.hit();
+          this.engine.play("stone-strike");
           break;
         case EventKind.Heal:
-          this.sfx.pickup();
+          this.sound("pickup.xp");
           break;
         case EventKind.Dash:
-          this.sfx.cast();
+          this.engine.play("stone-rupture");
           break;
         case EventKind.CastleHit:
-          this.sfx.castleHit();
+          this.sound("castleHit");
           break;
         case EventKind.Pickup:
-          if (events.u[i] === 1) this.sfx.coin();
-          else if (events.u[i] === 2) this.sfx.heart();
-          else this.sfx.pickup();
+          if (events.u[i] === 1) this.sound("pickup.coin");
+          else if (events.u[i] === 2) this.sound("pickup.heart");
+          else this.sound("pickup.xp");
           break;
         case EventKind.OrbPickup:
-          this.sfx.orb();
+          this.sound("orb.boots");
           break;
         case EventKind.ChestOpen:
-          this.sfx.chest();
+          this.sound("chest.open");
           break;
         case EventKind.LevelUp:
-          this.sfx.levelUp();
+          this.sound("levelUp");
           break;
         case EventKind.BossSpawn:
-          this.sfx.bossArrive();
+          this.sound("bossArrive");
           break;
         case EventKind.Slam:
-          if (events.value[i] === SlamEvent.Hit) this.sfx.slam();
+          if (events.value[i] === SlamEvent.Hit) this.sound("slam.hit");
           break;
         case EventKind.Enrage:
-          this.sfx.enrage();
+          this.sound("enrage");
           break;
       }
     }
