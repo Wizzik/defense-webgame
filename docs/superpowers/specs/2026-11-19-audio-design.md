@@ -1,6 +1,6 @@
 # Zvuk a hudba: návrh
 
-- **Stav:** návrh ke schválení (19. 11. 2026). Co je označeno jako Claudovo, může Petr změnit.
+- **Stav:** schváleno Petrem 19. 11. 2026 (plán: `docs/superpowers/plans/2026-11-19-audio.md`). Co je označeno jako Claudovo, může Petr změnit.
 - **Vychází z:** Petrova přání 19. 11. 2026: „vadí mi monotónní zvuky, nemá to cit, duši“; „každý hrdina má svoje téma, celé by to mělo být ve stylu fantasy“.
 - **Staví na:** `main` po PR #22 (`8cfdbd9`), větev `audio`.
 - **Místo v pořadí:** první z projektů „hra kompletní před multiplayerem“ (Petr, 19. 11. 2026): 1 zvuk a hudba + nastavení, 2 víc hrdinů v simulaci a AI spojenec, 3 frakce nepřátel, 4 obtížnosti s prostředím, 5 postup mezi běhy, 6 credits a právní kontrola. Obchod v hradu (a s ním dřevo, věže, oprava) vypadl.

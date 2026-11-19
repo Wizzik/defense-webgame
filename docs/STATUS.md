@@ -2,6 +2,14 @@
 
 Updated 2026-11-19 (Gravecaller nerf on top of the sustain merge; both wait for Petr's playtest). Read this first when you resume work.
 
+
+## Audio and music: spec approved, plan written (2026-11-19, branch `audio`); next: execute the plan
+
+- Petr (2026-11-19): the game is OK now, but the sounds are monotonous, "no feel, no soul"; fantasy style, every hero with its own theme. Above all he wants the game **complete before multiplayer**. Order he approved: 1 audio and music + settings, 2 several heroes in the simulation and an AI ally (the base for co-op: the sim knows one hero today), 3 enemy factions by phase, 4 difficulties with environments, 5 progression between runs (hero unlocks, talents, account perks), 6 credits and legal check, then multiplayer. **Dropped:** the castle shop (and with it wood, towers, repair).
+- Spec: `docs/superpowers/specs/2026-11-19-audio-design.md` (path A: recorded CC0 sounds and orchestral music, synthesis only as a fallback). Plan: `docs/superpowers/plans/2026-11-19-audio.md`, 10 tasks.
+- Petr's part: Task 1 writes `docs/audio-sources.md` (links to download: OpenGameArt and Kenney are not reachable from the container); Petr downloads the zips into one folder, connects it in the desktop app ("Add folder") and picks the music by listening (2 candidates per slot). Tasks 2-8 do not need him; Task 9 needs the folder, Task 10 his music picks.
+- Execution: in a new chat ("pokračuj dle status.md"), Petr chooses native or subagent-driven.
+
 ## Gravecaller nerf: smaller Bone Stampede, half the Grave Grasp heal (2026-11-19); waits for Petr's playtest
 
 - Petr's wish: the Gravecaller is so strong because its ultimate reaches much wider than other heroes' ultimates; halve its heal too.
