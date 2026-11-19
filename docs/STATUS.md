@@ -27,7 +27,7 @@ Updated 2026-11-19 (PR #18 merged and deployed; Petr played it, found the game t
   - the Sparkshot: does every arrow burn, does it feel strong enough;
   - the compare panel at 1280x720: readability, the lined-up rows, keys 1, 2 and Esc, the mouse;
   - quick links: https://wizzik.github.io/defense-webgame/?debug=1 after the merge; in the console `__game.debug.grantGold(5000)`, then walk to a chest (a worn slot shows a Choice after the first few chests); `__game.debug.setAbilityLevel(0, 5)` for a signature spell at its top level; `__game.debug.wear("head", "travelers-hood")` to wear an item at once.
-- Next: Petr reads the open decision, plays, and says merge (or which knob values to set first).
+- Merged at Petr's word after green CI, Pages deployed. Petr kept the knobs and asked for sustain instead (the section above).
 
 ## Chest loot, Magic Find and enemy threat: merged (PR #15 as `dd88ff5`, 2026-11-18); waits for Petr's playtest
 
