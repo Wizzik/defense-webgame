@@ -139,8 +139,8 @@
     range: range
     damage: { design: [400, 800, 1600, 3200, 6400] }
     # The map heals 50 to 300. Phase 2b-2 lowered it to 10-60 (with the map's values the hero was never in
-    # danger) and Petr cut that by another 75 % on 2026-11-11.
-    healPerHit: { design: [2.5, 5, 7.5, 10, 15] }
+    # danger), Petr cut that by another 75 % on 2026-11-11 and halved it again on 2026-11-19.
+    healPerHit: { design: [1.25, 2.5, 3.75, 5, 7.5] }
   review:
     jassFunctions:
       - Trig_Dead_Catch_Func003Func002A
@@ -193,8 +193,11 @@
   targeting: densest_cluster
   params:
     tickDamage: DataC
-    ticksPerSecond: DataA
-    radius: area
+    # Petr 2026-11-19: the map's area (1000, 1500) made it reach far wider than any other ultimate, so the
+    # radius is 700, 900 (the others reach 500-1000). Bursts a second shrink with the area (map 20, 30) so an
+    # enemy inside is hit about as often as before (1.5-1.6 hits a second); the whole spell deals less.
+    ticksPerSecond: { design: [10, 11] }
+    radius: { design: [700, 900] }
     duration: duration
     hitRadius: DataD
 

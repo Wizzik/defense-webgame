@@ -2,6 +2,14 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Gravecaller: smaller Bone Stampede, half the Grave Grasp heal (2026-11-19; Petr's wish, the numbers are Claude's)
+
+- Why: Petr found the Gravecaller far too strong; its ultimate reaches much wider than any other hero's, and its heal should be halved.
+- **Bone Stampede** (`design/abilities.yaml`): radius 1000, 1500 (map area) -> 700, 900 (other ultimates reach 500-1000). Bursts a second 20, 30 (map) -> 10, 11, so an enemy inside is hit about as often as before (`tps x hitRadius^2 / radius^2` = 1.5, 1.6 hits a second; with the old bursts a smaller circle would have hit everything inside three times as often). Damage, duration and burst radius (275, 350) stay. The whole spell deals about 0.5 x (level 1) and 0.35 x (level 2) of before.
+- **Grave Grasp** `healPerHit` 2.5, 5, 7.5, 10, 15 -> 1.25, 2.5, 3.75, 5, 7.5.
+- Autopilot, no gear, before -> after: seeds 1-20 20 -> 20 wins, castle of won runs 80 -> 73 %, lowest hero hp avg 80 -> 76 % (min 65 -> 60 %), never below 50 %; seeds 21-40 20 -> 20 (castle 67 %). Phase-20 burst 2165 -> 1745. The other heroes share no ability with it and are unchanged.
+- **Open for Petr:** the autopilot still wins every run. Probes on top of this change (seeds 1-20, not committed): no heal at all 20, no Bone Stampede damage 20, Grave Grasp damage x0.5 20, Grave Grasp range 800 -> 500 20. Its strength in the simulation is the kit: three damage spells (Grave Grasp and Skull Ring every 1.98 s, Soul Bolt every 3.3 s with unlimited range) where the other heroes have one or two plus auras or on-hit. A player feels the ultimate and the heal more than the autopilot does; whether more is needed is Petr's call after he plays.
+
 ## Sustain (2026-11-19; Petr chose the direction, the numbers are Claude's)
 
 Spec `docs/superpowers/specs/2026-11-19-sustain-design.md`, plan `docs/superpowers/plans/2026-11-19-sustain.md`. Why: after PR #18 Petr died in the 3rd minute ("it is really very hard") and asked for sustain instead of turning the spell knobs back. The spell knobs (0.5 / 0.005) and `rules.threat.heroDamageTaken 2` stay.
