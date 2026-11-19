@@ -58,6 +58,17 @@ describe("chest compare lines", () => {
     expect(mf).toEqual({ stat: "magicFind", keep: "", take: take("magicFind", 0.1), keepTone: "plain", takeTone: "better", takeNew: true });
   });
 
+  it("a lifesteal row shows a percent on the side that has it", () => {
+    const { data, gear, crown } = setup();
+    data.items[crown]!.stats = [{ stat: "str", value: 20 }, { stat: "hp", value: 50 }, { stat: "lifesteal", value: 0.015 }];
+    const info = compareLines("en", data, gear, { slot: 0, item: crown, action: ChestAction.Choice });
+    const row = info.rows.find((r) => r.stat === "lifesteal")!;
+    expect(row.keep).toBe("");
+    expect(row.take).toMatch(/^\+\d+(\.\d)? % lifesteal$/);
+    expect(row.takeTone).toBe("better");
+    expect(row.takeNew).toBe(true);
+  });
+
   it("equal values are plain on both sides", () => {
     const { data, crown, hood } = setup();
     const gear = new GearState();

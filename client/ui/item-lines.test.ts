@@ -34,7 +34,7 @@ describe("item lines", () => {
   });
 
   it("names every stat in both languages", () => {
-    const stats = ["str", "agi", "int", "hp", "armor", "regen", "damage", "attackSpeed", "moveSpeed", "spellPower", "magnet", "goldFind", "magicFind"] as const;
+    const stats = ["str", "agi", "int", "hp", "armor", "regen", "damage", "attackSpeed", "moveSpeed", "spellPower", "magnet", "goldFind", "magicFind", "lifesteal"] as const;
     for (const stat of stats) {
       expect(statLabel("en", stat).length).toBeGreaterThan(0);
       expect(statLabel("cs", stat).length).toBeGreaterThan(0);
@@ -44,5 +44,8 @@ describe("item lines", () => {
     expect(statValue("magicFind", 0.12)).toBe("+12 %");
     expect(itemLines("en", { ...ring, stats: [{ stat: "magicFind", value: 0.12 }] }, 1, 0, GEAR)).toEqual(["+12 % magic find"]);
     expect(itemLines("cs", { ...ring, stats: [{ stat: "magicFind", value: 0.12 }] }, 1, 0, GEAR)).toEqual(["+12 % magický nález"]);
+    expect(statValue("lifesteal", 0.015)).toBe("+1.5 %");
+    expect(itemLines("en", { ...ring, stats: [{ stat: "lifesteal", value: 0.015 }] }, 1, 0, GEAR)).toEqual(["+1.5 % lifesteal"]);
+    expect(itemLines("cs", { ...ring, stats: [{ stat: "lifesteal", value: 0.015 }] }, 1, 0, GEAR)).toEqual(["+1.5 % vysávání života"]);
   });
 });

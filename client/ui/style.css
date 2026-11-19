@@ -922,7 +922,8 @@
 }
 .doll-totals {
   display: flex;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 4px 16px;
   padding-top: 8px;
   border-top: 1px solid #2c3a54;
 }

@@ -232,6 +232,7 @@ describe("generated game data", () => {
     const UNIT: Record<string, number> = {
       str: 0.5, agi: 0.5, int: 0.5, hp: 12, armor: 0.25, regen: 0.1,
       damage: 0.005, attackSpeed: 0.005, spellPower: 0.005, moveSpeed: 0.01, goldFind: 0.01, magnet: 10, magicFind: 0.02,
+      lifesteal: 0.0025,
     };
     const BUDGET: Record<string, number> = { common: 6, rare: 12, epic: 20, legendary: 30, mythic: 42 };
     const of = (rarity: string) => items.filter((item) => item.rarity === rarity);
@@ -275,6 +276,22 @@ describe("generated game data", () => {
         "band-of-resolve", "belt-of-many-knives", "compass-of-the-lost-scout", "falcon-charm", "hourglass-of-the-hunt",
         "hunters-whistle", "pendant-of-the-deep-well", "ring-of-the-keen-eye", "seal-of-the-archivist", "tin-ring",
       ]);
+    });
+
+    it("ten items carry lifesteal, each between 1 and 3 %", () => {
+      const ls = items.filter((item) => item.stats.some((row) => row.stat === "lifesteal"));
+      expect(ls.length).toBe(10);
+      for (const item of ls) {
+        const value = item.stats.find((row) => row.stat === "lifesteal")!.value;
+        expect(value, item.id).toBeGreaterThanOrEqual(0.01);
+        expect(value, item.id).toBeLessThanOrEqual(0.03);
+        expect(item.rarity, item.id).not.toBe("common");
+      }
+      const types = ls.map((item) => item.slotType);
+      for (const [type, min] of [["mainHand", 2], ["hands", 2], ["offHand", 1], ["ring", 2], ["trinket", 2]] as const) {
+        expect(types.filter((t) => t === type).length, type).toBeGreaterThanOrEqual(min);
+      }
+      expect(ls.filter((item) => item.rarity === "rare").length).toBeGreaterThanOrEqual(3);
     });
 
     it("the best epic-or-better magic find build gives about 100 % at level 5", () => {

@@ -70,6 +70,7 @@ export class GearPanel {
     this.doll.render(runSlots(run), {
       ...hero.stats, str: hero.str + hero.gear.str, agi: hero.agi + hero.gear.agi, int: hero.int + hero.gear.int,
       magicFind: hero.gear.magicFind,
+      lifesteal: hero.gear.lifesteal,
     });
     this.session.paused = true;
     this.root.hidden = false;

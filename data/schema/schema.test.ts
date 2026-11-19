@@ -83,6 +83,12 @@ function fixture(): any {
         { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.35, elites: 0 },
       ],
       threat: { heroDamageTaken: 2 },
+      sustain: {
+        buffSeconds: 15, lifesteal: { capPerSecond: 0.02 }, hearts: { chance: 0.04, healShare: 0.08 },
+        orbs: { maxOnMap: 3, firstSeconds: [8, 20, 32], respawnSeconds: { min: 30, max: 45 }, minCastleDistance: 300,
+          maxCastleDistance: 2000, minSpacing: 500, chestSpacing: 200, pickupRadius: 70 },
+        boots: { moveSpeed: 2 }, berserk: { damage: 1.5 }, heal: { share: 1 },
+      },
       magicFind: { limit: 1.5, rarityFactor: { rare: 1, epic: 1.5, legendary: 2, mythic: 2.5 } },
       gear: { levelStep: 0.15, chestLevelStep: 0.3, maxPermanentLevel: 5 },
       chests: { count: 3, basePrice: 40, priceGrowth: 1.18, minCastleDistance: 700, maxCastleDistance: 2000,
@@ -560,5 +566,40 @@ describe("item and gear schemas", () => {
     expect(validateGameData(data).enemies[0]!.gold).toBe(0);
     data.enemies[0].gold = -1;
     expect(errorMessage(data)).toContain("enemies.0 (grunt).gold");
+  });
+});
+
+describe("sustain rules", () => {
+  it("accepts the sustain block and an item with lifesteal", () => {
+    const data = fixture();
+    data.items.push({ id: "leech-ring", name: { en: "Leech", cs: "Pijavice" }, slotType: "ring", rarity: "rare",
+      stats: [{ stat: "str", value: 6 }, { stat: "lifesteal", value: 0.015 }] });
+    expect(validateGameData(data).rules.sustain.orbs.maxOnMap).toBe(3);
+  });
+
+  it("needs one first time per orb place", () => {
+    const data = fixture();
+    data.rules.sustain.orbs.firstSeconds = [8, 20];
+    expect(errorMessage(data)).toContain("firstSeconds");
+  });
+
+  it("rejects a respawn min above its max", () => {
+    const data = fixture();
+    data.rules.sustain.orbs.respawnSeconds = { min: 50, max: 45 };
+    expect(errorMessage(data)).toContain("respawnSeconds");
+  });
+
+  it("rejects minCastleDistance not below maxCastleDistance", () => {
+    const data = fixture();
+    data.rules.sustain.orbs.minCastleDistance = 2000;
+    expect(errorMessage(data)).toContain("minCastleDistance");
+  });
+
+  it("rejects a heart chance of 0 or above 1", () => {
+    for (const chance of [0, 1.2]) {
+      const data = fixture();
+      data.rules.sustain.hearts.chance = chance;
+      expect(errorMessage(data)).toContain("sustain.hearts.chance");
+    }
   });
 });
