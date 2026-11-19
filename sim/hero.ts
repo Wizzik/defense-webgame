@@ -146,6 +146,6 @@ export function updateHeroCombat(run: Run): void {
   const extra = extraTargets(run);
   damageEnemy(run, best, amount, 0);
   if (e.alive[best] === 1) stunEnemy(run, best, stun);
-  hitExtraTargets(run, best, extra, stun);
+  hitExtraTargets(run, best, extra, stun, bonus);
   onGearAttack(run, best, targetX, targetY, amount);
 }

@@ -360,8 +360,9 @@
   targeting: on_attack
   params:
     bonusDamage: DataA
-    # Petr's wish of 2026-11-18 (multishot); the map's spell has no extra targets. Design values: split shots
-    # deal the base attack without the burn (sim/hero-multishot.ts, docs/DECISIONS.md).
+    # Petr's wish of 2026-11-18 (multishot); the map's spell has no extra targets. Design values. Since Petr's
+    # word of 2026-11-19 every split shot carries the burn too; empower and gear effects stay with the main shot
+    # (sim/hero-multishot.ts, docs/DECISIONS.md).
     extraTargets: { design: [1, 1, 2, 2, 3] }
 
 - id: quickstep
