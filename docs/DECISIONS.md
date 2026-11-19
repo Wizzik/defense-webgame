@@ -2,6 +2,52 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Sustain (2026-11-19; Petr chose the direction, the numbers are Claude's)
+
+Spec `docs/superpowers/specs/2026-11-19-sustain-design.md`, plan `docs/superpowers/plans/2026-11-19-sustain.md`. Why: after PR #18 Petr died in the 3rd minute ("it is really very hard") and asked for sustain instead of turning the spell knobs back. The spell knobs (0.5 / 0.005) and `rules.threat.heroDamageTaken 2` stay.
+
+- **Rules** (`rules.sustain` in `design/rules.yaml`): `buffSeconds 15`; `lifesteal.capPerSecond 0.02`; `hearts { chance 0.04, healShare 0.08 }`; `orbs { maxOnMap 3, firstSeconds [8, 20, 32], respawnSeconds 30-45, minCastleDistance 300, maxCastleDistance 2000, minSpacing 500, chestSpacing 200, pickupRadius 70 }`; `boots.moveSpeed 2`, `berserk.damage 1.5`, `heal.share 1`. Petr's numbers (x2 speed, x1.5 damage, 100 % hp over 15 s, 15 s, respawn 30-45 s, a random place each time) are not tuned.
+- **Lifesteal** is a share stat on items, 1 point = 0.25 %. It heals `lifesteal` x the damage dealt without overkill, for base attacks (source 0) and spells (source 1, which includes on-hit bonuses and gear effects); summons (source 2) do not heal. Cap: a budget refilled every step by `capPerSecond` x max hp x the step length and kept for at most one second; only the hp actually healed leaves the budget. It never heals a fallen hero or above max hp. The stat grows with item levels like every other row.
+- **The ten lifesteal items** (one row of the same points replaced; no magic find, no effect and no sole main-attribute row touched):
+
+| item | rarity, slot | replaced row | lifesteal at level 1 |
+|---|---|---|---|
+| greatblade-of-the-keep | epic mainHand | hp 48 | 1 % |
+| staff-of-the-low-tide | epic mainHand | regen 0.4 | 1 % |
+| masons-grip | rare hands | damage 2.5 % | 1.25 % |
+| weavers-gloves | epic hands | attack speed 2 % | 1 % |
+| oaken-shield | rare offHand | armor 1.75 | 1.75 % |
+| moonlit-signet | rare ring | gold 5 % | 1.25 % |
+| ring-of-the-keen-eye | epic ring | damage 3 % | 1.5 % |
+| astrolabe-shard | epic trinket | hp 60 | 1.25 % |
+| vial-of-clear-thought | rare trinket | spell power 2.5 % | 1.25 % |
+| siegebreaker-vambraces | epic wrist | hp 60 | 1.25 % |
+
+- **Hearts:** a third pickup store (64); elites and bosses always drop one, a common enemy with `chance`; it lies 24 west of the crystal (the coin lies east); the magnet pulls it; it heals `healShare` x max hp at once. A full store loses the heart.
+- **Orbs:** `maxOnMap` places; place i spawns first at `firstSeconds[i]`, then 30-45 s after its pickup, each time at a random point in the band around the castle, inside the arena, `minSpacing` from the other orbs and from its own last spot, `chestSpacing` from chests (40 tries, then the last point in the band). The kind is uniform. The magnet does not pull orbs; the hero picks one up within 70. The same orb again restarts its effect at 15 s, it does not stack. Boots multiply the final move speed (`hero.speedScale`, not added to gear); berserk multiplies all damage the hero deals, summons included (Claude's reading: Serpent Shaman's orb would do little otherwise); the heal orb heals max hp / 450 a step from the current max hp, beside the lifesteal cap.
+- **Random stream:** `run.sustainRng = new Rng((seed ^ 0x27d4eb2f) >>> 0)` draws the heart chance, orb places, kinds and respawns; the main `rng` and `chestRng` do not move, so enemies and chests of a seed stay the same.
+- **Step order:** `updatePickups(hearts, 2)`, `updateOrbs`, `updateBuffs` after the coins and before `regenCastle` (the spec put `updateBuffs` after `updateGearEffects`; the end of the step sums the lifesteal of the whole step into one `HeroHeal` event).
+- **Autopilot:** after dodging slams and charges, before a chest: the nearest boots or berserk orb within 900, a heal orb within 1500 only below 70 % hp; never in the finale.
+- **Client:** orbs are drawn at radius 0.5 (about 2.8 x a crystal, not the spec's 1.5 x: at 1.5 x they were a few pixels in the 1280x720 shot), with a glyph leaning to the camera and a faint ring on the floor; colours boots #4fa8ff, berserk #e0444e, renewal #4fd18b. Heal numbers are green and summed over 0.5 s.
+- **Balance** (autopilot wins of 20, seeds 1-20 / 21-40; `main` at `4b50a8c` -> this branch, defaults above):
+
+| hero | none main | none sustain | mid main | mid sustain | full main | full sustain |
+|---|---|---|---|---|---|---|
+| Stonehorn | 3 / 1 | 18 / 11 | 12 / 13 | 19 / 18 | 20 / 20 | 19 / 19 |
+| Nightglaive | 1 / 0 | 3 / 6 | 3 / 1 | 4 / 5 | 19 / 17 | 15 / 19 |
+| Gravecaller | 20 / 20 | 20 / 20 | 20 / 20 | 20 / 20 | 20 / 20 | 20 / 20 |
+| Serpent Shaman | 6 / 5 | 13 / 12 | 17 / 13 | 16 / 18 | 20 / 20 | 20 / 20 |
+| Mistwarden | 0 / 0 | 1 / 6 | 2 / 1 | 10 / 13 | 17 / 15 | 16 / 13 |
+| Sparkshot | 7 / 5 | 9 / 6 | 9 / 8 | 8 / 4 | 15 / 13 | 14 / 14 |
+| Redcleaver | 0 / 0 | 3 / 2 | 1 / 2 | 4 / 4 | 6 / 4 | 6 / 10 |
+| Tidecaller | 0 / 0 | 6 / 2 | 2 / 0 | 4 / 5 | 16 / 12 | 13 / 10 |
+| all (of 320) | 68 | 138 | 124 | 172 | 254 | 248 |
+
+  Losses by minutes, both seed sets: without gear `main` 0-2: 31, 2-4: 171, 4-6: 10, ..., 16-18: 23, 18-20: 8 -> sustain 0-2: 11, 2-4: 29, 4-6: 3, 12-16: 7, 16-18: 94, 18-20: 38 (losses before 4:00 202 -> 40); mid gear before 4:00 73 -> 4. The losses moved to the finale.
+  `sustain` line of `sim:run` without gear, seeds 1-20 (per run): about 120-255 hearts, 4-6 boots, 4-5 berserk and 1-4 heal orbs; healed by lifesteal 4000-14000 (from chest items), by hearts 900-11000, by the heal orb 100-4100 hp.
+- **Tuning:** the targets of spec 2 are met without gear (138 of 320, aim about 131) and with mid gear (172, most runs), and the losses before 4:00 fell by 80 %. Full gear stays at 248 (`main` 254): `capPerSecond 0.03` gave the same 248 and 170 mid, so the cap does not bind there; the full-gear losses are finale losses of Redcleaver, Tidecaller, Mistwarden and Sparkshot (their kits, out of scope). The defaults were kept.
+- **Open for Petr:** full gear does not reach "almost all" (248 of 320, as on `main`); hearts heal a lot over a run (about 200 hearts at 8 %) but only 4 % of common kills drop one, so they matter most in fights; Gravecaller still wins 20 of 20; the orb size is Claude's (bigger than the spec's 1.5 x).
+
 ## Spell scaling, multishot on every arrow, chest compare (2026-11-19; Petr chose the direction, the numbers are Claude's)
 
 Spec: `docs/superpowers/specs/2026-11-19-spell-scaling-chest-compare-design.md`. Plan: `docs/superpowers/plans/2026-11-19-spell-scaling-chest-compare.md`. Petr (playtest of PR #15 and #16): spells scale far too strong, globally; every multishot arrow should get the Searing Rounds bonus; a chest swap should show both items and let him keep or take. He chose direction A: tame the spell curves and Int's spell power, enemies unchanged.

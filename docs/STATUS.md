@@ -1,16 +1,28 @@
 # Status
 
-Updated 2026-11-19 (PR #18 merged and deployed; Petr played it, found the game too hard and asked for sustain; the sustain spec and plan are approved on branch `sustain`, execution is next). Read this first when you resume work.
+Updated 2026-11-19 (the sustain plan is executed on branch `sustain`; PR open against `main`, merge only at Petr's word). Read this first when you resume work.
 
-## Next: execute the sustain plan (lifesteal, hearts, map orbs; spec and plan approved 2026-11-19)
+## Sustain: lifesteal, hearts and map orbs: done on `sustain`, PR open (2026-11-19); waits for Petr's playtest and his word to merge
 
-- Why: Petr played PR #18 ("it is really very hard", he died in the 3rd minute) and asked for sustain instead of only turning the spell knobs: a lifesteal stat on items (a low single-digit share of all damage from attacks and spells), hearts that killed enemies drop and that heal, and orbs on the map (boots +100 % move speed 15 s, berserk +50 % damage 15 s, heal 100 % hp over 15 s). Hearts and orbs must help from the first minute, without gear.
-- Petr's choices (brainstorm 2026-11-19): orbs as a regular rhythm (up to 3 on the map, each new one at a random place, respawn 30-45 s); lifesteal by rewriting one row on about 10 existing items, with a cap; orbs built as `sim/orbs.ts` + `sim/buffs.ts`.
-- Spec: `docs/superpowers/specs/2026-11-19-sustain-design.md`. Plan: `docs/superpowers/plans/2026-11-19-sustain.md` (7 tasks). Both are on the branch `sustain` (from `main` at `4b50a8c`).
-- Next in a new chat: execute the plan on `sustain` (Petr picks subagent-driven or native), then a PR against `main`; merge only at Petr's word.
-- The spell knobs of PR #18 (0.5 / 0.005) and the doubled enemy damage stay; sustain is meant to carry the first minutes.
+- All 7 tasks of `docs/superpowers/plans/2026-11-19-sustain.md` are done (inline in one chat, one final self-review against spec 4.1-4.7 and `AGENTS.md`: the chat starts no separate reviewer). `npm run check`, the build and the e2e project `webgl2-fallback` (33 of 33) pass. Spec: `docs/superpowers/specs/2026-11-19-sustain-design.md`. Numbers, the ten items and the win table: `docs/DECISIONS.md`, section Sustain.
+- Why: Petr played PR #18 ("it is really very hard", he died in the 3rd minute) and asked for sustain instead of turning the spell knobs back. The knobs (0.5 / 0.005) and the doubled enemy damage stay.
+- What it brings:
+  - **orbs on the map** (up to 3, the first at 8, 20 and 32 s, then 30-45 s after a pickup, each time at a random place 300-2000 from the castle): boots x2 move speed, berserk x1.5 damage (spells and summons too), renewal 100 % hp over 15 s; each lasts 15 s, the same orb again restarts it; the magnet does not pull orbs, walk within 70;
+  - **hearts:** elites and bosses always drop one, other enemies 4 %; the magnet pulls them; a heart heals 8 % of max hp;
+  - **lifesteal** on ten rare and epic items (one row each replaced, 1-1.75 % at level 1): heals that share of the damage of attacks and spells, at most 2 % of max hp a second;
+  - the HUD shows the running effects with seconds over the ability bar; heals rise as green numbers; lifesteal stands in tooltips, the chest compare and the totals under the doll; two new sounds;
+  - the autopilot walks to boots and berserk orbs within 900 and to a renewal orb within 1500 below 70 % hp; `sim:run` prints a `sustain` line.
+- Balance (autopilot wins of 320, seeds 1-20 and 21-40, `main` -> `sustain`): without gear 68 -> 138, mid gear 124 -> 172, full gear 254 -> 248; losses before 4:00 without gear 202 -> 40, so the losses moved to the finale (16-20 minutes).
+- What Petr checks in the playtest:
+  - can the first minutes be survived now, is the game still a challenge later;
+  - is an orb visible and worth the walk (they are drawn bigger than the spec said: about 2.8 x a crystal, with a ring on the floor), do berserk and boots feel strong, does renewal save a bad moment;
+  - hearts: are they noticeable, is 8 % right;
+  - lifesteal in the tooltips and under the doll; the effect bar over the ability bar at 1280x720;
+  - quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1, then in the console `__game.debug.spawnOrb("heal")` (or `"boots"`, `"berserk"`), `__game.debug.dropHeart()`, `__game.debug.wear("ring1", "moonlit-signet")` for lifesteal.
+- **Open for Petr:** full gear does not reach "almost all" (248 of 320, `main` 254); a higher lifesteal cap changed nothing, the full-gear losses are finale losses of Redcleaver, Tidecaller, Mistwarden and Sparkshot (their kits). Gravecaller still wins 20 of 20.
+- Next: Petr plays the branch after the merge (or asks for changes on the PR). Merge only at his word.
 
-## Spell scaling, multishot on every arrow, chest compare: merged (PR #18 as `4b50a8c`, 2026-11-19); Petr played it and asked for sustain (below)
+## Spell scaling, multishot on every arrow, chest compare: merged (PR #18 as `4b50a8c`, 2026-11-19); Petr played it and asked for sustain (above)
 
 - All 7 tasks of `docs/superpowers/plans/2026-11-19-spell-scaling-chest-compare.md` are done (inline in one chat, one final self-review). `npm run check`, the build and the e2e project `webgl2-fallback` pass. Spec: `docs/superpowers/specs/2026-11-19-spell-scaling-chest-compare-design.md`. Numbers, rulings and tables: `docs/DECISIONS.md`, section Spell scaling, multishot on every arrow, chest compare.
 - What it brings:
@@ -27,7 +39,7 @@ Updated 2026-11-19 (PR #18 merged and deployed; Petr played it, found the game t
   - the Sparkshot: does every arrow burn, does it feel strong enough;
   - the compare panel at 1280x720: readability, the lined-up rows, keys 1, 2 and Esc, the mouse;
   - quick links: https://wizzik.github.io/defense-webgame/?debug=1 after the merge; in the console `__game.debug.grantGold(5000)`, then walk to a chest (a worn slot shows a Choice after the first few chests); `__game.debug.setAbilityLevel(0, 5)` for a signature spell at its top level; `__game.debug.wear("head", "travelers-hood")` to wear an item at once.
-- Merged at Petr's word after green CI, Pages deployed. Petr kept the knobs and asked for sustain instead (the section above).
+- Merged at Petr's word after green CI, Pages deployed. Petr kept the knobs and asked for sustain instead (the Sustain section at the top).
 
 ## Chest loot, Magic Find and enemy threat: merged (PR #15 as `dd88ff5`, 2026-11-18); waits for Petr's playtest
 
