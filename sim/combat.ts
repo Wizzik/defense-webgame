@@ -1,3 +1,4 @@
+import { berserkScale, lifestealOnHit } from "./buffs";
 import { TICKS_PER_SECOND } from "./constants";
 import { Role } from "./enemies";
 import { Slam, SlamEvent, windupRadius } from "./enemy-slam";
@@ -52,18 +53,21 @@ export function damageCastle(run: Run, amount: number, attacker: number): void {
 }
 
 /**
- * Subtracts `amount` from an enemy, wakes a sieger and kills it at 0 hp.
+ * Subtracts `amount` (x the berserk orb's scale) from an enemy, wakes a sieger and kills it at 0 hp.
  * `source`: 0 base attack, 1 spell, 2 summoned unit. `ref`: spell slot (1), ally index (2), else -1.
- * Only sources 0 and 1 knock back.
+ * Only sources 0 and 1 knock back and heal the hero by lifesteal (sim/buffs.ts).
  */
-export function damageEnemy(run: Run, slot: number, amount: number, source: 0 | 1 | 2, ref = -1): void {
+export function damageEnemy(run: Run, slot: number, raw: number, source: 0 | 1 | 2, ref = -1): void {
   const e = run.enemies;
   if (e.alive[slot] === 0) return;
+  const amount = raw * berserkScale(run);
   const before = e.hp[slot];
   e.hp[slot] = before - amount;
   e.lastHitTick[slot] = run.tick;
   if (e.role[slot] === Role.Sieger) e.aggro[slot] = 1;
-  run.stats.damageDealt += Math.min(amount, before);
+  const dealt = Math.min(amount, before);
+  run.stats.damageDealt += dealt;
+  if (source !== 2) lifestealOnHit(run, dealt);
   run.events.push(EventKind.Hit, slot, amount, e.x[slot], e.y[slot], source, ref);
   if (e.hp[slot] <= 0) killEnemy(run, slot);
   else if (source !== 2) knockBack(run, slot, source);

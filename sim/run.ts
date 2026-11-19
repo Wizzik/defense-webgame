@@ -1,5 +1,6 @@
 import type { GameData } from "../data/schema";
 import { createAbilitySlots, updateAbilities } from "./abilities/slots";
+import { BuffState, fillLifestealBudget, updateBuffs } from "./buffs";
 import type { AbilitySlot } from "./abilities/slots";
 import { TICKS_PER_SECOND } from "./constants";
 import { chooseCard, openOffer } from "./cards";
@@ -123,7 +124,14 @@ export class Run {
   nextPackTick: number;
   /** The last phase whose elites were sent (-1: none yet). */
   elitePhase = -1;
-  readonly stats: RunStats = { kills: 0, spawned: 0, damageDealt: 0, xpGained: 0, goldGained: 0 };
+  readonly stats: RunStats = {
+    kills: 0, spawned: 0, damageDealt: 0, xpGained: 0, goldGained: 0,
+    hearts: 0, orbsBoots: 0, orbsBerserk: 0, orbsHeal: 0, healedLifesteal: 0, healedHearts: 0, healedOrb: 0,
+  };
+  /** Orb effects and the lifesteal budget (sim/buffs.ts). */
+  readonly buffs = new BuffState();
+  /** Hearts and orbs draw from this generator, so they shift neither the enemies nor the chests of a seed. */
+  readonly sustainRng: Rng;
   /** The step in which the final boss comes. The run goes on until it falls. */
   readonly durationTicks: number;
   /** The ultimate casts by itself; the player can switch this off (Task 7). */
@@ -175,7 +183,7 @@ export class Run {
       facingX: 0, facingY: 1, moving: false,
       level: 1, xp: 0,
       str: def.attributes.str.base, agi: def.attributes.agi.base, int: def.attributes.int.base,
-      hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, gear: emptyGearBonus(), passive: emptyPassiveBonus(), attackCooldown: 0, pendingLevelUps: 0,
+      hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, gear: emptyGearBonus(), passive: emptyPassiveBonus(), attackCooldown: 0, pendingLevelUps: 0, speedScale: 1,
       dashTicks: 0, dashCooldown: 0, dashDirX: 0, dashDirY: 0,
     };
     heroStats(data, hero, stats);
@@ -192,10 +200,12 @@ export class Run {
       hp: rules.castle.hp, maxHp: rules.castle.hp, lastHitTick: -1,
     };
     this.chestRng = new Rng((options.seed ^ 0x5bd1e995) >>> 0);
+    this.sustainRng = new Rng((options.seed ^ 0x27d4eb2f) >>> 0);
     this.chestPriceRaw = rules.chests.basePrice;
     this.chests = new ChestStore(rules.chests.count);
     for (let i = 0; i < rules.chests.count; i++) placeChest(this, i, true);
     if (options.startPhase !== undefined) applyStartPhase(this, options.startPhase);
+    fillLifestealBudget(this);
   }
 
   /** The time of the final boss has come. */
@@ -233,6 +243,7 @@ export class Run {
    *   updateAllies(this);         // phase 2a, Task 6
    *   updatePickups(this, crystals, 0);   // Task 7
    *   updatePickups(this, coins, 1);      // gear plan, Task 3
+   *   updateBuffs(this);          // sustain plan, Task 2: orb timers, heal over time, lifesteal budget and its event
    *   regenCastle(this);          // Task 4
    *   this.tick++;
    *   checkEnd(this);             // castle (Task 4) -> hero (Task 5) -> the final boss fell (phase 2b-3); a loss wins over a win
@@ -268,6 +279,7 @@ export class Run {
     updateAllies(this);
     updatePickups(this, this.crystals, 0);
     updatePickups(this, this.coins, 1);
+    updateBuffs(this);
     regenCastle(this);
     this.tick++;
     checkEnd(this);

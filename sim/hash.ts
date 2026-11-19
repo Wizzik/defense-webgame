@@ -58,6 +58,14 @@ export function stateHash(run: Run): number {
   mixInt(fx.hasteLeft);
   mixFloat(fx.hasteCarry);
   mixInt(run.shieldTicks);
+  mixFloat(hero.speedScale);
+  const buffs = run.buffs;
+  mixInt(buffs.bootsTicks);
+  mixInt(buffs.berserkTicks);
+  mixInt(buffs.healTicks);
+  mixFloat(buffs.lifestealBudget);
+  mixFloat(buffs.healCarry);
+  mixInt(run.sustainRng.state);
   mixInt(run.stats.kills);
   mixInt(run.stats.spawned);
   mixFloat(run.castle.hp);
