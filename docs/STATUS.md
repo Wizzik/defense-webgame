@@ -1,6 +1,25 @@
 # Status
 
-## Spell sounds review: PR open (2026-11-20)
+Updated 2026-11-20 (enemy factions executed on branch `factions`, PR against `main` waits for Petr's word). Read this first when you resume work.
+
+## Enemy factions: done on branch `factions` (2026-11-20); PR waits for Petr's word
+
+- All 8 tasks of `docs/superpowers/plans/2026-11-20-enemy-factions.md` are done inline in one chat with one final review. `npm run check`, the build and the e2e project `webgl2-fallback` pass. Numbers, rulings and the win table: `docs/DECISIONS.md`, section Enemy factions.
+- What it brings:
+  - four factions by five phases: Human Legion 1-5, Blood Clan 6-10, Restless Dead 11-15, Moon Grove 16-20; elites of a phase and rushes come from the faction of their phase; a horn and a news line announce a new faction (after the boss's news in the same step);
+  - 16 new enemy types (4 per new faction, an elite each, and the risen), every common type with its own KayKit model and a faction palette (no orange); humans are now knights, rogues and a priest (skeletons are the undead);
+  - mechanics: the bloodcaller's bloodlust (red glow), the webcrawler's web (slow), the rotgut's poison cloud (grey-green ring), the gravebinder raising the fallen (green flash, the risen give nothing), the grove druid's and grove warden's roots (green warning circle, 1.2 s without walking or dash); the web and the roots show in the effect bar with seconds;
+  - faction death sounds and mechanic sounds from files already encoded; the autopilot leaves roots, fights rotguts from the cloud's edge and hunts casters first.
+- What Petr checks in the playtest:
+  - does each faction look and sound different, can he tell the types apart (palettes, sizes) and the enemies from the heroes;
+  - the mechanics: is a lusted orc readable, is the cloud fair, are roots dodgeable (1 s warning), is raising annoying or fun;
+  - the news line at 4:10, 8:20 and 12:30-13:20 (boss first, then the faction);
+  - balance: the Blood Clan was the deadliest at first and was softened; Nightglaive with gear wins more now, Mistwarden with gear on some seeds less (table in DECISIONS);
+  - **fps**: `?fps=1&debug=1&phase=16` with a full elf crowd on his machine (22 enemy meshes now instead of 6); the model download grew 5.6 -> 9.8 MB.
+- Quick links (after a merge): https://wizzik.github.io/defense-webgame/?debug=1&phase=6 (Blood Clan with the first miniboss), `&phase=11` (Restless Dead), `&phase=16` (Moon Grove); in the console `__game.debug.spawnFaction("undead")` (or `orc`, `elf`, `human`), `__game.debug.spawnEach()` (the current faction); `__game.faction`, `__game.slowed`, `__game.rooted`.
+- Order after this (Petr, 2026-11-20): 4 difficulties with environments, 5 progression between runs, 6 credits and legal check, then multiplayer, which starts with several heroes in the simulation. No AI ally for the player; co-op notes in DECISIONS.
+
+## Spell sounds review: merged (PR #25 `3de6a45`, 2026-11-20)
 
 - Petr: Falling Stars sounds like wood; spells should sound like their names. 21 spell cues rebuilt as layered takes (list and why in `docs/DECISIONS.md`, Audio and music). The simulation did not change.
 - What Petr checks: the A/B page from the chat, then in the game `?debug=1&hero=nightglaive` (Falling Stars), `__game.debug.learn(4, "meteor")`, `__game.debug.learn(5, "smite")`. Any cue he dislikes is one `mix()` entry to change.

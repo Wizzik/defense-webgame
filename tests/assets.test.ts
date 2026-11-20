@@ -74,6 +74,29 @@ describe("enemy models", () => {
   }
 });
 
+describe("faction models", () => {
+  const enemies = JSON.parse(readFileSync("data/generated/enemies.json", "utf8")) as { id: string; model?: string; boss?: true }[];
+
+  it("every common enemy type has a model of its own", () => {
+    expect(enemies.filter((e) => !e.boss && e.model !== undefined).map((e) => e.id)).toEqual([]);
+  });
+
+  it("the human types wear adventurer bodies, the undead skeletons", () => {
+    const body = (id: string) => MODELS.find((m) => m.out === `enemies/${id}.glb`)!.source;
+    for (const id of ["shieldbearer", "scout", "musketeer", "chaplain", "lancer", "captain"]) expect(body(id), id).toMatch(/^adv:/);
+    for (const id of ["ghoul", "webcrawler", "rotgut", "gravebinder", "risen", "bone-tyrant"]) expect(body(id), id).toMatch(/^skel:/);
+  });
+
+  it("no enemy wears exactly the parts of a hero", () => {
+    const parts = (out: string) => {
+      const m = MODELS.find((x) => x.out === out)!;
+      return [m.source, ...(m.keepNodes ?? []), ...(m.attach ?? []).map((a) => a.file)].sort().join("|");
+    };
+    const heroes = new Set(ids("heroes").map((id) => parts(`heroes/${id}.glb`)));
+    for (const e of enemies.filter((x) => x.model === undefined)) expect(heroes.has(parts(`enemies/${e.id}.glb`)), e.id).toBe(false);
+  });
+});
+
 describe("environment models", () => {
   const names = ["castle", "tower", "flag", "tree-a", "tree-b", "trees-a", "trees-b", "trees-c", "rock-a", "rock-b", "rock-c"];
   for (const name of names) {
@@ -90,11 +113,11 @@ describe("environment models", () => {
 });
 
 describe("model budget", () => {
-  it("keeps all models together within 6 MB", () => {
+  it("keeps all models together within 10 MB", () => {
     const total = listFiles(`${ASSETS}/models`)
       .filter((f) => f.endsWith(".glb"))
       .reduce((sum, f) => sum + statSync(f).size, 0);
-    expect(total).toBeLessThanOrEqual(6_000_000);
+    expect(total).toBeLessThanOrEqual(10_000_000);
   });
 });
 

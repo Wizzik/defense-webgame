@@ -2,6 +2,7 @@ export const EventKind = {
   Hit: 1,
   Death: 2,
   Cast: 3,
+  /** The hero lost hp: a = the enemy slot (-1 none), value = hp, x/y = the hero, u = HeroHitSource (sim/combat.ts). */
   HeroHit: 4,
   CastleHit: 5,
   /** A crystal, a coin or a heart was collected: value = XP, gold or hp gained, u = 0 crystal / 1 coin / 2 heart. */
@@ -43,6 +44,14 @@ export const EventKind = {
   OrbSpawn: 24,
   /** The hero picked an orb up: a = its place, value = its kind (OrbKind), x/y = the orb. */
   OrbPickup: 25,
+  /** A new enemy faction: a = its index in rules.factions, value = the phase (1-based), x/y = the hero. */
+  Faction: 26,
+  /** A bloodcaller cast bloodlust: a = its slot, value = enemies lusted, x/y = the caster. */
+  Bloodlust: 27,
+  /** The hero was snared: value = 0 web (slow) / 1 roots, x/y = the hero, u = seconds. */
+  HeroSnared: 28,
+  /** A gravebinder raised an enemy: a = the new slot, value = the raiser's type index, x/y = where. */
+  Raise: 29,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

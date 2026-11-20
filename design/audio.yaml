@@ -167,6 +167,74 @@ cues:
   - id: shared-breath
     files: [audio/sfx/shared-breath-1.ogg, audio/sfx/shared-breath-2.ogg]
     synth: cast
+  # enemy factions (2026-11-20): new cues on files already encoded, so a death or a mechanic never takes the voice
+  # of a hero's own cue (one voice per cue)
+  - id: human-fall
+    files: [audio/sfx/cleaver-chop-1.ogg, audio/sfx/cleaver-chop-2.ogg]
+    synth: death
+    gainDb: -8
+    maxVoices: 1
+    priority: 0
+  - id: human-fall-heavy
+    files: [audio/sfx/castle-thud-1.ogg, audio/sfx/castle-thud-2.ogg, audio/sfx/castle-thud-3.ogg]
+    synth: death
+    gainDb: -6
+    maxVoices: 1
+    priority: 0
+  - id: orc-fall
+    files: [audio/sfx/stone-strike-1.ogg, audio/sfx/stone-strike-2.ogg, audio/sfx/stone-strike-3.ogg]
+    synth: death
+    gainDb: -6
+    maxVoices: 1
+    priority: 0
+  - id: orc-fall-heavy
+    files: [audio/sfx/stone-quake-1.ogg, audio/sfx/stone-quake-2.ogg]
+    synth: death
+    gainDb: -4
+    maxVoices: 1
+    priority: 0
+  - id: elf-fall
+    files: [audio/sfx/moon-whisper-1.ogg, audio/sfx/moon-whisper-2.ogg]
+    synth: death
+    gainDb: -8
+    maxVoices: 1
+    priority: 0
+  - id: elf-fall-heavy
+    files: [audio/sfx/moon-glimmer-1.ogg, audio/sfx/moon-glimmer-2.ogg]
+    synth: death
+    gainDb: -6
+    maxVoices: 1
+    priority: 0
+  - id: blood-howl
+    files: [audio/sfx/blood-fan-1.ogg, audio/sfx/blood-fan-2.ogg]
+    synth: cast
+    gainDb: -6
+    maxVoices: 1
+    priority: 1
+  - id: web-snare
+    files: [audio/sfx/mist-chill-1.ogg, audio/sfx/mist-chill-2.ogg]
+    synth: hit
+    gainDb: -6
+    maxVoices: 1
+    priority: 1
+  - id: root-creak
+    files: [audio/sfx/bone-grasp-1.ogg, audio/sfx/bone-grasp-2.ogg]
+    synth: cast
+    gainDb: -4
+    maxVoices: 1
+    priority: 2
+  - id: root-bind
+    files: [audio/sfx/stone-tap-1.ogg, audio/sfx/stone-tap-2.ogg]
+    synth: hit
+    gainDb: -4
+    maxVoices: 1
+    priority: 1
+  - id: grave-rise
+    files: [audio/sfx/bone-wail-1.ogg, audio/sfx/bone-wail-2.ogg]
+    synth: cast
+    gainDb: -6
+    maxVoices: 1
+    priority: 1
   - id: bone-rattle
     files: [audio/sfx/bone-rattle-1.ogg, audio/sfx/bone-rattle-2.ogg, audio/sfx/bone-rattle-3.ogg, audio/sfx/bone-rattle-4.ogg, audio/sfx/bone-rattle-5.ogg]
     synth: death
@@ -374,16 +442,33 @@ heroes:
   tidecaller: { attack: tide-bolt }
 
 enemies:
-  shieldbearer: { death: bone-rattle }
-  scout: { death: bone-rattle }
-  musketeer: { death: bone-rattle }
-  chaplain: { death: bone-rattle }
-  lancer: { death: bone-rattle }
-  captain: { death: bone-rattle-heavy }
+  shieldbearer: { death: human-fall }
+  scout: { death: human-fall }
+  musketeer: { death: human-fall }
+  chaplain: { death: human-fall }
+  lancer: { death: human-fall }
+  captain: { death: human-fall-heavy }
   iron-marshal: { death: bone-rattle-heavy }
   pale-abbot: { death: bone-rattle-heavy }
   gunmaster: { death: bone-rattle-heavy }
   dread-regent: { death: bone-rattle-heavy }
+  # faction types: deaths by faction (humans metal, orcs heavy blows, undead bones, elves light and airy)
+  brute: { death: orc-fall }
+  spearthrower: { death: orc-fall }
+  hornback: { death: orc-fall }
+  bloodcaller: { death: orc-fall }
+  warlord: { death: orc-fall-heavy }
+  ghoul: { death: bone-rattle }
+  webcrawler: { death: bone-rattle }
+  rotgut: { death: bone-rattle }
+  gravebinder: { death: bone-rattle }
+  risen: { death: bone-rattle }
+  bone-tyrant: { death: bone-rattle-heavy }
+  huntress: { death: elf-fall }
+  moon-archer: { death: elf-fall }
+  stone-warden: { death: elf-fall-heavy }
+  grove-druid: { death: elf-fall }
+  grove-warden: { death: elf-fall-heavy }
 
 sounds:
   pickup.xp: none
@@ -412,3 +497,9 @@ sounds:
   gear.equip: gear-equip
   lowHp: heartbeat
   ui.click: ui-click
+  faction: war-horn
+  enemy.bloodlust: blood-howl
+  hero.web: web-snare
+  enemy.root: root-creak
+  hero.root: root-bind
+  enemy.raise: grave-rise

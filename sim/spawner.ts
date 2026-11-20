@@ -35,6 +35,7 @@ export function spawnEnemies(run: Run): void {
   const { arena } = rules;
   run.nextPackTick = run.tick + Math.max(1, Math.round(phase.pack.everySeconds * TICKS_PER_SECOND));
   const elites = run.elitePhase !== phaseIndex ? phase.elites : 0;
+  const elite = run.eliteTypes[run.phaseFaction[phaseIndex]!]!;
   run.elitePhase = phaseIndex;
   const scale = timeScale(rules, run.tick);
   const finale = run.inFinale;
@@ -54,7 +55,7 @@ export function spawnEnemies(run: Run): void {
     let spawned = 0;
     for (let k = 0; k < n; k++) {
       if (store.aliveCount >= store.capacity) break;
-      const type = k < packElites ? run.eliteType : pickType(table, rng.next());
+      const type = k < packElites ? elite : pickType(table, rng.next());
       scatterMember(run, type, role, cx, cy, half, scale);
       spawned++;
     }
@@ -79,7 +80,30 @@ export function scatterMember(
   const x = clamp(cx + (run.rng.next() * 2 - 1) * half, arena.width / 2 - def.collision);
   const y = clamp(cy + (run.rng.next() * 2 - 1) * half, arena.height / 2 - def.collision);
   run.stats.spawned++;
-  return run.enemies.spawn(type, role, x, y, def.hp * scale, scale, run.tick);
+  const slot = run.enemies.spawn(type, role, x, y, def.hp * scale, scale, run.tick);
+  // a strike from afar waits its whole cooldown after the spawn (a boss's first strike: sim/timeline.ts spawnBoss)
+  if (slot >= 0 && def.strike !== undefined) run.enemies.strikeCooldown[slot] = Math.round(def.strike.cooldownSeconds * TICKS_PER_SECOND);
+  return slot;
+}
+
+/**
+ * Spawns one enemy of `type` at (x, y) (clamped into the arena) with the hp and damage of this moment, like a pack member.
+ * Draws nothing from the rng. Never pushes another enemy out: returns -1 when the store is full.
+ */
+export function spawnAt(run: Run, type: number, role: number, x: number, y: number): number {
+  const store = run.enemies;
+  if (store.aliveCount >= store.capacity) return -1;
+  const { arena } = run.data.rules;
+  const def = run.data.enemies[type];
+  const scale = timeScale(run.data.rules, run.tick);
+  const slot = store.spawn(
+    type, role, clamp(x, arena.width / 2 - def.collision), clamp(y, arena.height / 2 - def.collision),
+    def.hp * scale, scale, run.tick,
+  );
+  if (slot < 0) return -1;
+  run.stats.spawned++;
+  if (def.strike !== undefined) store.strikeCooldown[slot] = Math.round(def.strike.cooldownSeconds * TICKS_PER_SECOND);
+  return slot;
 }
 
 function clamp(value: number, limit: number): number {

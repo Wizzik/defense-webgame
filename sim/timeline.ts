@@ -12,10 +12,9 @@ export interface TimedEvent {
   tick: number;
   /** Type index of the boss; -1 for a rush. */
   boss: number;
-  /** A rush: type indices and how many of each, in the order of the design. */
-  types: Int32Array;
-  counts: Int32Array;
-  members: number;
+  /** A rush: its elites and heavy types; the types come from the faction of the phase it comes in. */
+  elites: number;
+  heavies: number;
 }
 
 /** Built once, when the run is created. */
@@ -24,17 +23,9 @@ export function buildTimeline(data: GameData): TimedEvent[] {
     const tick = Math.round(event.atSeconds * TICKS_PER_SECOND);
     if (event.kind === "boss") {
       const boss = enemyType(data, event.enemy, `event ${i}`);
-      return { tick, boss, types: new Int32Array(0), counts: new Int32Array(0), members: 0 };
+      return { tick, boss, elites: 0, heavies: 0 };
     }
-    const units = Object.entries(event.units);
-    const counts = Int32Array.from(units, ([, count]) => count);
-    return {
-      tick,
-      boss: -1,
-      types: Int32Array.from(units, ([id]) => enemyType(data, id, `event ${i}`)),
-      counts,
-      members: counts.reduce((sum, n) => sum + n, 0),
-    };
+    return { tick, boss: -1, elites: event.elites, heavies: event.heavies };
   });
 }
 
@@ -104,16 +95,17 @@ function spawnRush(run: Run, event: TimedEvent): void {
   run.rushWarned = false;
   const cx = rules.arena.castle.x + run.rushDirX * rules.arena.spawn.radius;
   const cy = rules.arena.castle.y + run.rushDirY * rules.arena.spawn.radius;
-  const half = packHalf(rules, event.members);
+  const members = event.elites + event.heavies;
+  const half = packHalf(rules, members);
   const scale = timeScale(rules, run.tick);
   const store = run.enemies;
+  const faction = run.phaseFaction[run.phaseIndex]!;
   let spawned = 0;
-  for (let t = 0; t < event.types.length; t++) {
-    for (let k = 0; k < event.counts[t]; k++) {
-      if (store.aliveCount >= store.capacity) break;
-      scatterMember(run, event.types[t], Role.Sieger, cx, cy, half, scale);
-      spawned++;
-    }
+  for (let k = 0; k < members; k++) {
+    if (store.aliveCount >= store.capacity) break;
+    const type = k < event.elites ? run.eliteTypes[faction]! : run.heavyTypes[faction]!;
+    scatterMember(run, type, Role.Sieger, cx, cy, half, scale);
+    spawned++;
   }
   if (spawned > 0) run.events.push(EventKind.PackSpawn, Role.Sieger, spawned, cx, cy, 0, 0);
 }

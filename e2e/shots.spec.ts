@@ -62,6 +62,26 @@ test("shot: types", async ({ page }) => {
   await page.screenshot({ path: join(shotsDir, "types.png"), clip: { x: 400, y: 90, width: 480, height: 270 } });
 });
 
+test("shot: factions", async ({ page }) => {
+  // one row per faction (human at the bottom, elves at the top), spawned behind the paused menu, and the hero below them
+  await page.goto("/?seed=7&hero=stonehorn&debug=1&lang=cs");
+  await page.waitForFunction(() => document.querySelector("#start")?.textContent === "Start" || document.querySelector("#start")?.textContent === "Hrát", undefined, { timeout: 90_000 });
+  await page.waitForTimeout(500);
+  await page.evaluate(() => {
+    const debug = window.__game!.debug!;
+    ["human", "orc", "undead", "elf"].forEach((id, row) => {
+      debug.teleport(1600, -1000 + row * 450);
+      debug.spawnFaction(id);
+    });
+    debug.teleport(1600, -350);
+  });
+  await page.waitForFunction(() => (window.__game?.enemyTypes ?? 0) >= 21, undefined, { timeout: 10_000, polling: 50 });
+  await page.locator("#start").click();
+  await page.waitForFunction(() => window.__game?.screen === "playing", undefined, { timeout: 90_000, polling: 50 });
+  await page.waitForTimeout(250);
+  await shot(page, "factions");
+});
+
 test("shot: castle", async ({ page }) => {
   await startRun(page, "seed=7&hero=gravecaller&debug=1");
   await page.evaluate(() => window.__game!.debug!.teleport(0, -420));

@@ -1,5 +1,5 @@
 import type { AudioData, GameSound } from "../../data/schema/audio";
-import { EventKind, OrbKind, type Run, SlamEvent } from "../../sim";
+import { EventKind, HeroHitSource, OrbKind, type Run, SlamEvent } from "../../sim";
 
 /** A cue to play: `world` sounds are panned by their place on the screen. */
 export interface CueRequest {
@@ -43,6 +43,10 @@ export const HANDLED_EVENTS: Record<keyof typeof EventKind, "sound" | "skip"> = 
   HeroHeal: "sound",
   OrbSpawn: "skip",
   OrbPickup: "sound",
+  Faction: "sound",
+  Bloodlust: "sound",
+  HeroSnared: "sound",
+  Raise: "sound",
 };
 
 const ORB_SOUNDS: Record<number, GameSound> = {
@@ -97,7 +101,8 @@ export function resolveEventCues(run: Run, data: AudioData, enemyIds: readonly s
         sound("bossDeath", i);
         break;
       case EventKind.HeroHit:
-        sound("heroHit", i, false);
+        // a poison cloud hurts every step: the hp bar shows it, a sound would drown everything
+        if (events.u[i] !== HeroHitSource.Cloud) sound("heroHit", i, false);
         break;
       case EventKind.CastleHit:
         sound("castleHit", i);
@@ -139,9 +144,26 @@ export function resolveEventCues(run: Run, data: AudioData, enemyIds: readonly s
       case EventKind.RushWarning:
         sound("rushWarning", i, false);
         break;
-      case EventKind.Slam:
-        if (events.value[i] === SlamEvent.Warning) sound("slam.warn", i);
-        else if (events.value[i] === SlamEvent.Hit) sound("slam.hit", i);
+      case EventKind.Slam: {
+        // roots warn with their own creak and land silently: the hero's binding sound follows (HeroSnared)
+        const slot = events.a[i]!;
+        // a type with a root strike has no slam, so its warnings are always roots
+        const roots = run.data.enemies[run.enemies.type[slot]!]?.strike?.effect === "root";
+        if (events.value[i] === SlamEvent.Warning) sound(roots ? "enemy.root" : "slam.warn", i);
+        else if (events.value[i] === SlamEvent.Hit && !roots) sound("slam.hit", i);
+        break;
+      }
+      case EventKind.Faction:
+        sound("faction", i, false);
+        break;
+      case EventKind.Bloodlust:
+        sound("enemy.bloodlust", i);
+        break;
+      case EventKind.HeroSnared:
+        sound(events.value[i] === 1 ? "hero.root" : "hero.web", i, false);
+        break;
+      case EventKind.Raise:
+        sound("enemy.raise", i);
         break;
       case EventKind.Enrage:
         sound("enrage", i, false);

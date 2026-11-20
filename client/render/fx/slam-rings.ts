@@ -1,7 +1,7 @@
 import { CircleGeometry, type InstancedMesh, RingGeometry } from "three/webgpu";
 import { createFxMesh, disposeMesh, hide, type Rgb, setColor, writeScaled } from "./instances";
 
-const POOL = 4;
+const DEFAULT_POOL = 4;
 /** Above the aura rings (0.05) and the blob shadows. */
 const FLOOR_LIFT = 0.06;
 const RING_INNER = 0.95;
@@ -19,7 +19,7 @@ export function ringFill(elapsedTicks: number, windupTicks: number): number {
 
 /**
  * Warning circles of boss slams on the floor: an outline at the full radius and a disc that grows to it
- * during the windup, then a short flash. A pool of 4; a fifth slam at once is not drawn.
+ * during the windup, then a short flash. A pool of 4 by default; one more slam at once is not drawn.
  */
 export class SlamRings {
   readonly outlines: InstancedMesh;
@@ -27,19 +27,28 @@ export class SlamRings {
   /** Circles drawn in the last `write` (warning or flashing). */
   visible = 0;
   /** Enemy slot of the ring; -1 when free. */
-  private readonly slot = new Int32Array(POOL).fill(-1);
-  private readonly x = new Float64Array(POOL);
-  private readonly z = new Float64Array(POOL);
-  private readonly radius = new Float64Array(POOL);
-  private readonly start = new Float64Array(POOL);
-  private readonly windup = new Float64Array(POOL);
+  private readonly slot: Int32Array;
+  private readonly x: Float64Array;
+  private readonly z: Float64Array;
+  private readonly radius: Float64Array;
+  private readonly start: Float64Array;
+  private readonly windup: Float64Array;
   /** Time the flash started; negative while the ring still warns. */
-  private readonly flash = new Float64Array(POOL).fill(-1);
+  private readonly flash: Float64Array;
+  private readonly pool: number;
   private dirty = false;
 
-  constructor(private readonly color: Rgb) {
-    this.outlines = createFxMesh(new RingGeometry(RING_INNER, 1, 96).rotateX(-Math.PI / 2), POOL);
-    this.fills = createFxMesh(new CircleGeometry(1, 64).rotateX(-Math.PI / 2), POOL);
+  constructor(private readonly color: Rgb, pool = DEFAULT_POOL) {
+    this.pool = pool;
+    this.slot = new Int32Array(pool).fill(-1);
+    this.x = new Float64Array(pool);
+    this.z = new Float64Array(pool);
+    this.radius = new Float64Array(pool);
+    this.start = new Float64Array(pool);
+    this.windup = new Float64Array(pool);
+    this.flash = new Float64Array(pool).fill(-1);
+    this.outlines = createFxMesh(new RingGeometry(RING_INNER, 1, 96).rotateX(-Math.PI / 2), pool);
+    this.fills = createFxMesh(new CircleGeometry(1, 64).rotateX(-Math.PI / 2), pool);
   }
 
   /** A warning starts. Scene coordinates and seconds. */
@@ -79,7 +88,7 @@ export class SlamRings {
     const fc = this.fills.instanceColor!.array as Float32Array;
     const [r, g, b] = this.color;
     let visible = 0;
-    for (let i = 0; i < POOL; i++) {
+    for (let i = 0; i < this.pool; i++) {
       if (this.slot[i] !== -1 && this.flash[i]! >= 0 && now - this.flash[i]! >= FLASH_SECONDS) this.slot[i] = -1;
       if (this.slot[i] === -1) {
         hide(om, oc, i);

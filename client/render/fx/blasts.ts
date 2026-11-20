@@ -15,11 +15,12 @@ export class BlastFx {
   private readonly x = new Float32Array(BLAST_POOL);
   private readonly z = new Float32Array(BLAST_POOL);
   private readonly size = new Float32Array(BLAST_POOL);
-  private readonly color = rgb(BLAST_COLOR);
+  private readonly color: ReturnType<typeof rgb>;
   /** True when the last write showed something, so one more write must hide it. */
   private shown = false;
 
-  constructor() {
+  constructor(color = BLAST_COLOR) {
+    this.color = rgb(color);
     this.mesh = createFxMesh(new SphereGeometry(0.5, 12, 8), BLAST_POOL);
   }
 

@@ -2,6 +2,7 @@ import { armorReduction, damageCastle, damageHero } from "./combat";
 import { TICK_SECONDS, TICKS_PER_SECOND } from "./constants";
 import { Slam, SlamEvent } from "./enemy-slam";
 import { EventKind } from "./events";
+import { rootHero } from "./hero-snares";
 import type { Run } from "./run";
 
 /** After a strike lands, a slam waits at least this long: the hero gets a moment to answer. */
@@ -18,7 +19,8 @@ export let strikeVY = 0;
  * None -> Strike: the enemy targets the hero in [minRange, maxRange] with the strike ready. A circle warns where
  * the hero stands and stays there. With `leap` the enemy travels to the centre of the circle during the windup,
  * otherwise it stands. After the windup the hero inside the circle and the castle the circle reaches take the
- * damage, and the cooldown starts. A stun or the death of the enemy cancels the warning (cancelSlam, killEnemy).
+ * damage (a root strike: the hero inside is rooted, nothing is damaged), and the cooldown starts. A root strike
+ * also starts when the enemy does not go for the hero. A stun or the death of the enemy cancels the warning (cancelSlam, killEnemy).
  * The windup lives in the slam fields of the store (state Slam.Strike), so the circle is drawn, dodged and
  * cancelled like a slam.
  */
@@ -31,7 +33,8 @@ export function updateStrike(run: Run, i: number, targetsHero: boolean, heroDist
   const { hero, castle } = run;
 
   if (e.slamState[i] === Slam.None) {
-    if (!targetsHero || e.strikeCooldown[i] > 0 || heroDist < strike.minRange || heroDist > strike.maxRange) return false;
+    // roots are a spell at the hero in sight: they do not wait for the enemy to go for the hero
+    if ((!targetsHero && strike.effect !== "root") || e.strikeCooldown[i] > 0 || heroDist < strike.minRange || heroDist > strike.maxRange) return false;
     e.slamState[i] = Slam.Strike;
     e.slamTicks[i] = Math.max(1, Math.round(strike.windupSeconds * TICKS_PER_SECOND));
     e.slamX[i] = hero.x;
@@ -54,11 +57,18 @@ export function updateStrike(run: Run, i: number, targetsHero: boolean, heroDist
     }
     return true;
   }
-  const raw = strike.damage * e.damageScale[i];
   run.events.push(EventKind.Slam, i, SlamEvent.Hit, cx, cy, strike.radius, 0);
   const hx = hero.x - cx;
   const hy = hero.y - cy;
-  if (hx * hx + hy * hy <= strike.radius * strike.radius) {
+  const inside = hx * hx + hy * hy <= strike.radius * strike.radius;
+  if (strike.effect === "root") {
+    // roots hold the hero and hurt nobody; the castle is out of their reach
+    if (inside) rootHero(run, Math.round(strike.rootSeconds! * TICKS_PER_SECOND));
+    endStrike(run, i);
+    return true;
+  }
+  const raw = strike.damage! * e.damageScale[i];
+  if (inside) {
     damageHero(run, raw * (1 - armorReduction(hero.stats.armor, run.data.constants.defenseArmor)), i);
   }
   const wx = castle.x - cx;

@@ -1,3 +1,4 @@
+import { snareSpeedScale } from "./hero-snares";
 import type { GameData } from "../data/schema";
 import { consumeEmpower, extraTargets, onHitBonus, onHitStunTicks } from "./abilities/on-hit";
 import { armorReduction, damageEnemy, rollDamage, stunEnemy } from "./combat";
@@ -50,6 +51,7 @@ export function applyActions(run: Run, input: TickInput): void {
   if ((actions & InputAction.ToggleAuto) !== 0) run.ultimateAuto = !run.ultimateAuto;
   const hero = run.hero;
   if ((actions & InputAction.Dash) === 0 || hero.hp <= 0 || hero.dashCooldown > 0 || hero.dashTicks > 0) return;
+  if (hero.rootTicks > 0) return;
   let dx = sign(input.moveX);
   let dy = sign(input.moveY);
   if (dx === 0 && dy === 0) {
@@ -68,13 +70,18 @@ export function applyActions(run: Run, input: TickInput): void {
   run.events.push(EventKind.Dash, 0, dash.distance, hero.x, hero.y, dx, dy);
 }
 
-/** Moves the hero by the input direction at move speed (or along the dash), kept inside the arena. */
+/** Moves the hero by the input direction at move speed (or along the dash), kept inside the arena; roots hold it. */
 export function moveHero(run: Run, input: TickInput): void {
   const hero = run.hero;
   if (hero.dashCooldown > 0) hero.dashCooldown--;
   let dx: number;
   let dy: number;
   let step: number;
+  if (hero.rootTicks > 0) {
+    hero.dashTicks = 0;
+    hero.moving = false;
+    return;
+  }
   if (hero.dashTicks > 0) {
     const { dash } = run.data.rules.hero;
     dx = hero.dashDirX;
@@ -89,7 +96,7 @@ export function moveHero(run: Run, input: TickInput): void {
     const len = Math.sqrt(dx * dx + dy * dy);
     dx /= len;
     dy /= len;
-    step = hero.stats.moveSpeed * TICK_SECONDS;
+    step = hero.stats.moveSpeed * snareSpeedScale(hero) * TICK_SECONDS;
   }
   const { arena } = run.data.rules;
   const limitX = arena.width / 2 - hero.stats.collision;

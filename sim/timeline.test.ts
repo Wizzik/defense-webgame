@@ -16,9 +16,9 @@ import { gameData } from "./testing/game-data";
 const newRun = (seed = 1) => {
   const data = gameData();
   data.rules.events = [
-    { atSeconds: 180, kind: "rush", units: { captain: 3, lancer: 4 } },
+    { atSeconds: 180, kind: "rush", elites: 3, heavies: 4 },
     { atSeconds: 250, kind: "boss", enemy: "iron-marshal" },
-    { atSeconds: 360, kind: "rush", units: { captain: 4, lancer: 6 } },
+    { atSeconds: 360, kind: "rush", elites: 4, heavies: 6 },
     { atSeconds: 500, kind: "boss", enemy: "pale-abbot" },
     { atSeconds: 750, kind: "boss", enemy: "gunmaster" },
   ];
@@ -165,7 +165,7 @@ describe("timeline", () => {
     for (const phase of data.rules.phases) {
       for (const id of Object.keys(phase.mix)) expect(bosses.has(id), id).toBe(false);
     }
-    expect(bosses.has(data.rules.enemies.elite)).toBe(false);
+    for (const faction of data.rules.factions) expect(bosses.has(faction.elite), faction.id).toBe(false);
   });
 
   it("same seed gives the same timeline", () => {

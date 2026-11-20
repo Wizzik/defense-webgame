@@ -34,4 +34,35 @@ describe("Announcer", () => {
     announcer.clear();
     expect(announcer.text).toBe("");
   });
+
+  it("a queued line waits until the line on screen ends", () => {
+    const announcer = new Announcer();
+    announcer.push("boss", 3);
+    announcer.queue("faction", 5);
+    expect(announcer.text).toBe("boss");
+    announcer.step();
+    announcer.step();
+    expect(announcer.text).toBe("boss");
+    announcer.step();
+    expect(announcer.text).toBe("faction");
+    for (let i = 0; i < 4; i++) announcer.step();
+    expect(announcer.text).toBe("faction");
+    announcer.step();
+    expect(announcer.text).toBe("");
+  });
+
+  it("a queued line shows at once when nothing is on screen", () => {
+    const announcer = new Announcer();
+    announcer.queue("faction", 2);
+    expect(announcer.text).toBe("faction");
+  });
+
+  it("clear drops the queued line too", () => {
+    const announcer = new Announcer();
+    announcer.push("boss", 3);
+    announcer.queue("faction", 5);
+    announcer.clear();
+    for (let i = 0; i < 4; i++) announcer.step();
+    expect(announcer.text).toBe("");
+  });
 });

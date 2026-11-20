@@ -28,7 +28,10 @@ const DODGE_DISTANCE = 700;
 /** Below this share of its hp the hero keeps this far from every enemy, as a careful player would. */
 const LOW_HP = 0.3;
 const LOW_HP_DISTANCE = 350;
-/** The bot leaves a slam circle when it stands nearer than the radius plus this to its centre. */
+/** A target with a poison cloud is fought from its edge: the bot keeps between radius + CLOUD_INSIDE and radius + CLOUD_MARGIN. */
+const CLOUD_MARGIN = 60;
+const CLOUD_INSIDE = 10;
+/** The bot leaves a slam circle (a strike's or a root circle too) when it stands nearer than the radius plus this to its centre. */
 const SLAM_MARGIN = 60;
 /**
  * The bot goes for a chest only with at least this share of the hero's and of the castle's hp. The hero's share is
@@ -158,6 +161,10 @@ export function botInput(run: Run, out: TickInput): TickInput {
   let charger = -1;
   let chargerSq = DODGE_DISTANCE * DODGE_DISTANCE;
   let slammer = -1;
+  // a bloodcaller or a gravebinder near the hero goes first (spec 2026-11-20, 4.10)
+  let priority = -1;
+  let prioritySq = CHASE_DISTANCE * CHASE_DISTANCE;
+  const defs = run.data.enemies;
   for (let i = 0; i < enemies.capacity; i++) {
     if (enemies.alive[i] === 0) continue;
     const cx = enemies.x[i] - castle.x;
@@ -173,6 +180,11 @@ export function botInput(run: Run, out: TickInput): TickInput {
     if (heroSq < nearSq) {
       nearSq = heroSq;
       near = i;
+    }
+    const kind = defs[enemies.type[i]];
+    if ((kind.bloodlust !== undefined || kind.raise !== undefined) && heroSq <= prioritySq) {
+      prioritySq = heroSq;
+      priority = i;
     }
     if (enemies.chargeState[i] === Charge.Windup && heroSq < chargerSq) {
       chargerSq = heroSq;
@@ -280,12 +292,22 @@ export function botInput(run: Run, out: TickInput): TickInput {
   } else {
     // In the finale the final boss is the target: the run is won when it falls.
     const target = run.finalBossSlot >= 0 ? run.finalBossSlot
+      : priority >= 0 ? priority
       : threat >= 0 ? threat : near >= 0 && nearDist <= CHASE_DISTANCE ? near : -1;
     if (target >= 0) {
       const tx = enemies.x[target] - hero.x;
       const ty = enemies.y[target] - hero.y;
       const d = Math.sqrt(tx * tx + ty * ty);
-      const stop = melee ? MELEE_STOP : def.baseAttack.range - RANGED_MARGIN;
+      let stop = melee ? MELEE_STOP : def.baseAttack.range - RANGED_MARGIN;
+      const cloud = defs[enemies.type[target]].cloud;
+      if (cloud !== undefined && stop < cloud.radius + CLOUD_MARGIN) {
+        // fight it from the edge of its cloud: spells reach it, the cloud does not reach the hero
+        stop = cloud.radius + CLOUD_MARGIN;
+        if (d < cloud.radius + CLOUD_INSIDE) {
+          dx = d > 1e-6 ? -tx : 1;
+          dy = d > 1e-6 ? -ty : 0;
+        }
+      }
       if (d > stop) {
         dx = tx;
         dy = ty;

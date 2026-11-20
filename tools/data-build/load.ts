@@ -137,6 +137,13 @@ export interface EnemyEntry {
   slam?: NonNullable<Enemy["slam"]>;
   strike?: NonNullable<Enemy["strike"]>;
   hunter?: true;
+  /** Design values, copied as they are. */
+  faction?: Enemy["faction"];
+  knockbackScale?: number;
+  bloodlust?: NonNullable<Enemy["bloodlust"]>;
+  web?: NonNullable<Enemy["web"]>;
+  cloud?: NonNullable<Enemy["cloud"]>;
+  raise?: NonNullable<Enemy["raise"]>;
 }
 
 /** One entry of design/items.yaml. Items have no record in the export: they are validated and copied. */

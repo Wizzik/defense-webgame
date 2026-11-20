@@ -2,6 +2,37 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Enemy factions (2026-11-20; Petr approved direction B and left the design to Claude, the numbers are Claude's)
+
+- Spec `docs/superpowers/specs/2026-11-20-enemy-factions-design.md`, plan `docs/superpowers/plans/2026-11-20-enemy-factions.md`.
+- Four factions by five phases (`rules.factions`): Human Legion 1-5 (captain, lancer), Blood Clan 6-10 (warlord, hornback), Restless Dead 11-15 (bone tyrant, rotgut), Moon Grove 16-20 (grove warden, stone warden). The elites of a phase and every rush take the elite and the heavy type of the faction of the phase they come in (rush counts unchanged: 3:00 human, 6:00 orc, 9:00 and 12:00 undead, 15:00 elf). The finale keeps the faction of phase 20. A run that starts in a later faction (`?phase`) announces it in its first step.
+- Names: our own. The spec's Ghoul and Huntress were map unit names, so in English they are Ghast and Glade Stalker (Czech Ghúl and Lovkyně stay); oshm keeps no `mapName` because "Shaman" is part of our hero's name. The Czech setting "Třesení obrazu" became "Otřesy obrazu": the rawcode `esen` matched inside it in the repo guard.
+- Phase mixes 6-20 keep the human weights by role (foot = shieldbearer + scout weight, shooter, heavy, caster), only the types change; the first phase of a faction has no leftovers of the one before (a clean change).
+- Numbers per role follow the human type of the same role (damage a second and hp, after `design/scaling.yaml`), then tuned: hornback damage 0.7 -> 0.45 and spearthrower 0.55 -> 0.45 (with bloodlust the Blood Clan killed a Mistwarden starting at phase 6 in 19 s against 37 s on `main`), moon archer 0.32 -> 0.25 and stone warden hp 1.2 -> 1.05, damage 0.6 -> 0.5 (they took the castle in the finale: 56 000 castle damage against 47 000). The stone warden still has the most hp of the common types (662 against 656).
+- Mechanics (defaults of the spec unless named):
+  - bloodlust (bloodcaller): every 6 s up to 3 orcs within 450 (no boss, not itself, not lusted already, nearest first) get +20 % walking speed, damage and attack speed for 8 s (the spec's 30 % made the Blood Clan the deadliest faction by far); a stunned bloodcaller does not cast; no cast without a target. With the warlord's aura a lusted orc hits x1.5;
+  - web (webcrawler): every hit on the hero slows its walking by 30 % for 2 s, renewed, not stacked; it multiplies with the boots orb; dashes keep their distance; a hit under the Spirit Ward shield does not slow;
+  - roots (grove druid 400-900 every 9 s, grove warden 300-900 every 6 s): a strike from afar with `effect: root`, radius 160, 1 s warning; the hero inside cannot walk or dash for 1.2 s (36 steps, a running dash ends), nothing takes damage. Roots start also when the druid does not go for the hero (support packs never target the hero). A fresh spawn waits its whole strike cooldown;
+  - poison cloud (rotgut 220, bone tyrant 350): 1 % of max hp a second, x `threat.heroDamageTaken` (2) = 2 % as the spec wants; armor does not count, the shield does; several clouds do not add up; the castle is never hurt. Its HeroHit events carry `u = 1`: no hurt sound and no shake;
+  - raising (gravebinder): every 5 s up to 2 risen at the nearest of the last 64 common deaths within 500 that are younger than 10 s; never pushes another enemy out of a full store; a risen (xp 0) drops nothing at all and leaves no place, elites and bosses leave none either;
+  - knockback: stone warden and the three new elites take 0.3 of it (`knockbackScale`); the captain is unchanged.
+- Every aura carrier now uses its own aura (`buffed` holds the carrier's type + 1). Before, only the first aura type counted, so the Dread Regent's aura never buffed anyone; now it does in the finale.
+- Models: every common type has its own model from the pinned KayKit packs. Humans moved to adventurer bodies (knights, rogues, a mage), orcs are barbarians, a hooded rogue and a mage, the undead are the skeletons, elves hooded rogues, knights and a mage. No enemy wears exactly the parts of a hero (a test). The spec expected animation tracks to be most of a model; measured, a model is ~190 kB of mesh, ~40 kB of clips and 17 kB of texture, so no clip compression: the model budget went 6 -> 10 MB (9.8 MB now). The next model needs quantized meshes or fewer triangles.
+- Palettes (`client/render/enemy-tints.ts`): humans steel blue and grey, orcs dark green and olive brown (hue at least 46°, out of the orange band 20-45°), undead bone white and sickly green, elves blue violet and turquoise. A lusted enemy glows red; root circles are green, boss circles red.
+- Sounds: new cues on files already encoded (`design/audio.yaml`), so a death never takes the voice of a hero's own cue: humans die with metal (cleaver-chop, castle-thud), orcs with heavy blows (stone-strike, stone-quake), undead with bones as before, elves light and airy (moon-whisper, moon-glimmer); bloodlust blood-fan, web mist-chill, roots bone-grasp (warning) and stone-tap (bound), raise bone-wail, a new faction the war horn.
+- Autopilot: it leaves root circles like slams (they live in the slam fields), fights a target with a cloud from the cloud's edge (radius + 60, steps out under radius + 10) and goes for a bloodcaller or a gravebinder within `CHASE_DISTANCE` before anything else but the final boss. `sim:run` prints `factions: rooted s, cloud hp, raised` per hero.
+- Balance (autopilot wins of 20; heroes in the order stonehorn, nightglaive, gravecaller, serpent-shaman, mistwarden, sparkshot, redcleaver, tidecaller):
+
+  | | `main` | `factions` |
+  |---|---|---|
+  | seeds 1-20, no gear | 18 3 20 13 1 9 3 6 | 18 5 20 14 0 8 5 3 |
+  | seeds 1-20, mid gear | 19 4 20 16 10 8 4 4 | 20 11 20 17 8 10 3 5 |
+  | seeds 21-40, no gear | 11 6 20 12 6 6 2 2 | 16 9 20 13 5 6 5 5 |
+  | seeds 21-40, mid gear | 18 5 20 18 13 4 4 5 | 19 13 20 18 6 11 4 5 |
+
+  Seeds 1-20 without gear stay within ±3 for every hero. Off the band: Nightglaive with mid gear (+7, +8 on both seed sets), and on seeds 21-40 Stonehorn (+5), Sparkshot mid (+7) and Mistwarden mid (-7). Every run is decided in the finale (castle losses at 16-20 minutes, as on `main`); no losses gather in the 50 s after a faction arrives. The autopilot is never rooted (it leaves every circle), loses 100-2100 hp a run in clouds and sees 100-370 risen a run.
+- Co-op note (Petr, 2026-11-20; not built here): there is no AI ally for the player (the ally was only meant for simulations); co-op makes the game several times harder (by the number of players); a fallen teammate is revived by standing on him for 5 s; several heroes in the simulation are built at the start of the multiplayer phase.
+
 ## Gravecaller: smaller Bone Stampede, half the Grave Grasp heal (2026-11-19; Petr's wish, the numbers are Claude's)
 
 - Why: Petr found the Gravecaller far too strong; its ultimate reaches much wider than any other hero's, and its heal should be halved.

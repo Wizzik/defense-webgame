@@ -23,7 +23,6 @@ function newRun(tweak?: (d: GameData) => void, seed = 1) {
   data.rules.run.firstPackSeconds = 0;
   data.rules.run.timeScaling = { seconds: 1200, cap: 2 };
   data.rules.enemies.maxAlive = 150;
-  data.rules.enemies.elite = "captain";
   data.rules.phases = [phase()];
   tweak?.(data);
   return createRun(data, { seed, durationSeconds: 100000 });

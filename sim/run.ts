@@ -14,11 +14,15 @@ import { COIN_CAPACITY, CRYSTAL_CAPACITY, CrystalStore, HEART_CAPACITY, updatePi
 import { updateEnemies } from "./enemy-ai";
 import { BEHAVIOR_IDS } from "./enemy-steer";
 import { healEnemies } from "./enemy-heal";
+import { CORPSE_CAPACITY, CorpseRing } from "./corpses";
 import { EnemyStore } from "./enemies";
+import { updateClouds } from "./enemy-cloud";
 import { EventKind, EventLog } from "./events";
 import { updateGearEffects } from "./gear-effects";
 import { emptyGearBonus, GearState, loadGear, type LoadoutEntry, recomputeGear } from "./gear";
 import { refreshHeroStats } from "./level-up";
+import { tickSnares } from "./hero-snares";
+import { buildFactionTables, updateFaction } from "./factions";
 import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import { InputAction, type TickInput } from "./input";
 import { Rng } from "./rng";
@@ -94,10 +98,21 @@ export class Run {
   readonly enemyBehavior: Uint8Array;
   /** 1 for an enemy type that goes for the hero whatever its role is. */
   readonly enemyHunter: Uint8Array;
-  /** Type index of the first enemy type with an aura; -1 when there is none. */
-  readonly auraType: number;
-  /** Type index of the elite. */
-  readonly eliteType: number;
+  /** 1 for every enemy type that carries an aura (sim/enemy-aura.ts). */
+  readonly hasAura: Uint8Array;
+  /** Faction index per 0-based phase index (sim/factions.ts). */
+  readonly phaseFaction: Uint8Array;
+  /** Type index of each faction's elite and of its heavy type (rushes). */
+  readonly eliteTypes: Int32Array;
+  readonly heavyTypes: Int32Array;
+  /** 1 for every enemy type that is the elite of a faction. */
+  readonly isElite: Uint8Array;
+  /** Places of the last deaths of common enemies, for gravebinders (sim/enemy-raise.ts). */
+  readonly corpses = new CorpseRing(CORPSE_CAPACITY);
+  /** Type index each type raises (its `raise.type`), -1 for a type that raises nothing. */
+  readonly raiseTypes: Int32Array;
+  /** The faction of the current phase; updateFaction announces a change. */
+  factionIndex = 0;
   /** `rules.events` prepared for the steps (sim/timeline.ts). */
   readonly timeline: TimedEvent[];
   /** Index of the next event of `timeline`. */
@@ -130,6 +145,7 @@ export class Run {
   readonly stats: RunStats = {
     kills: 0, spawned: 0, damageDealt: 0, xpGained: 0, goldGained: 0,
     hearts: 0, orbsBoots: 0, orbsBerserk: 0, orbsHeal: 0, healedLifesteal: 0, healedHearts: 0, healedOrb: 0,
+    cloudDamage: 0, rootedTicks: 0, raised: 0,
   };
   /** Orb effects and the lifesteal budget (sim/buffs.ts). */
   readonly buffs = new BuffState();
@@ -158,7 +174,14 @@ export class Run {
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);
     this.enemyBehavior = Uint8Array.from(data.enemies, (e) => BEHAVIOR_IDS.indexOf(e.behavior));
     this.enemyHunter = Uint8Array.from(data.enemies, (e) => (e.hunter ? 1 : 0));
-    this.auraType = data.enemies.findIndex((e) => e.aura !== undefined);
+    this.raiseTypes = Int32Array.from(data.enemies, (e, i) =>
+      e.raise === undefined ? -1 : enemyType(data, e.raise.type, `enemies.${i}.raise.type`));
+    this.hasAura = Uint8Array.from(data.enemies, (e) => (e.aura !== undefined ? 1 : 0));
+    const factions = buildFactionTables(data);
+    this.phaseFaction = factions.phaseFaction;
+    this.eliteTypes = factions.eliteTypes;
+    this.heavyTypes = factions.heavyTypes;
+    this.isElite = factions.isElite;
     this.isBoss = Uint8Array.from(data.enemies, (e) => (e.boss ? 1 : 0));
     this.phaseTables = buildPhaseTables(data);
     this.timeline = buildTimeline(data);
@@ -167,7 +190,6 @@ export class Run {
       { length: this.timeline.filter((event) => event.boss >= 0).length + 1 },
       () => ({ type: -1, spawnTick: -1, deathTick: -1 }),
     );
-    this.eliteType = enemyType(data, rules.enemies.elite, "rules.enemies.elite");
     this.nextPackTick = Math.round(rules.run.firstPackSeconds * TICKS_PER_SECOND);
     this.durationTicks = Math.round(
       (options.durationSeconds ?? rules.run.durationSeconds) * TICKS_PER_SECOND,
@@ -189,7 +211,7 @@ export class Run {
       level: 1, xp: 0,
       str: def.attributes.str.base, agi: def.attributes.agi.base, int: def.attributes.int.base,
       hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, gear: emptyGearBonus(), passive: emptyPassiveBonus(), attackCooldown: 0, pendingLevelUps: 0, speedScale: 1,
-      dashTicks: 0, dashCooldown: 0, dashDirX: 0, dashDirY: 0,
+      dashTicks: 0, dashCooldown: 0, dashDirX: 0, dashDirY: 0, slowTicks: 0, slowShare: 0, rootTicks: 0,
     };
     heroStats(data, hero, stats);
     hero.hp = stats.maxHp;
@@ -238,9 +260,12 @@ export class Run {
    *   savePrevious(this);         // Task 3 (crystals: Task 7)
    *   applyActions(this, input);  // phase 2a, Task 7 (R, T, dash)
    *   moveHero(this, input);      // Task 3
+   *   tickSnares(this);           // enemy factions: web and roots count down after the move they held
+   *   updateFaction(this);        // enemy factions: the faction of the phase, announced when it changes
    *   updateTimeline(this);       // phase 2b-3 (elite rushes and bosses by time)
    *   spawnEnemies(this);         // Task 4
    *   updateEnemies(this);        // Task 4
+   *   updateClouds(this);         // enemy factions: poison clouds hurt the hero
    *   healEnemies(this);          // phase 2b-1 (reads the grid built by updateEnemies)
    *   updateHeroCombat(this);     // Task 5
    *   updateAbilities(this);      // Task 6
@@ -276,9 +301,12 @@ export class Run {
     savePrevious(this);
     applyActions(this, input);
     moveHero(this, input);
+    tickSnares(this);
+    updateFaction(this);
     updateTimeline(this);
     spawnEnemies(this);
     updateEnemies(this);
+    updateClouds(this);
     healEnemies(this);
     updateHeroCombat(this);
     updateAbilities(this);

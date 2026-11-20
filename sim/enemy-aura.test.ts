@@ -41,7 +41,7 @@ describe("captain aura", () => {
     stunnedCaptain(run, 0, 0);
     const g = place(run, "shieldbearer", Role.Sieger, 200, 0);
     expect(stride(run, g)).toBeCloseTo((speed * (1 + AURA.moveSpeed)) / 30, 9);
-    expect(run.enemies.buffed[g]).toBe(1);
+    expect(run.enemies.buffed[g]).toBe(typeOf(run, "captain") + 1);
 
     const siege = auraRun();
     const { castle } = siege;

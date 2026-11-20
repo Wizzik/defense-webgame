@@ -42,6 +42,9 @@ export function stateHash(run: Run): number {
   mixInt(hero.pendingLevelUps);
   mixInt(hero.dashTicks);
   mixInt(hero.dashCooldown);
+  mixInt(hero.slowTicks);
+  mixFloat(hero.slowShare);
+  mixInt(hero.rootTicks);
   mixFloat(hero.dashDirX);
   mixFloat(hero.dashDirY);
   mixFloat(hero.bonus.damage);
@@ -79,6 +82,16 @@ export function stateHash(run: Run): number {
   mixFloat(run.castle.hp);
   mixInt(run.nextPackTick);
   mixInt(run.elitePhase);
+  mixInt(run.factionIndex);
+  const corpses = run.corpses;
+  mixInt(corpses.head);
+  for (let i = 0; i < corpses.capacity; i++) {
+    mixInt(corpses.alive[i]!);
+    mixInt(corpses.tick[i]!);
+    mixFloat(corpses.x[i]!);
+    mixFloat(corpses.y[i]!);
+  }
+  mixInt(run.stats.raised);
   mixInt(run.nextEvent);
   mixInt(run.rushWarned ? 1 : 0);
   mixFloat(run.rushDirX);
@@ -133,6 +146,10 @@ export function stateHash(run: Run): number {
     mixFloat(e.chargeDirX[i]);
     mixFloat(e.chargeDirY[i]);
     mixInt(e.buffed[i]);
+    mixInt(e.bloodlustTicks[i]);
+    mixInt(e.bloodlustType[i]);
+    mixInt(e.bloodlustCooldown[i]);
+    mixInt(e.raiseCooldown[i]);
     mixInt(e.slamState[i]);
     mixInt(e.slamTicks[i]);
     mixInt(e.slamCooldown[i]);

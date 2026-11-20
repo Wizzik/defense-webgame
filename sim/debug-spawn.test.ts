@@ -13,11 +13,11 @@ function newRun(maxAlive?: number) {
 }
 
 describe("debugSpawnEach", () => {
-  it("spawns one hunter of every common type north of the hero, and no boss", () => {
+  it("spawns one hunter of every common type of the current faction north of the hero, and no boss", () => {
     const run = newRun();
     debugSpawnEach(run);
     const e = run.enemies;
-    const types = run.data.enemies.filter((d) => !d.boss).length;
+    const types = run.data.enemies.filter((d) => d.faction === "human").length;
     expect(types).toBe(6);
     expect(run.bossCount).toBe(0);
     expect(e.aliveCount).toBe(types);
@@ -31,6 +31,14 @@ describe("debugSpawnEach", () => {
     // the row is centred on the hero
     expect((e.x[0]! + e.x[types - 1]!) / 2).toBeCloseTo(run.hero.x, 9);
     expect(run.stats.spawned).toBe(types);
+  });
+
+  it("follows the faction of the phase and leaves out the risen", () => {
+    const run = newRun();
+    run.factionIndex = 2;
+    debugSpawnEach(run);
+    const ids = Array.from(run.enemies.type.subarray(0, run.enemies.aliveCount), (t) => run.data.enemies[t]!.id);
+    expect(ids).toEqual(["ghoul", "webcrawler", "rotgut", "gravebinder", "bone-tyrant"]);
   });
 
   it("a full store skips the rest", () => {

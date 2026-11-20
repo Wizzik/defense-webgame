@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { LocalizedText, Slug } from "./common";
 
+/** The enemy factions of a run (spec 2026-11-20). */
+export const FactionId = z.enum(["human", "orc", "undead", "elf"]);
+export type FactionId = z.infer<typeof FactionId>;
+
 export const EnemySchema = z.object({
   id: Slug,
   name: LocalizedText,
@@ -21,7 +25,10 @@ export const EnemySchema = z.object({
   }).strict(),
   /** How the type walks: see sim/enemy-steer.ts and sim/enemy-charge.ts. */
   behavior: z.enum(["siege", "flank", "skirmish", "support", "charge"]),
-  xp: z.number().int().positive(),
+  /** The faction the type belongs to (sim/factions.ts); bosses have none. */
+  faction: FactionId.optional(),
+  /** Crystal value; 0 drops no crystal (and no heart). */
+  xp: z.number().int().min(0),
   /** Value of the coin the enemy drops; 0 drops none. */
   gold: z.number().int().min(0).default(0),
   /** Heals the most wounded enemy in `range` (itself too) by `amount` every `cooldown` seconds. */
@@ -68,13 +75,49 @@ export const EnemySchema = z.object({
     minRange: z.number().positive(),
     maxRange: z.number().positive(),
     radius: z.number().positive(),
-    damage: z.number().positive(),
+    /** What the circle does: `damage` (the default) or `root`: it holds the hero for `rootSeconds`, no damage. */
+    effect: z.enum(["damage", "root"]).optional(),
+    damage: z.number().positive().optional(),
+    rootSeconds: z.number().positive().optional(),
     windupSeconds: z.number().positive(),
     cooldownSeconds: z.number().positive(),
     leap: z.boolean(),
-  }).strict().refine((s) => s.minRange < s.maxRange, "minRange is not below maxRange").optional(),
+  }).strict().refine((s) => s.minRange < s.maxRange, "minRange is not below maxRange")
+    .refine((s) => (s.effect === "root" ? s.rootSeconds !== undefined : s.damage !== undefined), {
+      message: "a damage strike needs damage, a root strike needs rootSeconds",
+    }).optional(),
+  /**
+   * Raises the fallen (sim/enemy-raise.ts): every `cooldownSeconds` up to `count` enemies of `type` rise at the nearest
+   * deaths within `range` that are younger than `maxAgeSeconds`.
+   */
+  raise: z.object({
+    type: Slug,
+    cooldownSeconds: z.number().positive(),
+    count: z.number().int().min(1),
+    range: z.number().positive(),
+    maxAgeSeconds: z.number().positive(),
+  }).strict().optional(),
+  /** A poison cloud around the type (sim/enemy-cloud.ts): the hero inside loses `hpSharePerSecond` x max hp a second. */
+  cloud: z.object({ radius: z.number().positive(), hpSharePerSecond: z.number().positive().max(1) }).strict().optional(),
+  /** The web (sim/hero-snares.ts): every hit of the type on the hero slows its walking by `slow` for `seconds`. */
+  web: z.object({ slow: z.number().positive().max(1), seconds: z.number().positive() }).strict().optional(),
   /** Goes for the hero whatever the role of its pack is. */
   hunter: z.literal(true).optional(),
+  /**
+   * Bloodlust (sim/enemy-bloodlust.ts): every `cooldownSeconds` the type gives up to `targets` enemies of its faction
+   * within `range` (bosses and itself excepted, nearest first) `seconds` of faster walking, harder hits and faster attacks.
+   */
+  bloodlust: z.object({
+    cooldownSeconds: z.number().positive(),
+    targets: z.number().int().min(1),
+    range: z.number().positive(),
+    seconds: z.number().positive(),
+    moveSpeed: z.number().min(0),
+    damage: z.number().min(0),
+    attackSpeed: z.number().min(0),
+  }).strict().optional(),
+  /** Multiplies the knockback of hits on the type: 0 = it does not move (default 1). */
+  knockbackScale: z.number().min(0).optional(),
 }).strict();
 
 export type Enemy = z.infer<typeof EnemySchema>;

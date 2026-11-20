@@ -51,6 +51,7 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
       damageMax: Math.round(num("damage_max") * (m.damage ?? 1)),
     },
     behavior: entry.behavior,
+    ...(entry.faction !== undefined ? { faction: entry.faction } : {}),
     xp: entry.xp,
     gold: entry.gold ?? 0,
   };
@@ -75,10 +76,27 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
   if (entry.strike) {
     const s = entry.strike;
     enemy.strike = {
-      minRange: s.minRange, maxRange: s.maxRange, radius: s.radius, damage: s.damage,
+      minRange: s.minRange, maxRange: s.maxRange, radius: s.radius,
+      ...(s.effect !== undefined ? { effect: s.effect } : {}),
+      ...(s.damage !== undefined ? { damage: s.damage } : {}),
+      ...(s.rootSeconds !== undefined ? { rootSeconds: s.rootSeconds } : {}),
       windupSeconds: s.windupSeconds, cooldownSeconds: s.cooldownSeconds, leap: s.leap,
     };
   }
   if (entry.hunter) enemy.hunter = true;
+  if (entry.raise) {
+    const r = entry.raise;
+    enemy.raise = { type: r.type, cooldownSeconds: r.cooldownSeconds, count: r.count, range: r.range, maxAgeSeconds: r.maxAgeSeconds };
+  }
+  if (entry.cloud) enemy.cloud = { radius: entry.cloud.radius, hpSharePerSecond: entry.cloud.hpSharePerSecond };
+  if (entry.web) enemy.web = { slow: entry.web.slow, seconds: entry.web.seconds };
+  if (entry.bloodlust) {
+    const b = entry.bloodlust;
+    enemy.bloodlust = {
+      cooldownSeconds: b.cooldownSeconds, targets: b.targets, range: b.range, seconds: b.seconds,
+      moveSpeed: b.moveSpeed, damage: b.damage, attackSpeed: b.attackSpeed,
+    };
+  }
+  if (entry.knockbackScale !== undefined) enemy.knockbackScale = entry.knockbackScale;
   return enemy;
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EventKind, OrbKind, SlamEvent } from "../../sim";
+import { EventKind, HeroHitSource, OrbKind, SlamEvent } from "../../sim";
 import { abilityRun } from "../../sim/testing/ability-run";
 import { loadAudioData } from "./data";
 import { type CueRequest, type CueState, HANDLED_EVENTS, newCueRequests, resolveEventCues } from "./event-cues";
@@ -55,6 +55,36 @@ describe("resolveEventCues", () => {
     const slot = run.enemies.spawn(0, 0, 5, 5, 10, 1, 0);
     run.events.push(EventKind.Death, slot, 0, 5, 5, 0, 0);
     expect(resolve()[0]!.cue).toBe(data.enemies[enemyIds[run.enemies.type[slot]!]!]!.death);
+  });
+
+  it("plays the faction horn, bloodlust, web, roots and the raise; root circles creak instead of the slam", () => {
+    const { run, resolve } = setup();
+    const druid = run.enemies.spawn(run.data.enemies.findIndex((e) => e.id === "grove-druid"), 0, 5, 5, 10, 1, 0);
+    run.events.push(EventKind.Faction, 1, 6, 0, 0, 0, 0);
+    run.events.push(EventKind.Bloodlust, 0, 3, 0, 0, 0, 0);
+    run.events.push(EventKind.HeroSnared, 0, 0, 0, 0, 2, 0);
+    run.events.push(EventKind.HeroSnared, 0, 1, 0, 0, 1.2, 0);
+    run.events.push(EventKind.Raise, 0, 0, 0, 0, 0, 0);
+    run.events.push(EventKind.Slam, druid, SlamEvent.Warning, 0, 0, 160, 30);
+    run.events.push(EventKind.Slam, druid, SlamEvent.Hit, 0, 0, 160, 0);
+    expect(resolve().map((r) => r.cue)).toEqual([
+      data.sounds.faction, data.sounds["enemy.bloodlust"], data.sounds["hero.web"], data.sounds["hero.root"],
+      data.sounds["enemy.raise"], data.sounds["enemy.root"],
+    ]);
+  });
+
+  it("a poison cloud step is silent, a hit is not", () => {
+    const { run, resolve } = setup();
+    run.events.push(EventKind.HeroHit, 3, 5, 0, 0, HeroHitSource.Cloud, 0);
+    expect(resolve()).toEqual([]);
+    run.events.push(EventKind.HeroHit, 3, 5, 0, 0, HeroHitSource.Hit, 0);
+    expect(resolve().map((r) => r.cue)).toEqual([data.sounds.heroHit]);
+  });
+
+  it("every faction type dies with its faction's sound", () => {
+    const deaths = (ids: string[]) => new Set(ids.map((id) => data.enemies[id]!.death));
+    expect(deaths(["brute", "spearthrower", "hornback", "bloodcaller"]).size).toBe(1);
+    expect(deaths(["shieldbearer", "brute", "ghoul", "huntress"]).size).toBe(4);
   });
 
   it("maps every game event to its sound", () => {

@@ -81,6 +81,11 @@ export interface GameSnapshot {
   buffs: { boots: number; berserk: number; heal: number };
   /** The hero's lifesteal from gear (a share). */
   lifesteal: number;
+  /** Id of the enemy faction of the current phase (`human`, `orc`, `undead`, `elf`). */
+  faction: string;
+  /** Seconds left of the web's slow and of the roots on the hero (0 when none runs). */
+  slowed: number;
+  rooted: number;
   /** Only with ?debug=1. */
   debug?: {
     grantXp(amount: number): void;
@@ -92,8 +97,10 @@ export interface GameSnapshot {
     setAbilityLevel(slot: number, level: number): void;
     /** Learns a shared spell or passive (by id) into an empty slot; throws an Error when the rules refuse it. */
     learn(slot: number, abilityId: string): void;
-    /** One hunter of every common enemy type, in a row north of the hero. */
+    /** One hunter of every common enemy type of the current faction (no risen), in a row north of the hero. */
     spawnEach(): void;
+    /** One hunter of every type of the faction `id` (no risen); throws an Error for an unknown faction. */
+    spawnFaction(id: string): void;
     /** Moves the hero to simulation coordinates, clamped to the arena. */
     teleport(x: number, y: number): void;
     /** Kills every living boss; the fall of the final boss wins the run in the next step. */
@@ -124,6 +131,7 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0 },
     gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, settingsOpen: false, gear: [], collection: {}, gearSaved: false,
     orbs: [], hearts: 0, buffs: { boots: 0, berserk: 0, heal: 0 }, lifesteal: 0,
+    faction: "human", slowed: 0, rooted: 0,
   };
   window.__game = snapshot;
   return snapshot;
@@ -168,6 +176,13 @@ export function addDebugHooks(
     spawnEach(): void {
       const run = getRun();
       if (run) debugSpawnEach(run);
+    },
+    spawnFaction(id: string): void {
+      const run = getRun();
+      if (!run) return;
+      const faction = run.data.rules.factions.find((f) => f.id === id);
+      if (!faction) throw new Error(`debug.spawnFaction: unknown faction "${id}"`);
+      debugSpawnEach(run, faction.id);
     },
     teleport(x: number, y: number): void {
       const run = getRun();
@@ -327,6 +342,9 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
   snapshot.buffs.berserk = buffs.berserkTicks / TICKS_PER_SECOND;
   snapshot.buffs.heal = buffs.healTicks / TICKS_PER_SECOND;
   snapshot.lifesteal = run.hero.gear.lifesteal;
+  snapshot.faction = run.data.rules.factions[run.phaseFaction[run.phaseIndex]!]!.id;
+  snapshot.slowed = run.hero.slowTicks / TICKS_PER_SECOND;
+  snapshot.rooted = run.hero.rootTicks / TICKS_PER_SECOND;
   snapshot.phase = runPhase(run);
   const boss = latestBoss(run);
   if (boss < 0) {

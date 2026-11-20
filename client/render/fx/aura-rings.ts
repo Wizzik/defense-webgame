@@ -1,7 +1,7 @@
 import { type InstancedMesh, RingGeometry } from "three/webgpu";
 import { createFxMesh, disposeMesh, hide, type Rgb, setColor, writeScaled } from "./instances";
 
-const POOL = 8;
+const DEFAULT_POOL = 8;
 const FLOOR_LIFT = 0.05;
 const RING_INNER = 0.96;
 
@@ -10,9 +10,11 @@ export class AuraRings {
   readonly mesh: InstancedMesh;
   private used = 0;
   private shown = 0;
+  private readonly pool: number;
 
-  constructor() {
-    this.mesh = createFxMesh(new RingGeometry(RING_INNER, 1, 64).rotateX(-Math.PI / 2), POOL);
+  constructor(pool = DEFAULT_POOL) {
+    this.pool = pool;
+    this.mesh = createFxMesh(new RingGeometry(RING_INNER, 1, 64).rotateX(-Math.PI / 2), pool);
   }
 
   begin(): void {
@@ -21,7 +23,7 @@ export class AuraRings {
 
   /** Scene coordinates; rings beyond the pool are not drawn. */
   add(x: number, z: number, radius: number, color: Rgb, opacity: number): void {
-    if (this.used >= POOL) return;
+    if (this.used >= this.pool) return;
     const i = this.used++;
     writeScaled(this.mesh.instanceMatrix.array as Float32Array, i, x, FLOOR_LIFT, z, radius, 1, radius);
     setColor(this.mesh.instanceColor!.array as Float32Array, i, color[0], color[1], color[2], opacity);

@@ -9,6 +9,9 @@ import { gainXp } from "./level-up";
 import type { Rng } from "./rng";
 import type { Run } from "./run";
 
+/** `u` of a HeroHit event: a hit, or a step of a poison cloud (the client neither shakes nor plays the hurt sound). */
+export const HeroHitSource = { Hit: 0, Cloud: 1 } as const;
+
 /** Damage reduction from armor: 0 for armor <= 0, else armor * k / (1 + armor * k). */
 export function armorReduction(armor: number, k: number): number {
   if (armor <= 0) return 0;
@@ -29,15 +32,16 @@ export function heroDamageScale(run: Run): number {
 }
 
 /**
- * Subtracts `amount` x heroDamageScale from the hero (nothing while the shield runs).
- * `attacker` is the enemy slot (-1 for none).
+ * Subtracts `amount` x heroDamageScale from the hero (nothing while the shield runs) and returns what it took.
+ * `attacker` is the enemy slot (-1 for none); `source` goes to the event's u (HeroHitSource).
  */
-export function damageHero(run: Run, amount: number, attacker: number): void {
-  if (run.shieldTicks > 0) return;
+export function damageHero(run: Run, amount: number, attacker: number, source: number = HeroHitSource.Hit): number {
+  if (run.shieldTicks > 0) return 0;
   const hero = run.hero;
   const dealt = amount * heroDamageScale(run);
   hero.hp -= dealt;
-  run.events.push(EventKind.HeroHit, attacker, dealt, hero.x, hero.y, 0, 0);
+  run.events.push(EventKind.HeroHit, attacker, dealt, hero.x, hero.y, source, 0);
+  return dealt;
 }
 
 /** Subtracts `amount` from the castle (nothing while the shield runs) and records the hit tick. */
@@ -83,7 +87,9 @@ function knockBack(run: Run, slot: number, source: 0 | 1): void {
   const d = Math.sqrt(dx * dx + dy * dy);
   const ux = d > 1e-6 ? dx / d : 1;
   const uy = d > 1e-6 ? dy / d : 0;
-  const speed = (source === 1 ? knockback.ability : knockback.attack) / knockback.seconds;
+  const resist = run.data.enemies[e.type[slot]].knockbackScale ?? 1;
+  if (resist <= 0) return;
+  const speed = ((source === 1 ? knockback.ability : knockback.attack) * resist) / knockback.seconds;
   e.knockVX[slot] = ux * speed;
   e.knockVY[slot] = uy * speed;
   e.knockTicks[slot] = Math.round(knockback.seconds * TICKS_PER_SECOND);
@@ -105,9 +111,11 @@ const COIN_OFFSET = 24;
 const HEART_OFFSET = 24;
 
 /**
- * Emits Death, counts the kill, frees the slot and drops an XP crystal and, for a type with gold, a coin
+ * Emits Death, counts the kill, frees the slot, remembers the place of a common enemy's death for gravebinders
+ * (sim/corpses.ts) and drops an XP crystal and, for a type with gold, a coin
  * (XP and gold go straight to the hero when their store is full). An elite or a boss always drops a heart, a common
- * enemy with rules.sustain.hearts.chance drawn from sustainRng; a heart that does not fit is lost.
+ * enemy with rules.sustain.hearts.chance drawn from sustainRng; a heart that does not fit is lost. A type with xp 0
+ * drops nothing and leaves no place.
  */
 export function killEnemy(run: Run, slot: number): void {
   const e = run.enemies;
@@ -122,7 +130,7 @@ export function killEnemy(run: Run, slot: number): void {
   if (e.slamState[slot] !== Slam.None) {
     run.events.push(EventKind.Slam, slot, SlamEvent.Cancelled, e.slamX[slot], e.slamY[slot], windupRadius(run, slot), 0);
   }
-  if (run.isBoss[e.type[slot]] === 1 || e.type[slot] === run.eliteType) onGearEliteKill(run);
+  if (run.isBoss[e.type[slot]] === 1 || run.isElite[e.type[slot]] === 1) onGearEliteKill(run);
   if (run.isBoss[e.type[slot]] === 1) {
     run.events.push(EventKind.BossDeath, e.type[slot], run.bossesKilled++, x, y, 0, 0);
     run.bossCount--;
@@ -139,9 +147,12 @@ export function killEnemy(run: Run, slot: number): void {
     }
   }
   e.kill(slot);
+  // an enemy worth nothing (a risen, xp 0) drops nothing and leaves no place to raise from: nothing to farm
+  if (xp <= 0) return;
+  if (run.isBoss[type] === 0 && run.isElite[type] === 0) run.corpses.record(x, y, run.tick);
   if (run.crystals.drop(x, y, xp) < 0) gainXp(run, xp);
   if (gold > 0 && run.coins.drop(x + COIN_OFFSET, y, gold) < 0) gainGold(run, gold);
-  if (run.isBoss[type] === 1 || type === run.eliteType || run.sustainRng.next() < run.data.rules.sustain.hearts.chance) {
+  if (run.isBoss[type] === 1 || run.isElite[type] === 1 || run.sustainRng.next() < run.data.rules.sustain.hearts.chance) {
     run.hearts.drop(x - HEART_OFFSET, y, 1);
   }
 }

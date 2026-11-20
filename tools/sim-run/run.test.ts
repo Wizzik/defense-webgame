@@ -3,7 +3,7 @@ import { botInput, idleCard } from "../../sim/bot";
 import { createRun } from "../../sim/index";
 import type { TickInput } from "../../sim/input";
 import { gameData } from "../../sim/testing/game-data";
-import { formatHeroSummary, formatSummary, idleInput, kitLine, lossWindows, parseArgs, phaseXpLine, playBot, type RunSummary, sustainLine } from "./run";
+import { factionLine, formatHeroSummary, formatSummary, idleInput, kitLine, lossWindows, parseArgs, phaseXpLine, playBot, type RunSummary, sustainLine } from "./run";
 
 describe("formatSummary", () => {
   it("formats a lost run", () => {
@@ -13,6 +13,7 @@ describe("formatSummary", () => {
         castleHp: 0, castleMaxHp: 3000, castleHpPercent: 0, heroHp: 812, heroMaxHp: 1555, minHeroHpPercent: 42,
         bosses: [], enraged: false, phaseXp: [0], chests: 4, gold: 321, sharedSpells: [], passives: [], fullKitPhase: null, burst: [null, null, null, null], attack: [null, null, null, null],
         sustain: { hearts: 0, orbsBoots: 0, orbsBerserk: 0, orbsHeal: 0, healedLifesteal: 0, healedHearts: 0, healedOrb: 0 },
+        factions: { rootedSeconds: 0, cloudDamage: 0, raised: 0 },
       }),
     ).toBe(
       "stonehorn seed 1: lost (castle) at 2:14, kills 63, spawned 320, level 7, castle 0%, hero 812/1555, hero low 42%, chests 4, gold 321",
@@ -26,6 +27,7 @@ describe("formatSummary", () => {
         castleHp: 1860, castleMaxHp: 3000, castleHpPercent: 62, heroHp: 1, heroMaxHp: 2, minHeroHpPercent: 0,
         bosses: [], enraged: false, phaseXp: [0], chests: 4, gold: 321, sharedSpells: [], passives: [], fullKitPhase: null, burst: [null, null, null, null], attack: [null, null, null, null],
         sustain: { hearts: 0, orbsBoots: 0, orbsBerserk: 0, orbsHeal: 0, healedLifesteal: 0, healedHearts: 0, healedOrb: 0 },
+        factions: { rootedSeconds: 0, cloudDamage: 0, raised: 0 },
       }),
     ).toBe("nightglaive seed 2: won at 3:00, kills 5, spawned 9, level 2, castle 62%, hero 1/2, hero low 0%, chests 4, gold 321");
   });
@@ -35,7 +37,8 @@ const summary = (over: Partial<RunSummary>): RunSummary => ({
   hero: "stonehorn", seed: 1, result: "won", seconds: 1040, kills: 1, spawned: 2, level: 3,
   castleHp: 1, castleMaxHp: 2, castleHpPercent: 50, heroHp: 1, heroMaxHp: 2, minHeroHpPercent: 10,
   bosses: [], enraged: false, phaseXp: [0], chests: 0, gold: 0, sharedSpells: [], passives: [], fullKitPhase: null, burst: [null, null, null, null], attack: [null, null, null, null],
-  sustain: { hearts: 0, orbsBoots: 0, orbsBerserk: 0, orbsHeal: 0, healedLifesteal: 0, healedHearts: 0, healedOrb: 0 }, ...over,
+  sustain: { hearts: 0, orbsBoots: 0, orbsBerserk: 0, orbsHeal: 0, healedLifesteal: 0, healedHearts: 0, healedOrb: 0 },
+        factions: { rootedSeconds: 0, cloudDamage: 0, raised: 0 }, ...over,
 });
 
 describe("summaries of the full run", () => {
@@ -225,5 +228,19 @@ describe("sustain in the summaries", () => {
     const s = playBot(gameData(), 1, 300);
     expect(s.sustain.hearts).toBeGreaterThan(0);
     expect(s.sustain.orbsBoots + s.sustain.orbsBerserk + s.sustain.orbsHeal).toBeGreaterThan(0);
+  });
+});
+
+describe("factions in the summaries", () => {
+  it("factionLine gives the averages per run", () => {
+    const line = factionLine([
+      summary({ factions: { rootedSeconds: 3, cloudDamage: 800, raised: 10 } }),
+      summary({ factions: { rootedSeconds: 4.2, cloudDamage: 1000, raised: 13 } }),
+    ]);
+    expect(line).toBe("  factions: rooted 3.6 s, cloud hp 900, raised 11.5");
+  });
+
+  it("a hero summary ends with the factions line", () => {
+    expect(formatHeroSummary("stonehorn", [summary({})], false, "dread-regent")).toMatch(/\n  sustain: [^\n]*\n  factions: rooted 0\.0 s/);
   });
 });

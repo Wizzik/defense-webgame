@@ -13,7 +13,7 @@ export { debugSpawnOrb, OrbStore, placeOrb, updateOrbs } from "./orbs";
 export { cardGroups, chooseCard, openOffer } from "./cards";
 export { applyChestCard, ChestAction, chestPrice, ChestStore, chooseChestCard, rollChestOffer } from "./chests";
 export type { ChestCard, ChestOffer } from "./chests";
-export { killEnemy } from "./combat";
+export { HeroHitSource, killEnemy } from "./combat";
 export type { Card, CardOffer } from "./cards";
 export { debugSpawnEach } from "./debug-spawn";
 export { COIN_CAPACITY, CRYSTAL_CAPACITY, CrystalStore, debugDropHeart, debugGrantGold, HEART_CAPACITY, updatePickups } from "./crystals";

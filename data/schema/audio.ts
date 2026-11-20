@@ -17,6 +17,7 @@ export const GAME_SOUNDS = [
   "chest.open", "chest.pick", "levelUp", "heroHit", "heroHeal", "dash", "castleHit",
   "bossArrive", "bossDeath", "rushWarning", "slam.warn", "slam.hit", "enrage",
   "enemy.heal", "enemy.charge", "drop.legendary", "drop.mythic", "gear.equip", "lowHp", "ui.click",
+  "faction", "enemy.bloodlust", "hero.web", "enemy.root", "hero.root", "enemy.raise",
 ] as const;
 export type GameSound = (typeof GAME_SOUNDS)[number];
 
