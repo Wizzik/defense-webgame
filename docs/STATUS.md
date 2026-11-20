@@ -1,8 +1,15 @@
 # Status
 
-Updated 2026-11-20 (enemy factions executed on branch `factions`, PR against `main` waits for Petr's word). Read this first when you resume work.
+Updated 2026-11-20 (multiplayer spike spec and plan written; enemy factions merged as PR #26 `b67c076`, Petr's playtest passed). Read this first when you resume work.
 
-## Enemy factions: done on branch `factions` (2026-11-20); PR waits for Petr's word
+## Multiplayer spike: spec and plan written (2026-11-20, branch `multiplayer-spike`); waits for Petr's approval
+
+- Spec `docs/superpowers/specs/2026-11-20-multiplayer-spike-design.md`, plan `docs/superpowers/plans/2026-11-20-multiplayer-spike.md` (7 tasks; native execution recommended). Petr's co-op rules: `claude/multiplayer-decisions.md` in the claude.ai project (summary in spec chapter 3).
+- The spike changes no gameplay: a wider `stateHash`, a cross-engine determinism matrix (`/determinism/`, Playwright projects `sim-chromium`, `sim-firefox`, `sim-webkit`), lockstep and protocol tested in memory, a PeerJS page `/net-spike/`, the single-hero inventory `docs/multiplayer/single-hero-inventory.md` and the report `docs/multiplayer/spike-report.md`.
+- Pre-scan (spec chapter 4): determinism risk is low (the sim uses only exact `Math` functions); the single-hero assumption is deep (`run.hero` 514 uses, `levelUp`/`chest` pause the whole run).
+- Claude's suggestion: run the spike now (one chat), then difficulties, progression and credits as Petr ordered, each designed with a player-count knob; the multi-hero refactor follows the inventory's migration order. Petr decides.
+
+## Enemy factions: merged (PR #26 as `b67c076`, 2026-11-20, Pages deployed); Petr's playtest passed ("testy super")
 
 - All 8 tasks of `docs/superpowers/plans/2026-11-20-enemy-factions.md` are done inline in one chat with one final review. `npm run check`, the build and the e2e project `webgl2-fallback` pass. Numbers, rulings and the win table: `docs/DECISIONS.md`, section Enemy factions.
 - What it brings:
