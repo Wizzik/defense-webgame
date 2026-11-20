@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { mergeModelRows } from "../assets-build/license-rows";
-import { encodeArgs, licenseRows, mergeLicenseRows } from "./licenses";
+import { encodeArgs, licenseRows, mergeLicenseRows, mixArgs } from "./licenses";
 import type { AudioSource } from "./manifest";
 
 const sfx: AudioSource = {
@@ -45,6 +45,42 @@ describe("encodeArgs", () => {
     const joined = encodeArgs({ ...sfx, trim: [0.2, 0.6] }, "in.wav", "out.ogg").join(" ");
     expect(joined).toContain("afade=t=out:st=0.280:d=0.120");
     expect(encodeArgs(sfx, "in.wav", "out.ogg").join(" ")).not.toContain("afade");
+  });
+});
+
+describe("mixArgs", () => {
+  const layered: AudioSource = {
+    ...sfx,
+    out: "sfx/moon-starfall-1",
+    length: 1.9,
+    space: "hall",
+    layers: [
+      { src: "pack/shimmer.wav", trim: [0, 1.3], highpass: 3000, gainDb: -14 },
+      { src: "pack/bell.ogg", at: 0.1, rate: 2, reverse: true, tempo: 0.5 },
+    ],
+  };
+
+  it("mixes every layer with its own treatment, adds the room and cuts the length", () => {
+    const args = mixArgs(layered, ["a.wav", "b.ogg"], "out.ogg");
+    const joined = args.join(" ");
+    expect(joined).toContain("-ss 0 -to 1.3 -i a.wav -i b.ogg");
+    const graph = args[args.indexOf("-filter_complex") + 1]!;
+    expect(graph).toContain("[0:a]aformat=channel_layouts=mono,aresample=48000,afade=t=out:st=1.180:d=0.120,highpass=f=3000,volume=-14dB[l0]");
+    expect(graph).toContain("[1:a]aformat=channel_layouts=mono,aresample=48000,areverse,asetrate=96000,aresample=48000,atempo=0.5,adelay=100[l1]");
+    expect(graph).toContain("[l0][l1]amix=inputs=2:normalize=0:duration=longest,aecho=");
+    expect(graph).toContain("atrim=0:1.9,afade=t=out:st=1.650:d=0.25");
+    expect(graph).toContain("loudnorm=I=-16:TP=-1.5:LRA=11");
+    expect(joined).toContain("-map [out]");
+    expect(joined.endsWith("out.ogg")).toBe(true);
+  });
+
+  it("refuses a take without layers or with the wrong number of inputs", () => {
+    expect(() => mixArgs(sfx, ["a.wav"], "out.ogg")).toThrow();
+    expect(() => mixArgs(layered, ["a.wav"], "out.ogg")).toThrow();
+  });
+
+  it("marks a layered take as mixed in its license row", () => {
+    expect(licenseRows([layered], () => "f")[0]).toContain("Someone; mixed, loudness normalized");
   });
 });
 
