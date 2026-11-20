@@ -11,7 +11,7 @@
       "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 2,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -26,7 +26,7 @@
       "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 2,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -41,7 +41,7 @@
       "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 2,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -55,7 +55,7 @@
       "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 2,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -69,7 +69,7 @@
       "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 2,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -84,7 +84,7 @@
       "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 2,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -98,7 +98,7 @@
       "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 2,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -113,7 +113,7 @@
       "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 2,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -127,7 +127,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -141,7 +141,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 3,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -155,7 +155,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -169,7 +169,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -183,7 +183,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -197,7 +197,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -211,7 +211,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -225,7 +225,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -240,7 +240,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -254,7 +254,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -268,7 +268,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -282,7 +282,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -296,7 +296,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -310,7 +310,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -324,7 +324,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -338,7 +338,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -352,7 +352,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -366,7 +366,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -380,7 +380,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -394,7 +394,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -408,7 +408,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 3,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -422,7 +422,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -436,7 +436,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -450,7 +450,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -464,7 +464,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -478,7 +478,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -492,7 +492,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 3,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -506,7 +506,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -520,7 +520,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -534,7 +534,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -548,7 +548,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -562,7 +562,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -576,7 +576,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -590,7 +590,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -604,7 +604,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -619,7 +619,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -633,7 +633,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -647,7 +647,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -661,7 +661,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -678,7 +678,7 @@
       "gainDb": -6,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 0,
       "category": "sfx"
     },
@@ -692,7 +692,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 6,
+      "maxVoices": 1,
       "priority": 0,
       "category": "sfx"
     },
@@ -705,7 +705,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -719,7 +719,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 2,
       "category": "sfx"
     },
@@ -733,7 +733,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 2,
       "category": "sfx"
     },
@@ -746,7 +746,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 2,
       "category": "sfx"
     },
@@ -761,7 +761,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 2,
       "category": "sfx"
     },
@@ -775,7 +775,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 2,
       "category": "ui"
     },
@@ -788,7 +788,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 3,
       "category": "sfx"
     },
@@ -803,7 +803,7 @@
       "gainDb": -9,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 2,
+      "maxVoices": 1,
       "priority": 3,
       "category": "sfx"
     },
@@ -846,7 +846,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 2,
+      "maxVoices": 1,
       "priority": 2,
       "category": "sfx"
     },
@@ -874,7 +874,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 2,
+      "maxVoices": 1,
       "priority": 3,
       "category": "sfx"
     },
@@ -901,7 +901,7 @@
       "gainDb": -4,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 3,
+      "maxVoices": 1,
       "priority": 3,
       "category": "sfx"
     },
@@ -915,7 +915,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 3,
+      "maxVoices": 1,
       "priority": 3,
       "category": "sfx"
     },
@@ -941,7 +941,7 @@
       "gainDb": -8,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 0,
       "category": "sfx"
     },
@@ -955,7 +955,7 @@
       "gainDb": -6,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "sfx"
     },
@@ -969,7 +969,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 3,
       "category": "ui"
     },
@@ -983,7 +983,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 3,
       "category": "ui"
     },
@@ -998,7 +998,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 1,
       "priority": 1,
       "category": "ui"
     },
@@ -1027,7 +1027,7 @@
       "gainDb": 0,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 2,
+      "maxVoices": 1,
       "priority": 3,
       "category": "ui"
     }

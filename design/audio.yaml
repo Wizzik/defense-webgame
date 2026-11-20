@@ -1,7 +1,7 @@
 # Sounds and music of the game. `npm run audio:build` checks this file against the game data
 # and writes data/generated/audio.json. A cue is a named sound: `files` are recorded variants
 # (paths under assets/), `synth` is the fallback tone of client/audio/sfx.ts when no file loads.
-# Defaults: gainDb 0, pitchSpread 0.06, gainSpreadDb 2, maxVoices 4, priority 1 (0-3), category sfx.
+# Defaults: gainDb 0, pitchSpread 0.06, gainSpreadDb 2, maxVoices 1, priority 1 (0-3), category sfx.
 # Hero families (spec 5.1): stone (Stonehorn), moon (Nightglaive), bone/grave (Gravecaller),
 # storm/shaman (Serpent Shaman), mist (Mistwarden), spark (Sparkshot), blood/cleaver (Redcleaver),
 # tide (Tidecaller); shared-* for the shared spells.
@@ -11,49 +11,49 @@ cues:
     files: [audio/sfx/stone-strike-1.ogg, audio/sfx/stone-strike-2.ogg, audio/sfx/stone-strike-3.ogg]
     synth: hit
     gainDb: -10
-    maxVoices: 2
+    maxVoices: 1
   - id: moon-arrow
     files: [audio/sfx/moon-arrow-1.ogg, audio/sfx/moon-arrow-2.ogg, audio/sfx/moon-arrow-3.ogg]
     synth: hit
     gainDb: -10
-    maxVoices: 2
+    maxVoices: 1
   - id: grave-bolt
     files: [audio/sfx/grave-bolt-1.ogg, audio/sfx/grave-bolt-2.ogg, audio/sfx/grave-bolt-3.ogg]
     synth: hit
     gainDb: -10
-    maxVoices: 2
+    maxVoices: 1
   - id: shaman-bolt
     files: [audio/sfx/shaman-bolt-1.ogg, audio/sfx/shaman-bolt-2.ogg]
     synth: hit
     gainDb: -10
-    maxVoices: 2
+    maxVoices: 1
   - id: mist-chill
     files: [audio/sfx/mist-chill-1.ogg, audio/sfx/mist-chill-2.ogg]
     synth: hit
     gainDb: -10
-    maxVoices: 2
+    maxVoices: 1
   - id: spark-shot
     files: [audio/sfx/spark-shot-1.ogg, audio/sfx/spark-shot-2.ogg, audio/sfx/spark-shot-3.ogg]
     synth: hit
     gainDb: -10
-    maxVoices: 2
+    maxVoices: 1
   - id: cleaver-chop
     files: [audio/sfx/cleaver-chop-1.ogg, audio/sfx/cleaver-chop-2.ogg]
     synth: hit
     gainDb: -10
-    maxVoices: 2
+    maxVoices: 1
   - id: tide-bolt
     files: [audio/sfx/tide-bolt-1.ogg, audio/sfx/tide-bolt-2.ogg, audio/sfx/tide-bolt-3.ogg]
     synth: hit
     gainDb: -10
-    maxVoices: 2
+    maxVoices: 1
   - id: stone-rupture
     files: [audio/sfx/stone-rupture-1.ogg, audio/sfx/stone-rupture-2.ogg]
     synth: cast
   - id: stone-tap
     files: [audio/sfx/stone-tap-1.ogg, audio/sfx/stone-tap-2.ogg]
     synth: hit
-    maxVoices: 3
+    maxVoices: 1
   - id: stone-echo
     files: [audio/sfx/stone-echo-1.ogg, audio/sfx/stone-echo-2.ogg]
     synth: cast
@@ -111,7 +111,7 @@ cues:
   - id: spark-sear
     files: [audio/sfx/spark-sear-1.ogg, audio/sfx/spark-sear-2.ogg]
     synth: hit
-    maxVoices: 3
+    maxVoices: 1
   - id: spark-beams
     files: [audio/sfx/spark-beams-1.ogg, audio/sfx/spark-beams-2.ogg]
     synth: cast
@@ -130,7 +130,7 @@ cues:
   - id: tide-splash
     files: [audio/sfx/tide-splash-1.ogg, audio/sfx/tide-splash-2.ogg]
     synth: hit
-    maxVoices: 3
+    maxVoices: 1
   - id: tide-rip
     files: [audio/sfx/tide-rip-1.ogg, audio/sfx/tide-rip-2.ogg]
     synth: cast
@@ -170,13 +170,13 @@ cues:
   - id: bone-rattle
     files: [audio/sfx/bone-rattle-1.ogg, audio/sfx/bone-rattle-2.ogg, audio/sfx/bone-rattle-3.ogg, audio/sfx/bone-rattle-4.ogg, audio/sfx/bone-rattle-5.ogg]
     synth: death
-    maxVoices: 4
+    maxVoices: 1
     gainDb: -6
     priority: 0
   - id: bone-rattle-heavy
     files: [audio/sfx/bone-rattle-heavy-1.ogg, audio/sfx/bone-rattle-heavy-2.ogg]
     synth: death
-    maxVoices: 6
+    maxVoices: 1
     priority: 0
   - id: pickup-heart
     files: [audio/sfx/pickup-heart-1.ogg]
@@ -210,7 +210,7 @@ cues:
     files: [audio/sfx/hero-hurt-1.ogg, audio/sfx/hero-hurt-2.ogg, audio/sfx/hero-hurt-3.ogg]
     synth: hit
     priority: 3
-    maxVoices: 2
+    maxVoices: 1
     gainDb: -9
   - id: hero-heal
     files: [audio/sfx/hero-heal-1.ogg]
@@ -226,7 +226,7 @@ cues:
     files: [audio/sfx/castle-thud-1.ogg, audio/sfx/castle-thud-2.ogg, audio/sfx/castle-thud-3.ogg]
     synth: castleHit
     priority: 2
-    maxVoices: 2
+    maxVoices: 1
   - id: war-horn
     files: [audio/sfx/war-horn-1.ogg, audio/sfx/war-horn-2.ogg]
     synth: bossArrive
@@ -236,7 +236,7 @@ cues:
     files: [audio/sfx/boss-collapse-1.ogg, audio/sfx/boss-collapse-2.ogg]
     synth: death
     priority: 3
-    maxVoices: 2
+    maxVoices: 1
   - id: rush-horn
     files: [audio/sfx/rush-horn-1.ogg, audio/sfx/rush-horn-2.ogg]
     synth: bossArrive
@@ -246,13 +246,13 @@ cues:
     files: [audio/sfx/slam-breath-1.ogg]
     synth: cast
     priority: 3
-    maxVoices: 3
+    maxVoices: 1
     gainDb: -4
   - id: slam-impact
     files: [audio/sfx/slam-impact-1.ogg, audio/sfx/slam-impact-2.ogg]
     synth: slam
     priority: 3
-    maxVoices: 3
+    maxVoices: 1
   - id: boss-roar
     files: [audio/sfx/boss-roar-1.ogg]
     synth: enrage
@@ -293,7 +293,7 @@ cues:
     synth: pickup
     priority: 3
     category: ui
-    maxVoices: 2
+    maxVoices: 1
 
 # Music (all CC0, sources and authors in tools/audio-build/manifest.ts and assets/LICENSES.md).
 tracks:

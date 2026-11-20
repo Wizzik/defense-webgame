@@ -5,7 +5,7 @@ Updated 2026-11-20 (audio merged as PR #23 `73948f0`, Pages deployed; waits for 
 
 ## Audio and music: merged (PR #23 as `73948f0`, 2026-11-20, Pages deployed); quieter mix after Petr's first listen on branch `audio-quieter`
 
-- Petr's first listen (2026-11-20): the music is too loud, sword clanging too, far too many sounds; drop the gold and XP pickup sounds. Branch `audio-quieter`: those pickups are silent, default music 0.3, softer and fewer hero attack and enemy death sounds (numbers in `docs/DECISIONS.md`, Audio and music). A volume he already saved in Settings stays, so he may lower music there himself.
+- Petr's first listen (2026-11-20): the music is too loud, sword clanging too, far too many sounds; drop the gold and XP pickup sounds. Branch `audio-quieter`: those pickups are silent, default music 0.3, every sound at most once at a time, softer hero attacks and enemy deaths (numbers in `docs/DECISIONS.md`, Audio and music). A volume he already saved in Settings stays, so he may lower music there himself.
 
 - Petr (2026-11-19): the sounds were monotonous, "no feel, no soul"; fantasy style, every hero with its own theme; the game complete before multiplayer. Order he approved: 1 audio and music + settings, 2 several heroes in the simulation and an AI ally, 3 enemy factions by phase, 4 difficulties with environments, 5 progression between runs, 6 credits and legal check, then multiplayer. **Dropped:** the castle shop.
 - Spec `docs/superpowers/specs/2026-11-19-audio-design.md`, plan `docs/superpowers/plans/2026-11-19-audio.md`. Sources, levels and authors: `docs/DECISIONS.md`, section Audio and music.
