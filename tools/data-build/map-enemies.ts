@@ -84,6 +84,7 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
     };
   }
   if (entry.hunter) enemy.hunter = true;
+  if (entry.cloud) enemy.cloud = { radius: entry.cloud.radius, hpSharePerSecond: entry.cloud.hpSharePerSecond };
   if (entry.web) enemy.web = { slow: entry.web.slow, seconds: entry.web.seconds };
   if (entry.bloodlust) {
     const b = entry.bloodlust;

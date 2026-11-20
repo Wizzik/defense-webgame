@@ -86,6 +86,8 @@ export const EnemySchema = z.object({
     .refine((s) => (s.effect === "root" ? s.rootSeconds !== undefined : s.damage !== undefined), {
       message: "a damage strike needs damage, a root strike needs rootSeconds",
     }).optional(),
+  /** A poison cloud around the type (sim/enemy-cloud.ts): the hero inside loses `hpSharePerSecond` x max hp a second. */
+  cloud: z.object({ radius: z.number().positive(), hpSharePerSecond: z.number().positive().max(1) }).strict().optional(),
   /** The web (sim/hero-snares.ts): every hit of the type on the hero slows its walking by `slow` for `seconds`. */
   web: z.object({ slow: z.number().positive().max(1), seconds: z.number().positive() }).strict().optional(),
   /** Goes for the hero whatever the role of its pack is. */

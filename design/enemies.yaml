@@ -20,6 +20,8 @@
 # model: id of the enemy type whose model the type is drawn with.
 # strike: design value (sim/enemy-strike.ts): a warning circle on the hero from afar; with `leap` the boss jumps into it.
 # hunter: design value: the type goes for the hero whatever the role of its pack is.
+# cloud: design value (sim/enemy-cloud.ts): the share of max hp a second the hero loses inside; threat.heroDamageTaken (2)
+#   doubles it, so a hero loses 2 % a second as the spec wants.
 # web: design value (sim/hero-snares.ts): every hit of the webcrawler slows the hero.
 # strike with effect root: the druid's and the grove warden's roots (no damage, the hero cannot walk or dash).
 # bloodlust: design value (sim/enemy-bloodlust.ts): the bloodcaller speeds up and strengthens nearby orcs.
@@ -254,6 +256,7 @@
   behavior: siege
   xp: 4
   gold: 3
+  cloud: { radius: 220, hpSharePerSecond: 0.01 }
 
 - id: gravebinder
   model: chaplain   # provisional until the faction models (factions plan, Task 6)
@@ -290,6 +293,7 @@
   knockbackScale: 0.3
   xp: 12
   gold: 10
+  cloud: { radius: 350, hpSharePerSecond: 0.01 }
 
 # --- Moon Grove (phases 16-20) ---
 

@@ -31,7 +31,10 @@ export function rootHero(run: Run, ticks: number): void {
 export function tickSnares(run: Run): void {
   const hero = run.hero;
   if (hero.slowTicks > 0 && --hero.slowTicks === 0) hero.slowShare = 0;
-  if (hero.rootTicks > 0) hero.rootTicks--;
+  if (hero.rootTicks > 0) {
+    hero.rootTicks--;
+    run.stats.rootedTicks++;
+  }
 }
 
 /** Multiplier on the hero's walking speed from snares: 1 - the web's share while it runs, else 1. */

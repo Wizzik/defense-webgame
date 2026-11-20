@@ -15,6 +15,7 @@ import { updateEnemies } from "./enemy-ai";
 import { BEHAVIOR_IDS } from "./enemy-steer";
 import { healEnemies } from "./enemy-heal";
 import { EnemyStore } from "./enemies";
+import { updateClouds } from "./enemy-cloud";
 import { EventKind, EventLog } from "./events";
 import { updateGearEffects } from "./gear-effects";
 import { emptyGearBonus, GearState, loadGear, type LoadoutEntry, recomputeGear } from "./gear";
@@ -139,6 +140,7 @@ export class Run {
   readonly stats: RunStats = {
     kills: 0, spawned: 0, damageDealt: 0, xpGained: 0, goldGained: 0,
     hearts: 0, orbsBoots: 0, orbsBerserk: 0, orbsHeal: 0, healedLifesteal: 0, healedHearts: 0, healedOrb: 0,
+    cloudDamage: 0, rootedTicks: 0, raised: 0,
   };
   /** Orb effects and the lifesteal budget (sim/buffs.ts). */
   readonly buffs = new BuffState();
@@ -256,6 +258,7 @@ export class Run {
    *   updateTimeline(this);       // phase 2b-3 (elite rushes and bosses by time)
    *   spawnEnemies(this);         // Task 4
    *   updateEnemies(this);        // Task 4
+   *   updateClouds(this);         // enemy factions: poison clouds hurt the hero
    *   healEnemies(this);          // phase 2b-1 (reads the grid built by updateEnemies)
    *   updateHeroCombat(this);     // Task 5
    *   updateAbilities(this);      // Task 6
@@ -296,6 +299,7 @@ export class Run {
     updateTimeline(this);
     spawnEnemies(this);
     updateEnemies(this);
+    updateClouds(this);
     healEnemies(this);
     updateHeroCombat(this);
     updateAbilities(this);

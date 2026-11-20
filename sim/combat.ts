@@ -29,15 +29,16 @@ export function heroDamageScale(run: Run): number {
 }
 
 /**
- * Subtracts `amount` x heroDamageScale from the hero (nothing while the shield runs).
+ * Subtracts `amount` x heroDamageScale from the hero (nothing while the shield runs) and returns what it took.
  * `attacker` is the enemy slot (-1 for none).
  */
-export function damageHero(run: Run, amount: number, attacker: number): void {
-  if (run.shieldTicks > 0) return;
+export function damageHero(run: Run, amount: number, attacker: number): number {
+  if (run.shieldTicks > 0) return 0;
   const hero = run.hero;
   const dealt = amount * heroDamageScale(run);
   hero.hp -= dealt;
   run.events.push(EventKind.HeroHit, attacker, dealt, hero.x, hero.y, 0, 0);
+  return dealt;
 }
 
 /** Subtracts `amount` from the castle (nothing while the shield runs) and records the hit tick. */

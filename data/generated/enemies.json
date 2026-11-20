@@ -626,7 +626,11 @@
     "faction": "undead",
     "xp": 4,
     "gold": 3,
-    "model": "lancer"
+    "model": "lancer",
+    "cloud": {
+      "radius": 220,
+      "hpSharePerSecond": 0.01
+    }
   },
   {
     "id": "gravebinder",
@@ -706,6 +710,10 @@
     "gold": 10,
     "model": "captain",
     "hunter": true,
+    "cloud": {
+      "radius": 350,
+      "hpSharePerSecond": 0.01
+    },
     "knockbackScale": 0.3
   },
   {

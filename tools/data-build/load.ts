@@ -142,6 +142,7 @@ export interface EnemyEntry {
   knockbackScale?: number;
   bloodlust?: NonNullable<Enemy["bloodlust"]>;
   web?: NonNullable<Enemy["web"]>;
+  cloud?: NonNullable<Enemy["cloud"]>;
 }
 
 /** One entry of design/items.yaml. Items have no record in the export: they are validated and copied. */

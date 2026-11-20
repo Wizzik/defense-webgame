@@ -101,4 +101,8 @@ export interface RunStats {
   healedLifesteal: number;
   healedHearts: number;
   healedOrb: number;
+  /** Enemy factions: hp the hero lost in poison clouds, steps it was rooted, enemies raised by gravebinders. */
+  cloudDamage: number;
+  rootedTicks: number;
+  raised: number;
 }
