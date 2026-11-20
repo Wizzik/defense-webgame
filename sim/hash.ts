@@ -42,6 +42,9 @@ export function stateHash(run: Run): number {
   mixInt(hero.pendingLevelUps);
   mixInt(hero.dashTicks);
   mixInt(hero.dashCooldown);
+  mixInt(hero.slowTicks);
+  mixFloat(hero.slowShare);
+  mixInt(hero.rootTicks);
   mixFloat(hero.dashDirX);
   mixFloat(hero.dashDirY);
   mixFloat(hero.bonus.damage);

@@ -76,11 +76,15 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
   if (entry.strike) {
     const s = entry.strike;
     enemy.strike = {
-      minRange: s.minRange, maxRange: s.maxRange, radius: s.radius, damage: s.damage,
+      minRange: s.minRange, maxRange: s.maxRange, radius: s.radius,
+      ...(s.effect !== undefined ? { effect: s.effect } : {}),
+      ...(s.damage !== undefined ? { damage: s.damage } : {}),
+      ...(s.rootSeconds !== undefined ? { rootSeconds: s.rootSeconds } : {}),
       windupSeconds: s.windupSeconds, cooldownSeconds: s.cooldownSeconds, leap: s.leap,
     };
   }
   if (entry.hunter) enemy.hunter = true;
+  if (entry.web) enemy.web = { slow: entry.web.slow, seconds: entry.web.seconds };
   if (entry.bloodlust) {
     const b = entry.bloodlust;
     enemy.bloodlust = {

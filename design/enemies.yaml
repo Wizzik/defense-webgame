@@ -20,6 +20,8 @@
 # model: id of the enemy type whose model the type is drawn with.
 # strike: design value (sim/enemy-strike.ts): a warning circle on the hero from afar; with `leap` the boss jumps into it.
 # hunter: design value: the type goes for the hero whatever the role of its pack is.
+# web: design value (sim/hero-snares.ts): every hit of the webcrawler slows the hero.
+# strike with effect root: the druid's and the grove warden's roots (no damage, the hero cannot walk or dash).
 # bloodlust: design value (sim/enemy-bloodlust.ts): the bloodcaller speeds up and strengthens nearby orcs.
 # faction: design value: human, orc, undead or elf (rules.factions); bosses have none.
 # knockbackScale: design value: multiplies the knockback of hits (0 = does not move, default 1).
@@ -240,6 +242,7 @@
   behavior: skirmish
   xp: 2
   gold: 2
+  web: { slow: 0.3, seconds: 2 }
 
 - id: rotgut
   model: lancer   # provisional until the faction models (factions plan, Task 6)
@@ -337,6 +340,7 @@
   xp: 2
   gold: 2
   heal: { amount: 8, range: 450, cooldown: 1 }
+  strike: { minRange: 400, maxRange: 900, radius: 160, effect: root, rootSeconds: 1.2, windupSeconds: 1, cooldownSeconds: 9, leap: false }
 
 - id: grove-warden
   model: captain   # provisional until the faction models (factions plan, Task 6)
@@ -351,3 +355,4 @@
   xp: 12
   gold: 10
   charge: { minRange: 300, maxRange: 700, windupSeconds: 0.5, speedMultiplier: 2.5, damageMultiplier: 1.5, distance: 900, cooldownSeconds: 6 }
+  strike: { minRange: 300, maxRange: 900, radius: 160, effect: root, rootSeconds: 1.2, windupSeconds: 1, cooldownSeconds: 6, leap: false }

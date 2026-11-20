@@ -67,6 +67,10 @@ export interface HeroState {
   pendingLevelUps: number;
   /** Multiplier on the final move speed: 1, or rules.sustain.boots.moveSpeed while the boots orb runs (sim/buffs.ts). */
   speedScale: number;
+  /** Snares (sim/hero-snares.ts): steps left of the web's slow and its share, steps left of the roots. */
+  slowTicks: number;
+  slowShare: number;
+  rootTicks: number;
 }
 
 export interface CastleState {

@@ -596,7 +596,11 @@
     "faction": "undead",
     "xp": 2,
     "gold": 2,
-    "model": "musketeer"
+    "model": "musketeer",
+    "web": {
+      "slow": 0.3,
+      "seconds": 2
+    }
   },
   {
     "id": "rotgut",
@@ -812,7 +816,17 @@
       "range": 450,
       "cooldown": 1
     },
-    "model": "chaplain"
+    "model": "chaplain",
+    "strike": {
+      "minRange": 400,
+      "maxRange": 900,
+      "radius": 160,
+      "effect": "root",
+      "rootSeconds": 1.2,
+      "windupSeconds": 1,
+      "cooldownSeconds": 9,
+      "leap": false
+    }
   },
   {
     "id": "grove-warden",
@@ -848,6 +862,16 @@
       "cooldownSeconds": 6
     },
     "model": "captain",
+    "strike": {
+      "minRange": 300,
+      "maxRange": 900,
+      "radius": 160,
+      "effect": "root",
+      "rootSeconds": 1.2,
+      "windupSeconds": 1,
+      "cooldownSeconds": 6,
+      "leap": false
+    },
     "hunter": true,
     "knockbackScale": 0.3
   }

@@ -19,6 +19,7 @@ import { EventKind, EventLog } from "./events";
 import { updateGearEffects } from "./gear-effects";
 import { emptyGearBonus, GearState, loadGear, type LoadoutEntry, recomputeGear } from "./gear";
 import { refreshHeroStats } from "./level-up";
+import { tickSnares } from "./hero-snares";
 import { buildFactionTables, updateFaction } from "./factions";
 import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import { InputAction, type TickInput } from "./input";
@@ -201,7 +202,7 @@ export class Run {
       level: 1, xp: 0,
       str: def.attributes.str.base, agi: def.attributes.agi.base, int: def.attributes.int.base,
       hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, gear: emptyGearBonus(), passive: emptyPassiveBonus(), attackCooldown: 0, pendingLevelUps: 0, speedScale: 1,
-      dashTicks: 0, dashCooldown: 0, dashDirX: 0, dashDirY: 0,
+      dashTicks: 0, dashCooldown: 0, dashDirX: 0, dashDirY: 0, slowTicks: 0, slowShare: 0, rootTicks: 0,
     };
     heroStats(data, hero, stats);
     hero.hp = stats.maxHp;
@@ -250,6 +251,7 @@ export class Run {
    *   savePrevious(this);         // Task 3 (crystals: Task 7)
    *   applyActions(this, input);  // phase 2a, Task 7 (R, T, dash)
    *   moveHero(this, input);      // Task 3
+   *   tickSnares(this);           // enemy factions: web and roots count down after the move they held
    *   updateFaction(this);        // enemy factions: the faction of the phase, announced when it changes
    *   updateTimeline(this);       // phase 2b-3 (elite rushes and bosses by time)
    *   spawnEnemies(this);         // Task 4
@@ -289,6 +291,7 @@ export class Run {
     savePrevious(this);
     applyActions(this, input);
     moveHero(this, input);
+    tickSnares(this);
     updateFaction(this);
     updateTimeline(this);
     spawnEnemies(this);

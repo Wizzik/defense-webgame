@@ -80,7 +80,10 @@ export function scatterMember(
   const x = clamp(cx + (run.rng.next() * 2 - 1) * half, arena.width / 2 - def.collision);
   const y = clamp(cy + (run.rng.next() * 2 - 1) * half, arena.height / 2 - def.collision);
   run.stats.spawned++;
-  return run.enemies.spawn(type, role, x, y, def.hp * scale, scale, run.tick);
+  const slot = run.enemies.spawn(type, role, x, y, def.hp * scale, scale, run.tick);
+  // a strike from afar waits its whole cooldown after the spawn (a boss's first strike: sim/timeline.ts spawnBoss)
+  if (slot >= 0 && def.strike !== undefined) run.enemies.strikeCooldown[slot] = Math.round(def.strike.cooldownSeconds * TICKS_PER_SECOND);
+  return slot;
 }
 
 function clamp(value: number, limit: number): number {

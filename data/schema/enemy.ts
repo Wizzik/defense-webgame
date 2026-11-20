@@ -75,11 +75,19 @@ export const EnemySchema = z.object({
     minRange: z.number().positive(),
     maxRange: z.number().positive(),
     radius: z.number().positive(),
-    damage: z.number().positive(),
+    /** What the circle does: `damage` (the default) or `root`: it holds the hero for `rootSeconds`, no damage. */
+    effect: z.enum(["damage", "root"]).optional(),
+    damage: z.number().positive().optional(),
+    rootSeconds: z.number().positive().optional(),
     windupSeconds: z.number().positive(),
     cooldownSeconds: z.number().positive(),
     leap: z.boolean(),
-  }).strict().refine((s) => s.minRange < s.maxRange, "minRange is not below maxRange").optional(),
+  }).strict().refine((s) => s.minRange < s.maxRange, "minRange is not below maxRange")
+    .refine((s) => (s.effect === "root" ? s.rootSeconds !== undefined : s.damage !== undefined), {
+      message: "a damage strike needs damage, a root strike needs rootSeconds",
+    }).optional(),
+  /** The web (sim/hero-snares.ts): every hit of the type on the hero slows its walking by `slow` for `seconds`. */
+  web: z.object({ slow: z.number().positive().max(1), seconds: z.number().positive() }).strict().optional(),
   /** Goes for the hero whatever the role of its pack is. */
   hunter: z.literal(true).optional(),
   /**

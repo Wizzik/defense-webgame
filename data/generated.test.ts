@@ -212,8 +212,12 @@ describe("generated game data", () => {
       "lancer", "captain", "iron-marshal", "dread-regent", "hornback", "warlord", "grove-warden",
     ]);
     expect(enemies.filter((e) => e.hunter).map((e) => e.id)).toEqual(["captain", "warlord", "bone-tyrant", "grove-warden"]);
-    expect(enemies.filter((e) => e.strike !== undefined).map((e) => e.id)).toEqual(enemies.filter((e) => e.boss).map((e) => e.id));
-    expect(enemies.filter((e) => e.strike?.leap === false).map((e) => e.id)).toEqual(["gunmaster"]);
+    expect(enemies.filter((e) => e.strike !== undefined).map((e) => e.id)).toEqual([
+      ...enemies.filter((e) => e.boss).map((e) => e.id), "grove-druid", "grove-warden",
+    ]);
+    expect(enemies.filter((e) => e.strike?.leap === false).map((e) => e.id)).toEqual(["gunmaster", "grove-druid", "grove-warden"]);
+    expect(enemies.filter((e) => (e.strike as { effect?: string } | undefined)?.effect === "root").map((e) => e.id))
+      .toEqual(["grove-druid", "grove-warden"]);
     expect(enemies.filter((e) => e.aura !== undefined).map((e) => e.id)).toEqual(["captain", "dread-regent", "warlord"]);
   });
 

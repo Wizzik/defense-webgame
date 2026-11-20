@@ -2,6 +2,7 @@ import { armorReduction, damageCastle, damageHero, rollDamage } from "./combat";
 import { TICK_SECONDS, TICKS_PER_SECOND } from "./constants";
 import { Action, Role } from "./enemies";
 import { attackDelayTicks, bloodlustDamageScale, bloodlustSpeedScale, updateBloodlust } from "./enemy-bloodlust";
+import { slowHero } from "./hero-snares";
 import { auraDamageScale, auraSpeedScale, updateEnemyAuras } from "./enemy-aura";
 import { cancelCharge, Charge, chargeVX, chargeVY, updateCharge } from "./enemy-charge";
 import { cancelSlam, updateSlam } from "./enemy-slam";
@@ -113,6 +114,9 @@ export function updateEnemies(run: Run): void {
             if (targetsHero) {
               const k = 1 - armorReduction(hero.stats.armor, constants.defenseArmor);
               damageHero(run, raw * k, i);
+              if (def.web !== undefined && run.shieldTicks === 0) {
+                slowHero(run, def.web.slow, Math.round(def.web.seconds * TICKS_PER_SECOND));
+              }
             } else {
               damageCastle(run, raw, i);
             }

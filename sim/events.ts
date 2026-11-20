@@ -47,6 +47,8 @@ export const EventKind = {
   Faction: 26,
   /** A bloodcaller cast bloodlust: a = its slot, value = enemies lusted, x/y = the caster. */
   Bloodlust: 27,
+  /** The hero was snared: value = 0 web (slow) / 1 roots, x/y = the hero, u = seconds. */
+  HeroSnared: 28,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */
