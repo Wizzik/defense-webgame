@@ -754,8 +754,8 @@
       "kind": "ranged",
       "range": 600,
       "cooldown": 1.5,
-      "damageMin": 8,
-      "damageMax": 9
+      "damageMin": 7,
+      "damageMax": 7
     },
     "behavior": "skirmish",
     "faction": "elf",
@@ -769,7 +769,7 @@
       "cs": "Kamenný strážce"
     },
     "level": 1,
-    "hp": 756,
+    "hp": 662,
     "hpRegen": 1.5,
     "armor": 8,
     "moveSpeed": 356,
@@ -779,8 +779,8 @@
       "kind": "melee",
       "range": 128,
       "cooldown": 2.5,
-      "damageMin": 35,
-      "damageMax": 42
+      "damageMin": 29,
+      "damageMax": 35
     },
     "behavior": "siege",
     "faction": "elf",
