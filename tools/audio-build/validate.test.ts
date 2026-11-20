@@ -96,6 +96,14 @@ describe("generated audio data", () => {
   });
 });
 
+describe("game sounds", () => {
+  it("may be none (silent)", () => {
+    const r = raw();
+    r.sounds = { ...(r.sounds as Record<string, string>), "pickup.xp": "none" };
+    expect(() => validateAudio(r, game, exists)).not.toThrow();
+  });
+});
+
 describe("music", () => {
   it("is required", () => {
     const r = raw();

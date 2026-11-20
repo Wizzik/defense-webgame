@@ -28,7 +28,7 @@ export const CueSchema = z.object({
   gainDb: z.number().default(0),
   pitchSpread: z.number().min(0).max(0.5).default(0.06),
   gainSpreadDb: z.number().min(0).max(12).default(2),
-  maxVoices: z.number().int().min(1).max(16).default(4),
+  maxVoices: z.number().int().min(1).max(16).default(1),
   priority: z.number().int().min(0).max(3).default(1),
   category: AudioCategory.default("sfx"),
 }).strict().refine((c) => c.files.length > 0 || c.synth !== undefined, {

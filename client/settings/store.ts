@@ -7,7 +7,7 @@ export interface Settings {
 }
 
 export const SETTINGS_KEY = "defense-webgame.settings";
-export const DEFAULT_SETTINGS: Readonly<Settings> = { master: 0.8, music: 0.6, sfx: 0.8, shake: true, numbers: true };
+export const DEFAULT_SETTINGS: Readonly<Settings> = { master: 0.8, music: 0.3, sfx: 0.8, shake: true, numbers: true };
 
 function volume(v: unknown, fallback: number): number {
   return typeof v === "number" && Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : fallback;

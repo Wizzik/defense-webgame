@@ -69,7 +69,7 @@ export function validateAudio(raw: unknown, game: AudioGame, fileExists: (path: 
   }
   for (const id of Object.keys(data.enemies)) if (!enemyIds.has(id)) errors.push(`unknown enemy ${id}`);
 
-  for (const [sound, id] of Object.entries(data.sounds)) ref(`sound ${sound}`, id);
+  for (const [sound, id] of Object.entries(data.sounds)) ref(`sound ${sound}`, id, true);
 
   const { run, ...single } = data.music;
   for (const [slot, id] of [...Object.entries(single), ...run.map((id, i) => [`run.${i}`, id] as const)]) {

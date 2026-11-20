@@ -101,7 +101,6 @@ export const SFX_SOURCES: AudioSource[] = [
   ...cue("cleaver-chop", [
     [K_RPG, "chop.ogg"],
     melee("knife_slice2_48kHz_16bit_0.56s_d1b73212_s03.wav"),
-    [MEDIEVAL_HIT, "Axe Norse Sword Blade on Blade.wav", [0.1, 0.5]],
   ]),
   ...cue("tide-bolt", [[SPLASH, "water_splash-02.flac"], [SPLASH, "water_splash-05.flac"], [SPLASH, "water_splash-03.flac"]]),
 
@@ -173,8 +172,6 @@ export const SFX_SOURCES: AudioSource[] = [
   ...cue("enemy-charge", [[MEDIEVAL_TEX, "medieval_sfx_textures_2_of_2/Spear Swing.wav", [0.8, 2.0]], [SWISH, "swish-9.wav"]]),
 
   // pickups, chests, orbs
-  ...cue("pickup-xp", [[K_UI, "glass_001.ogg"], [K_UI, "glass_002.ogg"], [K_UI, "pluck_001.ogg"]]),
-  ...cue("pickup-coin", [[K_RPG, "handleCoins.ogg"], [K_RPG, "handleCoins2.ogg"]]),
   ...cue("pickup-heart", [spell("Healing Spell Impact 15_s08.wav", 0.6)]),
   ...cue("orb-boots", [[SWISH, "swish-11.wav"], spell("Wind Spell Impact 1_s07.wav", 0.8)]),
   ...cue("orb-berserk", [melee("impact_punch_heavy_000_48kHz_16bit_0.65s_8fb58ba7_s02.wav"), spell("Fire Spell Impact 1_s06.wav", 0.8)]),
