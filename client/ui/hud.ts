@@ -9,7 +9,7 @@ import { BuffBar } from "./buff-bar";
 import { el, formatTime, setText } from "./dom";
 import type { Drop } from "../../meta";
 import { chestLootLine, dropLine } from "./drop-lines";
-import { type Lang, t } from "./i18n";
+import { type Lang, type MessageKey, t } from "./i18n";
 
 /** How long the news of a boss or of an enrage stays (a rush stays for its warning time). */
 const ANNOUNCE_TICKS = 4 * TICKS_PER_SECOND;
@@ -164,6 +164,7 @@ export class Hud {
     this.sync(run);
     this.announcer.step();
     const { events } = run;
+    let faction = "";
     for (let i = 0; i < events.count; i++) {
       const kind = events.kind[i];
       if (kind === EventKind.RushWarning) {
@@ -181,11 +182,15 @@ export class Hud {
           this.announcer.push(line.text, ANNOUNCE_TICKS, line.tone);
           this.loot(line.tone);
         }
+      } else if (kind === EventKind.Faction) {
+        faction = run.data.rules.factions[events.a[i]!]!.id;
       } else if (kind === EventKind.Enrage) {
         const name = run.data.enemies[run.finalBossType]!.name[lang];
         this.announcer.push(t(lang, "announce.enrage", { name }), ANNOUNCE_TICKS);
       }
     }
+    // a new faction waits behind the news of its step (a boss comes in the same step at 4:10 and 8:20)
+    if (faction !== "" && faction !== "human") this.announcer.queue(t(lang, `announce.faction.${faction}` as MessageKey), ANNOUNCE_TICKS);
   }
 
   private loot(tone: string): void {
@@ -233,7 +238,7 @@ export class Hud {
     setText(this.muteKey, `${t(lang, "gear.key")} · ${t(lang, "settings.key")} · ${t(lang, "hud.muteKey")}`);
     setText(this.kills, t(lang, "hud.kills", { n: run.stats.kills }));
 
-    this.buffBar.update(run.buffs, lang);
+    this.buffBar.update(run.buffs, run.hero, lang);
     this.updateAbilities(run, lang);
   }
   private updateAbilities(run: Run, lang: Lang): void {

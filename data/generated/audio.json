@@ -666,6 +666,162 @@
       "category": "sfx"
     },
     {
+      "id": "human-fall",
+      "files": [
+        "audio/sfx/cleaver-chop-1.ogg",
+        "audio/sfx/cleaver-chop-2.ogg"
+      ],
+      "synth": "death",
+      "gainDb": -8,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 0,
+      "category": "sfx"
+    },
+    {
+      "id": "human-fall-heavy",
+      "files": [
+        "audio/sfx/castle-thud-1.ogg",
+        "audio/sfx/castle-thud-2.ogg",
+        "audio/sfx/castle-thud-3.ogg"
+      ],
+      "synth": "death",
+      "gainDb": -6,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 0,
+      "category": "sfx"
+    },
+    {
+      "id": "orc-fall",
+      "files": [
+        "audio/sfx/stone-strike-1.ogg",
+        "audio/sfx/stone-strike-2.ogg",
+        "audio/sfx/stone-strike-3.ogg"
+      ],
+      "synth": "death",
+      "gainDb": -6,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 0,
+      "category": "sfx"
+    },
+    {
+      "id": "orc-fall-heavy",
+      "files": [
+        "audio/sfx/stone-quake-1.ogg",
+        "audio/sfx/stone-quake-2.ogg"
+      ],
+      "synth": "death",
+      "gainDb": -4,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 0,
+      "category": "sfx"
+    },
+    {
+      "id": "elf-fall",
+      "files": [
+        "audio/sfx/moon-whisper-1.ogg",
+        "audio/sfx/moon-whisper-2.ogg"
+      ],
+      "synth": "death",
+      "gainDb": -8,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 0,
+      "category": "sfx"
+    },
+    {
+      "id": "elf-fall-heavy",
+      "files": [
+        "audio/sfx/moon-glimmer-1.ogg",
+        "audio/sfx/moon-glimmer-2.ogg"
+      ],
+      "synth": "death",
+      "gainDb": -6,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 0,
+      "category": "sfx"
+    },
+    {
+      "id": "blood-howl",
+      "files": [
+        "audio/sfx/blood-fan-1.ogg",
+        "audio/sfx/blood-fan-2.ogg"
+      ],
+      "synth": "cast",
+      "gainDb": -6,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "web-snare",
+      "files": [
+        "audio/sfx/mist-chill-1.ogg",
+        "audio/sfx/mist-chill-2.ogg"
+      ],
+      "synth": "hit",
+      "gainDb": -6,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "root-creak",
+      "files": [
+        "audio/sfx/bone-grasp-1.ogg",
+        "audio/sfx/bone-grasp-2.ogg"
+      ],
+      "synth": "cast",
+      "gainDb": -4,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 2,
+      "category": "sfx"
+    },
+    {
+      "id": "root-bind",
+      "files": [
+        "audio/sfx/stone-tap-1.ogg",
+        "audio/sfx/stone-tap-2.ogg"
+      ],
+      "synth": "hit",
+      "gainDb": -4,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
+      "id": "grave-rise",
+      "files": [
+        "audio/sfx/bone-wail-1.ogg",
+        "audio/sfx/bone-wail-2.ogg"
+      ],
+      "synth": "cast",
+      "gainDb": -6,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 1,
+      "category": "sfx"
+    },
+    {
       "id": "bone-rattle",
       "files": [
         "audio/sfx/bone-rattle-1.ogg",
@@ -1241,22 +1397,22 @@
   },
   "enemies": {
     "shieldbearer": {
-      "death": "bone-rattle"
+      "death": "human-fall"
     },
     "scout": {
-      "death": "bone-rattle"
+      "death": "human-fall"
     },
     "musketeer": {
-      "death": "bone-rattle"
+      "death": "human-fall"
     },
     "chaplain": {
-      "death": "bone-rattle"
+      "death": "human-fall"
     },
     "lancer": {
-      "death": "bone-rattle"
+      "death": "human-fall"
     },
     "captain": {
-      "death": "bone-rattle-heavy"
+      "death": "human-fall-heavy"
     },
     "iron-marshal": {
       "death": "bone-rattle-heavy"
@@ -1271,19 +1427,19 @@
       "death": "bone-rattle-heavy"
     },
     "brute": {
-      "death": "bone-rattle"
+      "death": "orc-fall"
     },
     "spearthrower": {
-      "death": "bone-rattle"
+      "death": "orc-fall"
     },
     "hornback": {
-      "death": "bone-rattle"
+      "death": "orc-fall"
     },
     "bloodcaller": {
-      "death": "bone-rattle"
+      "death": "orc-fall"
     },
     "warlord": {
-      "death": "bone-rattle-heavy"
+      "death": "orc-fall-heavy"
     },
     "ghoul": {
       "death": "bone-rattle"
@@ -1304,19 +1460,19 @@
       "death": "bone-rattle-heavy"
     },
     "huntress": {
-      "death": "bone-rattle"
+      "death": "elf-fall"
     },
     "moon-archer": {
-      "death": "bone-rattle"
+      "death": "elf-fall"
     },
     "stone-warden": {
-      "death": "bone-rattle"
+      "death": "elf-fall-heavy"
     },
     "grove-druid": {
-      "death": "bone-rattle"
+      "death": "elf-fall"
     },
     "grove-warden": {
-      "death": "bone-rattle-heavy"
+      "death": "elf-fall-heavy"
     }
   },
   "sounds": {
@@ -1345,7 +1501,13 @@
     "drop.mythic": "drop-mythic",
     "gear.equip": "gear-equip",
     "lowHp": "heartbeat",
-    "ui.click": "ui-click"
+    "ui.click": "ui-click",
+    "faction": "war-horn",
+    "enemy.bloodlust": "blood-howl",
+    "hero.web": "web-snare",
+    "enemy.root": "root-creak",
+    "hero.root": "root-bind",
+    "enemy.raise": "grave-rise"
   },
   "music": {
     "menu": "menu-fantasy-theme",

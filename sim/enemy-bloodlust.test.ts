@@ -76,16 +76,17 @@ describe("bloodlust", () => {
     expect(run.enemies.bloodlustTicks[late]).toBe(240);
   });
 
-  it("a lusted brute walks 30 % faster, hits 30 % harder and attacks after delay / 1.3", () => {
+  it("a lusted brute walks faster, hits harder and attacks sooner by the bloodcaller's shares", () => {
     const run = bloodRun();
     const lust = typeOf(run, "bloodcaller");
+    const share = run.data.enemies[lust]!.bloodlust!;
     const def = run.data.enemies[typeOf(run, "brute")]!;
     const g = place(run, "brute", Role.Sieger, 2000, 2000);
     const plain = stride(run, g);
     expect(plain).toBeCloseTo(def.moveSpeed / 30, 9);
     run.enemies.bloodlustTicks[g] = 100;
     run.enemies.bloodlustType[g] = lust;
-    expect(stride(run, g)).toBeCloseTo((def.moveSpeed * 1.3) / 30, 9);
+    expect(stride(run, g)).toBeCloseTo((def.moveSpeed * (1 + share.moveSpeed)) / 30, 9);
 
     const { castle } = run;
     const a = place(run, "brute", Role.Sieger, castle.x + castle.radius + def.collision + 20, castle.y);
@@ -94,8 +95,9 @@ describe("bloodlust", () => {
     run.step(NO_INPUT);
     const hits = eventsOf(run, EventKind.CastleHit).filter((k) => run.events.a[k] === a);
     expect(hits).toHaveLength(1);
-    expect(run.events.value[hits[0]!]).toBeCloseTo(DAMAGE * 1.3, 9);
-    expect(run.enemies.attackCooldown[a]).toBe(Math.round((def.attack.cooldown * 30) / 1.3));
+    expect(run.events.value[hits[0]!]).toBeCloseTo(DAMAGE * (1 + share.damage), 9);
+    expect(share.attackSpeed).toBeGreaterThan(0);
+    expect(run.enemies.attackCooldown[a]).toBe(Math.round((def.attack.cooldown * 30) / (1 + share.attackSpeed)));
   });
 
   it("the same seed gives the same state", () => {

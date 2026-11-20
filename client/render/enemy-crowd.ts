@@ -26,6 +26,8 @@ const FLASH_SECONDS = 0.12;
 const BODY_TINT = 0.45;
 /** Share of the type colour that the model also emits, so the type reads in the dark arena. */
 const GLOW = 0.12;
+/** A lusted enemy (bloodlust) glows in this red the whole time the effect runs. */
+const LUST_GLOW = vec3(0.55, 0.06, 0.04);
 /** Marks "never hit" in `anim.w`, far enough in the past for the flash window. */
 const NEVER = -1000;
 
@@ -41,6 +43,9 @@ interface TypeMesh {
   matrices: Float32Array;
   anim: Float32Array;
   animAttribute: InstancedBufferAttribute;
+  /** 1 per instance while its enemy is lusted (bloodlust), else 0. */
+  lust: Float32Array;
+  lustAttribute: InstancedBufferAttribute;
   walk: VatClip;
   punch: VatClip;
   idle: VatClip;
@@ -79,6 +84,10 @@ export class EnemyCrowd implements RunView {
     const animAttribute = new InstancedBufferAttribute(anim, 4);
     animAttribute.setUsage(DynamicDrawUsage);
     geometry.setAttribute("anim", animAttribute);
+    const lust = new Float32Array(capacity);
+    const lustAttribute = new InstancedBufferAttribute(lust, 1);
+    lustAttribute.setUsage(DynamicDrawUsage);
+    geometry.setAttribute("lust", lustAttribute);
 
     const animNode = attribute("anim", "vec4");
     const tint = uniform(new Vector3(tints[type * 3], tints[type * 3 + 1], tints[type * 3 + 2]));
@@ -88,9 +97,10 @@ export class EnemyCrowd implements RunView {
     const base = vat.map ? texture(vat.map, uv()).rgb : vertexColor();
     material.colorNode = base.mul(mix(vec3(1, 1, 1), tint.div(peak), BODY_TINT));
     material.positionNode = vatPositionNode(vat, animNode, this.time, VAT_FPS);
-    // glow in the type colour, white for a moment after a hit
+    // glow in the type colour (red while lusted), white for a moment after a hit
     const sinceHit = this.time.sub(animNode.w);
-    material.emissiveNode = mix(tint.mul(GLOW), vec3(1, 1, 1), float(1).sub(step(FLASH_SECONDS, sinceHit)));
+    const glow = mix(tint.mul(GLOW), LUST_GLOW, attribute("lust", "float"));
+    material.emissiveNode = mix(glow, vec3(1, 1, 1), float(1).sub(step(FLASH_SECONDS, sinceHit)));
 
     const mesh = new InstancedMesh(geometry, material, capacity);
     mesh.instanceMatrix.setUsage(DynamicDrawUsage);
@@ -102,6 +112,8 @@ export class EnemyCrowd implements RunView {
       matrices: mesh.instanceMatrix.array as Float32Array,
       anim,
       animAttribute,
+      lust,
+      lustAttribute,
       walk: requireClip(vat, WALK_CLIP),
       punch: requireClip(vat, PUNCH_CLIP),
       idle: requireClip(vat, IDLE_CLIP),
@@ -121,7 +133,7 @@ export class EnemyCrowd implements RunView {
       const x = enemies.prevX[slot] + (enemies.x[slot] - enemies.prevX[slot]) * alpha;
       const y = enemies.prevY[slot] + (enemies.y[slot] - enemies.prevY[slot]) * alpha;
       const type = enemies.type[slot];
-      const { matrices, anim, walk, punch, idle, height, feet } = types[type];
+      const { matrices, anim, lust, walk, punch, idle, height, feet } = types[type];
       const n = buckets.push(type);
       const diameter = 2 * run.data.enemies[type].collision * SCENE_SCALE;
       const scale = (MODEL_HEIGHT_FACTOR * diameter) / height;
@@ -161,12 +173,14 @@ export class EnemyCrowd implements RunView {
       anim[a + 1] = clip.frames;
       anim[a + 2] = start;
       anim[a + 3] = enemies.lastHitTick[slot] < 0 ? NEVER : enemies.lastHitTick[slot] * seconds;
+      lust[n] = enemies.bloodlustTicks[slot] > 0 ? 1 : 0;
     }
     for (let type = 0; type < types.length; type++) {
-      const { mesh, animAttribute } = types[type];
+      const { mesh, animAttribute, lustAttribute } = types[type];
       mesh.count = buckets.count(type);
       mesh.instanceMatrix.needsUpdate = true;
       animAttribute.needsUpdate = true;
+      lustAttribute.needsUpdate = true;
     }
   }
 

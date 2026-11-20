@@ -1,5 +1,5 @@
 import type { GameData } from "../../data/schema";
-import { createRun, EventKind, InputAction, type LoadoutEntry, NO_INPUT, type Run, SlamEvent, TICK_SECONDS, type TickInput, ULTIMATE_SLOT } from "../../sim";
+import { createRun, EventKind, HeroHitSource, InputAction, type LoadoutEntry, NO_INPUT, type Run, SlamEvent, TICK_SECONDS, type TickInput, ULTIMATE_SLOT } from "../../sim";
 import { SCENE_SCALE } from "../render/coords";
 import type { FollowCamera } from "../render/camera";
 import type { Scene } from "three/webgpu";
@@ -116,7 +116,7 @@ export class Session {
         if (SHAKING_KINDS.has(run.abilities[slot]!.def.kind)) {
           this.camera.shake(slot === ULTIMATE_SLOT ? SHAKE_ULTIMATE : SHAKE_CAST);
         }
-      } else if (events.kind[i] === EventKind.HeroHit) this.camera.shake(SHAKE_HERO_HIT);
+      } else if (events.kind[i] === EventKind.HeroHit && events.u[i] !== HeroHitSource.Cloud) this.camera.shake(SHAKE_HERO_HIT);
       else if (events.kind[i] === EventKind.Slam && events.value[i] === SlamEvent.Hit) this.camera.shake(SHAKE_ULTIMATE);
     }
   }

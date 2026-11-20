@@ -1,4 +1,4 @@
-import { damageHero } from "./combat";
+import { damageHero, HeroHitSource } from "./combat";
 import { TICKS_PER_SECOND } from "./constants";
 import type { Run } from "./run";
 
@@ -25,5 +25,5 @@ export function updateClouds(run: Run): void {
     source = i;
   }
   if (source < 0) return;
-  run.stats.cloudDamage += damageHero(run, (share * hero.stats.maxHp) / TICKS_PER_SECOND, source);
+  run.stats.cloudDamage += damageHero(run, (share * hero.stats.maxHp) / TICKS_PER_SECOND, source, HeroHitSource.Cloud);
 }

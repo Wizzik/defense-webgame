@@ -2,6 +2,7 @@ export const EventKind = {
   Hit: 1,
   Death: 2,
   Cast: 3,
+  /** The hero lost hp: a = the enemy slot (-1 none), value = hp, x/y = the hero, u = HeroHitSource (sim/combat.ts). */
   HeroHit: 4,
   CastleHit: 5,
   /** A crystal, a coin or a heart was collected: value = XP, gold or hp gained, u = 0 crystal / 1 coin / 2 heart. */

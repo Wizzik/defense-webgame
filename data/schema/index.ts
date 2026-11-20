@@ -14,7 +14,7 @@ export { LocalizedText, Slug } from "./common";
 export { ConstantsSchema } from "./constants";
 export type { Constants } from "./constants";
 export { EnemySchema } from "./enemy";
-export type { Enemy } from "./enemy";
+export type { Enemy, FactionId } from "./enemy";
 export { PointSchema, RarityWeightsSchema, RulesSchema } from "./rules";
 export type { Point, RarityWeights, Rules } from "./rules";
 export { HeroSchema } from "./hero";

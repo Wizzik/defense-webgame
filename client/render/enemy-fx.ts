@@ -4,6 +4,7 @@ import { EventKind, type Run, SlamEvent, TICKS_PER_SECOND } from "../../sim";
 import type { RunView } from "../game/session";
 import { SCENE_SCALE } from "./coords";
 import { AuraRings } from "./fx/aura-rings";
+import { BlastFx } from "./fx/blasts";
 import { BoltFx } from "./fx/bolts";
 import { rgb } from "./fx/instances";
 import { SlamRings } from "./fx/slam-rings";
@@ -19,11 +20,31 @@ const AURA_COLOR = rgb(0xb84ad8);
 const AURA_OPACITY = 0.25;
 /** Warning circle of a boss slam. */
 const SLAM_COLOR = rgb(0xd94a4a);
+/** Warning circle of roots (grove druid, grove warden): green, not the bosses' red. */
+const ROOT_COLOR = rgb(0x5fd04a);
+const ROOT_POOL = 8;
+/** The steady poison cloud on the floor around a rotgut and a bone tyrant. */
+const CLOUD_COLOR = rgb(0x8fa27a);
+const CLOUD_OPACITY = 0.35;
+/** Floor rings: every cloud carrier, plus the web and the roots at the hero's feet. */
+const FLOOR_POOL = 64;
+/** The web under a slowed hero and the roots around a rooted hero's feet (world units). */
+const WEB_COLOR = rgb(0xe4e8f0);
+const WEB_RADIUS = 70;
+const ROOT_RING_COLOR = rgb(0x5fd04a);
+const ROOT_RADIUS = 45;
+const SNARE_OPACITY = 0.8;
+/** A red flash over a bloodcaller that casts, a green one where a gravebinder raises (world units across). */
+const LUST_FLASH = 0xd9302a;
+const LUST_SIZE = 90;
+const RAISE_FLASH = 0x6fe08a;
+const RAISE_SIZE = 110;
 
 /**
  * Shots of ranged enemies (the hit is instant, the beam is only an effect) and the heal beams of
  * chaplains, the line that warns of a lancer's charge, the ring under a captain's aura and the warning circle of a
- * boss slam. A shooter that died in the same step is drawn from its last position: its slot keeps
+ * boss slam, the green circles of roots, the poison clouds, the web and the roots at the hero's feet, and the flashes of
+ * bloodlust and of a raise. A shooter that died in the same step is drawn from its last position: its slot keeps
  * the values until the next spawn, which comes only in the next step.
  */
 export class EnemyFx implements RunView {
@@ -32,6 +53,12 @@ export class EnemyFx implements RunView {
   private readonly telegraphs: BoltFx;
   private readonly auraRings = new AuraRings();
   private readonly slamRings = new SlamRings(SLAM_COLOR);
+  private readonly rootRings = new SlamRings(ROOT_COLOR, ROOT_POOL);
+  private readonly floorRings = new AuraRings(FLOOR_POOL);
+  private readonly lustFlashes = new BlastFx(LUST_FLASH);
+  private readonly raiseFlashes = new BlastFx(RAISE_FLASH);
+  /** 1 for enemy types whose strike roots. */
+  private readonly roots: Uint8Array;
   private readonly data: GameData;
   /** 1 for enemy types that shoot. */
   private readonly ranged: Uint8Array;
@@ -39,15 +66,19 @@ export class EnemyFx implements RunView {
 
   constructor(data: GameData) {
     this.ranged = Uint8Array.from(data.enemies, (e) => (e.attack.kind === "ranged" ? 1 : 0));
+    this.roots = Uint8Array.from(data.enemies, (e) => (e.strike?.effect === "root" ? 1 : 0));
     this.data = data;
     const windup = Math.max(0.1, ...data.enemies.map((e) => e.charge?.windupSeconds ?? 0));
     this.telegraphs = new BoltFx(windup, CHARGE_THICKNESS);
-    this.object.add(this.bolts.mesh, this.telegraphs.mesh, this.auraRings.mesh, this.slamRings.outlines, this.slamRings.fills);
+    this.object.add(
+      this.bolts.mesh, this.telegraphs.mesh, this.auraRings.mesh, this.slamRings.outlines, this.slamRings.fills,
+      this.rootRings.outlines, this.rootRings.fills, this.floorRings.mesh, this.lustFlashes.mesh, this.raiseFlashes.mesh,
+    );
   }
 
   /** Slam circles on the floor now (warning or flashing). */
   get slamRingCount(): number {
-    return this.slamRings.visible;
+    return this.slamRings.visible + this.rootRings.visible;
   }
 
   onEvents(run: Run): void {
@@ -81,13 +112,18 @@ export class EnemyFx implements RunView {
         );
       } else if (kind === EventKind.Slam) {
         const value = events.value[i];
+        const rings = this.roots[e.type[a]!] === 1 ? this.rootRings : this.slamRings;
         if (value === SlamEvent.Warning) {
-          this.slamRings.warn(
+          rings.warn(
             a, events.x[i]! * SCENE_SCALE, -events.y[i]! * SCENE_SCALE, events.u[i]! * SCENE_SCALE,
             now, events.v[i]! / TICKS_PER_SECOND,
           );
-        } else if (value === SlamEvent.Hit) this.slamRings.hit(a, now);
-        else this.slamRings.cancel(a);
+        } else if (value === SlamEvent.Hit) rings.hit(a, now);
+        else rings.cancel(a);
+      } else if (kind === EventKind.Bloodlust) {
+        this.lustFlashes.add(now, events.x[i]! * SCENE_SCALE, -events.y[i]! * SCENE_SCALE, LUST_SIZE * SCENE_SCALE);
+      } else if (kind === EventKind.Raise) {
+        this.raiseFlashes.add(now, events.x[i]! * SCENE_SCALE, -events.y[i]! * SCENE_SCALE, RAISE_SIZE * SCENE_SCALE);
       }
     }
   }
@@ -98,6 +134,10 @@ export class EnemyFx implements RunView {
     this.bolts.write(now);
     this.telegraphs.write(now);
     this.slamRings.write(now);
+    this.rootRings.write(now);
+    this.lustFlashes.write(now);
+    this.raiseFlashes.write(now);
+    this.updateFloor(run, alpha);
     this.auraRings.begin();
     const e = run.enemies;
     for (let i = 0; i < e.capacity; i++) {
@@ -110,12 +150,36 @@ export class EnemyFx implements RunView {
     this.auraRings.end();
   }
 
+  /** Poison clouds around their carriers and the hero's web and roots, rewritten every frame. */
+  private updateFloor(run: Run, alpha: number): void {
+    const rings = this.floorRings;
+    rings.begin();
+    const { enemies: e, hero } = run;
+    const hx = (hero.prevX + (hero.x - hero.prevX) * alpha) * SCENE_SCALE;
+    const hz = -(hero.prevY + (hero.y - hero.prevY) * alpha) * SCENE_SCALE;
+    if (hero.rootTicks > 0) rings.add(hx, hz, ROOT_RADIUS * SCENE_SCALE, ROOT_RING_COLOR, SNARE_OPACITY);
+    if (hero.slowTicks > 0) rings.add(hx, hz, WEB_RADIUS * SCENE_SCALE, WEB_COLOR, SNARE_OPACITY);
+    for (let i = 0; i < e.capacity; i++) {
+      if (e.alive[i] === 0) continue;
+      const cloud = this.data.enemies[e.type[i]!]!.cloud;
+      if (cloud === undefined) continue;
+      const x = e.prevX[i]! + (e.x[i]! - e.prevX[i]!) * alpha;
+      const y = e.prevY[i]! + (e.y[i]! - e.prevY[i]!) * alpha;
+      rings.add(x * SCENE_SCALE, -y * SCENE_SCALE, cloud.radius * SCENE_SCALE, CLOUD_COLOR, CLOUD_OPACITY);
+    }
+    rings.end();
+  }
+
   dispose(): void {
     this.object.removeFromParent();
     this.bolts.dispose();
     this.telegraphs.dispose();
     this.auraRings.dispose();
     this.slamRings.dispose();
+    this.rootRings.dispose();
+    this.floorRings.dispose();
+    this.lustFlashes.dispose();
+    this.raiseFlashes.dispose();
   }
 
   private beam(now: number, ax: number, ay: number, bx: number, by: number, shot: boolean): void {
@@ -132,5 +196,8 @@ export class EnemyFx implements RunView {
     this.bolts.reset();
     this.telegraphs.reset();
     this.slamRings.reset();
+    this.rootRings.reset();
+    this.lustFlashes.reset();
+    this.raiseFlashes.reset();
   }
 }

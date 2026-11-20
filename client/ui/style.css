@@ -286,6 +286,12 @@
 .buff-cell.heal {
   --buff-color: #4fd18b;
 }
+.buff-cell.web {
+  --buff-color: #d6dbe4;
+}
+.buff-cell.root {
+  --buff-color: #6fbf4a;
+}
 .buff-icon svg {
   display: block;
   width: 20px;

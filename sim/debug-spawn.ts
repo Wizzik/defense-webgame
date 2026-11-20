@@ -1,3 +1,4 @@
+import type { FactionId } from "../data/schema";
 import { Role } from "./enemies";
 import type { Run } from "./run";
 import { timeScale } from "./spawner";
@@ -7,7 +8,7 @@ const SPACING = 300;
 const NORTH = 600;
 
 /** A type debugSpawnEach sends for `faction`: of that faction, no boss, and not one that only rises (xp 0). */
-function sent(run: Run, type: number, faction: string): boolean {
+function sent(run: Run, type: number, faction: FactionId): boolean {
   const def = run.data.enemies[type];
   return run.isBoss[type] === 0 && def.faction === faction && def.xp > 0;
 }
@@ -17,7 +18,7 @@ function sent(run: Run, type: number, faction: string): boolean {
  * A full store skips the rest. Bosses are left out (they come by the timeline; `?phase` starts near one), and so
  * are the risen, which only a gravebinder raises.
  */
-export function debugSpawnEach(run: Run, faction = run.data.rules.factions[run.factionIndex]!.id): void {
+export function debugSpawnEach(run: Run, faction: FactionId = run.data.rules.factions[run.factionIndex]!.id): void {
   const { enemies: store, hero } = run;
   const defs = run.data.enemies;
   const scale = timeScale(run.data.rules, run.tick);

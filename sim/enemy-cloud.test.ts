@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { heroDamageScale } from "./combat";
+import { heroDamageScale, HeroHitSource } from "./combat";
+import { EventKind } from "./events";
 import { Role } from "./enemies";
 import { NO_INPUT } from "./input";
 import { enemyRun, place, type EnemyRun } from "./testing/enemy-run";
@@ -30,6 +31,8 @@ describe("poison cloud", () => {
     const maxHp = run.hero.stats.maxHp;
     steps(run, 30);
     expect(run.stats.cloudDamage).toBeCloseTo(0.01 * maxHp * heroDamageScale(run), 3);
+    const hit = run.events.kind.subarray(0, run.events.count).indexOf(EventKind.HeroHit);
+    expect(run.events.u[hit]).toBe(HeroHitSource.Cloud);
   });
 
   it("two clouds over the hero hurt like one", () => {

@@ -319,9 +319,11 @@ test("every hero plays without errors", async ({ page }, testInfo) => {
 test("every enemy type renders without errors", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&debug=1&speed=2&duration=60&lang=en");
   await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
-  // behind the menu the run is paused, so nobody dies before the count is read
-  await page.evaluate(() => window.__game!.debug!.spawnEach());
-  await page.waitForFunction((n) => (window.__game?.enemyTypes ?? 0) >= n, enemyIds.length, {
+  // behind the menu the run is paused, so nobody dies before the count is read; every faction's row (no risen)
+  await page.evaluate(() => {
+    for (const id of ["human", "orc", "undead", "elf"]) window.__game!.debug!.spawnFaction(id);
+  });
+  await page.waitForFunction((n) => (window.__game?.enemyTypes ?? 0) >= n, enemyIds.length - 1, {
     timeout: 3_000,
     polling: 50,
   });
@@ -449,6 +451,38 @@ test("a miniboss shows its bar and name", async ({ page }, testInfo) => {
   await testInfo.attach(`miniboss-${testInfo.project.name}`, { body: await page.screenshot({ type: "png" }), contentType: "image/png" });
 });
 
+test("a run from phase 6 meets the Blood Clan: its news follows the boss's, spawnFaction refuses an unknown id", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&phase=6&speed=2&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await page.waitForFunction(() => window.__game?.phase === 6, undefined, { timeout: 30_000 });
+  expect(await page.evaluate(() => window.__game!.faction)).toBe("orc");
+  const unknown = await page.evaluate(() => {
+    try {
+      window.__game!.debug!.spawnFaction("dwarf");
+      return "";
+    } catch (e) {
+      return (e as Error).message;
+    }
+  });
+  expect(unknown).toContain("unknown faction");
+  await page.evaluate(() => {
+    for (let slot = 0; slot < 4; slot++) window.__game!.debug!.setAbilityLevel(slot, 5);
+  });
+  await page.locator("#start").click();
+  const announce = page.locator("#announce");
+  const deadline = Date.now() + 60_000;
+  const seen: string[] = [];
+  while (Date.now() < deadline && !seen.includes("The Blood Clan approaches!")) {
+    if ((await page.evaluate(() => window.__game?.screen)) === "levelUp") await pickCard(page);
+    const text = (await announce.isVisible()) ? await announce.textContent() : "";
+    if (text && seen[seen.length - 1] !== text) seen.push(text);
+    await page.waitForTimeout(50);
+  }
+  expect(seen).toEqual(["Iron Marshal has arrived", "The Blood Clan approaches!"]);
+  await page.evaluate(() => window.__game!.debug!.spawnEach());
+  await page.waitForFunction(() => (window.__game?.enemyTypes ?? 0) >= 4, undefined, { timeout: 5_000, polling: 50 });
+});
+
 test("an elite rush is announced", async ({ page }) => {
   // phase 4 starts at 2:30; the rush of 3:00 is announced 7 s ahead
   await page.goto("/?seed=1&debug=1&phase=4&duration=1200&speed=8&lang=en");
@@ -530,6 +564,8 @@ test("a slam shows a ring and hides it after the hit", async ({ page }, testInfo
   await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
   await page.waitForFunction(() => window.__game?.phase === 6, undefined, { timeout: 30_000 });
   expect(await page.evaluate(() => window.__game!.render.slamRings)).toBe(0);
+  // common gear in every slot: the Blood Clan's lusted warlord kills a bare Mistwarden before the first slam
+  await wearCommons(page);
   await page.locator("#start").click();
   await page.waitForFunction(() => window.__game?.boss?.id === "iron-marshal", undefined, { timeout: 30_000, polling: 50 });
   // stay next to the boss until its slam is ready (7 s after it came) and it winds up
@@ -547,6 +583,11 @@ test("a slam shows a ring and hides it after the hit", async ({ page }, testInfo
   expect(rings).toBe(1);
   expect(await page.evaluate(() => window.__game!.slams)).toBeLessThanOrEqual(1);
   await testInfo.attach(`slam-${testInfo.project.name}`, { body: await page.screenshot({ type: "png" }), contentType: "image/png" });
+  // step away from the boss and its pack, so the hero lives through the windup (a lost run freezes the ring)
+  await page.evaluate(() => {
+    const g = window.__game!;
+    if (g.boss) g.debug!.teleport(g.boss.x - 1500, g.boss.y);
+  });
   // the windup is 1 s and the flash 0.2 s of game time; a level-up card would freeze both
   const gone = Date.now() + 30_000;
   while ((await page.evaluate(() => window.__game!.render.slamRings)) !== 0 && Date.now() < gone) {

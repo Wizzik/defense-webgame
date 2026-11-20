@@ -9,6 +9,9 @@ import { gainXp } from "./level-up";
 import type { Rng } from "./rng";
 import type { Run } from "./run";
 
+/** `u` of a HeroHit event: a hit, or a step of a poison cloud (the client neither shakes nor plays the hurt sound). */
+export const HeroHitSource = { Hit: 0, Cloud: 1 } as const;
+
 /** Damage reduction from armor: 0 for armor <= 0, else armor * k / (1 + armor * k). */
 export function armorReduction(armor: number, k: number): number {
   if (armor <= 0) return 0;
@@ -30,14 +33,14 @@ export function heroDamageScale(run: Run): number {
 
 /**
  * Subtracts `amount` x heroDamageScale from the hero (nothing while the shield runs) and returns what it took.
- * `attacker` is the enemy slot (-1 for none).
+ * `attacker` is the enemy slot (-1 for none); `source` goes to the event's u (HeroHitSource).
  */
-export function damageHero(run: Run, amount: number, attacker: number): number {
+export function damageHero(run: Run, amount: number, attacker: number, source: number = HeroHitSource.Hit): number {
   if (run.shieldTicks > 0) return 0;
   const hero = run.hero;
   const dealt = amount * heroDamageScale(run);
   hero.hp -= dealt;
-  run.events.push(EventKind.HeroHit, attacker, dealt, hero.x, hero.y, 0, 0);
+  run.events.push(EventKind.HeroHit, attacker, dealt, hero.x, hero.y, source, 0);
   return dealt;
 }
 
