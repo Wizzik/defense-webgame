@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-20 (audio branch complete, PR open). Read this first when you resume work.
+Updated 2026-11-20 (audio branch complete, PR #23 open). Read this first when you resume work.
 
 
 ## Audio and music: all 10 tasks done on branch `audio`, PR #23 open (2026-11-20); waits for Petr's listen and merge word
