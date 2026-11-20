@@ -1,0 +1,93 @@
+// Determinism matrix (spec 2026-11-20 multiplayer spike, 5.2): a fixed set of autopilot runs whose state hashes
+// must match in Node and in every browser engine. Pure: no DOM and no timers, so Node and the page share it.
+import type { GameData } from "../../data/schema";
+import { botInput, createRun, idleCard, stateHash, type Run, type RunState, type TickInput } from "../../sim";
+import { gearPreset } from "../../tools/sim-run/gear-presets";
+
+export interface MatrixCase {
+  id: string;
+  hero: string;
+  seed: number;
+  startPhase?: number;
+  durationSeconds?: number;
+  gear: "none" | "full";
+  maxTicks: number;
+  /** No movement and the idle card pick instead of the autopilot (tests only). */
+  idle?: boolean;
+}
+
+export interface CaseResult {
+  id: string;
+  ticks: number;
+  state: RunState;
+  checkpoints: number[];
+}
+
+export const CHECKPOINT_EVERY = 300;
+
+/** The cases of spec 5.2: every hero from phase 1, then four late starts with full gear. */
+export function matrixCases(data: GameData): MatrixCase[] {
+  const cases: MatrixCase[] = data.heroes.map((h) => ({
+    id: `h-${h.id}`, hero: h.id, seed: 1, durationSeconds: 300, gear: "none", maxTicks: 12_000,
+  }));
+  cases.push(
+    { id: "p6", hero: "nightglaive", seed: 2, startPhase: 6, gear: "full", maxTicks: 6000 },
+    { id: "p11", hero: "gravecaller", seed: 3, startPhase: 11, gear: "full", maxTicks: 6000 },
+    { id: "p16", hero: "tidecaller", seed: 4, startPhase: 16, gear: "full", maxTicks: 6000 },
+    { id: "p21", hero: "sparkshot", seed: 5, startPhase: 21, gear: "full", maxTicks: 6000 },
+  );
+  return cases;
+}
+
+function idleInput(run: Run, out: TickInput): TickInput {
+  out.moveX = 0;
+  out.moveY = 0;
+  out.actions = 0;
+  out.card = run.offer ? idleCard(run, run.offer) : run.chestOffer ? 0 : -1;
+  return out;
+}
+
+/** Plays one case; a checkpoint is the state hash after every `every`-th step and after the last step. */
+export function runCase(data: GameData, c: MatrixCase, every = CHECKPOINT_EVERY): CaseResult {
+  const loadout = c.gear === "none" ? [] : gearPreset(data, c.hero, c.gear);
+  const run = createRun(data, {
+    seed: c.seed, hero: c.hero, startPhase: c.startPhase, durationSeconds: c.durationSeconds, loadout,
+  });
+  const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
+  const checkpoints: number[] = [];
+  let ticks = 0;
+  while (ticks < c.maxTicks && run.state !== "won" && run.state !== "lost") {
+    if (c.idle) idleInput(run, input);
+    else botInput(run, input);
+    run.step(input);
+    ticks++;
+    if (ticks % every === 0) checkpoints.push(stateHash(run));
+  }
+  if (ticks % every !== 0) checkpoints.push(stateHash(run));
+  return { id: c.id, ticks, state: run.state, checkpoints };
+}
+
+/** FNV-1a (32 bit) over every checkpoint of every case in order, as 8 lowercase hex digits. */
+export function matrixDigest(results: readonly CaseResult[]): string {
+  let h = 2166136261;
+  for (const r of results) {
+    for (const cp of r.checkpoints) h = Math.imul(h ^ (cp >>> 0), 16777619) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}
+
+/** The first case and checkpoint index where `b` differs from the reference `a`, or null when they match. */
+export function firstDifference(
+  a: readonly CaseResult[], b: readonly CaseResult[],
+): { id: string; index: number } | null {
+  for (let i = 0; i < a.length; i++) {
+    const ra = a[i]!;
+    const rb = b[i];
+    if (rb === undefined || rb.id !== ra.id) return { id: ra.id, index: 0 };
+    const n = Math.max(ra.checkpoints.length, rb.checkpoints.length);
+    for (let k = 0; k < n; k++) {
+      if (ra.checkpoints[k] !== rb.checkpoints[k]) return { id: ra.id, index: k };
+    }
+  }
+  return null;
+}
