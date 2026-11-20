@@ -871,3 +871,40 @@ test("orbs lie on the map; a berserk orb shows in the HUD; a heart heals the hur
   await page.evaluate(() => window.__game!.debug!.dropHeart());
   await page.waitForFunction((b) => window.__game!.heroHp >= b + 30, before, { timeout: 10_000, polling: 50 });
 });
+
+test("settings open with O, pause the run and persist", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&lang=cs");
+  await page.locator("#start").click();
+  await waitForScreenPickingLevelUps(page, "playing");
+  await page.keyboard.press("KeyO");
+  await page.waitForFunction(() => window.__game!.settingsOpen === true);
+  await expect(page.locator("#settings-panel .gear-title")).toHaveText("Nastavení");
+  const tick = await page.evaluate(() => window.__game!.tick);
+  await page.waitForTimeout(500);
+  expect(await page.evaluate(() => window.__game!.tick)).toBe(tick);
+  await page.locator('#settings-panel input[data-setting="music"]').fill("20");
+  await page.locator('#settings-panel input[data-setting="shake"]').uncheck();
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => window.__game!.settingsOpen === false);
+  await page.waitForFunction((t) => window.__game!.tick > t, tick);
+
+  await page.reload();
+  await page.waitForFunction(() => window.__game?.screen === "menu");
+  await page.locator("#settings").click();
+  await expect(page.locator('#settings-panel input[data-setting="music"]')).toHaveValue("20");
+  await expect(page.locator('#settings-panel input[data-setting="shake"]')).not.toBeChecked();
+  await page.locator("#settings-close").click();
+  await page.waitForFunction(() => window.__game!.settingsOpen === false);
+});
+
+test("no audio request fails", async ({ page }) => {
+  const failed: string[] = [];
+  page.on("response", (response) => {
+    if (response.url().includes("/audio/") && response.status() >= 400) failed.push(`${response.status()} ${response.url()}`);
+  });
+  await page.goto("/?seed=1&debug=1");
+  await page.locator("#start").click();
+  await waitForScreenPickingLevelUps(page, "playing");
+  await page.waitForTimeout(1500);
+  expect(failed).toEqual([]);
+});

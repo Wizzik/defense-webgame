@@ -8,6 +8,8 @@ import { RulesSchema } from "./rules";
 
 export { AbilityKind, AbilitySchema, MAX_BOUNCES, PASSIVE_KEYS, Targeting } from "./ability";
 export type { Ability, PassiveKey } from "./ability";
+export { AudioCategory, AudioDataSchema, CueSchema, GAME_SOUNDS, MusicSchema, SYNTH_NAMES, SynthName, TrackSchema } from "./audio";
+export type { AudioData, Cue, GameSound, Music, Track } from "./audio";
 export { LocalizedText, Slug } from "./common";
 export { ConstantsSchema } from "./constants";
 export type { Constants } from "./constants";

@@ -92,6 +92,8 @@ export class Hud {
   /** What a boss that just fell dropped (boss id, its order in the run); main.ts sets it. */
   /** The drop of a fallen boss; `magicFind` is the hero's magic find at that moment. */
   dropFor: ((bossId: string, order: number, magicFind: number) => Drop) | null = null;
+  /** Called with the rarity class ("rarity-legendary", "rarity-mythic") of a top-rarity drop or chest pick. */
+  onLoot: ((tone: string) => void) | null = null;
 
   constructor(parent: HTMLElement) {
     this.root = el("div", "hud", parent);
@@ -172,14 +174,22 @@ export class Hud {
       } else if (kind === EventKind.BossDeath && this.dropFor) {
         const line = dropLine(lang, this.dropFor(run.data.enemies[events.a[i]!]!.id, events.value[i]!, run.hero.gear.magicFind));
         this.announcer.push(line.text, ANNOUNCE_TICKS, line.tone);
+        this.loot(line.tone);
       } else if (kind === EventKind.ChestPick) {
         const line = chestLootLine(lang, run.data, events.u[i]!, events.v[i]!);
-        if (line) this.announcer.push(line.text, ANNOUNCE_TICKS, line.tone);
+        if (line) {
+          this.announcer.push(line.text, ANNOUNCE_TICKS, line.tone);
+          this.loot(line.tone);
+        }
       } else if (kind === EventKind.Enrage) {
         const name = run.data.enemies[run.finalBossType]!.name[lang];
         this.announcer.push(t(lang, "announce.enrage", { name }), ANNOUNCE_TICKS);
       }
     }
+  }
+
+  private loot(tone: string): void {
+    if (tone === "rarity-legendary" || tone === "rarity-mythic") this.onLoot?.(tone);
   }
 
   /** A new run starts with no news. */
@@ -220,7 +230,7 @@ export class Hud {
 
     setText(this.castle.label, `${t(lang, "hud.castle")} ${Math.max(0, Math.ceil(castle.hp))} / ${castle.maxHp}`);
     this.castle.fill.style.width = fraction(castle.hp, castle.maxHp);
-    setText(this.muteKey, `${t(lang, "gear.key")} · ${t(lang, "hud.muteKey")}`);
+    setText(this.muteKey, `${t(lang, "gear.key")} · ${t(lang, "settings.key")} · ${t(lang, "hud.muteKey")}`);
     setText(this.kills, t(lang, "hud.kills", { n: run.stats.kills }));
 
     this.buffBar.update(run.buffs, lang);

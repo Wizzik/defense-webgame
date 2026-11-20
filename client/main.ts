@@ -2,7 +2,14 @@
 import { Scene, type WebGPURenderer } from "three/webgpu";
 import type { GameData } from "../data/schema";
 import { ALLY_CAPACITY, COIN_CAPACITY, CRYSTAL_CAPACITY, HEART_CAPACITY } from "../sim";
-import { Sfx } from "./audio/sfx";
+import type { AudioData } from "../data/schema/audio";
+import { loadAudioData } from "./audio/data";
+import { AudioEngine } from "./audio/engine";
+import { MusicDirector, type MusicInput, musicSlot } from "./audio/music-director";
+import { MusicPlayer } from "./audio/music-player";
+import { latestBoss } from "./game/boss";
+import { loadSettings, type Settings, saveSettings } from "./settings/store";
+import { SettingsPanel } from "./ui/settings-panel";
 import { SoundView } from "./audio/sound-view";
 import { loadGameData } from "./game/data";
 import { addDebugHooks, publishSnapshot, updateSnapshot } from "./game/debug";
@@ -63,6 +70,15 @@ function storeLang(value: Lang): void {
     localStorage.setItem(LANG_KEY, value);
   } catch {
     // storage may be blocked; the choice then lasts until reload
+  }
+}
+
+/** localStorage, or null where the browser blocks it. */
+function storage(): Storage | null {
+  try {
+    return localStorage;
+  } catch {
+    return null;
   }
 }
 
@@ -182,10 +198,32 @@ async function start(): Promise<void> {
   const blobShadows = new BlobShadows(data.rules.enemies.maxAlive + ALLY_CAPACITY);
   scene.add(blobShadows.mesh, crowd.object, crystals.mesh, coins.mesh, hearts.mesh, orbView.object, chestView.object, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
-  const sfx = new Sfx();
-  sfx.setMuted(readStoredMuted());
+  const audioData = loadAudioData();
+  const audio = new AudioEngine(audioData, import.meta.env.BASE_URL);
+  audio.setMuted(readStoredMuted());
+  const sound: Sound = {
+    active: false,
+    settings: loadSettings(storage()),
+    applySettings: (s) => {
+      audio.setVolumes(s);
+      followCamera.shakeEnabled = s.shake;
+      numbers.enabled = s.numbers;
+    },
+    data: audioData,
+    engine: audio,
+    director: new MusicDirector(),
+    music: new MusicPlayer(audio, audioData, import.meta.env.BASE_URL),
+  };
+  // browsers start audio only after a gesture: the first click or key in the menu enables it (the menu music starts then)
+  const enableAudio = (): void => {
+    audio.enable();
+    void audio.preload();
+  };
+  sound.applySettings(sound.settings);
+  addEventListener("pointerdown", enableAudio, { once: true });
+  addEventListener("keydown", enableAudio, { once: true });
   const packArrows = new PackArrows(document.getElementById("ui")!, followCamera.camera);
-  session.views.push(heroView, allyView, blobShadows, crowd, crystals, coins, hearts, orbView, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(sfx));
+  session.views.push(heroView, allyView, blobShadows, crowd, crystals, coins, hearts, orbView, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(audio, audioData, sound.director, followCamera.camera, data.enemies.map((e) => e.id), () => sound.active));
 
   addEventListener("resize", () => {
     renderer.setSize(innerWidth, innerHeight);
@@ -208,7 +246,7 @@ async function start(): Promise<void> {
   };
   publishGear();
   session.views.push({ update: publishGear, onEvents: () => {}, dispose: () => {} });
-  const ui = createUi(data, gear, !params.debug && !gear.persistent, session, followCamera, sfx, randomSeed, hero, gpu.software, (setLoading) =>
+  const ui = createUi(data, gear, !params.debug && !gear.persistent, session, followCamera, sound, randomSeed, hero, gpu.software, (setLoading) =>
     heroLoader(models, session, heroView, allyView, setLoading),
   );
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
@@ -265,9 +303,22 @@ function heroLoader(
   };
 }
 
+interface Sound {
+  settings: Settings;
+  /** Applies volumes, screen shake and damage numbers. */
+  applySettings(s: Settings): void;
+  /** A run is on screen and not paused (the low-hp pulse beats only then); the UI keeps it current. */
+  active: boolean;
+  engine: AudioEngine;
+  data: AudioData;
+  director: MusicDirector;
+  music: MusicPlayer;
+}
+
 interface Ui {
   update(width: number, height: number): void;
   readonly menuOpen: boolean;
+  readonly settingsOpen: boolean;
   /** The chest card whose compare is open, or null. */
   readonly chestCompare: number | null;
   useHero: UseHero;
@@ -280,7 +331,7 @@ function createUi(
   noSave: boolean,
   session: Session,
   followCamera: FollowCamera,
-  sfx: Sfx,
+  sound: Sound,
   nextSeed: () => number,
   initialHero: string,
   softwareGpu: boolean,
@@ -302,7 +353,8 @@ function createUi(
   };
   const menu = new Menu(root, data.heroes, heroId, {
     onStart: () => {
-      sfx.enable();
+      sound.engine.enable();
+      void sound.engine.preload();
       menuOpen = false;
       session.paused = false;
       menu.setVisible(false);
@@ -317,10 +369,39 @@ function createUi(
     onLang: applyLang,
     onSound: () => setMuted(!muted),
     onGear: () => gearScreen.open(heroId, lang),
+    onSettings: () => openSettings(false),
+  });
+  // the settings: from the menu button, or O in a run (pauses it until the panel closes)
+  let settingsPausedRun = false;
+  const settingsPanel = new SettingsPanel(root, {
+    onChange: (s) => {
+      sound.settings = s;
+      sound.applySettings(s);
+      saveSettings(storage(), s);
+    },
+    onClose: () => closeSettings(),
+  });
+  const closeSettings = (): void => {
+    settingsPanel.close();
+    if (settingsPausedRun) session.paused = false;
+    settingsPausedRun = false;
+  };
+  const openSettings = (fromRun: boolean): void => {
+    settingsPausedRun = fromRun;
+    if (fromRun) session.paused = true;
+    settingsPanel.open(sound.settings, lang);
+  };
+  // buttons of the menu, the settings and the gear screen click
+  root.addEventListener("click", (event) => {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("button, input") && target.closest("#menu, #settings-panel, #gear-screen")) {
+      sound.engine.play(sound.data.sounds["ui.click"]);
+    }
   });
   // the paused run behind the menu wears the old doll: after a change it is started again
   const gearScreen = new GearScreen(root, {
     data, gear,
+    onEquip: () => sound.engine.play(sound.data.sounds["gear.equip"]),
     onClose: (changed) => {
       if (changed) void useHero(heroId);
       menu.setVisible(true);
@@ -330,7 +411,7 @@ function createUi(
   let muted = readStoredMuted();
   const setMuted = (value: boolean): void => {
     muted = value;
-    sfx.setMuted(value);
+    sound.engine.setMuted(value);
     storeMuted(value);
     menu.setSound(!value);
   };
@@ -338,11 +419,16 @@ function createUi(
   menu.setGpuWarning(softwareGpu);
   menu.setSaveWarning(noSave);
   addEventListener("keydown", (event) => {
-    if (event.code === "KeyM" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
-      setMuted(!muted);
+    if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.code === "KeyM") setMuted(!muted);
+    else if (event.code === "KeyO") {
+      if (settingsPanel.isOpen) {
+        if (settingsPausedRun) closeSettings();
+      } else if (!menuOpen && session.run?.state === "playing" && !session.paused) openSettings(true);
     }
   });
   const hud = new Hud(root);
+  hud.onLoot = (tone) => sound.engine.play(sound.data.sounds[tone === "rarity-mythic" ? "drop.mythic" : "drop.legendary"]);
   hud.dropFor = (bossId, order, magicFind) => gear.onBossDeath(bossId, session.seed, order, magicFind);
   // the HUD reads the events of every step for its news line
   session.views.push({ update: () => {}, onEvents: (run) => hud.onEvents(run, lang), dispose: () => {} });
@@ -365,9 +451,22 @@ function createUi(
     get chestCompare() {
       return cards.comparing;
     },
+    get settingsOpen() {
+      return settingsPanel.isOpen;
+    },
     update(width, height) {
       const run = session.run;
       if (!run) return;
+      const input: MusicInput = {
+        menuOpen,
+        state: run.state,
+        bossAlive: latestBoss(run) >= 0,
+        finale: run.inFinale,
+        panelOpen: !menuOpen && session.paused,
+      };
+      sound.active = !menuOpen && !session.paused;
+      sound.music.set(musicSlot(input));
+      sound.music.setDuck(sound.director.duck(input, performance.now() / 1000));
       hud.setVisible(!menuOpen);
       if (menuOpen) {
         ended = false;
@@ -405,6 +504,7 @@ function runLoop(
   // read live, not copied once a frame: a test that clicks a card and reads it at once must not depend on a frame
   // having passed (slow software rendering)
   Object.defineProperty(snapshot, "chestCompare", { get: () => ui.chestCompare, enumerable: true, configurable: true });
+  Object.defineProperty(snapshot, "settingsOpen", { get: () => ui.settingsOpen, enumerable: true, configurable: true });
   let last = -1;
   renderer.setAnimationLoop((now) => {
     try {

@@ -26,6 +26,8 @@ export class DamageNumbers implements RunView {
   private readonly worldX = new Float32Array(POOL);
   private readonly worldZ = new Float32Array(POOL);
   private readonly shown = new Uint8Array(POOL);
+  /** Off in the settings: no numbers are shown. */
+  enabled = true;
   private readonly point = new Vector3();
   private lastTick = 0;
   private readonly heals = new HealWindow(HEAL_WINDOW_SECONDS);
@@ -40,6 +42,7 @@ export class DamageNumbers implements RunView {
     const now = run.tick / TICKS_PER_SECOND;
     if (run.tick < this.lastTick) this.reset();
     this.lastTick = run.tick;
+    if (!this.enabled) return;
     for (let i = 0; i < events.count; i++) {
       const kind = events.kind[i];
       if (kind === EventKind.HeroHeal || (kind === EventKind.Pickup && events.u[i] === 2)) {

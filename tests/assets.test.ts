@@ -97,3 +97,33 @@ describe("model budget", () => {
     expect(total).toBeLessThanOrEqual(6_000_000);
   });
 });
+
+describe("audio", () => {
+  const dir = join(ASSETS, "audio");
+  const files = (sub: string): string[] => {
+    try {
+      return listFiles(join(dir, sub));
+    } catch {
+      return [];
+    }
+  };
+  const size = (list: string[]): number => list.reduce((n, f) => n + statSync(f).size, 0);
+
+  it("audio budgets", () => {
+    const sfx = files("sfx");
+    const music = files("music");
+    expect(size(sfx)).toBeLessThanOrEqual(3 * 1024 * 1024);
+    expect(size(music)).toBeLessThanOrEqual(15 * 1024 * 1024);
+    for (const f of [...sfx, ...music]) expect(f.endsWith(".ogg"), f).toBe(true);
+  });
+
+  it("every audio file is used by audio.json and every used file exists", () => {
+    const audio = JSON.parse(readFileSync("data/generated/audio.json", "utf8")) as {
+      cues: { files: string[] }[];
+      tracks: { file: string }[];
+    };
+    const used = new Set([...audio.cues.flatMap((c) => c.files), ...audio.tracks.map((t) => t.file)]);
+    const present = [...files("sfx"), ...files("music")].map((f) => relative(ASSETS, f));
+    expect(sorted(present)).toEqual(sorted([...used]));
+  });
+});
