@@ -1,6 +1,7 @@
 import { armorReduction, damageCastle, damageHero, rollDamage } from "./combat";
 import { TICK_SECONDS, TICKS_PER_SECOND } from "./constants";
 import { Action, Role } from "./enemies";
+import { attackDelayTicks, bloodlustDamageScale, bloodlustSpeedScale, updateBloodlust } from "./enemy-bloodlust";
 import { auraDamageScale, auraSpeedScale, updateEnemyAuras } from "./enemy-aura";
 import { cancelCharge, Charge, chargeVX, chargeVY, updateCharge } from "./enemy-charge";
 import { cancelSlam, updateSlam } from "./enemy-slam";
@@ -31,6 +32,7 @@ export function updateEnemies(run: Run): void {
   }
 
   updateEnemyAuras(run);
+  updateBloodlust(run);
 
   for (let i = 0; i < e.capacity; i++) {
     if (e.alive[i] === 0) continue;
@@ -41,7 +43,7 @@ export function updateEnemies(run: Run): void {
     if (e.chargeCooldown[i] > 0) e.chargeCooldown[i]--;
     if (e.slamCooldown[i] > 0) e.slamCooldown[i]--;
     // Slow lowers walking speed only (not knockback) and runs down even while stunned.
-    let walk = def.moveSpeed * auraSpeedScale(run, i);
+    let walk = def.moveSpeed * auraSpeedScale(run, i) * bloodlustSpeedScale(run, i);
     if (run.enraged && i === run.finalBossSlot) walk *= rules.run.finale.enrage.moveSpeed;
     if (e.slowTicks[i] > 0) {
       walk *= 1 - e.slowFactor[i];
@@ -107,14 +109,14 @@ export function updateEnemies(run: Run): void {
           e.action[i] = Action.Attack;
           if (e.attackCooldown[i] <= 0) {
             let raw = rollDamage(run.rng, def.attack.damageMin, def.attack.damageMax) * e.damageScale[i];
-            raw *= auraDamageScale(run, i);
+            raw *= auraDamageScale(run, i) * bloodlustDamageScale(run, i);
             if (targetsHero) {
               const k = 1 - armorReduction(hero.stats.armor, constants.defenseArmor);
               damageHero(run, raw * k, i);
             } else {
               damageCastle(run, raw, i);
             }
-            e.attackCooldown[i] = Math.round(def.attack.cooldown * TICKS_PER_SECOND);
+            e.attackCooldown[i] = attackDelayTicks(run, i);
             e.lastAttackTick[i] = run.tick;
           }
           e.facingX[i] = ux;

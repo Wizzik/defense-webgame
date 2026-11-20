@@ -134,6 +134,9 @@ export function stateHash(run: Run): number {
     mixFloat(e.chargeDirX[i]);
     mixFloat(e.chargeDirY[i]);
     mixInt(e.buffed[i]);
+    mixInt(e.bloodlustTicks[i]);
+    mixInt(e.bloodlustType[i]);
+    mixInt(e.bloodlustCooldown[i]);
     mixInt(e.slamState[i]);
     mixInt(e.slamTicks[i]);
     mixInt(e.slamCooldown[i]);

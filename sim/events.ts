@@ -45,6 +45,8 @@ export const EventKind = {
   OrbPickup: 25,
   /** A new enemy faction: a = its index in rules.factions, value = the phase (1-based), x/y = the hero. */
   Faction: 26,
+  /** A bloodcaller cast bloodlust: a = its slot, value = enemies lusted, x/y = the caster. */
+  Bloodlust: 27,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

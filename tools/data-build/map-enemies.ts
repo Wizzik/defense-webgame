@@ -81,6 +81,13 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
     };
   }
   if (entry.hunter) enemy.hunter = true;
+  if (entry.bloodlust) {
+    const b = entry.bloodlust;
+    enemy.bloodlust = {
+      cooldownSeconds: b.cooldownSeconds, targets: b.targets, range: b.range, seconds: b.seconds,
+      moveSpeed: b.moveSpeed, damage: b.damage, attackSpeed: b.attackSpeed,
+    };
+  }
   if (entry.knockbackScale !== undefined) enemy.knockbackScale = entry.knockbackScale;
   return enemy;
 }

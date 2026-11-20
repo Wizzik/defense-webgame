@@ -1,6 +1,7 @@
 import { armorReduction, damageHero, rollDamage } from "./combat";
 import { TICK_SECONDS, TICKS_PER_SECOND } from "./constants";
 import { auraDamageScale } from "./enemy-aura";
+import { attackDelayTicks, bloodlustDamageScale } from "./enemy-bloodlust";
 import { EventKind } from "./events";
 import type { Run } from "./run";
 
@@ -53,10 +54,10 @@ export function updateCharge(run: Run, i: number, targetsHero: boolean, heroDist
   }
 
   if (heroDist <= def.collision + hero.stats.collision + TOUCH_MARGIN) {
-    const buff = auraDamageScale(run, i);
+    const buff = auraDamageScale(run, i) * bloodlustDamageScale(run, i);
     const raw = rollDamage(run.rng, def.attack.damageMin, def.attack.damageMax) * e.damageScale[i] * charge.damageMultiplier * buff;
     damageHero(run, raw * (1 - armorReduction(hero.stats.armor, run.data.constants.defenseArmor)), i);
-    e.attackCooldown[i] = Math.round(def.attack.cooldown * TICKS_PER_SECOND);
+    e.attackCooldown[i] = attackDelayTicks(run, i);
     e.lastAttackTick[i] = run.tick;
     cancelCharge(run, i);
     return true;

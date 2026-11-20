@@ -82,6 +82,19 @@ export const EnemySchema = z.object({
   }).strict().refine((s) => s.minRange < s.maxRange, "minRange is not below maxRange").optional(),
   /** Goes for the hero whatever the role of its pack is. */
   hunter: z.literal(true).optional(),
+  /**
+   * Bloodlust (sim/enemy-bloodlust.ts): every `cooldownSeconds` the type gives up to `targets` enemies of its faction
+   * within `range` (bosses and itself excepted, nearest first) `seconds` of faster walking, harder hits and faster attacks.
+   */
+  bloodlust: z.object({
+    cooldownSeconds: z.number().positive(),
+    targets: z.number().int().min(1),
+    range: z.number().positive(),
+    seconds: z.number().positive(),
+    moveSpeed: z.number().min(0),
+    damage: z.number().min(0),
+    attackSpeed: z.number().min(0),
+  }).strict().optional(),
   /** Multiplies the knockback of hits on the type: 0 = it does not move (default 1). */
   knockbackScale: z.number().min(0).optional(),
 }).strict();
