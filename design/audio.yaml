@@ -10,35 +10,43 @@ cues:
   - id: stone-strike
     files: [audio/sfx/stone-strike-1.ogg, audio/sfx/stone-strike-2.ogg, audio/sfx/stone-strike-3.ogg]
     synth: hit
-    gainDb: -4
+    gainDb: -10
+    maxVoices: 2
   - id: moon-arrow
     files: [audio/sfx/moon-arrow-1.ogg, audio/sfx/moon-arrow-2.ogg, audio/sfx/moon-arrow-3.ogg]
     synth: hit
-    gainDb: -4
+    gainDb: -10
+    maxVoices: 2
   - id: grave-bolt
     files: [audio/sfx/grave-bolt-1.ogg, audio/sfx/grave-bolt-2.ogg, audio/sfx/grave-bolt-3.ogg]
     synth: hit
-    gainDb: -4
+    gainDb: -10
+    maxVoices: 2
   - id: shaman-bolt
     files: [audio/sfx/shaman-bolt-1.ogg, audio/sfx/shaman-bolt-2.ogg]
     synth: hit
-    gainDb: -4
+    gainDb: -10
+    maxVoices: 2
   - id: mist-chill
     files: [audio/sfx/mist-chill-1.ogg, audio/sfx/mist-chill-2.ogg]
     synth: hit
-    gainDb: -4
+    gainDb: -10
+    maxVoices: 2
   - id: spark-shot
     files: [audio/sfx/spark-shot-1.ogg, audio/sfx/spark-shot-2.ogg, audio/sfx/spark-shot-3.ogg]
     synth: hit
-    gainDb: -4
+    gainDb: -10
+    maxVoices: 2
   - id: cleaver-chop
-    files: [audio/sfx/cleaver-chop-1.ogg, audio/sfx/cleaver-chop-2.ogg, audio/sfx/cleaver-chop-3.ogg]
+    files: [audio/sfx/cleaver-chop-1.ogg, audio/sfx/cleaver-chop-2.ogg]
     synth: hit
-    gainDb: -4
+    gainDb: -10
+    maxVoices: 2
   - id: tide-bolt
     files: [audio/sfx/tide-bolt-1.ogg, audio/sfx/tide-bolt-2.ogg, audio/sfx/tide-bolt-3.ogg]
     synth: hit
-    gainDb: -4
+    gainDb: -10
+    maxVoices: 2
   - id: stone-rupture
     files: [audio/sfx/stone-rupture-1.ogg, audio/sfx/stone-rupture-2.ogg]
     synth: cast
@@ -162,21 +170,13 @@ cues:
   - id: bone-rattle
     files: [audio/sfx/bone-rattle-1.ogg, audio/sfx/bone-rattle-2.ogg, audio/sfx/bone-rattle-3.ogg, audio/sfx/bone-rattle-4.ogg, audio/sfx/bone-rattle-5.ogg]
     synth: death
-    maxVoices: 6
+    maxVoices: 4
+    gainDb: -6
     priority: 0
   - id: bone-rattle-heavy
     files: [audio/sfx/bone-rattle-heavy-1.ogg, audio/sfx/bone-rattle-heavy-2.ogg]
     synth: death
     maxVoices: 6
-    priority: 0
-  - id: pickup-xp
-    files: [audio/sfx/pickup-xp-1.ogg, audio/sfx/pickup-xp-2.ogg, audio/sfx/pickup-xp-3.ogg]
-    synth: pickup
-    priority: 0
-    gainDb: -3
-  - id: pickup-coin
-    files: [audio/sfx/pickup-coin-1.ogg, audio/sfx/pickup-coin-2.ogg]
-    synth: coin
     priority: 0
   - id: pickup-heart
     files: [audio/sfx/pickup-heart-1.ogg]
@@ -211,7 +211,7 @@ cues:
     synth: hit
     priority: 3
     maxVoices: 2
-    gainDb: -6
+    gainDb: -9
   - id: hero-heal
     files: [audio/sfx/hero-heal-1.ogg]
     synth: pickup
@@ -386,8 +386,8 @@ enemies:
   dread-regent: { death: bone-rattle-heavy }
 
 sounds:
-  pickup.xp: pickup-xp
-  pickup.coin: pickup-coin
+  pickup.xp: none
+  pickup.coin: none
   pickup.heart: pickup-heart
   orb.boots: orb-boots
   orb.berserk: orb-berserk

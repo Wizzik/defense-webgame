@@ -25,7 +25,7 @@ export interface EngineDeps {
 const HEADROOM = 0.5;
 /** How long a synth-only voice counts against the limits. */
 const SYNTH_SECONDS = 0.4;
-const DEFAULT_VOLUMES: Volumes = { master: 0.8, music: 0.6, sfx: 0.8 };
+const DEFAULT_VOLUMES: Volumes = { master: 0.8, music: 0.3, sfx: 0.8 };
 
 interface Graph {
   ctx: AudioContext;

@@ -87,8 +87,13 @@ describe("resolveEventCues", () => {
       // OrbPickup and Slam carry their kind in value; the rest ignore it
       run.events.push(kind, 0, value, 3, 4, u, 0);
       const got = resolve();
-      expect(got.map((r) => r.cue), `${sound}`).toEqual([data.sounds[sound as keyof typeof data.sounds]]);
+      const cue = data.sounds[sound as keyof typeof data.sounds];
+      expect(got.map((r) => r.cue), `${sound}`).toEqual(cue === "none" ? [] : [cue]);
     }
+  });
+
+  it("plays nothing for XP and gold pickups (silent since 2026-11-20)", () => {
+    expect([data.sounds["pickup.xp"], data.sounds["pickup.coin"]]).toEqual(["none", "none"]);
   });
 
   it("skips the orb heal, a cancelled slam and the charge run", () => {

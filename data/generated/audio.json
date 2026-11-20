@@ -8,10 +8,10 @@
         "audio/sfx/stone-strike-3.ogg"
       ],
       "synth": "hit",
-      "gainDb": -4,
+      "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 2,
       "priority": 1,
       "category": "sfx"
     },
@@ -23,10 +23,10 @@
         "audio/sfx/moon-arrow-3.ogg"
       ],
       "synth": "hit",
-      "gainDb": -4,
+      "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 2,
       "priority": 1,
       "category": "sfx"
     },
@@ -38,10 +38,10 @@
         "audio/sfx/grave-bolt-3.ogg"
       ],
       "synth": "hit",
-      "gainDb": -4,
+      "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 2,
       "priority": 1,
       "category": "sfx"
     },
@@ -52,10 +52,10 @@
         "audio/sfx/shaman-bolt-2.ogg"
       ],
       "synth": "hit",
-      "gainDb": -4,
+      "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 2,
       "priority": 1,
       "category": "sfx"
     },
@@ -66,10 +66,10 @@
         "audio/sfx/mist-chill-2.ogg"
       ],
       "synth": "hit",
-      "gainDb": -4,
+      "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 2,
       "priority": 1,
       "category": "sfx"
     },
@@ -81,10 +81,10 @@
         "audio/sfx/spark-shot-3.ogg"
       ],
       "synth": "hit",
-      "gainDb": -4,
+      "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 2,
       "priority": 1,
       "category": "sfx"
     },
@@ -92,14 +92,13 @@
       "id": "cleaver-chop",
       "files": [
         "audio/sfx/cleaver-chop-1.ogg",
-        "audio/sfx/cleaver-chop-2.ogg",
-        "audio/sfx/cleaver-chop-3.ogg"
+        "audio/sfx/cleaver-chop-2.ogg"
       ],
       "synth": "hit",
-      "gainDb": -4,
+      "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 2,
       "priority": 1,
       "category": "sfx"
     },
@@ -111,10 +110,10 @@
         "audio/sfx/tide-bolt-3.ogg"
       ],
       "synth": "hit",
-      "gainDb": -4,
+      "gainDb": -10,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 4,
+      "maxVoices": 2,
       "priority": 1,
       "category": "sfx"
     },
@@ -676,10 +675,10 @@
         "audio/sfx/bone-rattle-5.ogg"
       ],
       "synth": "death",
-      "gainDb": 0,
+      "gainDb": -6,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
-      "maxVoices": 6,
+      "maxVoices": 4,
       "priority": 0,
       "category": "sfx"
     },
@@ -694,35 +693,6 @@
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
       "maxVoices": 6,
-      "priority": 0,
-      "category": "sfx"
-    },
-    {
-      "id": "pickup-xp",
-      "files": [
-        "audio/sfx/pickup-xp-1.ogg",
-        "audio/sfx/pickup-xp-2.ogg",
-        "audio/sfx/pickup-xp-3.ogg"
-      ],
-      "synth": "pickup",
-      "gainDb": -3,
-      "pitchSpread": 0.06,
-      "gainSpreadDb": 2,
-      "maxVoices": 4,
-      "priority": 0,
-      "category": "sfx"
-    },
-    {
-      "id": "pickup-coin",
-      "files": [
-        "audio/sfx/pickup-coin-1.ogg",
-        "audio/sfx/pickup-coin-2.ogg"
-      ],
-      "synth": "coin",
-      "gainDb": 0,
-      "pitchSpread": 0.06,
-      "gainSpreadDb": 2,
-      "maxVoices": 4,
       "priority": 0,
       "category": "sfx"
     },
@@ -830,7 +800,7 @@
         "audio/sfx/hero-hurt-3.ogg"
       ],
       "synth": "hit",
-      "gainDb": -6,
+      "gainDb": -9,
       "pitchSpread": 0.06,
       "gainSpreadDb": 2,
       "maxVoices": 2,
@@ -1302,8 +1272,8 @@
     }
   },
   "sounds": {
-    "pickup.xp": "pickup-xp",
-    "pickup.coin": "pickup-coin",
+    "pickup.xp": "none",
+    "pickup.coin": "none",
     "pickup.heart": "pickup-heart",
     "orb.boots": "orb-boots",
     "orb.berserk": "orb-berserk",
