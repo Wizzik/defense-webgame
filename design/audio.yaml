@@ -8,294 +8,309 @@
 
 cues:
   - id: stone-strike
-    files: []
+    files: [audio/sfx/stone-strike-1.ogg, audio/sfx/stone-strike-2.ogg, audio/sfx/stone-strike-3.ogg]
     synth: hit
     gainDb: -4
   - id: moon-arrow
-    files: []
+    files: [audio/sfx/moon-arrow-1.ogg, audio/sfx/moon-arrow-2.ogg, audio/sfx/moon-arrow-3.ogg]
     synth: hit
     gainDb: -4
   - id: grave-bolt
-    files: []
+    files: [audio/sfx/grave-bolt-1.ogg, audio/sfx/grave-bolt-2.ogg, audio/sfx/grave-bolt-3.ogg]
     synth: hit
     gainDb: -4
   - id: shaman-bolt
-    files: []
+    files: [audio/sfx/shaman-bolt-1.ogg, audio/sfx/shaman-bolt-2.ogg]
     synth: hit
     gainDb: -4
   - id: mist-chill
-    files: []
+    files: [audio/sfx/mist-chill-1.ogg, audio/sfx/mist-chill-2.ogg]
     synth: hit
     gainDb: -4
   - id: spark-shot
-    files: []
+    files: [audio/sfx/spark-shot-1.ogg, audio/sfx/spark-shot-2.ogg, audio/sfx/spark-shot-3.ogg]
     synth: hit
     gainDb: -4
   - id: cleaver-chop
-    files: []
+    files: [audio/sfx/cleaver-chop-1.ogg, audio/sfx/cleaver-chop-2.ogg, audio/sfx/cleaver-chop-3.ogg]
     synth: hit
     gainDb: -4
   - id: tide-bolt
-    files: []
+    files: [audio/sfx/tide-bolt-1.ogg, audio/sfx/tide-bolt-2.ogg, audio/sfx/tide-bolt-3.ogg]
     synth: hit
     gainDb: -4
   - id: stone-rupture
-    files: []
+    files: [audio/sfx/stone-rupture-1.ogg, audio/sfx/stone-rupture-2.ogg]
     synth: cast
   - id: stone-tap
-    files: []
+    files: [audio/sfx/stone-tap-1.ogg, audio/sfx/stone-tap-2.ogg]
     synth: hit
     maxVoices: 3
   - id: stone-echo
-    files: []
+    files: [audio/sfx/stone-echo-1.ogg, audio/sfx/stone-echo-2.ogg]
     synth: cast
   - id: stone-quake
-    files: []
+    files: [audio/sfx/stone-quake-1.ogg, audio/sfx/stone-quake-2.ogg]
     synth: cast
   - id: moon-glimmer
-    files: []
+    files: [audio/sfx/moon-glimmer-1.ogg, audio/sfx/moon-glimmer-2.ogg]
     synth: cast
   - id: moon-starfall
-    files: []
+    files: [audio/sfx/moon-starfall-1.ogg, audio/sfx/moon-starfall-2.ogg]
     synth: cast
   - id: moon-whisper
-    files: []
+    files: [audio/sfx/moon-whisper-1.ogg, audio/sfx/moon-whisper-2.ogg]
     synth: cast
   - id: bone-grasp
-    files: []
+    files: [audio/sfx/bone-grasp-1.ogg, audio/sfx/bone-grasp-2.ogg]
     synth: cast
   - id: bone-ring
-    files: []
+    files: [audio/sfx/bone-ring-1.ogg, audio/sfx/bone-ring-2.ogg, audio/sfx/bone-ring-3.ogg]
     synth: cast
   - id: bone-wail
-    files: []
+    files: [audio/sfx/bone-wail-1.ogg, audio/sfx/bone-wail-2.ogg]
     synth: cast
   - id: bone-stampede
-    files: []
+    files: [audio/sfx/bone-stampede-1.ogg, audio/sfx/bone-stampede-2.ogg]
     synth: cast
   - id: storm-totem
-    files: []
+    files: [audio/sfx/storm-totem-1.ogg, audio/sfx/storm-totem-2.ogg]
     synth: cast
   - id: storm-bolt
-    files: []
+    files: [audio/sfx/storm-bolt-1.ogg, audio/sfx/storm-bolt-2.ogg]
     synth: cast
   - id: storm-mend
-    files: []
+    files: [audio/sfx/storm-mend-1.ogg, audio/sfx/storm-mend-2.ogg]
     synth: cast
   - id: storm-chorus
-    files: []
+    files: [audio/sfx/storm-chorus-1.ogg, audio/sfx/storm-chorus-2.ogg]
     synth: cast
   - id: mist-burst
-    files: []
+    files: [audio/sfx/mist-burst-1.ogg, audio/sfx/mist-burst-2.ogg]
     synth: cast
   - id: mist-wisp
-    files: []
+    files: [audio/sfx/mist-wisp-1.ogg, audio/sfx/mist-wisp-2.ogg]
     synth: cast
   - id: mist-surge
-    files: []
+    files: [audio/sfx/mist-surge-1.ogg, audio/sfx/mist-surge-2.ogg]
     synth: cast
   - id: mist-wail
-    files: []
+    files: [audio/sfx/mist-wail-1.ogg, audio/sfx/mist-wail-2.ogg]
     synth: cast
   - id: spark-rockets
-    files: []
+    files: [audio/sfx/spark-rockets-1.ogg, audio/sfx/spark-rockets-2.ogg]
     synth: cast
   - id: spark-sear
-    files: []
+    files: [audio/sfx/spark-sear-1.ogg, audio/sfx/spark-sear-2.ogg]
     synth: hit
     maxVoices: 3
   - id: spark-beams
-    files: []
+    files: [audio/sfx/spark-beams-1.ogg, audio/sfx/spark-beams-2.ogg]
     synth: cast
   - id: blood-toss
-    files: []
+    files: [audio/sfx/blood-toss-1.ogg, audio/sfx/blood-toss-2.ogg]
     synth: cast
   - id: blood-fan
-    files: []
+    files: [audio/sfx/blood-fan-1.ogg, audio/sfx/blood-fan-2.ogg]
     synth: cast
   - id: blood-rot
-    files: []
+    files: [audio/sfx/blood-rot-1.ogg, audio/sfx/blood-rot-2.ogg]
     synth: cast
   - id: tide-crush
-    files: []
+    files: [audio/sfx/tide-crush-1.ogg, audio/sfx/tide-crush-2.ogg]
     synth: cast
   - id: tide-splash
-    files: []
+    files: [audio/sfx/tide-splash-1.ogg, audio/sfx/tide-splash-2.ogg]
     synth: hit
     maxVoices: 3
   - id: tide-rip
-    files: []
+    files: [audio/sfx/tide-rip-1.ogg, audio/sfx/tide-rip-2.ogg]
     synth: cast
   - id: tide-lake
-    files: []
+    files: [audio/sfx/tide-lake-1.ogg, audio/sfx/tide-lake-2.ogg]
     synth: cast
   - id: shared-arc
-    files: []
+    files: [audio/sfx/shared-arc-1.ogg, audio/sfx/shared-arc-2.ogg]
     synth: cast
   - id: shared-smite
-    files: []
+    files: [audio/sfx/shared-smite-1.ogg, audio/sfx/shared-smite-2.ogg]
     synth: cast
   - id: shared-firebolt
-    files: []
+    files: [audio/sfx/shared-firebolt-1.ogg, audio/sfx/shared-firebolt-2.ogg]
     synth: cast
   - id: shared-frost
-    files: []
+    files: [audio/sfx/shared-frost-1.ogg, audio/sfx/shared-frost-2.ogg]
     synth: cast
   - id: shared-meteor
-    files: []
+    files: [audio/sfx/shared-meteor-1.ogg, audio/sfx/shared-meteor-2.ogg]
     synth: cast
   - id: shared-holy
-    files: []
+    files: [audio/sfx/shared-holy-1.ogg, audio/sfx/shared-holy-2.ogg]
     synth: cast
   - id: shared-blades
-    files: []
+    files: [audio/sfx/shared-blades-1.ogg, audio/sfx/shared-blades-2.ogg, audio/sfx/shared-blades-3.ogg]
     synth: cast
   - id: shared-shock
-    files: []
+    files: [audio/sfx/shared-shock-1.ogg, audio/sfx/shared-shock-2.ogg]
     synth: cast
   - id: shared-sentry
-    files: []
+    files: [audio/sfx/shared-sentry-1.ogg, audio/sfx/shared-sentry-2.ogg]
     synth: cast
   - id: shared-breath
-    files: []
+    files: [audio/sfx/shared-breath-1.ogg, audio/sfx/shared-breath-2.ogg]
     synth: cast
   - id: bone-rattle
-    files: []
+    files: [audio/sfx/bone-rattle-1.ogg, audio/sfx/bone-rattle-2.ogg, audio/sfx/bone-rattle-3.ogg, audio/sfx/bone-rattle-4.ogg, audio/sfx/bone-rattle-5.ogg]
     synth: death
     maxVoices: 6
     priority: 0
   - id: bone-rattle-heavy
-    files: []
+    files: [audio/sfx/bone-rattle-heavy-1.ogg, audio/sfx/bone-rattle-heavy-2.ogg]
     synth: death
     maxVoices: 6
     priority: 0
   - id: pickup-xp
-    files: []
+    files: [audio/sfx/pickup-xp-1.ogg, audio/sfx/pickup-xp-2.ogg, audio/sfx/pickup-xp-3.ogg]
     synth: pickup
     priority: 0
     gainDb: -3
   - id: pickup-coin
-    files: []
+    files: [audio/sfx/pickup-coin-1.ogg, audio/sfx/pickup-coin-2.ogg]
     synth: coin
     priority: 0
   - id: pickup-heart
-    files: []
+    files: [audio/sfx/pickup-heart-1.ogg]
     synth: heart
   - id: orb-boots
-    files: []
+    files: [audio/sfx/orb-boots-1.ogg, audio/sfx/orb-boots-2.ogg]
     synth: orb
     priority: 2
   - id: orb-berserk
-    files: []
+    files: [audio/sfx/orb-berserk-1.ogg, audio/sfx/orb-berserk-2.ogg]
     synth: orb
     priority: 2
   - id: orb-renewal
-    files: []
+    files: [audio/sfx/orb-renewal-1.ogg]
     synth: orb
     priority: 2
   - id: chest-open
-    files: []
+    files: [audio/sfx/chest-open-1.ogg, audio/sfx/chest-open-2.ogg, audio/sfx/chest-open-3.ogg]
     synth: chest
     priority: 2
   - id: chest-pick
-    files: []
+    files: [audio/sfx/chest-pick-1.ogg, audio/sfx/chest-pick-2.ogg]
     synth: chest
     priority: 2
     category: ui
   - id: level-up
-    files: []
+    files: [audio/sfx/level-up-1.ogg]
     synth: levelUp
     priority: 3
   - id: hero-hurt
-    files: []
+    files: [audio/sfx/hero-hurt-1.ogg, audio/sfx/hero-hurt-2.ogg, audio/sfx/hero-hurt-3.ogg]
     synth: hit
     priority: 3
     maxVoices: 2
     gainDb: -6
   - id: hero-heal
-    files: []
+    files: [audio/sfx/hero-heal-1.ogg]
     synth: pickup
     maxVoices: 1
     gainDb: -6
   - id: hero-dash
-    files: []
+    files: [audio/sfx/hero-dash-1.ogg, audio/sfx/hero-dash-2.ogg, audio/sfx/hero-dash-3.ogg]
     synth: cast
     priority: 2
     maxVoices: 1
   - id: castle-thud
-    files: []
+    files: [audio/sfx/castle-thud-1.ogg, audio/sfx/castle-thud-2.ogg, audio/sfx/castle-thud-3.ogg]
     synth: castleHit
     priority: 2
     maxVoices: 2
   - id: war-horn
-    files: []
+    files: [audio/sfx/war-horn-1.ogg, audio/sfx/war-horn-2.ogg]
     synth: bossArrive
     priority: 3
     maxVoices: 1
   - id: boss-collapse
-    files: []
+    files: [audio/sfx/boss-collapse-1.ogg, audio/sfx/boss-collapse-2.ogg]
     synth: death
     priority: 3
     maxVoices: 2
   - id: rush-horn
-    files: []
+    files: [audio/sfx/rush-horn-1.ogg, audio/sfx/rush-horn-2.ogg]
     synth: bossArrive
     priority: 3
     maxVoices: 1
   - id: slam-breath
-    files: []
+    files: [audio/sfx/slam-breath-1.ogg]
     synth: cast
     priority: 3
     maxVoices: 3
     gainDb: -4
   - id: slam-impact
-    files: []
+    files: [audio/sfx/slam-impact-1.ogg, audio/sfx/slam-impact-2.ogg]
     synth: slam
     priority: 3
     maxVoices: 3
   - id: boss-roar
-    files: []
+    files: [audio/sfx/boss-roar-1.ogg]
     synth: enrage
     priority: 3
     maxVoices: 1
   - id: chaplain-mend
-    files: []
+    files: [audio/sfx/chaplain-mend-1.ogg]
     synth: pickup
     priority: 0
     gainDb: -8
   - id: enemy-charge
-    files: []
+    files: [audio/sfx/enemy-charge-1.ogg, audio/sfx/enemy-charge-2.ogg]
     synth: cast
     priority: 1
     gainDb: -6
   - id: drop-legendary
-    files: []
+    files: [audio/sfx/drop-legendary-1.ogg, audio/sfx/drop-legendary-2.ogg]
     synth: levelUp
     priority: 3
     category: ui
   - id: drop-mythic
-    files: []
+    files: [audio/sfx/drop-mythic-1.ogg, audio/sfx/drop-mythic-2.ogg]
     synth: levelUp
     priority: 3
     category: ui
   - id: gear-equip
-    files: []
+    files: [audio/sfx/gear-equip-1.ogg, audio/sfx/gear-equip-2.ogg, audio/sfx/gear-equip-3.ogg]
     synth: chest
     category: ui
   - id: heartbeat
-    files: []
+    files: [audio/sfx/heartbeat-1.ogg, audio/sfx/heartbeat-2.ogg]
     synth: heart
     priority: 3
     maxVoices: 1
     gainDb: -4
   - id: ui-click
-    files: []
+    files: [audio/sfx/ui-click-1.ogg, audio/sfx/ui-click-2.ogg, audio/sfx/ui-click-3.ogg]
     synth: pickup
     priority: 3
     category: ui
     maxVoices: 2
 
-tracks: []
+# Music (all CC0, sources and authors in tools/audio-build/manifest.ts and assets/LICENSES.md).
+tracks:
+  - { id: menu-fantasy-theme, file: audio/music/menu-fantasy-theme.ogg }
+  - { id: run-determined-pursuit, file: audio/music/run-determined-pursuit.ogg }
+  - { id: boss-fight, file: audio/music/boss-fight.ogg }
+  - { id: final-epic-endgame, file: audio/music/final-epic-endgame.ogg }
+  - { id: victory-fanfare, file: audio/music/victory-fanfare.ogg, loop: false }
+  - { id: defeat-game-over, file: audio/music/defeat-game-over.ogg, loop: false }
+
+music:
+  menu: menu-fantasy-theme
+  run: [run-determined-pursuit]
+  miniboss: boss-fight
+  final: final-epic-endgame
+  victory: victory-fanfare
+  defeat: defeat-game-over
 
 # Every ability: the cue of its cast and, optionally, of its hits (passives and the two speed auras: none).
 abilities:

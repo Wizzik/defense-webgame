@@ -54,7 +54,7 @@ export class MusicPlayer {
   }
 
   private trackFor(slot: MusicSlot): Track | null {
-    const music = this.data.music!;
+    const music = this.data.music;
     const id = slot === "run" ? music.run[this.runIndex % music.run.length]! : music[slot];
     return this.tracks.get(id) ?? null;
   }

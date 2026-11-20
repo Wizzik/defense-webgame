@@ -63,7 +63,6 @@ export const AudioDataSchema = z.object({
   heroes: z.record(z.string(), z.object({ attack: CueRef, attackHit: CueRef.optional() }).strict()),
   enemies: z.record(z.string(), z.object({ death: CueRef, attack: CueRef.optional() }).strict()),
   sounds: z.object(Object.fromEntries(GAME_SOUNDS.map((s) => [s, CueRef])) as Record<GameSound, typeof CueRef>).strict(),
-  /** Optional until the music is chosen (plan Task 10). */
-  music: MusicSchema.optional(),
+  music: MusicSchema,
 }).strict();
 export type AudioData = z.infer<typeof AudioDataSchema>;

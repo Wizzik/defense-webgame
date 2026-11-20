@@ -38,6 +38,13 @@ describe("encodeArgs", () => {
     expect(joined).toContain("volume=-1dB");
     expect(joined).toContain("-ac 2 -c:a libopus -b:a 96k");
     expect(joined).toContain("-ss 2 -to 95.5");
+    expect(joined).toContain("afade=t=out:st=92.000:d=1.500");
+  });
+
+  it("fades the end of a cut effect so it does not click", () => {
+    const joined = encodeArgs({ ...sfx, trim: [0.2, 0.6] }, "in.wav", "out.ogg").join(" ");
+    expect(joined).toContain("afade=t=out:st=0.280:d=0.120");
+    expect(encodeArgs(sfx, "in.wav", "out.ogg").join(" ")).not.toContain("afade");
   });
 });
 

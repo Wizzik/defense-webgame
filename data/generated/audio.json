@@ -2,7 +2,11 @@
   "cues": [
     {
       "id": "stone-strike",
-      "files": [],
+      "files": [
+        "audio/sfx/stone-strike-1.ogg",
+        "audio/sfx/stone-strike-2.ogg",
+        "audio/sfx/stone-strike-3.ogg"
+      ],
       "synth": "hit",
       "gainDb": -4,
       "pitchSpread": 0.06,
@@ -13,7 +17,11 @@
     },
     {
       "id": "moon-arrow",
-      "files": [],
+      "files": [
+        "audio/sfx/moon-arrow-1.ogg",
+        "audio/sfx/moon-arrow-2.ogg",
+        "audio/sfx/moon-arrow-3.ogg"
+      ],
       "synth": "hit",
       "gainDb": -4,
       "pitchSpread": 0.06,
@@ -24,7 +32,11 @@
     },
     {
       "id": "grave-bolt",
-      "files": [],
+      "files": [
+        "audio/sfx/grave-bolt-1.ogg",
+        "audio/sfx/grave-bolt-2.ogg",
+        "audio/sfx/grave-bolt-3.ogg"
+      ],
       "synth": "hit",
       "gainDb": -4,
       "pitchSpread": 0.06,
@@ -35,7 +47,10 @@
     },
     {
       "id": "shaman-bolt",
-      "files": [],
+      "files": [
+        "audio/sfx/shaman-bolt-1.ogg",
+        "audio/sfx/shaman-bolt-2.ogg"
+      ],
       "synth": "hit",
       "gainDb": -4,
       "pitchSpread": 0.06,
@@ -46,7 +61,10 @@
     },
     {
       "id": "mist-chill",
-      "files": [],
+      "files": [
+        "audio/sfx/mist-chill-1.ogg",
+        "audio/sfx/mist-chill-2.ogg"
+      ],
       "synth": "hit",
       "gainDb": -4,
       "pitchSpread": 0.06,
@@ -57,7 +75,11 @@
     },
     {
       "id": "spark-shot",
-      "files": [],
+      "files": [
+        "audio/sfx/spark-shot-1.ogg",
+        "audio/sfx/spark-shot-2.ogg",
+        "audio/sfx/spark-shot-3.ogg"
+      ],
       "synth": "hit",
       "gainDb": -4,
       "pitchSpread": 0.06,
@@ -68,7 +90,11 @@
     },
     {
       "id": "cleaver-chop",
-      "files": [],
+      "files": [
+        "audio/sfx/cleaver-chop-1.ogg",
+        "audio/sfx/cleaver-chop-2.ogg",
+        "audio/sfx/cleaver-chop-3.ogg"
+      ],
       "synth": "hit",
       "gainDb": -4,
       "pitchSpread": 0.06,
@@ -79,7 +105,11 @@
     },
     {
       "id": "tide-bolt",
-      "files": [],
+      "files": [
+        "audio/sfx/tide-bolt-1.ogg",
+        "audio/sfx/tide-bolt-2.ogg",
+        "audio/sfx/tide-bolt-3.ogg"
+      ],
       "synth": "hit",
       "gainDb": -4,
       "pitchSpread": 0.06,
@@ -90,7 +120,10 @@
     },
     {
       "id": "stone-rupture",
-      "files": [],
+      "files": [
+        "audio/sfx/stone-rupture-1.ogg",
+        "audio/sfx/stone-rupture-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -101,7 +134,10 @@
     },
     {
       "id": "stone-tap",
-      "files": [],
+      "files": [
+        "audio/sfx/stone-tap-1.ogg",
+        "audio/sfx/stone-tap-2.ogg"
+      ],
       "synth": "hit",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -112,7 +148,10 @@
     },
     {
       "id": "stone-echo",
-      "files": [],
+      "files": [
+        "audio/sfx/stone-echo-1.ogg",
+        "audio/sfx/stone-echo-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -123,7 +162,10 @@
     },
     {
       "id": "stone-quake",
-      "files": [],
+      "files": [
+        "audio/sfx/stone-quake-1.ogg",
+        "audio/sfx/stone-quake-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -134,7 +176,10 @@
     },
     {
       "id": "moon-glimmer",
-      "files": [],
+      "files": [
+        "audio/sfx/moon-glimmer-1.ogg",
+        "audio/sfx/moon-glimmer-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -145,7 +190,10 @@
     },
     {
       "id": "moon-starfall",
-      "files": [],
+      "files": [
+        "audio/sfx/moon-starfall-1.ogg",
+        "audio/sfx/moon-starfall-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -156,7 +204,10 @@
     },
     {
       "id": "moon-whisper",
-      "files": [],
+      "files": [
+        "audio/sfx/moon-whisper-1.ogg",
+        "audio/sfx/moon-whisper-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -167,7 +218,10 @@
     },
     {
       "id": "bone-grasp",
-      "files": [],
+      "files": [
+        "audio/sfx/bone-grasp-1.ogg",
+        "audio/sfx/bone-grasp-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -178,7 +232,11 @@
     },
     {
       "id": "bone-ring",
-      "files": [],
+      "files": [
+        "audio/sfx/bone-ring-1.ogg",
+        "audio/sfx/bone-ring-2.ogg",
+        "audio/sfx/bone-ring-3.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -189,7 +247,10 @@
     },
     {
       "id": "bone-wail",
-      "files": [],
+      "files": [
+        "audio/sfx/bone-wail-1.ogg",
+        "audio/sfx/bone-wail-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -200,7 +261,10 @@
     },
     {
       "id": "bone-stampede",
-      "files": [],
+      "files": [
+        "audio/sfx/bone-stampede-1.ogg",
+        "audio/sfx/bone-stampede-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -211,7 +275,10 @@
     },
     {
       "id": "storm-totem",
-      "files": [],
+      "files": [
+        "audio/sfx/storm-totem-1.ogg",
+        "audio/sfx/storm-totem-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -222,7 +289,10 @@
     },
     {
       "id": "storm-bolt",
-      "files": [],
+      "files": [
+        "audio/sfx/storm-bolt-1.ogg",
+        "audio/sfx/storm-bolt-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -233,7 +303,10 @@
     },
     {
       "id": "storm-mend",
-      "files": [],
+      "files": [
+        "audio/sfx/storm-mend-1.ogg",
+        "audio/sfx/storm-mend-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -244,7 +317,10 @@
     },
     {
       "id": "storm-chorus",
-      "files": [],
+      "files": [
+        "audio/sfx/storm-chorus-1.ogg",
+        "audio/sfx/storm-chorus-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -255,7 +331,10 @@
     },
     {
       "id": "mist-burst",
-      "files": [],
+      "files": [
+        "audio/sfx/mist-burst-1.ogg",
+        "audio/sfx/mist-burst-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -266,7 +345,10 @@
     },
     {
       "id": "mist-wisp",
-      "files": [],
+      "files": [
+        "audio/sfx/mist-wisp-1.ogg",
+        "audio/sfx/mist-wisp-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -277,7 +359,10 @@
     },
     {
       "id": "mist-surge",
-      "files": [],
+      "files": [
+        "audio/sfx/mist-surge-1.ogg",
+        "audio/sfx/mist-surge-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -288,7 +373,10 @@
     },
     {
       "id": "mist-wail",
-      "files": [],
+      "files": [
+        "audio/sfx/mist-wail-1.ogg",
+        "audio/sfx/mist-wail-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -299,7 +387,10 @@
     },
     {
       "id": "spark-rockets",
-      "files": [],
+      "files": [
+        "audio/sfx/spark-rockets-1.ogg",
+        "audio/sfx/spark-rockets-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -310,7 +401,10 @@
     },
     {
       "id": "spark-sear",
-      "files": [],
+      "files": [
+        "audio/sfx/spark-sear-1.ogg",
+        "audio/sfx/spark-sear-2.ogg"
+      ],
       "synth": "hit",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -321,7 +415,10 @@
     },
     {
       "id": "spark-beams",
-      "files": [],
+      "files": [
+        "audio/sfx/spark-beams-1.ogg",
+        "audio/sfx/spark-beams-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -332,7 +429,10 @@
     },
     {
       "id": "blood-toss",
-      "files": [],
+      "files": [
+        "audio/sfx/blood-toss-1.ogg",
+        "audio/sfx/blood-toss-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -343,7 +443,10 @@
     },
     {
       "id": "blood-fan",
-      "files": [],
+      "files": [
+        "audio/sfx/blood-fan-1.ogg",
+        "audio/sfx/blood-fan-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -354,7 +457,10 @@
     },
     {
       "id": "blood-rot",
-      "files": [],
+      "files": [
+        "audio/sfx/blood-rot-1.ogg",
+        "audio/sfx/blood-rot-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -365,7 +471,10 @@
     },
     {
       "id": "tide-crush",
-      "files": [],
+      "files": [
+        "audio/sfx/tide-crush-1.ogg",
+        "audio/sfx/tide-crush-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -376,7 +485,10 @@
     },
     {
       "id": "tide-splash",
-      "files": [],
+      "files": [
+        "audio/sfx/tide-splash-1.ogg",
+        "audio/sfx/tide-splash-2.ogg"
+      ],
       "synth": "hit",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -387,7 +499,10 @@
     },
     {
       "id": "tide-rip",
-      "files": [],
+      "files": [
+        "audio/sfx/tide-rip-1.ogg",
+        "audio/sfx/tide-rip-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -398,7 +513,10 @@
     },
     {
       "id": "tide-lake",
-      "files": [],
+      "files": [
+        "audio/sfx/tide-lake-1.ogg",
+        "audio/sfx/tide-lake-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -409,7 +527,10 @@
     },
     {
       "id": "shared-arc",
-      "files": [],
+      "files": [
+        "audio/sfx/shared-arc-1.ogg",
+        "audio/sfx/shared-arc-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -420,7 +541,10 @@
     },
     {
       "id": "shared-smite",
-      "files": [],
+      "files": [
+        "audio/sfx/shared-smite-1.ogg",
+        "audio/sfx/shared-smite-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -431,7 +555,10 @@
     },
     {
       "id": "shared-firebolt",
-      "files": [],
+      "files": [
+        "audio/sfx/shared-firebolt-1.ogg",
+        "audio/sfx/shared-firebolt-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -442,7 +569,10 @@
     },
     {
       "id": "shared-frost",
-      "files": [],
+      "files": [
+        "audio/sfx/shared-frost-1.ogg",
+        "audio/sfx/shared-frost-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -453,7 +583,10 @@
     },
     {
       "id": "shared-meteor",
-      "files": [],
+      "files": [
+        "audio/sfx/shared-meteor-1.ogg",
+        "audio/sfx/shared-meteor-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -464,7 +597,10 @@
     },
     {
       "id": "shared-holy",
-      "files": [],
+      "files": [
+        "audio/sfx/shared-holy-1.ogg",
+        "audio/sfx/shared-holy-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -475,7 +611,11 @@
     },
     {
       "id": "shared-blades",
-      "files": [],
+      "files": [
+        "audio/sfx/shared-blades-1.ogg",
+        "audio/sfx/shared-blades-2.ogg",
+        "audio/sfx/shared-blades-3.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -486,7 +626,10 @@
     },
     {
       "id": "shared-shock",
-      "files": [],
+      "files": [
+        "audio/sfx/shared-shock-1.ogg",
+        "audio/sfx/shared-shock-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -497,7 +640,10 @@
     },
     {
       "id": "shared-sentry",
-      "files": [],
+      "files": [
+        "audio/sfx/shared-sentry-1.ogg",
+        "audio/sfx/shared-sentry-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -508,7 +654,10 @@
     },
     {
       "id": "shared-breath",
-      "files": [],
+      "files": [
+        "audio/sfx/shared-breath-1.ogg",
+        "audio/sfx/shared-breath-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -519,7 +668,13 @@
     },
     {
       "id": "bone-rattle",
-      "files": [],
+      "files": [
+        "audio/sfx/bone-rattle-1.ogg",
+        "audio/sfx/bone-rattle-2.ogg",
+        "audio/sfx/bone-rattle-3.ogg",
+        "audio/sfx/bone-rattle-4.ogg",
+        "audio/sfx/bone-rattle-5.ogg"
+      ],
       "synth": "death",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -530,7 +685,10 @@
     },
     {
       "id": "bone-rattle-heavy",
-      "files": [],
+      "files": [
+        "audio/sfx/bone-rattle-heavy-1.ogg",
+        "audio/sfx/bone-rattle-heavy-2.ogg"
+      ],
       "synth": "death",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -541,7 +699,11 @@
     },
     {
       "id": "pickup-xp",
-      "files": [],
+      "files": [
+        "audio/sfx/pickup-xp-1.ogg",
+        "audio/sfx/pickup-xp-2.ogg",
+        "audio/sfx/pickup-xp-3.ogg"
+      ],
       "synth": "pickup",
       "gainDb": -3,
       "pitchSpread": 0.06,
@@ -552,7 +714,10 @@
     },
     {
       "id": "pickup-coin",
-      "files": [],
+      "files": [
+        "audio/sfx/pickup-coin-1.ogg",
+        "audio/sfx/pickup-coin-2.ogg"
+      ],
       "synth": "coin",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -563,7 +728,9 @@
     },
     {
       "id": "pickup-heart",
-      "files": [],
+      "files": [
+        "audio/sfx/pickup-heart-1.ogg"
+      ],
       "synth": "heart",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -574,7 +741,10 @@
     },
     {
       "id": "orb-boots",
-      "files": [],
+      "files": [
+        "audio/sfx/orb-boots-1.ogg",
+        "audio/sfx/orb-boots-2.ogg"
+      ],
       "synth": "orb",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -585,7 +755,10 @@
     },
     {
       "id": "orb-berserk",
-      "files": [],
+      "files": [
+        "audio/sfx/orb-berserk-1.ogg",
+        "audio/sfx/orb-berserk-2.ogg"
+      ],
       "synth": "orb",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -596,7 +769,9 @@
     },
     {
       "id": "orb-renewal",
-      "files": [],
+      "files": [
+        "audio/sfx/orb-renewal-1.ogg"
+      ],
       "synth": "orb",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -607,7 +782,11 @@
     },
     {
       "id": "chest-open",
-      "files": [],
+      "files": [
+        "audio/sfx/chest-open-1.ogg",
+        "audio/sfx/chest-open-2.ogg",
+        "audio/sfx/chest-open-3.ogg"
+      ],
       "synth": "chest",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -618,7 +797,10 @@
     },
     {
       "id": "chest-pick",
-      "files": [],
+      "files": [
+        "audio/sfx/chest-pick-1.ogg",
+        "audio/sfx/chest-pick-2.ogg"
+      ],
       "synth": "chest",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -629,7 +811,9 @@
     },
     {
       "id": "level-up",
-      "files": [],
+      "files": [
+        "audio/sfx/level-up-1.ogg"
+      ],
       "synth": "levelUp",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -640,7 +824,11 @@
     },
     {
       "id": "hero-hurt",
-      "files": [],
+      "files": [
+        "audio/sfx/hero-hurt-1.ogg",
+        "audio/sfx/hero-hurt-2.ogg",
+        "audio/sfx/hero-hurt-3.ogg"
+      ],
       "synth": "hit",
       "gainDb": -6,
       "pitchSpread": 0.06,
@@ -651,7 +839,9 @@
     },
     {
       "id": "hero-heal",
-      "files": [],
+      "files": [
+        "audio/sfx/hero-heal-1.ogg"
+      ],
       "synth": "pickup",
       "gainDb": -6,
       "pitchSpread": 0.06,
@@ -662,7 +852,11 @@
     },
     {
       "id": "hero-dash",
-      "files": [],
+      "files": [
+        "audio/sfx/hero-dash-1.ogg",
+        "audio/sfx/hero-dash-2.ogg",
+        "audio/sfx/hero-dash-3.ogg"
+      ],
       "synth": "cast",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -673,7 +867,11 @@
     },
     {
       "id": "castle-thud",
-      "files": [],
+      "files": [
+        "audio/sfx/castle-thud-1.ogg",
+        "audio/sfx/castle-thud-2.ogg",
+        "audio/sfx/castle-thud-3.ogg"
+      ],
       "synth": "castleHit",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -684,7 +882,10 @@
     },
     {
       "id": "war-horn",
-      "files": [],
+      "files": [
+        "audio/sfx/war-horn-1.ogg",
+        "audio/sfx/war-horn-2.ogg"
+      ],
       "synth": "bossArrive",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -695,7 +896,10 @@
     },
     {
       "id": "boss-collapse",
-      "files": [],
+      "files": [
+        "audio/sfx/boss-collapse-1.ogg",
+        "audio/sfx/boss-collapse-2.ogg"
+      ],
       "synth": "death",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -706,7 +910,10 @@
     },
     {
       "id": "rush-horn",
-      "files": [],
+      "files": [
+        "audio/sfx/rush-horn-1.ogg",
+        "audio/sfx/rush-horn-2.ogg"
+      ],
       "synth": "bossArrive",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -717,7 +924,9 @@
     },
     {
       "id": "slam-breath",
-      "files": [],
+      "files": [
+        "audio/sfx/slam-breath-1.ogg"
+      ],
       "synth": "cast",
       "gainDb": -4,
       "pitchSpread": 0.06,
@@ -728,7 +937,10 @@
     },
     {
       "id": "slam-impact",
-      "files": [],
+      "files": [
+        "audio/sfx/slam-impact-1.ogg",
+        "audio/sfx/slam-impact-2.ogg"
+      ],
       "synth": "slam",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -739,7 +951,9 @@
     },
     {
       "id": "boss-roar",
-      "files": [],
+      "files": [
+        "audio/sfx/boss-roar-1.ogg"
+      ],
       "synth": "enrage",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -750,7 +964,9 @@
     },
     {
       "id": "chaplain-mend",
-      "files": [],
+      "files": [
+        "audio/sfx/chaplain-mend-1.ogg"
+      ],
       "synth": "pickup",
       "gainDb": -8,
       "pitchSpread": 0.06,
@@ -761,7 +977,10 @@
     },
     {
       "id": "enemy-charge",
-      "files": [],
+      "files": [
+        "audio/sfx/enemy-charge-1.ogg",
+        "audio/sfx/enemy-charge-2.ogg"
+      ],
       "synth": "cast",
       "gainDb": -6,
       "pitchSpread": 0.06,
@@ -772,7 +991,10 @@
     },
     {
       "id": "drop-legendary",
-      "files": [],
+      "files": [
+        "audio/sfx/drop-legendary-1.ogg",
+        "audio/sfx/drop-legendary-2.ogg"
+      ],
       "synth": "levelUp",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -783,7 +1005,10 @@
     },
     {
       "id": "drop-mythic",
-      "files": [],
+      "files": [
+        "audio/sfx/drop-mythic-1.ogg",
+        "audio/sfx/drop-mythic-2.ogg"
+      ],
       "synth": "levelUp",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -794,7 +1019,11 @@
     },
     {
       "id": "gear-equip",
-      "files": [],
+      "files": [
+        "audio/sfx/gear-equip-1.ogg",
+        "audio/sfx/gear-equip-2.ogg",
+        "audio/sfx/gear-equip-3.ogg"
+      ],
       "synth": "chest",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -805,7 +1034,10 @@
     },
     {
       "id": "heartbeat",
-      "files": [],
+      "files": [
+        "audio/sfx/heartbeat-1.ogg",
+        "audio/sfx/heartbeat-2.ogg"
+      ],
       "synth": "heart",
       "gainDb": -4,
       "pitchSpread": 0.06,
@@ -816,7 +1048,11 @@
     },
     {
       "id": "ui-click",
-      "files": [],
+      "files": [
+        "audio/sfx/ui-click-1.ogg",
+        "audio/sfx/ui-click-2.ogg",
+        "audio/sfx/ui-click-3.ogg"
+      ],
       "synth": "pickup",
       "gainDb": 0,
       "pitchSpread": 0.06,
@@ -826,7 +1062,44 @@
       "category": "ui"
     }
   ],
-  "tracks": [],
+  "tracks": [
+    {
+      "id": "menu-fantasy-theme",
+      "file": "audio/music/menu-fantasy-theme.ogg",
+      "gainDb": 0,
+      "loop": true
+    },
+    {
+      "id": "run-determined-pursuit",
+      "file": "audio/music/run-determined-pursuit.ogg",
+      "gainDb": 0,
+      "loop": true
+    },
+    {
+      "id": "boss-fight",
+      "file": "audio/music/boss-fight.ogg",
+      "gainDb": 0,
+      "loop": true
+    },
+    {
+      "id": "final-epic-endgame",
+      "file": "audio/music/final-epic-endgame.ogg",
+      "gainDb": 0,
+      "loop": true
+    },
+    {
+      "id": "victory-fanfare",
+      "file": "audio/music/victory-fanfare.ogg",
+      "gainDb": 0,
+      "loop": false
+    },
+    {
+      "id": "defeat-game-over",
+      "file": "audio/music/defeat-game-over.ogg",
+      "gainDb": 0,
+      "loop": false
+    }
+  ],
   "abilities": {
     "rock-rupture": {
       "cast": "stone-rupture"
@@ -1055,5 +1328,15 @@
     "gear.equip": "gear-equip",
     "lowHp": "heartbeat",
     "ui.click": "ui-click"
+  },
+  "music": {
+    "menu": "menu-fantasy-theme",
+    "run": [
+      "run-determined-pursuit"
+    ],
+    "miniboss": "boss-fight",
+    "final": "final-epic-endgame",
+    "victory": "victory-fanfare",
+    "defeat": "defeat-game-over"
   }
 }
