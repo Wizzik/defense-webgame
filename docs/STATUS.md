@@ -1,29 +1,21 @@
 # Status
 
-Updated 2026-11-19 (audio Tasks 1-8 done on branch `audio`; Tasks 9-10 wait for Petr's downloaded sounds and music picks). Read this first when you resume work.
+Updated 2026-11-20 (audio branch complete, PR open). Read this first when you resume work.
 
 
-## Audio and music: Tasks 1-8 done on branch `audio` (2026-11-19); next: Task 9 when Petr's folder is connected
+## Audio and music: all 10 tasks done on branch `audio`, PR open (2026-11-20); waits for Petr's listen and merge word
 
-- Petr (2026-11-19): the game is OK now, but the sounds are monotonous, "no feel, no soul"; fantasy style, every hero with its own theme. Above all he wants the game **complete before multiplayer**. Order he approved: 1 audio and music + settings, 2 several heroes in the simulation and an AI ally (the base for co-op: the sim knows one hero today), 3 enemy factions by phase, 4 difficulties with environments, 5 progression between runs (hero unlocks, talents, account perks), 6 credits and legal check, then multiplayer. **Dropped:** the castle shop (and with it wood, towers, repair).
-- Spec: `docs/superpowers/specs/2026-11-19-audio-design.md`. Plan: `docs/superpowers/plans/2026-11-19-audio.md`, 10 tasks. Ledger with every ruling: `.superpowers/sdd/2026-11-19-audio/progress.md` (untracked; the rulings are copied below).
-- Done inline in one chat (no subagents), `npm run check` (881 tests), the build and e2e `webgl2-fallback` (34 of 35; "a slam shows a ring" failed once and passed 2 of 2 alone) pass. Pushed, no PR yet (Task 10 opens it).
-  - Task 1: `docs/audio-sources.md` (also `claude/audio-sources.md` in the project): what Petr downloads, music pairs to choose from.
-  - Task 2: `design/audio.yaml` -> `npm run audio:build` -> `data/generated/audio.json` (zod schema `data/schema/audio.ts`, coverage of all 47 abilities, 8 heroes, 10 enemies, 26 game sounds). Every cue has `files: []` and a `synth` fallback for now; cue ids follow the hero families of spec 5.1.
-  - Tasks 3-6: `client/audio/`: `AudioEngine` (master, music, effects with compressor, interface buses; decoded variants with pitch and gain spread, 32 voices, per-cue limits, priority stealing, stereo by screen position, synth fallback with one warning per cue), `MusicDirector` + `MusicPlayer` (menu > win/lose > final boss > boss > run, 1.5 s crossfades, duck to 0.35 with a 900 Hz low-pass while the game stands, to 0.5 for 2.5 s after a boss or rush horn), `SoundView` through the data (new: hero hit, enemy heal and charge, slam warning, boss death, rush horn, lifesteal heal, loot drop, gear equip, UI click, low-hp heartbeat under 25 %).
-  - Task 7: Settings (menu button and **O** in a run, which pauses it): master, music, effects volume, screen shake, damage numbers; stored in `localStorage` (`defense-webgame.settings`); `__game.settingsOpen`.
-  - Task 8: `npm run audio:encode` (ffmpeg: silence trim, loudnorm -16/-18 LUFS, Opus mono 64k / stereo 96k) from `tools/audio-build/manifest.ts`, rewrites the audio rows of `assets/LICENSES.md`; `audio-source/` is ignored; `tests/assets.test.ts` guards the budgets (3 MB effects, 15 MB music) and that every audio file is used.
-- **Waiting for Petr:** download the list in `docs/audio-sources.md` into one folder, connect it in the Claude desktop app (+ -> Add folder) in the chat that continues, and pick the music (A or B per slot). This chat had no access to his computer.
-- Next chat ("pokračuj dle status.md"): Task 9 (sounds from the folder into the manifest and the cues), Task 10 (music, DECISIONS, ARCHITECTURE, AGENTS, PR), then the final review of the whole branch.
-- Until then the game sounds as before (the same synth tones) plus the new events, and has the Settings panel; no music yet.
-- Rulings made in Tasks 1-8 (Petr may change any):
-  - `audio:build` is its own script (`data:build` needs the map).
-  - The speed auras Swift Pace and Quickstep cast silently (spec 5.1); no spell has its own hit sound yet (Task 9 adds them).
-  - A gear splash (Blast) plays the hero's attack sound; a boss death plays heavy bones plus the boss collapse.
-  - The lifesteal heal sounds at most every 0.5 s, the orb heal not at all; the low-hp beat stops in the menu and while paused.
-  - Audio is enabled by the first click or key anywhere (the menu music then starts), not only by Start.
-  - O closes the panel again when O opened it; Esc closes it always.
-  - Deferred minor: a cue whose file failed is fetched again at the next Start (no second warning).
+- Petr (2026-11-19): the sounds were monotonous, "no feel, no soul"; fantasy style, every hero with its own theme; the game complete before multiplayer. Order he approved: 1 audio and music + settings, 2 several heroes in the simulation and an AI ally, 3 enemy factions by phase, 4 difficulties with environments, 5 progression between runs, 6 credits and legal check, then multiplayer. **Dropped:** the castle shop.
+- Spec `docs/superpowers/specs/2026-11-19-audio-design.md`, plan `docs/superpowers/plans/2026-11-19-audio.md`. Sources, levels and authors: `docs/DECISIONS.md`, section Audio and music.
+- Done inline without subagents; `npm run check` (886 tests), the build and e2e `webgl2-fallback` (35 of 35) pass. The simulation did not change (`git diff main -- sim` is empty).
+- What it brings:
+  - 161 recorded CC0 effects for all 75 cues (every ability, hero attack, enemy death and game sound), each hero with its own family; the synth tones stay as the fallback;
+  - six CC0 tracks: menu Fantasy Orchestral Theme, run Determined Pursuit, boss Boss Fight (Lisboa), final boss Epic Endgame, victory fanfare, defeat jingle; crossfades and ducking;
+  - the Settings panel (menu button, O in a run): master, music and effects volume, screen shake, damage numbers;
+  - `npm run audio:encode` from `tools/audio-build/manifest.ts` (sources from Petr's folder `Downloads\Zvuky`, unpacked into the untracked `audio-source/`).
+- **Open for Petr:** only one run track was downloaded, so the same 108 s loop plays the whole run; two more from the list (Battle Theme A or B, A Legend Will Rise, Laments of the War) would vary it. The finale track is the file "Heavy Concept A Bass Master.wav", taken as Epic Endgame Cinematic (cynicmusic); it loops every 40 s.
+- What Petr checks: can he tell a hero by its sound; does it still feel monotonous after 15 minutes; music against the fight (too loud or quiet: the Settings sliders); is the horn of a boss and a rush heard; the heartbeat under 25 % hp; the Settings panel on O. Quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1&phase=6 (miniboss and its music), `&phase=21` (finale), `?hero=sparkshot` etc.
+- Rulings of Tasks 1-8 (Petr may change any): the speed auras cast silently; a gear splash plays the hero's attack sound; the lifesteal heal sounds at most every 0.5 s, the orb heal not at all; audio starts at the first click or key; O closes the panel O opened, Esc always; a cue whose file failed is fetched again at the next Start.
 
 ## Gravecaller nerf: smaller Bone Stampede, half the Grave Grasp heal, double ultimate cooldown: merged (PR #21 `9922896`, PR #22 `8cfdbd9`, 2026-11-19, Pages deployed); waits for Petr's playtest
 
