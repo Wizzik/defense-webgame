@@ -437,6 +437,8 @@ Open after the tuning:
 
 ## Engineering
 
+- Multiplayer spike (2026-11-20, Claude's choices): the determinism matrix (`client/determinism/matrix.ts`, digest `73372c52` at `3d48341`) is the regression test of the multi-hero refactor: a step that must not change the one-player game keeps the digest, and the hash must mix the same values in the same order for one player. `stateHash` covers every field that can change a later step; `prevX/prevY`, constructor tables, the event buffer and the spatial grid stay out.
+- Co-op networking (spike): deterministic lockstep, `INPUT_DELAY = 3` steps (100 ms), a hash exchange every 30 steps, a ring of 256 steps per player; `peerjs` 1.5.5 (MIT, exact) with the PeerJS cloud signalling for now; network code only in `client/net/` and `client/net-spike/`, importing the sim only through `sim/index.ts`.
 - The spec outranks a plan. The fps gate is "roughly 60 fps with 150 enemies" (spec), not "≥ 60" (phase 0 plan).
 - Push the feature branch after every reviewed task, because the container can restart; merging to `main` waits for Petr.
 - `mapName` stays in `design/*.yaml` for looking objects up and never reaches `data/generated`.

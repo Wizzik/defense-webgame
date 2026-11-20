@@ -1,13 +1,18 @@
 # Status
 
-Updated 2026-11-20 (multiplayer spike spec and plan written; enemy factions merged as PR #26 `b67c076`, Petr's playtest passed). Read this first when you resume work.
+Updated 2026-11-20 (multiplayer spike done, PR #27 open; enemy factions merged as PR #26 `b67c076`). Read this first when you resume work.
 
-## Multiplayer spike: spec and plan written (2026-11-20, branch `multiplayer-spike`); waits for Petr's approval
+## Multiplayer spike: done, PR #27 open (2026-11-20, branch `multiplayer-spike`); merge waits for Petr
 
-- Spec `docs/superpowers/specs/2026-11-20-multiplayer-spike-design.md`, plan `docs/superpowers/plans/2026-11-20-multiplayer-spike.md` (7 tasks; native execution recommended). Petr's co-op rules: `claude/multiplayer-decisions.md` in the claude.ai project (summary in spec chapter 3).
-- The spike changes no gameplay: a wider `stateHash`, a cross-engine determinism matrix (`/determinism/`, Playwright projects `sim-chromium`, `sim-firefox`, `sim-webkit`), lockstep and protocol tested in memory, a PeerJS page `/net-spike/`, the single-hero inventory `docs/multiplayer/single-hero-inventory.md` and the report `docs/multiplayer/spike-report.md`.
-- Pre-scan (spec chapter 4): determinism risk is low (the sim uses only exact `Math` functions); the single-hero assumption is deep (`run.hero` 514 uses, `levelUp`/`chest` pause the whole run).
-- Claude's suggestion: run the spike now (one chat), then difficulties, progression and credits as Petr ordered, each designed with a player-count knob; the multi-hero refactor follows the inventory's migration order. Petr decides.
+- All 7 tasks of `docs/superpowers/plans/2026-11-20-multiplayer-spike.md` done inline in one chat (Petr approved the spike), one final self-review. The game did not change (`git diff main -- sim`: only `sim/hash.ts` and its test). `npm run check` (1040 tests), the build, e2e `webgl2-fallback` (36 of 36) and `sim-chromium` pass; CI on the PR: 78 of 78.
+- **Report: `docs/multiplayer/spike-report.md`.** In short:
+  - determinism holds: the matrix of 12 autopilot runs gives digest `73372c52` in Node, Chromium, Firefox and WebKit (CI), the first 600 steps of a phase-16 run match step by step; no fix was needed;
+  - lockstep works: two Chromium tabs over WebRTC (local PeerServer; the container cannot reach the PeerJS cloud) 60 s, 0 stalls, 0 desyncs; in memory, reordered and delayed delivery stays in sync over 3000 steps and a changed `gold` is caught within 30 steps;
+  - several heroes: `docs/multiplayer/single-hero-inventory.md`, 38 `sim/` files read the one hero, an 8-step migration of 8-10 chats in which every step keeps the one-player game (the matrix digest is the regression test).
+- New: the hash also covers enemy `maxHp`, `damageScale`, `spawnTick`, last hit and attack ticks, facing, heart values, `ultimateRequested` and the offer shape (the spec's pre-scan was wrong: gold, chests, pickups, projectiles, allies and offers were already hashed). Pages `/determinism/` and `/net-spike/` (after the merge on Pages), Playwright projects `sim-chromium`, `sim-firefox`, `sim-webkit`, `client/net/` (protocol, lockstep, PeerJS 1.5.5 link, room codes).
+- **What Petr does (report chapter 5):** after the merge (a) `/determinism/` in Chrome and Firefox must show `73372c52`; (b) `/net-spike/` Chrome (Host) + Firefox (the link) on one computer 10 minutes; (c) two computers in different networks 10 minutes; send the panel values to the chat.
+- **Open for Petr:** keep the level-up pause for one player or drop it everywhere (co-op has none, R3); the co-op card time limit (Claude: 10 s, then the autopilot card); the order of the next phases (Claude: difficulties, progression and credits as ordered, each with a player-count knob, inventory chapter 5; migration steps 1-4 could go before them).
+- Quick links after the merge: https://wizzik.github.io/defense-webgame/determinism/, https://wizzik.github.io/defense-webgame/net-spike/.
 
 ## Enemy factions: merged (PR #26 as `b67c076`, 2026-11-20, Pages deployed); Petr's playtest passed ("testy super")
 
