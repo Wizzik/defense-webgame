@@ -3,6 +3,7 @@ import { TICK_SECONDS, TICKS_PER_SECOND } from "./constants";
 import { Action, Role } from "./enemies";
 import { attackDelayTicks, bloodlustDamageScale, bloodlustSpeedScale, updateBloodlust } from "./enemy-bloodlust";
 import { slowHero } from "./hero-snares";
+import { updateRaise } from "./enemy-raise";
 import { auraDamageScale, auraSpeedScale, updateEnemyAuras } from "./enemy-aura";
 import { cancelCharge, Charge, chargeVX, chargeVY, updateCharge } from "./enemy-charge";
 import { cancelSlam, updateSlam } from "./enemy-slam";
@@ -34,6 +35,7 @@ export function updateEnemies(run: Run): void {
 
   updateEnemyAuras(run);
   updateBloodlust(run);
+  updateRaise(run);
 
   for (let i = 0; i < e.capacity; i++) {
     if (e.alive[i] === 0) continue;

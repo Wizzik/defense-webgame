@@ -86,6 +86,26 @@ export function scatterMember(
   return slot;
 }
 
+/**
+ * Spawns one enemy of `type` at (x, y) (clamped into the arena) with the hp and damage of this moment, like a pack member.
+ * Draws nothing from the rng. Never pushes another enemy out: returns -1 when the store is full.
+ */
+export function spawnAt(run: Run, type: number, role: number, x: number, y: number): number {
+  const store = run.enemies;
+  if (store.aliveCount >= store.capacity) return -1;
+  const { arena } = run.data.rules;
+  const def = run.data.enemies[type];
+  const scale = timeScale(run.data.rules, run.tick);
+  const slot = store.spawn(
+    type, role, clamp(x, arena.width / 2 - def.collision), clamp(y, arena.height / 2 - def.collision),
+    def.hp * scale, scale, run.tick,
+  );
+  if (slot < 0) return -1;
+  run.stats.spawned++;
+  if (def.strike !== undefined) store.strikeCooldown[slot] = Math.round(def.strike.cooldownSeconds * TICKS_PER_SECOND);
+  return slot;
+}
+
 function clamp(value: number, limit: number): number {
   return Math.max(-limit, Math.min(limit, value));
 }

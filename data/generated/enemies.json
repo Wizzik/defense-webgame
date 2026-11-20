@@ -656,7 +656,14 @@
     "faction": "undead",
     "xp": 2,
     "gold": 2,
-    "model": "chaplain"
+    "model": "chaplain",
+    "raise": {
+      "type": "risen",
+      "cooldownSeconds": 5,
+      "count": 2,
+      "range": 500,
+      "maxAgeSeconds": 10
+    }
   },
   {
     "id": "risen",

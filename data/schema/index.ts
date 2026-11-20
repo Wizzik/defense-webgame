@@ -159,6 +159,11 @@ export function validateGameData(data: unknown): GameData {
       if (!enemyIds.has(id)) errors.push(`rules.phases.${i}.mix: unknown enemy "${id}"`);
     }
   });
+  enemies.forEach((e, i) => {
+    if (e.raise !== undefined && !byId.has(e.raise.type)) {
+      errors.push(`enemies.${i} (${e.id}).raise.type: unknown enemy "${e.raise.type}"`);
+    }
+  });
   rules.factions.forEach((faction, i) => {
     for (const key of ["elite", "heavy"] as const) {
       const enemy = byId.get(faction[key]);

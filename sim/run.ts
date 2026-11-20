@@ -14,6 +14,7 @@ import { COIN_CAPACITY, CRYSTAL_CAPACITY, CrystalStore, HEART_CAPACITY, updatePi
 import { updateEnemies } from "./enemy-ai";
 import { BEHAVIOR_IDS } from "./enemy-steer";
 import { healEnemies } from "./enemy-heal";
+import { CORPSE_CAPACITY, CorpseRing } from "./corpses";
 import { EnemyStore } from "./enemies";
 import { updateClouds } from "./enemy-cloud";
 import { EventKind, EventLog } from "./events";
@@ -106,6 +107,10 @@ export class Run {
   readonly heavyTypes: Int32Array;
   /** 1 for every enemy type that is the elite of a faction. */
   readonly isElite: Uint8Array;
+  /** Places of the last deaths of common enemies, for gravebinders (sim/enemy-raise.ts). */
+  readonly corpses = new CorpseRing(CORPSE_CAPACITY);
+  /** Type index each type raises (its `raise.type`), -1 for a type that raises nothing. */
+  readonly raiseTypes: Int32Array;
   /** The faction of the current phase; updateFaction announces a change. */
   factionIndex = 0;
   /** `rules.events` prepared for the steps (sim/timeline.ts). */
@@ -169,6 +174,8 @@ export class Run {
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);
     this.enemyBehavior = Uint8Array.from(data.enemies, (e) => BEHAVIOR_IDS.indexOf(e.behavior));
     this.enemyHunter = Uint8Array.from(data.enemies, (e) => (e.hunter ? 1 : 0));
+    this.raiseTypes = Int32Array.from(data.enemies, (e, i) =>
+      e.raise === undefined ? -1 : enemyType(data, e.raise.type, `enemies.${i}.raise.type`));
     this.hasAura = Uint8Array.from(data.enemies, (e) => (e.aura !== undefined ? 1 : 0));
     const factions = buildFactionTables(data);
     this.phaseFaction = factions.phaseFaction;

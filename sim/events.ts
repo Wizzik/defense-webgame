@@ -49,6 +49,8 @@ export const EventKind = {
   Bloodlust: 27,
   /** The hero was snared: value = 0 web (slow) / 1 roots, x/y = the hero, u = seconds. */
   HeroSnared: 28,
+  /** A gravebinder raised an enemy: a = the new slot, value = the raiser's type index, x/y = where. */
+  Raise: 29,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

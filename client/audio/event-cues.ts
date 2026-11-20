@@ -46,6 +46,7 @@ export const HANDLED_EVENTS: Record<keyof typeof EventKind, "sound" | "skip"> = 
   Faction: "skip", // the faction news and horn come with the client part of the factions plan
   Bloodlust: "skip", // its sound comes with the client part of the factions plan
   HeroSnared: "skip", // its sound comes with the client part of the factions plan
+  Raise: "skip", // its sound comes with the client part of the factions plan
 };
 
 const ORB_SOUNDS: Record<number, GameSound> = {

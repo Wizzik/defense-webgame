@@ -20,6 +20,7 @@
 # model: id of the enemy type whose model the type is drawn with.
 # strike: design value (sim/enemy-strike.ts): a warning circle on the hero from afar; with `leap` the boss jumps into it.
 # hunter: design value: the type goes for the hero whatever the role of its pack is.
+# raise: design value (sim/enemy-raise.ts): the gravebinder raises risen where common enemies died.
 # cloud: design value (sim/enemy-cloud.ts): the share of max hp a second the hero loses inside; threat.heroDamageTaken (2)
 #   doubles it, so a hero loses 2 % a second as the spec wants.
 # web: design value (sim/hero-snares.ts): every hit of the webcrawler slows the hero.
@@ -268,6 +269,7 @@
   behavior: support
   xp: 2
   gold: 2
+  raise: { type: risen, cooldownSeconds: 5, count: 2, range: 500, maxAgeSeconds: 10 }
 
 - id: risen
   model: scout   # provisional until the faction models (factions plan, Task 6)

@@ -270,6 +270,14 @@ describe("game data schemas", () => {
     expect(errorMessage(d)).toContain("rules.factions.0.id");
   });
 
+  it("a raise must name a known enemy", () => {
+    const d = fixture();
+    d.enemies[0].raise = { type: "nobody", cooldownSeconds: 5, count: 2, range: 500, maxAgeSeconds: 10 };
+    expect(errorMessage(d)).toContain('enemies.0 (grunt).raise.type: unknown enemy "nobody"');
+    d.enemies[0].raise.type = "grunt";
+    expect(() => validateGameData(d)).not.toThrow();
+  });
+
   it("an enemy with xp 0 is valid, a faction must be known", () => {
     const d = fixture();
     d.enemies[0].xp = 0;

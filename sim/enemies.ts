@@ -51,6 +51,8 @@ export class EnemyStore {
   readonly bloodlustTicks: Int32Array;
   readonly bloodlustType: Uint16Array;
   readonly bloodlustCooldown: Int32Array;
+  /** Ticks until a gravebinder raises again (sim/enemy-raise.ts). */
+  readonly raiseCooldown: Int32Array;
   /** Ticks until the next strike from afar (sim/enemy-strike.ts); its windup lives in the slam fields. */
   readonly strikeCooldown: Int32Array;
 
@@ -96,6 +98,7 @@ export class EnemyStore {
     this.bloodlustTicks = new Int32Array(capacity);
     this.bloodlustType = new Uint16Array(capacity);
     this.bloodlustCooldown = new Int32Array(capacity);
+    this.raiseCooldown = new Int32Array(capacity);
   }
 
   /** Takes the lowest free slot; returns -1 when the store is full. */
@@ -152,6 +155,7 @@ export class EnemyStore {
     this.bloodlustTicks[slot] = 0;
     this.bloodlustType[slot] = 0;
     this.bloodlustCooldown[slot] = 0;
+    this.raiseCooldown[slot] = 0;
     return slot;
   }
 
