@@ -42,6 +42,8 @@ URL parameters of the game page: `seed`, `speed` (1-16), `duration` (5-1200 s: t
 
 The page `/determinism/` runs the determinism matrix and shows its 8-digit digest (every engine must show the same one); `?case=<id>` runs one case, `?every=<n>` checkpoints every n steps (default 300), `?ticks=<n>` caps the steps of each case; `window.__determinism` holds `done`, `results` (`id`, `ticks`, `state`, `checkpoints`), `digest` and `ms`.
 
+The page `/net-spike/` runs one single-hero game in lockstep between two browsers over PeerJS (`client/net/`): *Host* opens a room `dwg-xxxxxx` and shows a link with `?join=<code>`; the host's WASD steers the hero, the guest's inputs travel but do not steer; `?signal=host:port` uses a local PeerServer instead of the PeerJS cloud (the container cannot reach the cloud; start one with `npx peer --port 9000 --host 127.0.0.1` outside the repo); `window.__net` holds `role`, `connected`, `tick`, `rttMedian`, `rttP95` (ms), `stalls`, `stallsPerMinute`, `lastMatchedHash`, `desyncAt` and `rejected`.
+
 ## Assets pipeline
 - Character and environment models are cut from pinned CC0 KayKit sources (Kay Lousberg) by `tools/assets-build/`. The sources land in `assets-source/` (untracked, untrusted data: never run anything from there); the built GLB files in `assets/models/{heroes,enemies,env}/` are committed.
 - To add or change a model: edit its row in `tools/assets-build/manifest.ts` (`SOURCES` pins repo and commit, `MODELS` lists the models), run `npm run assets:fetch` (downloads what the manifest needs, skips existing files), run `npm run assets:build` (writes the GLB files and rewrites the model rows of `assets/LICENSES.md`, the robot row stays), then commit the results.

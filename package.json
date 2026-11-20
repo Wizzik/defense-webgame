@@ -38,6 +38,7 @@
     "yaml": "2.9.1"
   },
   "dependencies": {
+    "peerjs": "1.5.5",
     "three": "0.187.0",
     "zod": "4.6.7"
   }
