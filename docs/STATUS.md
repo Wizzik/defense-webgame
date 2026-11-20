@@ -7,13 +7,13 @@ Updated 2026-11-20 (audio branch complete, PR open). Read this first when you re
 
 - Petr (2026-11-19): the sounds were monotonous, "no feel, no soul"; fantasy style, every hero with its own theme; the game complete before multiplayer. Order he approved: 1 audio and music + settings, 2 several heroes in the simulation and an AI ally, 3 enemy factions by phase, 4 difficulties with environments, 5 progression between runs, 6 credits and legal check, then multiplayer. **Dropped:** the castle shop.
 - Spec `docs/superpowers/specs/2026-11-19-audio-design.md`, plan `docs/superpowers/plans/2026-11-19-audio.md`. Sources, levels and authors: `docs/DECISIONS.md`, section Audio and music.
-- Done inline without subagents; `npm run check` (886 tests), the build and e2e `webgl2-fallback` (35 of 35) pass. The simulation did not change (`git diff main -- sim` is empty).
+- Done inline without subagents; `npm run check` (889 tests), the build and e2e `webgl2-fallback` (35 of 35) pass. The simulation did not change (`git diff main -- sim` is empty).
 - What it brings:
   - 161 recorded CC0 effects for all 75 cues (every ability, hero attack, enemy death and game sound), each hero with its own family; the synth tones stay as the fallback;
   - six CC0 tracks: menu Fantasy Orchestral Theme, run Determined Pursuit, boss Boss Fight (Lisboa), final boss Epic Endgame, victory fanfare, defeat jingle; crossfades and ducking;
   - the Settings panel (menu button, O in a run): master, music and effects volume, screen shake, damage numbers;
   - `npm run audio:encode` from `tools/audio-build/manifest.ts` (sources from Petr's folder `Downloads\Zvuky`, unpacked into the untracked `audio-source/`).
-- **Open for Petr:** only one run track was downloaded, so the same 108 s loop plays the whole run; two more from the list (Battle Theme A or B, A Legend Will Rise, Laments of the War) would vary it. The finale track is the file "Heavy Concept A Bass Master.wav", taken as Epic Endgame Cinematic (cynicmusic); it loops every 40 s.
+- **Open for Petr:** only one run track was downloaded, so the same 108 s loop repeats seamlessly the whole run; two more from the list (Battle Theme A or B, A Legend Will Rise, Laments of the War) would vary it. The finale track is the file "Heavy Concept A Bass Master.wav", taken as Epic Endgame Cinematic (cynicmusic); it loops every 40 s.
 - What Petr checks: can he tell a hero by its sound; does it still feel monotonous after 15 minutes; music against the fight (too loud or quiet: the Settings sliders); is the horn of a boss and a rush heard; the heartbeat under 25 % hp; the Settings panel on O. Quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1&phase=6 (miniboss and its music), `&phase=21` (finale), `?hero=sparkshot` etc.
 - Rulings of Tasks 1-8 (Petr may change any): the speed auras cast silently; a gear splash plays the hero's attack sound; the lifesteal heal sounds at most every 0.5 s, the orb heal not at all; audio starts at the first click or key; O closes the panel O opened, Esc always; a cue whose file failed is fetched again at the next Start.
 

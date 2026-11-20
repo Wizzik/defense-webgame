@@ -21,6 +21,16 @@ const ALERT_GAIN = 0.5;
 const ALERT_SECONDS = 2.5;
 
 /** The music for a state: menu, then the end of a run, then the final boss, a boss, the run. */
+/**
+ * Whether a track loops on its element: the end jingles never; run tracks only when the run has one track
+ * (several run tracks play one after another); the rest as the track says.
+ */
+export function loopsInSlot(slot: MusicSlot, trackLoops: boolean, runTracks: number): boolean {
+  if (slot === "victory" || slot === "defeat") return false;
+  if (slot === "run") return runTracks === 1 && trackLoops;
+  return trackLoops;
+}
+
 export function musicSlot(input: MusicInput): MusicSlot {
   if (input.menuOpen) return "menu";
   if (input.state === "won") return "victory";

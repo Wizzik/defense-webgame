@@ -1,6 +1,6 @@
 import type { AudioData, Track } from "../../data/schema/audio";
 import type { AudioEngine } from "./engine";
-import type { Duck, MusicSlot } from "./music-director";
+import { type Duck, loopsInSlot, type MusicSlot } from "./music-director";
 
 const FADE_SECONDS = 1.5;
 /** setTargetAtTime reaches ~95 % after three time constants. */
@@ -15,7 +15,7 @@ interface Channel {
 
 /**
  * Streams the music through two <audio> elements wired into Web Audio and crossfades between them.
- * Run tracks play one after another; the end jingles play once; the rest loop. Before the engine is enabled it does nothing.
+ * Run tracks play one after another (a single run track loops); the end jingles play once; the rest loop. Before the engine is enabled it does nothing.
  */
 export class MusicPlayer {
   private readonly engine: AudioEngine;
@@ -38,7 +38,7 @@ export class MusicPlayer {
   }
 
   set(slot: MusicSlot): void {
-    if (slot === this.slot || !this.data.music || !this.wire()) return;
+    if (slot === this.slot || !this.wire()) return;
     this.slot = slot;
     if (slot === "run") this.runIndex = 0;
     this.crossfade(this.trackFor(slot));
@@ -105,7 +105,7 @@ export class MusicPlayer {
     this.active = 1 - this.active;
     const next = channels[this.active]!;
     next.element.src = `${this.baseUrl}${track.file}`;
-    next.element.loop = this.slot === "run" ? false : track.loop && this.slot !== "victory" && this.slot !== "defeat";
+    next.element.loop = this.slot !== null && loopsInSlot(this.slot, track.loop, this.data.music.run.length);
     next.fade.gain.cancelScheduledValues(ctx.currentTime);
     next.fade.gain.setValueAtTime(0, ctx.currentTime);
     next.fade.gain.setTargetAtTime(10 ** (track.gainDb / 20), ctx.currentTime, FADE_TAU);

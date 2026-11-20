@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type MusicInput, MusicDirector, musicSlot } from "./music-director";
+import { loopsInSlot, type MusicInput, MusicDirector, musicSlot } from "./music-director";
 
 const base: MusicInput = { menuOpen: false, state: "playing", bossAlive: false, finale: false, panelOpen: false };
 
@@ -41,5 +41,22 @@ describe("MusicDirector", () => {
     const d = new MusicDirector();
     d.onAlert(10);
     expect(d.duck({ ...base, menuOpen: true, state: "levelUp" }, 11)).toEqual({ gain: 1, lowpass: false });
+  });
+});
+
+describe("loopsInSlot", () => {
+  it("never loops the end jingles", () => {
+    expect(loopsInSlot("victory", true, 1)).toBe(false);
+    expect(loopsInSlot("defeat", true, 3)).toBe(false);
+  });
+
+  it("loops a single run track seamlessly but plays several one after another", () => {
+    expect(loopsInSlot("run", true, 1)).toBe(true);
+    expect(loopsInSlot("run", true, 2)).toBe(false);
+  });
+
+  it("follows the track elsewhere", () => {
+    expect(loopsInSlot("menu", true, 2)).toBe(true);
+    expect(loopsInSlot("final", false, 2)).toBe(false);
   });
 });
