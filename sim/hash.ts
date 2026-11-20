@@ -27,6 +27,7 @@ export function stateHash(run: Run): number {
   mixInt(run.rng.state);
   mixInt(run.heroIndex);
   mixInt(run.ultimateAuto ? 1 : 0);
+  mixInt(run.ultimateRequested ? 1 : 0);
   const hero = run.hero;
   mixFloat(hero.x);
   mixFloat(hero.y);
@@ -156,6 +157,13 @@ export function stateHash(run: Run): number {
     mixFloat(e.slamX[i]);
     mixFloat(e.slamY[i]);
     mixInt(e.strikeCooldown[i]);
+    mixFloat(e.maxHp[i]);
+    mixFloat(e.damageScale[i]);
+    mixInt(e.spawnTick[i]);
+    mixInt(e.lastHitTick[i]);
+    mixInt(e.lastAttackTick[i]);
+    mixFloat(e.facingX[i]);
+    mixFloat(e.facingY[i]);
   }
   const c = run.crystals;
   for (let i = 0; i < c.capacity; i++) {
@@ -175,8 +183,12 @@ export function stateHash(run: Run): number {
     mixFloat(run.chests.x[i]!);
     mixFloat(run.chests.y[i]!);
   }
-  if (run.chestOffer) {
-    for (const card of run.chestOffer.cards) {
+  if (run.chestOffer === null) mixInt(0);
+  else {
+    const cards = run.chestOffer.cards;
+    mixInt(cards.length);
+    for (let k = 0; k < cards.length; k++) {
+      const card = cards[k]!;
       mixInt(card.slot + 1);
       mixInt(card.item + 1);
       mixInt(card.action);
@@ -198,6 +210,7 @@ export function stateHash(run: Run): number {
     if (hearts.alive[i] === 0) continue;
     mixInt(i);
     mixInt(hearts.attracted[i]);
+    mixInt(hearts.value[i]);
     mixFloat(hearts.x[i]);
     mixFloat(hearts.y[i]);
   }
@@ -230,11 +243,16 @@ export function stateHash(run: Run): number {
     mixFloat(al.facingX[i]);
     mixFloat(al.facingY[i]);
   }
-  if (run.offer) {
-    for (const card of run.offer.cards) {
+  if (run.offer === null) mixInt(0);
+  else {
+    const cards = run.offer.cards;
+    mixInt(cards.length);
+    for (let k = 0; k < cards.length; k++) {
+      const card = cards[k]!;
       if (card.kind === "ability") {
         mixInt(1);
         mixInt(card.slot);
+        mixInt(card.fromLevel);
         mixInt(card.toLevel);
       } else if (card.kind === "learn") {
         mixInt(5);
