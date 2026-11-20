@@ -319,7 +319,7 @@ abilities:
   seismic-echo: { cast: stone-echo }
   groundbreaker: { cast: stone-quake }
   hunters-focus: { cast: moon-glimmer }
-  falling-stars: { cast: moon-starfall }
+  falling-stars: { cast: storm-mend } # swapped with Mending Tide (Petr, 2026-11-20)
   swift-pace: { cast: none }
   shadow-sisters: { cast: moon-whisper }
   grave-grasp: { cast: bone-grasp }
@@ -328,7 +328,7 @@ abilities:
   bone-stampede: { cast: bone-stampede }
   serpent-totem: { cast: storm-totem }
   forked-bolt: { cast: storm-bolt }
-  mending-tide: { cast: storm-mend }
+  mending-tide: { cast: moon-starfall } # swapped with Falling Stars (Petr, 2026-11-20)
   spirit-ward: { cast: storm-chorus }
   soul-burst: { cast: mist-burst }
   wisp-ward: { cast: mist-wisp }

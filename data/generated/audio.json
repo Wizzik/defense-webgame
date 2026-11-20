@@ -1087,7 +1087,7 @@
       "cast": "moon-glimmer"
     },
     "falling-stars": {
-      "cast": "moon-starfall"
+      "cast": "storm-mend"
     },
     "swift-pace": {
       "cast": "none"
@@ -1114,7 +1114,7 @@
       "cast": "storm-bolt"
     },
     "mending-tide": {
-      "cast": "storm-mend"
+      "cast": "moon-starfall"
     },
     "spirit-ward": {
       "cast": "storm-chorus"

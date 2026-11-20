@@ -205,21 +205,29 @@ const LAYERED: AudioSource[] = [
     { length: 1.3, space: "hall", layers: [M("Wind Spell Impact 4_s07.wav", { trim: [0, 0.9], gainDb: -6 }), M("Healing Spell Impact 9_s08.wav", { trim: [0, 1.4], rate: 0.7 })] },
     { length: 1.3, space: "hall", layers: [M("Healing Spell Impact 13_s08.wav", { trim: [0, 1.4], rate: 0.6 }), M("Wind Spell Impact 5_s07.wav", { trim: [0, 1.0], rate: 1.3, gainDb: -8 })] },
   ]),
-  // Bone Stampede: a rain of rattling bones over heavy hoofbeats
+  // Bone Stampede: a dark stampede: low bone clatter over deep hoofbeats, a drone and a ghostly moan (Petr, 2026-11-20: darker)
   ...mix("bone-stampede", [
     {
-      length: 1.8,
+      length: 2.0,
+      space: "hall",
       layers: [
-        ...[0, 0.09, 0.17, 0.28, 0.36, 0.47, 0.58, 0.7, 0.83, 0.95].map((at, i) => bone(i, at, i % 2 === 0 ? 0 : -4)),
-        ...[0, 0.22, 0.44, 0.66, 0.88].map((at) => L(K_IMPACT, "impactPunch_heavy_001.ogg", { at, lowpass: 300, gainDb: -6 })),
+        M("Wind Spell Impact 2_s07.wav", { trim: [0, 2.0], rate: 0.6, lowpass: 900, gainDb: -2 }),
+        M("Healing Spell Impact 7_s08.wav", { trim: [0, 2.0], rate: 0.4, lowpass: 1500, gainDb: -8 }),
+        X(LOW_BOOM, { lowpass: 150, gainDb: -6 }),
+        ...[0, 0.2, 0.38, 0.58, 0.76, 0.95, 1.15].map((at, i) => L(K_IMPACT, `impactPunch_heavy_00${i % 5}.ogg`, { at, rate: 0.6, lowpass: 250, gainDb: -2 })),
+        ...[0.05, 0.14, 0.27, 0.41, 0.5, 0.66, 0.8, 0.99, 1.1].map((at, i) => L(BONES, `${i}.ogg`, { at, rate: 0.65, lowpass: 2500, gainDb: -6 })),
       ],
     },
     {
-      length: 1.8,
+      length: 2.0,
+      space: "hall",
       layers: [
-        L(BONES2, "bones-2.wav", { gainDb: -2 }),
-        ...[0.12, 0.2, 0.33, 0.41, 0.55, 0.64, 0.78, 0.9].map((at, i) => bone(9 - i, at, i % 2 === 0 ? -2 : -5)),
-        ...[0.05, 0.27, 0.49, 0.71, 0.93].map((at) => L(K_IMPACT, "impactPunch_heavy_003.ogg", { at, lowpass: 300, gainDb: -6 })),
+        M("Earth Spell Impact 5_s07.wav", { trim: [0, 2.0], rate: 0.7, lowpass: 1200, gainDb: -2 }),
+        M("Healing Spell Impact 13_s08.wav", { trim: [0, 2.0], rate: 0.4, lowpass: 1500, gainDb: -8 }),
+        L(BONES2, "bones-2.wav", { rate: 0.6, lowpass: 2500, gainDb: -4 }),
+        ...[0.02, 0.21, 0.4, 0.6, 0.79, 0.98, 1.18].map((at, i) => L(K_IMPACT, `impactSoft_heavy_00${i % 5}.ogg`, { at, rate: 0.6, lowpass: 250, gainDb: -2 })),
+        ...[0.1, 0.23, 0.35, 0.52, 0.7, 0.86, 1.04].map((at, i) => L(BONES, `${9 - i}.ogg`, { at, rate: 0.6, lowpass: 2500, gainDb: -6 })),
+        X("explosion_crunch_000_48kHz_16bit_0.78s_e875be4e_s04.wav", { rate: 0.6, lowpass: 600, gainDb: -8 }),
       ],
     },
   ]),
