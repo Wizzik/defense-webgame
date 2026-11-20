@@ -178,6 +178,9 @@ export class EnemyCrowd implements RunView {
     for (let type = 0; type < types.length; type++) {
       const { mesh, animAttribute, lustAttribute } = types[type];
       mesh.count = buckets.count(type);
+      // a type with nobody alive is not drawn and uploads nothing (22 types, most of them absent in a phase)
+      mesh.visible = mesh.count > 0;
+      if (!mesh.visible) continue;
       mesh.instanceMatrix.needsUpdate = true;
       animAttribute.needsUpdate = true;
       lustAttribute.needsUpdate = true;
