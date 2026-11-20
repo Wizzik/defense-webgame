@@ -23,7 +23,8 @@ Updated 2026-11-20 (multiplayer spike spec and plan written; enemy factions merg
   - the news line at 4:10, 8:20 and 12:30-13:20 (boss first, then the faction);
   - balance: the Blood Clan was the deadliest at first and was softened; Nightglaive with gear wins more now, Mistwarden with gear on some seeds less (table in DECISIONS);
   - **fps**: `?fps=1&debug=1&phase=16` with a full elf crowd on his machine (22 enemy meshes now instead of 6); the model download grew 5.6 -> 9.8 MB.
-- Quick links (after a merge): https://wizzik.github.io/defense-webgame/?debug=1&phase=6 (Blood Clan with the first miniboss), `&phase=11` (Restless Dead), `&phase=16` (Moon Grove); in the console `__game.debug.spawnFaction("undead")` (or `orc`, `elf`, `human`), `__game.debug.spawnEach()` (the current faction); `__game.faction`, `__game.slowed`, `__game.rooted`.
+- CI on the PR first failed: with 22 enemy meshes software WebGPU drew every empty type mesh and the pack-arrow e2e ran out of time; empty type meshes are now hidden (faster than `main`), CI green, merged at Petr's word.
+- Quick links: https://wizzik.github.io/defense-webgame/?debug=1&phase=6 (Blood Clan with the first miniboss), `&phase=11` (Restless Dead), `&phase=16` (Moon Grove); in the console `__game.debug.spawnFaction("undead")` (or `orc`, `elf`, `human`), `__game.debug.spawnEach()` (the current faction); `__game.faction`, `__game.slowed`, `__game.rooted`.
 - Order after this (Petr, 2026-11-20): 4 difficulties with environments, 5 progression between runs, 6 credits and legal check, then multiplayer, which starts with several heroes in the simulation. No AI ally for the player; co-op notes in DECISIONS.
 
 ## Spell sounds review: merged (PR #25 `3de6a45`, 2026-11-20)
