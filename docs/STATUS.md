@@ -3,7 +3,7 @@
 Updated 2026-11-20 (audio branch complete, PR open). Read this first when you resume work.
 
 
-## Audio and music: all 10 tasks done on branch `audio`, PR open (2026-11-20); waits for Petr's listen and merge word
+## Audio and music: all 10 tasks done on branch `audio`, PR #23 open (2026-11-20); waits for Petr's listen and merge word
 
 - Petr (2026-11-19): the sounds were monotonous, "no feel, no soul"; fantasy style, every hero with its own theme; the game complete before multiplayer. Order he approved: 1 audio and music + settings, 2 several heroes in the simulation and an AI ally, 3 enemy factions by phase, 4 difficulties with environments, 5 progression between runs, 6 credits and legal check, then multiplayer. **Dropped:** the castle shop.
 - Spec `docs/superpowers/specs/2026-11-19-audio-design.md`, plan `docs/superpowers/plans/2026-11-19-audio.md`. Sources, levels and authors: `docs/DECISIONS.md`, section Audio and music.
