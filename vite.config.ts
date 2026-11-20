@@ -14,6 +14,7 @@ export default defineConfig({
       input: {
         main: resolve(import.meta.dirname, "client/index.html"),
         spike: resolve(import.meta.dirname, "client/spike/index.html"),
+        determinism: resolve(import.meta.dirname, "client/determinism/index.html"),
       },
     },
   },
