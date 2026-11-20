@@ -8,6 +8,8 @@ Updated 2026-11-20 (spell sounds PR #25 merged; the enemy factions spec and plan
 - Spec (approved by Petr): `docs/superpowers/specs/2026-11-20-enemy-factions-design.md`. Plan: `docs/superpowers/plans/2026-11-20-enemy-factions.md` (8 tasks). Petr left the design to Claude and approved direction B: four factions by five phases (Human Legion 1-5, Blood Clan 6-10, Restless Dead 11-15, Moon Grove 16-20), each new one with 4 types, an elite and one mechanic (bloodlust; web slow, poison cloud and raising the fallen; roots with a warning circle), models only from the pinned KayKit packs with faction palettes (no orange), sounds from the encoded CC0 files.
 - Execution: one new chat, native (inline) with one final review. The map export is needed for `data:build` (the map is a file in the claude.ai project).
 
+## Spell sounds review: merged (PR #25 `3de6a45`, 2026-11-20)
+
 - Petr: Falling Stars sounds like wood; spells should sound like their names. 21 spell cues rebuilt as layered takes (list and why in `docs/DECISIONS.md`, Audio and music). The simulation did not change.
 - What Petr checks: the A/B page from the chat, then in the game `?debug=1&hero=nightglaive` (Falling Stars), `__game.debug.learn(4, "meteor")`, `__game.debug.learn(5, "smite")`. Any cue he dislikes is one `mix()` entry to change.
 
