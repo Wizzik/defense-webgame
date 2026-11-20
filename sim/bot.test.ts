@@ -218,6 +218,45 @@ describe("autopilot", () => {
     expect(move(run).moveX).toBe(-1);
   });
 
+  it("the bot steps out of a root circle like out of a slam", () => {
+    const run = postRun();
+    const druid = run.data.enemies.findIndex((e) => e.id === "grove-druid");
+    put(run, 0, run.hero.x + 600, run.hero.y);
+    run.enemies.type[0] = druid;
+    run.enemies.slamState[0] = 2; // Slam.Strike
+    run.enemies.slamX[0] = run.hero.x + 40;
+    run.enemies.slamY[0] = run.hero.y;
+    const input = move(run);
+    expect(input.moveX).toBe(-1);
+    expect(input.actions & InputAction.Dash).toBe(InputAction.Dash);
+  });
+
+  it("a melee hero fights a rotgut from the edge of its cloud", () => {
+    const run = postRun(meleeHero.id);
+    const rotgut = run.data.enemies.findIndex((e) => e.id === "rotgut");
+    const radius = run.data.enemies[rotgut]!.cloud!.radius;
+    put(run, 0, run.hero.x + radius - 20, run.hero.y);
+    run.enemies.type[0] = rotgut;
+    expect(move(run).moveX).toBe(-1);
+    run.enemies.x[0] = run.hero.x + radius + 40;
+    expect(move(run).moveX).toBe(0);
+    run.enemies.x[0] = run.hero.x + radius + 200;
+    expect(move(run).moveX).toBe(1);
+  });
+
+  it("a gravebinder or a bloodcaller in chase reach goes before a nearer enemy", () => {
+    const run = postRun(meleeHero.id);
+    run.hero.y = run.castle.y + DEFEND_RADIUS + 300;
+    put(run, 0, run.hero.x + 250, run.hero.y);
+    put(run, 1, run.hero.x - CHASE_DISTANCE + 50, run.hero.y);
+    run.enemies.type[1] = run.data.enemies.findIndex((e) => e.id === "gravebinder");
+    expect(move(run).moveX).toBe(-1);
+    run.enemies.type[1] = run.data.enemies.findIndex((e) => e.id === "bloodcaller");
+    expect(move(run).moveX).toBe(-1);
+    run.enemies.type[1] = 0;
+    expect(move(run).moveX).toBe(1);
+  });
+
   it("the bot fights the final boss in the finale", () => {
     const run = postRun();
     // a threat west of the castle, the final boss far to the east

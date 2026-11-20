@@ -47,6 +47,8 @@ export interface RunSummary {
   attack: (number | null)[];
   /** Hearts and orbs picked up and hp healed by each source of sustain (spec 2026-11-19 sustain). */
   sustain: SustainStats;
+  /** Enemy factions (spec 2026-11-20): seconds the hero was rooted, hp it lost in poison clouds, enemies raised. */
+  factions: { rootedSeconds: number; cloudDamage: number; raised: number };
 }
 
 export interface SustainStats {
@@ -140,6 +142,11 @@ export function playBot(
       healedHearts: run.stats.healedHearts,
       healedOrb: run.stats.healedOrb,
     },
+    factions: {
+      rootedSeconds: run.stats.rootedTicks / TICKS_PER_SECOND,
+      cloudDamage: run.stats.cloudDamage,
+      raised: run.stats.raised,
+    },
   };
 }
 
@@ -222,7 +229,7 @@ export function formatHeroSummary(
     `enraged in ${summaries.filter((s) => s.enraged).length}; losses by minutes: ${lossWindows(summaries)}`;
   const wonChests = wonRuns.length > 0 ? (wonRuns.reduce((a, s) => a + s.chests, 0) / wonRuns.length).toFixed(1) : "-";
   const gear = `  chests avg ${avg((s) => s.chests).toFixed(1)} (won runs ${wonChests}), gold avg ${Math.round(avg((s) => s.gold))}`;
-  return `${head}\n${tail}\n${gear}\n${kitLine(summaries)}\n${burstLine(summaries, data)}\n${sustainLine(summaries)}`;
+  return `${head}\n${tail}\n${gear}\n${kitLine(summaries)}\n${burstLine(summaries, data)}\n${sustainLine(summaries)}\n${factionLine(summaries)}`;
 }
 
 /** Hearts, orbs by kind and hp healed by lifesteal, hearts and the heal orb: averages per run. */
@@ -233,6 +240,13 @@ export function sustainLine(summaries: RunSummary[]): string {
   return `  sustain: hearts ${one((s) => s.hearts)}, ` +
     `orbs boots ${one((s) => s.orbsBoots)} berserk ${one((s) => s.orbsBerserk)} heal ${one((s) => s.orbsHeal)}, ` +
     `healed lifesteal ${whole((s) => s.healedLifesteal)} hearts ${whole((s) => s.healedHearts)} orb ${whole((s) => s.healedOrb)}`;
+}
+
+/** Average per run of the faction mechanics on the hero: `  factions: rooted 3.6 s, cloud hp 900, raised 11.5`. */
+export function factionLine(summaries: RunSummary[]): string {
+  const avg = (f: (s: RunSummary["factions"]) => number) => summaries.reduce((a, s) => a + f(s.factions), 0) / summaries.length;
+  return `  factions: rooted ${avg((f) => f.rootedSeconds).toFixed(1)} s, cloud hp ${Math.round(avg((f) => f.cloudDamage))}, ` +
+    `raised ${avg((f) => f.raised).toFixed(1)}`;
 }
 
 /** How often each id appears, most first (ties by id): `meteor 7, smite 5`, or `-`. */
