@@ -1,5 +1,10 @@
 # Status
 
+## Spell sounds review: PR open (2026-11-20)
+
+- Petr: Falling Stars sounds like wood; spells should sound like their names. 21 spell cues rebuilt as layered takes (list and why in `docs/DECISIONS.md`, Audio and music). The simulation did not change.
+- What Petr checks: the A/B page from the chat, then in the game `?debug=1&hero=nightglaive` (Falling Stars), `__game.debug.learn(4, "meteor")`, `__game.debug.learn(5, "smite")`. Any cue he dislikes is one `mix()` entry to change.
+
 Updated 2026-11-20 (audio merged as PR #23 `73948f0`, Pages deployed; waits for Petr's listen). Read this first when you resume work.
 
 
