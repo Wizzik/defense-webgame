@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { LocalizedText, Slug } from "./common";
 
+/** The enemy factions of a run (spec 2026-11-20). */
+export const FactionId = z.enum(["human", "orc", "undead", "elf"]);
+export type FactionId = z.infer<typeof FactionId>;
+
 export const EnemySchema = z.object({
   id: Slug,
   name: LocalizedText,
@@ -21,7 +25,10 @@ export const EnemySchema = z.object({
   }).strict(),
   /** How the type walks: see sim/enemy-steer.ts and sim/enemy-charge.ts. */
   behavior: z.enum(["siege", "flank", "skirmish", "support", "charge"]),
-  xp: z.number().int().positive(),
+  /** The faction the type belongs to (sim/factions.ts); bosses have none. */
+  faction: FactionId.optional(),
+  /** Crystal value; 0 drops no crystal (and no heart). */
+  xp: z.number().int().min(0),
   /** Value of the coin the enemy drops; 0 drops none. */
   gold: z.number().int().min(0).default(0),
   /** Heals the most wounded enemy in `range` (itself too) by `amount` every `cooldown` seconds. */
@@ -75,6 +82,8 @@ export const EnemySchema = z.object({
   }).strict().refine((s) => s.minRange < s.maxRange, "minRange is not below maxRange").optional(),
   /** Goes for the hero whatever the role of its pack is. */
   hunter: z.literal(true).optional(),
+  /** Multiplies the knockback of hits on the type: 0 = it does not move (default 1). */
+  knockbackScale: z.number().min(0).optional(),
 }).strict();
 
 export type Enemy = z.infer<typeof EnemySchema>;

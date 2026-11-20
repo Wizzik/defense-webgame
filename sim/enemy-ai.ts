@@ -1,7 +1,7 @@
 import { armorReduction, damageCastle, damageHero, rollDamage } from "./combat";
 import { TICK_SECONDS, TICKS_PER_SECOND } from "./constants";
 import { Action, Role } from "./enemies";
-import { updateEnemyAuras } from "./enemy-aura";
+import { auraDamageScale, auraSpeedScale, updateEnemyAuras } from "./enemy-aura";
 import { cancelCharge, Charge, chargeVX, chargeVY, updateCharge } from "./enemy-charge";
 import { cancelSlam, updateSlam } from "./enemy-slam";
 import { strikeVX, strikeVY, updateStrike } from "./enemy-strike";
@@ -31,9 +31,6 @@ export function updateEnemies(run: Run): void {
   }
 
   updateEnemyAuras(run);
-  const aura = run.auraType >= 0 ? defs[run.auraType].aura : undefined;
-  const auraSpeed = aura === undefined ? 1 : 1 + aura.moveSpeed;
-  const auraDamage = aura === undefined ? 1 : 1 + aura.damage;
 
   for (let i = 0; i < e.capacity; i++) {
     if (e.alive[i] === 0) continue;
@@ -43,10 +40,8 @@ export function updateEnemies(run: Run): void {
     if (e.attackCooldown[i] > 0) e.attackCooldown[i]--;
     if (e.chargeCooldown[i] > 0) e.chargeCooldown[i]--;
     if (e.slamCooldown[i] > 0) e.slamCooldown[i]--;
-    const buffed = e.buffed[i] === 1;
-
     // Slow lowers walking speed only (not knockback) and runs down even while stunned.
-    let walk = buffed ? def.moveSpeed * auraSpeed : def.moveSpeed;
+    let walk = def.moveSpeed * auraSpeedScale(run, i);
     if (run.enraged && i === run.finalBossSlot) walk *= rules.run.finale.enrage.moveSpeed;
     if (e.slowTicks[i] > 0) {
       walk *= 1 - e.slowFactor[i];
@@ -112,7 +107,7 @@ export function updateEnemies(run: Run): void {
           e.action[i] = Action.Attack;
           if (e.attackCooldown[i] <= 0) {
             let raw = rollDamage(run.rng, def.attack.damageMin, def.attack.damageMax) * e.damageScale[i];
-            if (buffed) raw *= auraDamage;
+            raw *= auraDamageScale(run, i);
             if (targetsHero) {
               const k = 1 - armorReduction(hero.stats.armor, constants.defenseArmor);
               damageHero(run, raw * k, i);

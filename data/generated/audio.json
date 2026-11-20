@@ -1269,6 +1269,54 @@
     },
     "dread-regent": {
       "death": "bone-rattle-heavy"
+    },
+    "brute": {
+      "death": "bone-rattle"
+    },
+    "spearthrower": {
+      "death": "bone-rattle"
+    },
+    "hornback": {
+      "death": "bone-rattle"
+    },
+    "bloodcaller": {
+      "death": "bone-rattle"
+    },
+    "warlord": {
+      "death": "bone-rattle-heavy"
+    },
+    "ghoul": {
+      "death": "bone-rattle"
+    },
+    "webcrawler": {
+      "death": "bone-rattle"
+    },
+    "rotgut": {
+      "death": "bone-rattle"
+    },
+    "gravebinder": {
+      "death": "bone-rattle"
+    },
+    "risen": {
+      "death": "bone-rattle"
+    },
+    "bone-tyrant": {
+      "death": "bone-rattle-heavy"
+    },
+    "huntress": {
+      "death": "bone-rattle"
+    },
+    "moon-archer": {
+      "death": "bone-rattle"
+    },
+    "stone-warden": {
+      "death": "bone-rattle"
+    },
+    "grove-druid": {
+      "death": "bone-rattle"
+    },
+    "grove-warden": {
+      "death": "bone-rattle-heavy"
     }
   },
   "sounds": {

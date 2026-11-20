@@ -21,7 +21,7 @@ export const messagesCs = {
   "settings.master": "Celková hlasitost",
   "settings.music": "Hudba",
   "settings.sfx": "Efekty",
-  "settings.shake": "Třesení obrazu",
+  "settings.shake": "Otřesy obrazu",
   "settings.numbers": "Čísla poškození",
   "settings.close": "Zavřít",
   "settings.key": "O: nastavení",

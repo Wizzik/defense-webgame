@@ -70,11 +70,12 @@ function fixture(): any {
       hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
         dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 } },
       autocast: { novaMinEnemies: 1, healBelow: 0.6, shieldBelow: 0.35 },
-      enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 }, elite: "grunt", bossStunScale: 0.25 },
+      enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 }, bossStunScale: 0.25 },
       events: [
-        { atSeconds: 60, kind: "rush", units: { grunt: 3 } },
+        { atSeconds: 60, kind: "rush", elites: 1, heavies: 2 },
         { atSeconds: 100, kind: "boss", enemy: "warlord" },
       ],
+      factions: [{ id: "human", name: names("Legion"), fromPhase: 1, elite: "grunt", heavy: "grunt" }],
       debug: { phaseXp: [0, 10, 20, 30] },
       phases: [
         { mix: { grunt: 1 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 1, hunterShare: 0.2, elites: 0 },
@@ -249,10 +250,32 @@ describe("game data schemas", () => {
     expect(errorMessage(d)).toContain('rules.phases.2.mix: unknown enemy "ghost"');
   });
 
-  it("rejects an unknown elite", () => {
+  it("rejects an unknown or boss faction elite and heavy type", () => {
     const d = fixture();
-    d.rules.enemies.elite = "ghost";
-    expect(errorMessage(d)).toContain('rules.enemies.elite: unknown enemy "ghost"');
+    d.rules.factions[0].elite = "ghost";
+    d.rules.factions[0].heavy = "warlord";
+    expect(errorMessage(d)).toContain('rules.factions.0.elite: unknown enemy "ghost"');
+    expect(errorMessage(d)).toContain('rules.factions.0.heavy: "warlord" is a boss');
+  });
+
+  it("factions start at phase 1 and ascend", () => {
+    let d = fixture();
+    d.rules.factions[0].fromPhase = 2;
+    expect(errorMessage(d)).toContain("rules.factions.0.fromPhase: the first faction must start at phase 1");
+    d = fixture();
+    d.rules.factions.push({ ...d.rules.factions[0], id: "orc" });
+    expect(errorMessage(d)).toContain("rules.factions.1.fromPhase: not above the faction before it");
+    d = fixture();
+    d.rules.factions[0].id = "dwarf";
+    expect(errorMessage(d)).toContain("rules.factions.0.id");
+  });
+
+  it("an enemy with xp 0 is valid, a faction must be known", () => {
+    const d = fixture();
+    d.enemies[0].xp = 0;
+    expect(() => validateGameData(d)).not.toThrow();
+    d.enemies[0].faction = "dwarf";
+    expect(errorMessage(d)).toContain("enemies.0 (grunt).faction");
   });
 
   it("rejects a pack whose min is above its max", () => {
@@ -394,17 +417,18 @@ describe("game data schemas", () => {
     const d = fixture();
     d.rules.events = [
       { atSeconds: 250, kind: "boss", enemy: "warlord" },
-      { atSeconds: 180, kind: "rush", units: { grunt: 3 } },
+      { atSeconds: 180, kind: "rush", elites: 1, heavies: 2 },
     ];
     expect(errorMessage(d)).toContain("rules.events.1.atSeconds: below the event before it");
   });
 
   it("a rush needs at least one unit", () => {
     const d = fixture();
-    d.rules.events[0].units = {};
-    expect(errorMessage(d)).toContain("rules.events.0.units");
-    d.rules.events[0].units = { grunt: 0 };
-    expect(errorMessage(d)).toContain("rules.events.0.units.grunt");
+    d.rules.events[0].elites = 0;
+    d.rules.events[0].heavies = 0;
+    expect(errorMessage(d)).toContain("rules.events.0: needs at least one unit");
+    d.rules.events[0].heavies = -1;
+    expect(errorMessage(d)).toContain("rules.events.0.heavies");
   });
 
   it("slam cooldown min must not exceed max", () => {
@@ -421,16 +445,13 @@ describe("game data schemas", () => {
     expect(errorMessage(d)).toContain("rules.debug.phaseXp.2: below the value before it");
   });
 
-  it("event and finale enemies must exist and be bosses, rush units must exist", () => {
+  it("event and finale enemies must exist and be bosses", () => {
     let d = fixture();
     d.rules.events[1].enemy = "grunt";
     expect(errorMessage(d)).toContain('rules.events.1.enemy: "grunt" is not a boss');
     d = fixture();
     d.rules.run.finale.boss = "nobody";
     expect(errorMessage(d)).toContain('rules.run.finale.boss: unknown enemy "nobody"');
-    d = fixture();
-    d.rules.events[0].units = { nobody: 2 };
-    expect(errorMessage(d)).toContain('rules.events.0.units: unknown enemy "nobody"');
   });
 
   it("a model must name another enemy that has no model of its own", () => {

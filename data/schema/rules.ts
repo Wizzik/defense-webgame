@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { Slug } from "./common";
+import { LocalizedText, Slug } from "./common";
+import { FactionId } from "./enemy";
 import { RaritySchema } from "./item";
 
 export const PointSchema = z.object({ x: z.number(), y: z.number() }).strict();
@@ -65,8 +66,6 @@ export const RulesSchema = z.object({
     /** Knockback for the base attack and for an ability: initial speed = value / `seconds` (world units),
      *  fading linearly to zero over `seconds`, so the enemy travels about 0.67 × value. */
     knockback: z.object({ attack: nonNegative, ability: nonNegative, seconds: positive }).strict(),
-    /** The enemy type that comes as the elite of a phase. */
-    elite: Slug,
     /** A stun lasts this share of its time on a boss. */
     bossStunScale: z.number().min(0).max(1),
   }).strict(),
@@ -75,14 +74,33 @@ export const RulesSchema = z.object({
     z.object({
       atSeconds: nonNegative,
       kind: z.literal("rush"),
-      /** Enemy id to count; the members come in the order of the keys. */
-      units: z.record(Slug, z.number().int().min(1)).refine((u) => Object.keys(u).length > 0, "needs at least one unit"),
-    }).strict(),
+      /** The elite and the heavy type of the faction of the rush's phase (sim/factions.ts); elites come first. */
+      elites: z.number().int().min(0),
+      heavies: z.number().int().min(0),
+    }).strict().refine((r) => r.elites + r.heavies > 0, "needs at least one unit"),
     z.object({ atSeconds: nonNegative, kind: z.literal("boss"), enemy: Slug }).strict(),
   ])).superRefine((events, ctx) => {
     for (let i = 1; i < events.length; i++) {
       if (events[i]!.atSeconds < events[i - 1]!.atSeconds) {
         ctx.addIssue({ code: "custom", path: [i, "atSeconds"], message: "below the event before it" });
+      }
+    }
+  }),
+  /**
+   * Enemy factions by phase, ascending by `fromPhase` (1-based); the first starts at phase 1. A faction's elite comes as
+   * the elite of its phases and of its rushes; its heavy type fills a rush after the elites.
+   */
+  factions: z.array(z.object({
+    id: FactionId,
+    name: LocalizedText,
+    fromPhase: z.number().int().min(1),
+    elite: Slug,
+    heavy: Slug,
+  }).strict()).min(1).superRefine((factions, ctx) => {
+    if (factions[0]!.fromPhase !== 1) ctx.addIssue({ code: "custom", path: [0, "fromPhase"], message: "the first faction must start at phase 1" });
+    for (let i = 1; i < factions.length; i++) {
+      if (factions[i]!.fromPhase <= factions[i - 1]!.fromPhase) {
+        ctx.addIssue({ code: "custom", path: [i, "fromPhase"], message: "not above the faction before it" });
       }
     }
   }),

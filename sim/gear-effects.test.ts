@@ -148,7 +148,7 @@ describe("gear effects", () => {
     expect(drop(30)).toBe(30);
     killEnemy(run, dummy(run, 2000, 0, 0));
     expect(drop(30)).toBe(30);
-    killEnemy(run, dummy(run, 2000, 0, run.eliteType));
+    killEnemy(run, dummy(run, 2000, 0, run.eliteTypes[0]!));
     expect(drop(30)).toBe(60);
     expect(drop(150)).toBe(120 * 2 + 30);
     killEnemy(run, dummy(run, 2000, 0, run.finalBossType));

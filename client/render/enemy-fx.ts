@@ -99,16 +99,13 @@ export class EnemyFx implements RunView {
     this.telegraphs.write(now);
     this.slamRings.write(now);
     this.auraRings.begin();
-    const auraType = run.auraType;
-    if (auraType >= 0) {
-      const radius = this.data.enemies[auraType]!.aura!.radius * SCENE_SCALE;
-      const e = run.enemies;
-      for (let i = 0; i < e.capacity; i++) {
-        if (e.alive[i] === 0 || e.type[i] !== auraType) continue;
-        const x = e.prevX[i]! + (e.x[i]! - e.prevX[i]!) * alpha;
-        const y = e.prevY[i]! + (e.y[i]! - e.prevY[i]!) * alpha;
-        this.auraRings.add(x * SCENE_SCALE, -y * SCENE_SCALE, radius, AURA_COLOR, AURA_OPACITY);
-      }
+    const e = run.enemies;
+    for (let i = 0; i < e.capacity; i++) {
+      if (e.alive[i] === 0 || run.hasAura[e.type[i]!] === 0) continue;
+      const radius = this.data.enemies[e.type[i]!]!.aura!.radius * SCENE_SCALE;
+      const x = e.prevX[i]! + (e.x[i]! - e.prevX[i]!) * alpha;
+      const y = e.prevY[i]! + (e.y[i]! - e.prevY[i]!) * alpha;
+      this.auraRings.add(x * SCENE_SCALE, -y * SCENE_SCALE, radius, AURA_COLOR, AURA_OPACITY);
     }
     this.auraRings.end();
   }

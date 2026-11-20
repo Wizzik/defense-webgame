@@ -69,7 +69,6 @@
       "ability": 90,
       "seconds": 0.15
     },
-    "elite": "captain",
     "bossStunScale": 0.25
   },
   "phases": [
@@ -155,11 +154,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 4,
-        "scout": 3,
-        "musketeer": 3,
-        "chaplain": 2,
-        "lancer": 3
+        "brute": 7,
+        "spearthrower": 3,
+        "hornback": 3,
+        "bloodcaller": 2
       },
       "pack": {
         "min": 8,
@@ -172,11 +170,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 4,
-        "scout": 3,
-        "musketeer": 3,
-        "chaplain": 2,
-        "lancer": 3
+        "brute": 7,
+        "spearthrower": 3,
+        "hornback": 3,
+        "bloodcaller": 2
       },
       "pack": {
         "min": 8,
@@ -189,11 +186,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 4,
-        "scout": 3,
-        "musketeer": 3,
-        "chaplain": 2,
-        "lancer": 3
+        "brute": 7,
+        "spearthrower": 3,
+        "hornback": 3,
+        "bloodcaller": 2
       },
       "pack": {
         "min": 8,
@@ -206,11 +202,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 3,
-        "scout": 3,
-        "musketeer": 3,
-        "chaplain": 2,
-        "lancer": 3
+        "brute": 6,
+        "spearthrower": 3,
+        "hornback": 3,
+        "bloodcaller": 2
       },
       "pack": {
         "min": 9,
@@ -223,11 +218,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 3,
-        "scout": 3,
-        "musketeer": 3,
-        "chaplain": 2,
-        "lancer": 3
+        "brute": 6,
+        "spearthrower": 3,
+        "hornback": 3,
+        "bloodcaller": 2
       },
       "pack": {
         "min": 9,
@@ -240,11 +234,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 3,
-        "scout": 3,
-        "musketeer": 3,
-        "chaplain": 2,
-        "lancer": 3
+        "ghoul": 6,
+        "webcrawler": 3,
+        "rotgut": 3,
+        "gravebinder": 2
       },
       "pack": {
         "min": 11,
@@ -257,11 +250,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 3,
-        "scout": 3,
-        "musketeer": 3,
-        "chaplain": 2,
-        "lancer": 3
+        "ghoul": 6,
+        "webcrawler": 3,
+        "rotgut": 3,
+        "gravebinder": 2
       },
       "pack": {
         "min": 11,
@@ -274,11 +266,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 3,
-        "scout": 3,
-        "musketeer": 3,
-        "chaplain": 2,
-        "lancer": 3
+        "ghoul": 6,
+        "webcrawler": 3,
+        "rotgut": 3,
+        "gravebinder": 2
       },
       "pack": {
         "min": 11,
@@ -291,11 +282,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 3,
-        "scout": 3,
-        "musketeer": 4,
-        "chaplain": 2,
-        "lancer": 3
+        "ghoul": 6,
+        "webcrawler": 4,
+        "rotgut": 3,
+        "gravebinder": 2
       },
       "pack": {
         "min": 10,
@@ -308,11 +298,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 3,
-        "scout": 3,
-        "musketeer": 4,
-        "chaplain": 2,
-        "lancer": 3
+        "ghoul": 6,
+        "webcrawler": 4,
+        "rotgut": 3,
+        "gravebinder": 2
       },
       "pack": {
         "min": 10,
@@ -325,11 +314,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 3,
-        "scout": 3,
-        "musketeer": 4,
-        "chaplain": 2,
-        "lancer": 4
+        "huntress": 6,
+        "moon-archer": 4,
+        "stone-warden": 4,
+        "grove-druid": 2
       },
       "pack": {
         "min": 11,
@@ -342,11 +330,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 3,
-        "scout": 3,
-        "musketeer": 4,
-        "chaplain": 2,
-        "lancer": 4
+        "huntress": 6,
+        "moon-archer": 4,
+        "stone-warden": 4,
+        "grove-druid": 2
       },
       "pack": {
         "min": 11,
@@ -359,11 +346,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 3,
-        "scout": 3,
-        "musketeer": 4,
-        "chaplain": 2,
-        "lancer": 4
+        "huntress": 6,
+        "moon-archer": 4,
+        "stone-warden": 4,
+        "grove-druid": 2
       },
       "pack": {
         "min": 11,
@@ -376,11 +362,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 2,
-        "scout": 3,
-        "musketeer": 4,
-        "chaplain": 2,
-        "lancer": 4
+        "huntress": 5,
+        "moon-archer": 4,
+        "stone-warden": 4,
+        "grove-druid": 2
       },
       "pack": {
         "min": 12,
@@ -393,11 +378,10 @@
     },
     {
       "mix": {
-        "shieldbearer": 2,
-        "scout": 3,
-        "musketeer": 4,
-        "chaplain": 2,
-        "lancer": 4
+        "huntress": 5,
+        "moon-archer": 4,
+        "stone-warden": 4,
+        "grove-druid": 2
       },
       "pack": {
         "min": 12,
@@ -409,14 +393,54 @@
       "elites": 3
     }
   ],
+  "factions": [
+    {
+      "id": "human",
+      "name": {
+        "en": "Human Legion",
+        "cs": "Lidská legie"
+      },
+      "fromPhase": 1,
+      "elite": "captain",
+      "heavy": "lancer"
+    },
+    {
+      "id": "orc",
+      "name": {
+        "en": "Blood Clan",
+        "cs": "Krvavý klan"
+      },
+      "fromPhase": 6,
+      "elite": "warlord",
+      "heavy": "hornback"
+    },
+    {
+      "id": "undead",
+      "name": {
+        "en": "Restless Dead",
+        "cs": "Neklidní mrtví"
+      },
+      "fromPhase": 11,
+      "elite": "bone-tyrant",
+      "heavy": "rotgut"
+    },
+    {
+      "id": "elf",
+      "name": {
+        "en": "Moon Grove",
+        "cs": "Měsíční háj"
+      },
+      "fromPhase": 16,
+      "elite": "grove-warden",
+      "heavy": "stone-warden"
+    }
+  ],
   "events": [
     {
       "atSeconds": 180,
       "kind": "rush",
-      "units": {
-        "captain": 2,
-        "lancer": 3
-      }
+      "elites": 2,
+      "heavies": 3
     },
     {
       "atSeconds": 250,
@@ -426,10 +450,8 @@
     {
       "atSeconds": 360,
       "kind": "rush",
-      "units": {
-        "captain": 4,
-        "lancer": 6
-      }
+      "elites": 4,
+      "heavies": 6
     },
     {
       "atSeconds": 500,
@@ -439,18 +461,14 @@
     {
       "atSeconds": 540,
       "kind": "rush",
-      "units": {
-        "captain": 5,
-        "lancer": 8
-      }
+      "elites": 5,
+      "heavies": 8
     },
     {
       "atSeconds": 720,
       "kind": "rush",
-      "units": {
-        "captain": 6,
-        "lancer": 10
-      }
+      "elites": 6,
+      "heavies": 10
     },
     {
       "atSeconds": 750,
@@ -460,10 +478,8 @@
     {
       "atSeconds": 900,
       "kind": "rush",
-      "units": {
-        "captain": 8,
-        "lancer": 12
-      }
+      "elites": 8,
+      "heavies": 12
     }
   ],
   "debug": {

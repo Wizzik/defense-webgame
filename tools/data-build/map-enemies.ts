@@ -51,6 +51,7 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
       damageMax: Math.round(num("damage_max") * (m.damage ?? 1)),
     },
     behavior: entry.behavior,
+    ...(entry.faction !== undefined ? { faction: entry.faction } : {}),
     xp: entry.xp,
     gold: entry.gold ?? 0,
   };
@@ -80,5 +81,6 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
     };
   }
   if (entry.hunter) enemy.hunter = true;
+  if (entry.knockbackScale !== undefined) enemy.knockbackScale = entry.knockbackScale;
   return enemy;
 }

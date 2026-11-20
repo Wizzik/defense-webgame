@@ -131,11 +131,7 @@ export function validateGameData(data: unknown): GameData {
   checkBoss("rules.run.finale.boss", rules.run.finale.boss);
   rules.events.forEach((event, i) => {
     if (event.kind === "boss") checkBoss(`rules.events.${i}.enemy`, event.enemy);
-    else {
-      for (const id of Object.keys(event.units)) {
-        if (!enemyIds.has(id)) errors.push(`rules.events.${i}.units: unknown enemy "${id}"`);
-      }
-    }
+
   });
   rules.drops.forEach((drop, i) => checkBoss(`rules.drops.${i}.boss`, drop.boss));
 
@@ -163,9 +159,13 @@ export function validateGameData(data: unknown): GameData {
       if (!enemyIds.has(id)) errors.push(`rules.phases.${i}.mix: unknown enemy "${id}"`);
     }
   });
-  if (!enemyIds.has(rules.enemies.elite)) {
-    errors.push(`rules.enemies.elite: unknown enemy "${rules.enemies.elite}"`);
-  }
+  rules.factions.forEach((faction, i) => {
+    for (const key of ["elite", "heavy"] as const) {
+      const enemy = byId.get(faction[key]);
+      if (!enemy) errors.push(`rules.factions.${i}.${key}: unknown enemy "${faction[key]}"`);
+      else if (enemy.boss) errors.push(`rules.factions.${i}.${key}: "${faction[key]}" is a boss`);
+    }
+  });
   const covered = rules.phases.length * rules.run.phaseSeconds;
   if (covered < rules.run.durationSeconds) {
     errors.push(`rules.phases: phases cover ${covered} s, the run lasts ${rules.run.durationSeconds} s`);

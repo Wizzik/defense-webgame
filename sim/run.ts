@@ -19,6 +19,7 @@ import { EventKind, EventLog } from "./events";
 import { updateGearEffects } from "./gear-effects";
 import { emptyGearBonus, GearState, loadGear, type LoadoutEntry, recomputeGear } from "./gear";
 import { refreshHeroStats } from "./level-up";
+import { buildFactionTables, updateFaction } from "./factions";
 import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import { InputAction, type TickInput } from "./input";
 import { Rng } from "./rng";
@@ -94,10 +95,17 @@ export class Run {
   readonly enemyBehavior: Uint8Array;
   /** 1 for an enemy type that goes for the hero whatever its role is. */
   readonly enemyHunter: Uint8Array;
-  /** Type index of the first enemy type with an aura; -1 when there is none. */
-  readonly auraType: number;
-  /** Type index of the elite. */
-  readonly eliteType: number;
+  /** 1 for every enemy type that carries an aura (sim/enemy-aura.ts). */
+  readonly hasAura: Uint8Array;
+  /** Faction index per 0-based phase index (sim/factions.ts). */
+  readonly phaseFaction: Uint8Array;
+  /** Type index of each faction's elite and of its heavy type (rushes). */
+  readonly eliteTypes: Int32Array;
+  readonly heavyTypes: Int32Array;
+  /** 1 for every enemy type that is the elite of a faction. */
+  readonly isElite: Uint8Array;
+  /** The faction of the current phase; updateFaction announces a change. */
+  factionIndex = 0;
   /** `rules.events` prepared for the steps (sim/timeline.ts). */
   readonly timeline: TimedEvent[];
   /** Index of the next event of `timeline`. */
@@ -158,7 +166,12 @@ export class Run {
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);
     this.enemyBehavior = Uint8Array.from(data.enemies, (e) => BEHAVIOR_IDS.indexOf(e.behavior));
     this.enemyHunter = Uint8Array.from(data.enemies, (e) => (e.hunter ? 1 : 0));
-    this.auraType = data.enemies.findIndex((e) => e.aura !== undefined);
+    this.hasAura = Uint8Array.from(data.enemies, (e) => (e.aura !== undefined ? 1 : 0));
+    const factions = buildFactionTables(data);
+    this.phaseFaction = factions.phaseFaction;
+    this.eliteTypes = factions.eliteTypes;
+    this.heavyTypes = factions.heavyTypes;
+    this.isElite = factions.isElite;
     this.isBoss = Uint8Array.from(data.enemies, (e) => (e.boss ? 1 : 0));
     this.phaseTables = buildPhaseTables(data);
     this.timeline = buildTimeline(data);
@@ -167,7 +180,6 @@ export class Run {
       { length: this.timeline.filter((event) => event.boss >= 0).length + 1 },
       () => ({ type: -1, spawnTick: -1, deathTick: -1 }),
     );
-    this.eliteType = enemyType(data, rules.enemies.elite, "rules.enemies.elite");
     this.nextPackTick = Math.round(rules.run.firstPackSeconds * TICKS_PER_SECOND);
     this.durationTicks = Math.round(
       (options.durationSeconds ?? rules.run.durationSeconds) * TICKS_PER_SECOND,
@@ -238,6 +250,7 @@ export class Run {
    *   savePrevious(this);         // Task 3 (crystals: Task 7)
    *   applyActions(this, input);  // phase 2a, Task 7 (R, T, dash)
    *   moveHero(this, input);      // Task 3
+   *   updateFaction(this);        // enemy factions: the faction of the phase, announced when it changes
    *   updateTimeline(this);       // phase 2b-3 (elite rushes and bosses by time)
    *   spawnEnemies(this);         // Task 4
    *   updateEnemies(this);        // Task 4
@@ -276,6 +289,7 @@ export class Run {
     savePrevious(this);
     applyActions(this, input);
     moveHero(this, input);
+    updateFaction(this);
     updateTimeline(this);
     spawnEnemies(this);
     updateEnemies(this);

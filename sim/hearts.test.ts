@@ -19,13 +19,13 @@ function spawn(r: R, type: number, dx = 400, dy = 0): number {
 }
 
 function commonType(r: R): number {
-  return r.data.enemies.findIndex((e, i) => !e.boss && i !== r.eliteType);
+  return r.data.enemies.findIndex((e, i) => !e.boss && r.isElite[i] === 0);
 }
 
 describe("hearts", () => {
   it("an elite and a boss always drop a heart", () => {
     const r = run(1e-9);
-    killEnemy(r, spawn(r, r.eliteType));
+    killEnemy(r, spawn(r, r.eliteTypes[0]!));
     expect(r.hearts.count).toBe(1);
     killEnemy(r, spawn(r, r.isBoss.indexOf(1)));
     expect(r.hearts.count).toBe(2);
@@ -76,7 +76,7 @@ describe("hearts", () => {
     const r = run();
     for (let i = 0; i < HEART_CAPACITY; i++) r.hearts.drop(r.hero.x + 2000, r.hero.y, 1);
     r.hero.hp = r.hero.stats.maxHp / 2;
-    killEnemy(r, spawn(r, r.eliteType));
+    killEnemy(r, spawn(r, r.eliteTypes[0]!));
     expect(r.hearts.count).toBe(HEART_CAPACITY);
     expect(r.hero.hp).toBe(r.hero.stats.maxHp / 2);
   });

@@ -43,6 +43,8 @@ export const EventKind = {
   OrbSpawn: 24,
   /** The hero picked an orb up: a = its place, value = its kind (OrbKind), x/y = the orb. */
   OrbPickup: 25,
+  /** A new enemy faction: a = its index in rules.factions, value = the phase (1-based), x/y = the hero. */
+  Faction: 26,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

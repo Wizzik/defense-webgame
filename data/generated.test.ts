@@ -109,17 +109,24 @@ describe("generated game data", () => {
     expect(JSON.parse(read("rules.json")).threat).toEqual({ heroDamageTaken: 2 });
   });
 
-  it("enemies have six common types and four bosses with their attack kinds", () => {
-    const enemies = JSON.parse(read("enemies.json")) as { id: string; attack: { kind: string }; heal?: unknown; boss?: true }[];
+  it("enemies have the human types, four bosses and the faction types with their attack kinds", () => {
+    const enemies = JSON.parse(read("enemies.json")) as { id: string; attack: { kind: string }; heal?: unknown; boss?: true; faction?: string }[];
     expect(enemies.map((e) => e.id)).toEqual([
       "shieldbearer", "scout", "musketeer", "chaplain", "lancer", "captain",
       "iron-marshal", "pale-abbot", "gunmaster", "dread-regent",
+      "brute", "spearthrower", "hornback", "bloodcaller", "warlord",
+      "ghoul", "webcrawler", "rotgut", "gravebinder", "risen", "bone-tyrant",
+      "huntress", "moon-archer", "stone-warden", "grove-druid", "grove-warden",
     ]);
+    expect(enemies.filter((e) => e.faction === undefined).map((e) => e.id)).toEqual(enemies.filter((e) => e.boss).map((e) => e.id));
     expect(enemies.filter((e) => e.boss).map((e) => e.id)).toEqual(["iron-marshal", "pale-abbot", "gunmaster", "dread-regent"]);
     const ranged = enemies.filter((e) => e.attack.kind === "ranged").map((e) => e.id);
-    expect(ranged).toEqual(["musketeer", "chaplain", "pale-abbot", "gunmaster"]);
+    expect(ranged).toEqual([
+      "musketeer", "chaplain", "pale-abbot", "gunmaster", "spearthrower", "bloodcaller", "webcrawler", "gravebinder",
+      "huntress", "moon-archer",
+    ]);
     expect(enemies.filter((e) => e.attack.kind !== "ranged").every((e) => e.attack.kind === "melee")).toBe(true);
-    expect(enemies.filter((e) => e.heal !== undefined).map((e) => e.id)).toEqual(["chaplain", "pale-abbot"]);
+    expect(enemies.filter((e) => e.heal !== undefined).map((e) => e.id)).toEqual(["chaplain", "pale-abbot", "grove-druid"]);
   });
 
   it("there are 20 phases and the final boss comes at 1000 s", () => {
@@ -193,16 +200,21 @@ describe("generated game data", () => {
     expect(Object.fromEntries(enemies.map((e) => [e.id, e.behavior]))).toEqual({
       shieldbearer: "siege", scout: "flank", musketeer: "skirmish", chaplain: "support", lancer: "charge", captain: "charge",
       "iron-marshal": "charge", "pale-abbot": "siege", gunmaster: "skirmish", "dread-regent": "charge",
+      brute: "siege", spearthrower: "skirmish", hornback: "charge", bloodcaller: "support", warlord: "charge",
+      ghoul: "flank", webcrawler: "skirmish", rotgut: "siege", gravebinder: "support", risen: "siege", "bone-tyrant": "siege",
+      huntress: "flank", "moon-archer": "skirmish", "stone-warden": "siege", "grove-druid": "support", "grove-warden": "charge",
     });
   });
 
   it("the lancer charges and the captain has an aura", () => {
     const enemies = JSON.parse(read("enemies.json")) as { id: string; charge?: unknown; aura?: unknown; hunter?: true; boss?: true; strike?: { leap: boolean } }[];
-    expect(enemies.filter((e) => e.charge !== undefined).map((e) => e.id)).toEqual(["lancer", "captain", "iron-marshal", "dread-regent"]);
-    expect(enemies.filter((e) => e.hunter).map((e) => e.id)).toEqual(["captain"]);
+    expect(enemies.filter((e) => e.charge !== undefined).map((e) => e.id)).toEqual([
+      "lancer", "captain", "iron-marshal", "dread-regent", "hornback", "warlord", "grove-warden",
+    ]);
+    expect(enemies.filter((e) => e.hunter).map((e) => e.id)).toEqual(["captain", "warlord", "bone-tyrant", "grove-warden"]);
     expect(enemies.filter((e) => e.strike !== undefined).map((e) => e.id)).toEqual(enemies.filter((e) => e.boss).map((e) => e.id));
     expect(enemies.filter((e) => e.strike?.leap === false).map((e) => e.id)).toEqual(["gunmaster"]);
-    expect(enemies.filter((e) => e.aura !== undefined).map((e) => e.id)).toEqual(["captain", "dread-regent"]);
+    expect(enemies.filter((e) => e.aura !== undefined).map((e) => e.id)).toEqual(["captain", "dread-regent", "warlord"]);
   });
 
   it("carries the phase 2a mechanics", () => {

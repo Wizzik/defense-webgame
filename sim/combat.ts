@@ -83,7 +83,9 @@ function knockBack(run: Run, slot: number, source: 0 | 1): void {
   const d = Math.sqrt(dx * dx + dy * dy);
   const ux = d > 1e-6 ? dx / d : 1;
   const uy = d > 1e-6 ? dy / d : 0;
-  const speed = (source === 1 ? knockback.ability : knockback.attack) / knockback.seconds;
+  const resist = run.data.enemies[e.type[slot]].knockbackScale ?? 1;
+  if (resist <= 0) return;
+  const speed = ((source === 1 ? knockback.ability : knockback.attack) * resist) / knockback.seconds;
   e.knockVX[slot] = ux * speed;
   e.knockVY[slot] = uy * speed;
   e.knockTicks[slot] = Math.round(knockback.seconds * TICKS_PER_SECOND);
@@ -122,7 +124,7 @@ export function killEnemy(run: Run, slot: number): void {
   if (e.slamState[slot] !== Slam.None) {
     run.events.push(EventKind.Slam, slot, SlamEvent.Cancelled, e.slamX[slot], e.slamY[slot], windupRadius(run, slot), 0);
   }
-  if (run.isBoss[e.type[slot]] === 1 || e.type[slot] === run.eliteType) onGearEliteKill(run);
+  if (run.isBoss[e.type[slot]] === 1 || run.isElite[e.type[slot]] === 1) onGearEliteKill(run);
   if (run.isBoss[e.type[slot]] === 1) {
     run.events.push(EventKind.BossDeath, e.type[slot], run.bossesKilled++, x, y, 0, 0);
     run.bossCount--;
@@ -141,7 +143,7 @@ export function killEnemy(run: Run, slot: number): void {
   e.kill(slot);
   if (run.crystals.drop(x, y, xp) < 0) gainXp(run, xp);
   if (gold > 0 && run.coins.drop(x + COIN_OFFSET, y, gold) < 0) gainGold(run, gold);
-  if (run.isBoss[type] === 1 || type === run.eliteType || run.sustainRng.next() < run.data.rules.sustain.hearts.chance) {
+  if (run.isBoss[type] === 1 || run.isElite[type] === 1 || run.sustainRng.next() < run.data.rules.sustain.hearts.chance) {
     run.hearts.drop(x - HEART_OFFSET, y, 1);
   }
 }

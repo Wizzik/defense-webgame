@@ -35,6 +35,7 @@ export function spawnEnemies(run: Run): void {
   const { arena } = rules;
   run.nextPackTick = run.tick + Math.max(1, Math.round(phase.pack.everySeconds * TICKS_PER_SECOND));
   const elites = run.elitePhase !== phaseIndex ? phase.elites : 0;
+  const elite = run.eliteTypes[run.phaseFaction[phaseIndex]!]!;
   run.elitePhase = phaseIndex;
   const scale = timeScale(rules, run.tick);
   const finale = run.inFinale;
@@ -54,7 +55,7 @@ export function spawnEnemies(run: Run): void {
     let spawned = 0;
     for (let k = 0; k < n; k++) {
       if (store.aliveCount >= store.capacity) break;
-      const type = k < packElites ? run.eliteType : pickType(table, rng.next());
+      const type = k < packElites ? elite : pickType(table, rng.next());
       scatterMember(run, type, role, cx, cy, half, scale);
       spawned++;
     }

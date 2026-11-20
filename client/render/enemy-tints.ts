@@ -14,6 +14,23 @@ export const ENEMY_TINTS: Readonly<Record<string, number>> = {
   "pale-abbot": 0xd9f0e8,
   gunmaster: 0x2f5fb0,
   "dread-regent": 0x8a1f3c,
+  // provisional faction tints (enemy factions plan, Task 6 sets the palettes)
+  brute: 0x3f6b3a,
+  spearthrower: 0x5a7d4a,
+  hornback: 0x6b5236,
+  bloodcaller: 0x8a3030,
+  warlord: 0x2e4f2a,
+  ghoul: 0xcfd6bf,
+  webcrawler: 0xa9b89a,
+  rotgut: 0x7f9a6a,
+  gravebinder: 0x9ec7a0,
+  risen: 0xe0e4d8,
+  "bone-tyrant": 0xb7c4a6,
+  huntress: 0x7a6ad0,
+  "moon-archer": 0x4bb8c4,
+  "stone-warden": 0x5e5f9a,
+  "grove-druid": 0x3fa7a0,
+  "grove-warden": 0x6a4fb8,
 };
 
 /** Colour of an enemy type; an unknown type is red. */
