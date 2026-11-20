@@ -77,11 +77,19 @@ export function bodyNodes(body: string): string[] {
   return [`${prefix}_Body`, head, `${prefix}_ArmLeft`, `${prefix}_ArmRight`, `${prefix}_LegLeft`, `${prefix}_LegRight`];
 }
 
+/**
+ * An enemy model: an adventurer body (`adv`: humans, orcs, elves) keeps its body parts and the named parts of its own
+ * file, a skeleton body (`skel`: the undead) gets weapons attached to its hands (spec 2026-11-20, 4.6).
+ */
 interface EnemyRow {
   id: string;
+  src: "adv" | "skel";
   body: string;
+  /** adv: parts of the body's file to keep besides the body. */
+  keep?: string[];
+  /** skel: nodes to delete. */
   remove?: string[];
-  attach: { file: string; slot: "handslot.r" | "handslot.l" }[];
+  attach?: { file: string; slot: "handslot.r" | "handslot.l" }[];
   walking: string;
   punch: string;
 }
@@ -92,49 +100,38 @@ const skel = (name: string, slot: "handslot.r" | "handslot.l") => ({
 });
 
 const ENEMIES: EnemyRow[] = [
+  // Human Legion: knights, rogues and a priest
+  { id: "shieldbearer", src: "adv", body: "Knight", keep: ["1H_Sword", "Round_Shield", "Knight_Helmet"], walking: "Walking_A", punch: "1H_Melee_Attack_Chop" },
+  { id: "scout", src: "adv", body: "Rogue", keep: ["Knife"], walking: "Running_B", punch: "1H_Melee_Attack_Slice_Diagonal" },
+  { id: "musketeer", src: "adv", body: "Rogue", keep: ["2H_Crossbow", "Rogue_Cape"], walking: "Walking_A", punch: "2H_Ranged_Shoot" },
+  { id: "chaplain", src: "adv", body: "Mage", keep: ["Spellbook", "Mage_Cape"], walking: "Walking_A", punch: "Spellcast_Shoot" },
+  { id: "lancer", src: "adv", body: "Knight", keep: ["2H_Sword", "Knight_Helmet"], walking: "Running_A", punch: "2H_Melee_Attack_Stab" },
+  { id: "captain", src: "adv", body: "Knight", keep: ["1H_Sword", "Badge_Shield", "Knight_Helmet", "Knight_Cape"], walking: "Walking_A", punch: "1H_Melee_Attack_Slice_Horizontal" },
+  // Blood Clan: barbarians, a hooded thrower and a caster
+  { id: "brute", src: "adv", body: "Barbarian", keep: ["1H_Axe", "Barbarian_Round_Shield"], walking: "Walking_A", punch: "1H_Melee_Attack_Chop" },
+  { id: "spearthrower", src: "adv", body: "Rogue_Hooded", keep: ["Throwable"], walking: "Walking_A", punch: "Throw" },
+  { id: "hornback", src: "adv", body: "Barbarian", keep: ["2H_Axe", "Barbarian_Hat"], walking: "Running_A", punch: "2H_Melee_Attack_Chop" },
+  { id: "bloodcaller", src: "adv", body: "Mage", keep: ["1H_Wand"], walking: "Walking_A", punch: "Spellcast_Raise" },
+  { id: "warlord", src: "adv", body: "Barbarian", keep: ["2H_Axe", "Barbarian_Hat", "Barbarian_Cape"], walking: "Walking_A", punch: "2H_Melee_Attack_Slice" },
+  // Restless Dead: the skeletons
+  { id: "ghoul", src: "skel", body: "Skeleton_Minion", walking: "Running_B", punch: "Unarmed_Melee_Attack_Punch_A" },
+  { id: "webcrawler", src: "skel", body: "Skeleton_Rogue", attach: [skel("Skeleton_Crossbow", "handslot.r")], walking: "Walking_A", punch: "2H_Ranged_Shoot" },
   {
-    id: "shieldbearer",
-    body: "Skeleton_Warrior",
-    attach: [skel("Skeleton_Blade", "handslot.r"), skel("Skeleton_Shield_Large_A", "handslot.l")],
-    walking: "Walking_A",
-    punch: "1H_Melee_Attack_Chop",
+    id: "rotgut", src: "skel", body: "Skeleton_Warrior", remove: ["Skeleton_Warrior_Helmet"],
+    attach: [skel("Skeleton_Axe", "handslot.r")], walking: "Walking_D_Skeletons", punch: "2H_Melee_Attack_Chop",
   },
+  { id: "gravebinder", src: "skel", body: "Skeleton_Mage", attach: [skel("Skeleton_Staff", "handslot.r")], walking: "Walking_A", punch: "Spellcast_Summon" },
+  { id: "risen", src: "skel", body: "Skeleton_Minion", remove: ["Skeleton_Minion_Cloak"], walking: "Walking_D_Skeletons", punch: "Unarmed_Melee_Attack_Punch_B" },
   {
-    id: "scout",
-    body: "Skeleton_Minion",
-    attach: [skel("Skeleton_Blade", "handslot.r")],
-    walking: "Running_B",
-    punch: "1H_Melee_Attack_Slice_Diagonal",
+    id: "bone-tyrant", src: "skel", body: "Skeleton_Warrior",
+    attach: [skel("Skeleton_Axe", "handslot.r"), skel("Skeleton_Shield_Large_B", "handslot.l")], walking: "Walking_A", punch: "1H_Melee_Attack_Chop",
   },
-  {
-    id: "musketeer",
-    body: "Skeleton_Rogue",
-    attach: [skel("Skeleton_Crossbow", "handslot.r")],
-    walking: "Walking_A",
-    punch: "2H_Ranged_Shoot",
-  },
-  {
-    id: "chaplain",
-    body: "Skeleton_Mage",
-    attach: [skel("Skeleton_Staff", "handslot.r")],
-    walking: "Walking_A",
-    punch: "Spellcast_Shoot",
-  },
-  {
-    id: "lancer",
-    body: "Skeleton_Warrior",
-    remove: ["Skeleton_Warrior_Helmet"],
-    attach: [skel("Skeleton_Axe", "handslot.r")],
-    walking: "Running_A",
-    punch: "2H_Melee_Attack_Chop",
-  },
-  {
-    id: "captain",
-    body: "Skeleton_Warrior",
-    attach: [skel("Skeleton_Blade", "handslot.r"), skel("Skeleton_Shield_Large_B", "handslot.l")],
-    walking: "Walking_A",
-    punch: "1H_Melee_Attack_Slice_Horizontal",
-  },
+  // Moon Grove: hooded rogues, knights of stone and a staff druid
+  { id: "huntress", src: "adv", body: "Rogue_Hooded", keep: ["Knife", "Knife_Offhand"], walking: "Running_A", punch: "Throw" },
+  { id: "moon-archer", src: "adv", body: "Rogue", keep: ["1H_Crossbow", "Knife_Offhand"], walking: "Walking_A", punch: "1H_Ranged_Shoot" },
+  { id: "stone-warden", src: "adv", body: "Knight", keep: ["1H_Sword", "Rectangle_Shield", "Knight_Helmet"], walking: "Walking_B", punch: "1H_Melee_Attack_Stab" },
+  { id: "grove-druid", src: "adv", body: "Mage", keep: ["2H_Staff", "Mage_Hat"], walking: "Walking_A", punch: "Spellcasting" },
+  { id: "grove-warden", src: "adv", body: "Knight", keep: ["1H_Sword", "Spike_Shield", "Knight_Cape"], walking: "Walking_A", punch: "1H_Melee_Attack_Slice_Diagonal" },
 ];
 
 /** `[out name, path under hex root without extension]` */
@@ -166,7 +163,8 @@ export const MODELS: ModelSpec[] = [
   ...ENEMIES.map(
     (e): ModelSpec => ({
       out: `enemies/${e.id}.glb`,
-      source: `skel:Characters/gltf/${e.body}.glb`,
+      source: e.src === "adv" ? `adv:Characters/gltf/${e.body}.glb` : `skel:Characters/gltf/${e.body}.glb`,
+      ...(e.src === "adv" ? { keepNodes: [...bodyNodes(e.body), ...(e.keep ?? [])] } : {}),
       removeNodes: e.remove,
       attach: e.attach,
       clips: { Idle: "Idle", Walking: e.walking, Punch: e.punch },

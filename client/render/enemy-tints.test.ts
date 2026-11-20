@@ -25,6 +25,42 @@ describe("enemy tints", () => {
     }
   });
 
+  it("no tint of a common type has an orange hue (20-45 degrees)", () => {
+    for (const e of enemies.filter((x) => !("boss" in x))) {
+      const hex = enemyTint(e.id);
+      const r = ((hex >> 16) & 0xff) / 255;
+      const g = ((hex >> 8) & 0xff) / 255;
+      const b = (hex & 0xff) / 255;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      if (max - min < 0.08) continue; // grey: no hue
+      let hue = max === r ? ((g - b) / (max - min)) % 6 : max === g ? (b - r) / (max - min) + 2 : (r - g) / (max - min) + 4;
+      hue = (hue * 60 + 360) % 360;
+      expect(hue >= 20 && hue <= 45, `${e.id}: hue ${hue.toFixed(0)}`).toBe(false);
+    }
+  });
+
+  it("each faction keeps to its palette family", () => {
+    const hueOf = (hex: number) => {
+      const r = ((hex >> 16) & 0xff) / 255;
+      const g = ((hex >> 8) & 0xff) / 255;
+      const b = (hex & 0xff) / 255;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      if (max - min < 0.08) return -1;
+      const h = max === r ? ((g - b) / (max - min)) % 6 : max === g ? (b - r) / (max - min) + 2 : (r - g) / (max - min) + 4;
+      return (h * 60 + 360) % 360;
+    };
+    const family: Record<string, [number, number]> = { orc: [46, 160], undead: [50, 160], elf: [170, 290], human: [190, 250] };
+    for (const e of enemies as { id: string; faction?: string }[]) {
+      if (e.faction === undefined) continue;
+      const hue = hueOf(enemyTint(e.id));
+      if (hue < 0) continue;
+      const [lo, hi] = family[e.faction]!;
+      expect(hue >= lo && hue <= hi, `${e.id} (${e.faction}): hue ${hue.toFixed(0)}`).toBe(true);
+    }
+  });
+
   it("tintTable holds linear rgb per type, in type order", () => {
     const table = tintTable([{ id: "chaplain" }, { id: "ghost" }]);
     expect(table).toHaveLength(6);

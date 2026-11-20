@@ -405,8 +405,7 @@
     "behavior": "siege",
     "faction": "orc",
     "xp": 1,
-    "gold": 1,
-    "model": "shieldbearer"
+    "gold": 1
   },
   {
     "id": "spearthrower",
@@ -431,8 +430,7 @@
     "behavior": "skirmish",
     "faction": "orc",
     "xp": 2,
-    "gold": 2,
-    "model": "musketeer"
+    "gold": 2
   },
   {
     "id": "hornback",
@@ -466,8 +464,7 @@
       "damageMultiplier": 1.5,
       "distance": 900,
       "cooldownSeconds": 6
-    },
-    "model": "lancer"
+    }
   },
   {
     "id": "bloodcaller",
@@ -493,7 +490,6 @@
     "faction": "orc",
     "xp": 2,
     "gold": 2,
-    "model": "chaplain",
     "bloodlust": {
       "cooldownSeconds": 6,
       "targets": 3,
@@ -542,7 +538,6 @@
       "moveSpeed": 0.25,
       "damage": 0.25
     },
-    "model": "captain",
     "hunter": true,
     "knockbackScale": 0.3
   },
@@ -569,8 +564,7 @@
     "behavior": "flank",
     "faction": "undead",
     "xp": 1,
-    "gold": 1,
-    "model": "scout"
+    "gold": 1
   },
   {
     "id": "webcrawler",
@@ -596,7 +590,6 @@
     "faction": "undead",
     "xp": 2,
     "gold": 2,
-    "model": "musketeer",
     "web": {
       "slow": 0.3,
       "seconds": 2
@@ -626,7 +619,6 @@
     "faction": "undead",
     "xp": 4,
     "gold": 3,
-    "model": "lancer",
     "cloud": {
       "radius": 220,
       "hpSharePerSecond": 0.01
@@ -656,7 +648,6 @@
     "faction": "undead",
     "xp": 2,
     "gold": 2,
-    "model": "chaplain",
     "raise": {
       "type": "risen",
       "cooldownSeconds": 5,
@@ -688,8 +679,7 @@
     "behavior": "siege",
     "faction": "undead",
     "xp": 0,
-    "gold": 0,
-    "model": "scout"
+    "gold": 0
   },
   {
     "id": "bone-tyrant",
@@ -715,7 +705,6 @@
     "faction": "undead",
     "xp": 12,
     "gold": 10,
-    "model": "captain",
     "hunter": true,
     "cloud": {
       "radius": 350,
@@ -746,8 +735,7 @@
     "behavior": "flank",
     "faction": "elf",
     "xp": 1,
-    "gold": 1,
-    "model": "scout"
+    "gold": 1
   },
   {
     "id": "moon-archer",
@@ -772,8 +760,7 @@
     "behavior": "skirmish",
     "faction": "elf",
     "xp": 2,
-    "gold": 2,
-    "model": "musketeer"
+    "gold": 2
   },
   {
     "id": "stone-warden",
@@ -799,7 +786,6 @@
     "faction": "elf",
     "xp": 4,
     "gold": 3,
-    "model": "lancer",
     "knockbackScale": 0.3
   },
   {
@@ -831,7 +817,6 @@
       "range": 450,
       "cooldown": 1
     },
-    "model": "chaplain",
     "strike": {
       "minRange": 400,
       "maxRange": 900,
@@ -876,7 +861,6 @@
       "distance": 900,
       "cooldownSeconds": 6
     },
-    "model": "captain",
     "strike": {
       "minRange": 300,
       "maxRange": 900,

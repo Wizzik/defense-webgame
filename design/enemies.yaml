@@ -161,7 +161,6 @@
 # --- Blood Clan (phases 6-10) ---
 
 - id: brute
-  model: shieldbearer   # provisional until the faction models (factions plan, Task 6)
   faction: orc
   source: ogru
   mapName: Grunt
@@ -172,7 +171,6 @@
   gold: 1
 
 - id: spearthrower
-  model: musketeer   # provisional until the faction models (factions plan, Task 6)
   faction: orc
   source: ohun
   mapName: Troll Headhunter
@@ -183,7 +181,6 @@
   gold: 2
 
 - id: hornback
-  model: lancer   # provisional until the faction models (factions plan, Task 6)
   faction: orc
   source: otau
   mapName: Tauren
@@ -195,7 +192,6 @@
   charge: { minRange: 300, maxRange: 700, windupSeconds: 0.5, speedMultiplier: 2.5, damageMultiplier: 1.5, distance: 900, cooldownSeconds: 6 }
 
 - id: bloodcaller
-  model: chaplain   # provisional until the faction models (factions plan, Task 6)
   faction: orc
   source: oshm
   # the map's name of oshm is not kept as mapName: it is a word of our own hero's name (Serpent Shaman)
@@ -207,7 +203,6 @@
   bloodlust: { cooldownSeconds: 6, targets: 3, range: 450, seconds: 8, moveSpeed: 0.3, damage: 0.3, attackSpeed: 0.3 }
 
 - id: warlord
-  model: captain   # provisional until the faction models (factions plan, Task 6)
   faction: orc
   source: ogru
   mapName: Grunt
@@ -225,7 +220,6 @@
 # --- Restless Dead (phases 11-15) ---
 
 - id: ghoul
-  model: scout   # provisional until the faction models (factions plan, Task 6)
   faction: undead
   source: ugho
   mapName: Ghoul
@@ -236,7 +230,6 @@
   gold: 1
 
 - id: webcrawler
-  model: musketeer   # provisional until the faction models (factions plan, Task 6)
   faction: undead
   source: ucry
   mapName: Crypt Fiend
@@ -248,7 +241,6 @@
   web: { slow: 0.3, seconds: 2 }
 
 - id: rotgut
-  model: lancer   # provisional until the faction models (factions plan, Task 6)
   faction: undead
   source: uabo
   mapName: Abomination
@@ -260,7 +252,6 @@
   cloud: { radius: 220, hpSharePerSecond: 0.01 }
 
 - id: gravebinder
-  model: chaplain   # provisional until the faction models (factions plan, Task 6)
   faction: undead
   source: unec
   mapName: Necromancer
@@ -272,7 +263,6 @@
   raise: { type: risen, cooldownSeconds: 5, count: 2, range: 500, maxAgeSeconds: 10 }
 
 - id: risen
-  model: scout   # provisional until the faction models (factions plan, Task 6)
   faction: undead
   source: ugho
   mapName: Ghoul
@@ -284,7 +274,6 @@
   gold: 0
 
 - id: bone-tyrant
-  model: captain   # provisional until the faction models (factions plan, Task 6)
   faction: undead
   source: uabo
   mapName: Abomination
@@ -300,7 +289,6 @@
 # --- Moon Grove (phases 16-20) ---
 
 - id: huntress
-  model: scout   # provisional until the faction models (factions plan, Task 6)
   faction: elf
   source: esen
   mapName: Huntress
@@ -311,7 +299,6 @@
   gold: 1
 
 - id: moon-archer
-  model: musketeer   # provisional until the faction models (factions plan, Task 6)
   faction: elf
   source: earc
   mapName: Archer
@@ -323,7 +310,6 @@
   gold: 2
 
 - id: stone-warden
-  model: lancer   # provisional until the faction models (factions plan, Task 6)
   faction: elf
   source: emtg
   mapName: Mountain Giant
@@ -336,7 +322,6 @@
   gold: 3
 
 - id: grove-druid
-  model: chaplain   # provisional until the faction models (factions plan, Task 6)
   faction: elf
   source: edoc
   mapName: Druid of the Claw
@@ -349,7 +334,6 @@
   strike: { minRange: 400, maxRange: 900, radius: 160, effect: root, rootSeconds: 1.2, windupSeconds: 1, cooldownSeconds: 9, leap: false }
 
 - id: grove-warden
-  model: captain   # provisional until the faction models (factions plan, Task 6)
   faction: elf
   source: emtg
   mapName: Mountain Giant
