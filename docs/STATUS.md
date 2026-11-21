@@ -1,8 +1,12 @@
 # Status
 
-Updated 2026-11-21 (difficulties plan 1 executed on branch `difficulties`, PR #28 open; waits for Petr's playtest and his word to merge). Read this first when you resume work.
+Updated 2026-11-21 (difficulties plan 1 merged as PR #28 `35ed49d`; plan 2 written on branch `difficulties-2`). Read this first when you resume work.
 
-## Difficulties 1: world ladder, Normal / Insane / Hell, world choice, unlocks (PR #28, branch `difficulties`, 2026-11-21)
+## Difficulties 2: obstacles, paths, the wall of world 1, the summer storm (plan written, 2026-11-21)
+
+- Plan: `docs/superpowers/plans/2026-11-21-difficulties-obstacles.md` (7 tasks, branch `difficulties-2`). Execute it in a new chat. World 1 gets the old wall with two gates in the north, four paths (+15 % speed), 30-40 seeded islands with a passability check, collisions, island avoidance, flow fields through the gates, autopilot routing and the summer storm (bolts after a 1.2 s circle from phase 3); worlds 2-5 share world 1's map and storm until plan 3; world 1 Normal is retuned to 66-80 of 160 without gear.
+
+## Difficulties 1: world ladder, Normal / Insane / Hell, world choice, unlocks (merged as PR #28 `35ed49d`, 2026-11-21)
 
 - All 7 tasks of `docs/superpowers/plans/2026-11-21-difficulties-ladder.md` done inline in one chat, one final self-review. `npm run check`, the build, e2e `webgl2-fallback` (40 of 40) and `sim-chromium` pass. Spec: `docs/superpowers/specs/2026-11-21-difficulties-worlds-design.md`. Numbers, the win table and rulings: `docs/DECISIONS.md`, section Difficulties and worlds, plan 1.
 - What it brings:
@@ -18,7 +22,7 @@ Updated 2026-11-21 (difficulties plan 1 executed on branch `difficulties`, PR #2
   - the feel of Insane and Hell: Hell is very hard for the autopilot even with the best gear (19 of 160 wins in world 5); the worlds differ little in strength (x1.14 at world 5) because mid gear loses 41 % already in world 1. Tell me if the ladder should climb steeper;
   - quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1&world=5&difficulty=hell (everything open, Start, then the world screen preselects world 5 Hell), `?debug=1&phase=16&difficulty=insane`; in the console `__game.world`, `__game.difficulty`, `__game.unlocked`.
 - **Open for Petr:** world 5 Normal with mid gear wins 67 of 160 (the plan wanted 70-90, the spec "about half"); Hell may need softening after he plays.
-- Next after his playtest: difficulties plan 2 (obstacles, paths, the wall of world 1, the summer storm), written in a new chat from spec 4.5-4.7 and 4.10.
+- Merged at Petr's word (2026-11-21) after green CI; his playtest of the world screen and the unlocks still stands.
 
 ## Order (Petr, 2026-11-21)
 
