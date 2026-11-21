@@ -25,7 +25,7 @@ function gameData(): GameData {
     JSON.parse(readFileSync(new URL(`../data/generated/${name}.json`, import.meta.url), "utf8"));
   return validateGameData({
     heroes: read("heroes"), abilities: read("abilities"), enemies: read("enemies"),
-    rules: read("rules"), items: read("items"), constants: read("constants"),
+    rules: read("rules"), items: read("items"), constants: read("constants"), worlds: read("worlds"),
   });
 }
 

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
-import type { Ability, Enemy, Hero, Item, Rules } from "../../data/schema";
+import type { Ability, Enemy, Hero, Item, Rules, World } from "../../data/schema";
 import { parseScaling, SCALING_YAML, type Scaling } from "./scaling";
 
 /** Design files as they are named in error messages. */
@@ -10,6 +10,7 @@ export const ABILITIES_YAML = "design/abilities.yaml";
 export const ENEMIES_YAML = "design/enemies.yaml";
 export const RULES_YAML = "design/rules.yaml";
 export const ITEMS_YAML = "design/items.yaml";
+export const WORLDS_YAML = "design/worlds.yaml";
 
 /** Object data fields of one export ability level. */
 export const DATA_FIELDS = [
@@ -159,6 +160,7 @@ export interface Design {
   rules: Rules;
   abilities: AbilityEntry[];
   items: ItemEntry[];
+  worlds: World[];
   scaling: Scaling;
 }
 
@@ -173,7 +175,7 @@ export function loadMapExport(dir: string): MapExport {
   };
 }
 
-/** Reads heroes.yaml, abilities.yaml, enemies.yaml, items.yaml and rules.yaml from a design folder. */
+/** Reads heroes.yaml, abilities.yaml, enemies.yaml, items.yaml, worlds.yaml and rules.yaml from a design folder. */
 export function loadDesign(dir: string): Design {
   return {
     heroes: list(readYaml(join(dir, "heroes.yaml")), HEROES_YAML) as HeroEntry[],
@@ -181,6 +183,7 @@ export function loadDesign(dir: string): Design {
     enemies: list(readYaml(join(dir, "enemies.yaml")), ENEMIES_YAML) as EnemyEntry[],
     rules: readYaml(join(dir, "rules.yaml")) as Rules,
     items: list(readYaml(join(dir, "items.yaml")), ITEMS_YAML) as ItemEntry[],
+    worlds: list(readYaml(join(dir, "worlds.yaml")), WORLDS_YAML) as World[],
     scaling: loadScaling(dir),
   };
 }

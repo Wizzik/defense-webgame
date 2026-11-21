@@ -37,6 +37,7 @@ export function buildGameData(src: MapExport, design: Design, mapVersion: string
     rules: design.rules,
     items: design.items.map(mapItem),
     constants: mapConstants(src.mapInfo.misc_constants, mapVersion),
+    worlds: design.worlds.map(({ id, name, blurb, color, ready }) => ({ id, name, blurb, color, ready })),
   };
   // Throws GameDataError. The parsed copy is not kept because zod reorders the keys.
   validateGameData(data);
@@ -55,7 +56,7 @@ function mapItem(entry: ItemEntry): Item {
   };
 }
 
-/** Writes heroes, abilities, enemies, rules, items and constants as JSON: indent 2, keys in mapping order. */
+/** Writes heroes, abilities, enemies, rules, items, constants and worlds as JSON: indent 2, keys in mapping order. */
 export function writeGameData(data: GameData, outDir: string): void {
   mkdirSync(outDir, { recursive: true });
   const files: [string, unknown][] = [
@@ -65,6 +66,7 @@ export function writeGameData(data: GameData, outDir: string): void {
     ["rules.json", data.rules],
     ["items.json", data.items],
     ["constants.json", data.constants],
+    ["worlds.json", data.worlds],
   ];
   for (const [file, value] of files) {
     writeFileSync(join(outDir, file), `${JSON.stringify(value, null, 2)}\n`);

@@ -146,6 +146,11 @@ describe("data-build", () => {
       mapVersion: "test",
     });
     expect(JSON.stringify(data)).not.toContain("Export text");
+    expect(data.worlds).toStrictEqual([{
+      id: "fixture-world", name: { en: "Fixture World", cs: "Testovací svět" },
+      blurb: { en: "A test world.", cs: "Testovací svět." }, color: "#1e3b40", ready: true,
+    }]);
+    expect(data.rules.difficulty.levels.hell.extraRushes).toEqual([{ atSeconds: 30, elites: 1, heavies: 1 }]);
   });
 
   it("rejects a non-numeric misc constant with its name", () => {

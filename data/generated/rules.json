@@ -645,5 +645,93 @@
       "newSpell": 2,
       "newPassive": 2
     }
+  },
+  "difficulty": {
+    "worldStep": {
+      "hp": 0.25,
+      "damage": 0.25
+    },
+    "reward": {
+      "goldPerWorld": 0.1,
+      "magicFindPerWorld": 0.1
+    },
+    "levels": {
+      "normal": {
+        "hp": 1,
+        "damage": 1,
+        "packSize": 1,
+        "eliteHp": 1,
+        "magicFind": 0,
+        "extraRushes": []
+      },
+      "insane": {
+        "hp": 1.75,
+        "damage": 1.75,
+        "packSize": 1.2,
+        "eliteHp": 1,
+        "magicFind": 0.25,
+        "extraRushes": [
+          {
+            "atSeconds": 90,
+            "elites": 1,
+            "heavies": 2
+          },
+          {
+            "atSeconds": 270,
+            "elites": 2,
+            "heavies": 3
+          },
+          {
+            "atSeconds": 450,
+            "elites": 3,
+            "heavies": 4
+          },
+          {
+            "atSeconds": 630,
+            "elites": 4,
+            "heavies": 6
+          },
+          {
+            "atSeconds": 810,
+            "elites": 5,
+            "heavies": 8
+          }
+        ]
+      },
+      "hell": {
+        "hp": 3,
+        "damage": 3,
+        "packSize": 1.4,
+        "eliteHp": 1.5,
+        "magicFind": 0.5,
+        "extraRushes": [
+          {
+            "atSeconds": 90,
+            "elites": 1,
+            "heavies": 2
+          },
+          {
+            "atSeconds": 270,
+            "elites": 2,
+            "heavies": 3
+          },
+          {
+            "atSeconds": 450,
+            "elites": 3,
+            "heavies": 4
+          },
+          {
+            "atSeconds": 630,
+            "elites": 4,
+            "heavies": 6
+          },
+          {
+            "atSeconds": 810,
+            "elites": 5,
+            "heavies": 8
+          }
+        ]
+      }
+    }
   }
 }

@@ -101,7 +101,22 @@ function fixture(): any {
         sharedSpells: ["zap"], passives: ["boon"], sharedSpellSlots: 2, passiveSlots: 4,
         cardWeights: { signature: 4, sharedUpgrade: 3, newSpell: 2, newPassive: 2 },
       },
+      difficulty: {
+        worldStep: { hp: 0.25, damage: 0.25 },
+        reward: { goldPerWorld: 0.1, magicFindPerWorld: 0.1 },
+        levels: {
+          normal: { hp: 1, damage: 1, packSize: 1, eliteHp: 1, magicFind: 0, extraRushes: [] },
+          insane: { hp: 1.75, damage: 1.75, packSize: 1.2, eliteHp: 1, magicFind: 0.25,
+            extraRushes: [{ atSeconds: 90, elites: 1, heavies: 2 }] },
+          hell: { hp: 3, damage: 3, packSize: 1.4, eliteHp: 1.5, magicFind: 0.5,
+            extraRushes: [{ atSeconds: 90, elites: 1, heavies: 2 }] },
+        },
+      },
     },
+    worlds: [
+      { id: "first-world", name: names("First"), blurb: names("A plain."), color: "#1f3a44", ready: true },
+      { id: "second-world", name: names("Second"), blurb: names("A waste."), color: "#3a2428", ready: false },
+    ],
     items: SLOT_TYPES.map((slotType) => ({
       id: `plain-${slotType.toLowerCase()}`, name: names(slotType), slotType, rarity: "common",
       stats: [{ stat: "str", value: 6 }],
@@ -630,5 +645,48 @@ describe("sustain rules", () => {
       data.rules.sustain.hearts.chance = chance;
       expect(errorMessage(data)).toContain("sustain.hearts.chance");
     }
+  });
+});
+
+describe("difficulty and worlds", () => {
+  it("accepts a valid difficulty table and worlds", () => {
+    const data = validateGameData(fixture());
+    expect(data.rules.difficulty.levels.hell.eliteHp).toBe(1.5);
+    expect(data.worlds.map((w) => w.id)).toEqual(["first-world", "second-world"]);
+  });
+
+  it("needs all three levels", () => {
+    const data = fixture();
+    delete data.rules.difficulty.levels.hell;
+    expect(errorMessage(data)).toContain("difficulty.levels.hell");
+  });
+
+  it("rejects a pack size of 0", () => {
+    const data = fixture();
+    data.rules.difficulty.levels.insane.packSize = 0;
+    expect(errorMessage(data)).toContain("difficulty.levels.insane.packSize");
+  });
+
+  it("rejects an extra rush with negative elites", () => {
+    const data = fixture();
+    data.rules.difficulty.levels.insane.extraRushes[0].elites = -1;
+    expect(errorMessage(data)).toContain("extraRushes");
+  });
+
+  it("rejects a world colour that is not a dark hex", () => {
+    for (const color of ["orange", "#12345", "#GGGGGG"]) {
+      const data = fixture();
+      data.worlds[0].color = color;
+      expect(errorMessage(data)).toContain("worlds.0 (first-world).color");
+    }
+  });
+
+  it("rejects duplicate world ids and an empty world list", () => {
+    const dup = fixture();
+    dup.worlds[1].id = "first-world";
+    expect(errorMessage(dup)).toContain("duplicate world id");
+    const none = fixture();
+    none.worlds = [];
+    expect(errorMessage(none)).toContain("worlds");
   });
 });

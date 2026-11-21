@@ -4,7 +4,7 @@ import { parse } from "yaml";
 import { describe, expect, it } from "vitest";
 import { validateGameData } from "./schema";
 
-const FILES = ["heroes.json", "abilities.json", "enemies.json", "rules.json", "items.json", "constants.json"] as const;
+const FILES = ["heroes.json", "abilities.json", "enemies.json", "rules.json", "items.json", "constants.json", "worlds.json"] as const;
 /** Keys that carry map texts (tooltips) or design-only lookups (mapName). */
 const FORBIDDEN_KEYS = new Set(["tooltip", "ubertip", "tip", "mapName", "source", "review", "jassFunctions"]);
 
@@ -53,6 +53,7 @@ describe("generated game data", () => {
         rules: JSON.parse(read("rules.json")),
         items: JSON.parse(read("items.json")),
         constants: JSON.parse(read("constants.json")),
+        worlds: JSON.parse(read("worlds.json")),
       }),
     ).not.toThrow();
   });
@@ -80,6 +81,7 @@ describe("generated game data", () => {
       ["abilities.json", "abilities.yaml"],
       ["enemies.json", "enemies.yaml"],
       ["items.json", "items.yaml"],
+      ["worlds.json", "worlds.yaml"],
     ] as const;
     for (const [json, yaml] of pairs) {
       const pick = ({ id, name, description, role }: Entry) => ({ id, name, description, role });
@@ -127,6 +129,21 @@ describe("generated game data", () => {
     ]);
     expect(enemies.filter((e) => e.attack.kind !== "ranged").every((e) => e.attack.kind === "melee")).toBe(true);
     expect(enemies.filter((e) => e.heal !== undefined).map((e) => e.id)).toEqual(["chaplain", "pale-abbot", "grove-druid"]);
+  });
+
+  it("five worlds, only the first ready, and the difficulty table", () => {
+    const worlds = JSON.parse(read("worlds.json")) as { id: string; ready: boolean }[];
+    expect(worlds.map((w) => w.id)).toEqual(["silver-march", "red-waste", "shadewood", "frostreach", "blightscar"]);
+    expect(worlds.map((w) => w.ready)).toEqual([true, false, false, false, false]);
+    type Level = { hp: number; damage: number; packSize: number; eliteHp: number; magicFind: number; extraRushes: { atSeconds: number }[] };
+    const rules = JSON.parse(read("rules.json")) as { run: { durationSeconds: number }; difficulty: { levels: Record<string, Level> } };
+    expect(rules.difficulty.levels.normal).toEqual({ hp: 1, damage: 1, packSize: 1, eliteHp: 1, magicFind: 0, extraRushes: [] });
+    for (const id of ["insane", "hell"]) {
+      const times = rules.difficulty.levels[id]!.extraRushes.map((r) => r.atSeconds);
+      expect(times.length, id).toBeGreaterThan(0);
+      expect(times, id).toEqual([...times].sort((a, b) => a - b));
+      for (const t of times) expect(t, id).toBeLessThan(rules.run.durationSeconds);
+    }
   });
 
   it("there are 20 phases and the final boss comes at 1000 s", () => {
