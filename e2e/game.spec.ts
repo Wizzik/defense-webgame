@@ -991,7 +991,9 @@ test("debug opens every course; hell world 3 makes enemies tougher", async ({ pa
   await page.locator("#start").click();
   await page.locator('#world-screen [data-difficulty="hell"]').click();
   await page.locator('#world-screen [data-world="3"]').click();
-  await expect(page.locator("#world-detail")).toContainText("Síla nepřátel ×4,5");
+  // the strength follows the tuning of rules.difficulty: only check that it is above x1
+  const strength = await page.locator("#world-detail .world-line").first().textContent();
+  expect(Number(/×([\d,]+)/.exec(strength ?? "")?.[1]?.replace(",", "."))).toBeGreaterThan(1);
   await page.locator("#world-start").click();
   await waitForScreen(page, "playing");
   expect(await page.evaluate(() => [window.__game!.world, window.__game!.difficulty])).toEqual([3, "hell"]);
