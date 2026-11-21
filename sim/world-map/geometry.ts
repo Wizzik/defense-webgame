@@ -43,6 +43,7 @@ function reach(r: number): number {
 /** Does the circle (x, y, r) overlap no obstacle? */
 export function isFree(map: WorldMap, x: number, y: number, r: number): boolean {
   const k = reach(r);
+  if (k === 1 && map.near[cellOf(x, y)] === 0) return true;
   const c0 = cellCol(x);
   const r0 = cellRow(y);
   for (let row = r0 - k; row <= r0 + k; row++) {
@@ -77,6 +78,7 @@ export function pushOut(map: WorldMap, x: number, y: number, r: number): void {
   pushX = x;
   pushY = y;
   const k = reach(r);
+  if (k === 1 && map.near[cellOf(x, y)] === 0) return;
   for (let pass = 0; pass < 2; pass++) {
     const c0 = cellCol(pushX);
     const r0 = cellRow(pushY);

@@ -32,33 +32,55 @@ export function cellCenterY(cell: number): number {
 
 const NEIGHBOR_DC = [1, -1, 0, 0, 1, 1, -1, -1];
 const NEIGHBOR_DR = [0, 0, 1, -1, 1, -1, 1, -1];
+const NEIGHBOR_OFFSET = Int32Array.from(NEIGHBOR_DC, (dc, k) => NEIGHBOR_DR[k]! * MAP_SIZE + dc);
 
 /**
- * Breadth-first walk over free cells from `start` with 8 neighbours and no corner cutting (a diagonal step needs
- * both orthogonal cells free). Writes the step count into `dist` (-1 = not reached) and, when `next` is given, the
- * cell one step closer to `start`. Uses the map's shared queue; does not allocate.
+ * Recomputes the move masks of the cells col0..col1 x row0..row1: bit k = the step to neighbour k (8 neighbours) is
+ * allowed: inside the grid, onto a free cell, and a diagonal only when both orthogonal cells are free (no corner
+ * cutting). A blocked cell may still step out, so a target in an obstacle's margin spreads to its free neighbours.
+ */
+export function updateMoves(map: WorldMap, col0: number, col1: number, row0: number, row1: number): void {
+  const { blocked, moves } = map;
+  for (let row = Math.max(0, row0); row <= Math.min(MAP_SIZE - 1, row1); row++) {
+    for (let col = Math.max(0, col0); col <= Math.min(MAP_SIZE - 1, col1); col++) {
+      let mask = 0;
+      for (let k = 0; k < 8; k++) {
+        const nc = col + NEIGHBOR_DC[k]!;
+        const nr = row + NEIGHBOR_DR[k]!;
+        if (nc < 0 || nr < 0 || nc >= MAP_SIZE || nr >= MAP_SIZE) continue;
+        if (blocked[nr * MAP_SIZE + nc] === 1) continue;
+        if (k >= 4 && (blocked[row * MAP_SIZE + nc] === 1 || blocked[nr * MAP_SIZE + col] === 1)) continue;
+        mask |= 1 << k;
+      }
+      moves[row * MAP_SIZE + col] = mask;
+    }
+  }
+}
+
+/**
+ * Breadth-first walk over free cells from `start` along the move masks (8 neighbours, no corner cutting). Writes the
+ * step count into `dist` (-1 = not reached) and, when `next` is given, the cell one step closer to `start`. Returns
+ * the cells reached. Uses the map's shared queue; does not allocate.
  */
 export function bfs(map: WorldMap, start: number, dist: Int32Array, next: Int32Array | null): number {
-  const { blocked, queue } = map;
+  const { moves, queue } = map;
   dist.fill(-1);
   if (next !== null) next.fill(-1);
-  if (blocked[start] === 1) return 0;
+  // A blocked start (a target in an obstacle's margin) still spreads to its free neighbours.
   let head = 0;
   let tail = 0;
   queue[tail++] = start;
   dist[start] = 0;
   while (head < tail) {
     const cell = queue[head++]!;
-    const col = cell % MAP_SIZE;
-    const row = (cell - col) / MAP_SIZE;
+    const mask = moves[cell]!;
+    if (mask === 0) continue;
+    const d = dist[cell]! + 1;
     for (let k = 0; k < 8; k++) {
-      const nc = col + NEIGHBOR_DC[k]!;
-      const nr = row + NEIGHBOR_DR[k]!;
-      if (nc < 0 || nr < 0 || nc >= MAP_SIZE || nr >= MAP_SIZE) continue;
-      const n = nr * MAP_SIZE + nc;
-      if (dist[n] !== -1 || blocked[n] === 1) continue;
-      if (k >= 4 && (blocked[row * MAP_SIZE + nc] === 1 || blocked[nr * MAP_SIZE + col] === 1)) continue;
-      dist[n] = dist[cell]! + 1;
+      if ((mask & (1 << k)) === 0) continue;
+      const n = cell + NEIGHBOR_OFFSET[k]!;
+      if (dist[n] !== -1) continue;
+      dist[n] = d;
       if (next !== null) next[n] = cell;
       queue[tail++] = n;
     }
@@ -70,6 +92,8 @@ export function bfs(map: WorldMap, start: number, dist: Int32Array, next: Int32A
 export function blockedReachable(map: WorldMap): { free: number; reached: number } {
   let free = 0;
   for (let i = 0; i < map.blocked.length; i++) if (map.blocked[i] === 0) free++;
-  const reached = bfs(map, cellOf(map.castleX, map.castleY), map.scratchDist, null);
+  bfs(map, cellOf(map.castleX, map.castleY), map.scratchDist, null);
+  let reached = 0;
+  for (let i = 0; i < map.blocked.length; i++) if (map.blocked[i] === 0 && map.scratchDist[i] >= 0) reached++;
   return { free, reached };
 }

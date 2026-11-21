@@ -2,7 +2,7 @@ import type { WorldMap as WorldMapDef } from "../../data/schema";
 import type { Rng } from "../rng";
 import { polylineDistance, segmentDistance } from "./geometry";
 import { blockedReachable } from "./grid";
-import { IslandKind, placeIsland, removeLastIsland, type WorldMap } from "./map";
+import { addIsland, IslandKind, removeLastIsland, type WorldMap } from "./map";
 
 /** Tries per island before it is left out. */
 const TRIES = 40;
@@ -24,7 +24,7 @@ export function placeIslands(map: WorldMap, def: WorldMapDef, rng: Rng): void {
       const w = rng.next() * weights;
       const kind = w < kinds.rock ? IslandKind.Rock : w < kinds.rock + kinds.trees ? IslandKind.Trees : IslandKind.Ruin;
       if (!allowed(map, def, x, y, r, gap)) continue;
-      placeIsland(map, x, y, r, kind);
+      addIsland(map, x, y, r, kind);
       const { free, reached } = blockedReachable(map);
       if (reached === free) break;
       removeLastIsland(map);

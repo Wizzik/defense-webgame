@@ -8,6 +8,8 @@ import { Slam, windupRadius } from "./enemy-slam";
 import { InputAction } from "./input";
 import type { TickInput } from "./input";
 import type { Run } from "./run";
+import { computeFlow, crossesFeature, crossesIsland, flowDir, flowX, flowY } from "./world-map/flow";
+import { cellOf } from "./world-map/grid";
 
 /** An enemy nearer to the castle than this is a threat: the bot goes for the threat nearest to the castle. */
 export const DEFEND_RADIUS = 1400;
@@ -241,11 +243,7 @@ export function botInput(run: Run, out: TickInput): TickInput {
         oy = ty;
       }
     }
-    if (orbSq < Infinity) {
-      out.moveX = Math.abs(ox) > AXIS_DEADZONE ? Math.sign(ox) : 0;
-      out.moveY = Math.abs(oy) > AXIS_DEADZONE ? Math.sign(oy) : 0;
-      return out;
-    }
+    if (orbSq < Infinity) return walkTo(run, out, hero.x + ox, hero.y + oy);
   }
 
   if (
@@ -267,22 +265,19 @@ export function botInput(run: Run, out: TickInput): TickInput {
         cy = ty;
       }
     }
-    out.moveX = Math.abs(cx) > AXIS_DEADZONE ? Math.sign(cx) : 0;
-    out.moveY = Math.abs(cy) > AXIS_DEADZONE ? Math.sign(cy) : 0;
-    return out;
+    return walkTo(run, out, hero.x + cx, hero.y + cy);
   }
 
   const def = run.data.heroes[run.heroIndex];
   const melee = def.baseAttack.kind === "melee";
   let dx = 0;
   let dy = 0;
+  let routed = false;
   const postX = castle.x - hero.x;
   const postY = castle.y + HOME_OFFSET - hero.y;
   if (postX * postX + postY * postY > LEASH_DISTANCE * LEASH_DISTANCE) {
     // Too far from the castle (a long retreat): walk back, whatever the enemies do.
-    out.moveX = Math.abs(postX) > AXIS_DEADZONE ? Math.sign(postX) : 0;
-    out.moveY = Math.abs(postY) > AXIS_DEADZONE ? Math.sign(postY) : 0;
-    return out;
+    return walkTo(run, out, castle.x, castle.y + HOME_OFFSET);
   }
   const nearDist = Math.sqrt(nearSq);
   const keep = hero.hp < hero.stats.maxHp * LOW_HP ? LOW_HP_DISTANCE : melee ? 0 : RETREAT_DISTANCE;
@@ -309,15 +304,19 @@ export function botInput(run: Run, out: TickInput): TickInput {
         }
       }
       if (d > stop) {
-        dx = tx;
-        dy = ty;
+        routeTo(run, enemies.x[target], enemies.y[target]);
+        dx = routeX;
+        dy = routeY;
+        routed = routeFlow;
       }
     } else {
       const homeX = castle.x - hero.x;
       const homeY = castle.y + HOME_OFFSET - hero.y;
       if (Math.sqrt(homeX * homeX + homeY * homeY) > HOME_TOLERANCE) {
-        dx = homeX;
-        dy = homeY;
+        routeTo(run, castle.x, castle.y + HOME_OFFSET);
+        dx = routeX;
+        dy = routeY;
+        routed = routeFlow;
       }
     }
   }
@@ -329,8 +328,56 @@ export function botInput(run: Run, out: TickInput): TickInput {
       if (nearDist <= slot.def.params.length[slot.level - 1]) return out;
     }
   }
+  if (routed) {
+    out.moveX = axis(dx);
+    out.moveY = axis(dy);
+    return out;
+  }
   out.moveX = Math.abs(dx) > AXIS_DEADZONE ? Math.sign(dx) : 0;
   out.moveY = Math.abs(dy) > AXIS_DEADZONE ? Math.sign(dy) : 0;
+  return out;
+}
+
+/** Result of routeTo: the walking direction (a unit vector when routeFlow, else the straight offset to the target). */
+export let routeX = 0;
+export let routeY = 0;
+export let routeFlow = false;
+/** The autopilot's flow field is recomputed at most every BOT_FLOW_EVERY steps, when its target cell changed. */
+const BOT_FLOW_EVERY = 8;
+
+/**
+ * The way to (tx, ty) (spec 2026-11-21 difficulties 4.6): straight, or along the map's forBot flow field when the
+ * straight line touches the wall or an island (the hero would stick to it).
+ */
+export function routeTo(run: Run, tx: number, ty: number): void {
+  const { hero, map } = run;
+  routeX = tx - hero.x;
+  routeY = ty - hero.y;
+  routeFlow = false;
+  const r = hero.stats.collision;
+  if (!crossesFeature(map, hero.x, hero.y, tx, ty, r) && !crossesIsland(map, hero.x, hero.y, tx, ty, r)) return;
+  const field = map.forBot;
+  if (cellOf(tx, ty) !== field.targetCell && run.tick - field.tick >= BOT_FLOW_EVERY) {
+    computeFlow(map, field, tx, ty);
+    field.tick = run.tick;
+  }
+  flowDir(field, hero.x, hero.y);
+  if (flowX === 0 && flowY === 0) return;
+  routeX = flowX;
+  routeY = flowY;
+  routeFlow = true;
+}
+
+/** Walks towards (tx, ty) along routeTo. */
+function walkTo(run: Run, out: TickInput, tx: number, ty: number): TickInput {
+  routeTo(run, tx, ty);
+  if (routeFlow) {
+    out.moveX = axis(routeX);
+    out.moveY = axis(routeY);
+  } else {
+    out.moveX = Math.abs(routeX) > AXIS_DEADZONE ? Math.sign(routeX) : 0;
+    out.moveY = Math.abs(routeY) > AXIS_DEADZONE ? Math.sign(routeY) : 0;
+  }
   return out;
 }
 

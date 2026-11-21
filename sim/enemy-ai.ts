@@ -9,6 +9,8 @@ import { cancelCharge, Charge, chargeVX, chargeVY, updateCharge } from "./enemy-
 import { cancelSlam, updateSlam } from "./enemy-slam";
 import { strikeVX, strikeVY, updateStrike } from "./enemy-strike";
 import { avoidIslands, Behavior, steer, steerHold, steerX, steerY } from "./enemy-steer";
+import { crossesFeature, flowDir, flowX, flowY } from "./world-map/flow";
+import { heroFlow } from "./world-map/hero-flow";
 import { pathSpeedScale, pushOut as pushOutOfMap, pushX as mapPushX, pushY as mapPushY } from "./world-map/geometry";
 import type { Run } from "./run";
 
@@ -110,7 +112,10 @@ export function updateEnemies(run: Run): void {
         const ux = dist > 1e-6 ? dx / dist : 0;
         const uy = dist > 1e-6 ? dy / dist : 0;
         steer(run, i, targetsHero, ux, uy, dist, reach);
-        if (dist <= reach && !steerHold) {
+        // Behind the wall the flow field leads through a gate (spec 4.6), ahead of a flanker's or skirmisher's angle;
+        // a melee blow does not reach over it.
+        const walled = crossesFeature(run.map, x, y, tx, ty, def.collision);
+        if (dist <= reach && !steerHold && !(walled && def.attack.kind === "melee")) {
           e.action[i] = Action.Attack;
           if (e.attackCooldown[i] <= 0) {
             let raw = rollDamage(run.rng, def.attack.damageMin, def.attack.damageMax) * e.damageScale[i];
@@ -131,9 +136,15 @@ export function updateEnemies(run: Run): void {
           e.facingY[i] = uy;
         } else {
           e.action[i] = Action.Move;
-          avoidIslands(run, i, def.collision);
-          vx = steerX * walk;
-          vy = steerY * walk;
+          if (walled) flowDir(targetsHero ? heroFlow(run) : run.map.toCastle, x, y);
+          if (walled && (flowX !== 0 || flowY !== 0)) {
+            vx = flowX * walk;
+            vy = flowY * walk;
+          } else {
+            avoidIslands(run, i, def.collision);
+            vx = steerX * walk;
+            vy = steerY * walk;
+          }
         }
       }
     }

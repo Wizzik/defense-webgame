@@ -13,7 +13,7 @@ import { Role } from "./enemies";
 import { createRun } from "./run";
 import { spawnBoss } from "./timeline";
 import type { Run } from "./run";
-import { gameData } from "./testing/game-data";
+import { gameData, openArena } from "./testing/game-data";
 
 function play(seed: number, onStep?: (run: Run) => void, record?: TickInput[], hero?: string): Run {
   const run = createRun(gameData(), { seed, hero });
@@ -77,7 +77,7 @@ describe("autopilot", () => {
 
   /** A run with the hero on the bot's home spot, no enemies and no spell ready. */
   const postRun = (hero?: string) => {
-    const run = createRun(gameData(), { seed: 1, hero });
+    const run = createRun(openArena(gameData()), { seed: 1, hero });
     run.hero.x = run.castle.x;
     run.hero.y = run.castle.y + HOME_OFFSET;
     // spells cool down, so the bot does not stand still to aim a line
@@ -402,6 +402,25 @@ describe("balance", () => {
       expect(input.moveX * dx + input.moveY * dy).toBeGreaterThan(0);
       let guard = 0;
       while (run.state !== "chest" && guard++ < 3000) run.step(botInput(run, input));
+      expect(run.state).toBe("chest");
+    });
+
+    it("walks through a gate of the wall to a chest beyond it and opens it within 25 s", () => {
+      const data = gameData();
+      silenceSpawns(data);
+      data.worlds[0]!.map.islands.count = { min: 0, max: 0 };
+      data.rules.sustain.orbs.firstSeconds = data.rules.sustain.orbs.firstSeconds.map(() => 100000);
+      const run = createRun(data, { seed: 3, durationSeconds: 100000 });
+      run.hero.x = 0;
+      run.hero.y = 1200;
+      for (let i = 0; i < run.chests.x.length; i++) {
+        run.chests.x[i] = i === 0 ? 0 : -2500;
+        run.chests.y[i] = i === 0 ? 2000 : -2500;
+      }
+      run.gold = chestPrice(run);
+      const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
+      let guard = 0;
+      while (run.state !== "chest" && guard++ < 25 * 30) run.step(botInput(run, input));
       expect(run.state).toBe("chest");
     });
 

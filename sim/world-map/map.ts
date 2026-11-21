@@ -1,7 +1,8 @@
 import type { GameData } from "../../data/schema";
 import type { Rng } from "../rng";
 import { isFree, PATH_CELL, PATH_SIZE, segmentDistance } from "./geometry";
-import { cellCenterX, cellCenterY, cellCol, cellRow, MAP_ORIGIN, MAP_SIZE, PASS_MARGIN } from "./grid";
+import { cellCenterX, cellCenterY, cellCol, cellRow, MAP_ORIGIN, MAP_SIZE, PASS_MARGIN, updateMoves } from "./grid";
+import { computeFlow, FlowField } from "./flow";
 import { placeIslands } from "./islands";
 
 export { MAP_CELL, MAP_SIZE } from "./grid";
@@ -24,6 +25,11 @@ export class WorldMap {
   /** Half the wall thickness. */
   readonly segHalf: number;
   readonly segCount: number;
+  /** The bounding box of the wall's segment axes. */
+  readonly featMinX: number;
+  readonly featMaxX: number;
+  readonly featMinY: number;
+  readonly featMaxY: number;
   readonly islandX: Float64Array;
   readonly islandY: Float64Array;
   readonly islandR: Float64Array;
@@ -31,9 +37,13 @@ export class WorldMap {
   islandCount = 0;
   /** MAP_SIZE²; 1 = the cell's centre lies within an obstacle grown by PASS_MARGIN. */
   readonly blocked = new Uint8Array(CELLS);
+  /** Per cell, bit k = the BFS may step to neighbour k (sim/world-map/grid.ts updateMoves). */
+  readonly moves = new Uint8Array(CELLS);
   /** Obstacles touching each cell (CSR): items cellStart[c]..cellStart[c + 1] - 1; index < segCount = a segment. */
   readonly cellStart = new Int32Array(CELLS + 1);
   cellItems: Int32Array = new Int32Array(0);
+  /** 1 = the cell or one of its 8 neighbours lists an obstacle (a quick exit for pushOut and isFree of r <= MAP_CELL). */
+  readonly near = new Uint8Array(CELLS);
   /** PATH_SIZE² (cells of PATH_CELL): 1 = the centre lies within half the path width of a path. */
   readonly onPath = new Uint8Array(PATH_SIZE * PATH_SIZE);
   readonly pathBonus: number;
@@ -44,6 +54,10 @@ export class WorldMap {
   /** The shared BFS queue and a scratch distance field (no allocation in the step). */
   readonly queue = new Int32Array(CELLS);
   readonly scratchDist = new Int32Array(CELLS);
+  /** Flow fields (spec 4.6): to the castle (built with the map), to the hero (enemy-ai), for the autopilot (bot). */
+  readonly toCastle = new FlowField();
+  readonly toHero = new FlowField();
+  readonly forBot = new FlowField();
 
   constructor(data: GameData, world: number) {
     const def = data.worlds[world - 1];
@@ -55,6 +69,10 @@ export class WorldMap {
     this.segX2 = Float64Array.from(feature.segments, (s) => s[2]);
     this.segY2 = Float64Array.from(feature.segments, (s) => s[3]);
     this.segHalf = feature.thickness / 2;
+    this.featMinX = Math.min(...feature.segments.map((s) => Math.min(s[0], s[2])));
+    this.featMaxX = Math.max(...feature.segments.map((s) => Math.max(s[0], s[2])));
+    this.featMinY = Math.min(...feature.segments.map((s) => Math.min(s[1], s[3])));
+    this.featMaxY = Math.max(...feature.segments.map((s) => Math.max(s[1], s[3])));
     this.segCount = n;
     const capacity = Math.max(1, islands.count.max);
     this.islandX = new Float64Array(capacity);
@@ -92,11 +110,18 @@ export class WorldMap {
 export function buildWorldMap(data: GameData, world: number, rng: Rng): WorldMap {
   const map = new WorldMap(data, world);
   placeIslands(map, data.worlds[world - 1]!.map, rng);
+  computeFlow(map, map.toCastle, map.castleX, map.castleY);
   return map;
 }
 
-/** Adds an island, rebuilds the cell lists and the blocked mask around it (construction and tests only: allocates). */
+/** Tests: adds an island and refreshes the castle's flow field (allocates). */
 export function placeIsland(map: WorldMap, x: number, y: number, r: number, kind: IslandKind): void {
+  addIsland(map, x, y, r, kind);
+  computeFlow(map, map.toCastle, map.castleX, map.castleY);
+}
+
+/** Adds an island, rebuilds the cell lists and the blocked mask around it (construction only: allocates). */
+export function addIsland(map: WorldMap, x: number, y: number, r: number, kind: IslandKind): void {
   const i = map.islandCount;
   if (i >= map.islandX.length) throw new Error("placeIsland: island capacity full");
   map.islandX[i] = x;
@@ -130,6 +155,7 @@ function markBlocked(map: WorldMap, col0: number, col1: number, row0: number, ro
       map.blocked[c] = isFree(map, cellCenterX(c), cellCenterY(c), PASS_MARGIN) ? 0 : 1;
     }
   }
+  updateMoves(map, col0 - 1, col1 + 1, row0 - 1, row1 + 1);
 }
 
 /** Rebuilds the CSR cell lists: every cell an obstacle's bounding box touches. */
@@ -147,6 +173,16 @@ function reindex(map: WorldMap): void {
     items[fill[cell]!++] = item;
   });
   map.cellItems = items;
+  map.near.fill(0);
+  for (let row = 0; row < MAP_SIZE; row++) {
+    for (let col = 0; col < MAP_SIZE; col++) {
+      const c = row * MAP_SIZE + col;
+      if (counts[c + 1]! === counts[c]!) continue;
+      for (let r = Math.max(0, row - 1); r <= Math.min(MAP_SIZE - 1, row + 1); r++) {
+        for (let k = Math.max(0, col - 1); k <= Math.min(MAP_SIZE - 1, col + 1); k++) map.near[r * MAP_SIZE + k] = 1;
+      }
+    }
+  }
 }
 
 function forEachCell(map: WorldMap, total: number, visit: (cell: number, item: number) => void): void {
