@@ -154,7 +154,7 @@ Všechny jsou v simulaci, deterministické a čitelné; ohlásí je zpráva v HU
 
 ### 4.10 Rozdělení do plánů (každý v samostatném chatu)
 
-1. **Obtížnost, žebříček, menu, odemykání:** tabulka násobků, `RunOptions`, obrazovka volby, uložení, odměny, svět 1 jako dnešní mapa v novém systému `worlds.yaml` (zatím bez překážek), `sim:run` přepínače, ladění násobků.
+1. **Obtížnost, žebříček, menu, odemykání:** tabulka násobků, `RunOptions`, obrazovka volby, uložení, odměny, svět 1 jako dnešní mapa v novém systému `worlds.yaml` (zatím bez překážek), `sim:run` přepínače, ladění násobků. Světy 2–5 jsou v tomto kroku jen síla a jméno se vzhledem světa 1 a s označením „připravujeme“, aby šel žebříček hrát hned.
 2. **Překážky, cesty, průchody:** kostra a rozmístění, kolize, vyhýbání, mapa směrů, autopilot, kontrola průchodnosti; svět 1 dostane hradbu a ostrůvky a letní bouři; přeladění světa 1 k cíli ±10 %.
 3. **Světy 2–5:** vzhled, modely, načítání po světě, čtyři přírodní situace, ladění světů ke cíli z 4.2, snímky.
 
