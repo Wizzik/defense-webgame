@@ -1,3 +1,5 @@
+import { DIFFICULTY_IDS, type DifficultyId } from "../../data/schema";
+
 export interface GameParams {
   seed: number;
   speed: number;
@@ -12,7 +14,13 @@ export interface GameParams {
   hero?: string;
   /** ?phase=N, only with debug=1: start at phase N (1 to 21, the last is the finale). The session checks it against the data. */
   startPhase?: number;
+  /** ?world=N (1 to 5) and ?difficulty=normal|insane|hell; main.ts keeps them only when unlocked (or with debug=1). */
+  world?: number;
+  difficulty?: DifficultyId;
 }
+
+/** Worlds of the ladder (design/worlds.yaml). */
+const MAX_WORLD = 5;
 
 /** 20 phases and the finale. */
 const MAX_START_PHASE = 21;
@@ -35,6 +43,8 @@ export function readGameParams(search: string, randomSeed: () => number): GamePa
   const hero = params.get("hero")?.trim();
   const debug = params.get("debug") === "1";
   const phase = readInt(params.get("phase"));
+  const world = readInt(params.get("world"));
+  const difficulty = params.get("difficulty");
   return {
     seed: readInt(params.get("seed")) ?? randomSeed(),
     speed: speed === undefined ? 1 : clamp(speed, 1, 16),
@@ -46,5 +56,7 @@ export function readGameParams(search: string, randomSeed: () => number): GamePa
     lang: lang === "en" || lang === "cs" ? lang : undefined,
     hero: hero ? hero : undefined,
     startPhase: debug && phase !== undefined && phase >= 1 && phase <= MAX_START_PHASE ? phase : undefined,
+    world: world !== undefined && world >= 1 && world <= MAX_WORLD ? world : undefined,
+    difficulty: (DIFFICULTY_IDS as readonly string[]).includes(difficulty ?? "") ? (difficulty as DifficultyId) : undefined,
   };
 }

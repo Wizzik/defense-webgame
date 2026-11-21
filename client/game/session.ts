@@ -1,4 +1,4 @@
-import type { GameData } from "../../data/schema";
+import type { DifficultyId, GameData } from "../../data/schema";
 import { createRun, EventKind, HeroHitSource, InputAction, type LoadoutEntry, NO_INPUT, type Run, SlamEvent, TICK_SECONDS, type TickInput, ULTIMATE_SLOT } from "../../sim";
 import { SCENE_SCALE } from "../render/coords";
 import type { FollowCamera } from "../render/camera";
@@ -37,6 +37,9 @@ export class Session {
   seed = 0;
   /** A paused session shows its run but does not step it (the menu backdrop). */
   paused = false;
+  /** World and difficulty of the next run (the world screen sets them). */
+  world = 1;
+  difficulty: DifficultyId = "normal";
   private readonly data: GameData;
   private readonly params: GameParams;
   private readonly camera: FollowCamera;
@@ -64,7 +67,9 @@ export class Session {
     // a phase the data does not have is ignored: the run starts normally
     const phase = startPhase !== undefined && startPhase <= this.data.rules.phases.length + 1 ? startPhase : undefined;
     const loadout = this.loadoutFor(hero ?? this.data.rules.start.hero);
-    this.run = createRun(this.data, { seed, hero, durationSeconds, startPhase: phase, loadout });
+    this.run = createRun(this.data, {
+      seed, hero, durationSeconds, startPhase: phase, loadout, world: this.world, difficulty: this.difficulty,
+    });
     this.onStart();
     this.seed = seed;
     this.paused = paused;

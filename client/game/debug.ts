@@ -1,5 +1,5 @@
 import type { GearSession } from "./gear-session";
-import type { Rarity } from "../../data/schema";
+import type { DifficultyId, Rarity } from "../../data/schema";
 import {
   type ChestOffer, chestPrice, debugDropHeart, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, debugSpawnOrb,
   debugWear, killEnemy, learnAbility, OrbKind,
@@ -86,6 +86,13 @@ export interface GameSnapshot {
   /** Seconds left of the web's slow and of the roots on the hero (0 when none runs). */
   slowed: number;
   rooted: number;
+  /** World (1-5) and difficulty of the current run. */
+  world: number;
+  difficulty: DifficultyId;
+  /** courseKey ("3-insane") of every unlocked world and difficulty. */
+  unlocked: string[];
+  /** Whether the world progress is stored in this browser (false with ?debug=1 and without storage). */
+  progressSaved: boolean;
   /** Only with ?debug=1. */
   debug?: {
     grantXp(amount: number): void;
@@ -131,7 +138,7 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0 },
     gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, settingsOpen: false, gear: [], collection: {}, gearSaved: false,
     orbs: [], hearts: 0, buffs: { boots: 0, berserk: 0, heal: 0 }, lifesteal: 0,
-    faction: "human", slowed: 0, rooted: 0,
+    faction: "human", slowed: 0, rooted: 0, world: 1, difficulty: "normal", unlocked: [], progressSaved: false,
   };
   window.__game = snapshot;
   return snapshot;
@@ -264,6 +271,8 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
   snapshot.enemies = run.enemies.aliveCount;
   snapshot.enemyTypes = countTypes(run);
   snapshot.hero = run.hero.def.id;
+  snapshot.world = run.world;
+  snapshot.difficulty = run.difficulty;
   snapshot.heroX = run.hero.x;
   snapshot.heroY = run.hero.y;
   // the slot count is fixed (10), so these arrays are filled in place after the first frame

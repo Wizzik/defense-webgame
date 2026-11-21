@@ -1,6 +1,7 @@
 import {
   chestPrice, EventKind, isEmptySlot, passiveSlotRange, sharedSlotRange, TICKS_PER_SECOND, type Run, ULTIMATE_SLOT,
   xpToNext,
+  runMagicFind,
 } from "../../sim";
 import { abilityIconSvg } from "./ability-icons";
 import { Announcer } from "./announcer";
@@ -173,7 +174,7 @@ export class Hud {
         const name = run.data.enemies[events.value[i]!]!.name[lang];
         this.announcer.push(t(lang, "announce.boss", { name }), ANNOUNCE_TICKS);
       } else if (kind === EventKind.BossDeath && this.dropFor) {
-        const line = dropLine(lang, this.dropFor(run.data.enemies[events.a[i]!]!.id, events.value[i]!, run.hero.gear.magicFind));
+        const line = dropLine(lang, this.dropFor(run.data.enemies[events.a[i]!]!.id, events.value[i]!, runMagicFind(run)));
         this.announcer.push(line.text, ANNOUNCE_TICKS, line.tone);
         this.loot(line.tone);
       } else if (kind === EventKind.ChestPick) {
