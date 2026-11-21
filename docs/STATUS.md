@@ -1,12 +1,28 @@
 # Status
 
-Updated 2026-11-21 (difficulties plan 1 written on branch `difficulties`; next: execute it in a new chat). Read this first when you resume work.
+Updated 2026-11-21 (difficulties plan 1 executed on branch `difficulties`, PR open; waits for Petr's playtest and his word to merge). Read this first when you resume work.
 
-## Next: difficulties with environments (Petr, 2026-11-21)
+## Difficulties 1: world ladder, Normal / Insane / Hell, world choice, unlocks (branch `difficulties`, 2026-11-21)
 
-- Petr: start difficulties now, then progression between runs, credits and legal check, then the multiplayer migration. Design each with a player-count knob (`docs/multiplayer/single-hero-inventory.md`, chapter 5).
-- Spec (Czech): claude.ai project `claude/specs/2026-11-21-difficulties-worlds-design.md`; Petr chose a world ladder + Normal/Insane/Hell, obstacle islands + one chokepoint per world, a fixed skeleton + seeded placement. Split into three plans (spec 4.10).
-- **Plan 1 written:** `docs/superpowers/plans/2026-11-21-difficulties-ladder.md` on branch `difficulties` (`38a9bad`), 7 tasks: data (difficulty table, `design/worlds.yaml`), sim (`RunOptions.world`/`difficulty`, `sim/difficulty.ts`, extra rushes, rewards), `sim:run` and matrix (world 1 Normal must equal today), `meta/progress.ts` (unlocks), client storage and params, the world screen, tuning + docs. Next: execute it in a new chat (Petr picks native or subagent-driven); `data:build` needs the map extracted from the project file.
+- All 7 tasks of `docs/superpowers/plans/2026-11-21-difficulties-ladder.md` done inline in one chat, one final self-review. `npm run check`, the build, e2e `webgl2-fallback` (40 of 40) and `sim-chromium` pass. Spec: `docs/superpowers/specs/2026-11-21-difficulties-worlds-design.md`. Numbers, the win table and rulings: `docs/DECISIONS.md`, section Difficulties and worlds, plan 1.
+- What it brings:
+  - after menu Start a world choice: Normal / Insane / Hell, five world cards in their colours (Silver March, Red Waste, Shadewood, Frostreach, Blightscar), under the chosen one its sentence, enemy strength (x1.14 for world 5 Normal) and the reward; locked ones are greyed with a lock; Back and Esc return to the menu;
+  - a win of world N opens world N + 1 on the same difficulty; world 5 Normal opens Insane, world 5 Insane opens Hell; the best result (win or phase) stands on each card, stored in the browser for all heroes;
+  - harder courses: enemy hp and damage x1.35 (Insane) and x1.75 (Hell, elites and bosses x1.2 more), bigger packs, five extra elite rushes; rewards: more gold per world, magic find +10 % per world and +25 / +50 % for Insane / Hell;
+  - worlds 2-5 still look like world 1 ("coming soon"): obstacles, paths and natural situations are plans 2 and 3;
+  - `sim:run --world 1-5|all --difficulty normal|insane|hell|all`; the determinism digest is now `22d17e18` (two new matrix cases).
+- World 1 Normal is exactly today's game (the `sim:run` output of seeds 1-20 did not change).
+- What Petr checks in the playtest:
+  - the world screen at his resolution: readability of the cards, the colours (no orange), the lock and "coming soon";
+  - unlocking: win world 1 Normal, then world 2 is open (without `debug`; a debug run stores nothing);
+  - the feel of Insane and Hell: Hell is very hard for the autopilot even with the best gear (19 of 160 wins in world 5); the worlds differ little in strength (x1.14 at world 5) because mid gear loses 41 % already in world 1. Tell me if the ladder should climb steeper;
+  - quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1&world=5&difficulty=hell (everything open, Start, then the world screen preselects world 5 Hell), `?debug=1&phase=16&difficulty=insane`; in the console `__game.world`, `__game.difficulty`, `__game.unlocked`.
+- **Open for Petr:** world 5 Normal with mid gear wins 67 of 160 (the plan wanted 70-90, the spec "about half"); Hell may need softening after he plays.
+- Next after his playtest: difficulties plan 2 (obstacles, paths, the wall of world 1, the summer storm), written in a new chat from spec 4.5-4.7 and 4.10.
+
+## Order (Petr, 2026-11-21)
+
+- Difficulties (plan 1 done, plans 2 and 3 next), then progression between runs, credits and legal check, then the multiplayer migration. Design each with a player-count knob (`docs/multiplayer/single-hero-inventory.md`, chapter 5).
 
 ## Multiplayer spike: merged (PR #27 as `c86fb8b`, 2026-11-21, Pages deployed); Petr's first net test done
 
