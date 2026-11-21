@@ -26,6 +26,7 @@ import { buildFactionTables, updateFaction } from "./factions";
 import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import { InputAction, type TickInput } from "./input";
 import { Rng } from "./rng";
+import { buildWorldMap, type WorldMap } from "./world-map/map";
 import { spawnEnemies } from "./spawner";
 import { applyStartPhase } from "./start-phase";
 import { checkCourse, type DifficultyMods, difficultyMods } from "./difficulty";
@@ -86,6 +87,9 @@ export class Run {
   /** The chests on the map (sim/chests.ts). */
   readonly chests: ChestStore;
   /** Places of chests and their offers come from this generator, so chests do not shift the enemies of a seed. */
+  /** The obstacle map of the run's world (sim/world-map/), its islands drawn from `mapRng` only. */
+  readonly mapRng: Rng;
+  readonly map: WorldMap;
   readonly chestRng: Rng;
   chestsOpened = 0;
   /** Bosses that fell in this run; the order of a boss's death picks its drop (meta/drop.ts). */
@@ -238,6 +242,8 @@ export class Run {
       x: rules.arena.castle.x, y: rules.arena.castle.y, radius: rules.castle.radius,
       hp: rules.castle.hp, maxHp: rules.castle.hp, lastHitTick: -1,
     };
+    this.mapRng = new Rng((options.seed ^ 0x68e31da4) >>> 0);
+    this.map = buildWorldMap(data, this.world, this.mapRng);
     this.chestRng = new Rng((options.seed ^ 0x5bd1e995) >>> 0);
     this.sustainRng = new Rng((options.seed ^ 0x27d4eb2f) >>> 0);
     this.orbs = createOrbs(this);

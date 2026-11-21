@@ -22,6 +22,11 @@ const RESULTS = { won: 1, castle: 2, hero: 3 } as const;
 /** FNV-1a (32 bit) over the simulation state, for determinism and replay tests. */
 export function stateHash(run: Run): number {
   h = 2166136261;
+  const map = run.map;
+  mixInt(map.islandCount);
+  let islands = 0;
+  for (let i = 0; i < map.islandCount; i++) islands += map.islandX[i]! + map.islandY[i]! + map.islandR[i]!;
+  mixFloat(islands);
   mixInt(run.tick);
   mixInt(STATES[run.state]);
   mixInt(run.result === null ? 0 : RESULTS[run.result]);
