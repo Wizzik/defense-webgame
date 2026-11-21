@@ -9,6 +9,45 @@
     cs: "Zelené pláně za soumraku, staré statky a první hradby říše."
   color: "#1e3b40"
   ready: true
+  # The fixed skeleton of world 1 (spec 4.5; north is +y): the old wall with two gates 250 wide at x = -625 and 625,
+  # its ends about 1960 from the castle (inside the arrival ring), four paths (+15 % speed). Worlds 2-5 share it until
+  # the worlds plan 3.
+  map: &silverMap
+    paths:
+      width: 160
+      speedBonus: 0.15
+      lines:
+        - [[0, 200], [-625, 1300], [-625, 1700], [-1100, 2800]]
+        - [[0, 200], [625, 1300], [625, 1700], [1100, 2800]]
+        - [[0, -200], [0, -2850]]
+        - [[-200, 0], [-2850, -300]]
+    feature:
+      thickness: 90
+      segments:
+        - [-1650, 1050, -1400, 1500]
+        - [-1400, 1500, -750, 1500]
+        - [-500, 1500, 500, 1500]
+        - [750, 1500, 1400, 1500]
+        - [1400, 1500, 1650, 1050]
+    islands:
+      count: { min: 30, max: 40 }
+      radius: { min: 40, max: 220 }
+      gap: 120
+      kinds: { rock: 5, trees: 4, ruin: 2 }
+    clear: { castle: 600, ringInner: 2200, ringOuter: 2600, pathMargin: 60, featureMargin: 150 }
+  # Bolts in waves from phase 3: a blue-white warning circle 1.2 s before each strike (spec 4.7).
+  hazard: &silverStorm
+    kind: storm
+    fromPhase: 3
+    everySeconds: { min: 35, max: 45 }
+    bolts: { min: 1, max: 3 }
+    spread: 300
+    warnSeconds: 1.2
+    radius: 120
+    heroShare: 0.08
+    enemyShare: 0.2
+    bossShare: 0.02
+    name: { en: Summer storm, cs: Letní bouře }
 - id: red-waste
   name: { en: Red Waste, cs: Rudá pustina }
   blurb:
@@ -16,6 +55,8 @@
     cs: "Rudá hlína a suchá tráva, kde se pod tvrdým nebem shromažďují klany."
   color: "#3d2427"
   ready: false
+  map: *silverMap
+  hazard: *silverStorm
 - id: shadewood
   name: { en: Shadewood, cs: Stínový hvozd }
   blurb:
@@ -23,6 +64,8 @@
     cs: "Nekonečná noc pod pradávnými stromy, osvětlená jen měsícem."
   color: "#1a2440"
   ready: false
+  map: *silverMap
+  hazard: *silverStorm
 - id: frostreach
   name: { en: Frostreach, cs: Mrazivý sever }
   blurb:
@@ -30,6 +73,8 @@
     cs: "Sníh, led a studené šedé světlo na okraji světa."
   color: "#2a3a4c"
   ready: false
+  map: *silverMap
+  hazard: *silverStorm
 - id: blightscar
   name: { en: Blightscar, cs: Spálená říše }
   blurb:
@@ -37,3 +82,5 @@
     cs: "Spálená černá země pod fialovou oblohou a zeleným ohněm."
   color: "#2a1c34"
   ready: false
+  map: *silverMap
+  hazard: *silverStorm

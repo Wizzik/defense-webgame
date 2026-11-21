@@ -19,7 +19,7 @@ export type { Enemy, FactionId } from "./enemy";
 export { DIFFICULTY_IDS, PointSchema, RarityWeightsSchema, RulesSchema } from "./rules";
 export type { DifficultyId, Point, RarityWeights, Rules } from "./rules";
 export { WorldSchema } from "./world";
-export type { World } from "./world";
+export type { World, WorldMap, Hazard } from "./world";
 export { HeroSchema } from "./hero";
 export type { Hero } from "./hero";
 export { ItemSchema, RARITIES, RARITY_ROWS, SLOT_TYPES, STAT_IDS } from "./item";

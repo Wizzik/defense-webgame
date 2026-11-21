@@ -10,7 +10,151 @@
       "cs": "Zelené pláně za soumraku, staré statky a první hradby říše."
     },
     "color": "#1e3b40",
-    "ready": true
+    "ready": true,
+    "map": {
+      "paths": {
+        "width": 160,
+        "speedBonus": 0.15,
+        "lines": [
+          [
+            [
+              0,
+              200
+            ],
+            [
+              -625,
+              1300
+            ],
+            [
+              -625,
+              1700
+            ],
+            [
+              -1100,
+              2800
+            ]
+          ],
+          [
+            [
+              0,
+              200
+            ],
+            [
+              625,
+              1300
+            ],
+            [
+              625,
+              1700
+            ],
+            [
+              1100,
+              2800
+            ]
+          ],
+          [
+            [
+              0,
+              -200
+            ],
+            [
+              0,
+              -2850
+            ]
+          ],
+          [
+            [
+              -200,
+              0
+            ],
+            [
+              -2850,
+              -300
+            ]
+          ]
+        ]
+      },
+      "feature": {
+        "thickness": 90,
+        "segments": [
+          [
+            -1650,
+            1050,
+            -1400,
+            1500
+          ],
+          [
+            -1400,
+            1500,
+            -750,
+            1500
+          ],
+          [
+            -500,
+            1500,
+            500,
+            1500
+          ],
+          [
+            750,
+            1500,
+            1400,
+            1500
+          ],
+          [
+            1400,
+            1500,
+            1650,
+            1050
+          ]
+        ]
+      },
+      "islands": {
+        "count": {
+          "min": 30,
+          "max": 40
+        },
+        "radius": {
+          "min": 40,
+          "max": 220
+        },
+        "gap": 120,
+        "kinds": {
+          "rock": 5,
+          "trees": 4,
+          "ruin": 2
+        }
+      },
+      "clear": {
+        "castle": 600,
+        "ringInner": 2200,
+        "ringOuter": 2600,
+        "pathMargin": 60,
+        "featureMargin": 150
+      }
+    },
+    "hazard": {
+      "kind": "storm",
+      "fromPhase": 3,
+      "everySeconds": {
+        "min": 35,
+        "max": 45
+      },
+      "bolts": {
+        "min": 1,
+        "max": 3
+      },
+      "spread": 300,
+      "warnSeconds": 1.2,
+      "radius": 120,
+      "heroShare": 0.08,
+      "enemyShare": 0.2,
+      "bossShare": 0.02,
+      "name": {
+        "en": "Summer storm",
+        "cs": "Letní bouře"
+      }
+    }
   },
   {
     "id": "red-waste",
@@ -23,7 +167,151 @@
       "cs": "Rudá hlína a suchá tráva, kde se pod tvrdým nebem shromažďují klany."
     },
     "color": "#3d2427",
-    "ready": false
+    "ready": false,
+    "map": {
+      "paths": {
+        "width": 160,
+        "speedBonus": 0.15,
+        "lines": [
+          [
+            [
+              0,
+              200
+            ],
+            [
+              -625,
+              1300
+            ],
+            [
+              -625,
+              1700
+            ],
+            [
+              -1100,
+              2800
+            ]
+          ],
+          [
+            [
+              0,
+              200
+            ],
+            [
+              625,
+              1300
+            ],
+            [
+              625,
+              1700
+            ],
+            [
+              1100,
+              2800
+            ]
+          ],
+          [
+            [
+              0,
+              -200
+            ],
+            [
+              0,
+              -2850
+            ]
+          ],
+          [
+            [
+              -200,
+              0
+            ],
+            [
+              -2850,
+              -300
+            ]
+          ]
+        ]
+      },
+      "feature": {
+        "thickness": 90,
+        "segments": [
+          [
+            -1650,
+            1050,
+            -1400,
+            1500
+          ],
+          [
+            -1400,
+            1500,
+            -750,
+            1500
+          ],
+          [
+            -500,
+            1500,
+            500,
+            1500
+          ],
+          [
+            750,
+            1500,
+            1400,
+            1500
+          ],
+          [
+            1400,
+            1500,
+            1650,
+            1050
+          ]
+        ]
+      },
+      "islands": {
+        "count": {
+          "min": 30,
+          "max": 40
+        },
+        "radius": {
+          "min": 40,
+          "max": 220
+        },
+        "gap": 120,
+        "kinds": {
+          "rock": 5,
+          "trees": 4,
+          "ruin": 2
+        }
+      },
+      "clear": {
+        "castle": 600,
+        "ringInner": 2200,
+        "ringOuter": 2600,
+        "pathMargin": 60,
+        "featureMargin": 150
+      }
+    },
+    "hazard": {
+      "kind": "storm",
+      "fromPhase": 3,
+      "everySeconds": {
+        "min": 35,
+        "max": 45
+      },
+      "bolts": {
+        "min": 1,
+        "max": 3
+      },
+      "spread": 300,
+      "warnSeconds": 1.2,
+      "radius": 120,
+      "heroShare": 0.08,
+      "enemyShare": 0.2,
+      "bossShare": 0.02,
+      "name": {
+        "en": "Summer storm",
+        "cs": "Letní bouře"
+      }
+    }
   },
   {
     "id": "shadewood",
@@ -36,7 +324,151 @@
       "cs": "Nekonečná noc pod pradávnými stromy, osvětlená jen měsícem."
     },
     "color": "#1a2440",
-    "ready": false
+    "ready": false,
+    "map": {
+      "paths": {
+        "width": 160,
+        "speedBonus": 0.15,
+        "lines": [
+          [
+            [
+              0,
+              200
+            ],
+            [
+              -625,
+              1300
+            ],
+            [
+              -625,
+              1700
+            ],
+            [
+              -1100,
+              2800
+            ]
+          ],
+          [
+            [
+              0,
+              200
+            ],
+            [
+              625,
+              1300
+            ],
+            [
+              625,
+              1700
+            ],
+            [
+              1100,
+              2800
+            ]
+          ],
+          [
+            [
+              0,
+              -200
+            ],
+            [
+              0,
+              -2850
+            ]
+          ],
+          [
+            [
+              -200,
+              0
+            ],
+            [
+              -2850,
+              -300
+            ]
+          ]
+        ]
+      },
+      "feature": {
+        "thickness": 90,
+        "segments": [
+          [
+            -1650,
+            1050,
+            -1400,
+            1500
+          ],
+          [
+            -1400,
+            1500,
+            -750,
+            1500
+          ],
+          [
+            -500,
+            1500,
+            500,
+            1500
+          ],
+          [
+            750,
+            1500,
+            1400,
+            1500
+          ],
+          [
+            1400,
+            1500,
+            1650,
+            1050
+          ]
+        ]
+      },
+      "islands": {
+        "count": {
+          "min": 30,
+          "max": 40
+        },
+        "radius": {
+          "min": 40,
+          "max": 220
+        },
+        "gap": 120,
+        "kinds": {
+          "rock": 5,
+          "trees": 4,
+          "ruin": 2
+        }
+      },
+      "clear": {
+        "castle": 600,
+        "ringInner": 2200,
+        "ringOuter": 2600,
+        "pathMargin": 60,
+        "featureMargin": 150
+      }
+    },
+    "hazard": {
+      "kind": "storm",
+      "fromPhase": 3,
+      "everySeconds": {
+        "min": 35,
+        "max": 45
+      },
+      "bolts": {
+        "min": 1,
+        "max": 3
+      },
+      "spread": 300,
+      "warnSeconds": 1.2,
+      "radius": 120,
+      "heroShare": 0.08,
+      "enemyShare": 0.2,
+      "bossShare": 0.02,
+      "name": {
+        "en": "Summer storm",
+        "cs": "Letní bouře"
+      }
+    }
   },
   {
     "id": "frostreach",
@@ -49,7 +481,151 @@
       "cs": "Sníh, led a studené šedé světlo na okraji světa."
     },
     "color": "#2a3a4c",
-    "ready": false
+    "ready": false,
+    "map": {
+      "paths": {
+        "width": 160,
+        "speedBonus": 0.15,
+        "lines": [
+          [
+            [
+              0,
+              200
+            ],
+            [
+              -625,
+              1300
+            ],
+            [
+              -625,
+              1700
+            ],
+            [
+              -1100,
+              2800
+            ]
+          ],
+          [
+            [
+              0,
+              200
+            ],
+            [
+              625,
+              1300
+            ],
+            [
+              625,
+              1700
+            ],
+            [
+              1100,
+              2800
+            ]
+          ],
+          [
+            [
+              0,
+              -200
+            ],
+            [
+              0,
+              -2850
+            ]
+          ],
+          [
+            [
+              -200,
+              0
+            ],
+            [
+              -2850,
+              -300
+            ]
+          ]
+        ]
+      },
+      "feature": {
+        "thickness": 90,
+        "segments": [
+          [
+            -1650,
+            1050,
+            -1400,
+            1500
+          ],
+          [
+            -1400,
+            1500,
+            -750,
+            1500
+          ],
+          [
+            -500,
+            1500,
+            500,
+            1500
+          ],
+          [
+            750,
+            1500,
+            1400,
+            1500
+          ],
+          [
+            1400,
+            1500,
+            1650,
+            1050
+          ]
+        ]
+      },
+      "islands": {
+        "count": {
+          "min": 30,
+          "max": 40
+        },
+        "radius": {
+          "min": 40,
+          "max": 220
+        },
+        "gap": 120,
+        "kinds": {
+          "rock": 5,
+          "trees": 4,
+          "ruin": 2
+        }
+      },
+      "clear": {
+        "castle": 600,
+        "ringInner": 2200,
+        "ringOuter": 2600,
+        "pathMargin": 60,
+        "featureMargin": 150
+      }
+    },
+    "hazard": {
+      "kind": "storm",
+      "fromPhase": 3,
+      "everySeconds": {
+        "min": 35,
+        "max": 45
+      },
+      "bolts": {
+        "min": 1,
+        "max": 3
+      },
+      "spread": 300,
+      "warnSeconds": 1.2,
+      "radius": 120,
+      "heroShare": 0.08,
+      "enemyShare": 0.2,
+      "bossShare": 0.02,
+      "name": {
+        "en": "Summer storm",
+        "cs": "Letní bouře"
+      }
+    }
   },
   {
     "id": "blightscar",
@@ -62,6 +638,150 @@
       "cs": "Spálená černá země pod fialovou oblohou a zeleným ohněm."
     },
     "color": "#2a1c34",
-    "ready": false
+    "ready": false,
+    "map": {
+      "paths": {
+        "width": 160,
+        "speedBonus": 0.15,
+        "lines": [
+          [
+            [
+              0,
+              200
+            ],
+            [
+              -625,
+              1300
+            ],
+            [
+              -625,
+              1700
+            ],
+            [
+              -1100,
+              2800
+            ]
+          ],
+          [
+            [
+              0,
+              200
+            ],
+            [
+              625,
+              1300
+            ],
+            [
+              625,
+              1700
+            ],
+            [
+              1100,
+              2800
+            ]
+          ],
+          [
+            [
+              0,
+              -200
+            ],
+            [
+              0,
+              -2850
+            ]
+          ],
+          [
+            [
+              -200,
+              0
+            ],
+            [
+              -2850,
+              -300
+            ]
+          ]
+        ]
+      },
+      "feature": {
+        "thickness": 90,
+        "segments": [
+          [
+            -1650,
+            1050,
+            -1400,
+            1500
+          ],
+          [
+            -1400,
+            1500,
+            -750,
+            1500
+          ],
+          [
+            -500,
+            1500,
+            500,
+            1500
+          ],
+          [
+            750,
+            1500,
+            1400,
+            1500
+          ],
+          [
+            1400,
+            1500,
+            1650,
+            1050
+          ]
+        ]
+      },
+      "islands": {
+        "count": {
+          "min": 30,
+          "max": 40
+        },
+        "radius": {
+          "min": 40,
+          "max": 220
+        },
+        "gap": 120,
+        "kinds": {
+          "rock": 5,
+          "trees": 4,
+          "ruin": 2
+        }
+      },
+      "clear": {
+        "castle": 600,
+        "ringInner": 2200,
+        "ringOuter": 2600,
+        "pathMargin": 60,
+        "featureMargin": 150
+      }
+    },
+    "hazard": {
+      "kind": "storm",
+      "fromPhase": 3,
+      "everySeconds": {
+        "min": 35,
+        "max": 45
+      },
+      "bolts": {
+        "min": 1,
+        "max": 3
+      },
+      "spread": 300,
+      "warnSeconds": 1.2,
+      "radius": 120,
+      "heroShare": 0.08,
+      "enemyShare": 0.2,
+      "bossShare": 0.02,
+      "name": {
+        "en": "Summer storm",
+        "cs": "Letní bouře"
+      }
+    }
   }
 ]
