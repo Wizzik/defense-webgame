@@ -1,8 +1,8 @@
 # Status
 
-Updated 2026-11-21 (difficulties plan 2 done, PR #29 from `difficulties-2` waits for CI and Petr's word). Read this first when you resume work.
+Updated 2026-11-21 (difficulties plan 2 merged as PR #29 `316476d`). Read this first when you resume work.
 
-## Difficulties 2: obstacles, paths, the wall of world 1, the summer storm (PR #29, 2026-11-21)
+## Difficulties 2: obstacles, paths, the wall of world 1, the summer storm (merged as PR #29 `316476d`, 2026-11-21)
 
 - All 7 tasks of `docs/superpowers/plans/2026-11-21-difficulties-obstacles.md` done inline in one chat, one final self-review. `npm run check` (1131 tests), the build, e2e `webgl2-fallback` and `sim-chromium` pass. Numbers, rulings and the win table: `docs/DECISIONS.md`, section Difficulties and worlds, plan 2.
 - What it brings:
@@ -19,6 +19,7 @@ Updated 2026-11-21 (difficulties plan 2 done, PR #29 from `difficulties-2` waits
   - islands: do trees or rocks hide enemies;
   - **fps** with a full crowd on his machine: `?fps=1&debug=1&phase=16` against `main` (144 there; the goal is at most -10 %); the simulation step is ~1.5x `main` (0.076 ms).
   - quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1&phase=3 then `__game.debug.hazard()` in the console; `?fps=1&debug=1&phase=16`; `__game.obstacles`, `__game.hazard`.
+- Merged at Petr's word (2026-11-21) after green CI; his playtest stands.
 - **Open for Petr:** with gear the autopilot now wins more than before (mid 104, full 137; world 5 Normal mid 76 instead of 67): the wall and its chokepoint help the defence. Plan 3 tunes worlds 2-5 and can steepen the ladder.
 
 ## Difficulties 1: world ladder, Normal / Insane / Hell, world choice, unlocks (merged as PR #28 `35ed49d`, 2026-11-21)
