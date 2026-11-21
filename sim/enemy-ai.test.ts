@@ -4,11 +4,11 @@ import { Action, Role } from "./enemies";
 import { EventKind } from "./events";
 import { updateEnemies } from "./enemy-ai";
 import { createRun } from "./run";
-import { gameData } from "./testing/game-data";
+import { gameData, openArena } from "./testing/game-data";
 import { silenceSpawns } from "./testing/silence";
 
 function newRun() {
-  const data = gameData();
+  const data = openArena(gameData());
   data.rules.arena = {
     width: 6000, height: 5000, castle: { x: 0, y: -2000 }, heroStart: { x: 0, y: 1500 },
     spawn: { radius: 2000, spread: 150 },

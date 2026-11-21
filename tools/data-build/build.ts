@@ -37,7 +37,7 @@ export function buildGameData(src: MapExport, design: Design, mapVersion: string
     rules: design.rules,
     items: design.items.map(mapItem),
     constants: mapConstants(src.mapInfo.misc_constants, mapVersion),
-    worlds: design.worlds.map(({ id, name, blurb, color, ready }) => ({ id, name, blurb, color, ready })),
+    worlds: design.worlds.map(({ id, name, blurb, color, ready, map, hazard }) => ({ id, name, blurb, color, ready, map, hazard })),
   };
   // Throws GameDataError. The parsed copy is not kept because zod reorders the keys.
   validateGameData(data);

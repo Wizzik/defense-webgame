@@ -114,8 +114,10 @@ function fixture(): any {
       },
     },
     worlds: [
-      { id: "first-world", name: names("First"), blurb: names("A plain."), color: "#1f3a44", ready: true },
-      { id: "second-world", name: names("Second"), blurb: names("A waste."), color: "#3a2428", ready: false },
+      { id: "first-world", name: names("First"), blurb: names("A plain."), color: "#1f3a44", ready: true,
+        map: worldMap(), hazard: storm() },
+      { id: "second-world", name: names("Second"), blurb: names("A waste."), color: "#3a2428", ready: false,
+        map: worldMap(), hazard: storm() },
     ],
     items: SLOT_TYPES.map((slotType) => ({
       id: `plain-${slotType.toLowerCase()}`, name: names(slotType), slotType, rarity: "common",
@@ -681,6 +683,39 @@ describe("difficulty and worlds", () => {
     }
   });
 
+  it("rejects a path with one point", () => {
+    const data = fixture();
+    data.worlds[0].map.paths.lines[0] = [[0, 0]];
+    expect(errorMessage(data)).toContain("worlds.0 (first-world).map.paths.lines.0");
+  });
+
+  it("rejects an island count whose max is below its min", () => {
+    const data = fixture();
+    data.worlds[0].map.islands.count = { min: 5, max: 4 };
+    expect(errorMessage(data)).toContain("map.islands.count");
+  });
+
+  it("rejects a clear ring whose outer edge is not beyond the inner", () => {
+    const data = fixture();
+    data.worlds[0].map.clear.ringOuter = data.worlds[0].map.clear.ringInner;
+    expect(errorMessage(data)).toContain("map.clear.ringOuter");
+  });
+
+  it("rejects a storm with no bolts and an unknown hazard kind", () => {
+    const none = fixture();
+    none.worlds[0].hazard.bolts.min = 0;
+    expect(errorMessage(none)).toContain("hazard");
+    const odd = fixture();
+    (odd.worlds[0].hazard as { kind: string }).kind = "flood";
+    expect(errorMessage(odd)).toContain("hazard");
+  });
+
+  it("accepts the map and storm of a world", () => {
+    const data = validateGameData(fixture());
+    expect(data.worlds[0].map.feature.segments).toHaveLength(2);
+    expect(data.worlds[0].hazard.kind).toBe("storm");
+  });
+
   it("rejects duplicate world ids and an empty world list", () => {
     const dup = fixture();
     dup.worlds[1].id = "first-world";
@@ -690,3 +725,19 @@ describe("difficulty and worlds", () => {
     expect(errorMessage(none)).toContain("worlds");
   });
 });
+
+function worldMap() {
+  return {
+    paths: { width: 160, speedBonus: 0.15, lines: [[[0, -200], [0, -2800]]] as [number, number][][] },
+    feature: { thickness: 90, segments: [[-1400, 1500, -750, 1500], [500, 1500, 1400, 1500]] as [number, number, number, number][] },
+    islands: { count: { min: 30, max: 40 }, radius: { min: 40, max: 220 }, gap: 120, kinds: { rock: 5, trees: 4, ruin: 2 } },
+    clear: { castle: 600, ringInner: 2200, ringOuter: 2600, pathMargin: 60, featureMargin: 150 },
+  };
+}
+
+function storm() {
+  return {
+    kind: "storm" as const, fromPhase: 3, everySeconds: { min: 35, max: 45 }, bolts: { min: 1, max: 3 }, spread: 300,
+    warnSeconds: 1.2, radius: 120, heroShare: 0.08, enemyShare: 0.2, bossShare: 0.02, name: { en: "Storm", cs: "Bouře" },
+  };
+}

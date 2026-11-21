@@ -9,6 +9,7 @@ import { hitExtraTargets } from "./hero-multishot";
 import { InputAction } from "./input";
 import type { TickInput } from "./input";
 import type { Run } from "./run";
+import { pushOut, pushX, pushY, pathSpeedScale } from "./world-map/geometry";
 import type { HeroState, HeroStats } from "./world";
 
 /** Derives the hero's combat stats from attributes plus gear and passives (map formulas plus run rules). Writes into `out`. */
@@ -70,13 +71,20 @@ export function applyActions(run: Run, input: TickInput): void {
   run.events.push(EventKind.Dash, 0, dash.distance, hero.x, hero.y, dx, dy);
 }
 
-/** Moves the hero by the input direction at move speed (or along the dash), kept inside the arena; roots hold it. */
+/** The longest piece of one step's movement that is pushed out of obstacles on its own (the wall is 90 thick). */
+export const MOVE_PIECE = 24;
+
+/**
+ * Moves the hero by the input direction at move speed (+ the path bonus on a path) or along the dash, kept inside the
+ * arena and out of obstacles; roots hold it. A dash ends at an obstacle that stops more than half a piece of it.
+ */
 export function moveHero(run: Run, input: TickInput): void {
   const hero = run.hero;
   if (hero.dashCooldown > 0) hero.dashCooldown--;
   let dx: number;
   let dy: number;
   let step: number;
+  let dashing = false;
   if (hero.rootTicks > 0) {
     hero.dashTicks = 0;
     hero.moving = false;
@@ -88,6 +96,7 @@ export function moveHero(run: Run, input: TickInput): void {
     dy = hero.dashDirY;
     step = dash.distance / Math.round(dash.seconds * TICKS_PER_SECOND);
     hero.dashTicks--;
+    dashing = true;
   } else {
     dx = sign(input.moveX);
     dy = sign(input.moveY);
@@ -96,13 +105,30 @@ export function moveHero(run: Run, input: TickInput): void {
     const len = Math.sqrt(dx * dx + dy * dy);
     dx /= len;
     dy /= len;
-    step = hero.stats.moveSpeed * snareSpeedScale(hero) * TICK_SECONDS;
+    step = hero.stats.moveSpeed * snareSpeedScale(hero) * TICK_SECONDS *
+      pathSpeedScale(run.map, hero.x, hero.y, run.map.pathBonus);
   }
   const { arena } = run.data.rules;
-  const limitX = arena.width / 2 - hero.stats.collision;
-  const limitY = arena.height / 2 - hero.stats.collision;
-  hero.x = Math.max(-limitX, Math.min(limitX, hero.x + dx * step));
-  hero.y = Math.max(-limitY, Math.min(limitY, hero.y + dy * step));
+  const r = hero.stats.collision;
+  const limitX = arena.width / 2 - r;
+  const limitY = arena.height / 2 - r;
+  // In pieces of at most MOVE_PIECE, each pushed out of the obstacles, so a dash cannot jump through the wall.
+  const pieces = Math.ceil(step / MOVE_PIECE);
+  const piece = step / pieces;
+  for (let k = 0; k < pieces; k++) {
+    const tx = Math.max(-limitX, Math.min(limitX, hero.x + dx * piece));
+    const ty = Math.max(-limitY, Math.min(limitY, hero.y + dy * piece));
+    pushOut(run.map, tx, ty, r);
+    const ex = pushX - tx;
+    const ey = pushY - ty;
+    hero.x = Math.max(-limitX, Math.min(limitX, pushX));
+    hero.y = Math.max(-limitY, Math.min(limitY, pushY));
+    if (dashing && ex * ex + ey * ey > (piece * piece) / 4) {
+      // a dash that runs into an obstacle ends there
+      hero.dashTicks = 0;
+      break;
+    }
+  }
   hero.facingX = dx;
   hero.facingY = dy;
   hero.moving = true;

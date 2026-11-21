@@ -4,11 +4,11 @@ import type { GameData } from "../../data/schema";
 import { debugSetAbilityLevel } from "../abilities/slots";
 import { EventKind } from "../events";
 import { createRun } from "../run";
-import { gameData } from "./game-data";
+import { gameData, openArena } from "./game-data";
 import { silenceSpawns } from "./silence";
 
 export function enemyRun(tweak?: (data: GameData) => void) {
-  const data = gameData();
+  const data = openArena(gameData());
   data.rules.arena = {
     width: 12000, height: 12000, castle: { x: -4000, y: -4000 }, heroStart: { x: 0, y: 0 },
     spawn: { radius: 1500, spread: 150 },

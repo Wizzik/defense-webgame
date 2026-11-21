@@ -8,7 +8,10 @@ import { auraDamageScale, auraSpeedScale, updateEnemyAuras } from "./enemy-aura"
 import { cancelCharge, Charge, chargeVX, chargeVY, updateCharge } from "./enemy-charge";
 import { cancelSlam, updateSlam } from "./enemy-slam";
 import { strikeVX, strikeVY, updateStrike } from "./enemy-strike";
-import { Behavior, steer, steerHold, steerX, steerY } from "./enemy-steer";
+import { avoidIslands, Behavior, steer, steerHold, steerX, steerY } from "./enemy-steer";
+import { crossesFeature, flowDir, flowX, flowY } from "./world-map/flow";
+import { heroFlow } from "./world-map/hero-flow";
+import { pathSpeedScale, pushOut as pushOutOfMap, pushX as mapPushX, pushY as mapPushY } from "./world-map/geometry";
 import type { Run } from "./run";
 
 const MAX_NEIGHBOURS = 64;
@@ -48,6 +51,7 @@ export function updateEnemies(run: Run): void {
     // Slow lowers walking speed only (not knockback) and runs down even while stunned.
     let walk = def.moveSpeed * auraSpeedScale(run, i) * bloodlustSpeedScale(run, i);
     if (run.enraged && i === run.finalBossSlot) walk *= rules.run.finale.enrage.moveSpeed;
+    walk *= pathSpeedScale(run.map, x, y, run.map.pathBonus);
     if (e.slowTicks[i] > 0) {
       walk *= 1 - e.slowFactor[i];
       e.slowTicks[i]--;
@@ -108,7 +112,10 @@ export function updateEnemies(run: Run): void {
         const ux = dist > 1e-6 ? dx / dist : 0;
         const uy = dist > 1e-6 ? dy / dist : 0;
         steer(run, i, targetsHero, ux, uy, dist, reach);
-        if (dist <= reach && !steerHold) {
+        // Behind the wall the flow field leads through a gate (spec 4.6), ahead of a flanker's or skirmisher's angle;
+        // a melee blow does not reach over it.
+        const walled = crossesFeature(run.map, x, y, tx, ty, def.collision);
+        if (dist <= reach && !steerHold && !(walled && def.attack.kind === "melee")) {
           e.action[i] = Action.Attack;
           if (e.attackCooldown[i] <= 0) {
             let raw = rollDamage(run.rng, def.attack.damageMin, def.attack.damageMax) * e.damageScale[i];
@@ -129,8 +136,15 @@ export function updateEnemies(run: Run): void {
           e.facingY[i] = uy;
         } else {
           e.action[i] = Action.Move;
-          vx = steerX * walk;
-          vy = steerY * walk;
+          if (walled) flowDir(targetsHero ? heroFlow(run) : run.map.toCastle, x, y);
+          if (walled && (flowX !== 0 || flowY !== 0)) {
+            vx = flowX * walk;
+            vy = flowY * walk;
+          } else {
+            avoidIslands(run, i, def.collision);
+            vx = steerX * walk;
+            vy = steerY * walk;
+          }
         }
       }
     }
@@ -170,6 +184,12 @@ export function updateEnemies(run: Run): void {
     ny = pushOutY;
     nx = pushOut(nx, ny, castle.x, castle.y, castle.radius + def.collision);
     ny = pushOutY;
+    // Out of the wall and the islands; a charge or a leap flies over them and is pushed out after it lands.
+    if (!charging && !leaping) {
+      pushOutOfMap(run.map, nx, ny, def.collision);
+      nx = mapPushX;
+      ny = mapPushY;
+    }
     const insideX = Math.max(-arenaX + def.collision, Math.min(arenaX - def.collision, nx));
     const insideY = Math.max(-arenaY + def.collision, Math.min(arenaY - def.collision, ny));
     // A charge ends at the arena edge.

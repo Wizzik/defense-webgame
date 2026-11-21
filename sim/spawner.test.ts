@@ -5,7 +5,7 @@ import { EventKind } from "./events";
 import { createRun } from "./run";
 import { spawnEnemies } from "./spawner";
 import { buildPhaseTables, pickType } from "./spawn-tables";
-import { gameData } from "./testing/game-data";
+import { gameData, openArena } from "./testing/game-data";
 
 type Phase = GameData["rules"]["phases"][number];
 
@@ -17,7 +17,7 @@ function phase(over: Partial<Phase> = {}): Phase {
 }
 
 function newRun(tweak?: (d: GameData) => void, seed = 1) {
-  const data = gameData();
+  const data = openArena(gameData());
   data.rules.arena = JSON.parse(JSON.stringify(ARENA));
   data.rules.run.phaseSeconds = 50;
   data.rules.run.firstPackSeconds = 0;

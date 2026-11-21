@@ -292,6 +292,9 @@
 .buff-cell.root {
   --buff-color: #6fbf4a;
 }
+.buff-cell.storm {
+  --buff-color: #bcd8ff;
+}
 .buff-icon svg {
   display: block;
   width: 20px;

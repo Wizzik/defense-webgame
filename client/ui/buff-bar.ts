@@ -2,7 +2,7 @@ import { type BuffState, TICKS_PER_SECOND } from "../../sim";
 import { el, setText } from "./dom";
 import { type Lang, t } from "./i18n";
 
-export type BuffKind = "boots" | "berserk" | "heal" | "web" | "root";
+export type BuffKind = "boots" | "berserk" | "heal" | "web" | "root" | "storm";
 
 /** The hero's snares the bar reads (sim HeroState). */
 export interface Snares {
@@ -17,10 +17,11 @@ export interface BuffCell {
   label: string;
 }
 
-const KINDS: readonly BuffKind[] = ["boots", "berserk", "heal", "web", "root"];
+const KINDS: readonly BuffKind[] = ["boots", "berserk", "heal", "web", "root", "storm"];
 
-function ticksOf(buffs: BuffState, snares: Snares, kind: BuffKind): number {
+function ticksOf(buffs: BuffState, snares: Snares, kind: BuffKind, stormTicks: number): number {
   switch (kind) {
+    case "storm": return stormTicks;
     case "boots": return buffs.bootsTicks;
     case "berserk": return buffs.berserkTicks;
     case "heal": return buffs.healTicks;
@@ -30,26 +31,31 @@ function ticksOf(buffs: BuffState, snares: Snares, kind: BuffKind): number {
 }
 
 function labelOf(kind: BuffKind, lang: Lang): string {
+  if (kind === "storm") return t(lang, "buff.storm");
   return kind === "web" || kind === "root" ? t(lang, `snare.${kind}`) : t(lang, `orb.${kind}`);
 }
 
-/** The running orb effects and snares, in the order boots, berserk, heal, web, roots. */
-export function buffCells(buffs: BuffState, snares: Snares, lang: Lang): BuffCell[] {
+/**
+ * The running orb effects and snares, in the order boots, berserk, heal, web, roots, then the storm with the steps
+ * until its nearest bolt (sim hazardPending).
+ */
+export function buffCells(buffs: BuffState, snares: Snares, lang: Lang, stormTicks = 0): BuffCell[] {
   const out: BuffCell[] = [];
   for (const kind of KINDS) {
-    const ticks = ticksOf(buffs, snares, kind);
+    const ticks = ticksOf(buffs, snares, kind, stormTicks);
     if (ticks > 0) out.push({ kind, seconds: Math.ceil(ticks / TICKS_PER_SECOND), label: labelOf(kind, lang) });
   }
   return out;
 }
 
-/** Our own glyphs (24 x 24, drawn with the text colour): a boot, an axe, a cross, a web, roots. */
+/** Our own glyphs (24 x 24, drawn with the text colour): a boot, an axe, a cross, a web, roots, a lightning bolt. */
 export const ORB_GLYPHS: Record<BuffKind, string> = {
   boots: '<path d="M8 3h6v10l6 3v4H5v-4l3-3z"/><path d="M2 10h4M1 14h3"/>',
   berserk: '<path d="M7 21L17 5"/><path d="M14 3c4 0 7 3 7 7-3 0-6-1-8-3z"/>',
   heal: '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>',
   web: '<path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19"/><path d="M12 7l5 5-5 5-5-5z"/>',
   root: '<path d="M12 3v9"/><path d="M12 12c-2 3-5 4-8 5M12 12c2 3 5 4 8 5M12 12v9M8 15c0 3-1 5-3 6M16 15c0 3 1 5 3 6"/>',
+  storm: '<path d="M13 2L5 13h6l-2 9 9-12h-6z"/>',
 };
 
 function glyph(kind: BuffKind): string {
@@ -61,7 +67,7 @@ interface Node {
   seconds: HTMLElement;
 }
 
-/** The running orb effects and snares over the ability bar: a glyph with its seconds left each, hidden when none runs. */
+/** The running orb effects, snares and the storm over the ability bar: a glyph with its seconds each, hidden when none runs. */
 export class BuffBar {
   private readonly root: HTMLElement;
   private readonly nodes = new Map<BuffKind, Node>();
@@ -78,10 +84,10 @@ export class BuffBar {
     }
   }
 
-  update(buffs: BuffState, snares: Snares, lang: Lang): void {
+  update(buffs: BuffState, snares: Snares, lang: Lang, stormTicks = 0): void {
     for (const kind of KINDS) {
       const node = this.nodes.get(kind)!;
-      const ticks = ticksOf(buffs, snares, kind);
+      const ticks = ticksOf(buffs, snares, kind, stormTicks);
       node.root.hidden = ticks <= 0;
       if (ticks <= 0) continue;
       setText(node.seconds, `${Math.ceil(ticks / TICKS_PER_SECOND)} s`);

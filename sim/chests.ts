@@ -4,6 +4,7 @@ import { RARITIES } from "../data/schema";
 import { EventKind } from "./events";
 import { recomputeGear, SLOT_COUNT, slotTypeOf } from "./gear";
 import { drawRarity, magicFindWeights } from "./magic-find";
+import { isFree, nearestFree, pushX, pushY } from "./world-map/geometry";
 import type { Run } from "./run";
 
 /** Places tried for a chest before the last one that kept the distance from the castle is taken. */
@@ -72,6 +73,7 @@ export function placeChest(run: Run, index: number, fresh: boolean): void {
     const dy = y - castle.y;
     const sq = dx * dx + dy * dy;
     if (sq < minSq || sq > maxSq || x < -limitX || x > limitX || y < -limitY || y > limitY) continue;
+    if (!isFree(run.map, x, y, rules.pickupRadius)) continue;
     fallbackX = x;
     fallbackY = y;
     let apart = true;
@@ -85,8 +87,10 @@ export function placeChest(run: Run, index: number, fresh: boolean): void {
     }
     if (apart) break;
   }
-  chests.x[index] = fallbackX;
-  chests.y[index] = fallbackY;
+  // every place, the fallback too, ends outside the obstacles
+  nearestFree(run.map, fallbackX, fallbackY, rules.pickupRadius);
+  chests.x[index] = pushX;
+  chests.y[index] = pushY;
 }
 
 /**

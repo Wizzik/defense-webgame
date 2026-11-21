@@ -41,4 +41,15 @@ describe("buff bar", () => {
     expect(cells.slice(1).map((c) => c.label)).toEqual(["Webbed", "Rooted"]);
     expect(buffCells(buffs, snared, "cs").slice(1).map((c) => c.label)).toEqual(["V síti", "Spoután"]);
   });
+
+  it("shows the storm with the seconds until the nearest bolt, after the snares", () => {
+    const buffs = new BuffState();
+    buffs.bootsTicks = 30;
+    const cells = buffCells(buffs, { slowTicks: 30, rootTicks: 0 }, "cs", 36);
+    expect(cells.map((c) => c.kind)).toEqual(["boots", "web", "storm"]);
+    expect(cells[2]!.seconds).toBe(2);
+    expect(cells[2]!.label).toBe("Blesk");
+    expect(buffCells(buffs, free, "en", 1).at(-1)!.label).toBe("Lightning");
+    expect(buffCells(buffs, free, "en", 0).map((c) => c.kind)).toEqual(["boots"]);
+  });
 });

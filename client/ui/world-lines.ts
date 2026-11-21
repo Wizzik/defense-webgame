@@ -35,7 +35,7 @@ export function worldCard(
   return { name: def.name[lang], status, locked: !unlocked, preparing: !def.ready };
 }
 
-/** The lines under the chosen card: the blurb, the enemy strength (hp multiplier) and the reward. */
+/** The lines under the chosen card: the blurb, the enemy strength (hp multiplier), the reward and the natural event. */
 export function worldDetail(data: GameData, world: number, difficulty: DifficultyId, lang: Lang): string[] {
   const def = data.worlds[world - 1]!;
   const mods = difficultyMods(data.rules, world, difficulty);
@@ -47,5 +47,6 @@ export function worldDetail(data: GameData, world: number, difficulty: Difficult
     def.blurb[lang],
     t(lang, "world.strength", { x: factor(mods.hp, lang) }),
     parts.length > 0 ? t(lang, "world.reward", { parts: parts.join(", ") }) : t(lang, "world.noReward"),
+    t(lang, "world.hazard", { name: def.hazard.name[lang] }),
   ];
 }

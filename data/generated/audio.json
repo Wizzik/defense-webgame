@@ -1076,6 +1076,34 @@
       "category": "sfx"
     },
     {
+      "id": "storm-warning",
+      "files": [
+        "audio/sfx/storm-totem-1.ogg",
+        "audio/sfx/storm-totem-2.ogg"
+      ],
+      "synth": "cast",
+      "gainDb": -6,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 2,
+      "category": "sfx"
+    },
+    {
+      "id": "storm-strike",
+      "files": [
+        "audio/sfx/shared-smite-1.ogg",
+        "audio/sfx/shared-smite-2.ogg"
+      ],
+      "synth": "slam",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 3,
+      "category": "sfx"
+    },
+    {
       "id": "boss-roar",
       "files": [
         "audio/sfx/boss-roar-1.ogg"
@@ -1494,6 +1522,8 @@
     "rushWarning": "rush-horn",
     "slam.warn": "slam-breath",
     "slam.hit": "slam-impact",
+    "storm.warn": "storm-warning",
+    "storm.strike": "storm-strike",
     "enrage": "boss-roar",
     "enemy.heal": "chaplain-mend",
     "enemy.charge": "enemy-charge",

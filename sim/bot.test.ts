@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { debugSetAbilityLevel } from "./abilities/slots";
 import { EventKind } from "./events";
+import { debugHazard, hazardPending } from "./hazard";
 import { botCard, botChestChoice, botChestKeep, botInput, idleCard, CHASE_DISTANCE, DEFEND_RADIUS, HOME_OFFSET, LEASH_DISTANCE } from "./bot";
 import { OrbKind } from "./buffs";
 import { ChestAction, chestPrice } from "./chests";
@@ -13,7 +14,7 @@ import { Role } from "./enemies";
 import { createRun } from "./run";
 import { spawnBoss } from "./timeline";
 import type { Run } from "./run";
-import { gameData } from "./testing/game-data";
+import { gameData, openArena } from "./testing/game-data";
 
 function play(seed: number, onStep?: (run: Run) => void, record?: TickInput[], hero?: string): Run {
   const run = createRun(gameData(), { seed, hero });
@@ -77,7 +78,7 @@ describe("autopilot", () => {
 
   /** A run with the hero on the bot's home spot, no enemies and no spell ready. */
   const postRun = (hero?: string) => {
-    const run = createRun(gameData(), { seed: 1, hero });
+    const run = createRun(openArena(gameData()), { seed: 1, hero });
     run.hero.x = run.castle.x;
     run.hero.y = run.castle.y + HOME_OFFSET;
     // spells cool down, so the bot does not stand still to aim a line
@@ -202,6 +203,25 @@ describe("autopilot", () => {
     const dx = run.hero.x - run.enemies.slamX[boss]!;
     const dy = run.hero.y - run.enemies.slamY[boss]!;
     expect(Math.sqrt(dx * dx + dy * dy)).toBeGreaterThan(radius);
+  });
+
+  it("the bot walks out of a storm bolt's circle before it strikes", () => {
+    const run = postRun();
+    debugHazard(run);
+    for (let i = 0; i < run.hazard.ticks.length; i++) {
+      run.hazard.x[i] = run.hero.x + 40;
+      run.hazard.y[i] = run.hero.y;
+    }
+    const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
+    let hit = false;
+    for (let i = 0; i < 36; i++) {
+      botInput(run, input);
+      if (i === 0) expect(input.moveX).toBe(-1);
+      run.step(input);
+      for (let k = 0; k < run.events.count; k++) if (run.events.kind[k] === EventKind.HeroHit) hit = true;
+    }
+    expect(hazardPending(run)).toBe(0);
+    expect(hit).toBe(false);
   });
 
   it("a slam circle the hero is not in changes nothing", () => {
@@ -402,6 +422,25 @@ describe("balance", () => {
       expect(input.moveX * dx + input.moveY * dy).toBeGreaterThan(0);
       let guard = 0;
       while (run.state !== "chest" && guard++ < 3000) run.step(botInput(run, input));
+      expect(run.state).toBe("chest");
+    });
+
+    it("walks through a gate of the wall to a chest beyond it and opens it within 25 s", () => {
+      const data = gameData();
+      silenceSpawns(data);
+      data.worlds[0]!.map.islands.count = { min: 0, max: 0 };
+      data.rules.sustain.orbs.firstSeconds = data.rules.sustain.orbs.firstSeconds.map(() => 100000);
+      const run = createRun(data, { seed: 3, durationSeconds: 100000 });
+      run.hero.x = 0;
+      run.hero.y = 1200;
+      for (let i = 0; i < run.chests.x.length; i++) {
+        run.chests.x[i] = i === 0 ? 0 : -2500;
+        run.chests.y[i] = i === 0 ? 2000 : -2500;
+      }
+      run.gold = chestPrice(run);
+      const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
+      let guard = 0;
+      while (run.state !== "chest" && guard++ < 25 * 30) run.step(botInput(run, input));
       expect(run.state).toBe("chest");
     });
 

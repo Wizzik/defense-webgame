@@ -40,6 +40,7 @@ describe("worldDetail", () => {
       d.worlds[2]!.blurb.cs,
       "Síla nepřátel ×2,63",
       "Odměna: zlato ×1,2, Magic Find +45 %",
+      "Přírodní situace: Letní bouře",
     ]);
   });
 
@@ -49,14 +50,23 @@ describe("worldDetail", () => {
       d.worlds[1]!.blurb.en,
       "Enemy strength ×1.25",
       "Reward: gold ×1.1, Magic Find +10%",
+      "Natural event: Summer storm",
     ]);
   });
 
   it("world 1 normal has no extra reward; world 1 hell only magic find", () => {
     const d = data();
-    expect(worldDetail(d, 1, "normal", "cs").slice(1)).toEqual(["Síla nepřátel ×1", "Bez odměny navíc"]);
-    expect(worldDetail(d, 1, "normal", "en").slice(1)).toEqual(["Enemy strength ×1", "No extra reward"]);
-    expect(worldDetail(d, 1, "hell", "en").slice(1)).toEqual(["Enemy strength ×3", "Reward: Magic Find +50%"]);
+    expect(worldDetail(d, 1, "normal", "cs").slice(1, 3)).toEqual(["Síla nepřátel ×1", "Bez odměny navíc"]);
+    expect(worldDetail(d, 1, "normal", "en").slice(1, 3)).toEqual(["Enemy strength ×1", "No extra reward"]);
+    expect(worldDetail(d, 1, "hell", "en").slice(1, 3)).toEqual(["Enemy strength ×3", "Reward: Magic Find +50%"]);
+  });
+
+  it("names the world's natural event in both languages, for every world", () => {
+    const d = data();
+    for (let w = 1; w <= d.worlds.length; w++) {
+      expect(worldDetail(d, w, "normal", "en").at(-1)).toBe(`Natural event: ${d.worlds[w - 1]!.hazard.name.en}`);
+      expect(worldDetail(d, w, "normal", "cs").at(-1)).toBe(`Přírodní situace: ${d.worlds[w - 1]!.hazard.name.cs}`);
+    }
   });
 });
 

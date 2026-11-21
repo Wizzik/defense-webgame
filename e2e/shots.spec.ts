@@ -89,6 +89,16 @@ test("shot: castle", async ({ page }) => {
   await shot(page, "castle");
 });
 
+test("shot: world-1", async ({ page }) => {
+  // the old wall with its western gate, islands around, and a storm wave winding up
+  await startRun(page, "seed=7&hero=stonehorn&debug=1&lang=cs");
+  await page.evaluate(() => window.__game!.debug!.teleport(-625, 1300));
+  await page.waitForTimeout(1_000);
+  await page.evaluate(() => window.__game!.debug!.hazard());
+  await page.waitForTimeout(400);
+  await shot(page, "world-1");
+});
+
 test("shot: corner", async ({ page }) => {
   await startRun(page, "seed=7&hero=nightglaive&debug=1");
   await page.evaluate(() => window.__game!.debug!.teleport(2900, 2900));

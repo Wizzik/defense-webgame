@@ -359,3 +359,62 @@ describe("generated game data", () => {
     });
   });
 });
+
+describe("world maps", () => {
+  type Pt = [number, number];
+  type WorldJson = {
+    id: string;
+    map: {
+      paths: { width: number; lines: Pt[][] };
+      feature: { thickness: number; segments: [number, number, number, number][] };
+      clear: { castle: number; ringInner: number; ringOuter: number };
+    };
+  };
+  const worlds = JSON.parse(read("worlds.json")) as WorldJson[];
+  const rules = JSON.parse(read("rules.json")) as { arena: { castle: { x: number; y: number }; heroStart: { x: number; y: number } } };
+  const { x: cx, y: cy } = rules.arena.castle;
+  const nearestToCastle = ([x1, y1, x2, y2]: [number, number, number, number]): number => {
+    const dx = x2 - x1, dy = y2 - y1;
+    const t = Math.max(0, Math.min(1, ((cx - x1) * dx + (cy - y1) * dy) / (dx * dx + dy * dy)));
+    return Math.hypot(x1 + t * dx - cx, y1 + t * dy - cy);
+  };
+
+  it("every wall segment stays out of the castle circle and the arrival ring", () => {
+    for (const w of worlds) {
+      const half = w.map.feature.thickness / 2;
+      for (const s of w.map.feature.segments) {
+        expect(nearestToCastle(s), w.id).toBeGreaterThan(w.map.clear.castle + half);
+        const far = Math.max(Math.hypot(s[0] - cx, s[1] - cy), Math.hypot(s[2] - cx, s[3] - cy));
+        expect(far, w.id).toBeLessThan(w.map.clear.ringInner - half);
+      }
+    }
+  });
+
+  it("the gaps between neighbouring wall segments that share no end are gates 200-300 wide", () => {
+    for (const w of worlds) {
+      const segs = w.map.feature.segments;
+      for (let i = 0; i + 1 < segs.length; i++) {
+        const a = segs[i]!, b = segs[i + 1]!;
+        const gap = Math.hypot(b[0] - a[2], b[1] - a[3]);
+        if (gap === 0) continue;
+        expect(gap, `${w.id} gate ${i}`).toBeGreaterThanOrEqual(200);
+        expect(gap, `${w.id} gate ${i}`).toBeLessThanOrEqual(300);
+      }
+    }
+  });
+
+  it("every path starts by the castle and ends beyond the arrival ring", () => {
+    for (const w of worlds) {
+      for (const line of w.map.paths.lines) {
+        const [sx, sy] = line[0]!, [ex, ey] = line[line.length - 1]!;
+        expect(Math.hypot(sx - cx, sy - cy), w.id).toBeLessThanOrEqual(250);
+        expect(Math.hypot(ex - cx, ey - cy), w.id).toBeGreaterThan(w.map.clear.ringOuter);
+      }
+    }
+  });
+
+  it("the hero starts inside the clear castle circle", () => {
+    const { x, y } = rules.arena.heroStart;
+    for (const w of worlds) expect(Math.hypot(x - cx, y - cy), w.id).toBeLessThan(w.map.clear.castle);
+  });
+});

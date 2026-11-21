@@ -3,15 +3,16 @@ import { gameData } from "../../sim/testing/game-data";
 import { firstDifference, matrixCases, matrixDigest, runCase, type CaseResult, type MatrixCase } from "./matrix";
 
 describe("matrixCases", () => {
-  it("lists the eight heroes, four start phases and two harder courses with unique ids", () => {
+  it("lists the eight heroes, four start phases, two harder courses and the storm with unique ids", () => {
     const data = gameData();
     const cases = matrixCases(data);
-    expect(cases).toHaveLength(14);
+    expect(cases).toHaveLength(15);
+    expect(cases.find((c) => c.id === "w1-storm")).toMatchObject({ hero: "sparkshot", seed: 9, startPhase: 3, maxTicks: 4500 });
     expect(cases.slice(0, 8).map((c) => c.id)).toEqual(data.heroes.map((h) => `h-${h.id}`));
-    expect(cases.slice(8).map((c) => c.id)).toEqual(["p6", "p11", "p16", "p21", "w3-insane", "w5-hell"]);
+    expect(cases.slice(8).map((c) => c.id)).toEqual(["p6", "p11", "p16", "p21", "w3-insane", "w5-hell", "w1-storm"]);
     expect(cases.find((c) => c.id === "w3-insane")).toMatchObject({ hero: "stonehorn", seed: 6, world: 3, difficulty: "insane" });
     expect(cases.find((c) => c.id === "w5-hell")).toMatchObject({ hero: "redcleaver", seed: 7, world: 5, difficulty: "hell", startPhase: 6 });
-    expect(new Set(cases.map((c) => c.id)).size).toBe(14);
+    expect(new Set(cases.map((c) => c.id)).size).toBe(15);
   });
 
   it("the harder courses repeat their checkpoints and differ from world 1 normal", () => {

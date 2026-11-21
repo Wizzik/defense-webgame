@@ -2,7 +2,7 @@ import type { GearSession } from "./gear-session";
 import type { DifficultyId, Rarity } from "../../data/schema";
 import {
   type ChestOffer, chestPrice, debugDropHeart, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, debugSpawnOrb,
-  debugWear, killEnemy, learnAbility, OrbKind,
+  debugWear, killEnemy, learnAbility, OrbKind, debugHazard, hazardPending,
   type Run,
   SLOT_IDS, type SlotId, TICKS_PER_SECOND,
 } from "../../sim";
@@ -53,7 +53,7 @@ export interface GameSnapshot {
   /** Slams winding up (warning circles on the ground). */
   slams: number;
   /** What the renderer built: `heroModels` is how many hero figures stand in the scene (refreshed every frame), `slamRings` how many slam circles lie on the floor. */
-  render: { enemyMeshes: number; heroModels: number; shadows: boolean; slamRings: number };
+  render: { enemyMeshes: number; heroModels: number; shadows: boolean; slamRings: number; hazardRings: number };
   /** Gold the hero holds. */
   gold: number;
   /** Gold the next chest costs. */
@@ -93,6 +93,10 @@ export interface GameSnapshot {
   unlocked: string[];
   /** Whether the world progress is stored in this browser (false with ?debug=1 and without storage). */
   progressSaved: boolean;
+  /** Obstacles of the run's map: islands + wall segments. */
+  obstacles: number;
+  /** The storm: seconds until the nearest bolt strikes (0 when none waits) and the waves so far. */
+  hazard: { pending: number; waves: number };
   /** Only with ?debug=1. */
   debug?: {
     grantXp(amount: number): void;
@@ -120,6 +124,8 @@ export interface GameSnapshot {
     spawnOrb(type: string): void;
     /** A heart 100 ahead of the hero. */
     dropHeart(): void;
+    /** A wave of the world's storm at once. */
+    hazard(): void;
   };
 }
 
@@ -135,10 +141,11 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     backend, gpu, frames: 0, screen: "menu", tick: 0, level: 0, kills: 0, heroHp: 0, castleHp: 0, enemies: 0, enemyTypes: 0,
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], abilityIds: [], ultimateAuto: true, allies: 0,
     projectiles: 0, packArrows: 0, charging: 0, phase: 1, boss: null, slams: 0,
-    render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0 },
+    render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0, hazardRings: 0 },
     gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, settingsOpen: false, gear: [], collection: {}, gearSaved: false,
     orbs: [], hearts: 0, buffs: { boots: 0, berserk: 0, heal: 0 }, lifesteal: 0,
     faction: "human", slowed: 0, rooted: 0, world: 1, difficulty: "normal", unlocked: [], progressSaved: false,
+    obstacles: 0, hazard: { pending: 0, waves: 0 },
   };
   window.__game = snapshot;
   return snapshot;
@@ -234,6 +241,14 @@ export function addDebugHooks(
       const run = getRun();
       if (run) debugDropHeart(run);
     },
+    hazard(): void {
+      const run = getRun();
+      if (!run) return;
+      // the warnings are events of no step: hand them to the views now, the next step clears them
+      run.events.clear();
+      debugHazard(run);
+      deliver(run);
+    },
   };
 }
 
@@ -272,6 +287,9 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
   snapshot.enemyTypes = countTypes(run);
   snapshot.hero = run.hero.def.id;
   snapshot.world = run.world;
+  snapshot.obstacles = run.map.islandCount + run.map.segCount;
+  snapshot.hazard.pending = hazardPending(run) / TICKS_PER_SECOND;
+  snapshot.hazard.waves = run.hazard.waves;
   snapshot.difficulty = run.difficulty;
   snapshot.heroX = run.hero.x;
   snapshot.heroY = run.hero.y;

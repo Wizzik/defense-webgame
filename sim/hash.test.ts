@@ -5,7 +5,7 @@ import type { TickInput } from "./input";
 import { Rng } from "./rng";
 import { NO_INPUT } from "./input";
 import { createRun, type Run } from "./run";
-import { gameData } from "./testing/game-data";
+import { gameData, openArena } from "./testing/game-data";
 
 function play(seed: number, inputSeed: number, steps: number): number {
   const run = createRun(gameData(), { seed });
@@ -85,7 +85,7 @@ describe("stateHash", () => {
   }
 
   it("covers a living projectile", () => {
-    const run = createRun(gameData(), { seed: 5, hero: "gravecaller" });
+    const run = createRun(openArena(gameData()), { seed: 5, hero: "gravecaller" });
     const i = stepUntil(run, () => run.projectiles.alive.indexOf(1), 3000);
     expect(i).toBeGreaterThanOrEqual(0);
     const before = stateHash(run);
