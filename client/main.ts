@@ -15,6 +15,9 @@ import { loadGameData } from "./game/data";
 import { addDebugHooks, publishSnapshot, updateSnapshot } from "./game/debug";
 import { GearSession } from "./game/gear-session";
 import { indexedDbBackend, memoryBackend } from "./game/save-store";
+import { ProgressSession } from "./game/progress-session";
+import { WorldScreen } from "./ui/world-screen";
+import { firstUnlocked, type ProgressData } from "../meta";
 import { Keyboard } from "./game/keyboard";
 import { readGameParams } from "./game/params";
 import { Session } from "./game/session";
@@ -146,6 +149,12 @@ async function start(): Promise<void> {
   const data = loadGameData();
   // a debugging session starts from an empty collection and stores nothing
   const gear = await GearSession.load(data, params.debug ? memoryBackend() : await indexedDbBackend(), { persistent: !params.debug });
+  // the world ladder: with debug every course is open and results stay in memory
+  const progress = await ProgressSession.load(
+    data,
+    params.debug ? memoryBackend<ProgressData>() : await indexedDbBackend<ProgressData>(undefined, "progress"),
+    { persistent: !params.debug, unlockAll: params.debug },
+  );
   const hero = pickHero(data, params.hero, readStoredHero());
   const { renderer, backend } = await createRenderer(params.renderer, document.body);
   const gpu = describeGpu(renderer.backend, backend);
@@ -167,6 +176,12 @@ async function start(): Promise<void> {
   const followCamera = new FollowCamera(innerWidth / innerHeight);
   const keyboard = new Keyboard(window);
   const session = new Session({ data, params, scene, camera: followCamera, keyboard });
+  // ?world and ?difficulty: a locked course falls back to world 1 on normal (debug opens every course)
+  const course = params.debug
+    ? { world: Math.min(params.world ?? 1, data.worlds.length), difficulty: params.difficulty ?? "normal" }
+    : firstUnlocked(progress.progress, params.world ?? 1, params.difficulty ?? "normal", data.worlds.length);
+  session.world = course.world;
+  session.difficulty = course.difficulty;
   // the run behind the menu starts once the first hero's model is loaded and uses this seed
   session.seed = params.seed;
   const heroView = new HeroView();
@@ -243,10 +258,12 @@ async function start(): Promise<void> {
   const publishGear = (): void => {
     snapshot.collection = gear.save.items;
     snapshot.gearSaved = gear.persistent;
+    snapshot.unlocked = progress.unlocked();
+    snapshot.progressSaved = progress.persistent;
   };
   publishGear();
   session.views.push({ update: publishGear, onEvents: () => {}, dispose: () => {} });
-  const ui = createUi(data, gear, !params.debug && !gear.persistent, session, followCamera, sound, randomSeed, hero, gpu.software, (setLoading) =>
+  const ui = createUi(data, gear, progress, !params.debug && !gear.persistent, session, followCamera, sound, randomSeed, hero, gpu.software, (setLoading) =>
     heroLoader(models, session, heroView, allyView, setLoading),
   );
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
@@ -328,6 +345,7 @@ interface Ui {
 function createUi(
   data: GameData,
   gear: GearSession,
+  progress: ProgressSession,
   noSave: boolean,
   session: Session,
   followCamera: FollowCamera,
@@ -352,12 +370,12 @@ function createUi(
     menu.setLang(next);
   };
   const menu = new Menu(root, data.heroes, heroId, {
+    // Start opens the world choice; its Start begins the run
     onStart: () => {
       sound.engine.enable();
       void sound.engine.preload();
-      menuOpen = false;
-      session.paused = false;
       menu.setVisible(false);
+      worldScreen.open(session.world, session.difficulty, lang);
     },
     onHero: (id) => {
       heroId = id;
@@ -370,6 +388,23 @@ function createUi(
     onSound: () => setMuted(!muted),
     onGear: () => gearScreen.open(heroId, lang),
     onSettings: () => openSettings(false),
+  });
+  const worldScreen = new WorldScreen(root, {
+    data, progress,
+    onStart: (world, difficulty) => {
+      // the paused run behind the menu goes on when it already has this course (debug setups made on it stay);
+      // another course starts a new run with the same seed
+      const run = session.run;
+      if (run && run.world === world && run.difficulty === difficulty && run.hero.def.id === heroId) {
+        session.paused = false;
+      } else {
+        session.world = world;
+        session.difficulty = difficulty;
+        session.start(session.seed, false, heroId);
+      }
+      menuOpen = false;
+    },
+    onBack: () => menu.setVisible(true),
   });
   // the settings: from the menu button, or O in a run (pauses it until the panel closes)
   let settingsPausedRun = false;
@@ -394,7 +429,7 @@ function createUi(
   // buttons of the menu, the settings and the gear screen click
   root.addEventListener("click", (event) => {
     const target = event.target as HTMLElement | null;
-    if (target?.closest("button, input") && target.closest("#menu, #settings-panel, #gear-screen")) {
+    if (target?.closest("button, input") && target.closest("#menu, #settings-panel, #gear-screen, #world-screen")) {
       sound.engine.play(sound.data.sounds["ui.click"]);
     }
   });
@@ -481,6 +516,7 @@ function createUi(
       chestPointer.update(run, followCamera.camera, width, height);
       if ((run.state === "won" || run.state === "lost") && !ended) {
         ended = true;
+        progress.record(run.world, run.difficulty, { won: run.state === "won", phase: run.inFinale ? 21 : run.phaseIndex + 1 });
         end.show(run, session.seed, lang, gear.drops);
       }
     },

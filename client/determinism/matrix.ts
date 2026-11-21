@@ -1,6 +1,6 @@
 // Determinism matrix (spec 2026-11-20 multiplayer spike, 5.2): a fixed set of autopilot runs whose state hashes
 // must match in Node and in every browser engine. Pure: no DOM and no timers, so Node and the page share it.
-import type { GameData } from "../../data/schema";
+import type { DifficultyId, GameData } from "../../data/schema";
 import { botInput, createRun, idleCard, stateHash, type Run, type RunState, type TickInput } from "../../sim";
 import { gearPreset } from "../../tools/sim-run/gear-presets";
 
@@ -14,6 +14,9 @@ export interface MatrixCase {
   maxTicks: number;
   /** No movement and the idle card pick instead of the autopilot (tests only). */
   idle?: boolean;
+  /** Defaults: world 1, normal. */
+  world?: number;
+  difficulty?: DifficultyId;
 }
 
 export interface CaseResult {
@@ -25,7 +28,10 @@ export interface CaseResult {
 
 export const CHECKPOINT_EVERY = 300;
 
-/** The cases of spec 5.2: every hero from phase 1, then four late starts with full gear. */
+/**
+ * The cases of spec 5.2: every hero from phase 1, then four late starts with full gear; then a world 3 insane run
+ * and a world 5 hell start at phase 6 (difficulties spec 2026-11-21 4.9).
+ */
 export function matrixCases(data: GameData): MatrixCase[] {
   const cases: MatrixCase[] = data.heroes.map((h) => ({
     id: `h-${h.id}`, hero: h.id, seed: 1, durationSeconds: 300, gear: "none", maxTicks: 12_000,
@@ -35,6 +41,8 @@ export function matrixCases(data: GameData): MatrixCase[] {
     { id: "p11", hero: "gravecaller", seed: 3, startPhase: 11, gear: "full", maxTicks: 6000 },
     { id: "p16", hero: "tidecaller", seed: 4, startPhase: 16, gear: "full", maxTicks: 6000 },
     { id: "p21", hero: "sparkshot", seed: 5, startPhase: 21, gear: "full", maxTicks: 6000 },
+    { id: "w3-insane", hero: "stonehorn", seed: 6, durationSeconds: 300, gear: "none", maxTicks: 9000, world: 3, difficulty: "insane" },
+    { id: "w5-hell", hero: "redcleaver", seed: 7, startPhase: 6, gear: "full", maxTicks: 6000, world: 5, difficulty: "hell" },
   );
   return cases;
 }
@@ -52,6 +60,7 @@ export function runCase(data: GameData, c: MatrixCase, every = CHECKPOINT_EVERY)
   const loadout = c.gear === "none" ? [] : gearPreset(data, c.hero, c.gear);
   const run = createRun(data, {
     seed: c.seed, hero: c.hero, startPhase: c.startPhase, durationSeconds: c.durationSeconds, loadout,
+    world: c.world, difficulty: c.difficulty,
   });
   const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   const checkpoints: number[] = [];

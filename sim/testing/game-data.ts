@@ -5,10 +5,11 @@ import enemies from "../../data/generated/enemies.json";
 import heroes from "../../data/generated/heroes.json";
 import items from "../../data/generated/items.json";
 import rules from "../../data/generated/rules.json";
+import worlds from "../../data/generated/worlds.json";
 import { validateGameData } from "../../data/schema";
 import type { GameData } from "../../data/schema";
 
 /** Returns a fresh copy on every call (validation rebuilds the objects), so tests may mutate it. */
 export function gameData(): GameData {
-  return validateGameData({ heroes, abilities, enemies, rules, items, constants });
+  return validateGameData({ heroes, abilities, enemies, rules, items, constants, worlds });
 }

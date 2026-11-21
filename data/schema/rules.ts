@@ -14,6 +14,24 @@ export const RarityWeightsSchema = z.partialRecord(RaritySchema, positive)
   .refine((w) => Object.keys(w).length > 0, "needs at least one rarity");
 export type RarityWeights = z.infer<typeof RarityWeightsSchema>;
 
+export const DIFFICULTY_IDS = ["normal", "insane", "hell"] as const;
+export type DifficultyId = (typeof DIFFICULTY_IDS)[number];
+
+/** One difficulty: multipliers on enemy strength, extra magic find and elite rushes on top of `rules.events`. */
+const DifficultyLevelSchema = z.object({
+  hp: positive,
+  damage: positive,
+  packSize: positive,
+  /** Elites and bosses get this on top of `hp`. */
+  eliteHp: positive,
+  magicFind: nonNegative,
+  extraRushes: z.array(z.object({
+    atSeconds: positive,
+    elites: z.number().int().min(0),
+    heavies: z.number().int().min(0),
+  }).strict().refine((r) => r.elites + r.heavies > 0, "needs at least one unit")),
+}).strict();
+
 export const RulesSchema = z.object({
   start: z.object({ hero: Slug }).strict(),
   run: z.object({
@@ -209,6 +227,16 @@ export const RulesSchema = z.object({
       newSpell: positive,
       newPassive: positive,
     }).strict(),
+  }).strict(),
+  /**
+   * Difficulties and worlds (spec 2026-11-21 4.2, sim/difficulty.ts): enemy hp and damage x level x
+   * (1 + worldStep x (world - 1)); gold x (1 + goldPerWorld x (world - 1)); magic find + magicFindPerWorld x
+   * (world - 1) + level.magicFind.
+   */
+  difficulty: z.object({
+    worldStep: z.object({ hp: nonNegative, damage: nonNegative }).strict(),
+    reward: z.object({ goldPerWorld: nonNegative, magicFindPerWorld: nonNegative }).strict(),
+    levels: z.object({ normal: DifficultyLevelSchema, insane: DifficultyLevelSchema, hell: DifficultyLevelSchema }).strict(),
   }).strict(),
 }).strict();
 

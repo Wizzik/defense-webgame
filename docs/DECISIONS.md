@@ -2,6 +2,39 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Difficulties and worlds, plan 1 (2026-11-21; Petr chose the world ladder plus Normal / Insane / Hell, the numbers are Claude's)
+
+- Spec: `docs/superpowers/specs/2026-11-21-difficulties-worlds-design.md`. Plan 1 brings the table, the five worlds (world 1 ready, worlds 2-5 playable with the look of world 1 and marked "coming soon"), the world choice after menu Start, unlocks and rewards. Obstacles, paths and natural situations come with plans 2 and 3, so the world choice shows no natural situation yet.
+- **Table** (`rules.difficulty`, `sim/difficulty.ts`): enemy hp and damage x level x (1 + 0.035 x (world - 1)), so world 5 is x1.14; elites and bosses x `eliteHp` on top; pack sizes x `packSize` (the cap of 150 living enemies stays); castle and hero unchanged.
+
+| | hp | damage | packs | elites and bosses | magic find | extra rushes |
+|---|---|---|---|---|---|---|
+| Normal | x1 | x1 | x1 | x1 | +0 | none |
+| Insane | x1.35 | x1.35 | x1.2 | x1 | +25 % | 1:30 (1 + 2), 4:30 (2 + 3), 7:30 (3 + 4), 10:30 (4 + 6), 13:30 (5 + 8) |
+| Hell | x1.75 | x1.75 | x1.4 | x1.2 | +50 % | as Insane |
+
+- Extra rushes (elites + heavies of the phase's faction) are about one step weaker than the normal rush before them and are announced like the others; an extra rush at the time of a normal event comes after it.
+- **Rewards:** gold from enemies x (1 + 0.1 x (world - 1)); magic find +10 % per world above the first plus the level's; it raises chest cards and boss drops (Claude's ruling: the spec names magic find in general).
+- **Why so much smaller than the spec's proposal** (world step 0.25, Insane x1.75, Hell x3 and elites x1.5): with them world 5 Normal with mid gear won 3 of 80 (seeds 1-10), Insane world 1 with full gear 16 of 80 and Hell about 1. The losses were castle losses in the finale: the bigger final boss could not be killed before the castle fell. A world step of 0.04 gave 32 of 80 and 0.03 42 (seeds 1-10), so 0.035.
+- **Wins of the autopilot, seeds 1-20 (of 160):**
+
+| course | no gear | mid gear | full gear |
+|---|---|---|---|
+| world 1 Normal | 73 (as before) | 94 (as before) | 127 |
+| world 2 Normal | 65 | 83 | 126 |
+| world 3 Normal | 57 | 80 | 125 |
+| world 4 Normal | 55 | 80 | 118 |
+| world 5 Normal | 45 | 67 | 108 |
+| world 1 Insane | | 39 | 78 |
+| world 5 Insane | | 24 | 51 |
+| world 1 Hell | | 11 | 25 |
+| world 5 Hell | | 7 | 19 |
+
+- Targets of the plan: world 1 Normal is today's game (the `sim:run` output of seeds 1-20 with no gear and mid gear is byte for byte the same); world 5 Normal with mid gear 70-90 of 160: **67, just under** (42 %, the spec's "about half"); Hell world 5 with full gear under 80: 19; Insane between; no world wins more than the one before it.
+- **Open for Petr:** Hell is hard even with the best gear (19 of 160, 25 in world 1); the worlds differ little in strength (x1.14 at world 5) because mid gear already loses 41 % in world 1. Plan 2 retunes world 1 with obstacles anyway.
+- The world and the difficulty are part of `stateHash` (spec 4.9): two runs of one seed on different courses must not look equal to a replay or lockstep check. The determinism matrix has two new cases (`w3-insane`, `w5-hell`); its digest is now `22d17e18` (was `73372c52`).
+- Unlocks (`meta/progress.ts`): world 1 Normal is open; a win of world N on a difficulty opens world N + 1 on it; a win of world 5 on Normal opens Insane, on Insane opens Hell. Only the best result per course is stored (IndexedDB key `progress`); unlocks are derived from it. `?debug=1` opens everything and stores nothing.
+
 ## Enemy factions (2026-11-20; Petr approved direction B and left the design to Claude, the numbers are Claude's)
 
 - Spec `docs/superpowers/specs/2026-11-20-enemy-factions-design.md`, plan `docs/superpowers/plans/2026-11-20-enemy-factions.md`.

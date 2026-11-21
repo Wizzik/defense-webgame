@@ -5,6 +5,7 @@ import type { Rules } from "../data/schema";
 import type { Run } from "./run";
 import { dirX, dirY, randomDirection, rotatedDirection } from "./spawn-direction";
 import { pickType } from "./spawn-tables";
+import { enemyDamageScale, enemyHp } from "./difficulty";
 
 /** A pack of this size fits `arena.spawn.spread`; a bigger one spreads over a wider square. */
 const PACK_AT_SPREAD = 8;
@@ -45,7 +46,8 @@ export function spawnEnemies(run: Run): void {
   for (let p = 0; p < phase.packs; p++) {
     rotatedDirection(baseX, baseY, p, phase.packs);
     const rolled = phase.pack.min + Math.floor(rng.next() * (phase.pack.max - phase.pack.min + 1));
-    const size = finale ? Math.max(1, Math.round(rolled * rules.run.finale.packScale)) : rolled;
+    const sized = Math.max(1, Math.round(rolled * run.mods.packSize));
+    const size = finale ? Math.max(1, Math.round(sized * rules.run.finale.packScale)) : sized;
     const role = rng.next() < phase.hunterShare ? Role.Hunter : Role.Sieger;
     const cx = arena.castle.x + dirX * arena.spawn.radius;
     const cy = arena.castle.y + dirY * arena.spawn.radius;
@@ -80,7 +82,7 @@ export function scatterMember(
   const x = clamp(cx + (run.rng.next() * 2 - 1) * half, arena.width / 2 - def.collision);
   const y = clamp(cy + (run.rng.next() * 2 - 1) * half, arena.height / 2 - def.collision);
   run.stats.spawned++;
-  const slot = run.enemies.spawn(type, role, x, y, def.hp * scale, scale, run.tick);
+  const slot = run.enemies.spawn(type, role, x, y, enemyHp(run, type, scale), enemyDamageScale(run, scale), run.tick);
   // a strike from afar waits its whole cooldown after the spawn (a boss's first strike: sim/timeline.ts spawnBoss)
   if (slot >= 0 && def.strike !== undefined) run.enemies.strikeCooldown[slot] = Math.round(def.strike.cooldownSeconds * TICKS_PER_SECOND);
   return slot;
@@ -98,7 +100,7 @@ export function spawnAt(run: Run, type: number, role: number, x: number, y: numb
   const scale = timeScale(run.data.rules, run.tick);
   const slot = store.spawn(
     type, role, clamp(x, arena.width / 2 - def.collision), clamp(y, arena.height / 2 - def.collision),
-    def.hp * scale, scale, run.tick,
+    enemyHp(run, type, scale), enemyDamageScale(run, scale), run.tick,
   );
   if (slot < 0) return -1;
   run.stats.spawned++;

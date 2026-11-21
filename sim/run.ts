@@ -1,4 +1,4 @@
-import type { GameData } from "../data/schema";
+import type { DifficultyId, GameData } from "../data/schema";
 import { createAbilitySlots, updateAbilities } from "./abilities/slots";
 import { BuffState, fillLifestealBudget, updateBuffs } from "./buffs";
 import { createOrbs, type OrbStore, updateOrbs } from "./orbs";
@@ -28,6 +28,7 @@ import { InputAction, type TickInput } from "./input";
 import { Rng } from "./rng";
 import { spawnEnemies } from "./spawner";
 import { applyStartPhase } from "./start-phase";
+import { checkCourse, type DifficultyMods, difficultyMods } from "./difficulty";
 import { buildTimeline, type TimedEvent, updateTimeline } from "./timeline";
 import { buildPhaseTables, enemyType, type PhaseTable } from "./spawn-tables";
 import { SpatialHash } from "./spatial-grid";
@@ -45,6 +46,10 @@ export interface RunOptions {
   startPhase?: number;
   /** Permanent items the hero wears; entries that do not fit are skipped (sim/gear.ts). */
   loadout?: readonly LoadoutEntry[];
+  /** World of the ladder, 1 to `data.worlds.length`; defaults to 1. */
+  world?: number;
+  /** Defaults to "normal". */
+  difficulty?: DifficultyId;
 }
 
 /** One boss of the run, for run summaries. */
@@ -59,6 +64,10 @@ const EVENT_CAPACITY = 1024;
 
 export class Run {
   readonly data: GameData;
+  /** World of the ladder (1-based) and difficulty; `mods` are their multipliers (sim/difficulty.ts). */
+  readonly world: number;
+  readonly difficulty: DifficultyId;
+  readonly mods: DifficultyMods;
   readonly rng: Rng;
   readonly events = new EventLog(EVENT_CAPACITY);
   readonly hero: HeroState;
@@ -168,6 +177,9 @@ export class Run {
   constructor(data: GameData, options: RunOptions) {
     const { rules } = data;
     this.data = data;
+    this.world = options.world ?? 1;
+    this.difficulty = checkCourse(data, this.world, options.difficulty ?? "normal");
+    this.mods = difficultyMods(rules, this.world, this.difficulty);
     this.rng = new Rng(options.seed);
     this.enemies = new EnemyStore(rules.enemies.maxAlive);
     this.gear = new GearState(rules.enemies.maxAlive);
@@ -184,7 +196,7 @@ export class Run {
     this.isElite = factions.isElite;
     this.isBoss = Uint8Array.from(data.enemies, (e) => (e.boss ? 1 : 0));
     this.phaseTables = buildPhaseTables(data);
-    this.timeline = buildTimeline(data);
+    this.timeline = buildTimeline(data, this.difficulty);
     this.finalBossType = enemyType(data, rules.run.finale.boss, "rules.run.finale.boss");
     this.bossLog = Array.from(
       { length: this.timeline.filter((event) => event.boss >= 0).length + 1 },

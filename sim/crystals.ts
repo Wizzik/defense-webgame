@@ -59,7 +59,7 @@ export class CrystalStore {
 
 /** Adds gold to the hero's purse: the coin's value times (1 + goldFind + the gold passive), rounded. Returns the gold gained. */
 export function gainGold(run: Run, value: number): number {
-  const amount = Math.round(value * (1 + run.hero.gear.goldFind + run.hero.passive.gold));
+  const amount = Math.round(value * run.mods.gold * (1 + run.hero.gear.goldFind + run.hero.passive.gold));
   run.gold += amount;
   run.stats.goldGained += amount;
   return amount;

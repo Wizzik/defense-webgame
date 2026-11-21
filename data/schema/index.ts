@@ -5,6 +5,7 @@ import { EnemySchema } from "./enemy";
 import { HeroSchema } from "./hero";
 import { ItemSchema, SLOT_TYPES } from "./item";
 import { RulesSchema } from "./rules";
+import { WorldSchema } from "./world";
 
 export { AbilityKind, AbilitySchema, MAX_BOUNCES, PASSIVE_KEYS, Targeting } from "./ability";
 export type { Ability, PassiveKey } from "./ability";
@@ -15,8 +16,10 @@ export { ConstantsSchema } from "./constants";
 export type { Constants } from "./constants";
 export { EnemySchema } from "./enemy";
 export type { Enemy, FactionId } from "./enemy";
-export { PointSchema, RarityWeightsSchema, RulesSchema } from "./rules";
-export type { Point, RarityWeights, Rules } from "./rules";
+export { DIFFICULTY_IDS, PointSchema, RarityWeightsSchema, RulesSchema } from "./rules";
+export type { DifficultyId, Point, RarityWeights, Rules } from "./rules";
+export { WorldSchema } from "./world";
+export type { World } from "./world";
 export { HeroSchema } from "./hero";
 export type { Hero } from "./hero";
 export { ItemSchema, RARITIES, RARITY_ROWS, SLOT_TYPES, STAT_IDS } from "./item";
@@ -29,6 +32,7 @@ export const GameDataSchema = z.object({
   rules: RulesSchema,
   items: z.array(ItemSchema),
   constants: ConstantsSchema,
+  worlds: z.array(WorldSchema).min(1),
 }).strict();
 
 export type GameData = z.infer<typeof GameDataSchema>;
@@ -60,8 +64,14 @@ export function validateGameData(data: unknown): GameData {
       parsed.error.issues.map((i) => `${describePath(data, i.path)}: ${i.message}`),
     );
   }
-  const { heroes, abilities, enemies, rules, items } = parsed.data;
+  const { heroes, abilities, enemies, rules, items, worlds } = parsed.data;
   const errors: string[] = [];
+
+  const worldIds = new Set<string>();
+  worlds.forEach((w, i) => {
+    if (worldIds.has(w.id)) errors.push(`worlds.${i}.id: duplicate world id "${w.id}"`);
+    worldIds.add(w.id);
+  });
 
   const abilityIds = new Set<string>();
   abilities.forEach((a, i) => {

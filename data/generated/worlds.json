@@ -1,0 +1,67 @@
+[
+  {
+    "id": "silver-march",
+    "name": {
+      "en": "Silver March",
+      "cs": "Stříbrná marka"
+    },
+    "blurb": {
+      "en": "Green fields at dusk, old farms and the first walls of the realm.",
+      "cs": "Zelené pláně za soumraku, staré statky a první hradby říše."
+    },
+    "color": "#1e3b40",
+    "ready": true
+  },
+  {
+    "id": "red-waste",
+    "name": {
+      "en": "Red Waste",
+      "cs": "Rudá pustina"
+    },
+    "blurb": {
+      "en": "Red clay and dry grass where the clans gather under a hard sky.",
+      "cs": "Rudá hlína a suchá tráva, kde se pod tvrdým nebem shromažďují klany."
+    },
+    "color": "#3d2427",
+    "ready": false
+  },
+  {
+    "id": "shadewood",
+    "name": {
+      "en": "Shadewood",
+      "cs": "Stínový hvozd"
+    },
+    "blurb": {
+      "en": "An endless night under ancient trees, lit only by the moon.",
+      "cs": "Nekonečná noc pod pradávnými stromy, osvětlená jen měsícem."
+    },
+    "color": "#1a2440",
+    "ready": false
+  },
+  {
+    "id": "frostreach",
+    "name": {
+      "en": "Frostreach",
+      "cs": "Mrazivý sever"
+    },
+    "blurb": {
+      "en": "Snow, ice and a cold grey light at the edge of the world.",
+      "cs": "Sníh, led a studené šedé světlo na okraji světa."
+    },
+    "color": "#2a3a4c",
+    "ready": false
+  },
+  {
+    "id": "blightscar",
+    "name": {
+      "en": "Blightscar",
+      "cs": "Spálená říše"
+    },
+    "blurb": {
+      "en": "Scorched black earth under a violet sky and green flame.",
+      "cs": "Spálená černá země pod fialovou oblohou a zeleným ohněm."
+    },
+    "color": "#2a1c34",
+    "ready": false
+  }
+]

@@ -69,4 +69,11 @@ describe("readGameParams", () => {
     expect(readGameParams("?hero=", random).hero).toBeUndefined();
     expect(readGameParams("", random).hero).toBeUndefined();
   });
+
+  it("reads world and difficulty", () => {
+    expect(readGameParams("?world=3&difficulty=hell", () => 1)).toMatchObject({ world: 3, difficulty: "hell" });
+    for (const q of ["?world=9", "?world=0", "?world=2.5", "?world=x"]) expect(readGameParams(q, () => 1).world, q).toBeUndefined();
+    expect(readGameParams("?difficulty=x", () => 1).difficulty).toBeUndefined();
+    expect(readGameParams("", () => 1)).toMatchObject({ world: undefined, difficulty: undefined });
+  });
 });

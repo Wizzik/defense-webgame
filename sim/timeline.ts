@@ -1,4 +1,5 @@
-import type { GameData } from "../data/schema";
+import type { DifficultyId, GameData } from "../data/schema";
+import { enemyDamageScale, enemyHp } from "./difficulty";
 import { TICKS_PER_SECOND } from "./constants";
 import { Role } from "./enemies";
 import { EventKind } from "./events";
@@ -17,9 +18,12 @@ export interface TimedEvent {
   heavies: number;
 }
 
-/** Built once, when the run is created. */
-export function buildTimeline(data: GameData): TimedEvent[] {
-  return data.rules.events.map((event, i) => {
+/**
+ * Built once, when the run is created: `rules.events` plus the difficulty's extra rushes, sorted stably by tick
+ * (an event of `rules.events` comes before an extra rush at the same tick).
+ */
+export function buildTimeline(data: GameData, difficulty: DifficultyId = "normal"): TimedEvent[] {
+  const events: TimedEvent[] = data.rules.events.map((event, i) => {
     const tick = Math.round(event.atSeconds * TICKS_PER_SECOND);
     if (event.kind === "boss") {
       const boss = enemyType(data, event.enemy, `event ${i}`);
@@ -27,6 +31,13 @@ export function buildTimeline(data: GameData): TimedEvent[] {
     }
     return { tick, boss: -1, elites: event.elites, heavies: event.heavies };
   });
+  for (const rush of data.rules.difficulty.levels[difficulty].extraRushes) {
+    events.push({ tick: Math.round(rush.atSeconds * TICKS_PER_SECOND), boss: -1, elites: rush.elites, heavies: rush.heavies });
+  }
+  return events
+    .map((event, order) => ({ event, order }))
+    .sort((a, b) => a.event.tick - b.event.tick || a.order - b.order)
+    .map(({ event }) => event);
 }
 
 /**
@@ -129,7 +140,7 @@ export function spawnBoss(run: Run, type: number, role: number): number {
     store.kill(oldest);
   }
   const scale = timeScale(rules, run.tick);
-  const slot = store.spawn(type, role, x, y, def.hp * scale, scale, run.tick);
+  const slot = store.spawn(type, role, x, y, enemyHp(run, type, scale), enemyDamageScale(run, scale), run.tick);
   if (def.slam) store.slamCooldown[slot] = Math.round(def.slam.cooldownSeconds[0] * TICKS_PER_SECOND);
   if (def.strike) store.strikeCooldown[slot] = Math.round(def.strike.cooldownSeconds * TICKS_PER_SECOND);
   run.stats.spawned++;

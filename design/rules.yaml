@@ -120,3 +120,21 @@ progression: { xpFirst: 10, xpStep: 9, magnetRadius: 300, crystalSpeed: 900, pic
   passives: [might, arcane-focus, haste, vigor, fleet-foot, fortune],
   sharedSpellSlots: 2, passiveSlots: 4,
   cardWeights: { signature: 4, sharedUpgrade: 3, newSpell: 2, newPassive: 2 } }
+# difficulty (spec 2026-11-21 difficulties and worlds 4.2, sim/difficulty.ts, docs/DECISIONS.md section Difficulties
+#   and worlds): enemy hp and damage x level.hp / level.damage x (1 + worldStep x (world - 1)); pack sizes x packSize
+#   (the cap of enemies.maxAlive stays); elites and bosses get eliteHp on top; extraRushes come on top of `events`
+#   (elites and heavies of the phase's faction, announced like the others). Rewards: gold from enemies
+#   x (1 + goldPerWorld x (world - 1)), magic find + magicFindPerWorld x (world - 1) + level.magicFind.
+#   World 1 on normal is the game as it was before the worlds.
+difficulty:
+  worldStep: { hp: 0.035, damage: 0.035 }
+  reward: { goldPerWorld: 0.1, magicFindPerWorld: 0.1 }
+  levels:
+    normal: { hp: 1, damage: 1, packSize: 1, eliteHp: 1, magicFind: 0, extraRushes: [] }
+    insane: { hp: 1.35, damage: 1.35, packSize: 1.2, eliteHp: 1, magicFind: 0.25, extraRushes: &extraRushes [
+      { atSeconds: 90, elites: 1, heavies: 2 },
+      { atSeconds: 270, elites: 2, heavies: 3 },
+      { atSeconds: 450, elites: 3, heavies: 4 },
+      { atSeconds: 630, elites: 4, heavies: 6 },
+      { atSeconds: 810, elites: 5, heavies: 8 } ] }
+    hell: { hp: 1.75, damage: 1.75, packSize: 1.4, eliteHp: 1.2, magicFind: 0.5, extraRushes: *extraRushes }

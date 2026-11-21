@@ -1181,3 +1181,98 @@
   color: #8fa3c4;
   font-variant-numeric: tabular-nums;
 }
+
+/* World choice (spec 2026-11-21 4.4): dark cards in the colour of their world, no orange. */
+.world-panel {
+  width: min(980px, 100%);
+}
+.world-title {
+  font-size: 26px;
+}
+.world-difficulties {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.world-difficulty-label {
+  color: var(--muted);
+  margin-right: 6px;
+}
+.world-cards {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+.world-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 120px;
+  padding: 12px 8px;
+  background: linear-gradient(160deg, var(--world-color), rgba(10, 13, 18, 0.95));
+  border: 2px solid rgba(255, 255, 255, 0.12);
+}
+.world-card:hover:not(:disabled),
+.world-card:focus-visible {
+  background: linear-gradient(160deg, var(--world-color), rgba(30, 38, 50, 0.95));
+}
+.world-card[aria-pressed="true"] {
+  border-color: #9fc3e0;
+  color: var(--ink);
+  box-shadow: 0 0 0 2px rgba(159, 195, 224, 0.35);
+}
+.world-card:disabled,
+.world-difficulty:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.world-difficulty[aria-pressed="true"] {
+  border-color: #9fc3e0;
+  color: #cfe3f3;
+}
+.world-card-name {
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+}
+.world-card-status {
+  font-size: 14px;
+  color: #cfe3f3;
+  min-height: 1.2em;
+}
+.world-card-tag {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.world-detail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 4.6em;
+  text-align: center;
+}
+.world-blurb {
+  max-width: 600px;
+}
+.world-line {
+  font-size: 14px;
+  color: var(--muted);
+}
+.world-bottom {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+@media (max-width: 720px) {
+  .world-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

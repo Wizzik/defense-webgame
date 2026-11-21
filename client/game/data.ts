@@ -5,8 +5,9 @@ import enemies from "../../data/generated/enemies.json";
 import heroes from "../../data/generated/heroes.json";
 import items from "../../data/generated/items.json";
 import rules from "../../data/generated/rules.json";
+import worlds from "../../data/generated/worlds.json";
 
 /** Bundled game data, validated once at start so a broken data file fails loudly. */
 export function loadGameData(): GameData {
-  return validateGameData({ heroes, abilities, enemies, rules, items, constants });
+  return validateGameData({ heroes, abilities, enemies, rules, items, constants, worlds });
 }

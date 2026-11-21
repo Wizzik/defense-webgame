@@ -1,0 +1,5 @@
+- id: fixture-world
+  name: { en: Fixture World, cs: Testovací svět }
+  blurb: { en: A test world., cs: Testovací svět. }
+  color: "#1e3b40"
+  ready: true

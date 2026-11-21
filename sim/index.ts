@@ -16,6 +16,8 @@ export type { ChestCard, ChestOffer } from "./chests";
 export { HeroHitSource, killEnemy } from "./combat";
 export type { Card, CardOffer } from "./cards";
 export { debugSpawnEach } from "./debug-spawn";
+export { difficultyMods, enemyDamageScale, enemyHp, runMagicFind } from "./difficulty";
+export type { DifficultyMods } from "./difficulty";
 export { COIN_CAPACITY, CRYSTAL_CAPACITY, CrystalStore, debugDropHeart, debugGrantGold, HEART_CAPACITY, updatePickups } from "./crystals";
 export { TICKS_PER_SECOND, TICK_SECONDS } from "./constants";
 export { ALLY_CAPACITY, AllyKind, AllyStore, updateAllies } from "./allies";
