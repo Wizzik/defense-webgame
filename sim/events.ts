@@ -52,6 +52,11 @@ export const EventKind = {
   HeroSnared: 28,
   /** A gravebinder raised an enemy: a = the new slot, value = the raiser's type index, x/y = where. */
   Raise: 29,
+  /** A storm bolt (sim/hazard.ts): a = its place, value = 0 the warning starts / 1 it strikes, x/y = the centre,
+   *  u = radius, v = steps of the warning. */
+  Hazard: 30,
+  /** The first wave of the world's natural event in a run: x/y = the hero. */
+  HazardWave: 31,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

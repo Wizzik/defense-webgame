@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { debugSetAbilityLevel } from "./abilities/slots";
 import { EventKind } from "./events";
+import { debugHazard, hazardPending } from "./hazard";
 import { botCard, botChestChoice, botChestKeep, botInput, idleCard, CHASE_DISTANCE, DEFEND_RADIUS, HOME_OFFSET, LEASH_DISTANCE } from "./bot";
 import { OrbKind } from "./buffs";
 import { ChestAction, chestPrice } from "./chests";
@@ -202,6 +203,25 @@ describe("autopilot", () => {
     const dx = run.hero.x - run.enemies.slamX[boss]!;
     const dy = run.hero.y - run.enemies.slamY[boss]!;
     expect(Math.sqrt(dx * dx + dy * dy)).toBeGreaterThan(radius);
+  });
+
+  it("the bot walks out of a storm bolt's circle before it strikes", () => {
+    const run = postRun();
+    debugHazard(run);
+    for (let i = 0; i < run.hazard.ticks.length; i++) {
+      run.hazard.x[i] = run.hero.x + 40;
+      run.hazard.y[i] = run.hero.y;
+    }
+    const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
+    let hit = false;
+    for (let i = 0; i < 36; i++) {
+      botInput(run, input);
+      if (i === 0) expect(input.moveX).toBe(-1);
+      run.step(input);
+      for (let k = 0; k < run.events.count; k++) if (run.events.kind[k] === EventKind.HeroHit) hit = true;
+    }
+    expect(hazardPending(run)).toBe(0);
+    expect(hit).toBe(false);
   });
 
   it("a slam circle the hero is not in changes nothing", () => {

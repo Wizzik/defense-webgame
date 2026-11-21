@@ -8,6 +8,7 @@ import { chooseCard, openOffer } from "./cards";
 import type { CardOffer } from "./cards";
 import { type ChestOffer, ChestStore, chooseChestCard, placeChest, updateChests } from "./chests";
 import { regenCastle } from "./castle";
+import { HazardState, updateHazard } from "./hazard";
 import { ALLY_CAPACITY, AllyStore, updateAllies } from "./allies";
 import { PROJECTILE_CAPACITY, ProjectileStore, updateProjectiles } from "./projectiles";
 import { COIN_CAPACITY, CRYSTAL_CAPACITY, CrystalStore, HEART_CAPACITY, updatePickups } from "./crystals";
@@ -164,6 +165,9 @@ export class Run {
   readonly buffs = new BuffState();
   /** Hearts and orbs draw from this generator, so they shift neither the enemies nor the chests of a seed. */
   readonly sustainRng: Rng;
+  /** The world's natural event (sim/hazard.ts) and its own rng. */
+  readonly hazardRng: Rng;
+  readonly hazard = new HazardState();
   /** The orb places on the map (sim/orbs.ts). */
   readonly orbs: OrbStore;
   /** The step in which the final boss comes. The run goes on until it falls. */
@@ -246,6 +250,7 @@ export class Run {
     this.map = buildWorldMap(data, this.world, this.mapRng);
     this.chestRng = new Rng((options.seed ^ 0x5bd1e995) >>> 0);
     this.sustainRng = new Rng((options.seed ^ 0x27d4eb2f) >>> 0);
+    this.hazardRng = new Rng((options.seed ^ 0x1b873593) >>> 0);
     this.orbs = createOrbs(this);
     this.chestPriceRaw = rules.chests.basePrice;
     this.chests = new ChestStore(rules.chests.count);
@@ -295,6 +300,7 @@ export class Run {
    *   updatePickups(this, hearts, 2);     // sustain plan, Task 3 (a fallen hero is not healed)
    *   updateOrbs(this);           // sustain plan, Task 4: orb spawns, respawns and pickups (no magnet)
    *   updateBuffs(this);          // sustain plan, Task 2: orb timers, heal over time, lifesteal budget and its event
+   *   updateHazard(this);         // difficulties plan 2: the storm's bolts and waves
    *   regenCastle(this);          // Task 4
    *   this.tick++;
    *   checkEnd(this);             // castle (Task 4) -> hero (Task 5) -> the final boss fell (phase 2b-3); a loss wins over a win
@@ -336,6 +342,7 @@ export class Run {
     updatePickups(this, this.hearts, 2);
     updateOrbs(this);
     updateBuffs(this);
+    updateHazard(this);
     regenCastle(this);
     this.tick++;
     checkEnd(this);

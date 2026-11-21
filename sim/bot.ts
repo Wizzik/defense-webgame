@@ -200,10 +200,28 @@ export function botInput(run: Run, out: TickInput): TickInput {
     }
   }
 
-  if (slammer >= 0) {
+  // a storm bolt waiting over the hero is dodged like a slam (spec 2026-11-21 difficulties 4.7)
+  let boltX = 0;
+  let boltY = 0;
+  let bolt = false;
+  if (slammer < 0) {
+    const { hazard } = run;
+    const reach = run.data.worlds[run.world - 1]!.hazard.radius + SLAM_MARGIN;
+    for (let i = 0; i < hazard.ticks.length && !bolt; i++) {
+      if (hazard.ticks[i] === 0) continue;
+      const sx = hero.x - hazard.x[i]!;
+      const sy = hero.y - hazard.y[i]!;
+      if (sx * sx + sy * sy >= reach * reach) continue;
+      bolt = true;
+      boltX = hazard.x[i]!;
+      boltY = hazard.y[i]!;
+    }
+  }
+
+  if (slammer >= 0 || bolt) {
     // Straight out of the circle, away from its centre; the dash helps when it is ready.
-    const sx = hero.x - enemies.slamX[slammer];
-    const sy = hero.y - enemies.slamY[slammer];
+    const sx = hero.x - (bolt ? boltX : enemies.slamX[slammer]);
+    const sy = hero.y - (bolt ? boltY : enemies.slamY[slammer]);
     const d = Math.sqrt(sx * sx + sy * sy);
     out.moveX = axis(d > 1e-6 ? sx / d : 1);
     out.moveY = axis(d > 1e-6 ? sy / d : 0);

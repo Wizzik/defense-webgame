@@ -47,6 +47,8 @@ export const HANDLED_EVENTS: Record<keyof typeof EventKind, "sound" | "skip"> = 
   Bloodlust: "sound",
   HeroSnared: "sound",
   Raise: "sound",
+  Hazard: "skip", // client task of difficulties plan 2 gives the storm its sounds
+  HazardWave: "skip",
 };
 
 const ORB_SOUNDS: Record<number, GameSound> = {
