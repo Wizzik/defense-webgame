@@ -1,10 +1,25 @@
 # Status
 
-Updated 2026-11-21 (difficulties plan 1 merged as PR #28 `35ed49d`; plan 2 written on branch `difficulties-2`). Read this first when you resume work.
+Updated 2026-11-21 (difficulties plan 2 done on branch `difficulties-2`, PR against `main` waits for Petr's word). Read this first when you resume work.
 
-## Difficulties 2: obstacles, paths, the wall of world 1, the summer storm (plan written, 2026-11-21)
+## Difficulties 2: obstacles, paths, the wall of world 1, the summer storm (done on `difficulties-2`, 2026-11-21)
 
-- Plan: `docs/superpowers/plans/2026-11-21-difficulties-obstacles.md` (7 tasks, branch `difficulties-2`). Execute it in a new chat. World 1 gets the old wall with two gates in the north, four paths (+15 % speed), 30-40 seeded islands with a passability check, collisions, island avoidance, flow fields through the gates, autopilot routing and the summer storm (bolts after a 1.2 s circle from phase 3); worlds 2-5 share world 1's map and storm until plan 3; world 1 Normal is retuned to 66-80 of 160 without gear.
+- All 7 tasks of `docs/superpowers/plans/2026-11-21-difficulties-obstacles.md` done inline in one chat, one final self-review. `npm run check` (1131 tests), the build, e2e `webgl2-fallback` and `sim-chromium` pass. Numbers, rulings and the win table: `docs/DECISIONS.md`, section Difficulties and worlds, plan 2.
+- What it brings:
+  - world 1 has the old wall in the north with two gates (x = -625 and 625), four paths of trodden earth (+15 % walking speed), 30-40 islands of rocks, trees and ruins placed from the run seed (every free place still reaches the castle);
+  - the hero and enemies collide with the wall and the islands (no dash through the wall), enemies walk around islands and through the gates (flow fields), a melee enemy cannot hit over the wall; the autopilot routes through the gates;
+  - the summer storm from phase 3: a wave every 55-70 s of 1-3 bolts near the hero, a blue-white circle 1.2 s ahead, then 8 % of the hero's hp, 20 % of an enemy's, 2 % of a boss's; a lightning glyph in the effect bar counts down, the news line announces the first wave, the world screen names the natural event;
+  - worlds 2-5 share world 1's map and storm until plan 3;
+  - `sim:run` prints a `world` line; the determinism digest is now `38f9402b` (new case `w1-storm`).
+- Balance (world 1 Normal, seeds 1-20, wins of 160): without gear 73 -> 74, mid 94 -> 104, full 127 -> 137. The storm made the autopilot win more (it dodges every bolt), so waves come every 55-70 s instead of 35-45.
+- What Petr checks in the playtest:
+  - the wall and its gates: readable, does it feel like a place; do enemies come through the gates sensibly, does anything get stuck (enemies, the hero, the autopilot);
+  - paths: visible (not orange), does the speed feel;
+  - the storm: is the circle readable and different from a boss slam, is 1.2 s fair, is 8 % right, is a wave every 55-70 s too rare or too often;
+  - islands: do trees or rocks hide enemies;
+  - **fps** with a full crowd on his machine: `?fps=1&debug=1&phase=16` against `main` (144 there; the goal is at most -10 %); the simulation step is ~1.5x `main` (0.076 ms).
+  - quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1&phase=3 then `__game.debug.hazard()` in the console; `?fps=1&debug=1&phase=16`; `__game.obstacles`, `__game.hazard`.
+- **Open for Petr:** with gear the autopilot now wins more than before (mid 104, full 137; world 5 Normal mid 76 instead of 67): the wall and its chokepoint help the defence. Plan 3 tunes worlds 2-5 and can steepen the ladder.
 
 ## Difficulties 1: world ladder, Normal / Insane / Hell, world choice, unlocks (merged as PR #28 `35ed49d`, 2026-11-21)
 
