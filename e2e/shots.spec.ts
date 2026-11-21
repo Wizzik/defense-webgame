@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Page } from "@playwright/test";
 import type { GameSnapshot } from "../client/game/debug";
-import { test } from "./fixtures";
+import { startRun as clickStart, test } from "./fixtures";
 
 declare global {
   interface Window {
@@ -18,7 +18,7 @@ test.beforeAll(() => mkdirSync(shotsDir, { recursive: true }));
 
 async function startRun(page: Page, query: string): Promise<void> {
   await page.goto(`/?${query}`);
-  await page.locator("#start").click();
+  await clickStart(page);
   await page.waitForFunction(() => window.__game?.screen === "playing", undefined, { timeout: 90_000, polling: 250 });
 }
 
@@ -76,7 +76,7 @@ test("shot: factions", async ({ page }) => {
     debug.teleport(1600, -350);
   });
   await page.waitForFunction(() => (window.__game?.enemyTypes ?? 0) >= 21, undefined, { timeout: 10_000, polling: 50 });
-  await page.locator("#start").click();
+  await clickStart(page);
   await page.waitForFunction(() => window.__game?.screen === "playing", undefined, { timeout: 90_000, polling: 50 });
   await page.waitForTimeout(250);
   await shot(page, "factions");
@@ -128,6 +128,17 @@ test("shot: heroes", async ({ page }) => {
     // the hero stands at the middle of the screen
     await page.screenshot({ path: join(shotsDir, `hero-${hero}.png`), clip: { x: 520, y: 240, width: 240, height: 200 } });
   }
+});
+
+test("shot: worlds", async ({ page }) => {
+  await page.goto("/?seed=7&lang=cs&debug=1&hero=stonehorn");
+  await page.locator("#start").waitFor({ timeout: 90_000 });
+  await page.waitForFunction(() => window.__game?.hero !== "", undefined, { timeout: 90_000 });
+  await page.locator("#start").click();
+  await page.locator('#world-screen [data-difficulty="insane"]').click();
+  await page.locator('#world-screen [data-world="2"]').click();
+  await page.waitForTimeout(300);
+  await shot(page, "worlds");
 });
 
 test("shot: gear", async ({ page }) => {

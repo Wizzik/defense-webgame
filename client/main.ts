@@ -16,6 +16,7 @@ import { addDebugHooks, publishSnapshot, updateSnapshot } from "./game/debug";
 import { GearSession } from "./game/gear-session";
 import { indexedDbBackend, memoryBackend } from "./game/save-store";
 import { ProgressSession } from "./game/progress-session";
+import { WorldScreen } from "./ui/world-screen";
 import { firstUnlocked, type ProgressData } from "../meta";
 import { Keyboard } from "./game/keyboard";
 import { readGameParams } from "./game/params";
@@ -369,12 +370,12 @@ function createUi(
     menu.setLang(next);
   };
   const menu = new Menu(root, data.heroes, heroId, {
+    // Start opens the world choice; its Start begins the run
     onStart: () => {
       sound.engine.enable();
       void sound.engine.preload();
-      menuOpen = false;
-      session.paused = false;
       menu.setVisible(false);
+      worldScreen.open(session.world, session.difficulty, lang);
     },
     onHero: (id) => {
       heroId = id;
@@ -387,6 +388,23 @@ function createUi(
     onSound: () => setMuted(!muted),
     onGear: () => gearScreen.open(heroId, lang),
     onSettings: () => openSettings(false),
+  });
+  const worldScreen = new WorldScreen(root, {
+    data, progress,
+    onStart: (world, difficulty) => {
+      // the paused run behind the menu goes on when it already has this course (debug setups made on it stay);
+      // another course starts a new run with the same seed
+      const run = session.run;
+      if (run && run.world === world && run.difficulty === difficulty && run.hero.def.id === heroId) {
+        session.paused = false;
+      } else {
+        session.world = world;
+        session.difficulty = difficulty;
+        session.start(session.seed, false, heroId);
+      }
+      menuOpen = false;
+    },
+    onBack: () => menu.setVisible(true),
   });
   // the settings: from the menu button, or O in a run (pauses it until the panel closes)
   let settingsPausedRun = false;
@@ -411,7 +429,7 @@ function createUi(
   // buttons of the menu, the settings and the gear screen click
   root.addEventListener("click", (event) => {
     const target = event.target as HTMLElement | null;
-    if (target?.closest("button, input") && target.closest("#menu, #settings-panel, #gear-screen")) {
+    if (target?.closest("button, input") && target.closest("#menu, #settings-panel, #gear-screen, #world-screen")) {
       sound.engine.play(sound.data.sounds["ui.click"]);
     }
   });

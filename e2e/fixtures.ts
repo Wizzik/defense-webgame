@@ -25,3 +25,10 @@ export const test = base.extend<{ consoleErrors: string[]; allowedConsoleErrors:
 });
 
 export { expect };
+
+/** Menu Start, then Start of the world choice (world and difficulty as preselected). */
+export async function startRun(page: import("@playwright/test").Page): Promise<void> {
+  await page.locator("#start").click();
+  await expect(page.locator("#world-screen")).toBeVisible();
+  await page.locator("#world-start").click();
+}

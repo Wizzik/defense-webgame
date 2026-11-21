@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Page } from "@playwright/test";
 import type { GameSnapshot } from "../client/game/debug";
-import { expect, test } from "./fixtures";
+import { expect, startRun, test } from "./fixtures";
 import { luminanceStdDev } from "./luminance";
 
 declare global {
@@ -112,7 +112,7 @@ test("menu starts a run on the available backend", async ({ page }, testInfo) =>
   await page.goto("/?seed=1&lang=en");
   const start = page.locator("#start");
   await expect(start).toHaveText("Start", { timeout: 90_000 });
-  await start.click();
+  await startRun(page);
   await page.waitForFunction(() => (window.__game?.frames ?? 0) > 30, undefined, {
     timeout: 90_000,
     polling: 250,
@@ -152,14 +152,14 @@ test("the shadow map is on unless ?shadows=0 or the GPU is software, and the gam
     software: window.__game!.gpu.software,
   }));
   expect(shadows).toBe(!software);
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   await page.waitForFunction(() => (window.__game?.frames ?? 0) > 30, undefined, { timeout: 90_000, polling: 250 });
 
   await page.goto("/?seed=1&lang=en&shadows=0");
   await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
   expect(await page.evaluate(() => window.__game!.render.shadows)).toBe(false);
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   await page.waitForFunction(() => (window.__game?.frames ?? 0) > 30, undefined, { timeout: 90_000, polling: 250 });
 });
@@ -174,13 +174,13 @@ test("menu warns about software rendering only on a software GPU", async ({ page
   if (gpu.software) await expect(warning).toBeVisible();
   else await expect(warning).toBeHidden();
   // the warning never blocks the start
-  await start.click();
+  await startRun(page);
   await waitForScreen(page, "playing");
 });
 
 test("level-up shows three cards and a pick resumes the run", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&debug=1&lang=cs");
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   await page.evaluate((n) => window.__game!.debug!.grantXp(n), xpFirst);
   await waitForScreen(page, "levelUp");
@@ -199,7 +199,7 @@ test("level-up shows three cards and a pick resumes the run", async ({ page }, t
 
 test("run ends with the end screen", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&duration=10&speed=8&debug=1&lang=en");
-  await page.locator("#start").click();
+  await startRun(page);
   // the duration brings the final boss; the run is won when it falls
   await page.waitForFunction(() => window.__game?.boss?.id === "dread-regent", undefined, { timeout: 90_000, polling: 100 });
   expect(await page.evaluate(() => window.__game?.screen)).not.toBe("won");
@@ -226,7 +226,7 @@ test("menu lets you pick a hero", async ({ page }, testInfo) => {
     body: await page.screenshot({ type: "png" }),
     contentType: "image/png",
   });
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   expect(await page.evaluate(() => window.__game?.hero)).toBe("nightglaive");
   expect(await page.evaluate(() => window.__game?.screen)).toBe("playing");
@@ -246,7 +246,7 @@ test("every hero has its own model", async ({ page }) => {
     expect(await page.evaluate(() => window.__game?.render.heroModels), `${hero} models`).toBe(1);
   }
   // a restart puts a fresh model in place of the old one
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   expect(await page.evaluate(() => window.__game?.render.heroModels)).toBe(1);
 });
@@ -273,7 +273,7 @@ test("the menu lists eight heroes and starts each of the new ones", async ({ pag
     await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
     await expect(page.locator("button.hero-button")).toHaveCount(8);
     await expect(page.locator(`button.hero-button[data-hero="${hero}"]`)).toHaveAttribute("aria-pressed", "true");
-    await page.locator("#start").click();
+    await startRun(page);
     await waitForScreen(page, "playing");
     expect(await page.evaluate(() => window.__game?.hero)).toBe(hero);
     const screen = await playToEnd(page, 60_000, 200);
@@ -286,7 +286,7 @@ test("every hero plays without errors", async ({ page }, testInfo) => {
   for (const hero of heroIds) {
     await page.goto(`/?seed=1&hero=${hero}&debug=1&speed=8&duration=20&lang=en`);
     await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
-    await page.locator("#start").click();
+    await startRun(page);
     await waitForScreen(page, "playing");
     expect(await page.evaluate(() => window.__game?.hero)).toBe(hero);
     await page.evaluate(() => {
@@ -327,7 +327,7 @@ test("every enemy type renders without errors", async ({ page }, testInfo) => {
     timeout: 3_000,
     polling: 50,
   });
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   // the row walks to the hero: shooters fire and die next to it, the chaplain heals
   await page.waitForTimeout(1_500);
@@ -347,7 +347,7 @@ test("pack arrows point at a new pack", async ({ page }) => {
   await page.goto("/?seed=1&speed=2&lang=en");
   await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
   expect(await page.evaluate(() => window.__game?.packArrows)).toBe(0);
-  await page.locator("#start").click();
+  await startRun(page);
   await page.waitForFunction(() => (window.__game?.packArrows ?? 0) >= 1, undefined, { timeout: 5_000, polling: 50 });
   await expect(page.locator(".pack-arrow:not([hidden])").first()).toBeVisible();
 });
@@ -356,7 +356,7 @@ test("a lancer charge renders without errors", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&debug=1&duration=60&lang=en");
   await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
   await page.evaluate(() => window.__game!.debug!.spawnEach());
-  await page.locator("#start").click();
+  await startRun(page);
   await page.waitForFunction(() => (window.__game?.charging ?? 0) >= 1, undefined, { timeout: 6_000, polling: 30 });
   await testInfo.attach(`lancer-charge-${testInfo.project.name}`, {
     body: await page.screenshot({ type: "png" }),
@@ -368,7 +368,7 @@ test("a lancer charge renders without errors", async ({ page }, testInfo) => {
 
 test("R casts the ultimate and T switches auto", async ({ page }) => {
   await page.goto("/?seed=1&hero=stonehorn&debug=1&lang=en");
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   expect(await page.evaluate(() => window.__game?.ultimateAuto)).toBe(true);
 
@@ -384,7 +384,7 @@ test("R casts the ultimate and T switches auto", async ({ page }) => {
 
 test("a new run has ten slots; a shared spell and a passive learned by debug show in the HUD and the spell casts", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&hero=stonehorn&debug=1&lang=en");
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   const ids = await page.evaluate(() => window.__game!.abilityIds.slice());
   expect(ids).toHaveLength(10);
@@ -422,7 +422,7 @@ test("a new run has ten slots; a shared spell and a passive learned by debug sho
 
 test("Space dashes", async ({ page }) => {
   await page.goto("/?seed=1&lang=en");
-  await page.locator("#start").click(); // the Start button hides; keyboard focus then falls back to the page, so Space reaches the game
+  await startRun(page); // the Start button hides; keyboard focus then falls back to the page, so Space reaches the game
   await waitForScreen(page, "playing");
   await page.waitForFunction(() => (window.__game?.tick ?? 0) > 5, undefined, { timeout: 30_000 });
   const before = await page.evaluate(() => ({ x: window.__game!.heroX, y: window.__game!.heroY }));
@@ -439,7 +439,7 @@ test("a miniboss shows its bar and name", async ({ page }, testInfo) => {
   await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
   // the run behind the menu already stands at the start of the phase
   await page.waitForFunction(() => window.__game?.phase === 6, undefined, { timeout: 30_000 });
-  await page.locator("#start").click();
+  await startRun(page);
   await page.waitForFunction(() => window.__game?.boss?.id === "iron-marshal", undefined, { timeout: 30_000, polling: 50 });
   const bar = page.locator("#boss-bar");
   await expect(bar).toBeVisible();
@@ -468,7 +468,7 @@ test("a run from phase 6 meets the Blood Clan: its news follows the boss's, spaw
   await page.evaluate(() => {
     for (let slot = 0; slot < 4; slot++) window.__game!.debug!.setAbilityLevel(slot, 5);
   });
-  await page.locator("#start").click();
+  await startRun(page);
   const announce = page.locator("#announce");
   const deadline = Date.now() + 60_000;
   const seen: string[] = [];
@@ -492,7 +492,7 @@ test("an elite rush is announced", async ({ page }) => {
   await page.evaluate(() => {
     for (let slot = 0; slot < 4; slot++) window.__game!.debug!.setAbilityLevel(slot, 5);
   });
-  await page.locator("#start").click();
+  await startRun(page);
   const announce = page.locator("#announce");
   const deadline = Date.now() + 90_000;
   let seen = false;
@@ -512,7 +512,7 @@ test("the finale shows the final boss and ends with a win", async ({ page }) => 
   await page.goto("/?seed=1&debug=1&phase=21&lang=cs");
   await expect(page.locator("#start")).toHaveText("Hrát", { timeout: 90_000 });
   await page.waitForFunction(() => window.__game?.phase === 21, undefined, { timeout: 30_000 });
-  await page.locator("#start").click();
+  await startRun(page);
   await page.waitForFunction(() => window.__game?.boss?.id === "dread-regent", undefined, { timeout: 30_000, polling: 50 });
   await expect(page.locator(".hud-phase")).toHaveText("Finále");
   await expect(page.locator("#boss-bar .boss-name")).toHaveText("Hrůzný regent");
@@ -528,7 +528,7 @@ test("phase without debug starts a normal run", async ({ page }) => {
     await page.waitForFunction(() => window.__game?.hero !== "", undefined, { timeout: 30_000 });
     expect(await page.evaluate(() => window.__game?.tick), query).toBe(0);
     expect(await page.evaluate(() => window.__game?.phase), query).toBe(1);
-    await page.locator("#start").click();
+    await startRun(page);
     await waitForScreen(page, "playing");
     await page.waitForFunction(() => (window.__game?.tick ?? 0) > 10, undefined, { timeout: 30_000 });
     expect(await page.evaluate(() => window.__game?.boss), query).toBeNull();
@@ -539,7 +539,7 @@ test("phase without debug starts a normal run", async ({ page }) => {
 test("a restart clears the boss bar", async ({ page }) => {
   await page.goto("/?seed=1&debug=1&phase=21&lang=en");
   await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
-  await page.locator("#start").click();
+  await startRun(page);
   await page.waitForFunction(() => window.__game?.boss !== null, undefined, { timeout: 30_000, polling: 50 });
   await expect(page.locator("#boss-bar")).toBeVisible();
   await expect(page.locator("#announce")).toHaveText("Dread Regent has arrived");
@@ -553,7 +553,7 @@ test("a restart clears the boss bar", async ({ page }) => {
   await expect(page.locator("#announce")).toBeHidden();
   // and the new run brings its own boss and news
   await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
-  await page.locator("#start").click();
+  await startRun(page);
   await page.waitForFunction(() => window.__game?.boss !== null, undefined, { timeout: 30_000, polling: 50 });
   await expect(page.locator("#boss-bar")).toBeVisible();
 });
@@ -566,7 +566,7 @@ test("a slam shows a ring and hides it after the hit", async ({ page }, testInfo
   expect(await page.evaluate(() => window.__game!.render.slamRings)).toBe(0);
   // common gear in every slot: the Blood Clan's lusted warlord kills a bare Mistwarden before the first slam
   await wearCommons(page);
-  await page.locator("#start").click();
+  await startRun(page);
   await page.waitForFunction(() => window.__game?.boss?.id === "iron-marshal", undefined, { timeout: 30_000, polling: 50 });
   // stay next to the boss until its slam is ready (7 s after it came) and it winds up
   const deadline = Date.now() + 60_000;
@@ -599,7 +599,7 @@ test("a slam shows a ring and hides it after the hit", async ({ page }, testInfo
 
 test("a chest takes gold and offers three rolled items; the pick lands in the gear", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&debug=1&lang=cs");
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   const before = await page.evaluate(() => {
     const g = window.__game!;
@@ -645,7 +645,7 @@ test("a chest takes gold and offers three rolled items; the pick lands in the ge
 
 test("a chest card for a worn slot opens the compare; Esc goes back, 1 keeps, the take button takes", async ({ page }) => {
   await page.goto("/?seed=1&debug=1&lang=cs");
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   await wearCommons(page);
   await page.evaluate(() => {
@@ -712,7 +712,7 @@ test("a chest card for a worn slot opens the compare; Esc goes back, 1 keeps, th
 
 test("C opens the gear panel and pauses the run; C closes it; C does nothing under the cards", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&debug=1&lang=cs");
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   await expect(page.locator("#gear-panel")).toBeHidden();
 
@@ -750,7 +750,7 @@ test("C opens the gear panel and pauses the run; C closes it; C does nothing und
 
 test("a boss that falls drops an item into the collection and the end screen lists it", async ({ page }) => {
   await page.goto("/?seed=1&debug=1&phase=6&lang=cs");
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   await expect(page.locator("#save-warning")).toBeHidden();
   expect(await page.evaluate(() => ({ collection: window.__game!.collection, saved: window.__game!.gearSaved })))
@@ -768,7 +768,7 @@ test("a boss that falls drops an item into the collection and the end screen lis
   await page.evaluate(() => window.__game!.debug!.grantItem("oaken-shield", 9));
   expect(await page.evaluate(() => window.__game!.collection["oaken-shield"])).toBe(5);
   await page.goto("/?seed=1&debug=1&phase=21&lang=cs");
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   await page.waitForFunction(() => window.__game!.boss !== null);
   await page.evaluate(() => window.__game!.debug!.killBoss());
@@ -845,7 +845,7 @@ test("the gear screen equips an item for one hero; the run starts with it", asyn
 
   await page.locator("#gear-back").click();
   await expect(page.locator("#gear-screen")).toBeHidden();
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   const worn = await page.evaluate(() => window.__game!.gear.filter((slot) => slot !== null));
   expect(worn).toEqual([
@@ -875,7 +875,7 @@ test("every hero has its own doll", async ({ page }) => {
 
 test("orbs lie on the map; a berserk orb shows in the HUD; a heart heals the hurt hero", async ({ page }) => {
   await page.goto("/?seed=1&lang=en&debug=1&speed=4&hero=stonehorn");
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreen(page, "playing");
   // the first orb comes at 8 s; level-up cards pause the run on the way
   for (let i = 0; i < 400; i++) {
@@ -915,7 +915,7 @@ test("orbs lie on the map; a berserk orb shows in the HUD; a heart heals the hur
 
 test("settings open with O, pause the run and persist", async ({ page }) => {
   await page.goto("/?seed=1&debug=1&lang=cs");
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreenPickingLevelUps(page, "playing");
   await page.keyboard.press("KeyO");
   await page.waitForFunction(() => window.__game!.settingsOpen === true);
@@ -944,8 +944,67 @@ test("no audio request fails", async ({ page }) => {
     if (response.url().includes("/audio/") && response.status() >= 400) failed.push(`${response.status()} ${response.url()}`);
   });
   await page.goto("/?seed=1&debug=1");
-  await page.locator("#start").click();
+  await startRun(page);
   await waitForScreenPickingLevelUps(page, "playing");
   await page.waitForTimeout(1500);
   expect(failed).toEqual([]);
+});
+
+test("the world choice opens only world 1 on normal at first", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await page.locator("#start").click();
+  await expect(page.locator("#world-screen")).toBeVisible();
+  await expect(page.locator('#world-screen [data-world="1"]')).toBeEnabled();
+  for (const w of ["2", "3", "4", "5"]) await expect(page.locator(`#world-screen [data-world="${w}"]`)).toBeDisabled();
+  await expect(page.locator('#world-screen [data-difficulty="normal"]')).toBeEnabled();
+  await expect(page.locator('#world-screen [data-difficulty="insane"]')).toBeDisabled();
+  await expect(page.locator('#world-screen [data-difficulty="hell"]')).toBeDisabled();
+  await expect(page.locator("#world-detail")).toContainText("No extra reward");
+  // Back returns to the menu, Esc too
+  await page.locator("#world-back").click();
+  await expect(page.locator("#start")).toBeVisible();
+  await page.locator("#start").click();
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#world-screen")).toBeHidden();
+  await startRun(page);
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => [window.__game!.world, window.__game!.difficulty])).toEqual([1, "normal"]);
+  expect(await page.evaluate(() => window.__game!.unlocked)).toEqual(["1-normal"]);
+});
+
+test("a locked course from the URL falls back to world 1 on normal", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en&world=4&difficulty=hell");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await page.locator("#start").click();
+  await expect(page.locator('#world-screen [data-world="1"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator('#world-screen [data-difficulty="normal"]')).toHaveAttribute("aria-pressed", "true");
+  await page.locator("#world-start").click();
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => [window.__game!.world, window.__game!.difficulty])).toEqual([1, "normal"]);
+});
+
+test("debug opens every course; hell world 3 makes enemies tougher", async ({ page }) => {
+  await page.goto("/?seed=1&lang=cs&debug=1");
+  await expect(page.locator("#start")).toHaveText("Hrát", { timeout: 90_000 });
+  expect(await page.evaluate(() => window.__game!.unlocked.length)).toBe(15);
+  await page.locator("#start").click();
+  await page.locator('#world-screen [data-difficulty="hell"]').click();
+  await page.locator('#world-screen [data-world="3"]').click();
+  await expect(page.locator("#world-detail")).toContainText("Síla nepřátel ×4,5");
+  await page.locator("#world-start").click();
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => [window.__game!.world, window.__game!.difficulty])).toEqual([3, "hell"]);
+});
+
+test("a won run shows a star on its world card", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en&debug=1&duration=5");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await startRun(page);
+  expect(await playToEnd(page)).toBe("won");
+  expect(await page.evaluate(() => window.__game!.progressSaved)).toBe(false);
+  await page.locator("#end button.primary").click();
+  await expect(page.locator("#start")).toBeVisible();
+  await page.locator("#start").click();
+  await expect(page.locator('#world-screen [data-world="1"] .world-card-status')).toHaveText("★ win");
 });
