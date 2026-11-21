@@ -3,13 +3,25 @@ import { gameData } from "../../sim/testing/game-data";
 import { firstDifference, matrixCases, matrixDigest, runCase, type CaseResult, type MatrixCase } from "./matrix";
 
 describe("matrixCases", () => {
-  it("lists the eight heroes and four start phases with unique ids", () => {
+  it("lists the eight heroes, four start phases and two harder courses with unique ids", () => {
     const data = gameData();
     const cases = matrixCases(data);
-    expect(cases).toHaveLength(12);
+    expect(cases).toHaveLength(14);
     expect(cases.slice(0, 8).map((c) => c.id)).toEqual(data.heroes.map((h) => `h-${h.id}`));
-    expect(cases.slice(8).map((c) => c.id)).toEqual(["p6", "p11", "p16", "p21"]);
-    expect(new Set(cases.map((c) => c.id)).size).toBe(12);
+    expect(cases.slice(8).map((c) => c.id)).toEqual(["p6", "p11", "p16", "p21", "w3-insane", "w5-hell"]);
+    expect(cases.find((c) => c.id === "w3-insane")).toMatchObject({ hero: "stonehorn", seed: 6, world: 3, difficulty: "insane" });
+    expect(cases.find((c) => c.id === "w5-hell")).toMatchObject({ hero: "redcleaver", seed: 7, world: 5, difficulty: "hell", startPhase: 6 });
+    expect(new Set(cases.map((c) => c.id)).size).toBe(14);
+  });
+
+  it("the harder courses repeat their checkpoints and differ from world 1 normal", () => {
+    const data = gameData();
+    for (const id of ["w3-insane", "w5-hell"]) {
+      const c = { ...matrixCases(data).find((m) => m.id === id)!, maxTicks: 900 };
+      const first = runCase(data, c);
+      expect(runCase(data, c).checkpoints, id).toEqual(first.checkpoints);
+      expect(runCase(data, { ...c, world: 1, difficulty: "normal" }).checkpoints, id).not.toEqual(first.checkpoints);
+    }
   });
 });
 

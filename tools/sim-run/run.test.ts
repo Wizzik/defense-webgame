@@ -64,6 +64,15 @@ describe("summaries of the full run", () => {
     expect(() => parseArgs(["--seeds", "x"])).toThrow("--seeds");
   });
 
+  it("parses worlds and difficulties", () => {
+    expect(parseArgs([])).toMatchObject({ worlds: [1], difficulties: ["normal"] });
+    expect(parseArgs(["--world", "all", "--difficulty", "hell"])).toMatchObject({ worlds: [1, 2, 3, 4, 5], difficulties: ["hell"] });
+    expect(parseArgs(["--world", "3", "--difficulty", "all"])).toMatchObject({ worlds: [3], difficulties: ["normal", "insane", "hell"] });
+    expect(() => parseArgs(["--world", "7"])).toThrow("--world");
+    expect(() => parseArgs(["--world", "0"])).toThrow("--world");
+    expect(() => parseArgs(["--difficulty", "nightmare"])).toThrow("--difficulty");
+  });
+
   it("a summary lists boss kill times", () => {
     const s = playBot(gameData(), 1, 260, "stonehorn", false, 6);
     expect(s.bosses[0]).toMatchObject({ id: "iron-marshal", spawnSeconds: 250 });

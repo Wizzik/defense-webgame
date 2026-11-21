@@ -5,7 +5,7 @@ import { createRun, isEmptySlot, passiveSlotRange, sharedSlotRange } from "../..
 import type { LoadoutEntry, Run, RunResult } from "../../sim/index";
 import type { TickInput } from "../../sim/input";
 import { gameData } from "../../sim/testing/game-data";
-import type { GameData } from "../../data/schema";
+import { DIFFICULTY_IDS, type DifficultyId, type GameData } from "../../data/schema";
 import { attackHit, BURST_PHASES, burstLine, spellBurst } from "./burst";
 import { GEAR_PRESETS, type GearPresetName, gearPreset } from "./gear-presets";
 
@@ -73,9 +73,9 @@ export function idleInput(run: Run, out: TickInput): TickInput {
 /** Plays one run with the autopilot, or with no input at all when `idle` is set. */
 export function playBot(
   data: GameData, seed: number, durationSeconds?: number, hero?: string, idle = false, startPhase?: number,
-  loadout: readonly LoadoutEntry[] = [],
+  loadout: readonly LoadoutEntry[] = [], world = 1, difficulty: DifficultyId = "normal",
 ): RunSummary {
-  const run = createRun(data, { seed, durationSeconds, hero, startPhase, loadout });
+  const run = createRun(data, { seed, durationSeconds, hero, startPhase, loadout, world, difficulty });
   const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   const phaseTicks = data.rules.run.phaseSeconds * TICKS_PER_SECOND;
   const phaseXp: number[] = [];
@@ -281,12 +281,17 @@ interface Args {
   phaseXp: boolean;
   /** The loadout every hero wears (tools/sim-run/gear-presets.ts). */
   gear: GearPresetName;
+  /** Worlds and difficulties to play; every combination is played (`--world`, `--difficulty`). */
+  worlds: number[];
+  difficulties: DifficultyId[];
 }
 
 const SWITCHES = new Set(["--idle", "--phase-xp"]);
 
-export function parseArgs(argv: string[]): Args {
-  const out: Args = { hero: "all", seed: 1, runs: 1, idle: false, phaseXp: false, gear: "none" };
+export function parseArgs(argv: string[], worldCount = gameData().worlds.length): Args {
+  const out: Args = {
+    hero: "all", seed: 1, runs: 1, idle: false, phaseXp: false, gear: "none", worlds: [1], difficulties: ["normal"],
+  };
   for (let i = 0; i < argv.length; i += 2) {
     const flag = argv[i];
     if (SWITCHES.has(flag)) {
@@ -305,6 +310,19 @@ export function parseArgs(argv: string[]): Args {
     if (flag === "--gear") {
       if (!(GEAR_PRESETS as readonly string[]).includes(raw ?? "")) throw new Error("sim:run: --gear needs none, mid or full");
       out.gear = raw as GearPresetName;
+      continue;
+    }
+    if (flag === "--world") {
+      const n = Number(raw);
+      if (raw === "all") out.worlds = Array.from({ length: worldCount }, (_, k) => k + 1);
+      else if (Number.isInteger(n) && n >= 1 && n <= worldCount) out.worlds = [n];
+      else throw new Error(`sim:run: --world needs a world from 1 to ${worldCount} or all`);
+      continue;
+    }
+    if (flag === "--difficulty") {
+      if (raw === "all") out.difficulties = [...DIFFICULTY_IDS];
+      else if ((DIFFICULTY_IDS as readonly string[]).includes(raw ?? "")) out.difficulties = [raw as DifficultyId];
+      else throw new Error("sim:run: --difficulty needs normal, insane, hell or all");
       continue;
     }
     if (flag === "--seeds") {
@@ -329,18 +347,26 @@ function main(): void {
   const args = parseArgs(process.argv.slice(2));
   const data = gameData();
   const ids = args.hero === "all" ? data.heroes.map((h) => h.id) : [args.hero];
-  const all: RunSummary[] = [];
-  for (const hero of ids) {
-    const summaries: RunSummary[] = [];
-    for (let i = 0; i < args.runs; i++) {
-      const s = playBot(data, args.seed + i, args.duration, hero, args.idle, args.phase, gearPreset(data, hero, args.gear));
-      summaries.push(s);
-      console.log(formatSummary(s));
+  const several = args.worlds.length * args.difficulties.length > 1;
+  for (const world of args.worlds) {
+    for (const difficulty of args.difficulties) {
+      if (several) console.log(`== world ${world} ${data.worlds[world - 1]!.id} / ${difficulty} ==`);
+      const all: RunSummary[] = [];
+      for (const hero of ids) {
+        const summaries: RunSummary[] = [];
+        for (let i = 0; i < args.runs; i++) {
+          const s = playBot(
+            data, args.seed + i, args.duration, hero, args.idle, args.phase, gearPreset(data, hero, args.gear), world, difficulty,
+          );
+          summaries.push(s);
+          console.log(formatSummary(s));
+        }
+        all.push(...summaries);
+        console.log(formatHeroSummary(hero, summaries, args.idle, data.rules.run.finale.boss, data));
+      }
+      if (args.phaseXp) console.log(`phaseXp: ${phaseXpLine(all, data.rules.phases.length)}`);
     }
-    all.push(...summaries);
-    console.log(formatHeroSummary(hero, summaries, args.idle, data.rules.run.finale.boss, data));
   }
-  if (args.phaseXp) console.log(`phaseXp: ${phaseXpLine(all, data.rules.phases.length)}`);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) main();
