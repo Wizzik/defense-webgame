@@ -1,4 +1,5 @@
 import type { Run } from "./run";
+import { cellCol, cellRow, MAP_CELL, MAP_SIZE } from "./world-map/grid";
 
 /** How an enemy type walks; the index of `behavior` in the enemy schema. */
 export const Behavior = { Siege: 0, Flank: 1, Skirmish: 2, Support: 3, Charge: 4 } as const;
@@ -90,4 +91,58 @@ function steerSupport(run: Run, i: number): void {
     steerX = 0;
     steerY = 0;
   }
+}
+
+/** Cells ahead of an enemy that avoidIslands looks into (besides its own). */
+const AVOID_CELLS_AHEAD = 2;
+/** An island is avoided when its centre is ahead within r + R + AVOID_LOOKAHEAD * r. */
+const AVOID_LOOKAHEAD = 1.5;
+
+/**
+ * Turns the walking direction (steerX, steerY) of enemy i (collision r) onto the tangent around the nearest island
+ * ahead of it (spec 2026-11-21 difficulties 4.6): the island's centre lies ahead (projection > 0 and below
+ * r + R + 1.5 r) and less than R + r to the side. It passes on the side away from the centre; exactly in line, even
+ * slots go right and odd slots left. The wall is left to the flow fields and pushOut.
+ */
+export function avoidIslands(run: Run, i: number, r: number): void {
+  const map = run.map;
+  if (map.islandCount === 0 || (steerX === 0 && steerY === 0)) return;
+  const e = run.enemies;
+  const x = e.x[i];
+  const y = e.y[i];
+  let best = -1;
+  let bestAlong = 0;
+  let bestCross = 0;
+  let lastCell = -1;
+  for (let k = 0; k <= AVOID_CELLS_AHEAD; k++) {
+    const cell = cellRow(y + steerY * k * MAP_CELL) * MAP_SIZE + cellCol(x + steerX * k * MAP_CELL);
+    if (cell === lastCell) continue;
+    lastCell = cell;
+    for (let j = map.cellStart[cell]; j < map.cellStart[cell + 1]; j++) {
+      const item = map.cellItems[j];
+      if (item < map.segCount) continue;
+      const isl = item - map.segCount;
+      const R = map.islandR[isl];
+      const rx = map.islandX[isl] - x;
+      const ry = map.islandY[isl] - y;
+      const along = rx * steerX + ry * steerY;
+      if (along <= 0 || along >= r + R + AVOID_LOOKAHEAD * r) continue;
+      const cross = steerX * ry - steerY * rx;
+      if (cross >= R + r || cross <= -(R + r)) continue;
+      if (best >= 0 && along >= bestAlong) continue;
+      best = isl;
+      bestAlong = along;
+      bestCross = cross;
+    }
+  }
+  if (best < 0) return;
+  const rx = map.islandX[best] - x;
+  const ry = map.islandY[best] - y;
+  const d = Math.sqrt(rx * rx + ry * ry);
+  if (d < 1e-6) return;
+  const nx = rx / d;
+  const ny = ry / d;
+  const right = bestCross > 0 || (bestCross === 0 && (i & 1) === 0);
+  steerX = right ? ny : -ny;
+  steerY = right ? -nx : nx;
 }

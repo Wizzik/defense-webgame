@@ -7,11 +7,11 @@ import { NO_INPUT } from "./input";
 import { gainXp } from "./level-up";
 import { createRun } from "./run";
 import { spawnBoss } from "./timeline";
-import { gameData } from "./testing/game-data";
+import { gameData, openArena } from "./testing/game-data";
 import { silenceSpawns } from "./testing/silence";
 
 function newRun(durationSeconds = 100) {
-  const data = gameData();
+  const data = openArena(gameData());
   data.rules.arena.width = 6000;
   data.rules.arena.height = 5000;
   data.rules.arena.heroStart = { x: 0, y: 0 };

@@ -8,7 +8,8 @@ import { auraDamageScale, auraSpeedScale, updateEnemyAuras } from "./enemy-aura"
 import { cancelCharge, Charge, chargeVX, chargeVY, updateCharge } from "./enemy-charge";
 import { cancelSlam, updateSlam } from "./enemy-slam";
 import { strikeVX, strikeVY, updateStrike } from "./enemy-strike";
-import { Behavior, steer, steerHold, steerX, steerY } from "./enemy-steer";
+import { avoidIslands, Behavior, steer, steerHold, steerX, steerY } from "./enemy-steer";
+import { pathSpeedScale, pushOut as pushOutOfMap, pushX as mapPushX, pushY as mapPushY } from "./world-map/geometry";
 import type { Run } from "./run";
 
 const MAX_NEIGHBOURS = 64;
@@ -48,6 +49,7 @@ export function updateEnemies(run: Run): void {
     // Slow lowers walking speed only (not knockback) and runs down even while stunned.
     let walk = def.moveSpeed * auraSpeedScale(run, i) * bloodlustSpeedScale(run, i);
     if (run.enraged && i === run.finalBossSlot) walk *= rules.run.finale.enrage.moveSpeed;
+    walk *= pathSpeedScale(run.map, x, y, run.map.pathBonus);
     if (e.slowTicks[i] > 0) {
       walk *= 1 - e.slowFactor[i];
       e.slowTicks[i]--;
@@ -129,6 +131,7 @@ export function updateEnemies(run: Run): void {
           e.facingY[i] = uy;
         } else {
           e.action[i] = Action.Move;
+          avoidIslands(run, i, def.collision);
           vx = steerX * walk;
           vy = steerY * walk;
         }
@@ -170,6 +173,12 @@ export function updateEnemies(run: Run): void {
     ny = pushOutY;
     nx = pushOut(nx, ny, castle.x, castle.y, castle.radius + def.collision);
     ny = pushOutY;
+    // Out of the wall and the islands; a charge or a leap flies over them and is pushed out after it lands.
+    if (!charging && !leaping) {
+      pushOutOfMap(run.map, nx, ny, def.collision);
+      nx = mapPushX;
+      ny = mapPushY;
+    }
     const insideX = Math.max(-arenaX + def.collision, Math.min(arenaX - def.collision, nx));
     const insideY = Math.max(-arenaY + def.collision, Math.min(arenaY - def.collision, ny));
     // A charge ends at the arena edge.

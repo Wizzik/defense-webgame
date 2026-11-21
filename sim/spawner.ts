@@ -5,6 +5,7 @@ import type { Rules } from "../data/schema";
 import type { Run } from "./run";
 import { dirX, dirY, randomDirection, rotatedDirection } from "./spawn-direction";
 import { pickType } from "./spawn-tables";
+import { nearestFree, pushX, pushY } from "./world-map/geometry";
 import { enemyDamageScale, enemyHp } from "./difficulty";
 
 /** A pack of this size fits `arena.spawn.spread`; a bigger one spreads over a wider square. */
@@ -79,8 +80,11 @@ export function scatterMember(
 ): number {
   const { arena } = run.data.rules;
   const def = run.data.enemies[type];
-  const x = clamp(cx + (run.rng.next() * 2 - 1) * half, arena.width / 2 - def.collision);
-  const y = clamp(cy + (run.rng.next() * 2 - 1) * half, arena.height / 2 - def.collision);
+  const rx = cx + (run.rng.next() * 2 - 1) * half;
+  const ry = cy + (run.rng.next() * 2 - 1) * half;
+  nearestFree(run.map, rx, ry, def.collision);
+  const x = clamp(pushX, arena.width / 2 - def.collision);
+  const y = clamp(pushY, arena.height / 2 - def.collision);
   run.stats.spawned++;
   const slot = run.enemies.spawn(type, role, x, y, enemyHp(run, type, scale), enemyDamageScale(run, scale), run.tick);
   // a strike from afar waits its whole cooldown after the spawn (a boss's first strike: sim/timeline.ts spawnBoss)
@@ -89,7 +93,7 @@ export function scatterMember(
 }
 
 /**
- * Spawns one enemy of `type` at (x, y) (clamped into the arena) with the hp and damage of this moment, like a pack member.
+ * Spawns one enemy of `type` at (x, y) (moved to the nearest free place, clamped into the arena) with the hp and damage of this moment, like a pack member.
  * Draws nothing from the rng. Never pushes another enemy out: returns -1 when the store is full.
  */
 export function spawnAt(run: Run, type: number, role: number, x: number, y: number): number {
@@ -98,8 +102,9 @@ export function spawnAt(run: Run, type: number, role: number, x: number, y: numb
   const { arena } = run.data.rules;
   const def = run.data.enemies[type];
   const scale = timeScale(run.data.rules, run.tick);
+  nearestFree(run.map, x, y, def.collision);
   const slot = store.spawn(
-    type, role, clamp(x, arena.width / 2 - def.collision), clamp(y, arena.height / 2 - def.collision),
+    type, role, clamp(pushX, arena.width / 2 - def.collision), clamp(pushY, arena.height / 2 - def.collision),
     enemyHp(run, type, scale), enemyDamageScale(run, scale), run.tick,
   );
   if (slot < 0) return -1;

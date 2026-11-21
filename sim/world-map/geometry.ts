@@ -135,14 +135,16 @@ function pushFrom(map: WorldMap, item: number, r: number): boolean {
 }
 
 /**
- * The nearest free place for a circle of radius r: pushOut when that frees it, otherwise the free cell centres in
+ * The nearest free place for a circle of radius r: pushOut (clamped into the grid) when that frees it, otherwise the free cell centres in
  * growing square rings around (x, y), the closest of the first ring that has one. Kept inside the grid. Result in
  * pushX/pushY.
  */
 export function nearestFree(map: WorldMap, x: number, y: number, r: number): void {
   const limit = -MAP_ORIGIN - r;
   pushOut(map, x, y, r);
-  if (Math.abs(pushX) <= limit && Math.abs(pushY) <= limit && isFree(map, pushX, pushY, r)) return;
+  pushX = pushX < -limit ? -limit : pushX > limit ? limit : pushX;
+  pushY = pushY < -limit ? -limit : pushY > limit ? limit : pushY;
+  if (isFree(map, pushX, pushY, r)) return;
   const start = cellOf(x, y);
   const c0 = start % MAP_SIZE;
   const r0 = (start - c0) / MAP_SIZE;

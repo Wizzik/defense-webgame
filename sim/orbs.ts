@@ -1,6 +1,7 @@
 import { OrbKind, startBuff } from "./buffs";
 import { TICKS_PER_SECOND } from "./constants";
 import { EventKind } from "./events";
+import { isFree, nearestFree, pushX, pushY } from "./world-map/geometry";
 import type { Run } from "./run";
 
 /** Places tried for an orb before the last one in the band is taken. */
@@ -70,6 +71,7 @@ export function placeOrb(run: Run, index: number): void {
     const dy = y - castle.y;
     const sq = dx * dx + dy * dy;
     if (sq < minSq || sq > maxSq || x < -limitX || x > limitX || y < -limitY || y > limitY) continue;
+    if (!isFree(run.map, x, y, rules.pickupRadius)) continue;
     px = x;
     py = y;
     let apart = orbs.placed[index] === 0 || farFrom(x, y, orbs.x[index]!, orbs.y[index]!, spacingSq);
@@ -82,7 +84,9 @@ export function placeOrb(run: Run, index: number): void {
     if (apart) break;
   }
   const kind = Math.min(Math.floor(rng.next() * 3), 2);
-  spawnAt(run, index, kind, px, py);
+  // every place, the fallback too, ends outside the obstacles
+  nearestFree(run.map, px, py, rules.pickupRadius);
+  spawnAt(run, index, kind, pushX, pushY);
 }
 
 function spawnAt(run: Run, index: number, kind: number, x: number, y: number): void {
