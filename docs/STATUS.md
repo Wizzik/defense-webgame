@@ -1,10 +1,10 @@
 # Status
 
-Updated 2026-11-20 (multiplayer spike done, PR #27 open; enemy factions merged as PR #26 `b67c076`). Read this first when you resume work.
+Updated 2026-11-21 (multiplayer spike merged as PR #27 `c86fb8b`, Pages deployed; waits for Petr's network tests). Read this first when you resume work.
 
-## Multiplayer spike: done, PR #27 open (2026-11-20, branch `multiplayer-spike`); merge waits for Petr
+## Multiplayer spike: merged (PR #27 as `c86fb8b`, 2026-11-21, Pages deployed); waits for Petr's network tests
 
-- All 7 tasks of `docs/superpowers/plans/2026-11-20-multiplayer-spike.md` done inline in one chat (Petr approved the spike), one final self-review. The game did not change (`git diff main -- sim`: only `sim/hash.ts` and its test). `npm run check` (1040 tests), the build, e2e `webgl2-fallback` (36 of 36) and `sim-chromium` pass; CI on the PR: 78 of 78.
+- All 7 tasks of `docs/superpowers/plans/2026-11-20-multiplayer-spike.md` done inline in one chat (Petr approved the spike), one final self-review. The game did not change (`git diff main -- sim`: only `sim/hash.ts` and its test). `npm run check` (1040 tests), the build, e2e `webgl2-fallback` (36 of 36) and `sim-chromium` pass; CI on the PR: 78 of 78; the CI job timeout went 25 -> 40 minutes (Firefox, WebKit and the `sim-*` projects made the job about 25 minutes). Merged at Petr's word.
 - **Report: `docs/multiplayer/spike-report.md`.** In short:
   - determinism holds: the matrix of 12 autopilot runs gives digest `73372c52` in Node, Chromium, Firefox and WebKit (CI), the first 600 steps of a phase-16 run match step by step; no fix was needed;
   - lockstep works: two Chromium tabs over WebRTC (local PeerServer; the container cannot reach the PeerJS cloud) 60 s, 0 stalls, 0 desyncs; in memory, reordered and delayed delivery stays in sync over 3000 steps and a changed `gold` is caught within 30 steps;
