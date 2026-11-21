@@ -30,7 +30,7 @@ export const CHECKPOINT_EVERY = 300;
 
 /**
  * The cases of spec 5.2: every hero from phase 1, then four late starts with full gear; then a world 3 insane run
- * and a world 5 hell start at phase 6 (difficulties spec 2026-11-21 4.9).
+ * and a world 5 hell start at phase 6 (difficulties spec 2026-11-21 4.9), and a world 1 run through the storm.
  */
 export function matrixCases(data: GameData): MatrixCase[] {
   const cases: MatrixCase[] = data.heroes.map((h) => ({
@@ -43,6 +43,8 @@ export function matrixCases(data: GameData): MatrixCase[] {
     { id: "p21", hero: "sparkshot", seed: 5, startPhase: 21, gear: "full", maxTicks: 6000 },
     { id: "w3-insane", hero: "stonehorn", seed: 6, durationSeconds: 300, gear: "none", maxTicks: 9000, world: 3, difficulty: "insane" },
     { id: "w5-hell", hero: "redcleaver", seed: 7, startPhase: 6, gear: "full", maxTicks: 6000, world: 5, difficulty: "hell" },
+    // obstacles and the summer storm from its first wave (difficulties plan 2)
+    { id: "w1-storm", hero: "sparkshot", seed: 9, startPhase: 3, gear: "none", maxTicks: 4500 },
   );
   return cases;
 }

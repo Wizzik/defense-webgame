@@ -1,7 +1,7 @@
 import { pathToFileURL } from "node:url";
 import { botInput, idleCard } from "../../sim/bot";
 import { TICKS_PER_SECOND } from "../../sim/constants";
-import { createRun, isEmptySlot, passiveSlotRange, sharedSlotRange } from "../../sim/index";
+import { createRun, EventKind, HeroHitSource, isEmptySlot, passiveSlotRange, sharedSlotRange } from "../../sim/index";
 import type { LoadoutEntry, Run, RunResult } from "../../sim/index";
 import type { TickInput } from "../../sim/input";
 import { gameData } from "../../sim/testing/game-data";
@@ -49,6 +49,8 @@ export interface RunSummary {
   sustain: SustainStats;
   /** Enemy factions (spec 2026-11-20): seconds the hero was rooted, hp it lost in poison clouds, enemies raised. */
   factions: { rootedSeconds: number; cloudDamage: number; raised: number };
+  /** The world (difficulties plan 2): islands of the map, storm waves and bolts, bolts that hit the hero. */
+  world: { islands: number; waves: number; bolts: number; boltHits: number };
 }
 
 export interface SustainStats {
@@ -83,6 +85,7 @@ export function playBot(
   const attack: (number | null)[] = BURST_PHASES.map(() => null);
   let lowest = 1;
   let fullKitPhase: number | null = null;
+  let boltHits = 0;
   while (run.state !== "won" && run.state !== "lost") {
     while (phaseXp.length < data.rules.phases.length && run.tick >= phaseXp.length * phaseTicks) {
       phaseXp.push(run.stats.xpGained);
@@ -96,6 +99,9 @@ export function playBot(
     if (idle) idleInput(run, input);
     else botInput(run, input);
     run.step(input);
+    for (let i = 0; i < run.events.count; i++) {
+      if (run.events.kind[i] === EventKind.HeroHit && run.events.u[i] === HeroHitSource.Storm) boltHits++;
+    }
     lowest = Math.min(lowest, run.hero.hp / run.hero.stats.maxHp);
     if (fullKitPhase === null && run.abilities.every((slot) => !isEmptySlot(slot) && slot.level >= slot.def.levels)) {
       fullKitPhase = Math.min(Math.floor(run.tick / phaseTicks) + 1, data.rules.phases.length + 1);
@@ -142,6 +148,7 @@ export function playBot(
       healedHearts: run.stats.healedHearts,
       healedOrb: run.stats.healedOrb,
     },
+    world: { islands: run.map.islandCount, waves: run.hazard.waves, bolts: run.hazard.bolts, boltHits },
     factions: {
       rootedSeconds: run.stats.rootedTicks / TICKS_PER_SECOND,
       cloudDamage: run.stats.cloudDamage,
@@ -229,7 +236,7 @@ export function formatHeroSummary(
     `enraged in ${summaries.filter((s) => s.enraged).length}; losses by minutes: ${lossWindows(summaries)}`;
   const wonChests = wonRuns.length > 0 ? (wonRuns.reduce((a, s) => a + s.chests, 0) / wonRuns.length).toFixed(1) : "-";
   const gear = `  chests avg ${avg((s) => s.chests).toFixed(1)} (won runs ${wonChests}), gold avg ${Math.round(avg((s) => s.gold))}`;
-  return `${head}\n${tail}\n${gear}\n${kitLine(summaries)}\n${burstLine(summaries, data)}\n${sustainLine(summaries)}\n${factionLine(summaries)}`;
+  return `${head}\n${tail}\n${gear}\n${kitLine(summaries)}\n${burstLine(summaries, data)}\n${sustainLine(summaries)}\n${factionLine(summaries)}\n${worldLine(summaries)}`;
 }
 
 /** Hearts, orbs by kind and hp healed by lifesteal, hearts and the heal orb: averages per run. */
@@ -247,6 +254,13 @@ export function factionLine(summaries: RunSummary[]): string {
   const avg = (f: (s: RunSummary["factions"]) => number) => summaries.reduce((a, s) => a + f(s.factions), 0) / summaries.length;
   return `  factions: rooted ${avg((f) => f.rootedSeconds).toFixed(1)} s, cloud hp ${Math.round(avg((f) => f.cloudDamage))}, ` +
     `raised ${avg((f) => f.raised).toFixed(1)}`;
+}
+
+/** Averages per run of the world: `  world: islands 35.5, storm waves 21.0, bolts 42.5, bolts on the hero 3.5`. */
+export function worldLine(summaries: RunSummary[]): string {
+  const avg = (f: (s: RunSummary["world"]) => number) => (summaries.reduce((a, s) => a + f(s.world), 0) / summaries.length).toFixed(1);
+  return `  world: islands ${avg((w) => w.islands)}, storm waves ${avg((w) => w.waves)}, bolts ${avg((w) => w.bolts)}, ` +
+    `bolts on the hero ${avg((w) => w.boltHits)}`;
 }
 
 /** How often each id appears, most first (ties by id): `meteor 7, smite 5`, or `-`. */

@@ -137,8 +137,8 @@
       "kind": "storm",
       "fromPhase": 3,
       "everySeconds": {
-        "min": 35,
-        "max": 45
+        "min": 55,
+        "max": 70
       },
       "bolts": {
         "min": 1,
@@ -294,8 +294,8 @@
       "kind": "storm",
       "fromPhase": 3,
       "everySeconds": {
-        "min": 35,
-        "max": 45
+        "min": 55,
+        "max": 70
       },
       "bolts": {
         "min": 1,
@@ -451,8 +451,8 @@
       "kind": "storm",
       "fromPhase": 3,
       "everySeconds": {
-        "min": 35,
-        "max": 45
+        "min": 55,
+        "max": 70
       },
       "bolts": {
         "min": 1,
@@ -608,8 +608,8 @@
       "kind": "storm",
       "fromPhase": 3,
       "everySeconds": {
-        "min": 35,
-        "max": 45
+        "min": 55,
+        "max": 70
       },
       "bolts": {
         "min": 1,
@@ -765,8 +765,8 @@
       "kind": "storm",
       "fromPhase": 3,
       "everySeconds": {
-        "min": 35,
-        "max": 45
+        "min": 55,
+        "max": 70
       },
       "bolts": {
         "min": 1,

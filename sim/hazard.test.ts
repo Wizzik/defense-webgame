@@ -47,16 +47,17 @@ function waves(run: Run, seconds: number): { tick: number; bolts: number; far: n
 }
 
 describe("summer storm", () => {
-  it("comes in waves of 1-3 bolts 35-45 s apart from phase 3, the first 35-45 s into it", () => {
+  it("comes in waves of 1-3 bolts everySeconds apart from phase 3, the first everySeconds into it", () => {
     const run = createRun(quiet(), { seed: 1, durationSeconds: 100000 });
-    const list = waves(run, 400);
+    const { min, max } = run.data.worlds[0]!.hazard.everySeconds;
+    const list = waves(run, 100 + 6 * max);
     expect(list.length).toBeGreaterThan(4);
-    expect(list[0]!.tick).toBeGreaterThanOrEqual((100 + 35) * 30);
-    expect(list[0]!.tick).toBeLessThanOrEqual((100 + 45) * 30);
+    expect(list[0]!.tick).toBeGreaterThanOrEqual((100 + min) * 30);
+    expect(list[0]!.tick).toBeLessThanOrEqual((100 + max) * 30);
     for (let k = 1; k < list.length; k++) {
       const gap = list[k]!.tick - list[k - 1]!.tick;
-      expect(gap).toBeGreaterThanOrEqual(35 * 30);
-      expect(gap).toBeLessThanOrEqual(45 * 30);
+      expect(gap).toBeGreaterThanOrEqual(min * 30);
+      expect(gap).toBeLessThanOrEqual(max * 30);
     }
     for (const w of list) {
       expect(w.bolts).toBeGreaterThanOrEqual(1);
@@ -152,26 +153,27 @@ describe("summer storm", () => {
     expect(strikes).toBe(0);
   });
 
-  it("from startPhase 11 the first wave comes 35-45 s after the start", () => {
+  it("from startPhase 11 the first wave comes everySeconds after the start", () => {
     const run = createRun(quiet(), { seed: 4, durationSeconds: 100000, startPhase: 11 });
+    const { min, max } = run.data.worlds[0]!.hazard.everySeconds;
     const start = run.tick;
-    const list = waves(run, 50);
+    const list = waves(run, max + 5);
     expect(list.length).toBeGreaterThan(0);
-    expect(list[0]!.tick - start).toBeGreaterThanOrEqual(35 * 30);
-    expect(list[0]!.tick - start).toBeLessThanOrEqual(45 * 30);
+    expect(list[0]!.tick - start).toBeGreaterThanOrEqual(min * 30);
+    expect(list[0]!.tick - start).toBeLessThanOrEqual(max * 30);
   });
 
   it("draws nothing from run.rng: the first pack is the same with a storm that never comes", () => {
     const first = (data: GameData) => {
       const run = createRun(data, { seed: 1 });
-      for (let s = 0; s < 200 * 30 && run.stats.spawned === 0; s++) run.step(NO_INPUT);
+      for (let s = 0; s < 250 * 30 && run.stats.spawned === 0; s++) run.step(NO_INPUT);
       return Array.from({ length: 6 }, (_, i) => [run.enemies.type[i], run.enemies.x[i], run.enemies.y[i]]);
     };
     const late = gameData();
     for (const w of late.worlds) w.hazard.fromPhase = 99;
     const data = gameData();
-    data.rules.run.firstPackSeconds = 150;
-    late.rules.run.firstPackSeconds = 150;
+    data.rules.run.firstPackSeconds = 200;
+    late.rules.run.firstPackSeconds = 200;
     expect(first(data)).toEqual(first(late));
   });
 
