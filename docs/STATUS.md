@@ -1,8 +1,12 @@
 # Status
 
-Updated 2026-11-21 (multiplayer spike merged as PR #27 `c86fb8b`, Pages deployed; waits for Petr's network tests). Read this first when you resume work.
+Updated 2026-11-21 (multiplayer spike merged as PR #27 `c86fb8b`; Petr's first net test found the page loop throttled; next: difficulties). Read this first when you resume work.
 
-## Multiplayer spike: merged (PR #27 as `c86fb8b`, 2026-11-21, Pages deployed); waits for Petr's network tests
+## Next: difficulties with environments (Petr, 2026-11-21)
+
+- Petr: start difficulties now, then progression between runs, credits and legal check, then the multiplayer migration. Design each with a player-count knob (`docs/multiplayer/single-hero-inventory.md`, chapter 5). Start with brainstorming the spec in a new chat.
+
+## Multiplayer spike: merged (PR #27 as `c86fb8b`, 2026-11-21, Pages deployed); Petr's first net test done
 
 - All 7 tasks of `docs/superpowers/plans/2026-11-20-multiplayer-spike.md` done inline in one chat (Petr approved the spike), one final self-review. The game did not change (`git diff main -- sim`: only `sim/hash.ts` and its test). `npm run check` (1040 tests), the build, e2e `webgl2-fallback` (36 of 36) and `sim-chromium` pass; CI on the PR: 78 of 78; the CI job timeout went 25 -> 40 minutes (Firefox, WebKit and the `sim-*` projects made the job about 25 minutes). Merged at Petr's word.
 - **Report: `docs/multiplayer/spike-report.md`.** In short:
@@ -10,8 +14,9 @@ Updated 2026-11-21 (multiplayer spike merged as PR #27 `c86fb8b`, Pages deployed
   - lockstep works: two Chromium tabs over WebRTC (local PeerServer; the container cannot reach the PeerJS cloud) 60 s, 0 stalls, 0 desyncs; in memory, reordered and delayed delivery stays in sync over 3000 steps and a changed `gold` is caught within 30 steps;
   - several heroes: `docs/multiplayer/single-hero-inventory.md`, 38 `sim/` files read the one hero, an 8-step migration of 8-10 chats in which every step keeps the one-player game (the matrix digest is the regression test).
 - New: the hash also covers enemy `maxHp`, `damageScale`, `spawnTick`, last hit and attack ticks, facing, heart values, `ultimateRequested` and the offer shape (the spec's pre-scan was wrong: gold, chests, pickups, projectiles, allies and offers were already hashed). Pages `/determinism/` and `/net-spike/` (after the merge on Pages), Playwright projects `sim-chromium`, `sim-firefox`, `sim-webkit`, `client/net/` (protocol, lockstep, PeerJS 1.5.5 link, room codes).
-- **What Petr does (report chapter 5):** after the merge (a) `/determinism/` in Chrome and Firefox must show `73372c52`; (b) `/net-spike/` Chrome (Host) + Firefox (the link) on one computer 10 minutes; (c) two computers in different networks 10 minutes; send the panel values to the chat.
-- **Open for Petr:** keep the level-up pause for one player or drop it everywhere (co-op has none, R3); the co-op card time limit (Claude: 10 s, then the autopilot card); the order of the next phases (Claude: difficulties, progression and credits as ordered, each with a player-count knob, inventory chapter 5; migration steps 1-4 could go before them).
+- **Petr's first net test (2026-11-21, Chrome host + Firefox guest, one computer):** connected, RTT 0.7-0.8 ms (p95 1.1), hashes matched up to step 89, no desync, 0 rejected, **but only about 105 steps in 5.2 minutes** (host 4375 stalls, guest 580). From the panel numbers the guest page ran its fixed step about 2 times a second and the host about 14 (30 expected): the spike page steps the sim from `requestAnimationFrame`, which browsers throttle in a background, minimized or covered window, and `FixedStepLoop` drops lost time instead of catching up, so lockstep crawls at the slowest window's pace. The headless two-tab test could not show it (headless Chromium does not throttle). Needed before co-op (migration step 7): step the sim on a timer that is not throttled (a Web Worker) and run as many steps as are ready up to the wall-clock target; drawing stays on `requestAnimationFrame`. The spike page is not fixed yet.
+- **Petr's co-op decisions (2026-11-21):** single player keeps the level-up pause; a co-op card choice lasts 10 s, then the autopilot does not pick, the offer stays open and the hero becomes vulnerable again (open: does he attack and cast again before he picks). Full rules: claude.ai project `claude/multiplayer-decisions.md`.
+- **Still for Petr (report chapter 5):** after the merge (a) `/determinism/` in Chrome and Firefox must show `73372c52`; (b) `/net-spike/` Chrome (Host) + Firefox (the link) on one computer 10 minutes; (c) two computers in different networks 10 minutes; send the panel values to the chat.
 - Quick links after the merge: https://wizzik.github.io/defense-webgame/determinism/, https://wizzik.github.io/defense-webgame/net-spike/.
 
 ## Enemy factions: merged (PR #26 as `b67c076`, 2026-11-20, Pages deployed); Petr's playtest passed ("testy super")

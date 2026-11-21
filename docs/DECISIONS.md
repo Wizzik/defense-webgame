@@ -32,6 +32,7 @@ Decisions that still apply. Check here before you change a rule. Newest first in
 
   Seeds 1-20 without gear stay within ±3 for every hero. Off the band: Nightglaive with mid gear (+7, +8 on both seed sets), and on seeds 21-40 Stonehorn (+5), Sparkshot mid (+7) and Mistwarden mid (-7). Every run is decided in the finale (castle losses at 16-20 minutes, as on `main`); no losses gather in the 50 s after a faction arrives. The autopilot is never rooted (it leaves every circle), loses 100-2100 hp a run in clouds and sees 100-370 risen a run.
 - Co-op note (Petr, 2026-11-20; not built here): there is no AI ally for the player (the ally was only meant for simulations); co-op makes the game several times harder (by the number of players); a fallen teammate is revived by standing on him for 5 s; several heroes in the simulation are built at the start of the multiplayer phase.
+- Co-op level-up (Petr, 2026-11-21; not built yet): a single player keeps the level-up pause; in co-op a card choice lasts 10 s, then the autopilot does not pick, the offer stays open and the hero becomes vulnerable again (open: does he attack and cast before he picks).
 
 ## Gravecaller: smaller Bone Stampede, half the Grave Grasp heal (2026-11-19; Petr's wish, the numbers are Claude's)
 
@@ -437,6 +438,7 @@ Open after the tuning:
 
 ## Engineering
 
+- Co-op loop (Petr's net test, 2026-11-21): the co-op client steps the sim on a timer that browsers do not throttle (a Web Worker), not on `requestAnimationFrame`, and catches up to the wall-clock step target as far as inputs are ready; drawing stays on `requestAnimationFrame`.
 - Multiplayer spike (2026-11-20, Claude's choices): the determinism matrix (`client/determinism/matrix.ts`, digest `73372c52` at `3d48341`) is the regression test of the multi-hero refactor: a step that must not change the one-player game keeps the digest, and the hash must mix the same values in the same order for one player. `stateHash` covers every field that can change a later step; `prevX/prevY`, constructor tables, the event buffer and the spatial grid stay out.
 - Co-op networking (spike): deterministic lockstep, `INPUT_DELAY = 3` steps (100 ms), a hash exchange every 30 steps, a ring of 256 steps per player; `peerjs` 1.5.5 (MIT, exact) with the PeerJS cloud signalling for now; network code only in `client/net/` and `client/net-spike/`, importing the sim only through `sim/index.ts`.
 - The spec outranks a plan. The fps gate is "roughly 60 fps with 150 enemies" (spec), not "≥ 60" (phase 0 plan).
