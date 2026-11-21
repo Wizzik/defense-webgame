@@ -1,8 +1,8 @@
 # Status
 
-Updated 2026-11-21 (difficulties plan 1 executed on branch `difficulties`, PR open; waits for Petr's playtest and his word to merge). Read this first when you resume work.
+Updated 2026-11-21 (difficulties plan 1 executed on branch `difficulties`, PR #28 open; waits for Petr's playtest and his word to merge). Read this first when you resume work.
 
-## Difficulties 1: world ladder, Normal / Insane / Hell, world choice, unlocks (branch `difficulties`, 2026-11-21)
+## Difficulties 1: world ladder, Normal / Insane / Hell, world choice, unlocks (PR #28, branch `difficulties`, 2026-11-21)
 
 - All 7 tasks of `docs/superpowers/plans/2026-11-21-difficulties-ladder.md` done inline in one chat, one final self-review. `npm run check`, the build, e2e `webgl2-fallback` (40 of 40) and `sim-chromium` pass. Spec: `docs/superpowers/specs/2026-11-21-difficulties-worlds-design.md`. Numbers, the win table and rulings: `docs/DECISIONS.md`, section Difficulties and worlds, plan 1.
 - What it brings:
