@@ -39,6 +39,8 @@ import { BlobShadows } from "./render/blob-shadows";
 import { SunShadow, shadowsEnabled } from "./render/shadows";
 import { createLighting } from "./render/lighting";
 import { createArena } from "./render/scene";
+import { HazardFx } from "./render/hazard-fx";
+import { WorldView } from "./render/world-view";
 import { PROP_MODELS } from "./render/props";
 import { enemyModelId, ModelCache, modelUrl } from "./render/models";
 import { type BakedVat, bakeVat } from "./render/vat";
@@ -209,9 +211,11 @@ async function start(): Promise<void> {
   const effects = new Effects(data);
   const abilityFx = new AbilityFx();
   const enemyFx = new EnemyFx(data);
+  const worldView = new WorldView(data, props);
+  const hazardFx = new HazardFx(() => followCamera.shakeEnabled);
   const allyView = new AllyView(ALLY_CAPACITY);
   const blobShadows = new BlobShadows(data.rules.enemies.maxAlive + ALLY_CAPACITY);
-  scene.add(blobShadows.mesh, crowd.object, crystals.mesh, coins.mesh, hearts.mesh, orbView.object, chestView.object, effects.object, abilityFx.object, enemyFx.object, ...allyView.objects);
+  scene.add(blobShadows.mesh, crowd.object, crystals.mesh, coins.mesh, hearts.mesh, orbView.object, chestView.object, effects.object, abilityFx.object, enemyFx.object, worldView.object, hazardFx.object, ...allyView.objects);
   const numbers = new DamageNumbers(document.getElementById("ui")!, followCamera.camera);
   const audioData = loadAudioData();
   const audio = new AudioEngine(audioData, import.meta.env.BASE_URL);
@@ -238,7 +242,7 @@ async function start(): Promise<void> {
   addEventListener("pointerdown", enableAudio, { once: true });
   addEventListener("keydown", enableAudio, { once: true });
   const packArrows = new PackArrows(document.getElementById("ui")!, followCamera.camera);
-  session.views.push(heroView, allyView, blobShadows, crowd, crystals, coins, hearts, orbView, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(audio, audioData, sound.director, followCamera.camera, data.enemies.map((e) => e.id), () => sound.active));
+  session.views.push(worldView, hazardFx, heroView, allyView, blobShadows, crowd, crystals, coins, hearts, orbView, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(audio, audioData, sound.director, followCamera.camera, data.enemies.map((e) => e.id), () => sound.active));
 
   addEventListener("resize", () => {
     renderer.setSize(innerWidth, innerHeight);
@@ -280,7 +284,7 @@ async function start(): Promise<void> {
   session.frame(0);
   await renderer.compileAsync(scene, followCamera.camera);
 
-  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows, heroView, enemyFx, sunShadow, chestView);
+  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows, heroView, enemyFx, hazardFx, sunShadow, chestView);
 }
 
 /** Switches the run to a hero: `useHero(id, seed)` returns when the hero's model is in place (or its loading failed and the error is shown). */
@@ -534,6 +538,7 @@ function runLoop(
   packArrows: PackArrows,
   heroView: HeroView,
   enemyFx: EnemyFx,
+  hazardFx: HazardFx,
   sunShadow: SunShadow,
   chestView: ChestView,
 ): void {
@@ -554,6 +559,7 @@ function runLoop(
       updateSnapshot(snapshot, session.run, ui.menuOpen, packArrows.visible);
       snapshot.render.heroModels = heroView.modelCount;
       snapshot.render.slamRings = enemyFx.slamRingCount;
+      snapshot.render.hazardRings = hazardFx.ringCount;
       sunShadow.follow(followCamera.targetX, followCamera.targetZ);
       renderer.render(scene, followCamera.camera);
     } catch (error) {

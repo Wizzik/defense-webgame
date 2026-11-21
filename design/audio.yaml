@@ -321,6 +321,18 @@ cues:
     synth: slam
     priority: 3
     maxVoices: 1
+  # the summer storm of world 1 (difficulties plan 2): files already encoded for spells, no new download
+  - id: storm-warning
+    files: [audio/sfx/storm-totem-1.ogg, audio/sfx/storm-totem-2.ogg]
+    synth: cast
+    priority: 2
+    maxVoices: 1
+    gainDb: -6
+  - id: storm-strike
+    files: [audio/sfx/shared-smite-1.ogg, audio/sfx/shared-smite-2.ogg]
+    synth: slam
+    priority: 3
+    maxVoices: 1
   - id: boss-roar
     files: [audio/sfx/boss-roar-1.ogg]
     synth: enrage
@@ -489,6 +501,8 @@ sounds:
   rushWarning: rush-horn
   slam.warn: slam-breath
   slam.hit: slam-impact
+  storm.warn: storm-warning
+  storm.strike: storm-strike
   enrage: boss-roar
   enemy.heal: chaplain-mend
   enemy.charge: enemy-charge

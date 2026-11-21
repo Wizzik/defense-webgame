@@ -1015,3 +1015,16 @@ test("a won run shows a star on its world card", async ({ page }) => {
   await page.locator("#start").click();
   await expect(page.locator('#world-screen [data-world="1"] .world-card-status')).toHaveText("★ win");
 });
+
+test("world 1 has its wall and islands; the storm's bolt warns with a circle", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en&debug=1&phase=3&hero=stonehorn");
+  await startRun(page);
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => window.__game!.obstacles)).toBeGreaterThanOrEqual(35);
+  await page.evaluate(() => window.__game!.debug!.hazard());
+  await page.waitForFunction(
+    () => window.__game!.render.hazardRings > 0 && window.__game!.hazard.pending > 0,
+    undefined, { timeout: 1_000, polling: 50 },
+  );
+  await expect(page.locator(".buff-cell.storm")).toBeVisible();
+});

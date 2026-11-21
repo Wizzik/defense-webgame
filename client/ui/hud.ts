@@ -2,6 +2,7 @@ import {
   chestPrice, EventKind, isEmptySlot, passiveSlotRange, sharedSlotRange, TICKS_PER_SECOND, type Run, ULTIMATE_SLOT,
   xpToNext,
   runMagicFind,
+  hazardPending,
 } from "../../sim";
 import { abilityIconSvg } from "./ability-icons";
 import { Announcer } from "./announcer";
@@ -183,6 +184,8 @@ export class Hud {
           this.announcer.push(line.text, ANNOUNCE_TICKS, line.tone);
           this.loot(line.tone);
         }
+      } else if (kind === EventKind.HazardWave) {
+        this.announcer.push(t(lang, "announce.storm"), ANNOUNCE_TICKS);
       } else if (kind === EventKind.Faction) {
         faction = run.data.rules.factions[events.a[i]!]!.id;
       } else if (kind === EventKind.Enrage) {
@@ -239,7 +242,7 @@ export class Hud {
     setText(this.muteKey, `${t(lang, "gear.key")} · ${t(lang, "settings.key")} · ${t(lang, "hud.muteKey")}`);
     setText(this.kills, t(lang, "hud.kills", { n: run.stats.kills }));
 
-    this.buffBar.update(run.buffs, run.hero, lang);
+    this.buffBar.update(run.buffs, run.hero, lang, hazardPending(run));
     this.updateAbilities(run, lang);
   }
   private updateAbilities(run: Run, lang: Lang): void {

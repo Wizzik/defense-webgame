@@ -47,8 +47,8 @@ export const HANDLED_EVENTS: Record<keyof typeof EventKind, "sound" | "skip"> = 
   Bloodlust: "sound",
   HeroSnared: "sound",
   Raise: "sound",
-  Hazard: "skip", // client task of difficulties plan 2 gives the storm its sounds
-  HazardWave: "skip",
+  Hazard: "sound",
+  HazardWave: "skip", // the warning of its first bolt is heard in the same step
 };
 
 const ORB_SOUNDS: Record<number, GameSound> = {
@@ -155,6 +155,9 @@ export function resolveEventCues(run: Run, data: AudioData, enemyIds: readonly s
         else if (events.value[i] === SlamEvent.Hit && !roots) sound("slam.hit", i);
         break;
       }
+      case EventKind.Hazard:
+        sound(events.value[i] === 0 ? "storm.warn" : "storm.strike", i);
+        break;
       case EventKind.Faction:
         sound("faction", i, false);
         break;
