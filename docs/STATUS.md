@@ -1,10 +1,12 @@
 # Status
 
-Updated 2026-11-21 (multiplayer spike merged as PR #27 `c86fb8b`; Petr's first net test found the page loop throttled; next: difficulties). Read this first when you resume work.
+Updated 2026-11-21 (difficulties plan 1 written on branch `difficulties`; next: execute it in a new chat). Read this first when you resume work.
 
 ## Next: difficulties with environments (Petr, 2026-11-21)
 
-- Petr: start difficulties now, then progression between runs, credits and legal check, then the multiplayer migration. Design each with a player-count knob (`docs/multiplayer/single-hero-inventory.md`, chapter 5). Start with brainstorming the spec in a new chat.
+- Petr: start difficulties now, then progression between runs, credits and legal check, then the multiplayer migration. Design each with a player-count knob (`docs/multiplayer/single-hero-inventory.md`, chapter 5).
+- Spec (Czech): claude.ai project `claude/specs/2026-11-21-difficulties-worlds-design.md`; Petr chose a world ladder + Normal/Insane/Hell, obstacle islands + one chokepoint per world, a fixed skeleton + seeded placement. Split into three plans (spec 4.10).
+- **Plan 1 written:** `docs/superpowers/plans/2026-11-21-difficulties-ladder.md` on branch `difficulties` (`38a9bad`), 7 tasks: data (difficulty table, `design/worlds.yaml`), sim (`RunOptions.world`/`difficulty`, `sim/difficulty.ts`, extra rushes, rewards), `sim:run` and matrix (world 1 Normal must equal today), `meta/progress.ts` (unlocks), client storage and params, the world screen, tuning + docs. Next: execute it in a new chat (Petr picks native or subagent-driven); `data:build` needs the map extracted from the project file.
 
 ## Multiplayer spike: merged (PR #27 as `c86fb8b`, 2026-11-21, Pages deployed); Petr's first net test done
 
