@@ -725,7 +725,12 @@ test("C opens the gear panel and pauses the run; C closes it; C does nothing und
   await waitForScreenPickingLevelUps(page, "chest");
   await page.keyboard.press("KeyC");
   await expect(page.locator("#gear-panel")).toBeHidden();
-  await page.locator("button.card").first().click();
+  // a click in the first 300 ms after the cards appear is ignored (cards.ts PICK_DELAY_MS), and on slow software
+  // WebGPU this step comes sooner than that: click until the chest closes
+  await expect(async () => {
+    if ((await page.evaluate(() => window.__game?.screen)) === "chest") await page.locator("button.card").first().click({ timeout: 2_000 });
+    expect(await page.evaluate(() => window.__game?.screen)).not.toBe("chest");
+  }).toPass({ timeout: 30_000, intervals: [400] });
   await waitForScreenPickingLevelUps(page, "playing");
 
   await page.keyboard.press("KeyC");
