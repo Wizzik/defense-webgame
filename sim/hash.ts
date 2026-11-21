@@ -1,3 +1,4 @@
+import { DIFFICULTY_IDS } from "../data/schema";
 import type { Run } from "./run";
 
 const f64 = new Float64Array(1);
@@ -26,6 +27,8 @@ export function stateHash(run: Run): number {
   mixInt(run.result === null ? 0 : RESULTS[run.result]);
   mixInt(run.rng.state);
   mixInt(run.heroIndex);
+  mixInt(run.world);
+  mixInt(DIFFICULTY_IDS.indexOf(run.difficulty));
   mixInt(run.ultimateAuto ? 1 : 0);
   mixInt(run.ultimateRequested ? 1 : 0);
   const hero = run.hero;

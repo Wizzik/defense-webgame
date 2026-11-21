@@ -1,3 +1,4 @@
+import { runMagicFind } from "./difficulty";
 import type { Rarity } from "../data/schema";
 import { RARITIES } from "../data/schema";
 import { EventKind } from "./events";
@@ -131,7 +132,7 @@ function twinSlot(slot: number): number {
  */
 export function rollChestOffer(run: Run): ChestOffer {
   const { data, gear, chestRng: rng } = run;
-  const weights = magicFindWeights(data.rules.chests.rarityWeights, run.hero.gear.magicFind, data.rules.magicFind);
+  const weights = magicFindWeights(data.rules.chests.rarityWeights, runMagicFind(run), data.rules.magicFind);
   const count = Math.min(data.rules.chests.slotsPerOffer, SLOT_COUNT);
   const taken = new Uint8Array(SLOT_COUNT);
   const cards: ChestCard[] = [];

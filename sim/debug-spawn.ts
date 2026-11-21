@@ -1,3 +1,4 @@
+import { enemyDamageScale, enemyHp } from "./difficulty";
 import type { FactionId } from "../data/schema";
 import { Role } from "./enemies";
 import type { Run } from "./run";
@@ -29,7 +30,7 @@ export function debugSpawnEach(run: Run, faction: FactionId = run.data.rules.fac
     if (!sent(run, type, faction)) continue;
     if (store.aliveCount >= store.capacity) return;
     const x = hero.x + (k++ - (common - 1) / 2) * SPACING;
-    store.spawn(type, Role.Hunter, x, hero.y + NORTH, defs[type].hp * scale, scale, run.tick);
+    store.spawn(type, Role.Hunter, x, hero.y + NORTH, enemyHp(run, type, scale), enemyDamageScale(run, scale), run.tick);
     run.stats.spawned++;
   }
 }
