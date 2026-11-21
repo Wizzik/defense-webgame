@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Net spike</title>
+    <!-- no favicon request, so the console stays free of 404 errors -->
+    <link rel="icon" href="data:," />
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #141a24;
+        color: #c9d3e0;
+        font: 14px/1.5 system-ui, sans-serif;
+      }
+      main {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        padding: 24px;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 20px;
+        font-weight: 600;
+      }
+      button,
+      input {
+        font: inherit;
+        color: #c9d3e0;
+        background: #1c2533;
+        border: 1px solid #34465e;
+        border-radius: 4px;
+        padding: 6px 12px;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: #7f9cc0;
+      }
+      #controls {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      #link {
+        word-break: break-all;
+        color: #7f9cc0;
+      }
+      #panel {
+        font: 13px/1.6 ui-monospace, Menlo, Consolas, monospace;
+        white-space: pre;
+        min-width: 300px;
+      }
+      #banner {
+        margin: 12px 0;
+        padding: 8px 12px;
+        border-radius: 4px;
+        display: none;
+      }
+      #banner.desync {
+        display: block;
+        background: #5a1f27;
+        color: #f2d0d5;
+      }
+      #banner.closed {
+        display: block;
+        background: #2a3344;
+        color: #c9d3e0;
+      }
+      canvas {
+        border: 1px solid #243042;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section>
+        <h1>Net spike</h1>
+        <div id="controls">
+          <button id="host">Host</button>
+          <input id="code" placeholder="dwg-xxxxxx" size="12" />
+          <button id="join">Join</button>
+        </div>
+        <div id="link"></div>
+        <div id="banner"></div>
+        <div id="panel">not connected</div>
+        <p>The host moves the hero with WASD; the guest's keys travel too but do not steer yet.</p>
+      </section>
+      <canvas id="view" width="600" height="600"></canvas>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

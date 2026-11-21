@@ -1,8 +1,20 @@
 # Status
 
-Updated 2026-11-20 (enemy factions executed on branch `factions`, PR against `main` waits for Petr's word). Read this first when you resume work.
+Updated 2026-11-20 (multiplayer spike done, PR #27 open; enemy factions merged as PR #26 `b67c076`). Read this first when you resume work.
 
-## Enemy factions: done on branch `factions` (2026-11-20); PR waits for Petr's word
+## Multiplayer spike: done, PR #27 open (2026-11-20, branch `multiplayer-spike`); merge waits for Petr
+
+- All 7 tasks of `docs/superpowers/plans/2026-11-20-multiplayer-spike.md` done inline in one chat (Petr approved the spike), one final self-review. The game did not change (`git diff main -- sim`: only `sim/hash.ts` and its test). `npm run check` (1040 tests), the build, e2e `webgl2-fallback` (36 of 36) and `sim-chromium` pass; CI on the PR: 78 of 78.
+- **Report: `docs/multiplayer/spike-report.md`.** In short:
+  - determinism holds: the matrix of 12 autopilot runs gives digest `73372c52` in Node, Chromium, Firefox and WebKit (CI), the first 600 steps of a phase-16 run match step by step; no fix was needed;
+  - lockstep works: two Chromium tabs over WebRTC (local PeerServer; the container cannot reach the PeerJS cloud) 60 s, 0 stalls, 0 desyncs; in memory, reordered and delayed delivery stays in sync over 3000 steps and a changed `gold` is caught within 30 steps;
+  - several heroes: `docs/multiplayer/single-hero-inventory.md`, 38 `sim/` files read the one hero, an 8-step migration of 8-10 chats in which every step keeps the one-player game (the matrix digest is the regression test).
+- New: the hash also covers enemy `maxHp`, `damageScale`, `spawnTick`, last hit and attack ticks, facing, heart values, `ultimateRequested` and the offer shape (the spec's pre-scan was wrong: gold, chests, pickups, projectiles, allies and offers were already hashed). Pages `/determinism/` and `/net-spike/` (after the merge on Pages), Playwright projects `sim-chromium`, `sim-firefox`, `sim-webkit`, `client/net/` (protocol, lockstep, PeerJS 1.5.5 link, room codes).
+- **What Petr does (report chapter 5):** after the merge (a) `/determinism/` in Chrome and Firefox must show `73372c52`; (b) `/net-spike/` Chrome (Host) + Firefox (the link) on one computer 10 minutes; (c) two computers in different networks 10 minutes; send the panel values to the chat.
+- **Open for Petr:** keep the level-up pause for one player or drop it everywhere (co-op has none, R3); the co-op card time limit (Claude: 10 s, then the autopilot card); the order of the next phases (Claude: difficulties, progression and credits as ordered, each with a player-count knob, inventory chapter 5; migration steps 1-4 could go before them).
+- Quick links after the merge: https://wizzik.github.io/defense-webgame/determinism/, https://wizzik.github.io/defense-webgame/net-spike/.
+
+## Enemy factions: merged (PR #26 as `b67c076`, 2026-11-20, Pages deployed); Petr's playtest passed ("testy super")
 
 - All 8 tasks of `docs/superpowers/plans/2026-11-20-enemy-factions.md` are done inline in one chat with one final review. `npm run check`, the build and the e2e project `webgl2-fallback` pass. Numbers, rulings and the win table: `docs/DECISIONS.md`, section Enemy factions.
 - What it brings:
@@ -16,7 +28,8 @@ Updated 2026-11-20 (enemy factions executed on branch `factions`, PR against `ma
   - the news line at 4:10, 8:20 and 12:30-13:20 (boss first, then the faction);
   - balance: the Blood Clan was the deadliest at first and was softened; Nightglaive with gear wins more now, Mistwarden with gear on some seeds less (table in DECISIONS);
   - **fps**: `?fps=1&debug=1&phase=16` with a full elf crowd on his machine (22 enemy meshes now instead of 6); the model download grew 5.6 -> 9.8 MB.
-- Quick links (after a merge): https://wizzik.github.io/defense-webgame/?debug=1&phase=6 (Blood Clan with the first miniboss), `&phase=11` (Restless Dead), `&phase=16` (Moon Grove); in the console `__game.debug.spawnFaction("undead")` (or `orc`, `elf`, `human`), `__game.debug.spawnEach()` (the current faction); `__game.faction`, `__game.slowed`, `__game.rooted`.
+- CI on the PR first failed: with 22 enemy meshes software WebGPU drew every empty type mesh and the pack-arrow e2e ran out of time; empty type meshes are now hidden (faster than `main`), CI green, merged at Petr's word.
+- Quick links: https://wizzik.github.io/defense-webgame/?debug=1&phase=6 (Blood Clan with the first miniboss), `&phase=11` (Restless Dead), `&phase=16` (Moon Grove); in the console `__game.debug.spawnFaction("undead")` (or `orc`, `elf`, `human`), `__game.debug.spawnEach()` (the current faction); `__game.faction`, `__game.slowed`, `__game.rooted`.
 - Order after this (Petr, 2026-11-20): 4 difficulties with environments, 5 progression between runs, 6 credits and legal check, then multiplayer, which starts with several heroes in the simulation. No AI ally for the player; co-op notes in DECISIONS.
 
 ## Spell sounds review: merged (PR #25 `3de6a45`, 2026-11-20)
