@@ -1,8 +1,8 @@
 # Status
 
-Updated 2026-11-21 (difficulties plan 2 done on branch `difficulties-2`, PR against `main` waits for Petr's word). Read this first when you resume work.
+Updated 2026-11-21 (difficulties plan 2 done, PR #29 from `difficulties-2` waits for CI and Petr's word). Read this first when you resume work.
 
-## Difficulties 2: obstacles, paths, the wall of world 1, the summer storm (done on `difficulties-2`, 2026-11-21)
+## Difficulties 2: obstacles, paths, the wall of world 1, the summer storm (PR #29, 2026-11-21)
 
 - All 7 tasks of `docs/superpowers/plans/2026-11-21-difficulties-obstacles.md` done inline in one chat, one final self-review. `npm run check` (1131 tests), the build, e2e `webgl2-fallback` and `sim-chromium` pass. Numbers, rulings and the win table: `docs/DECISIONS.md`, section Difficulties and worlds, plan 2.
 - What it brings:
