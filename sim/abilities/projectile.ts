@@ -28,5 +28,5 @@ export function updateProjectile(run: Run, slot: AbilitySlot, index: number): vo
   }
   startCast(run, index, 0, hero.x, hero.y, dirX, dirY);
   store.spawn(index, target, e.spawnTick[target], hero.x, hero.y, p.speed?.[L] ?? 1200,
-    p.damage[L] * hero.stats.spellPower);
+    p.damage[L] * hero.stats.spellPower, run.current);
 }

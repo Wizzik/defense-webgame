@@ -1,6 +1,15 @@
 # Status
 
-Updated 2026-11-22 (difficulties plan 3a merged as PR #30 `c3dcfdb`). Read this first when you resume work.
+Updated 2026-11-22 (multiplayer migration steps 1-2 and the net loop fix on branch `mp-player-state`). Read this first when you resume work.
+
+## Multiplayer migration steps 1-2 and the net loop (branch `mp-player-state`, 2026-11-22)
+
+- Petr (2026-11-22): "go on with development, mainly the multiplayer". Done inline in one chat; `npm run check` (1185 tests), the build, e2e `webgl2-fallback` and `sim-chromium` (46 of 46) pass. Rulings: `docs/DECISIONS.md`, section Multiplayer migration, steps 1-2.
+- **Step 1:** `run.players` (`sim/player.ts`) holds the player's part of a run; the matrix digest stays `4bc81413`, now pinned by `client/determinism/digest.test.ts` (`npm run sim:digest`).
+- **Step 2:** `RunOptions.players` (1-4 heroes), `run.step(inputs[])`, the hero systems run once per player with `run.current` set; allies and bolts have an `owner`. One player is unchanged (same digest). Not yet: enemies, pickups, orbs, snares and the hazard see only player 0 (steps 3-4); a level-up or chest of any player still pauses the run (step 5); no revive (step 6).
+- **Net loop fix** (Petr's test of 2026-11-21 crawled at ~2 steps a second in the guest window): `/net-spike/` now steps from a worker heartbeat up to wall-clock time (`client/net/ticker.ts`, `client/net/wall-clock.ts`) and draws on `requestAnimationFrame` only. Test here: host + a guest page whose `requestAnimationFrame` never fires, 30 s, local PeerServer: 931 / 932 steps (30 a second), last matched hash 929, 0 stalls, no desync. The page now plays **two heroes**: the host steers stonehorn, the guest sparkshot.
+- **What Petr checks after the merge:** https://wizzik.github.io/defense-webgame/net-spike/ in Chrome (Host) + Firefox (the link) on one computer, 10 minutes, each window walking its own hero, one of them minimized for a while; then (c) two computers in different networks. Send the panel values (step, RTT, stalls/min, matched hash, desync). Remember: enemies still chase only the host's hero (step 3).
+- Next: migration step 3 (enemy targeting per enemy) and step 4 (shared XP, own gold, pickups to the collector), then step 5 (level-up without pause in co-op, 10 s choice).
 
 ## Difficulties 3a: Red Waste and Shadewood (merged as PR #30 `c3dcfdb`, 2026-11-22)
 

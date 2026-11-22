@@ -1,13 +1,16 @@
-// Net spike page (spec 2026-11-20 multiplayer spike, 5.4): two browsers run one single-hero game in lockstep over
-// PeerJS. The host's inputs steer the hero; the guest's inputs travel too, to exercise the lockstep.
+// Net spike page (spec 2026-11-20 multiplayer spike, 5.4): two browsers run one game with two heroes in lockstep
+// over PeerJS; each steers his own hero (the host the first, the guest the second). Steps run from a worker
+// heartbeat and catch up to wall-clock time (client/net/ticker.ts, wall-clock.ts), so a hidden or covered window
+// keeps pace; drawing stays on requestAnimationFrame.
 import {
   botInput, createRun, stateHash, TICK_SECONDS, type Run, type TickInput,
 } from "../../sim";
 import { loadGameData } from "../game/data";
 import { Keyboard } from "../game/keyboard";
-import { FixedStepLoop } from "../game/loop";
 import { HASH_EVERY, Lockstep } from "../net/lockstep";
 import { hostRoom, joinRoom, type PeerLink } from "../net/peer-link";
+import { startTicker } from "../net/ticker";
+import { WallClock } from "../net/wall-clock";
 import { inputMessage, PROTOCOL_VERSION, toInput, type NetMessage } from "../net/protocol";
 import { isRoomCode, newRoomCode } from "../net/room-code";
 import { parseSignal } from "../net/signal";
@@ -33,6 +36,10 @@ declare global {
 }
 
 const HERO = "stonehorn";
+/** The guest's hero; both sides know it, the host's travels in `hello`. */
+const GUEST_HERO = "sparkshot";
+/** How often the worker heartbeat asks for steps (two beats a step). */
+const BEAT_MS = 1000 / 60;
 const RTT_SAMPLES = 60;
 const HOST_TRIES = 3;
 
@@ -91,9 +98,9 @@ function setBusy(busy: boolean): void {
 }
 
 function play(peer: PeerLink, local: 0 | 1, seed: number, hero: string): void {
-  const run: Run = createRun(data, { seed, hero });
+  const run: Run = createRun(data, { seed, players: [{ hero }, { hero: GUEST_HERO }] });
   const lock = new Lockstep(2, local);
-  const loop = new FixedStepLoop(TICK_SECONDS, 4);
+  const clock = new WallClock(TICK_SECONDS * 1000);
   const scratch: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   const remote: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   const inputs: TickInput[] = [
@@ -102,11 +109,13 @@ function play(peer: PeerLink, local: 0 | 1, seed: number, hero: string): void {
   ];
   const other = local === 0 ? 1 : 0;
   const started = performance.now();
-  let last = started;
   let pingN = 0;
 
   peer.onMessage((m: NetMessage) => {
-    if (m.t === "in") lock.receive(other, m.k, toInput(m, remote));
+    if (m.t === "in") {
+      lock.receive(other, m.k, toInput(m, remote));
+      pump(); // run what the input made ready at once, not at the next beat
+    }
     else if (m.t === "hash") check(lock.recordHash(other, m.k, m.h));
     else if (m.t === "ping") peer.send({ t: "pong", n: m.n, at: m.at });
     else if (m.t === "pong") {
@@ -138,36 +147,55 @@ function play(peer: PeerLink, local: 0 | 1, seed: number, hero: string): void {
   }
 
   function localInput(): TickInput {
-    if (local === 0 && (run.state === "levelUp" || run.state === "chest")) return botInput(run, scratch);
+    if (run.choosing === local && (run.state === "levelUp" || run.state === "chest")) {
+      run.current = local; // the autopilot picks for the local player's offer
+      botInput(run, scratch);
+      run.current = 0;
+      return scratch;
+    }
     keyboard.read(scratch);
     scratch.card = -1;
     return scratch;
   }
 
-  function frame(now: number): void {
-    const steps = stopped ? 0 : loop.advance((now - last) / 1000, 1);
-    last = now;
+  /** Runs the steps due by wall-clock time as far as both players' inputs are known. */
+  function pump(): void {
+    if (stopped) return;
+    const now = performance.now();
+    const steps = clock.pending(now, lock.tick);
     for (let s = 0; s < steps && !stopped; s++) {
       if (lock.canQueue()) {
         const input = localInput();
         peer.send(inputMessage(lock.queueLocal(input), input));
       }
-      if (run.state === "won" || run.state === "lost" || !lock.ready()) continue;
+      if (run.state === "won" || run.state === "lost" || !lock.ready()) break;
       const k = lock.take(inputs);
-      run.step(inputs[0]!);
+      run.step(inputs);
       if ((k + 1) % HASH_EVERY === 0) {
         const h = stateHash(run);
         peer.send({ t: "hash", k, h });
         check(lock.recordHash(local, k, h));
       }
     }
+    report(now);
+  }
+
+  const ticker = startTicker(BEAT_MS, pump);
+
+  /** Copies the lockstep's numbers into `window.__net` (from every pump, so a window that does not draw has them too). */
+  function report(now: number): void {
     net.tick = lock.tick;
     net.stalls = lock.stalls;
     net.stallsPerMinute = lock.stalls / Math.max(1 / 60, (now - started) / 60_000);
     net.lastMatchedHash = lock.lastMatchedHash;
     net.desyncAt = lock.desyncAt;
     net.rejected = peer.rejected;
-    drawTopView(ctx, run);
+  }
+
+  function frame(now: number): void {
+    if (stopped) ticker.stop();
+    report(now);
+    drawTopView(ctx, run, local);
     showPanel();
     requestAnimationFrame(frame);
   }

@@ -60,7 +60,7 @@ function castWards(run: Run, slot: AbilitySlot, index: number): void {
     }
     x = Math.max(-arena.width / 2, Math.min(arena.width / 2, x));
     y = Math.max(-arena.height / 2, Math.min(arena.height / 2, y));
-    if (allies.spawn(AllyKind.Ward, index, 0, x, y, run.tick, expires) < 0) break;
+    if (allies.spawn(AllyKind.Ward, index, 0, x, y, run.tick, expires, run.current) < 0) break;
   }
 }
 
@@ -71,13 +71,13 @@ function castImages(run: Run, slot: AbilitySlot, index: number, mode: number): v
   if (mode === CastMode.Auto && nearestEnemy(run, hero.x, hero.y, IMAGE_SEEK_RANGE) < 0) return;
   const L = slot.level - 1;
   for (let i = 0; i < allies.capacity; i++) {
-    if (allies.alive[i] !== 0 && allies.ability[i] === index) allies.remove(i);
+    if (allies.alive[i] !== 0 && allies.ability[i] === index && allies.owner[i] === run.current) allies.remove(i);
   }
   const count = Math.min(def.params.count[L], IMAGE_OFFSETS.length);
   const expires = run.tick + Math.round(def.params.duration[L] * TICKS_PER_SECOND);
   for (let k = 0; k < count; k++) {
     const offset = IMAGE_OFFSETS[k];
-    if (allies.spawn(AllyKind.Image, index, k, hero.x + offset[0], hero.y + offset[1], run.tick, expires) < 0) break;
+    if (allies.spawn(AllyKind.Image, index, k, hero.x + offset[0], hero.y + offset[1], run.tick, expires, run.current) < 0) break;
   }
   startCast(run, index, count, hero.x, hero.y, 0, 0);
 }
@@ -85,7 +85,7 @@ function castImages(run: Run, slot: AbilitySlot, index: number, mode: number): v
 function countOf(run: Run, ability: number): number {
   const a = run.allies;
   let n = 0;
-  for (let i = 0; i < a.capacity; i++) if (a.alive[i] !== 0 && a.ability[i] === ability) n++;
+  for (let i = 0; i < a.capacity; i++) if (a.alive[i] !== 0 && a.ability[i] === ability && a.owner[i] === run.current) n++;
   return n;
 }
 
@@ -94,7 +94,7 @@ function removeOldest(run: Run, ability: number): void {
   const a = run.allies;
   let best = -1;
   for (let i = 0; i < a.capacity; i++) {
-    if (a.alive[i] === 0 || a.ability[i] !== ability) continue;
+    if (a.alive[i] === 0 || a.ability[i] !== ability || a.owner[i] !== run.current) continue;
     if (best < 0 || a.spawnTick[i] < a.spawnTick[best]) best = i;
   }
   if (best >= 0) a.remove(best);

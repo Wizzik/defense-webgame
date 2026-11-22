@@ -19,10 +19,15 @@ export function applyStartPhase(run: Run, phase: number): void {
   run.tick = phase > count ? run.durationTicks : Math.round((phase - 1) * rules.run.phaseSeconds * TICKS_PER_SECOND);
   while (run.nextEvent < run.timeline.length && run.timeline[run.nextEvent].tick < run.tick) run.nextEvent++;
   run.nextPackTick = run.tick + Math.round(rules.run.firstPackSeconds * TICKS_PER_SECOND);
-  gainXp(run, rules.debug.phaseXp[Math.min(phase, count) - 1]);
-  if (run.hero.pendingLevelUps > 0) {
-    openOffer(run);
-    while (run.offer) chooseCard(run, botCard(run, run.offer));
+  for (let p = 0; p < run.players.length; p++) {
+    run.current = p;
+    gainXp(run, rules.debug.phaseXp[Math.min(phase, count) - 1]);
+    if (run.hero.pendingLevelUps > 0) {
+      openOffer(run);
+      while (run.offer) chooseCard(run, botCard(run, run.offer));
+    }
   }
+  run.current = 0;
+  run.state = "playing";
   run.events.clear();
 }
