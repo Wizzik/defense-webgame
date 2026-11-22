@@ -29,6 +29,12 @@ export function stateHash(run: Run): number {
   mixFloat(islands);
   const hz = run.hazard;
   mixInt(hz.nextWaveTick);
+  if (hz.weatherTicks !== 0 || hz.warnTicks !== 0) {
+    // mixed only while a weather is announced or runs, so the hash of a storm world stays as before plan 3a
+    mixInt(hz.weatherTicks);
+    mixInt(hz.warnTicks);
+    mixInt(hz.waves);
+  }
   mixInt(run.hazardRng.state);
   for (let i = 0; i < hz.ticks.length; i++) {
     mixInt(hz.ticks[i]!);

@@ -4,6 +4,7 @@ import { damageEnemy, damageHero, heroDamageScale, HeroHitSource } from "./comba
 import { TICKS_PER_SECOND } from "./constants";
 import { EventKind } from "./events";
 import type { Run } from "./run";
+import { debugWeather, updateWeather } from "./weather";
 
 /** Bolts that can wait at once (a wave has at most `bolts.max`, and waves are 35 s and more apart). */
 export const HAZARD_CAPACITY = 8;
@@ -18,7 +19,12 @@ export class HazardState {
   readonly ticks = new Int32Array(HAZARD_CAPACITY);
   /** Tick of the next wave; -1 until the first update plans it (from the start of fromPhase or the run's start). */
   nextWaveTick = -1;
+  /** Storm waves, or weathers started. */
   waves = 0;
+  /** Steps left of the running weather (sim/weather.ts); 0 = none runs. */
+  weatherTicks = 0;
+  /** Steps until an announced weather starts; 0 = none announced. */
+  warnTicks = 0;
   bolts = 0;
 }
 
@@ -29,6 +35,7 @@ export class HazardState {
 export function updateHazard(run: Run): void {
   const storm = stormOf(run.data.worlds[run.world - 1]!);
   if (storm !== null) updateStorm(run, storm);
+  else updateWeather(run);
 }
 
 function updateStorm(run: Run, storm: Storm): void {
@@ -45,10 +52,11 @@ function updateStorm(run: Run, storm: Storm): void {
   if (run.tick >= h.nextWaveTick) startWave(run, storm);
 }
 
-/** Debug (`__game.debug.hazard()`): a wave at once; the next one follows its usual gap later. */
+/** Debug (`__game.debug.hazard()`): a storm wave or the weather at once; nothing in a thicket world. */
 export function debugHazard(run: Run): void {
   const storm = stormOf(run.data.worlds[run.world - 1]!);
   if (storm !== null) startWave(run, storm);
+  else debugWeather(run);
 }
 
 /** Steps until the nearest waiting bolt strikes; 0 when none waits. */

@@ -1,7 +1,7 @@
 import { pathToFileURL } from "node:url";
 import { botInput, idleCard } from "../../sim/bot";
 import { TICKS_PER_SECOND } from "../../sim/constants";
-import { createRun, EventKind, HeroHitSource, isEmptySlot, passiveSlotRange, sharedSlotRange } from "../../sim/index";
+import { createRun, EventKind, HeroHitSource, inThicket, isEmptySlot, passiveSlotRange, sharedSlotRange } from "../../sim/index";
 import type { LoadoutEntry, Run, RunResult } from "../../sim/index";
 import type { TickInput } from "../../sim/input";
 import { gameData } from "../../sim/testing/game-data";
@@ -49,8 +49,14 @@ export interface RunSummary {
   sustain: SustainStats;
   /** Enemy factions (spec 2026-11-20): seconds the hero was rooted, hp it lost in poison clouds, enemies raised. */
   factions: { rootedSeconds: number; cloudDamage: number; raised: number };
-  /** The world (difficulties plan 2): islands of the map, storm waves and bolts, bolts that hit the hero. */
-  world: { islands: number; waves: number; bolts: number; boltHits: number };
+  /**
+   * The world (difficulties plans 2 and 3a): islands of the map, storm waves and bolts, bolts that hit the hero; the
+   * kind of the natural event, sandstorms started (weather worlds) and the share of the hero's steps in a thicket.
+   */
+  world: {
+    islands: number; waves: number; bolts: number; boltHits: number;
+    kind?: "storm" | "weather" | "thicket"; sand?: number; thicketShare?: number;
+  };
 }
 
 export interface SustainStats {
@@ -86,6 +92,8 @@ export function playBot(
   let lowest = 1;
   let fullKitPhase: number | null = null;
   let boltHits = 0;
+  let thicketSteps = 0;
+  let steps = 0;
   while (run.state !== "won" && run.state !== "lost") {
     while (phaseXp.length < data.rules.phases.length && run.tick >= phaseXp.length * phaseTicks) {
       phaseXp.push(run.stats.xpGained);
@@ -99,6 +107,8 @@ export function playBot(
     if (idle) idleInput(run, input);
     else botInput(run, input);
     run.step(input);
+    steps++;
+    if (inThicket(run.map, run.hero.x, run.hero.y)) thicketSteps++;
     for (let i = 0; i < run.events.count; i++) {
       if (run.events.kind[i] === EventKind.HeroHit && run.events.u[i] === HeroHitSource.Storm) boltHits++;
     }
@@ -148,7 +158,12 @@ export function playBot(
       healedHearts: run.stats.healedHearts,
       healedOrb: run.stats.healedOrb,
     },
-    world: { islands: run.map.islandCount, waves: run.hazard.waves, bolts: run.hazard.bolts, boltHits },
+    world: {
+      islands: run.map.islandCount, waves: run.hazard.waves, bolts: run.hazard.bolts, boltHits,
+      kind: data.worlds[world - 1]!.hazard.kind,
+      sand: data.worlds[world - 1]!.hazard.kind === "weather" ? run.hazard.waves : 0,
+      thicketShare: steps > 0 ? thicketSteps / steps : 0,
+    },
     factions: {
       rootedSeconds: run.stats.rootedTicks / TICKS_PER_SECOND,
       cloudDamage: run.stats.cloudDamage,
@@ -256,11 +271,17 @@ export function factionLine(summaries: RunSummary[]): string {
     `raised ${avg((f) => f.raised).toFixed(1)}`;
 }
 
-/** Averages per run of the world: `  world: islands 35.5, storm waves 21.0, bolts 42.5, bolts on the hero 3.5`. */
+/**
+ * Averages per run of the world: `  world: islands 35.5, storm waves 21.0, bolts 42.5, bolts on the hero 3.5`, with
+ * `, sand 2.0` in a weather world and `, thicket 4.2 %` (the hero's steps in a thicket) in a thicket world.
+ */
 export function worldLine(summaries: RunSummary[]): string {
   const avg = (f: (s: RunSummary["world"]) => number) => (summaries.reduce((a, s) => a + f(s.world), 0) / summaries.length).toFixed(1);
-  return `  world: islands ${avg((w) => w.islands)}, storm waves ${avg((w) => w.waves)}, bolts ${avg((w) => w.bolts)}, ` +
+  let line = `  world: islands ${avg((w) => w.islands)}, storm waves ${avg((w) => w.waves)}, bolts ${avg((w) => w.bolts)}, ` +
     `bolts on the hero ${avg((w) => w.boltHits)}`;
+  if (summaries.some((s) => s.world.kind === "weather")) line += `, sand ${avg((w) => w.sand ?? 0)}`;
+  if (summaries.some((s) => s.world.kind === "thicket")) line += `, thicket ${avg((w) => 100 * (w.thicketShare ?? 0))} %`;
+  return line;
 }
 
 /** How often each id appears, most first (ties by id): `meteor 7, smite 5`, or `-`. */

@@ -10,7 +10,7 @@ export interface MatrixCase {
   seed: number;
   startPhase?: number;
   durationSeconds?: number;
-  gear: "none" | "full";
+  gear: "none" | "mid" | "full";
   maxTicks: number;
   /** No movement and the idle card pick instead of the autopilot (tests only). */
   idle?: boolean;
@@ -30,7 +30,8 @@ export const CHECKPOINT_EVERY = 300;
 
 /**
  * The cases of spec 5.2: every hero from phase 1, then four late starts with full gear; then a world 3 insane run
- * and a world 5 hell start at phase 6 (difficulties spec 2026-11-21 4.9), and a world 1 run through the storm.
+ * and a world 5 hell start at phase 6 (difficulties spec 2026-11-21 4.9), a world 1 run through the storm, a world 2
+ * run through a sandstorm and a world 3 run in the thicket.
  */
 export function matrixCases(data: GameData): MatrixCase[] {
   const cases: MatrixCase[] = data.heroes.map((h) => ({
@@ -45,6 +46,9 @@ export function matrixCases(data: GameData): MatrixCase[] {
     { id: "w5-hell", hero: "redcleaver", seed: 7, startPhase: 6, gear: "full", maxTicks: 6000, world: 5, difficulty: "hell" },
     // obstacles and the summer storm from its first wave (difficulties plan 2)
     { id: "w1-storm", hero: "sparkshot", seed: 9, startPhase: 3, gear: "none", maxTicks: 4500 },
+    // the sandstorm through a whole storm, and the thicket (difficulties plan 3a)
+    { id: "w2-sand", hero: "mistwarden", seed: 11, startPhase: 4, gear: "none", maxTicks: 6000, world: 2 },
+    { id: "w3-thicket", hero: "stonehorn", seed: 13, startPhase: 2, gear: "mid", maxTicks: 4500, world: 3 },
   );
   return cases;
 }
@@ -57,8 +61,13 @@ function idleInput(run: Run, out: TickInput): TickInput {
   return out;
 }
 
-/** Plays one case; a checkpoint is the state hash after every `every`-th step and after the last step. */
-export function runCase(data: GameData, c: MatrixCase, every = CHECKPOINT_EVERY): CaseResult {
+/**
+ * Plays one case; a checkpoint is the state hash after every `every`-th step and after the last step. `onStep`
+ * (tests) sees the run after each step.
+ */
+export function runCase(
+  data: GameData, c: MatrixCase, every = CHECKPOINT_EVERY, onStep?: (run: Run) => void,
+): CaseResult {
   const loadout = c.gear === "none" ? [] : gearPreset(data, c.hero, c.gear);
   const run = createRun(data, {
     seed: c.seed, hero: c.hero, startPhase: c.startPhase, durationSeconds: c.durationSeconds, loadout,
@@ -71,6 +80,7 @@ export function runCase(data: GameData, c: MatrixCase, every = CHECKPOINT_EVERY)
     if (c.idle) idleInput(run, input);
     else botInput(run, input);
     run.step(input);
+    onStep?.(run);
     ticks++;
     if (ticks % every === 0) checkpoints.push(stateHash(run));
   }

@@ -9,6 +9,7 @@ import { hitExtraTargets } from "./hero-multishot";
 import { InputAction } from "./input";
 import type { TickInput } from "./input";
 import type { Run } from "./run";
+import { weatherSpeedScale } from "./weather";
 import { groundSpeedScale, pushOut, pushX, pushY } from "./world-map/geometry";
 import type { HeroState, HeroStats } from "./world";
 
@@ -106,7 +107,7 @@ export function moveHero(run: Run, input: TickInput): void {
     dx /= len;
     dy /= len;
     step = hero.stats.moveSpeed * snareSpeedScale(hero) * TICK_SECONDS *
-      groundSpeedScale(run.map, hero.x, hero.y);
+      groundSpeedScale(run.map, hero.x, hero.y) * weatherSpeedScale(run);
   }
   const { arena } = run.data.rules;
   const r = hero.stats.collision;
