@@ -9,7 +9,7 @@ import { hitExtraTargets } from "./hero-multishot";
 import { InputAction } from "./input";
 import type { TickInput } from "./input";
 import type { Run } from "./run";
-import { pushOut, pushX, pushY, pathSpeedScale } from "./world-map/geometry";
+import { groundSpeedScale, pushOut, pushX, pushY } from "./world-map/geometry";
 import type { HeroState, HeroStats } from "./world";
 
 /** Derives the hero's combat stats from attributes plus gear and passives (map formulas plus run rules). Writes into `out`. */
@@ -106,7 +106,7 @@ export function moveHero(run: Run, input: TickInput): void {
     dx /= len;
     dy /= len;
     step = hero.stats.moveSpeed * snareSpeedScale(hero) * TICK_SECONDS *
-      pathSpeedScale(run.map, hero.x, hero.y, run.map.pathBonus);
+      groundSpeedScale(run.map, hero.x, hero.y);
   }
   const { arena } = run.data.rules;
   const r = hero.stats.collision;

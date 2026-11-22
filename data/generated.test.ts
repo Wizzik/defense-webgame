@@ -395,7 +395,7 @@ describe("world maps", () => {
     }
   });
 
-  it("the gaps between neighbouring feature segments that share no end are gates 200-310 wide", () => {
+  it("the gaps between neighbouring feature segments that share no end are gates 200-410 wide", () => {
     for (const w of worlds) {
       const segs = w.map.feature.segments;
       for (let i = 0; i + 1 < segs.length; i++) {
@@ -403,7 +403,7 @@ describe("world maps", () => {
         const gap = Math.hypot(b[0] - a[2], b[1] - a[3]);
         if (gap === 0) continue;
         expect(gap, `${w.id} gate ${i}`).toBeGreaterThanOrEqual(200);
-        expect(gap, `${w.id} gate ${i}`).toBeLessThanOrEqual(310);
+        expect(gap, `${w.id} gate ${i}`).toBeLessThanOrEqual(410);
       }
     }
   });

@@ -47,6 +47,10 @@ export class WorldMap {
   /** PATH_SIZE² (cells of PATH_CELL): 1 = the centre lies within half the path width of a path. */
   readonly onPath = new Uint8Array(PATH_SIZE * PATH_SIZE);
   readonly pathBonus: number;
+  /** PATH_SIZE²: 1 = the centre lies in a zone of the world's thicket (spec 4.7 point 3). */
+  readonly thicket = new Uint8Array(PATH_SIZE * PATH_SIZE);
+  /** The walking slow inside a thicket zone, a share; 0 when the world has none. */
+  readonly thicketSlow: number;
   readonly castleX: number;
   readonly castleY: number;
   /** Half the arena's side: islands stay inside it. */
@@ -97,6 +101,23 @@ export class WorldMap {
             const x = MAP_ORIGIN + (col + 0.5) * PATH_CELL;
             const y = MAP_ORIGIN + (row + 0.5) * PATH_CELL;
             if (segmentDistance(x, y, ax, ay, bx, by) <= half) this.onPath[row * PATH_SIZE + col] = 1;
+          }
+        }
+      }
+    }
+    const { hazard } = def;
+    this.thicketSlow = hazard.kind === "thicket" ? hazard.slow : 0;
+    if (hazard.kind === "thicket") {
+      for (const [zx, zy, zr] of hazard.zones) {
+        const col0 = pathCell(zx - zr);
+        const col1 = pathCell(zx + zr);
+        const row0 = pathCell(zy - zr);
+        const row1 = pathCell(zy + zr);
+        for (let row = row0; row <= row1; row++) {
+          for (let col = col0; col <= col1; col++) {
+            const dx = MAP_ORIGIN + (col + 0.5) * PATH_CELL - zx;
+            const dy = MAP_ORIGIN + (row + 0.5) * PATH_CELL - zy;
+            if (dx * dx + dy * dy <= zr * zr) this.thicket[row * PATH_SIZE + col] = 1;
           }
         }
       }

@@ -57,7 +57,7 @@
     cs: "Rudá hlína a suchá tráva, kde se pod tvrdým nebem shromažďují klany."
   color: "#3d2427"
   ready: false
-  # A river across the arena (thickness 150) with two bridges, gaps 300 at x = -1050..-750 and 1000..1300 (spec 4.5).
+  # A river across the arena (thickness 150) with two bridges, gaps 400 at x = -1100..-700 and 950..1350 (spec 4.5).
   map:
     paths:
       width: 160
@@ -71,11 +71,11 @@
       thickness: 150
       segments:
         - [-3000, 1500, -1500, 1150]
-        - [-1500, 1150, -1050, 1191]
-        - [-750, 1218, -400, 1250]
+        - [-1500, 1150, -1100, 1186]
+        - [-700, 1223, -400, 1250]
         - [-400, 1250, 600, 1000]
-        - [600, 1000, 1000, 1073]
-        - [1300, 1127, 1700, 1200]
+        - [600, 1000, 950, 1064]
+        - [1350, 1136, 1700, 1200]
         - [1700, 1200, 3000, 900]
     islands:
       count: { min: 28, max: 36 }
@@ -100,7 +100,7 @@
     cs: "Nekonečná noc pod pradávnými stromy, osvětlená jen měsícem."
   color: "#1a2440"
   ready: false
-  # A ring of ancient trees 1300 around the castle (thickness 110) with four passages 300 wide on the diagonals.
+  # A ring of ancient trees 1300 around the castle (thickness 110) with four passages 400 wide on the diagonals.
   map:
     paths:
       width: 160
@@ -113,22 +113,22 @@
     feature:
       thickness: 110
       segments:
-        - [807, 1019, 427, 1228]
+        - [767, 1050, 427, 1228]
         - [427, 1228, 0, 1300]
         - [0, 1300, -427, 1228]
-        - [-427, 1228, -807, 1019]
-        - [-1019, 807, -1228, 427]
+        - [-427, 1228, -767, 1050]
+        - [-1050, 767, -1228, 427]
         - [-1228, 427, -1300, 0]
         - [-1300, 0, -1228, -427]
-        - [-1228, -427, -1019, -807]
-        - [-807, -1019, -427, -1228]
+        - [-1228, -427, -1050, -767]
+        - [-767, -1050, -427, -1228]
         - [-427, -1228, 0, -1300]
         - [0, -1300, 427, -1228]
-        - [427, -1228, 807, -1019]
-        - [1019, -807, 1228, -427]
+        - [427, -1228, 767, -1050]
+        - [1050, -767, 1228, -427]
         - [1228, -427, 1300, 0]
         - [1300, 0, 1228, 427]
-        - [1228, 427, 1019, 807]
+        - [1228, 427, 1050, 767]
     islands:
       count: { min: 34, max: 44 }
       radius: { min: 40, max: 200 }

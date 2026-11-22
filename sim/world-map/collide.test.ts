@@ -56,6 +56,23 @@ describe("hero collisions", () => {
     expect(run.hero.dashTicks).toBe(0);
   });
 
+  it("a dash at the river stops on the bank", () => {
+    const data = gameData();
+    data.worlds[1]!.map.islands.count = { min: 0, max: 0 };
+    silenceSpawns(data);
+    const run = createRun(data, { seed: 1, world: 2 });
+    run.hero.x = -2200;
+    run.hero.y = 1000;
+    run.hero.dashDirX = 0;
+    run.hero.dashDirY = 1;
+    run.hero.dashTicks = 12;
+    walk(run, 0, 0, 12);
+    // the river's axis at x = -2200 lies at y = 1500 - 350 * 700 / 1500 (segment (-3000,1500)-(-1500,1150))
+    const axis = 1500 - (350 * 800) / 1500;
+    expect(run.hero.y).toBeLessThan(axis - 75 - 32 + 1);
+    expect(isFree(run.map, run.hero.x, run.hero.y, 31)).toBe(true);
+  });
+
   it("walks 1.15 times as far on a path", () => {
     const run = createRun(wallData(), { seed: 1 });
     run.hero.x = 0;
