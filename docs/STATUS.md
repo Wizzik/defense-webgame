@@ -4,7 +4,7 @@ Updated 2026-11-22 (difficulties plan 3a on branch `worlds-2-3`, PR open; waits 
 
 ## Difficulties 3a: Red Waste and Shadewood (branch `worlds-2-3`, PR against `main`, 2026-11-22)
 
-- All 8 tasks of `docs/superpowers/plans/2026-11-22-difficulties-worlds-2-3.md` (full text in the claude.ai project) done inline in one chat, one final self-review. `npm run check` (1172 tests), the build, e2e `webgl2-fallback` (44) and `sim-chromium` pass. Numbers, rulings and the win table: `docs/DECISIONS.md`, section Difficulties and worlds, plan 3a.
+- All 8 tasks of `docs/superpowers/plans/2026-11-22-difficulties-worlds-2-3.md` done inline in one chat, one final self-review. `npm run check` (1172 tests), the build, e2e `webgl2-fallback` (44) and `sim-chromium` pass. Numbers, rulings and the win table: `docs/DECISIONS.md`, section Difficulties and worlds, plan 3a.
 - What it brings:
   - **world 2 Red Waste:** wine-red clay, a blue river across the arena with two stone bridges, mesas, stumps and clan tents; the **sandstorm** from phase 2: announced 5 s ahead, then 15 s of thick pink-grey fog, blown dust and -20 % walking speed for everyone, every 100-130 s;
   - **world 3 Shadewood:** night in blues with fireflies, a ring of ancient trees around the castle with four diagonal passages, **thornbrake** zones (dark discs with bushes) where walking is 30 % slower (a path through them is not);
