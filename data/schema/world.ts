@@ -61,8 +61,32 @@ export const StormSchema = z.object({
   bossShare: share,
   name: LocalizedText,
 }).strict();
-export const HazardSchema = z.discriminatedUnion("kind", [StormSchema]);
+/**
+ * A timed natural event that slows the walking of everyone while it runs (spec 4.7 point 2): a warning warnSeconds
+ * ahead, then durationSeconds of weather, in gaps of everySeconds from fromPhase on. moveSlow is a share (0.2 = -20 %).
+ */
+export const WeatherSchema = z.object({
+  kind: z.literal("weather"),
+  effect: z.enum(["sand"]),
+  fromPhase: z.number().int().min(1),
+  everySeconds: range(positive),
+  durationSeconds: positive,
+  warnSeconds: positive,
+  moveSlow: share,
+  name: LocalizedText,
+}).strict();
+/** Fixed zones of brake that slow walking inside them by `slow` (spec 4.7 point 3); [x, y, r] of each zone. */
+export const ThicketSchema = z.object({
+  kind: z.literal("thicket"),
+  slow: share,
+  zones: z.array(z.tuple([finite, finite, positive])).min(1),
+  name: LocalizedText,
+}).strict();
+export const HazardSchema = z.discriminatedUnion("kind", [StormSchema, WeatherSchema, ThicketSchema]);
 export type Hazard = z.infer<typeof HazardSchema>;
+export type Storm = z.infer<typeof StormSchema>;
+export type Weather = z.infer<typeof WeatherSchema>;
+export type Thicket = z.infer<typeof ThicketSchema>;
 
 /** One world of the ladder (design/worlds.yaml); its place in the list is its number, 1-based. */
 export const WorldSchema = z.object({
@@ -78,3 +102,8 @@ export const WorldSchema = z.object({
   hazard: HazardSchema,
 }).strict();
 export type World = z.infer<typeof WorldSchema>;
+
+/** The world's summer storm, or null when its natural event is of another kind. */
+export function stormOf(world: World): Storm | null {
+  return world.hazard.kind === "storm" ? world.hazard : null;
+}

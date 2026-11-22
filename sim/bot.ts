@@ -1,4 +1,4 @@
-import { RARITIES } from "../data/schema";
+import { RARITIES, stormOf } from "../data/schema";
 import { sharedSlotRange, ULTIMATE_SLOT } from "./abilities/slots";
 import { OrbKind } from "./buffs";
 import type { CardOffer } from "./cards";
@@ -204,9 +204,10 @@ export function botInput(run: Run, out: TickInput): TickInput {
   let boltX = 0;
   let boltY = 0;
   let bolt = false;
-  if (slammer < 0) {
+  const storm = stormOf(run.data.worlds[run.world - 1]!);
+  if (slammer < 0 && storm !== null) {
     const { hazard } = run;
-    const reach = run.data.worlds[run.world - 1]!.hazard.radius + SLAM_MARGIN;
+    const reach = storm.radius + SLAM_MARGIN;
     for (let i = 0; i < hazard.ticks.length && !bolt; i++) {
       if (hazard.ticks[i] === 0) continue;
       const sx = hero.x - hazard.x[i]!;

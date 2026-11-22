@@ -2,6 +2,8 @@
 # world N on a difficulty unlocks world N + 1 on it (meta/progress.ts). Names and blurbs are our own.
 # color: the dark card colour in the world screen (no orange). ready: false = playable with the look of world 1 and
 # marked "coming soon" until the worlds plan 3 gives it its own look.
+# hazard kinds: storm (bolts after a warning circle), weather (a timed event slowing everyone's walking: effect sand),
+# thicket (fixed zones [x, y, r] of brake slowing walking inside them; a path wins over a zone).
 - id: silver-march
   name: { en: Silver March, cs: Stříbrná marka }
   blurb:
@@ -55,8 +57,42 @@
     cs: "Rudá hlína a suchá tráva, kde se pod tvrdým nebem shromažďují klany."
   color: "#3d2427"
   ready: false
-  map: *silverMap
-  hazard: *silverStorm
+  # A river across the arena (thickness 150) with two bridges, gaps 300 at x = -1050..-750 and 1000..1300 (spec 4.5).
+  map:
+    paths:
+      width: 160
+      speedBonus: 0.15
+      lines:
+        - [[0, 200], [-900, 1205], [-1200, 2800]]
+        - [[0, 200], [1150, 1100], [1500, 2800]]
+        - [[0, -200], [0, -2850]]
+        - [[200, 0], [2850, -300]]
+    feature:
+      thickness: 150
+      segments:
+        - [-3000, 1500, -1500, 1150]
+        - [-1500, 1150, -1050, 1191]
+        - [-750, 1218, -400, 1250]
+        - [-400, 1250, 600, 1000]
+        - [600, 1000, 1000, 1073]
+        - [1300, 1127, 1700, 1200]
+        - [1700, 1200, 3000, 900]
+    islands:
+      count: { min: 28, max: 36 }
+      radius: { min: 40, max: 200 }
+      gap: 120
+      kinds: { rock: 6, trees: 1, ruin: 3 }
+    clear: { castle: 600, ringInner: 2200, ringOuter: 2600, pathMargin: 60, featureMargin: 150 }
+  # A sandstorm from phase 2: announced 5 s ahead, then 15 s of -20 % walking speed for everyone.
+  hazard:
+    kind: weather
+    effect: sand
+    fromPhase: 2
+    everySeconds: { min: 100, max: 130 }
+    durationSeconds: 15
+    warnSeconds: 5
+    moveSlow: 0.2
+    name: { en: Sandstorm, cs: Písečná bouře }
 - id: shadewood
   name: { en: Shadewood, cs: Stínový hvozd }
   blurb:
@@ -64,8 +100,55 @@
     cs: "Nekonečná noc pod pradávnými stromy, osvětlená jen měsícem."
   color: "#1a2440"
   ready: false
-  map: *silverMap
-  hazard: *silverStorm
+  # A ring of ancient trees 1300 around the castle (thickness 110) with four passages 300 wide on the diagonals.
+  map:
+    paths:
+      width: 160
+      speedBonus: 0.15
+      lines:
+        - [[150, 150], [2000, 2000]]
+        - [[-150, 150], [-2000, 2000]]
+        - [[-150, -150], [-2000, -2000]]
+        - [[150, -150], [2000, -2000]]
+    feature:
+      thickness: 110
+      segments:
+        - [807, 1019, 427, 1228]
+        - [427, 1228, 0, 1300]
+        - [0, 1300, -427, 1228]
+        - [-427, 1228, -807, 1019]
+        - [-1019, 807, -1228, 427]
+        - [-1228, 427, -1300, 0]
+        - [-1300, 0, -1228, -427]
+        - [-1228, -427, -1019, -807]
+        - [-807, -1019, -427, -1228]
+        - [-427, -1228, 0, -1300]
+        - [0, -1300, 427, -1228]
+        - [427, -1228, 807, -1019]
+        - [1019, -807, 1228, -427]
+        - [1228, -427, 1300, 0]
+        - [1300, 0, 1228, 427]
+        - [1228, 427, 1019, 807]
+    islands:
+      count: { min: 34, max: 44 }
+      radius: { min: 40, max: 200 }
+      gap: 120
+      kinds: { rock: 2, trees: 7, ruin: 1 }
+    clear: { castle: 600, ringInner: 2200, ringOuter: 2600, pathMargin: 60, featureMargin: 150 }
+  # Thornbrake: walking inside a zone is 35 % slower (a path through a zone is not).
+  hazard:
+    kind: thicket
+    slow: 0.35
+    zones:
+      - [1850, 0, 300]
+      - [650, 1785, 280]
+      - [-1691, 616, 320]
+      - [-1832, -667, 260]
+      - [0, -1850, 300]
+      - [1645, -950, 280]
+      - [0, 900, 200]
+      - [-325, -893, 200]
+    name: { en: Thornbrake, cs: Trnité houští }
 - id: frostreach
   name: { en: Frostreach, cs: Mrazivý sever }
   blurb:

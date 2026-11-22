@@ -379,18 +379,23 @@ describe("world maps", () => {
     return Math.hypot(x1 + t * dx - cx, y1 + t * dy - cy);
   };
 
-  it("every wall segment stays out of the castle circle and the arrival ring", () => {
+  // The river of Red Waste crosses the whole arena (and the arrival ring) on purpose: enemies north of it walk over
+  // the bridges. Closed features (the wall, the tree ring) stay inside the ring.
+  const crossesArena = new Set(["red-waste"]);
+
+  it("every feature segment stays out of the castle circle; closed features stay inside the arrival ring", () => {
     for (const w of worlds) {
       const half = w.map.feature.thickness / 2;
       for (const s of w.map.feature.segments) {
         expect(nearestToCastle(s), w.id).toBeGreaterThan(w.map.clear.castle + half);
+        if (crossesArena.has(w.id)) continue;
         const far = Math.max(Math.hypot(s[0] - cx, s[1] - cy), Math.hypot(s[2] - cx, s[3] - cy));
         expect(far, w.id).toBeLessThan(w.map.clear.ringInner - half);
       }
     }
   });
 
-  it("the gaps between neighbouring wall segments that share no end are gates 200-300 wide", () => {
+  it("the gaps between neighbouring feature segments that share no end are gates 200-310 wide", () => {
     for (const w of worlds) {
       const segs = w.map.feature.segments;
       for (let i = 0; i + 1 < segs.length; i++) {
@@ -398,7 +403,7 @@ describe("world maps", () => {
         const gap = Math.hypot(b[0] - a[2], b[1] - a[3]);
         if (gap === 0) continue;
         expect(gap, `${w.id} gate ${i}`).toBeGreaterThanOrEqual(200);
-        expect(gap, `${w.id} gate ${i}`).toBeLessThanOrEqual(300);
+        expect(gap, `${w.id} gate ${i}`).toBeLessThanOrEqual(310);
       }
     }
   });

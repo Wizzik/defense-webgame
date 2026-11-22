@@ -716,6 +716,36 @@ describe("difficulty and worlds", () => {
     expect(data.worlds[0].hazard.kind).toBe("storm");
   });
 
+  it("parses a weather hazard", () => {
+    const ok = fixture();
+    ok.worlds[0].hazard = weather();
+    expect(validateGameData(ok).worlds[0].hazard.kind).toBe("weather");
+    const strong = fixture();
+    strong.worlds[0].hazard = { ...weather(), moveSlow: 1.2 };
+    expect(errorMessage(strong)).toContain("hazard");
+    const fog = fixture();
+    fog.worlds[0].hazard = { ...weather(), effect: "fog" };
+    expect(errorMessage(fog)).toContain("hazard");
+  });
+
+  it("parses a thicket hazard", () => {
+    const ok = fixture();
+    ok.worlds[0].hazard = thicket([[0, 900, 200]]);
+    expect(validateGameData(ok).worlds[0].hazard.kind).toBe("thicket");
+    const empty = fixture();
+    empty.worlds[0].hazard = thicket([]);
+    expect(errorMessage(empty)).toContain("hazard");
+    const flat = fixture();
+    flat.worlds[0].hazard = thicket([[0, 900, 0]]);
+    expect(errorMessage(flat)).toContain("hazard");
+  });
+
+  it("rejects an unknown hazard kind", () => {
+    const odd = fixture();
+    odd.worlds[0].hazard = { ...weather(), kind: "flood" };
+    expect(errorMessage(odd)).toContain("hazard");
+  });
+
   it("rejects duplicate world ids and an empty world list", () => {
     const dup = fixture();
     dup.worlds[1].id = "first-world";
@@ -740,4 +770,15 @@ function storm() {
     kind: "storm" as const, fromPhase: 3, everySeconds: { min: 35, max: 45 }, bolts: { min: 1, max: 3 }, spread: 300,
     warnSeconds: 1.2, radius: 120, heroShare: 0.08, enemyShare: 0.2, bossShare: 0.02, name: { en: "Storm", cs: "Bouře" },
   };
+}
+
+function weather() {
+  return {
+    kind: "weather" as const, effect: "sand", fromPhase: 2, everySeconds: { min: 100, max: 130 }, durationSeconds: 15,
+    warnSeconds: 5, moveSlow: 0.2, name: { en: "Sandstorm", cs: "Písečná bouře" },
+  };
+}
+
+function thicket(zones: number[][]) {
+  return { kind: "thicket" as const, slow: 0.35, zones, name: { en: "Thornbrake", cs: "Trnité houští" } };
 }
