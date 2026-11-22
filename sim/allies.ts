@@ -18,6 +18,8 @@ export class AllyStore {
   readonly kind: Uint8Array;
   /** Ability slot that summoned the ally. */
   readonly ability: Uint8Array;
+  /** Index of the player whose ability summoned the ally. */
+  readonly owner: Uint8Array;
   /** Index into IMAGE_OFFSETS (images only). */
   readonly formation: Uint8Array;
   readonly moving: Uint8Array;
@@ -37,6 +39,7 @@ export class AllyStore {
     this.alive = new Uint8Array(capacity);
     this.kind = new Uint8Array(capacity);
     this.ability = new Uint8Array(capacity);
+    this.owner = new Uint8Array(capacity);
     this.formation = new Uint8Array(capacity);
     this.moving = new Uint8Array(capacity);
     this.x = new Float64Array(capacity);
@@ -54,12 +57,14 @@ export class AllyStore {
   /** Takes the lowest free slot; returns -1 when the store is full. */
   spawn(
     kind: number, ability: number, formation: number, x: number, y: number, tick: number, expiresTick: number,
+    owner = 0,
   ): number {
     for (let i = 0; i < this.capacity; i++) {
       if (this.alive[i] !== 0) continue;
       this.alive[i] = 1;
       this.kind[i] = kind;
       this.ability[i] = ability;
+      this.owner[i] = owner;
       this.formation[i] = formation;
       this.moving[i] = 0;
       this.x[i] = x;
@@ -85,19 +90,22 @@ export class AllyStore {
   }
 }
 
-/** Expires, moves and attacks every ally, in ascending slot order. */
+/** Expires, moves and attacks every ally, in ascending slot order; each acts as its owner (`run.current`). */
 export function updateAllies(run: Run): void {
   const a = run.allies;
   if (a.count === 0) return;
+  const previous = run.current;
   for (let i = 0; i < a.capacity; i++) {
     if (a.alive[i] === 0) continue;
     if (run.tick >= a.expiresTick[i]) {
       a.remove(i);
       continue;
     }
+    run.current = a.owner[i]!;
     if (a.kind[i] === AllyKind.Ward) updateWard(run, i);
     else updateImage(run, i);
   }
+  run.current = previous;
 }
 
 function updateWard(run: Run, i: number): void {

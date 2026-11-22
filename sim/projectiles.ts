@@ -14,6 +14,8 @@ export class ProjectileStore {
   readonly alive: Uint8Array;
   /** Ability slot that fired the bolt. */
   readonly ability: Uint8Array;
+  /** Index of the player whose ability fired the bolt. */
+  readonly owner: Uint8Array;
   readonly target: Int32Array;
   /** The target's spawnTick when locked on; a refilled enemy slot has a different one. */
   readonly targetSpawnTick: Int32Array;
@@ -28,6 +30,7 @@ export class ProjectileStore {
     this.capacity = capacity;
     this.alive = new Uint8Array(capacity);
     this.ability = new Uint8Array(capacity);
+    this.owner = new Uint8Array(capacity);
     this.target = new Int32Array(capacity);
     this.targetSpawnTick = new Int32Array(capacity);
     this.x = new Float64Array(capacity);
@@ -41,11 +44,13 @@ export class ProjectileStore {
   /** Takes the lowest free slot; returns -1 when the store is full. */
   spawn(
     ability: number, target: number, targetSpawnTick: number, x: number, y: number, speed: number, damage: number,
+    owner = 0,
   ): number {
     for (let i = 0; i < this.capacity; i++) {
       if (this.alive[i] !== 0) continue;
       this.alive[i] = 1;
       this.ability[i] = ability;
+      this.owner[i] = owner;
       this.target[i] = target;
       this.targetSpawnTick[i] = targetSpawnTick;
       this.x[i] = x;
@@ -67,7 +72,10 @@ export class ProjectileStore {
   }
 }
 
-/** Flies every bolt towards its target (retargeting when it is gone); a bolt in reach hits and disappears. */
+/**
+ * Flies every bolt towards its target (retargeting when it is gone); a bolt in reach hits and disappears.
+ * The hit counts for the bolt's owner (`run.current`), like a cast of his.
+ */
 export function updateProjectiles(run: Run): void {
   const p = run.projectiles;
   if (p.count === 0) return;
@@ -92,7 +100,10 @@ export function updateProjectiles(run: Run): void {
       const damage = p.damage[i];
       const ability = p.ability[i];
       p.remove(i);
+      const previous = run.current;
+      run.current = p.owner[i]!;
       damageEnemy(run, t, damage, 1, ability); // spells ignore armor
+      run.current = previous;
       continue;
     }
     p.x[i] += (dx / d) * step;

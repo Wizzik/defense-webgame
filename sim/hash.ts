@@ -46,11 +46,11 @@ export function stateHash(run: Run): number {
   mixInt(STATES[run.state]);
   mixInt(run.result === null ? 0 : RESULTS[run.result]);
   mixInt(run.rng.state);
-  for (const p of run.players) mixInt(p.heroIndex);
+  for (let i = 0; i < run.players.length; i++) mixInt(run.players[i]!.heroIndex);
   mixInt(run.world);
   mixInt(DIFFICULTY_IDS.indexOf(run.difficulty));
   // every player block mixes the values of a one-hero run in the same order, so one player hashes as before
-  for (const p of run.players) mixPlayer(p);
+  for (let i = 0; i < run.players.length; i++) mixPlayer(run.players[i]!);
   mixInt(run.sustainRng.state);
   const orbs = run.orbs;
   for (let i = 0; i < orbs.alive.length; i++) {
@@ -91,7 +91,7 @@ export function stateHash(run: Run): number {
     mixInt(run.bossLog[b].spawnTick);
     mixInt(run.bossLog[b].deathTick);
   }
-  for (const p of run.players) mixAbilities(run, p);
+  for (let i = 0; i < run.players.length; i++) mixAbilities(run, run.players[i]!);
   const e = run.enemies;
   for (let i = 0; i < e.capacity; i++) {
     if (e.alive[i] === 0) continue;
@@ -148,7 +148,7 @@ export function stateHash(run: Run): number {
   mixInt(run.chestsOpened);
   mixInt(run.bossesKilled);
   mixFloat(run.chestPriceRaw);
-  for (const p of run.players) mixInt(p.openChest + 1);
+  for (let i = 0; i < run.players.length; i++) mixInt(run.players[i]!.openChest + 1);
   for (let i = 0; i < run.chests.x.length; i++) {
     mixFloat(run.chests.x[i]!);
     mixFloat(run.chests.y[i]!);
@@ -186,10 +186,13 @@ export function stateHash(run: Run): number {
     mixFloat(hearts.x[i]);
     mixFloat(hearts.y[i]);
   }
+  // owners are mixed only with several players, so a one-player run hashes as before
+  const owners = run.players.length > 1;
   const pr = run.projectiles;
   for (let i = 0; i < pr.capacity; i++) {
     if (pr.alive[i] === 0) continue;
     mixInt(i);
+    if (owners) mixInt(pr.owner[i]!);
     mixInt(pr.ability[i]);
     mixInt(pr.target[i]);
     mixInt(pr.targetSpawnTick[i]);
@@ -202,6 +205,7 @@ export function stateHash(run: Run): number {
   for (let i = 0; i < al.capacity; i++) {
     if (al.alive[i] === 0) continue;
     mixInt(i);
+    if (owners) mixInt(al.owner[i]!);
     mixInt(al.kind[i]);
     mixInt(al.ability[i]);
     mixFloat(al.x[i]);
@@ -215,7 +219,7 @@ export function stateHash(run: Run): number {
     mixFloat(al.facingX[i]);
     mixFloat(al.facingY[i]);
   }
-  for (const p of run.players) mixOffer(p);
+  for (let i = 0; i < run.players.length; i++) mixOffer(run.players[i]!);
   return h;
 }
 

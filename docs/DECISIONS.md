@@ -2,6 +2,14 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Multiplayer migration, steps 1-2: players and several heroes in the simulation (2026-11-22; Petr asked to go on with multiplayer, the choices are Claude's)
+
+- `run.players` (`sim/player.ts`) holds what belongs to one player; the matrix digest stays `4bc81413` (pinned now by `client/determinism/digest.test.ts`, `npm run sim:digest`).
+- **The current player instead of a parameter in 45 files:** `run.current` names the player whose systems run, and the old fields (`run.hero`, `run.gold`, `run.abilities`, ...) read `players[current]`. `Run.step` sets it around every per-player system, allies and bolts set it to their `owner`, and it is back to 0 outside. Why: the inventory's plan (a `player` parameter for every system) touches about 45 files and 1-2 chats; with `current` step 2 is a change in `run.ts`, the hash, allies, bolts and the start phase, and every kill, lifesteal, elite-kill haste and knockback is credited to the player whose spell or attack it was without a word changed in those files. The price: a hidden index; code outside `Run.step` must not leave it set (the tests check it is 0 after a step). Explicit parameters can still replace it file by file later.
+- Players stand `PLAYER_START_SPACING` = 120 apart east and west of the hero start (0, +120, -120, +240).
+- Until step 5 a level-up of any player still pauses the whole run (the offer goes to the first player with level-ups; `run.choosing`), and a chest likewise; until step 6 the run is lost when every hero has fallen (a fallen hero just lies there and casts nothing; no revive yet). Until steps 3 and 4 enemies, pickups, orbs, snares, clouds and the hazard see only player 0.
+- Kills by the storm, clouds or other run systems count for player 0 (gear effects that react to an elite kill).
+
 ## Difficulties and worlds, plan 3a: Red Waste and Shadewood (2026-11-22; the numbers, looks and the split of plan 3 are Claude's)
 
 - Plan: `docs/superpowers/plans/2026-11-22-difficulties-worlds-2-3.md` (spec 4.1, 4.5, 4.7 points 2-3, 4.8, 4.9, 4.10 point 3). **Plan 3 split in two:** 3a (this) builds the per-world look and model loading and worlds 2 and 3 whole; 3b (next chat, after Petr plays 3a) brings Frostreach (an ice ridge with a pass, a blizzard with chill) and Blightscar (a broken wall with breaches, green meteors leaving fire), their looks, the ladder tuned to spec 4.2 for world 5 and shots `world-4`, `world-5`. Worlds 4 and 5 still share world 1's map, storm and look.

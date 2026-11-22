@@ -25,7 +25,7 @@ import { refreshHeroStats } from "./level-up";
 import { tickSnares } from "./hero-snares";
 import { buildFactionTables, updateFaction } from "./factions";
 import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
-import { InputAction, type TickInput } from "./input";
+import { InputAction, NO_INPUT, type TickInput } from "./input";
 import { Rng } from "./rng";
 import { buildWorldMap, type WorldMap } from "./world-map/map";
 import { spawnEnemies } from "./spawner";
@@ -40,8 +40,21 @@ import type { CastleState, HeroState, HeroStats, RunStats } from "./world";
 
 export type RunState = "playing" | "levelUp" | "chest" | "won" | "lost";
 export type RunResult = "won" | "castle" | "hero";
+/** One player of a run with several heroes (multiplayer migration, step 2). */
+export interface PlayerOptions {
+  /** Hero id; defaults to rules.start.hero. */
+  hero?: string;
+  /** Permanent items the hero wears (sim/gear.ts). */
+  loadout?: readonly LoadoutEntry[];
+}
+
+/** How far apart the heroes of several players start, east and west of `arena.heroStart` (player 0 stands on it). */
+export const PLAYER_START_SPACING = 120;
+
 export interface RunOptions {
   seed: number;
+  /** The players, 1 to 4; when given, `hero` and `loadout` are ignored. Defaults to one player of `hero` and `loadout`. */
+  players?: readonly PlayerOptions[];
   durationSeconds?: number;
   /** Hero id; defaults to rules.start.hero. */
   hero?: string;
@@ -75,6 +88,14 @@ export class Run {
   readonly events = new EventLog(EVENT_CAPACITY);
   /** The players of the run; `players[0]` is the single player (sim/player.ts). */
   readonly players: PlayerState[] = [];
+  /**
+   * The player whose systems run now. `run.hero`, `run.abilities`, `run.gold`, ... read and write
+   * `players[current]`: `Run.step` sets it around every per-player system and around each ally and bolt
+   * (their owner), and puts it back to 0 after; everything else (enemies, pickups, the castle) sees player 0.
+   */
+  current = 0;
+  /** The player whose card or chest offer holds the run in the "levelUp" or "chest" state. */
+  choosing = 0;
   readonly castle: CastleState;
   readonly enemies: EnemyStore;
   readonly grid: SpatialHash;
@@ -197,32 +218,21 @@ export class Run {
       (options.durationSeconds ?? rules.run.durationSeconds) * TICKS_PER_SECOND,
     );
 
-    const heroId = options.hero ?? rules.start.hero;
-    const heroIndex = data.heroes.findIndex((h) => h.id === heroId);
-    if (heroIndex < 0) throw new Error(`createRun: unknown hero "${heroId}"`);
-    const def = data.heroes[heroIndex];
-    const stats: HeroStats = {
-      maxHp: 0, regenPerSecond: 0, armor: 0, attackIntervalSeconds: 0, damageMin: 0, damageMax: 0,
-      spellPower: 0, cooldownScale: 0, moveSpeed: 0, collision: 0,
-    };
-    const start = rules.arena.heroStart;
-    const hero: HeroState = {
-      def, x: start.x, y: start.y, prevX: start.x, prevY: start.y,
-      facingX: 0, facingY: 1, moving: false,
-      level: 1, xp: 0,
-      str: def.attributes.str.base, agi: def.attributes.agi.base, int: def.attributes.int.base,
-      hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, gear: emptyGearBonus(), passive: emptyPassiveBonus(), attackCooldown: 0, pendingLevelUps: 0, speedScale: 1,
-      dashTicks: 0, dashCooldown: 0, dashDirX: 0, dashDirY: 0, slowTicks: 0, slowShare: 0, rootTicks: 0,
-    };
-    heroStats(data, hero, stats);
-    hero.hp = stats.maxHp;
-    const player = new PlayerState(hero, heroIndex, rules.enemies.maxAlive);
-    this.players.push(player);
-
-    player.abilities = createAbilitySlots(this);
-    refreshHeroStats(this); // the same path as every later refresh, so a starting aura counts
-    if (options.loadout !== undefined) loadGear(this, options.loadout);
-    recomputeGear(this); // a living hero's hp grows with maxHp, so the hero starts full
+    const players: readonly PlayerOptions[] = options.players ?? [{ hero: options.hero, loadout: options.loadout }];
+    if (players.length < 1 || players.length > MAX_PLAYERS) {
+      throw new Error(`createRun: 1 to ${MAX_PLAYERS} players, got ${players.length}`);
+    }
+    for (let p = 0; p < players.length; p++) this.players.push(createPlayer(data, players[p]!, p));
+    for (let p = 0; p < players.length; p++) {
+      this.current = p;
+      const player = this.players[p]!;
+      player.abilities = createAbilitySlots(this);
+      refreshHeroStats(this); // the same path as every later refresh, so a starting aura counts
+      const loadout = players[p]!.loadout;
+      if (loadout !== undefined) loadGear(this, loadout);
+      recomputeGear(this); // a living hero's hp grows with maxHp, so the hero starts full
+    }
+    this.current = 0;
 
     this.castle = {
       x: rules.arena.castle.x, y: rules.arena.castle.y, radius: rules.castle.radius,
@@ -238,30 +248,34 @@ export class Run {
     this.chests = new ChestStore(rules.chests.count);
     for (let i = 0; i < rules.chests.count; i++) placeChest(this, i, true);
     if (options.startPhase !== undefined) applyStartPhase(this, options.startPhase);
-    fillLifestealBudget(this);
+    for (let p = 0; p < this.players.length; p++) {
+      this.current = p;
+      fillLifestealBudget(this);
+    }
+    this.current = 0;
   }
 
-  // Player 0 through the fields of the one-hero run (multiplayer migration, step 1):
+  // The current player (see `current`) through the fields of the one-hero run (multiplayer migration):
   // single-player code and the tests keep reading `run.hero`, `run.gold`, ...
-  get hero(): HeroState { return this.players[0].hero; }
-  get heroIndex(): number { return this.players[0].heroIndex; }
-  get abilities(): AbilitySlot[] { return this.players[0].abilities; }
-  get gear(): GearState { return this.players[0].gear; }
-  get buffs(): BuffState { return this.players[0].buffs; }
-  get gold(): number { return this.players[0].gold; }
-  set gold(value: number) { this.players[0].gold = value; }
-  get offer(): CardOffer | null { return this.players[0].offer; }
-  set offer(value: CardOffer | null) { this.players[0].offer = value; }
-  get chestOffer(): ChestOffer | null { return this.players[0].chestOffer; }
-  set chestOffer(value: ChestOffer | null) { this.players[0].chestOffer = value; }
-  get openChest(): number { return this.players[0].openChest; }
-  set openChest(value: number) { this.players[0].openChest = value; }
-  get ultimateAuto(): boolean { return this.players[0].ultimateAuto; }
-  set ultimateAuto(value: boolean) { this.players[0].ultimateAuto = value; }
-  get ultimateRequested(): boolean { return this.players[0].ultimateRequested; }
-  set ultimateRequested(value: boolean) { this.players[0].ultimateRequested = value; }
-  get shieldTicks(): number { return this.players[0].shieldTicks; }
-  set shieldTicks(value: number) { this.players[0].shieldTicks = value; }
+  get hero(): HeroState { return this.players[this.current].hero; }
+  get heroIndex(): number { return this.players[this.current].heroIndex; }
+  get abilities(): AbilitySlot[] { return this.players[this.current].abilities; }
+  get gear(): GearState { return this.players[this.current].gear; }
+  get buffs(): BuffState { return this.players[this.current].buffs; }
+  get gold(): number { return this.players[this.current].gold; }
+  set gold(value: number) { this.players[this.current].gold = value; }
+  get offer(): CardOffer | null { return this.players[this.current].offer; }
+  set offer(value: CardOffer | null) { this.players[this.current].offer = value; }
+  get chestOffer(): ChestOffer | null { return this.players[this.current].chestOffer; }
+  set chestOffer(value: ChestOffer | null) { this.players[this.current].chestOffer = value; }
+  get openChest(): number { return this.players[this.current].openChest; }
+  set openChest(value: number) { this.players[this.current].openChest = value; }
+  get ultimateAuto(): boolean { return this.players[this.current].ultimateAuto; }
+  set ultimateAuto(value: boolean) { this.players[this.current].ultimateAuto = value; }
+  get ultimateRequested(): boolean { return this.players[this.current].ultimateRequested; }
+  set ultimateRequested(value: boolean) { this.players[this.current].ultimateRequested = value; }
+  get shieldTicks(): number { return this.players[this.current].shieldTicks; }
+  set shieldTicks(value: number) { this.players[this.current].shieldTicks = value; }
 
   /** The time of the final boss has come. */
   get inFinale(): boolean {
@@ -311,55 +325,149 @@ export class Run {
    *   if (state === "playing" && hero.pendingLevelUps > 0) openOffer(this);   // Task 7
    *   else if (state === "playing") updateChests(this);   // gear plan, Task 4: after the end check and the cards
    *
+   * With several players (multiplayer migration step 2) the hero systems run once per player with `current` set to
+   * him, each in its own loop at its line above: applyActions, moveHero, tickSnares, updateHeroCombat, updateAbilities,
+   * updateGearEffects and updateBuffs; savePrevious covers every hero. Allies and bolts act as their owner. The offer
+   * goes to the first player with level-ups, else the first player on a chest opens it; `choosing` is that player.
+   * Enemies, pickups, orbs and the hazard still see player 0 (steps 3 and 4). The run is lost when every hero has fallen.
+   *
    * In the "chest" state only chooseChestCard runs (the KeepWorn bit keeps the worn item of a Choice), like chooseCard in "levelUp".
    */
-  step(input: TickInput): void {
+  step(input: TickInput | readonly TickInput[]): void {
     // first, also for a finished run: the client keeps stepping it, and the events of its last step
     // (a boss's death and so its drop) must reach the views once
     this.events.clear();
     if (this.state === "won" || this.state === "lost") return;
+    const count = this.players.length;
     if (this.state === "levelUp") {
-      chooseCard(this, input.card);
+      this.current = this.choosing;
+      chooseCard(this, inputOf(input, this.choosing).card);
+      this.current = 0;
       return;
     }
     if (this.state === "chest") {
-      chooseChestCard(this, input.card, (input.actions & InputAction.KeepWorn) !== 0);
+      const own = inputOf(input, this.choosing);
+      this.current = this.choosing;
+      chooseChestCard(this, own.card, (own.actions & InputAction.KeepWorn) !== 0);
+      this.current = 0;
       return;
     }
     savePrevious(this);
-    applyActions(this, input);
-    moveHero(this, input);
-    tickSnares(this);
+    for (let p = 0; p < count; p++) {
+      this.current = p;
+      applyActions(this, inputOf(input, p));
+    }
+    for (let p = 0; p < count; p++) {
+      this.current = p;
+      moveHero(this, inputOf(input, p));
+    }
+    for (let p = 0; p < count; p++) {
+      this.current = p;
+      tickSnares(this);
+    }
+    this.current = 0;
     updateFaction(this);
     updateTimeline(this);
     spawnEnemies(this);
     updateEnemies(this);
     updateClouds(this);
     healEnemies(this);
-    updateHeroCombat(this);
-    updateAbilities(this);
-    updateGearEffects(this);
+    for (let p = 0; p < count; p++) {
+      this.current = p;
+      updateHeroCombat(this);
+    }
+    for (let p = 0; p < count; p++) {
+      this.current = p;
+      updateAbilities(this);
+    }
+    for (let p = 0; p < count; p++) {
+      this.current = p;
+      updateGearEffects(this);
+    }
+    this.current = 0;
     updateProjectiles(this);
     updateAllies(this);
     updatePickups(this, this.crystals, 0);
     updatePickups(this, this.coins, 1);
     updatePickups(this, this.hearts, 2);
     updateOrbs(this);
-    updateBuffs(this);
+    for (let p = 0; p < count; p++) {
+      this.current = p;
+      updateBuffs(this);
+    }
+    this.current = 0;
     updateHazard(this);
     regenCastle(this);
     this.tick++;
     checkEnd(this);
     if (this.state !== "playing") return;
-    if (this.hero.pendingLevelUps > 0) openOffer(this);
-    else updateChests(this);
+    for (let p = 0; p < count; p++) {
+      if (this.players[p]!.hero.pendingLevelUps === 0) continue;
+      this.current = p;
+      this.choosing = p;
+      openOffer(this);
+      this.current = 0;
+      return;
+    }
+    for (let p = 0; p < count; p++) {
+      this.current = p;
+      updateChests(this);
+      if ((this.state as RunState) === "chest") {
+        this.choosing = p;
+        break;
+      }
+    }
+    this.current = 0;
   }
 }
 
+/** Most players of one run. */
+export const MAX_PLAYERS = 4;
+
+/** The input of player `p`: a single input steers player 0 only, a missing one is no input. */
+function inputOf(input: TickInput | readonly TickInput[], p: number): Readonly<TickInput> {
+  if (isInputList(input)) return input[p] ?? NO_INPUT;
+  return p === 0 ? input : NO_INPUT;
+}
+
+function isInputList(input: TickInput | readonly TickInput[]): input is readonly TickInput[] {
+  return Array.isArray(input);
+}
+
+function createPlayer(data: GameData, options: PlayerOptions, p: number): PlayerState {
+  const { rules } = data;
+  const heroId = options.hero ?? rules.start.hero;
+  const heroIndex = data.heroes.findIndex((h) => h.id === heroId);
+  if (heroIndex < 0) throw new Error(`createRun: unknown hero "${heroId}"`);
+  const def = data.heroes[heroIndex];
+  const stats: HeroStats = {
+    maxHp: 0, regenPerSecond: 0, armor: 0, attackIntervalSeconds: 0, damageMin: 0, damageMax: 0,
+    spellPower: 0, cooldownScale: 0, moveSpeed: 0, collision: 0,
+  };
+  const start = rules.arena.heroStart;
+  // player 0 on the start, then east, west, further east: 0, +1, -1, +2 spacings
+  const shift = p === 0 ? 0 : (p % 2 === 1 ? 1 : -1) * Math.ceil(p / 2) * PLAYER_START_SPACING;
+  const x = start.x + shift;
+  const hero: HeroState = {
+    def, x, y: start.y, prevX: x, prevY: start.y,
+    facingX: 0, facingY: 1, moving: false,
+    level: 1, xp: 0,
+    str: def.attributes.str.base, agi: def.attributes.agi.base, int: def.attributes.int.base,
+    hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, gear: emptyGearBonus(), passive: emptyPassiveBonus(), attackCooldown: 0, pendingLevelUps: 0, speedScale: 1,
+    dashTicks: 0, dashCooldown: 0, dashDirX: 0, dashDirY: 0, slowTicks: 0, slowShare: 0, rootTicks: 0,
+  };
+  heroStats(data, hero, stats);
+  hero.hp = stats.maxHp;
+  return new PlayerState(hero, heroIndex, rules.enemies.maxAlive);
+}
+
 function savePrevious(run: Run): void {
-  const { hero, enemies, crystals, coins, hearts, projectiles, allies } = run;
-  hero.prevX = hero.x;
-  hero.prevY = hero.y;
+  const { enemies, crystals, coins, hearts, projectiles, allies } = run;
+  for (let p = 0; p < run.players.length; p++) {
+    const hero = run.players[p]!.hero;
+    hero.prevX = hero.x;
+    hero.prevY = hero.y;
+  }
   for (let i = 0; i < crystals.capacity; i++) {
     if (crystals.alive[i] === 0) continue;
     crystals.prevX[i] = crystals.x[i];
@@ -399,7 +507,7 @@ function checkEnd(run: Run): void {
     run.events.push(EventKind.RunEnd, 1, 0, 0, 0, 0, 0);
     return;
   }
-  if (run.hero.hp <= 0) {
+  if (allHeroesDown(run)) {
     run.state = "lost";
     run.result = "hero";
     run.events.push(EventKind.RunEnd, 2, 0, 0, 0, 0, 0);
@@ -414,4 +522,10 @@ function checkEnd(run: Run): void {
 
 export function createRun(data: GameData, options: RunOptions): Run {
   return new Run(data, options);
+}
+
+/** Every hero has fallen (one player: the hero fell). */
+function allHeroesDown(run: Run): boolean {
+  for (let p = 0; p < run.players.length; p++) if (run.players[p]!.hero.hp > 0) return false;
+  return true;
 }
