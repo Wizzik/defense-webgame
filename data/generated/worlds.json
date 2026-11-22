@@ -167,7 +167,7 @@
       "cs": "Rudá hlína a suchá tráva, kde se pod tvrdým nebem shromažďují klany."
     },
     "color": "#3d2427",
-    "ready": false,
+    "ready": true,
     "map": {
       "paths": {
         "width": 160,
@@ -322,7 +322,7 @@
       "cs": "Nekonečná noc pod pradávnými stromy, osvětlená jen měsícem."
     },
     "color": "#1a2440",
-    "ready": false,
+    "ready": true,
     "map": {
       "paths": {
         "width": 160,
@@ -497,7 +497,7 @@
     },
     "hazard": {
       "kind": "thicket",
-      "slow": 0.35,
+      "slow": 0.3,
       "zones": [
         [
           1850,

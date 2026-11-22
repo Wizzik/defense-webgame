@@ -131,10 +131,10 @@ describe("generated game data", () => {
     expect(enemies.filter((e) => e.heal !== undefined).map((e) => e.id)).toEqual(["chaplain", "pale-abbot", "grove-druid"]);
   });
 
-  it("five worlds, only the first ready, and the difficulty table", () => {
+  it("five worlds, the first three ready, and the difficulty table", () => {
     const worlds = JSON.parse(read("worlds.json")) as { id: string; ready: boolean }[];
     expect(worlds.map((w) => w.id)).toEqual(["silver-march", "red-waste", "shadewood", "frostreach", "blightscar"]);
-    expect(worlds.map((w) => w.ready)).toEqual([true, false, false, false, false]);
+    expect(worlds.map((w) => w.ready)).toEqual([true, true, true, false, false]);
     type Level = { hp: number; damage: number; packSize: number; eliteHp: number; magicFind: number; extraRushes: { atSeconds: number }[] };
     const rules = JSON.parse(read("rules.json")) as { run: { durationSeconds: number }; difficulty: { levels: Record<string, Level> } };
     expect(rules.difficulty.levels.normal).toEqual({ hp: 1, damage: 1, packSize: 1, eliteHp: 1, magicFind: 0, extraRushes: [] });

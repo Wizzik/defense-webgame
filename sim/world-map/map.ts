@@ -22,6 +22,11 @@ export class WorldMap {
   readonly segY1: Float64Array;
   readonly segX2: Float64Array;
   readonly segY2: Float64Array;
+  /** Each segment's axis bounding box (crossesFeature skips a segment whose box a line misses). */
+  readonly segMinX: Float64Array;
+  readonly segMaxX: Float64Array;
+  readonly segMinY: Float64Array;
+  readonly segMaxY: Float64Array;
   /** Half the wall thickness. */
   readonly segHalf: number;
   readonly segCount: number;
@@ -72,6 +77,10 @@ export class WorldMap {
     this.segY1 = Float64Array.from(feature.segments, (s) => s[1]);
     this.segX2 = Float64Array.from(feature.segments, (s) => s[2]);
     this.segY2 = Float64Array.from(feature.segments, (s) => s[3]);
+    this.segMinX = Float64Array.from(feature.segments, (s) => Math.min(s[0], s[2]));
+    this.segMaxX = Float64Array.from(feature.segments, (s) => Math.max(s[0], s[2]));
+    this.segMinY = Float64Array.from(feature.segments, (s) => Math.min(s[1], s[3]));
+    this.segMaxY = Float64Array.from(feature.segments, (s) => Math.max(s[1], s[3]));
     this.segHalf = feature.thickness / 2;
     this.featMinX = Math.min(...feature.segments.map((s) => Math.min(s[0], s[2])));
     this.featMaxX = Math.max(...feature.segments.map((s) => Math.max(s[0], s[2])));

@@ -27,9 +27,10 @@ describe("worldCard", () => {
 
   it("a locked card and a world that is not ready yet", () => {
     const d = data();
-    const locked = worldCard(d, 3, undefined, false, "en");
-    expect(locked).toEqual({ name: "Shadewood", status: "", locked: true, preparing: true });
+    const locked = worldCard(d, 4, undefined, false, "en");
+    expect(locked).toEqual({ name: "Frostreach", status: "", locked: true, preparing: true });
     expect(worldCard(d, 1, undefined, true, "en").preparing).toBe(false);
+    expect(worldCard(d, 3, undefined, false, "en")).toEqual({ name: "Shadewood", status: "", locked: true, preparing: false });
   });
 });
 

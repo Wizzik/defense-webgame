@@ -86,8 +86,8 @@ describe("buildWorldMap", () => {
 
   it("thicket slows walking inside a zone, a path wins over the thicket", () => {
     const map = buildWorldMap(data, 3, new Rng(1));
-    expect(map.thicketSlow).toBeCloseTo(0.35, 9);
-    expect(groundSpeedScale(map, 0, 900)).toBeCloseTo(0.65, 9);
+    expect(map.thicketSlow).toBeCloseTo(0.3, 9);
+    expect(groundSpeedScale(map, 0, 900)).toBeCloseTo(0.7, 9);
     expect(groundSpeedScale(map, 1000, 1000)).toBeCloseTo(1.15, 9);
     expect(groundSpeedScale(map, 0, -600)).toBe(1);
     const one = buildWorldMap(data, 1, new Rng(1));

@@ -56,7 +56,7 @@
     en: "Red clay and dry grass where the clans gather under a hard sky."
     cs: "Rudá hlína a suchá tráva, kde se pod tvrdým nebem shromažďují klany."
   color: "#3d2427"
-  ready: false
+  ready: true
   # A river across the arena (thickness 150) with two bridges, gaps 400 at x = -1100..-700 and 950..1350 (spec 4.5).
   map:
     paths:
@@ -99,7 +99,7 @@
     en: "An endless night under ancient trees, lit only by the moon."
     cs: "Nekonečná noc pod pradávnými stromy, osvětlená jen měsícem."
   color: "#1a2440"
-  ready: false
+  ready: true
   # A ring of ancient trees 1300 around the castle (thickness 110) with four passages 400 wide on the diagonals.
   map:
     paths:
@@ -135,10 +135,10 @@
       gap: 120
       kinds: { rock: 2, trees: 7, ruin: 1 }
     clear: { castle: 600, ringInner: 2200, ringOuter: 2600, pathMargin: 60, featureMargin: 150 }
-  # Thornbrake: walking inside a zone is 35 % slower (a path through a zone is not).
+  # Thornbrake: walking inside a zone is 30 % slower (a path through a zone is not).
   hazard:
     kind: thicket
-    slow: 0.35
+    slow: 0.3
     zones:
       - [1850, 0, 300]
       - [650, 1785, 280]

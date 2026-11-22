@@ -1057,7 +1057,7 @@ test("world 3: the thicket slows the hero", async ({ page }) => {
   await waitForScreen(page, "playing");
   expect(await page.evaluate(() => window.__game!.hazard.kind)).toBe("thicket");
   await page.evaluate(() => window.__game!.debug!.teleport(0, 900));
-  await page.waitForFunction(() => Math.abs(window.__game!.hazard.ground - 0.65) < 0.01, undefined, { timeout: 2_000, polling: 50 });
+  await page.waitForFunction(() => Math.abs(window.__game!.hazard.ground - 0.7) < 0.01, undefined, { timeout: 2_000, polling: 50 });
   await expect(page.locator(".buff-cell.thicket")).toBeVisible();
   expect(await page.evaluate(() => window.__game!.render.particles)).toBeGreaterThan(0);
   await page.evaluate(() => window.__game!.debug!.teleport(0, -600));
