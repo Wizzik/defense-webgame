@@ -4,6 +4,8 @@ import { basename, join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 import { MODELS } from "../tools/assets-build/manifest";
 import { readGlbInfo } from "../tools/assets-build/glb-info";
+import { parse } from "yaml";
+import { COMMON_ENV, lookOf, worldModelIds } from "../client/render/world-look";
 
 const ASSETS = "assets";
 const ids = (file: string): string[] =>
@@ -97,8 +99,10 @@ describe("faction models", () => {
   });
 });
 
+const worldIds = (parse(readFileSync("design/worlds.yaml", "utf8")) as { id: string }[]).map((w) => w.id);
+
 describe("environment models", () => {
-  const names = ["castle", "tower", "flag", "tree-a", "tree-b", "trees-a", "trees-b", "trees-c", "rock-a", "rock-b", "rock-c"];
+  const names = sorted([...new Set([...COMMON_ENV, ...worldIds.flatMap((id) => worldModelIds(lookOf(id)))])]);
   for (const name of names) {
     it(name, () => {
       const info = readGlbInfo(`${ASSETS}/models/env/${name}.glb`);
@@ -113,11 +117,24 @@ describe("environment models", () => {
 });
 
 describe("model budget", () => {
-  it("keeps all models together within 10 MB", () => {
-    const total = listFiles(`${ASSETS}/models`)
-      .filter((f) => f.endsWith(".glb"))
-      .reduce((sum, f) => sum + statSync(f).size, 0);
-    expect(total).toBeLessThanOrEqual(10_000_000);
+  const env = (id: string): number => statSync(`${ASSETS}/models/env/${id}.glb`).size;
+  const worldBytes = (id: string): number => worldModelIds(lookOf(id)).reduce((n, m) => n + env(m), 0);
+
+  it("each world's env models stay within 1.5 MB", () => {
+    for (const id of worldIds) expect(worldBytes(id), id).toBeLessThanOrEqual(1_500_000);
+  });
+
+  it("common models plus one world stay within 10 MB", () => {
+    const common = listFiles(`${ASSETS}/models`)
+      .filter((f) => f.endsWith(".glb") && !f.includes(`${join("models", "env")}`))
+      .reduce((sum, f) => sum + statSync(f).size, 0) + COMMON_ENV.reduce((n, m) => n + env(m), 0);
+    const heaviest = Math.max(...worldIds.map(worldBytes));
+    expect(common + heaviest).toBeLessThanOrEqual(10_000_000);
+  });
+
+  it("every env model belongs to a world or the common set", () => {
+    const used = new Set([...COMMON_ENV, ...worldIds.flatMap((id) => worldModelIds(lookOf(id)))]);
+    for (const file of readdirSync(`${ASSETS}/models/env`)) expect(used.has(basename(file, ".glb")), file).toBe(true);
   });
 });
 

@@ -147,6 +147,15 @@ const ENV: [string, string][] = [
   ["rock-a", "decoration/nature/rock_single_A"],
   ["rock-b", "decoration/nature/rock_single_C"],
   ["rock-c", "decoration/nature/rock_single_E"],
+  // Red Waste and Shadewood (difficulties plan 3a)
+  ["mesa-a", "decoration/nature/mountain_A"],
+  ["mesa-c", "decoration/nature/mountain_C"],
+  ["rock-d", "decoration/nature/rock_single_D"],
+  ["stump-a", "decoration/nature/tree_single_A_cut"],
+  ["stumps", "decoration/nature/trees_A_cut"],
+  ["tent", "decoration/props/tent"],
+  ["bush", "decoration/nature/trees_A_small"],
+  ["trees-d", "decoration/nature/trees_B_medium"],
 ];
 
 export const MODELS: ModelSpec[] = [
