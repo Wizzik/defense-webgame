@@ -3,6 +3,8 @@ import {
   xpToNext,
   runMagicFind,
   hazardPending,
+  inThicket,
+  WeatherPhase,
 } from "../../sim";
 import { abilityIconSvg } from "./ability-icons";
 import { Announcer } from "./announcer";
@@ -90,6 +92,8 @@ export class Hud {
   private readonly announcer = new Announcer();
   private readonly bossBar: BossBar;
   private readonly buffBar: BuffBar;
+  private thicketRun: Run | null = null;
+  private readonly hazardCells = { stormTicks: 0, sandTicks: 0, inThicket: false };
   private lastRun: Run | null = null;
   /** What a boss that just fell dropped (boss id, its order in the run); main.ts sets it. */
   /** The drop of a fallen boss; `magicFind` is the hero's magic find at that moment. */
@@ -165,6 +169,11 @@ export class Hud {
   onEvents(run: Run, lang: Lang): void {
     this.sync(run);
     this.announcer.step();
+    // a thicket world names its brakes once, in the first step of a run
+    if (run !== this.thicketRun) {
+      this.thicketRun = run;
+      if (run.data.worlds[run.world - 1]!.hazard.kind === "thicket") this.announcer.push(t(lang, "announce.thicket"), ANNOUNCE_TICKS);
+    }
     const { events } = run;
     let faction = "";
     for (let i = 0; i < events.count; i++) {
@@ -185,7 +194,10 @@ export class Hud {
           this.loot(line.tone);
         }
       } else if (kind === EventKind.HazardWave) {
-        this.announcer.push(t(lang, "announce.storm"), ANNOUNCE_TICKS);
+        // the storm's first wave (u = 0) and a weather's warning; a weather's start and end stay quiet
+        const u = events.u[i]!;
+        if (u === 0) this.announcer.push(t(lang, "announce.storm"), ANNOUNCE_TICKS);
+        else if (u === WeatherPhase.Warn) this.announcer.push(t(lang, "announce.sand"), ANNOUNCE_TICKS);
       } else if (kind === EventKind.Faction) {
         faction = run.data.rules.factions[events.a[i]!]!.id;
       } else if (kind === EventKind.Enrage) {
@@ -242,7 +254,10 @@ export class Hud {
     setText(this.muteKey, `${t(lang, "gear.key")} · ${t(lang, "settings.key")} · ${t(lang, "hud.muteKey")}`);
     setText(this.kills, t(lang, "hud.kills", { n: run.stats.kills }));
 
-    this.buffBar.update(run.buffs, run.hero, lang, hazardPending(run));
+    this.hazardCells.stormTicks = hazardPending(run);
+    this.hazardCells.sandTicks = run.hazard.weatherTicks;
+    this.hazardCells.inThicket = inThicket(run.map, run.hero.x, run.hero.y);
+    this.buffBar.update(run.buffs, run.hero, lang, this.hazardCells);
     this.updateAbilities(run, lang);
   }
   private updateAbilities(run: Run, lang: Lang): void {

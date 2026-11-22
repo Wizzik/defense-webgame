@@ -67,7 +67,13 @@ export function crossesFeature(map: WorldMap, ax: number, ay: number, bx: number
   // the wall's bounding box first: most lines are nowhere near it
   if ((ax < bx ? ax : bx) > map.featMaxX + need || (ax > bx ? ax : bx) < map.featMinX - need ||
     (ay < by ? ay : by) > map.featMaxY + need || (ay > by ? ay : by) < map.featMinY - need) return false;
+  const minX = (ax < bx ? ax : bx) - need;
+  const maxX = (ax > bx ? ax : bx) + need;
+  const minY = (ay < by ? ay : by) - need;
+  const maxY = (ay > by ? ay : by) + need;
   for (let s = 0; s < map.segCount; s++) {
+    // each segment's own box: a ring or a river has segments all around, but a line meets only a few
+    if (map.segMinX[s] > maxX || map.segMaxX[s] < minX || map.segMinY[s] > maxY || map.segMaxY[s] < minY) continue;
     if (segmentsDistance(ax, ay, bx, by, map.segX1[s], map.segY1[s], map.segX2[s], map.segY2[s]) < need) return true;
   }
   return false;

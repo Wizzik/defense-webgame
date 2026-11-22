@@ -1,6 +1,23 @@
 # Status
 
-Updated 2026-11-21 (difficulties plan 2 merged as PR #29 `316476d`). Read this first when you resume work.
+Updated 2026-11-22 (difficulties plan 3a on branch `worlds-2-3`, PR open; waits for Petr). Read this first when you resume work.
+
+## Difficulties 3a: Red Waste and Shadewood (branch `worlds-2-3`, PR against `main`, 2026-11-22)
+
+- All 8 tasks of `docs/superpowers/plans/2026-11-22-difficulties-worlds-2-3.md` done inline in one chat, one final self-review. `npm run check` (1172 tests), the build, e2e `webgl2-fallback` (44) and `sim-chromium` pass. Numbers, rulings and the win table: `docs/DECISIONS.md`, section Difficulties and worlds, plan 3a.
+- What it brings:
+  - **world 2 Red Waste:** wine-red clay, a blue river across the arena with two stone bridges, mesas, stumps and clan tents; the **sandstorm** from phase 2: announced 5 s ahead, then 15 s of thick pink-grey fog, blown dust and -20 % walking speed for everyone, every 100-130 s;
+  - **world 3 Shadewood:** night in blues with fireflies, a ring of ancient trees around the castle with four diagonal passages, **thornbrake** zones (dark discs with bushes) where walking is 30 % slower (a path through them is not);
+  - each world's models load only before its first run (Start shows "Loading…"), the ground, forest and light change with the world; the effect bar shows the sandstorm's seconds and a thorn glyph while the hero stands in a thicket;
+  - worlds 2 and 3 are `ready` (no "coming soon"); worlds 4-5 still look like world 1 until plan 3b.
+- Balance (Normal, seeds 1-20, wins of 160; none / mid / full): world 1 74 / 104 / 137 (unchanged), world 2 64 / 88 / 125, world 3 53 / 78 / 121.
+- What Petr checks in the playtest:
+  - the look and readability of both worlds (no orange? is Red Waste too pink, is Shadewood too dark?), the river and its bridges, the tree ring as a border;
+  - does the thicket catch enemies (and the hero) in a fun way; is the sandstorm noticeable and not annoying (fog thickness, how often);
+  - fps with a full crowd in world 2 and 3: `?fps=1&debug=1&phase=16&world=2` and `&world=3` against world 1 (goal at most -10 %); the simulation step of world 3 is 1.3x world 1 (over the 1.2x goal, 0.077 ms);
+  - quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1&world=2 and `?debug=1&world=3`; in the console `__game.debug.hazard()` (a sandstorm at once in world 2), `__game.hazard` (kind, weather seconds, ground speed under the hero).
+- **Open for Petr:** the bridges and passages are 400 wide (the plan's 300 did not pass on the 100-unit grid); the thicket slow is 30 % (35 % put world 3 under its band).
+- Next: plan 3b (Frostreach and Blightscar, their natural events and looks, the ladder tuned for world 5), in a new chat after Petr plays 3a.
 
 ## Difficulties 2: obstacles, paths, the wall of world 1, the summer storm (merged as PR #29 `316476d`, 2026-11-21)
 

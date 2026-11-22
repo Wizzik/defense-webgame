@@ -1,6 +1,6 @@
 import type { GearSession } from "./gear-session";
 import type { DifficultyId, Rarity } from "../../data/schema";
-import {
+import { groundSpeedScale,
   type ChestOffer, chestPrice, debugDropHeart, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, debugSpawnOrb,
   debugWear, killEnemy, learnAbility, OrbKind, debugHazard, hazardPending,
   type Run,
@@ -52,8 +52,8 @@ export interface GameSnapshot {
   boss: { id: string; hp: number; maxHp: number; x: number; y: number } | null;
   /** Slams winding up (warning circles on the ground). */
   slams: number;
-  /** What the renderer built: `heroModels` is how many hero figures stand in the scene (refreshed every frame), `slamRings` how many slam circles lie on the floor. */
-  render: { enemyMeshes: number; heroModels: number; shadows: boolean; slamRings: number; hazardRings: number };
+  /** What the renderer built: `heroModels` is how many hero figures stand in the scene (refreshed every frame), `slamRings` how many slam circles lie on the floor, `particles` how many weather particles are drawn. */
+  render: { enemyMeshes: number; heroModels: number; shadows: boolean; slamRings: number; hazardRings: number; particles: number };
   /** Gold the hero holds. */
   gold: number;
   /** Gold the next chest costs. */
@@ -95,8 +95,12 @@ export interface GameSnapshot {
   progressSaved: boolean;
   /** Obstacles of the run's map: islands + wall segments. */
   obstacles: number;
-  /** The storm: seconds until the nearest bolt strikes (0 when none waits) and the waves so far. */
-  hazard: { pending: number; waves: number };
+  /**
+   * The world's natural event: its kind, seconds until the nearest bolt strikes (0 when none waits), storm waves or
+   * weathers so far, seconds left of the running weather, seconds until an announced weather starts, and the walking
+   * speed scale of the ground under the hero (paths 1.15, thicket 0.7, else 1).
+   */
+  hazard: { kind: "storm" | "weather" | "thicket"; pending: number; waves: number; weather: number; warning: number; ground: number };
   /** Only with ?debug=1. */
   debug?: {
     grantXp(amount: number): void;
@@ -124,7 +128,7 @@ export interface GameSnapshot {
     spawnOrb(type: string): void;
     /** A heart 100 ahead of the hero. */
     dropHeart(): void;
-    /** A wave of the world's storm at once. */
+    /** A wave of the world's storm, or its weather, at once (nothing in a thicket world). */
     hazard(): void;
   };
 }
@@ -141,11 +145,11 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     backend, gpu, frames: 0, screen: "menu", tick: 0, level: 0, kills: 0, heroHp: 0, castleHp: 0, enemies: 0, enemyTypes: 0,
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], abilityIds: [], ultimateAuto: true, allies: 0,
     projectiles: 0, packArrows: 0, charging: 0, phase: 1, boss: null, slams: 0,
-    render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0, hazardRings: 0 },
+    render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0, hazardRings: 0, particles: 0 },
     gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, settingsOpen: false, gear: [], collection: {}, gearSaved: false,
     orbs: [], hearts: 0, buffs: { boots: 0, berserk: 0, heal: 0 }, lifesteal: 0,
     faction: "human", slowed: 0, rooted: 0, world: 1, difficulty: "normal", unlocked: [], progressSaved: false,
-    obstacles: 0, hazard: { pending: 0, waves: 0 },
+    obstacles: 0, hazard: { kind: "storm", pending: 0, waves: 0, weather: 0, warning: 0, ground: 1 },
   };
   window.__game = snapshot;
   return snapshot;
@@ -290,6 +294,10 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
   snapshot.obstacles = run.map.islandCount + run.map.segCount;
   snapshot.hazard.pending = hazardPending(run) / TICKS_PER_SECOND;
   snapshot.hazard.waves = run.hazard.waves;
+  snapshot.hazard.kind = run.data.worlds[run.world - 1]!.hazard.kind;
+  snapshot.hazard.weather = run.hazard.weatherTicks / TICKS_PER_SECOND;
+  snapshot.hazard.warning = run.hazard.warnTicks / TICKS_PER_SECOND;
+  snapshot.hazard.ground = groundSpeedScale(run.map, run.hero.x, run.hero.y);
   snapshot.difficulty = run.difficulty;
   snapshot.heroX = run.hero.x;
   snapshot.heroY = run.hero.y;

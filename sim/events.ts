@@ -55,7 +55,8 @@ export const EventKind = {
   /** A storm bolt (sim/hazard.ts): a = its place, value = 0 the warning starts / 1 it strikes, x/y = the centre,
    *  u = radius, v = steps of the warning. */
   Hazard: 30,
-  /** The first wave of the world's natural event in a run: x/y = the hero. */
+  /** The world's natural event: the first storm wave of a run (u = 0), or a weather phase (u = WeatherPhase of
+   *  sim/weather.ts: 1 warning, 2 start, 3 end; value = seconds of the warning / of the weather / 0). x/y = the hero. */
   HazardWave: 31,
 } as const;
 

@@ -3,7 +3,7 @@ import type { GameData } from "../../data/schema";
 import { createRun } from "../run";
 import { Rng } from "../rng";
 import { gameData } from "../testing/game-data";
-import { isFree, pathSpeedScale } from "./geometry";
+import { groundSpeedScale, inThicket, isFree } from "./geometry";
 import { buildWorldMap, type WorldMap } from "./map";
 import { blockedReachable, MAP_SIZE } from "./grid";
 
@@ -80,8 +80,26 @@ describe("buildWorldMap", () => {
 
   it("a path speeds walking by its bonus on its axis only", () => {
     const map = buildWorldMap(data, 1, new Rng(1));
-    expect(pathSpeedScale(map, 0, -1500, 0.15)).toBeCloseTo(1.15, 9);
-    expect(pathSpeedScale(map, 200, -1500, 0.15)).toBe(1);
+    expect(groundSpeedScale(map, 0, -1500)).toBeCloseTo(1.15, 9);
+    expect(groundSpeedScale(map, 200, -1500)).toBe(1);
+  });
+
+  it("thicket slows walking inside a zone, a path wins over the thicket", () => {
+    const map = buildWorldMap(data, 3, new Rng(1));
+    expect(map.thicketSlow).toBeCloseTo(0.3, 9);
+    expect(groundSpeedScale(map, 0, 900)).toBeCloseTo(0.7, 9);
+    expect(groundSpeedScale(map, 1000, 1000)).toBeCloseTo(1.15, 9);
+    expect(groundSpeedScale(map, 0, -600)).toBe(1);
+    const one = buildWorldMap(data, 1, new Rng(1));
+    expect(one.thicketSlow).toBe(0);
+    for (const [x, y] of [[300, -1500], [1800, 0], [0, 900]] as const) expect(groundSpeedScale(one, x, y)).toBe(1);
+  });
+
+  it("inThicket", () => {
+    const map = buildWorldMap(data, 3, new Rng(1));
+    expect(inThicket(map, 1850, 0)).toBe(true);
+    expect(inThicket(map, 1400, 0)).toBe(false);
+    expect(inThicket(buildWorldMap(data, 1, new Rng(1)), 1850, 0)).toBe(false);
   });
 });
 

@@ -2,6 +2,30 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Difficulties and worlds, plan 3a: Red Waste and Shadewood (2026-11-22; the numbers, looks and the split of plan 3 are Claude's)
+
+- Plan: `docs/superpowers/plans/2026-11-22-difficulties-worlds-2-3.md` (spec 4.1, 4.5, 4.7 points 2-3, 4.8, 4.9, 4.10 point 3). **Plan 3 split in two:** 3a (this) builds the per-world look and model loading and worlds 2 and 3 whole; 3b (next chat, after Petr plays 3a) brings Frostreach (an ice ridge with a pass, a blizzard with chill) and Blightscar (a broken wall with breaches, green meteors leaving fire), their looks, the ladder tuned to spec 4.2 for world 5 and shots `world-4`, `world-5`. Worlds 4 and 5 still share world 1's map, storm and look.
+- **Natural events** (`data/schema/world.ts`): the union got `weather` (a timed event slowing everyone's walking: `effect: sand`, fromPhase, everySeconds, durationSeconds, warnSeconds, moveSlow) and `thicket` (fixed zones `[x, y, r]` with `slow`). `stormOf(world)` narrows to the storm; `sim/hazard.ts` runs the storm or `sim/weather.ts`.
+- **Red Waste skeleton:** a river across the whole arena (thickness 150; it crosses the arrival ring on purpose, so packs from the north walk over the bridges): polyline (-3000,1500) (-1500,1150) (-400,1250) (600,1000) (1700,1200) (3000,900) with two bridges, gaps 400 at x = -1100..-700 (centre (-900, 1205)) and 950..1350 (centre (1150, 1100)). The plan's 300 left the bridge cell blocked on the 100-unit grid (150 thickness + 2 x 36 margin), so both bridges and the tree-ring passages are 400. Paths: two to the bridges, S, E. Islands 28-36, radius 40-200, rock 6 / trees 1 / ruin 3 (mesas and rocks, dry stumps, clan tents).
+- **Sandstorm:** from phase 2, announced 5 s ahead ("A sandstorm is coming!"), then 15 s of -20 % walking speed for the hero and every enemy (not the dash, not knockback), every 100-130 s from the end of the previous one (the gap is drawn from `hazardRng`). Events `HazardWave` with `u` = 1 warning, 2 start, 3 end (the storm keeps `u` = 0). The state hash mixes the weather's steps only while one is announced or runs, so world 1's hash is unchanged.
+- **Shadewood skeleton:** a ring of ancient trees of radius 1300 around the castle (16 segments, thickness 110) with four passages 400 wide on the diagonals; four diagonal paths through them. Islands 34-44, rock 2 / trees 7 / ruin 1.
+- **Thornbrake:** eight zones (r 200-320; two inside the ring) where walking is **30 %** slower (the plan's 35 % put world 3 mid gear at 73 of 160, under its band); a path through a zone wins (+15 %). Stored in a path-cell mask (`WorldMap.thicket`, cells of 50); `groundSpeedScale` replaced `pathSpeedScale`; `inThicket` for the HUD and `sim:run`.
+- **Looks** (`client/render/world-look.ts`, pure data; `lookOf(id)`, worlds without a row look like Silver March): ground, sky, fog, hemisphere and moon light, path and stone colours, water, the feature style (`wall`, `river`, `trees`), island and forest models, a prop tint, the thicket and weather. Red Waste: wine-red and brown-red clay (hues 340-10°), a blue river with a dirt bank, stone bridge decks, prop tint 0xb4a6c4 (0xd9b8c0 made the stumps rust-orange), sand fog 34-78 (the plan's 14-40 hid everything: the camera is 46 away) with blown dust. Shadewood: night blues, a cold moon, the ring's tree clusters at scale 0.5 on a bank of roots (full size they were a forest band that hid the hero), dark violet thicket discs with bushes, fireflies. A test forbids orange (hue 15-45° with saturation > 0.35) in every look.
+- **Models:** eight new KayKit hex models (CC0): `mesa-a`, `mesa-c`, `rock-d`, `stump-a`, `stumps`, `tent`, `bush`, `trees-d` (250 kB together). Budget per world: each world's env models ≤ 1.5 MB, the common models plus the heaviest world ≤ 10 MB (`tests/assets.test.ts`). A world's models load once (the `ModelCache`) before its first run; the world screen's Start shows "Loading…" until then. `ArenaView` rebuilds the ground, forest and light when a run of another world starts.
+- **Particles:** dust and fireflies are an `InstancedMesh` of tiny octahedrons around the hero (WebGPU draws points 1 pixel wide), client-only randomness.
+- **Tuning** (`sim:run --hero all --seeds 1-20`, Normal, wins of 160; `worldStep` unchanged, so worlds 4-5 keep their plan 2 numbers):
+
+| Normal | none | mid | full |
+|---|---|---|---|
+| world 1 (unchanged) | 74 | 104 | 137 |
+| world 2 Red Waste | 64 | 88 | 125 |
+| world 3 Shadewood (thicket 35 %) | 56 | 73 | - |
+| world 3 Shadewood (**30 %**) | 53 | 78 | 121 |
+
+- Without gear: world 2 Stonehorn 13, Nightglaive 6, Gravecaller 20, Serpent Shaman 10, Mistwarden 1, Sparkshot 10, Redcleaver 1, Tidecaller 3; world 3 Stonehorn 13, Nightglaive 3, Gravecaller 20, Serpent Shaman 7, Mistwarden 1, Sparkshot 7, Redcleaver 0, Tidecaller 2 (7 heroes above 0 in both). A run of world 2 sees ~7 sandstorms; the autopilot spends ~2-3 % of its steps in a thicket.
+- **Step time** (stonehorn, phase 16, seeds 1-3, warm): world 1 0.058 ms, world 2 0.067 ms (1.15x), world 3 0.077 ms (1.3x, over the 1.2x goal). `crossesFeature` now skips segments whose own box a line misses (exact; the same runs); the rest is the hero's flow field, which enemies outside the ring need far more often. 0.077 ms is under 1 % of a 144 fps frame even at three steps a frame, so it stays; Petr's fps check decides.
+- **Determinism:** matrix cases `w2-sand` (mistwarden, seed 11, phase 4, 6000 steps: a whole sandstorm) and `w3-thicket` (stonehorn, seed 13, phase 2, mid gear, 4500 steps); `w1-storm` keeps its checkpoints; digest `4bc81413` (Node = sim-chromium).
+
 ## Difficulties and worlds, plan 2: obstacles, paths, the wall of world 1, the summer storm (2026-11-21; Petr chose islands plus one chokepoint per world and a fixed skeleton plus seeded islands, the numbers are Claude's)
 
 - Plan: `docs/superpowers/plans/2026-11-21-difficulties-obstacles.md` (spec 4.5, 4.6, 4.7 point 1, 4.9, 4.10 point 2). Worlds 2-5 share world 1's map and storm (YAML anchors `&silverMap`, `&silverStorm`) until plan 3.

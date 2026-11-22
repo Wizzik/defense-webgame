@@ -48,7 +48,7 @@ export const HANDLED_EVENTS: Record<keyof typeof EventKind, "sound" | "skip"> = 
   HeroSnared: "sound",
   Raise: "sound",
   Hazard: "sound",
-  HazardWave: "skip", // the warning of its first bolt is heard in the same step
+  HazardWave: "skip", // the storm: the warning of its first bolt is heard in the same step; a weather has no sound of its own
 };
 
 const ORB_SOUNDS: Record<number, GameSound> = {

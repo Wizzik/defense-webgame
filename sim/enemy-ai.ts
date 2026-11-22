@@ -11,7 +11,8 @@ import { strikeVX, strikeVY, updateStrike } from "./enemy-strike";
 import { avoidIslands, Behavior, steer, steerHold, steerX, steerY } from "./enemy-steer";
 import { crossesFeature, flowDir, flowX, flowY } from "./world-map/flow";
 import { heroFlow } from "./world-map/hero-flow";
-import { pathSpeedScale, pushOut as pushOutOfMap, pushX as mapPushX, pushY as mapPushY } from "./world-map/geometry";
+import { weatherSpeedScale } from "./weather";
+import { groundSpeedScale, pushOut as pushOutOfMap, pushX as mapPushX, pushY as mapPushY } from "./world-map/geometry";
 import type { Run } from "./run";
 
 const MAX_NEIGHBOURS = 64;
@@ -40,6 +41,7 @@ export function updateEnemies(run: Run): void {
   updateBloodlust(run);
   updateRaise(run);
 
+  const weatherScale = weatherSpeedScale(run);
   for (let i = 0; i < e.capacity; i++) {
     if (e.alive[i] === 0) continue;
     const def = defs[e.type[i]];
@@ -51,7 +53,7 @@ export function updateEnemies(run: Run): void {
     // Slow lowers walking speed only (not knockback) and runs down even while stunned.
     let walk = def.moveSpeed * auraSpeedScale(run, i) * bloodlustSpeedScale(run, i);
     if (run.enraged && i === run.finalBossSlot) walk *= rules.run.finale.enrage.moveSpeed;
-    walk *= pathSpeedScale(run.map, x, y, run.map.pathBonus);
+    walk *= groundSpeedScale(run.map, x, y) * weatherScale;
     if (e.slowTicks[i] > 0) {
       walk *= 1 - e.slowFactor[i];
       e.slowTicks[i]--;

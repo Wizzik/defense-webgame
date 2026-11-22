@@ -726,9 +726,10 @@ test("C opens the gear panel and pauses the run; C closes it; C does nothing und
   await page.keyboard.press("KeyC");
   await expect(page.locator("#gear-panel")).toBeHidden();
   // a click in the first 300 ms after the cards appear is ignored (cards.ts PICK_DELAY_MS), and on slow software
-  // WebGPU this step comes sooner than that: click until the chest closes
+  // WebGPU this step comes sooner than that: click until the chest closes. One click may take seconds on a slow CI
+  // runner's software rendering, so it gets 5 s.
   await expect(async () => {
-    if ((await page.evaluate(() => window.__game?.screen)) === "chest") await page.locator("button.card").first().click({ timeout: 2_000 });
+    if ((await page.evaluate(() => window.__game?.screen)) === "chest") await page.locator("button.card").first().click({ timeout: 5_000 });
     expect(await page.evaluate(() => window.__game?.screen)).not.toBe("chest");
   }).toPass({ timeout: 30_000, intervals: [400] });
   await waitForScreenPickingLevelUps(page, "playing");
@@ -1027,4 +1028,70 @@ test("world 1 has its wall and islands; the storm's bolt warns with a circle", a
     undefined, { timeout: 1_000, polling: 50 },
   );
   await expect(page.locator(".buff-cell.storm")).toBeVisible();
+});
+
+test("world 2: river, bridges and a sandstorm", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en&debug=1&world=2&hero=stonehorn");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await startRun(page);
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => window.__game!.hazard.kind)).toBe("weather");
+  expect(await page.evaluate(() => window.__game!.obstacles)).toBeGreaterThanOrEqual(7 + 28);
+  await page.evaluate(() => window.__game!.debug!.hazard());
+  await page.waitForFunction(
+    () => window.__game!.hazard.weather > 0 && window.__game!.render.particles > 0,
+    undefined, { timeout: 2_000, polling: 50 },
+  );
+  await expect(page.locator(".buff-cell.sand")).toBeVisible();
+  await page.evaluate(() => window.__game!.debug!.teleport(-2200, 1000));
+  await page.keyboard.down("KeyW");
+  await page.waitForTimeout(1_000);
+  await page.keyboard.up("KeyW");
+  // the river's axis at x = -2200 lies at y = 1337; half its thickness is 75
+  expect(await page.evaluate(() => window.__game!.heroY)).toBeLessThan(1337 - 75);
+});
+
+test("world 3: the thicket slows the hero", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en&debug=1&world=3&hero=stonehorn");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await startRun(page);
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => window.__game!.hazard.kind)).toBe("thicket");
+  await page.evaluate(() => window.__game!.debug!.teleport(0, 900));
+  await page.waitForFunction(() => Math.abs(window.__game!.hazard.ground - 0.7) < 0.01, undefined, { timeout: 2_000, polling: 50 });
+  await expect(page.locator(".buff-cell.thicket")).toBeVisible();
+  expect(await page.evaluate(() => window.__game!.render.particles)).toBeGreaterThan(0);
+  await page.evaluate(() => window.__game!.debug!.teleport(0, -600));
+  await page.waitForFunction(() => window.__game!.hazard.ground === 1, undefined, { timeout: 2_000, polling: 50 });
+});
+
+test("switching worlds rebuilds the arena", async ({ page }) => {
+  const envRequests: string[] = [];
+  page.on("request", (r) => {
+    const m = /\/models\/env\/([\w-]+)\.glb/.exec(r.url());
+    if (m) envRequests.push(m[1]!);
+  });
+  await page.goto("/?seed=1&lang=en&debug=1&duration=5&hero=stonehorn");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await page.locator("#start").click();
+  await page.locator('#world-screen [data-world="2"]').click();
+  await page.locator("#world-start").click();
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => [window.__game!.world, window.__game!.hazard.kind])).toEqual([2, "weather"]);
+  const riverMap = await page.evaluate(() => window.__game!.obstacles);
+  expect(await playToEnd(page)).toBeDefined();
+  await page.locator("#again").click();
+  await waitForScreen(page, "menu", 10_000);
+  await page.locator("#start").click();
+  await page.locator('#world-screen [data-world="3"]').click();
+  await page.locator("#world-start").click();
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => [window.__game!.world, window.__game!.hazard.kind])).toEqual([3, "thicket"]);
+  const ring = await page.evaluate(() => window.__game!.obstacles);
+  expect(ring).not.toBe(riverMap);
+  expect(ring).toBeGreaterThanOrEqual(16 + 34);
+  // every env model is fetched once, however often the worlds change
+  expect(envRequests.length).toBe(new Set(envRequests).size);
+  expect(new Set(envRequests).has("tent")).toBe(true);
+  expect(new Set(envRequests).has("bush")).toBe(true);
 });

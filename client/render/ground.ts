@@ -2,7 +2,7 @@ import { Mesh, MeshStandardNodeMaterial, PlaneGeometry } from "three/webgpu";
 import { abs, color, float, max, min, mix, mx_noise_float, positionWorld, smoothstep, vec2 } from "three/tsl";
 import type { Rules } from "../../data/schema";
 import { SCENE_SCALE } from "./coords";
-import { DIRT, GRASS_A, GRASS_B, GRASS_C } from "./palette";
+import type { WorldLook } from "./world-look";
 
 /** The plane reaches this far (sim units) past the arena on every side. */
 const MARGIN = 6000;
@@ -17,8 +17,9 @@ const RING_WIDTH = 160;
 const RING_FADE = 120;
 const RING_COVER = 0.55;
 
-/** Procedural ground: noisy grass, earth around the castle and an earth band on the spawn ring. */
-export function createGround(rules: Rules): Mesh {
+/** Procedural ground in the world's colours: noisy grass, earth around the castle and an earth band on the spawn ring. */
+export function createGround(rules: Rules, look: WorldLook): Mesh {
+  const { a: GRASS_A, b: GRASS_B, c: GRASS_C, dirt: DIRT } = look.ground;
   const { arena, castle } = rules;
   const size = (arena.width + 2 * MARGIN) * SCENE_SCALE;
   const depth = (arena.height + 2 * MARGIN) * SCENE_SCALE;

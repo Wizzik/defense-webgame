@@ -263,6 +263,26 @@ describe("the world in the summaries", () => {
     expect(line).toBe("  world: islands 35.5, storm waves 21.0, bolts 42.5, bolts on the hero 3.5");
   });
 
+  it("worldLine adds the sandstorms in a weather world and the thicket share in a thicket world", () => {
+    const sand = worldLine([
+      summary({ world: { islands: 30, waves: 2, bolts: 0, boltHits: 0, kind: "weather", sand: 2, thicketShare: 0 } }),
+      summary({ world: { islands: 32, waves: 3, bolts: 0, boltHits: 0, kind: "weather", sand: 3, thicketShare: 0 } }),
+    ]);
+    expect(sand).toBe("  world: islands 31.0, storm waves 2.5, bolts 0.0, bolts on the hero 0.0, sand 2.5");
+    const wood = worldLine([summary({ world: { islands: 40, waves: 0, bolts: 0, boltHits: 0, kind: "thicket", sand: 0, thicketShare: 0.042 } })]);
+    expect(wood).toBe("  world: islands 40.0, storm waves 0.0, bolts 0.0, bolts on the hero 0.0, thicket 4.2 %");
+  });
+
+  it("playBot counts the sandstorms of world 2 and the thicket steps of world 3", () => {
+    const sand = playBot(gameData(), 1, 400, "stonehorn", false, 2, [], 2);
+    expect(sand.world.kind).toBe("weather");
+    expect(sand.world.sand).toBeGreaterThanOrEqual(1);
+    const wood = playBot(gameData(), 1, 200, "stonehorn", false, undefined, [], 3);
+    expect(wood.world.kind).toBe("thicket");
+    expect(wood.world.thicketShare).toBeGreaterThanOrEqual(0);
+    expect(wood.world.thicketShare).toBeLessThanOrEqual(1);
+  });
+
   it("a hero summary ends with the world line", () => {
     expect(formatHeroSummary("stonehorn", [summary({})], false, "dread-regent")).toMatch(/\n  factions: [^\n]*\n  world: islands 0\.0/);
   });

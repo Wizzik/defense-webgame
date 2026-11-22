@@ -27,9 +27,10 @@ describe("worldCard", () => {
 
   it("a locked card and a world that is not ready yet", () => {
     const d = data();
-    const locked = worldCard(d, 3, undefined, false, "en");
-    expect(locked).toEqual({ name: "Shadewood", status: "", locked: true, preparing: true });
+    const locked = worldCard(d, 4, undefined, false, "en");
+    expect(locked).toEqual({ name: "Frostreach", status: "", locked: true, preparing: true });
     expect(worldCard(d, 1, undefined, true, "en").preparing).toBe(false);
+    expect(worldCard(d, 3, undefined, false, "en")).toEqual({ name: "Shadewood", status: "", locked: true, preparing: false });
   });
 });
 
@@ -40,7 +41,7 @@ describe("worldDetail", () => {
       d.worlds[2]!.blurb.cs,
       "Síla nepřátel ×2,63",
       "Odměna: zlato ×1,2, Magic Find +45 %",
-      "Přírodní situace: Letní bouře",
+      "Přírodní situace: Trnité houští",
     ]);
   });
 
@@ -50,7 +51,7 @@ describe("worldDetail", () => {
       d.worlds[1]!.blurb.en,
       "Enemy strength ×1.25",
       "Reward: gold ×1.1, Magic Find +10%",
-      "Natural event: Summer storm",
+      "Natural event: Sandstorm",
     ]);
   });
 

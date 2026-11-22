@@ -43,5 +43,6 @@ export { spawnBoss, updateTimeline } from "./timeline";
 export type { CastleState, HeroState, HeroStats, RunStats } from "./world";
 export { buildWorldMap, IslandKind, MAP_CELL, MAP_SIZE, placeIsland, WorldMap } from "./world-map/map";
 export { cellOf, PASS_MARGIN } from "./world-map/grid";
-export { isFree, nearestFree, pathSpeedScale, pushOut, pushX, pushY } from "./world-map/geometry";
+export { groundSpeedScale, inThicket, isFree, nearestFree, pushOut, pushX, pushY } from "./world-map/geometry";
+export { debugWeather, updateWeather, WeatherPhase, weatherSpeedScale } from "./weather";
 export { debugHazard, HAZARD_CAPACITY, hazardPending, HazardState, updateHazard } from "./hazard";

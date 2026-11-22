@@ -179,12 +179,26 @@ export function nearestFree(map: WorldMap, x: number, y: number, r: number): voi
   pushY = y;
 }
 
-/** 1 + bonus on a path, otherwise 1. */
-export function pathSpeedScale(map: WorldMap, x: number, y: number, bonus: number): number {
+/** Index of the path-mask cell under (x, y), or -1 outside the grid. */
+function pathIndex(x: number, y: number): number {
   const col = Math.floor((x - MAP_ORIGIN) / PATH_CELL);
   const row = Math.floor((y - MAP_ORIGIN) / PATH_CELL);
-  if (col < 0 || row < 0 || col >= PATH_SIZE || row >= PATH_SIZE) return 1;
-  return map.onPath[row * PATH_SIZE + col] === 1 ? 1 + bonus : 1;
+  if (col < 0 || row < 0 || col >= PATH_SIZE || row >= PATH_SIZE) return -1;
+  return row * PATH_SIZE + col;
+}
+
+/** Walking speed of the ground at (x, y): 1 + pathBonus on a path (a path wins), 1 - thicketSlow in a thicket, else 1. */
+export function groundSpeedScale(map: WorldMap, x: number, y: number): number {
+  const i = pathIndex(x, y);
+  if (i < 0) return 1;
+  if (map.onPath[i] === 1) return 1 + map.pathBonus;
+  return map.thicket[i] === 1 ? 1 - map.thicketSlow : 1;
+}
+
+/** Does (x, y) lie in a zone of the world's thicket? */
+export function inThicket(map: WorldMap, x: number, y: number): boolean {
+  const i = pathIndex(x, y);
+  return i >= 0 && map.thicket[i] === 1;
 }
 
 /** The path mask is finer than the obstacle grid. */

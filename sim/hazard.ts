@@ -1,8 +1,10 @@
+import { stormOf, type Storm } from "../data/schema";
 import { berserkScale } from "./buffs";
 import { damageEnemy, damageHero, heroDamageScale, HeroHitSource } from "./combat";
 import { TICKS_PER_SECOND } from "./constants";
 import { EventKind } from "./events";
 import type { Run } from "./run";
+import { debugWeather, updateWeather } from "./weather";
 
 /** Bolts that can wait at once (a wave has at most `bolts.max`, and waves are 35 s and more apart). */
 export const HAZARD_CAPACITY = 8;
@@ -17,7 +19,12 @@ export class HazardState {
   readonly ticks = new Int32Array(HAZARD_CAPACITY);
   /** Tick of the next wave; -1 until the first update plans it (from the start of fromPhase or the run's start). */
   nextWaveTick = -1;
+  /** Storm waves, or weathers started. */
   waves = 0;
+  /** Steps left of the running weather (sim/weather.ts); 0 = none runs. */
+  weatherTicks = 0;
+  /** Steps until an announced weather starts; 0 = none announced. */
+  warnTicks = 0;
   bolts = 0;
 }
 
@@ -26,23 +33,30 @@ export class HazardState {
  * Draws only from run.hazardRng.
  */
 export function updateHazard(run: Run): void {
+  const storm = stormOf(run.data.worlds[run.world - 1]!);
+  if (storm !== null) updateStorm(run, storm);
+  else updateWeather(run);
+}
+
+function updateStorm(run: Run, storm: Storm): void {
   const h = run.hazard;
-  const storm = run.data.worlds[run.world - 1]!.hazard;
   for (let i = 0; i < HAZARD_CAPACITY; i++) {
     if (h.ticks[i] === 0) continue;
     h.ticks[i]--;
-    if (h.ticks[i] === 0) strike(run, i);
+    if (h.ticks[i] === 0) strike(run, storm, i);
   }
   if (h.nextWaveTick < 0) {
     const from = Math.round((storm.fromPhase - 1) * run.data.rules.run.phaseSeconds * TICKS_PER_SECOND);
-    h.nextWaveTick = Math.max(from, run.tick) + gapTicks(run);
+    h.nextWaveTick = Math.max(from, run.tick) + gapTicks(run, storm);
   }
-  if (run.tick >= h.nextWaveTick) startWave(run);
+  if (run.tick >= h.nextWaveTick) startWave(run, storm);
 }
 
-/** Debug (`__game.debug.hazard()`): a wave at once; the next one follows its usual gap later. */
+/** Debug (`__game.debug.hazard()`): a storm wave or the weather at once; nothing in a thicket world. */
 export function debugHazard(run: Run): void {
-  startWave(run);
+  const storm = stormOf(run.data.worlds[run.world - 1]!);
+  if (storm !== null) startWave(run, storm);
+  else debugWeather(run);
 }
 
 /** Steps until the nearest waiting bolt strikes; 0 when none waits. */
@@ -55,15 +69,14 @@ export function hazardPending(run: Run): number {
   return best;
 }
 
-function gapTicks(run: Run): number {
-  const { everySeconds } = run.data.worlds[run.world - 1]!.hazard;
+function gapTicks(run: Run, storm: Storm): number {
+  const { everySeconds } = storm;
   const seconds = everySeconds.min + run.hazardRng.next() * (everySeconds.max - everySeconds.min);
   return Math.round(seconds * TICKS_PER_SECOND);
 }
 
-function startWave(run: Run): void {
+function startWave(run: Run, storm: Storm): void {
   const h = run.hazard;
-  const storm = run.data.worlds[run.world - 1]!.hazard;
   const rng = run.hazardRng;
   const { hero } = run;
   if (h.waves === 0) run.events.push(EventKind.HazardWave, 0, 0, hero.x, hero.y, 0, 0);
@@ -89,7 +102,7 @@ function startWave(run: Run): void {
     run.events.push(EventKind.Hazard, slot, 0, h.x[slot]!, h.y[slot]!, storm.radius, warn);
   }
   h.waves++;
-  h.nextWaveTick = run.tick + gapTicks(run);
+  h.nextWaveTick = run.tick + gapTicks(run, storm);
 }
 
 /**
@@ -97,9 +110,8 @@ function startWave(run: Run): void {
  * exact; the spirit shield stops it), enemyShare (bossShare for a boss) of each enemy's max hp in the circle (not
  * scaled by the berserk orb: the storm is not the hero's blow). The castle is spared.
  */
-function strike(run: Run, i: number): void {
+function strike(run: Run, storm: Storm, i: number): void {
   const h = run.hazard;
-  const storm = run.data.worlds[run.world - 1]!.hazard;
   const cx = h.x[i]!;
   const cy = h.y[i]!;
   const r2 = storm.radius * storm.radius;

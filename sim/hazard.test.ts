@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { GameData } from "../data/schema";
+import { stormOf, type GameData } from "../data/schema";
 import { HeroHitSource } from "./combat";
 import { Role } from "./enemies";
 import { EventKind } from "./events";
@@ -49,7 +49,7 @@ function waves(run: Run, seconds: number): { tick: number; bolts: number; far: n
 describe("summer storm", () => {
   it("comes in waves of 1-3 bolts everySeconds apart from phase 3, the first everySeconds into it", () => {
     const run = createRun(quiet(), { seed: 1, durationSeconds: 100000 });
-    const { min, max } = run.data.worlds[0]!.hazard.everySeconds;
+    const { min, max } = stormOf(run.data.worlds[0]!)!.everySeconds;
     const list = waves(run, 100 + 6 * max);
     expect(list.length).toBeGreaterThan(4);
     expect(list[0]!.tick).toBeGreaterThanOrEqual((100 + min) * 30);
@@ -155,7 +155,7 @@ describe("summer storm", () => {
 
   it("from startPhase 11 the first wave comes everySeconds after the start", () => {
     const run = createRun(quiet(), { seed: 4, durationSeconds: 100000, startPhase: 11 });
-    const { min, max } = run.data.worlds[0]!.hazard.everySeconds;
+    const { min, max } = stormOf(run.data.worlds[0]!)!.everySeconds;
     const start = run.tick;
     const list = waves(run, max + 5);
     expect(list.length).toBeGreaterThan(0);
@@ -170,7 +170,7 @@ describe("summer storm", () => {
       return Array.from({ length: 6 }, (_, i) => [run.enemies.type[i], run.enemies.x[i], run.enemies.y[i]]);
     };
     const late = gameData();
-    for (const w of late.worlds) w.hazard.fromPhase = 99;
+    for (const w of late.worlds) if (w.hazard.kind !== "thicket") w.hazard.fromPhase = 99;
     const data = gameData();
     data.rules.run.firstPackSeconds = 200;
     late.rules.run.firstPackSeconds = 200;
