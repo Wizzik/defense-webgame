@@ -86,9 +86,9 @@ const RED_WASTE: WorldLook = {
   feature: "river",
   islands: { rock: ["mesa-a", "mesa-c", "rock-d", "rock-b"], trees: ["stump-a", "stumps"], ruin: ["tent"] },
   forest: ["stumps", "stump-a", "rock-d", "mesa-c"],
-  propTint: 0xd9b8c0,
+  propTint: 0xb4a6c4,
   thicket: null,
-  weather: { color: 0x6a5056, fogNear: 14, fogFar: 40 },
+  weather: { color: 0x6a5056, fogNear: 34, fogFar: 78 },
   particles: "dust",
 };
 

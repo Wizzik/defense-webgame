@@ -99,6 +99,24 @@ test("shot: world-1", async ({ page }) => {
   await shot(page, "world-1");
 });
 
+test("shot: world-2", async ({ page }) => {
+  // the river with its western bridge, mesas and tents, and a sandstorm blowing
+  await startRun(page, "seed=7&hero=stonehorn&debug=1&lang=cs&world=2");
+  await page.evaluate(() => window.__game!.debug!.teleport(-900, 1050));
+  await page.waitForTimeout(500);
+  await page.evaluate(() => window.__game!.debug!.hazard());
+  await page.waitForTimeout(1_500);
+  await shot(page, "world-2");
+});
+
+test("shot: world-3", async ({ page }) => {
+  // the ring of ancient trees at its north-eastern passage, a thicket and fireflies
+  await startRun(page, "seed=7&hero=stonehorn&debug=1&lang=cs&world=3");
+  await page.evaluate(() => window.__game!.debug!.teleport(850, 850));
+  await page.waitForTimeout(1_000);
+  await shot(page, "world-3");
+});
+
 test("shot: corner", async ({ page }) => {
   await startRun(page, "seed=7&hero=nightglaive&debug=1");
   await page.evaluate(() => window.__game!.debug!.teleport(2900, 2900));

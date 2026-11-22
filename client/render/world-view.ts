@@ -65,6 +65,8 @@ const ROOTS_HEIGHT = 30;
 const BUSHES_MIN = 6;
 const BUSHES_MAX = 10;
 const THICKET_LIFT = 0.008;
+/** The ring's tree clusters are drawn small, so the ring reads as a hedge about its own thickness, not a forest. */
+const RING_TREE_SCALE = 0.5;
 
 /**
  * The obstacles and paths of the run's map (spec 2026-11-21 difficulties 4.5, 4.8): islands from the world's prop
@@ -161,7 +163,7 @@ export class WorldView implements RunView {
       group.add(this.boxes(byModel("roots"), this.material(look.stone.ruin, 0.95), (r) => [r.scale * 100 + thickness * 0.5, ROOTS_HEIGHT, thickness]));
       for (const tree of feature) {
         if (tree.model === "roots") continue;
-        placements.push({ model: propIndex(tree.model), x: tree.x, y: tree.y, scale: 1.05, turn: tree.rotation / (Math.PI / 2) });
+        placements.push({ model: propIndex(tree.model), x: tree.x, y: tree.y, scale: RING_TREE_SCALE, turn: tree.rotation / (Math.PI / 2) });
       }
     }
     const blocks: WorldInstance[] = [];

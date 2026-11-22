@@ -1,4 +1,4 @@
-import { AdditiveBlending, BufferAttribute, BufferGeometry, NormalBlending, Points, PointsMaterial } from "three/webgpu";
+import { AdditiveBlending, InstancedMesh, Matrix4, MeshBasicMaterial, NormalBlending, OctahedronGeometry } from "three/webgpu";
 import type { GameData } from "../../data/schema";
 import type { Run } from "../../sim";
 import type { RunView } from "../game/session";
@@ -17,14 +17,17 @@ const FIREFLY_COLOR = 0xbfe8a8;
 
 /**
  * Weather particles (client only; `Math.random` is fine here): blown dust while a sandstorm runs, slow wandering
- * fireflies always in a world whose look has them. One `Points` of fixed size around the hero; positions wrap.
+ * fireflies always in a world whose look has them. One `InstancedMesh` of tiny octahedrons (WebGPU draws points
+ * only 1 pixel wide) of fixed size around the hero; positions wrap.
  */
 export class Particles implements RunView {
-  readonly object: Points;
+  readonly object: InstancedMesh;
   private readonly positions = new Float32Array(CAPACITY * 3);
   private readonly drift = new Float32Array(CAPACITY * 3);
-  private readonly geometry = new BufferGeometry();
-  private readonly material = new PointsMaterial({ size: 0.25, transparent: true, opacity: 0.8, depthWrite: false });
+  private readonly geometry = new OctahedronGeometry(1, 0);
+  private readonly material = new MeshBasicMaterial({ transparent: true, opacity: 0.8, depthWrite: false, fog: false });
+  private readonly matrix = new Matrix4();
+  private size = 0.1;
   /** Points drawn now, for `__game.render.particles`. */
   visible = 0;
   private mode: "none" | "dust" | "fireflies" = "none";
@@ -38,9 +41,8 @@ export class Particles implements RunView {
       this.drift[i * 3 + 1] = Math.random() * 2 - 1;
       this.drift[i * 3 + 2] = Math.random() * 2 - 1;
     }
-    this.geometry.setAttribute("position", new BufferAttribute(this.positions, 3));
-    this.geometry.setDrawRange(0, 0);
-    this.object = new Points(this.geometry, this.material);
+    this.object = new InstancedMesh(this.geometry, this.material, CAPACITY);
+    this.object.count = 0;
     this.object.frustumCulled = false;
     this.object.visible = false;
   }
@@ -52,12 +54,12 @@ export class Particles implements RunView {
       this.mode = mode;
       if (mode === "dust") {
         this.material.color.setHex(look.weather?.color ?? 0x888888);
-        this.material.size = 0.18;
+        this.size = 0.07;
         this.material.blending = NormalBlending;
         this.material.opacity = 0.7;
       } else if (mode === "fireflies") {
         this.material.color.setHex(FIREFLY_COLOR);
-        this.material.size = 0.22;
+        this.size = 0.09;
         this.material.blending = AdditiveBlending;
         this.material.opacity = 0.9;
       }
@@ -65,7 +67,7 @@ export class Particles implements RunView {
     }
     this.visible = mode === "dust" ? CAPACITY : mode === "fireflies" ? FIREFLIES : 0;
     this.object.visible = this.visible > 0;
-    this.geometry.setDrawRange(0, this.visible);
+    this.object.count = this.visible;
     if (this.visible === 0) return;
     const step = Math.min(dt, 0.1);
     const p = this.positions;
@@ -90,8 +92,10 @@ export class Particles implements RunView {
       if (p[k + 2]! > HALF_Z) p[k + 2] -= 2 * HALF_Z;
       if (p[k + 2]! < -HALF_Z) p[k + 2] += 2 * HALF_Z;
       if (mode === "dust" && (p[k + 1]! < 0 || p[k + 1]! > HEIGHT)) p[k + 1] = Math.random() * HEIGHT;
+      this.matrix.makeScale(this.size, this.size, this.size).setPosition(p[k]!, p[k + 1]!, p[k + 2]!);
+      this.object.setMatrixAt(i, this.matrix);
     }
-    (this.geometry.getAttribute("position") as BufferAttribute).needsUpdate = true;
+    this.object.instanceMatrix.needsUpdate = true;
     this.object.position.set(run.hero.x * SCENE_SCALE, 0, -run.hero.y * SCENE_SCALE);
   }
 
