@@ -1,4 +1,5 @@
 import { DIFFICULTY_IDS } from "../data/schema";
+import type { PlayerState } from "./player";
 import type { Run } from "./run";
 
 const f64 = new Float64Array(1);
@@ -45,52 +46,11 @@ export function stateHash(run: Run): number {
   mixInt(STATES[run.state]);
   mixInt(run.result === null ? 0 : RESULTS[run.result]);
   mixInt(run.rng.state);
-  mixInt(run.heroIndex);
+  for (const p of run.players) mixInt(p.heroIndex);
   mixInt(run.world);
   mixInt(DIFFICULTY_IDS.indexOf(run.difficulty));
-  mixInt(run.ultimateAuto ? 1 : 0);
-  mixInt(run.ultimateRequested ? 1 : 0);
-  const hero = run.hero;
-  mixFloat(hero.x);
-  mixFloat(hero.y);
-  mixFloat(hero.facingX);
-  mixFloat(hero.facingY);
-  mixInt(hero.level);
-  mixFloat(hero.xp);
-  mixFloat(hero.str);
-  mixFloat(hero.agi);
-  mixFloat(hero.int);
-  mixFloat(hero.hp);
-  mixInt(hero.attackCooldown);
-  mixInt(hero.pendingLevelUps);
-  mixInt(hero.dashTicks);
-  mixInt(hero.dashCooldown);
-  mixInt(hero.slowTicks);
-  mixFloat(hero.slowShare);
-  mixInt(hero.rootTicks);
-  mixFloat(hero.dashDirX);
-  mixFloat(hero.dashDirY);
-  mixFloat(hero.bonus.damage);
-  mixFloat(hero.bonus.moveSpeed);
-  mixFloat(hero.bonus.attackSpeed);
-  for (let i = 0; i < run.gear.item.length; i++) {
-    mixInt(run.gear.item[i]! + 1);
-    mixInt(run.gear.base[i]!);
-    mixInt(run.gear.temp[i]!);
-  }
-  const fx = run.gear.fx;
-  mixInt(fx.chainCount);
-  mixInt(fx.shieldWait);
-  mixInt(fx.hasteLeft);
-  mixFloat(fx.hasteCarry);
-  mixInt(run.shieldTicks);
-  mixFloat(hero.speedScale);
-  const buffs = run.buffs;
-  mixInt(buffs.bootsTicks);
-  mixInt(buffs.berserkTicks);
-  mixInt(buffs.healTicks);
-  mixFloat(buffs.lifestealBudget);
-  mixFloat(buffs.healCarry);
+  // every player block mixes the values of a one-hero run in the same order, so one player hashes as before
+  for (const p of run.players) mixPlayer(p);
   mixInt(run.sustainRng.state);
   const orbs = run.orbs;
   for (let i = 0; i < orbs.alive.length; i++) {
@@ -131,19 +91,7 @@ export function stateHash(run: Run): number {
     mixInt(run.bossLog[b].spawnTick);
     mixInt(run.bossLog[b].deathTick);
   }
-  for (const slot of run.abilities) {
-    mixInt(run.data.abilities.indexOf(slot.def)); // -1 for an empty slot
-    mixInt(slot.level);
-    mixInt(slot.cooldown);
-    mixInt(slot.active ? 1 : 0);
-    mixFloat(slot.front);
-    mixInt(slot.ticksLeft);
-    mixFloat(slot.originX);
-    mixFloat(slot.originY);
-    mixFloat(slot.dirX);
-    mixFloat(slot.dirY);
-    for (let i = 0; i < slot.hit.length; i++) mixInt(slot.hit[i]);
-  }
+  for (const p of run.players) mixAbilities(run, p);
   const e = run.enemies;
   for (let i = 0; i < e.capacity; i++) {
     if (e.alive[i] === 0) continue;
@@ -200,23 +148,25 @@ export function stateHash(run: Run): number {
   mixInt(run.chestsOpened);
   mixInt(run.bossesKilled);
   mixFloat(run.chestPriceRaw);
-  mixInt(run.openChest + 1);
+  for (const p of run.players) mixInt(p.openChest + 1);
   for (let i = 0; i < run.chests.x.length; i++) {
     mixFloat(run.chests.x[i]!);
     mixFloat(run.chests.y[i]!);
   }
-  if (run.chestOffer === null) mixInt(0);
-  else {
-    const cards = run.chestOffer.cards;
-    mixInt(cards.length);
-    for (let k = 0; k < cards.length; k++) {
-      const card = cards[k]!;
-      mixInt(card.slot + 1);
-      mixInt(card.item + 1);
-      mixInt(card.action);
+  for (const p of run.players) {
+    if (p.chestOffer === null) mixInt(0);
+    else {
+      const cards = p.chestOffer.cards;
+      mixInt(cards.length);
+      for (let k = 0; k < cards.length; k++) {
+        const card = cards[k]!;
+        mixInt(card.slot + 1);
+        mixInt(card.item + 1);
+        mixInt(card.action);
+      }
     }
+    mixFloat(p.gold);
   }
-  mixFloat(run.gold);
   mixFloat(run.stats.goldGained);
   const coins = run.coins;
   for (let i = 0; i < coins.capacity; i++) {
@@ -265,9 +215,76 @@ export function stateHash(run: Run): number {
     mixFloat(al.facingX[i]);
     mixFloat(al.facingY[i]);
   }
-  if (run.offer === null) mixInt(0);
+  for (const p of run.players) mixOffer(p);
+  return h;
+}
+
+function mixPlayer(p: PlayerState): void {
+  mixInt(p.ultimateAuto ? 1 : 0);
+  mixInt(p.ultimateRequested ? 1 : 0);
+  const hero = p.hero;
+  mixFloat(hero.x);
+  mixFloat(hero.y);
+  mixFloat(hero.facingX);
+  mixFloat(hero.facingY);
+  mixInt(hero.level);
+  mixFloat(hero.xp);
+  mixFloat(hero.str);
+  mixFloat(hero.agi);
+  mixFloat(hero.int);
+  mixFloat(hero.hp);
+  mixInt(hero.attackCooldown);
+  mixInt(hero.pendingLevelUps);
+  mixInt(hero.dashTicks);
+  mixInt(hero.dashCooldown);
+  mixInt(hero.slowTicks);
+  mixFloat(hero.slowShare);
+  mixInt(hero.rootTicks);
+  mixFloat(hero.dashDirX);
+  mixFloat(hero.dashDirY);
+  mixFloat(hero.bonus.damage);
+  mixFloat(hero.bonus.moveSpeed);
+  mixFloat(hero.bonus.attackSpeed);
+  for (let i = 0; i < p.gear.item.length; i++) {
+    mixInt(p.gear.item[i]! + 1);
+    mixInt(p.gear.base[i]!);
+    mixInt(p.gear.temp[i]!);
+  }
+  const fx = p.gear.fx;
+  mixInt(fx.chainCount);
+  mixInt(fx.shieldWait);
+  mixInt(fx.hasteLeft);
+  mixFloat(fx.hasteCarry);
+  mixInt(p.shieldTicks);
+  mixFloat(hero.speedScale);
+  const buffs = p.buffs;
+  mixInt(buffs.bootsTicks);
+  mixInt(buffs.berserkTicks);
+  mixInt(buffs.healTicks);
+  mixFloat(buffs.lifestealBudget);
+  mixFloat(buffs.healCarry);
+}
+
+function mixAbilities(run: Run, p: PlayerState): void {
+  for (const slot of p.abilities) {
+    mixInt(run.data.abilities.indexOf(slot.def)); // -1 for an empty slot
+    mixInt(slot.level);
+    mixInt(slot.cooldown);
+    mixInt(slot.active ? 1 : 0);
+    mixFloat(slot.front);
+    mixInt(slot.ticksLeft);
+    mixFloat(slot.originX);
+    mixFloat(slot.originY);
+    mixFloat(slot.dirX);
+    mixFloat(slot.dirY);
+    for (let i = 0; i < slot.hit.length; i++) mixInt(slot.hit[i]);
+  }
+}
+
+function mixOffer(p: PlayerState): void {
+  if (p.offer === null) mixInt(0);
   else {
-    const cards = run.offer.cards;
+    const cards = p.offer.cards;
     mixInt(cards.length);
     for (let k = 0; k < cards.length; k++) {
       const card = cards[k]!;
@@ -286,5 +303,4 @@ export function stateHash(run: Run): number {
       }
     }
   }
-  return h;
 }

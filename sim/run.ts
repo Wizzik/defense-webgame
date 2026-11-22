@@ -1,6 +1,6 @@
 import type { DifficultyId, GameData } from "../data/schema";
 import { createAbilitySlots, updateAbilities } from "./abilities/slots";
-import { BuffState, fillLifestealBudget, updateBuffs } from "./buffs";
+import { type BuffState, fillLifestealBudget, updateBuffs } from "./buffs";
 import { createOrbs, type OrbStore, updateOrbs } from "./orbs";
 import type { AbilitySlot } from "./abilities/slots";
 import { TICKS_PER_SECOND } from "./constants";
@@ -20,7 +20,7 @@ import { EnemyStore } from "./enemies";
 import { updateClouds } from "./enemy-cloud";
 import { EventKind, EventLog } from "./events";
 import { updateGearEffects } from "./gear-effects";
-import { emptyGearBonus, GearState, loadGear, type LoadoutEntry, recomputeGear } from "./gear";
+import { emptyGearBonus, type GearState, loadGear, type LoadoutEntry, recomputeGear } from "./gear";
 import { refreshHeroStats } from "./level-up";
 import { tickSnares } from "./hero-snares";
 import { buildFactionTables, updateFaction } from "./factions";
@@ -34,6 +34,7 @@ import { checkCourse, type DifficultyMods, difficultyMods } from "./difficulty";
 import { buildTimeline, type TimedEvent, updateTimeline } from "./timeline";
 import { buildPhaseTables, enemyType, type PhaseTable } from "./spawn-tables";
 import { SpatialHash } from "./spatial-grid";
+import { PlayerState } from "./player";
 import { emptyPassiveBonus } from "./world";
 import type { CastleState, HeroState, HeroStats, RunStats } from "./world";
 
@@ -72,19 +73,16 @@ export class Run {
   readonly mods: DifficultyMods;
   readonly rng: Rng;
   readonly events = new EventLog(EVENT_CAPACITY);
-  readonly hero: HeroState;
+  /** The players of the run; `players[0]` is the single player (sim/player.ts). */
+  readonly players: PlayerState[] = [];
   readonly castle: CastleState;
   readonly enemies: EnemyStore;
   readonly grid: SpatialHash;
-  readonly heroIndex: number;
-  readonly abilities: AbilitySlot[];
   readonly crystals = new CrystalStore(CRYSTAL_CAPACITY);
   /** Gold coins on the ground. */
   readonly coins = new CrystalStore(COIN_CAPACITY);
   /** Hearts on the ground (sim/combat.ts drops them, updatePickups kind 2 heals). */
   readonly hearts = new CrystalStore(HEART_CAPACITY);
-  /** Gold the hero holds; it pays for chests and is gone after the run. */
-  gold = 0;
   /** The chests on the map (sim/chests.ts). */
   readonly chests: ChestStore;
   /** Places of chests and their offers come from this generator, so chests do not shift the enemies of a seed. */
@@ -97,15 +95,8 @@ export class Run {
   bossesKilled = 0;
   /** Price of the next chest before rounding: basePrice x priceGrowth for every chest opened. */
   chestPriceRaw: number;
-  /** The cards of the chest that is open; null outside the "chest" state. */
-  chestOffer: ChestOffer | null = null;
-  /** Index of the chest that is open; -1 outside the "chest" state. */
-  openChest = -1;
   readonly projectiles = new ProjectileStore(PROJECTILE_CAPACITY);
   readonly allies = new AllyStore(ALLY_CAPACITY);
-  /** What the hero wears: the loadout plus what chests gave in this run. */
-  readonly gear: GearState;
-  offer: CardOffer | null = null;
   /** Weighted enemy types per phase, built once here so a step does not allocate. */
   readonly phaseTables: PhaseTable[];
   /** Enemy type index to its Behavior. */
@@ -161,8 +152,6 @@ export class Run {
     hearts: 0, orbsBoots: 0, orbsBerserk: 0, orbsHeal: 0, healedLifesteal: 0, healedHearts: 0, healedOrb: 0,
     cloudDamage: 0, rootedTicks: 0, raised: 0,
   };
-  /** Orb effects and the lifesteal budget (sim/buffs.ts). */
-  readonly buffs = new BuffState();
   /** Hearts and orbs draw from this generator, so they shift neither the enemies nor the chests of a seed. */
   readonly sustainRng: Rng;
   /** The world's natural event (sim/hazard.ts) and its own rng. */
@@ -172,12 +161,6 @@ export class Run {
   readonly orbs: OrbStore;
   /** The step in which the final boss comes. The run goes on until it falls. */
   readonly durationTicks: number;
-  /** The ultimate casts by itself; the player can switch this off (Task 7). */
-  ultimateAuto = true;
-  /** R was pressed in this step; cleared by updateAbilities. */
-  ultimateRequested = false;
-  /** Steps left of the spirit shield: hero and castle take no damage while > 0. */
-  shieldTicks = 0;
   tick = 0;
   state: RunState = "playing";
   result: RunResult | null = null;
@@ -190,7 +173,6 @@ export class Run {
     this.mods = difficultyMods(rules, this.world, this.difficulty);
     this.rng = new Rng(options.seed);
     this.enemies = new EnemyStore(rules.enemies.maxAlive);
-    this.gear = new GearState(rules.enemies.maxAlive);
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);
     this.enemyBehavior = Uint8Array.from(data.enemies, (e) => BEHAVIOR_IDS.indexOf(e.behavior));
     this.enemyHunter = Uint8Array.from(data.enemies, (e) => (e.hunter ? 1 : 0));
@@ -219,7 +201,6 @@ export class Run {
     const heroIndex = data.heroes.findIndex((h) => h.id === heroId);
     if (heroIndex < 0) throw new Error(`createRun: unknown hero "${heroId}"`);
     const def = data.heroes[heroIndex];
-    this.heroIndex = heroIndex;
     const stats: HeroStats = {
       maxHp: 0, regenPerSecond: 0, armor: 0, attackIntervalSeconds: 0, damageMin: 0, damageMax: 0,
       spellPower: 0, cooldownScale: 0, moveSpeed: 0, collision: 0,
@@ -235,9 +216,10 @@ export class Run {
     };
     heroStats(data, hero, stats);
     hero.hp = stats.maxHp;
-    this.hero = hero;
+    const player = new PlayerState(hero, heroIndex, rules.enemies.maxAlive);
+    this.players.push(player);
 
-    this.abilities = createAbilitySlots(this);
+    player.abilities = createAbilitySlots(this);
     refreshHeroStats(this); // the same path as every later refresh, so a starting aura counts
     if (options.loadout !== undefined) loadGear(this, options.loadout);
     recomputeGear(this); // a living hero's hp grows with maxHp, so the hero starts full
@@ -258,6 +240,28 @@ export class Run {
     if (options.startPhase !== undefined) applyStartPhase(this, options.startPhase);
     fillLifestealBudget(this);
   }
+
+  // Player 0 through the fields of the one-hero run (multiplayer migration, step 1):
+  // single-player code and the tests keep reading `run.hero`, `run.gold`, ...
+  get hero(): HeroState { return this.players[0].hero; }
+  get heroIndex(): number { return this.players[0].heroIndex; }
+  get abilities(): AbilitySlot[] { return this.players[0].abilities; }
+  get gear(): GearState { return this.players[0].gear; }
+  get buffs(): BuffState { return this.players[0].buffs; }
+  get gold(): number { return this.players[0].gold; }
+  set gold(value: number) { this.players[0].gold = value; }
+  get offer(): CardOffer | null { return this.players[0].offer; }
+  set offer(value: CardOffer | null) { this.players[0].offer = value; }
+  get chestOffer(): ChestOffer | null { return this.players[0].chestOffer; }
+  set chestOffer(value: ChestOffer | null) { this.players[0].chestOffer = value; }
+  get openChest(): number { return this.players[0].openChest; }
+  set openChest(value: number) { this.players[0].openChest = value; }
+  get ultimateAuto(): boolean { return this.players[0].ultimateAuto; }
+  set ultimateAuto(value: boolean) { this.players[0].ultimateAuto = value; }
+  get ultimateRequested(): boolean { return this.players[0].ultimateRequested; }
+  set ultimateRequested(value: boolean) { this.players[0].ultimateRequested = value; }
+  get shieldTicks(): number { return this.players[0].shieldTicks; }
+  set shieldTicks(value: number) { this.players[0].shieldTicks = value; }
 
   /** The time of the final boss has come. */
   get inFinale(): boolean {
