@@ -323,8 +323,10 @@ test("every enemy type renders without errors", async ({ page }, testInfo) => {
   await page.evaluate(() => {
     for (const id of ["human", "orc", "undead", "elf"]) window.__game!.debug!.spawnFaction(id);
   });
+  // the snapshot is written per drawn frame; the first frame with every type compiles their meshes, which on a slow
+  // software renderer (CI) can take more than 3 s
   await page.waitForFunction((n) => (window.__game?.enemyTypes ?? 0) >= n, enemyIds.length - 1, {
-    timeout: 3_000,
+    timeout: 15_000,
     polling: 50,
   });
   await startRun(page);
