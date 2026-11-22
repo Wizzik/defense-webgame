@@ -207,6 +207,7 @@ export const messagesCs = {
   "world.hazard": "Přírodní situace: {name}",
   "buff.storm": "Blesk",
   "announce.storm": "Blíží se letní bouře!",
+  "world.loading": "Načítám…",
   "world.start": "Hrát",
   "world.back": "Zpět",
   "world.lockedHint": "Otevře se výhrou předchozího světa.",

@@ -41,7 +41,10 @@ import { createLighting } from "./render/lighting";
 import { createArena } from "./render/scene";
 import { HazardFx } from "./render/hazard-fx";
 import { WorldView } from "./render/world-view";
-import { PROP_MODELS } from "./render/props";
+import type { GLTF } from "three/addons/loaders/GLTFLoader.js";
+import { ArenaView } from "./render/arena-view";
+import { loadWorldModels } from "./render/world-models";
+import { lookOf } from "./render/world-look";
 import { enemyModelId, ModelCache, modelUrl } from "./render/models";
 import { type BakedVat, bakeVat } from "./render/vat";
 import { Cards } from "./ui/cards";
@@ -162,26 +165,36 @@ async function start(): Promise<void> {
   const gpu = describeGpu(renderer.backend, backend);
   const models = new ModelCache();
   const env = (id: string) => models.get(modelUrl("env", id));
-  const [enemyModels, castle, tower, flag, props] = await Promise.all([
-    Promise.all(data.enemies.map((enemy) => models.get(modelUrl("enemies", enemyModelId(enemy))))),
-    env("castle"),
-    env("tower"),
-    env("flag"),
-    Promise.all(PROP_MODELS.map((prop) => env(prop.id))),
-  ]);
-
-  const scene = new Scene();
-  const lighting = createLighting();
-  lighting.applyTo(scene);
-  const sunShadow = new SunShadow(lighting.sun, renderer, shadowsEnabled(params.shadows, gpu.software));
-  scene.add(lighting.object, createArena(data.rules, { castle, tower, flag, props }));
-  const followCamera = new FollowCamera(innerWidth / innerHeight);
-  const keyboard = new Keyboard(window);
-  const session = new Session({ data, params, scene, camera: followCamera, keyboard });
   // ?world and ?difficulty: a locked course falls back to world 1 on normal (debug opens every course)
   const course = params.debug
     ? { world: Math.min(params.world ?? 1, data.worlds.length), difficulty: params.difficulty ?? "normal" }
     : firstUnlocked(progress.progress, params.world ?? 1, params.difficulty ?? "normal", data.worlds.length);
+  // the env models of each world load once, before the first run of that world (spec 2026-11-21 difficulties 4.8)
+  const worldModels = new Map<string, GLTF>();
+  const loadWorld = async (world: number): Promise<void> => {
+    for (const [id, gltf] of await loadWorldModels(models, lookOf(data.worlds[world - 1]!.id))) worldModels.set(id, gltf);
+  };
+  const worldModel = (id: string): GLTF => {
+    const gltf = worldModels.get(id);
+    if (!gltf) throw new Error(`env model ${id} is not loaded`);
+    return gltf;
+  };
+  const [enemyModels, castle, tower, flag] = await Promise.all([
+    Promise.all(data.enemies.map((enemy) => models.get(modelUrl("enemies", enemyModelId(enemy))))),
+    env("castle"),
+    env("tower"),
+    env("flag"),
+    loadWorld(course.world),
+  ]);
+
+  const scene = new Scene();
+  const lighting = createLighting();
+  const sunShadow = new SunShadow(lighting.sun, renderer, shadowsEnabled(params.shadows, gpu.software));
+  scene.add(lighting.object, createArena(data.rules, { castle, tower, flag }));
+  const arenaView = new ArenaView(data, scene, lighting, worldModel);
+  const followCamera = new FollowCamera(innerWidth / innerHeight);
+  const keyboard = new Keyboard(window);
+  const session = new Session({ data, params, scene, camera: followCamera, keyboard });
   session.world = course.world;
   session.difficulty = course.difficulty;
   // the run behind the menu starts once the first hero's model is loaded and uses this seed
@@ -211,7 +224,7 @@ async function start(): Promise<void> {
   const effects = new Effects(data);
   const abilityFx = new AbilityFx();
   const enemyFx = new EnemyFx(data);
-  const worldView = new WorldView(data, props);
+  const worldView = new WorldView(data, worldModel);
   const hazardFx = new HazardFx(() => followCamera.shakeEnabled);
   const allyView = new AllyView(ALLY_CAPACITY);
   const blobShadows = new BlobShadows(data.rules.enemies.maxAlive + ALLY_CAPACITY);
@@ -242,7 +255,7 @@ async function start(): Promise<void> {
   addEventListener("pointerdown", enableAudio, { once: true });
   addEventListener("keydown", enableAudio, { once: true });
   const packArrows = new PackArrows(document.getElementById("ui")!, followCamera.camera);
-  session.views.push(worldView, hazardFx, heroView, allyView, blobShadows, crowd, crystals, coins, hearts, orbView, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(audio, audioData, sound.director, followCamera.camera, data.enemies.map((e) => e.id), () => sound.active));
+  session.views.push(arenaView, worldView, hazardFx, heroView, allyView, blobShadows, crowd, crystals, coins, hearts, orbView, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(audio, audioData, sound.director, followCamera.camera, data.enemies.map((e) => e.id), () => sound.active));
 
   addEventListener("resize", () => {
     renderer.setSize(innerWidth, innerHeight);
@@ -269,7 +282,7 @@ async function start(): Promise<void> {
   session.views.push({ update: publishGear, onEvents: () => {}, dispose: () => {} });
   const ui = createUi(data, gear, progress, !params.debug && !gear.persistent, session, followCamera, sound, randomSeed, hero, gpu.software, (setLoading) =>
     heroLoader(models, session, heroView, allyView, setLoading),
-  );
+  loadWorld);
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
   if (overlay) {
     document.getElementById("overlay")!.hidden = false;
@@ -358,6 +371,7 @@ function createUi(
   initialHero: string,
   softwareGpu: boolean,
   makeUseHero: (setLoading: (loading: boolean, failed?: boolean) => void) => UseHero,
+  loadWorld: (world: number) => Promise<void>,
 ): Ui {
   const root = document.getElementById("ui")!;
   let heroId = initialHero;
@@ -395,7 +409,13 @@ function createUi(
   });
   const worldScreen = new WorldScreen(root, {
     data, progress,
-    onStart: (world, difficulty) => {
+    onStart: async (world, difficulty) => {
+      try {
+        await loadWorld(world);
+      } catch (error) {
+        showError(new Error(`could not load the models of world ${world}`, { cause: error }));
+        return;
+      }
       // the paused run behind the menu goes on when it already has this course (debug setups made on it stay);
       // another course starts a new run with the same seed
       const run = session.run;

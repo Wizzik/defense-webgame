@@ -20,7 +20,7 @@ export class WorldScreen {
   private readonly start: HTMLButtonElement;
   private readonly data: GameData;
   private readonly progress: ProgressSession;
-  private readonly onStart: (world: number, difficulty: DifficultyId) => void;
+  private readonly onStart: (world: number, difficulty: DifficultyId) => void | Promise<void>;
   private readonly onBack: () => void;
   private world = 1;
   private difficulty: DifficultyId = "normal";
@@ -29,7 +29,8 @@ export class WorldScreen {
   constructor(parent: HTMLElement, deps: {
     data: GameData;
     progress: ProgressSession;
-    onStart(world: number, difficulty: DifficultyId): void;
+    /** May return a promise (the world's models load first): Start shows "Loading…" and stays disabled until then. */
+    onStart(world: number, difficulty: DifficultyId): void | Promise<void>;
     onBack(): void;
   }) {
     this.data = deps.data;
@@ -65,14 +66,23 @@ export class WorldScreen {
     this.back.addEventListener("click", () => this.close());
     this.start = el("button", "button primary", bottom);
     this.start.id = "world-start";
-    this.start.addEventListener("click", () => {
-      if (!this.progress.isUnlocked(this.world, this.difficulty)) return;
-      this.root.hidden = true;
-      this.onStart(this.world, this.difficulty);
-    });
+    this.start.addEventListener("click", () => void this.begin());
     addEventListener("keydown", (event) => {
       if (event.code === "Escape" && this.isOpen) this.close();
     });
+  }
+
+  private async begin(): Promise<void> {
+    if (this.start.disabled || !this.progress.isUnlocked(this.world, this.difficulty)) return;
+    this.start.disabled = true;
+    this.start.textContent = t(this.lang, "world.loading");
+    try {
+      await this.onStart(this.world, this.difficulty);
+      this.root.hidden = true;
+    } finally {
+      this.start.disabled = false;
+      this.start.textContent = t(this.lang, "world.start");
+    }
   }
 
   get isOpen(): boolean {

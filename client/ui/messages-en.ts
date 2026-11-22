@@ -205,6 +205,7 @@ export const messagesEn = {
   "world.hazard": "Natural event: {name}",
   "buff.storm": "Lightning",
   "announce.storm": "A summer storm is coming!",
+  "world.loading": "Loading…",
   "world.start": "Start",
   "world.back": "Back",
   "world.lockedHint": "Win the world before it to open it.",
