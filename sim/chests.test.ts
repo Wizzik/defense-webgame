@@ -278,7 +278,9 @@ describe("chests", () => {
   it("every rarity comes out of chests", () => {
     const seen = new Set<string>();
     for (let seed = 1; seed <= 400; seed++) {
-      for (const card of rollChestOffer(quietRun(seed)).cards) seen.add(quietRun(seed).data.items[card.item]!.rarity);
+      // one run per seed: building a run (its world map) is the slow part
+      const run = quietRun(seed);
+      for (const card of rollChestOffer(run).cards) seen.add(run.data.items[card.item]!.rarity);
     }
     expect([...seen].sort()).toEqual([...RARITIES].sort());
   });
