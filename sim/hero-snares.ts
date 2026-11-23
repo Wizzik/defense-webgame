@@ -1,5 +1,6 @@
 import { EventKind } from "./events";
 import type { Run } from "./run";
+import { isChoosing } from "./player";
 import type { HeroState } from "./world";
 import { TICKS_PER_SECOND } from "./constants";
 
@@ -12,7 +13,7 @@ export const Snare = { Web: 0, Root: 1 } as const;
  */
 export function slowHero(run: Run, share: number, ticks: number): void {
   const hero = run.hero;
-  if (ticks <= 0 || hero.hp <= 0) return;
+  if (ticks <= 0 || hero.hp <= 0 || isChoosing(run)) return;
   hero.slowShare = hero.slowTicks > 0 ? Math.max(hero.slowShare, share) : share;
   hero.slowTicks = Math.max(hero.slowTicks, ticks);
   run.events.push(EventKind.HeroSnared, 0, Snare.Web, hero.x, hero.y, ticks / TICKS_PER_SECOND, run.current);
@@ -21,7 +22,7 @@ export function slowHero(run: Run, share: number, ticks: number): void {
 /** Roots the hero for `ticks` steps: no walking and no dash (a running dash ends). Renews, the longer time wins. */
 export function rootHero(run: Run, ticks: number): void {
   const hero = run.hero;
-  if (ticks <= 0 || hero.hp <= 0) return;
+  if (ticks <= 0 || hero.hp <= 0 || isChoosing(run)) return;
   hero.rootTicks = Math.max(hero.rootTicks, ticks);
   hero.dashTicks = 0;
   run.events.push(EventKind.HeroSnared, 0, Snare.Root, hero.x, hero.y, ticks / TICKS_PER_SECOND, run.current);

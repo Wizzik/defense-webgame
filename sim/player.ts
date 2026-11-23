@@ -3,6 +3,7 @@ import { BuffState } from "./buffs";
 import type { CardOffer } from "./cards";
 import type { ChestOffer } from "./chests";
 import { GearState } from "./gear";
+import type { Run } from "./run";
 import type { HeroState } from "./world";
 
 /**
@@ -33,10 +34,20 @@ export class PlayerState {
   ultimateRequested = false;
   /** Steps left of the spirit shield: hero and castle take no damage while > 0. */
   shieldTicks = 0;
+  /**
+   * Co-op: steps left of the choice time of an open card or chest offer (sim/coop-choice.ts); while > 0 the hero is
+   * immune, does not attack or cast, and enemies ignore him. Always 0 for one player (his offers pause the run).
+   */
+  choosingTicks = 0;
 
   constructor(hero: HeroState, heroIndex: number, maxEnemies: number) {
     this.hero = hero;
     this.heroIndex = heroIndex;
     this.gear = new GearState(maxEnemies);
   }
+}
+
+/** The current player is in his co-op choice time (sim/coop-choice.ts): immune, not attacking or casting, ignored by enemies. */
+export function isChoosing(run: Run): boolean {
+  return run.players[run.current]!.choosingTicks > 0;
 }

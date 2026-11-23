@@ -3,8 +3,11 @@
 // heartbeat and catch up to wall-clock time (client/net/ticker.ts, wall-clock.ts), so a hidden or covered window
 // keeps pace; drawing stays on requestAnimationFrame.
 import {
-  botInput, createRun, stateHash, TICK_SECONDS, type Run, type TickInput,
+  botInput, CHOICE_TICKS, createRun, InputAction, stateHash, TICK_SECONDS, TICKS_PER_SECOND, type Run, type TickInput,
 } from "../../sim";
+
+/** The spike's autopilot picks a card or chest item this long after the offer opens. */
+const BOT_PICK_DELAY_TICKS = 2 * TICKS_PER_SECOND;
 import { loadGameData } from "../game/data";
 import { Keyboard } from "../game/keyboard";
 import { HASH_EVERY, Lockstep } from "../net/lockstep";
@@ -103,6 +106,7 @@ function play(peer: PeerLink, local: 0 | 1, seed: number, hero: string): void {
   const clock = new WallClock(TICK_SECONDS * 1000);
   const scratch: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   const remote: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
+  const picked: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   const inputs: TickInput[] = [
     { moveX: 0, moveY: 0, card: -1, actions: 0 },
     { moveX: 0, moveY: 0, card: -1, actions: 0 },
@@ -147,14 +151,19 @@ function play(peer: PeerLink, local: 0 | 1, seed: number, hero: string): void {
   }
 
   function localInput(): TickInput {
-    if (run.choosing === local && (run.state === "levelUp" || run.state === "chest")) {
-      run.current = local; // the autopilot picks for the local player's offer
-      botInput(run, scratch);
-      run.current = 0;
-      return scratch;
-    }
     keyboard.read(scratch);
     scratch.card = -1;
+    const own = run.players[local]!;
+    if (own.offer || own.chestOffer) {
+      // the page has no card panel yet (step 7): the autopilot picks for the local player, who keeps walking;
+      // it waits 2 s so the choice window (immune, idle, ignored) can be seen
+      if (own.choosingTicks > CHOICE_TICKS - BOT_PICK_DELAY_TICKS) return scratch;
+      run.current = local;
+      botInput(run, picked);
+      run.current = 0;
+      scratch.card = picked.card;
+      scratch.actions |= picked.actions & InputAction.KeepWorn;
+    }
     return scratch;
   }
 

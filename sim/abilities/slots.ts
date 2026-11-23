@@ -1,3 +1,4 @@
+import { isChoosing } from "../player";
 import type { Ability } from "../../data/schema";
 import { TICKS_PER_SECOND } from "../constants";
 import { EventKind } from "../events";
@@ -154,14 +155,18 @@ export function startCast(
   onHeroCast(run, index);
 }
 
-/** Counts the shield down, lowers the cooldown of learned slots by 1, then runs their updaters in slot order. */
+/**
+ * Counts the shield down, lowers the cooldown of learned slots by 1, then runs their updaters in slot order (none
+ * while the co-op hero chooses a card or a chest item).
+ */
 export function updateAbilities(run: Run): void {
   const slots = run.abilities;
   if (run.shieldTicks > 0) run.shieldTicks--;
   for (let i = 0; i < slots.length; i++) {
     if (slots[i].level >= 1 && slots[i].cooldown > 0) slots[i].cooldown--;
   }
-  for (let i = 0; i < slots.length; i++) {
+  // a co-op hero in his choice time casts nothing (sim/coop-choice.ts)
+  for (let i = 0; i < slots.length && !isChoosing(run); i++) {
     const slot = slots[i];
     if (slot.level < 1) continue;
     const update = UPDATERS[slot.def.kind];

@@ -7,6 +7,7 @@ const CASTLE = "#7f9cc0";
 const HERO = "#e6edf5";
 const TEAMMATE = "#7fb4d9";
 const FALLEN = "#5d6b80";
+const CHOOSING = "#9fd3ff";
 const ENEMY = "#b5525c";
 const BOSS = "#d77a86";
 
@@ -54,5 +55,13 @@ export function drawTopView(ctx: CanvasRenderingContext2D, run: Run, local = 0):
     ctx.beginPath();
     ctx.arc(px(hero.x), py(hero.y), 5, 0, Math.PI * 2);
     ctx.fill();
+    if (run.players[p]!.choosingTicks > 0) {
+      // choosing a card or a chest item in co-op: immune and ignored, shown by a ring
+      ctx.strokeStyle = CHOOSING;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(px(hero.x), py(hero.y), 9, 0, Math.PI * 2);
+      ctx.stroke();
+    }
   }
 }

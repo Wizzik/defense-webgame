@@ -1,6 +1,15 @@
 # Status
 
-Updated 2026-11-23 (multiplayer migration steps 3-4 merged as PR #33 `612cf90`). Read this first when you resume work.
+Updated 2026-11-23 (multiplayer migration step 5 on branch `mp-no-pause`). Read this first when you resume work.
+
+## Multiplayer migration step 5: co-op without a pause (branch `mp-no-pause`, 2026-11-23)
+
+- Petr (2026-11-23): "go on". Done inline in the same chat as steps 3-4; `npm run check` (1205 tests) and the build pass. Rulings: `docs/DECISIONS.md`, section Multiplayer migration, step 5.
+- **Single player keeps the pause**; the matrix digest stays `4bc81413`.
+- **Co-op:** a level-up or a chest never pauses the run; each player picks with his own input. For 10 s the choosing hero is immune, does not attack or cast, and enemies ignore him; then the offer stays open and he fights again. He can walk while choosing. Level-ups in a row share one 10 s.
+- `/net-spike/`: the autopilot picks for the local player 2 s after an offer opens (no card panel until step 7); a choosing hero has a light-blue ring.
+- What Petr can check after the merge on `/net-spike/`: the game does not stop at a level-up, a ring shows around a hero for 2 s and enemies turn to the other hero meanwhile.
+- Next: step 6 (a fallen hero is revived by standing on him 5 s, the run ends when all are down, more chests and harder enemies per player).
 
 ## Multiplayer migration steps 3-4: enemies pick a hero, shared XP, own gold (merged as PR #33 `612cf90`, 2026-11-23)
 

@@ -2,6 +2,16 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Multiplayer migration, step 5: co-op offers and chests without a pause (2026-11-23; Petr's rules of 2026-11-21, the details are Claude's)
+
+- **One player keeps the pause** (Petr): the "levelUp" and "chest" states and `run.choosing` work as before; the matrix digest stays `4bc81413`.
+- **Co-op never pauses:** with several players the run stays "playing". Each player has his own offer and chest offer; he picks through the `card` of his own input (with `KeepWorn` for a chest Choice), read at the start of a step (`coopChoose`, `sim/coop-choice.ts`). At the end of a step a player with nothing open gets his next offer (a level-up first, like one player), else the chest he stands on opens with his gold (`coopOpen`). A fallen hero opens nothing.
+- **Choice time** `CHOICE_SECONDS` = 10 (`player.choosingTicks`, Petr's number; a constant in the sim, not a rule in `rules.yaml`, because `data:build` needs the map): while it runs the hero takes no damage (`damageHero`), no web or roots, does not attack, casts nothing (cooldowns still run, his summons keep fighting), and enemies ignore him (`enemyTarget` skips him; with every hero fallen or choosing an enemy goes for the castle, and a charge stops). After it the offer **stays open** (the autopilot does not pick for a human), the hero is vulnerable and fights again.
+- **Claude's rulings:** the choosing hero **can walk** (and collect pickups): the panel will be non-modal, and standing frozen would be the pause again. A chained level-up opens the next offer in the **same** choice time, so a run of level-ups gives 10 s, not 10 s each; a chest opened afterwards starts a new 10 s (it costs gold). These can change after Petr plays co-op.
+- Hash: `choosingTicks` is mixed only with several players.
+- The autopilot (`botInput`) picks a co-op offer or chest at once and keeps walking. Probe (stonehorn + sparkshot, seeds 1-4): no paused step in a whole run, all won, both at level 49, 21-23 chests.
+- `/net-spike/` has no card panel yet (step 7): the autopilot picks for the local player 2 s after an offer opens, and a choosing hero has a light-blue ring. **Open for step 7:** inputs travel a few steps ahead in lockstep, so the client must send a card only once per offer (or the protocol carries the offer's number), or a queued card could also take the next chained offer.
+
 ## Multiplayer migration, steps 3-4: enemies pick a hero, shared XP, own gold, pickups to the collector (2026-11-23; Petr's rules R2 and R6, the details are Claude's)
 
 - One player is unchanged: the matrix digest stays `4bc81413` (the target column, like the owners, is hashed only with several players; the storm's bolt arrays are `HAZARD_CAPACITY` x players long, so one player keeps 8).
