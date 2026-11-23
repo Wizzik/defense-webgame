@@ -1,8 +1,8 @@
 # Status
 
-Updated 2026-11-23 (multiplayer migration step 7, the co-op client, on branch `coop-client`). Read this first when you resume work.
+Updated 2026-11-23 (multiplayer migration step 7, the co-op client, merged as PR #36 `dd6597b`). Read this first when you resume work.
 
-## Multiplayer migration step 7: the co-op client (branch `coop-client`, 2026-11-23)
+## Multiplayer migration step 7: the co-op client (merged as PR #36 `dd6597b`, 2026-11-23)
 
 - Petr (2026-11-23): "step 7: the client, lobby, net loop and teammates' HUD". Done inline in one chat; `npm run check`, the build and e2e `webgl2-fallback` pass (new `e2e/coop.spec.ts`). Rulings and details: `docs/DECISIONS.md`, section Multiplayer migration, step 7.
 - **Single player unchanged:** the matrix digest stays `4bc81413`; events got a player column that is not hashed.
