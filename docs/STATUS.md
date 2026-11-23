@@ -1,8 +1,8 @@
 # Status
 
-Updated 2026-11-23 (multiplayer migration step 7, the co-op client, merged as PR #36 `dd6597b`). Read this first when you resume work.
+Updated 2026-11-23 (co-op fixes after Petr's first test merged as PR #37). Read this first when you resume work. Read this first when you resume work.
 
-## After Petr's first co-op test: cards in the middle, 5 s choice, hero choice in the lobby, spell icons (branch `coop-fixes`, 2026-11-23)
+## After Petr's first co-op test: cards in the middle, 5 s choice, hero choice in the lobby, spell icons (merged as PR #37, 2026-11-23)
 
 - Petr: the cards must be in the middle as alone, the protection 5 s instead of 10, a guest who comes by the link must be able to change his hero, and every spell needs its own picture, bigger and better. Done; details in `docs/DECISIONS.md`, section After Petr's first co-op test.
 - What Petr checks: the cards and the 5 s; changing the hero in the lobby after joining (the host's lobby line names the new hero); the icons in the ability bar and on the cards: can he tell every spell apart, are they big and clear enough.
