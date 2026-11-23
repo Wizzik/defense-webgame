@@ -6,6 +6,7 @@ const GRID = "#1c2533";
 const CASTLE = "#7f9cc0";
 const HERO = "#e6edf5";
 const TEAMMATE = "#7fb4d9";
+const FALLEN = "#5d6b80";
 const ENEMY = "#b5525c";
 const BOSS = "#d77a86";
 
@@ -37,7 +38,18 @@ export function drawTopView(ctx: CanvasRenderingContext2D, run: Run, local = 0):
   }
   for (let p = 0; p < run.players.length; p++) {
     const hero = run.players[p]!.hero;
-    if (hero.hp <= 0) continue;
+    if (hero.hp <= 0) {
+      // a fallen hero stays on the map as a grey cross (no revive yet: migration step 6)
+      ctx.strokeStyle = FALLEN;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(px(hero.x) - 5, py(hero.y) - 5);
+      ctx.lineTo(px(hero.x) + 5, py(hero.y) + 5);
+      ctx.moveTo(px(hero.x) + 5, py(hero.y) - 5);
+      ctx.lineTo(px(hero.x) - 5, py(hero.y) + 5);
+      ctx.stroke();
+      continue;
+    }
     ctx.fillStyle = p === local ? HERO : TEAMMATE;
     ctx.beginPath();
     ctx.arc(px(hero.x), py(hero.y), 5, 0, Math.PI * 2);
