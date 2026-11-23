@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-23 (co-op fixes after Petr's first test merged as PR #37). Read this first when you resume work. Read this first when you resume work.
+Updated 2026-11-23 (co-op fixes after Petr's first test merged as PR #37). Read this first when you resume work.
 
 ## After Petr's first co-op test: cards in the middle, 5 s choice, hero choice in the lobby, spell icons (merged as PR #37, 2026-11-23)
 
