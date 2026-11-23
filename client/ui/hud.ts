@@ -46,17 +46,21 @@ interface Cell {
   fill: HTMLElement;
   /** Ultimate only. */
   mode?: HTMLElement;
+  /** The spell's icon; `shown` is the ability id it shows ("" for none). */
+  icon: HTMLElement;
+  shown: string;
 }
 
 function cell(parent: HTMLElement, slot: number, extra: string, key?: string, withMode = false): Cell {
   const root = el("div", `cell ${extra}`, parent);
   if (key) el("span", "cell-key", root, key);
+  const icon = el("span", "cell-icon", root);
   const name = el("div", "cell-name", root);
   const state = el("div", "cell-state", root);
   const mode = withMode ? el("div", "cell-mode", root) : undefined;
   const track = el("div", "cell-track", root);
   const fill = el("div", "bar-fill", track);
-  return { slot, root, name, state, fill, mode };
+  return { slot, root, name, state, fill, mode, icon, shown: "" };
 }
 
 /** A small cell of the passive row: the glyph and the level; a muted frame while the slot is empty. */
@@ -272,6 +276,11 @@ export class Hud {
       // a charged empowered strike (an armed on_hit ability) lights the frame
       view.root.classList.toggle("charged", learned && slot.def.kind === "on_hit" && slot.active);
       setText(view.name, empty ? t(lang, "hud.emptySlot") : slot.def.name[lang]);
+      const iconId = empty ? "" : slot.def.id;
+      if (view.shown !== iconId) {
+        view.shown = iconId;
+        view.icon.innerHTML = iconId ? abilityIconSvg(iconId) : "";
+      }
       if (!learned) {
         setText(view.state, empty ? "" : t(lang, "hud.notLearned"));
         view.fill.style.width = "0%";

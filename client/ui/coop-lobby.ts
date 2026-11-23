@@ -1,7 +1,10 @@
+import type { Hero } from "../../data/schema";
 import { el, setText } from "./dom";
 import { type Lang, t } from "./i18n";
 
 export interface CoopLobbyHandlers {
+  /** A hero picked in the lobby (also after joining, until the run starts). */
+  onHero(id: string): void;
   onHost(): void;
   onJoin(code: string): void;
   /** Host only, once a teammate is in: choose the course and start. */
@@ -21,13 +24,16 @@ export type LobbyState =
 
 /**
  * The co-op lobby (multiplayer migration step 7): Host opens a room and shows its link to send; Join takes a room
- * code (or the link opens the lobby with it). Each player plays the hero chosen in the menu and wears his own gear;
- * the host chooses the course and starts. Two players for now.
+ * code (or the link opens the lobby with it). Each player picks his hero here (the menu's hero at first; he can
+ * change it until the run starts, also while connected) and wears his own gear; the host chooses the course and
+ * starts. Two players for now.
  */
 export class CoopLobby {
   private readonly root: HTMLElement;
   private readonly title: HTMLElement;
   private readonly hero: HTMLElement;
+  private readonly heroButtons = new Map<string, HTMLButtonElement>();
+  private heroId = "";
   private readonly host: HTMLButtonElement;
   private readonly joinLabel: HTMLElement;
   private readonly code: HTMLInputElement;
@@ -39,16 +45,22 @@ export class CoopLobby {
   private readonly back: HTMLButtonElement;
   private readonly note: HTMLElement;
   private lang: Lang = "en";
-  private heroName = "";
   private state: LobbyState = { kind: "idle" };
 
-  constructor(parent: HTMLElement, handlers: CoopLobbyHandlers) {
+  constructor(parent: HTMLElement, private readonly heroes: readonly Hero[], handlers: CoopLobbyHandlers) {
     this.root = el("div", "screen coop-lobby", parent);
     this.root.id = "coop-lobby";
     this.root.hidden = true;
     const panel = el("div", "panel coop-panel", this.root);
     this.title = el("h2", "coop-title", panel);
     this.hero = el("p", "coop-hero", panel);
+    const heroRow = el("div", "menu-heroes coop-heroes", panel);
+    for (const hero of heroes) {
+      const button = el("button", "button coop-hero-button", heroRow);
+      button.dataset.hero = hero.id;
+      button.addEventListener("click", () => handlers.onHero(hero.id));
+      this.heroButtons.set(hero.id, button);
+    }
     this.host = el("button", "button primary", panel);
     this.host.id = "coop-host";
     this.host.addEventListener("click", () => handlers.onHost());
@@ -90,9 +102,9 @@ export class CoopLobby {
     return !this.root.hidden;
   }
 
-  open(lang: Lang, heroName: string, code = ""): void {
+  open(lang: Lang, heroId: string, code = ""): void {
     this.lang = lang;
-    this.heroName = heroName;
+    this.heroId = heroId;
     if (code) this.code.value = code;
     this.root.hidden = false;
     this.render();
@@ -100,6 +112,12 @@ export class CoopLobby {
 
   close(): void {
     this.root.hidden = true;
+  }
+
+  /** The hero this player plays (after a pick in the lobby or the menu). */
+  setHero(heroId: string): void {
+    this.heroId = heroId;
+    this.render();
   }
 
   set(state: LobbyState): void {
@@ -110,7 +128,14 @@ export class CoopLobby {
   private render(): void {
     const { lang, state } = this;
     setText(this.title, t(lang, "coop.title"));
-    setText(this.hero, t(lang, "coop.hero", { name: this.heroName }));
+    const heroName = this.heroes.find((h) => h.id === this.heroId)?.name[lang] ?? this.heroId;
+    setText(this.hero, t(lang, "coop.hero", { name: heroName }));
+    // the hero can change until the run starts (not while its models load)
+    for (const [id, button] of this.heroButtons) {
+      button.textContent = this.heroes.find((h) => h.id === id)!.name[lang];
+      button.setAttribute("aria-pressed", String(id === this.heroId));
+      button.disabled = state.kind === "loading";
+    }
     setText(this.host, t(lang, "coop.host"));
     setText(this.joinLabel, t(lang, "coop.code"));
     setText(this.join, t(lang, "coop.join"));

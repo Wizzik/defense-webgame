@@ -60,7 +60,7 @@ export const messagesCs = {
   "cards.new": "Nové",
   "menu.coop": "Co-op",
   "coop.title": "Co-op pro dva",
-  "coop.hero": "Hraješ za {name} se svou výbavou (hrdinu vybereš v menu).",
+  "coop.hero": "Hraješ za {name} se svou výbavou; hrdinu můžeš změnit, dokud hra nezačne.",
   "coop.host": "Založit hru",
   "coop.code": "Kód místnosti",
   "coop.join": "Připojit",

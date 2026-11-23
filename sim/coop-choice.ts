@@ -7,8 +7,9 @@ import type { Run } from "./run";
 /**
  * How long a co-op hero may choose a card or a chest item in peace (Petr, 2026-11-21): while the choice time runs he is
  * immune, does not attack or cast, and enemies ignore him. After it the offer stays open, but he fights and can be hurt.
+ * 10 s at first; 5 s since Petr's co-op test (2026-11-23).
  */
-export const CHOICE_SECONDS = 10;
+export const CHOICE_SECONDS = 5;
 export const CHOICE_TICKS = CHOICE_SECONDS * TICKS_PER_SECOND;
 
 /**
