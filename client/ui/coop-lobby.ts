@@ -57,7 +57,8 @@ export class CoopLobby {
     const heroRow = el("div", "menu-heroes coop-heroes", panel);
     for (const hero of heroes) {
       const button = el("button", "button coop-hero-button", heroRow);
-      button.dataset.hero = hero.id;
+      // not data-hero: the menu's hero buttons carry that, and tests select them by it
+      button.dataset.coopHero = hero.id;
       button.addEventListener("click", () => handlers.onHero(hero.id));
       this.heroButtons.set(hero.id, button);
     }
