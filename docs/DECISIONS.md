@@ -2,6 +2,13 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## After Petr's first co-op test (2026-11-23)
+
+- **Co-op cards in the middle** as for one player (the right-edge column is gone); the run still goes on, the choice time shows under the title.
+- **Choice time 10 s -> 5 s** (`CHOICE_SECONDS` in `sim/coop-choice.ts`): 5 s protected and passive, then the hero fights again while the offer stays open. The determinism digest does not change (the matrix has no co-op case).
+- **The hero can be changed in the lobby**, also after joining by the link: the lobby has the eight hero buttons (the menu's hero at first); a change before the start is sent again (`join` from the guest, `hello` from the host), and the host's start uses the latest heroes.
+- **Every ability has its own icon** (`client/ui/ability-icons.ts`, all 48: 32 hero spells and ultimates, 10 shared spells, 6 passives; a test checks that each has one and that no two share a glyph): a lit tile (radial gradient of the ability's colour, a thin frame) with a glowing glyph, colours by element and no orange. Shown at 38 px in every ability bar cell, 72 px over the name on every ability card (upgrade, learn, new), 36 px in the passive row.
+
 ## Multiplayer migration, step 7: the co-op client (2026-11-23; Petr asked for step 7, the design and details are Claude's)
 
 - **Two players for now:** the lockstep (`client/net/lockstep.ts`) and the protocol are for a host and one guest; 3-4 players need a star or mesh of links and stay for later (the sim already takes 4).

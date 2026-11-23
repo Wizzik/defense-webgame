@@ -182,6 +182,8 @@ export class Cards {
         ? t(lang, "cards.learn", { name: def.name[lang] })
         : t(lang, "cards.ability", { name: def.name[lang], n: card.toLevel });
       if (card.slot === ULTIMATE_SLOT) el("span", "card-badge", button, t(lang, "cards.ultimate"));
+      // the spell's own icon tells it apart at a glance
+      el("span", "card-icon", button).innerHTML = abilityIconSvg(def.id);
       el("span", "card-name", button, name);
       if (learn) el("span", "card-desc", button, def.description[lang]);
     } else if (card.kind === "learn") {
@@ -189,6 +191,7 @@ export class Cards {
       const badge = el("span", "card-badge card-new", button);
       badge.innerHTML = abilityIconSvg(def.id);
       el("span", "", badge, t(lang, "cards.new"));
+      el("span", "card-icon", button).innerHTML = abilityIconSvg(def.id);
       name = def.name[lang];
       el("span", "card-name", button, name);
       el("span", "card-desc", button, def.description[lang]);

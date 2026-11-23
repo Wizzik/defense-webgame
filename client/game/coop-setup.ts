@@ -51,6 +51,7 @@ export class CoopSetup {
   private peer: PeerLink | null = null;
   /** Host: the guest's hero and gear once he joined. */
   private mate: { hero: string; gear: NetGear[] } | null = null;
+  private role: "host" | "guest" | null = null;
   /** Bumped when the lobby is left, so a late answer of an old attempt is ignored. */
   private attempt = 0;
 
@@ -75,6 +76,16 @@ export class CoopSetup {
     if (this.peer && !this.deps.session.coop) this.peer.close();
     this.peer = null;
     this.mate = null;
+    this.role = null;
+  }
+
+  /** The local player picked another hero in the lobby: tell the teammate (the guest joins again with it). */
+  heroChanged(): void {
+    const { peer, deps } = this;
+    if (!peer || deps.session.coop) return;
+    const own = deps.heroId();
+    if (this.role === "guest") peer.send({ t: "join", v: PROTOCOL_VERSION, hero: own, g: toNet(deps.loadout(own)) });
+    else if (this.role === "host" && this.mate) peer.send({ t: "hello", v: PROTOCOL_VERSION, seed: 0, hero: own });
   }
 
   /** The link the guest opens: this page with `?join=<code>` (and the test signalling server, if any). */
@@ -100,6 +111,7 @@ export class CoopSetup {
           return;
         }
         this.peer = peer;
+        this.role = "host";
         peer.onMessage((m) => this.hostMessage(peer, m));
         peer.onClose((reason) => {
           if (this.peer === peer && !this.deps.session.coop) this.fail(t(this.deps.lang(), "coop.closed", { reason }));
@@ -175,6 +187,7 @@ export class CoopSetup {
         return;
       }
       this.peer = peer;
+      this.role = "guest";
       peer.onMessage((m) => void this.guestMessage(peer, m));
       peer.onClose((reason) => {
         if (this.peer === peer && !this.deps.session.coop) this.fail(t(this.deps.lang(), "coop.closed", { reason }));
@@ -229,6 +242,7 @@ export class CoopSetup {
     });
     this.peer = null;
     this.mate = null;
+    this.role = null;
     this.deps.onRunStarted();
     return net;
   }

@@ -345,7 +345,11 @@ function heroLoader(
       const gltf = await models.get(modelUrl("heroes", id));
       // ?debug=1&mate=<id>: the autopilot's hero of a local co-op run
       const mateGltf = mate ? await models.get(modelUrl("heroes", mate)) : null;
-      if (ticket !== latest) return;
+      // a co-op run that started meanwhile (a hero picked in the lobby just before) keeps its own models and run
+      if (ticket !== latest || session.coop) {
+        if (ticket === latest) setLoading(false);
+        return;
+      }
       heroViews[0]!.setModel(gltf);
       if (mateGltf) heroViews[1]!.setModel(mateGltf);
       allyView.setModel(gltf);
@@ -438,8 +442,15 @@ function createUi(
   });
   // co-op: the lobby; the host's course comes from the world screen (`coopCourse` routes its Start and Back)
   let coopCourse = false;
-  const heroName = (): string => data.heroes.find((h) => h.id === heroId)?.name[lang] ?? heroId;
-  const lobby = new CoopLobby(root, {
+  const lobby = new CoopLobby(root, data.heroes, {
+    onHero: (id) => {
+      heroId = id;
+      storeHero(id);
+      menu.setHero(id);
+      lobby.setHero(id);
+      void useHero(id);
+      coop.heroChanged();
+    },
     onHost: () => void coop.host(),
     onJoin: (code) => void coop.join(code),
     onStart: () => coop.chooseCourse(),
@@ -454,7 +465,7 @@ function createUi(
     sound.engine.enable();
     void sound.engine.preload();
     menu.setVisible(false);
-    lobby.open(lang, heroName(), code);
+    lobby.open(lang, heroId, code);
   };
   const coop = new CoopSetup({
     data, session, lobby,
@@ -507,7 +518,7 @@ function createUi(
     onBack: () => {
       if (coopCourse) {
         coopCourse = false;
-        lobby.open(lang, heroName());
+        lobby.open(lang, heroId);
       } else menu.setVisible(true);
     },
   });

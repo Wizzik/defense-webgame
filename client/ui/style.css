@@ -84,7 +84,8 @@
     grid-template-columns: repeat(2, minmax(112px, 1fr));
   }
 }
-.hero-button {
+.hero-button,
+.coop-hero-button {
   min-width: 112px;
 }
 .menu-hero-role {
@@ -368,7 +369,7 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
-  flex: 0 1 128px;
+  flex: 0 1 150px;
   min-width: 0;
   min-height: 74px;
   padding: 7px 8px 8px;
@@ -1280,65 +1281,12 @@
   }
 }
 
-/* co-op (multiplayer migration step 7): the cards as a compact column at the right edge, the fight stays visible */
+/* co-op: the cards sit in the middle as alone (Petr, 2026-11-23), the run goes on; the choice time under the title */
 .cards.coop {
-  inset: 100px 14px auto auto;
-  width: 250px;
-  padding: 0;
-  background: none;
-  align-items: stretch;
-  justify-content: flex-start;
-  gap: 8px;
-  pointer-events: none;
   z-index: 2;
-}
-.cards.coop > * {
-  pointer-events: auto;
 }
 .cards.coop .cards-title {
   order: -2;
-  font-size: 17px;
-  text-align: right;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
-}
-.cards.coop .cards-row {
-  flex-direction: column;
-  flex-wrap: nowrap;
-  gap: 8px;
-}
-.cards.coop .card {
-  width: auto;
-  min-height: 0;
-  padding: 8px 10px 8px 38px;
-  gap: 3px;
-  background: rgba(16, 22, 32, 0.92);
-}
-.cards.coop .card-key {
-  top: 8px;
-  left: 10px;
-}
-.cards.coop .card-name {
-  font-size: 15px;
-}
-.cards.coop .card-badge {
-  position: static;
-  align-self: flex-start;
-  font-size: 11px;
-}
-.cards.coop .card-change {
-  font-size: 13px;
-}
-.cards.coop .card-desc,
-.cards.coop .cards-hint {
-  display: none;
-}
-.cards.coop .card-line {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
-  font-size: 12px;
 }
 .cards-timer {
   position: relative;
@@ -1501,4 +1449,53 @@
   color: var(--muted);
   font-size: 13px;
   text-align: center;
+}
+
+/* every spell's own icon (Petr, 2026-11-23): a lit tile with a glowing glyph; left in the ability bar cells, big on the cards */
+.ability-icon .ability-glyph {
+  filter: drop-shadow(0 0 1.5px currentColor);
+}
+.cell-icon {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+}
+.cell-icon:empty {
+  display: none;
+}
+.cell:has(.cell-icon:not(:empty)) {
+  padding-left: 50px;
+}
+.cell:has(.cell-icon:not(:empty)) .cell-track {
+  margin-left: -43px;
+}
+.cell-icon svg,
+.card-icon svg,
+.passive-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.card-icon {
+  display: flex;
+  width: 72px;
+  height: 72px;
+  align-self: center;
+}
+.cards.coop .card-icon {
+  width: 64px;
+  height: 64px;
+}
+.passive-cell {
+  width: 40px;
+  height: 40px;
+}
+.passive-icon {
+  width: 36px;
+  height: 36px;
+}
+.card-new svg {
+  display: none;
 }
