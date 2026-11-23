@@ -1,7 +1,7 @@
 import { DIFFICULTY_IDS, type DifficultyId, type GameData, type Rules } from "../data/schema";
 import type { Run } from "./run";
 
-/** Multipliers of one world and difficulty (spec 2026-11-21 4.2), computed once when the run is created. */
+/** Multipliers of one world, difficulty and player count (spec 2026-11-21 4.2, rules.coop), computed once when the run is created. */
 export interface DifficultyMods {
   hp: number;
   damage: number;
@@ -13,15 +13,18 @@ export interface DifficultyMods {
   magicFind: number;
 }
 
-export function difficultyMods(rules: Rules, world: number, difficulty: DifficultyId): DifficultyMods {
+export function difficultyMods(rules: Rules, world: number, difficulty: DifficultyId, players = 1): DifficultyMods {
   const { worldStep, reward, levels } = rules.difficulty;
   const level = levels[difficulty];
   const above = world - 1;
+  // co-op (multiplayer migration step 6): every player after the first adds rules.coop.perPlayer; one player x 1
+  const more = players - 1;
+  const per = rules.coop.perPlayer;
   return {
-    hp: level.hp * (1 + worldStep.hp * above),
-    damage: level.damage * (1 + worldStep.damage * above),
-    packSize: level.packSize,
-    eliteHp: level.eliteHp,
+    hp: level.hp * (1 + worldStep.hp * above) * (1 + per.hp * more),
+    damage: level.damage * (1 + worldStep.damage * above) * (1 + per.damage * more),
+    packSize: level.packSize * (1 + per.packSize * more),
+    eliteHp: level.eliteHp * (1 + per.eliteHp * more),
     gold: 1 + reward.goldPerWorld * above,
     magicFind: reward.magicFindPerWorld * above + level.magicFind,
   };

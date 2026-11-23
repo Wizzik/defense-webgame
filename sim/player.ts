@@ -26,6 +26,8 @@ export class PlayerState {
   offer: CardOffer | null = null;
   /** The cards of the chest that is open; null outside the "chest" state. */
   chestOffer: ChestOffer | null = null;
+  /** Price of his next chest before rounding: basePrice x priceGrowth for every chest he opened (set by the run). */
+  chestPriceRaw = 0;
   /** Index of the chest that is open; -1 outside the "chest" state. */
   openChest = -1;
   /** The ultimate casts by itself; the player can switch this off. */
@@ -39,6 +41,11 @@ export class PlayerState {
    * immune, does not attack or cast, and enemies ignore him. Always 0 for one player (his offers pause the run).
    */
   choosingTicks = 0;
+  /**
+   * Co-op: steps a living teammate has stood by this fallen hero without a break (sim/revive.ts); at
+   * rules.coop.revive.seconds he stands up. 0 while he lives or nobody is near.
+   */
+  reviveTicks = 0;
 
   constructor(hero: HeroState, heroIndex: number, maxEnemies: number) {
     this.hero = hero;

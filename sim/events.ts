@@ -61,6 +61,9 @@ export const EventKind = {
   /** The world's natural event: the first storm wave of a run (u = 0), or a weather phase (u = WeatherPhase of
    *  sim/weather.ts: 1 warning, 2 start, 3 end; value = seconds of the warning / of the weather / 0). x/y = the hero. */
   HazardWave: 31,
+  /** Co-op: a fallen hero stood up (sim/revive.ts): a = the revived player, value = his hp, x/y = where he lies,
+   *  u = the teammate who revived him. */
+  Revive: 32,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

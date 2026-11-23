@@ -112,6 +112,10 @@ function fixture(): any {
             extraRushes: [{ atSeconds: 90, elites: 1, heavies: 2 }] },
         },
       },
+      coop: {
+        perPlayer: { hp: 0.6, damage: 0.15, packSize: 0.5, eliteHp: 0.4, chests: 1 },
+        revive: { seconds: 5, radius: 120, hpShare: 0.5 },
+      },
     },
     worlds: [
       { id: "first-world", name: names("First"), blurb: names("A plain."), color: "#1f3a44", ready: true,

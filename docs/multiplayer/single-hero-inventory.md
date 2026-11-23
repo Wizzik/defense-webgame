@@ -186,7 +186,7 @@ Every step leaves the one-player game unchanged. **The regression test is the de
 | 7 | client: lobby, net loop from the spike, several hero models, HUD for teammates, cards as a panel | no | e2e `webgl2-fallback` green; two-tab test like the spike | L | 2 |
 | 8 | balance of co-op (`sim:run --players 2..4`), Petr's playtests | - | tables in DECISIONS | M | 1 |
 
-Done: steps 1-2 (PR #31, 2026-11-22), steps 3-4 (PR #33, 2026-11-23), step 5 (2026-11-23; how they were built, and where they left this table: `docs/DECISIONS.md`, Multiplayer migration, steps 3-4 and step 5).
+Done: steps 1-2 (PR #31, 2026-11-22), steps 3-4 (PR #33, 2026-11-23), step 5 (PR #34, 2026-11-23), step 6 (2026-11-23; how they were built, and where they left this table: `docs/DECISIONS.md`, Multiplayer migration, steps 3-4, step 5 and step 6).
 
 Total: **8-10 chats** (the spike counted). Steps 1-4 could run before the difficulties and progression without blocking them.
 

@@ -34,6 +34,7 @@ export { heroStats, moveHero } from "./hero";
 export { NO_INPUT } from "./input";
 export { InputAction } from "./input";
 export { CHOICE_SECONDS, CHOICE_TICKS } from "./coop-choice";
+export { reviveShare, updateRevive } from "./revive";
 export { isChoosing } from "./player";
 export { enemyTarget, nearestPlayer, TARGET_SWITCH_MARGIN } from "./targets";
 export type { TickInput } from "./input";

@@ -50,3 +50,6 @@ difficulty:
     normal: { hp: 1, damage: 1, packSize: 1, eliteHp: 1, magicFind: 0, extraRushes: [] }
     insane: { hp: 1.75, damage: 1.75, packSize: 1.2, eliteHp: 1, magicFind: 0.25, extraRushes: [{ atSeconds: 30, elites: 1, heavies: 1 }] }
     hell: { hp: 3, damage: 3, packSize: 1.4, eliteHp: 1.5, magicFind: 0.5, extraRushes: [{ atSeconds: 30, elites: 1, heavies: 1 }] }
+coop:
+  perPlayer: { hp: 0.6, damage: 0.15, packSize: 0.5, eliteHp: 0.4, chests: 1 }
+  revive: { seconds: 5, radius: 120, hpShare: 0.5 }
