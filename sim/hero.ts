@@ -1,3 +1,4 @@
+import { isChoosing } from "./player";
 import { snareSpeedScale } from "./hero-snares";
 import type { GameData } from "../data/schema";
 import { consumeEmpower, extraTargets, onHitBonus, onHitStunTicks } from "./abilities/on-hit";
@@ -141,7 +142,7 @@ export function updateHeroCombat(run: Run): void {
   const stats = hero.stats;
   if (hero.hp > 0) hero.hp = Math.min(stats.maxHp, hero.hp + stats.regenPerSecond * TICK_SECONDS);
   if (hero.attackCooldown > 0) hero.attackCooldown--;
-  if (hero.attackCooldown > 0 || hero.hp <= 0) return;
+  if (hero.attackCooldown > 0 || hero.hp <= 0 || isChoosing(run)) return;
 
   const range = hero.def.baseAttack.range;
   let best = -1;

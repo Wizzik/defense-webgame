@@ -152,6 +152,13 @@ export function botInput(run: Run, out: TickInput): TickInput {
     if (card && botChestKeep(run, card)) out.actions = InputAction.KeepWorn;
     return out;
   }
+  // co-op (step 5): an open offer or chest does not pause the run; the autopilot picks and goes on moving
+  if (run.offer) out.card = botCard(run, run.offer);
+  else if (run.chestOffer) {
+    out.card = botChestChoice(run);
+    const card = run.chestOffer.cards[out.card];
+    if (card && botChestKeep(run, card)) out.actions = InputAction.KeepWorn;
+  }
   const { hero, castle, enemies } = run;
 
   // One pass: the threat nearest to the castle, the enemy nearest to the hero, the nearest charge winding up

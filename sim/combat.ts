@@ -8,6 +8,7 @@ import { onGearEliteKill } from "./gear-effects";
 import { gainXp } from "./level-up";
 import type { Rng } from "./rng";
 import type { Run } from "./run";
+import { isChoosing } from "./player";
 
 /**
  * `u` of a HeroHit event: a hit, a step of a poison cloud (the client neither shakes nor plays the hurt sound) or a
@@ -44,6 +45,8 @@ export function damageHero(run: Run, amount: number, attacker: number, source: n
   if (run.shieldTicks > 0) return 0;
   // a fallen hero of a co-op run takes nothing more (one player: the run ends in this step anyway)
   if (hero.hp <= 0 && run.players.length > 1) return 0;
+  // nor does a co-op hero in his choice time (sim/coop-choice.ts)
+  if (isChoosing(run)) return 0;
   const dealt = amount * heroDamageScale(run);
   hero.hp -= dealt;
   run.events.push(EventKind.HeroHit, attacker, dealt, hero.x, hero.y, source, run.current);

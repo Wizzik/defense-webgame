@@ -5,6 +5,7 @@ import { createOrbs, type OrbStore, updateOrbs } from "./orbs";
 import type { AbilitySlot } from "./abilities/slots";
 import { TICKS_PER_SECOND } from "./constants";
 import { chooseCard, openOffer } from "./cards";
+import { coopChoose, coopOpen } from "./coop-choice";
 import type { CardOffer } from "./cards";
 import { type ChestOffer, ChestStore, chooseChestCard, placeChest, updateChests } from "./chests";
 import { regenCastle } from "./castle";
@@ -334,6 +335,9 @@ export class Run {
    * him, each in its own loop at its line above: applyActions, moveHero, tickSnares, updateHeroCombat, updateAbilities,
    * updateGearEffects and updateBuffs; savePrevious covers every hero. Allies and bolts act as their owner. The offer
    * goes to the first player with level-ups, else the first player on a chest opens it; `choosing` is that player.
+   * That is the one-player rule only: with several players (step 5) offers and chests never pause the run; each player
+   * picks through his own input at the start of a step (coopChoose) and opens his next offer or chest at its end
+   * (coopOpen), with a choice time of CHOICE_SECONDS in which his hero is immune, idle and ignored (sim/coop-choice.ts).
    * updateClouds runs once per player. Enemies pick their target player themselves (sim/targets.ts, step 3); pickups
    * and orbs go to the nearest hero and XP to all (step 4). The run is lost when every hero has fallen.
    *
@@ -357,6 +361,14 @@ export class Run {
       chooseChestCard(this, own.card, (own.actions & InputAction.KeepWorn) !== 0);
       this.current = 0;
       return;
+    }
+    if (count > 1) {
+      // co-op: offers and chests never pause the run; each player picks through his own input (step 5)
+      for (let p = 0; p < count; p++) {
+        this.current = p;
+        coopChoose(this, inputOf(input, p));
+      }
+      this.current = 0;
     }
     savePrevious(this);
     for (let p = 0; p < count; p++) {
@@ -411,6 +423,14 @@ export class Run {
     this.tick++;
     checkEnd(this);
     if (this.state !== "playing") return;
+    if (count > 1) {
+      for (let p = 0; p < count; p++) {
+        this.current = p;
+        coopOpen(this);
+      }
+      this.current = 0;
+      return;
+    }
     for (let p = 0; p < count; p++) {
       if (this.players[p]!.hero.pendingLevelUps === 0) continue;
       this.current = p;

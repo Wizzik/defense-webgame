@@ -77,20 +77,20 @@ describe("a run with several players", () => {
     expect(run.result).toBe("hero");
   });
 
-  it("opens the card offer of a player with level-ups and takes his card", () => {
+  it("opens a co-op card offer without pausing and takes his card", () => {
     const run = twoPlayers();
     while (run.players[1]!.hero.pendingLevelUps === 0) gainXp(run, 50);
-    // the XP is shared (step 4): player 0 leveled too; his offer is spent here, so player 1's comes
+    // the XP is shared (step 4): both heroes leveled
     expect(run.players[0]!.hero.pendingLevelUps).toBe(run.players[1]!.hero.pendingLevelUps);
-    run.players[0]!.hero.pendingLevelUps = 0;
     run.step([NO_INPUT, NO_INPUT]);
-    expect(run.state).toBe("levelUp");
-    expect(run.choosing).toBe(1);
+    expect(run.state).toBe("playing");
+    expect(run.players[0]!.offer).not.toBeNull();
     expect(run.players[1]!.offer).not.toBeNull();
-    expect(run.players[0]!.offer).toBeNull();
-    while (run.state === "levelUp") run.step([NO_INPUT, { ...NO_INPUT, card: 0 }]);
+    const tick = run.tick;
+    while (run.players[1]!.offer) run.step([NO_INPUT, { ...NO_INPUT, card: 0 }]);
+    expect(run.tick).toBeGreaterThan(tick);
     expect(run.players[1]!.hero.pendingLevelUps).toBe(0);
-    expect(run.players[1]!.offer).toBeNull();
+    expect(run.players[0]!.offer).not.toBeNull();
   });
 
   it("is deterministic and hashes the second player", () => {

@@ -50,7 +50,10 @@ export function updateEnemies(run: Run): void {
     const x = e.x[i];
     const y = e.y[i];
     // the hero this enemy goes for (multiplayer migration step 3): run.hero, damageHero and the snares read him
-    run.current = enemyTarget(run, i);
+    // -1: every hero is fallen or choosing in co-op (step 5): the enemy goes for the castle
+    const target = enemyTarget(run, i);
+    const ignored = target < 0;
+    run.current = ignored ? 0 : target;
     const hero = run.hero;
     if (e.attackCooldown[i] > 0) e.attackCooldown[i]--;
     if (e.chargeCooldown[i] > 0) e.chargeCooldown[i]--;
@@ -79,13 +82,14 @@ export function updateEnemies(run: Run): void {
     } else {
       const hx = hero.x - x;
       const hy = hero.y - y;
-      const heroDist = Math.sqrt(hx * hx + hy * hy);
+      const heroDist = ignored ? Infinity : Math.sqrt(hx * hx + hy * hy);
+      if (ignored) cancelCharge(run, i);
       if (e.role[i] === Role.Sieger) {
         if (heroDist < rules.enemies.siegerAggroRange) e.aggro[i] = 1;
         else if (heroDist > rules.enemies.leashRange) e.aggro[i] = 0;
       }
-      const targetsHero = e.role[i] === Role.Hunter || e.aggro[i] === 1 || run.enemyHunter[e.type[i]] === 1 ||
-        run.enemyBehavior[e.type[i]] === Behavior.Flank;
+      const targetsHero = !ignored && (e.role[i] === Role.Hunter || e.aggro[i] === 1 || run.enemyHunter[e.type[i]] === 1 ||
+        run.enemyBehavior[e.type[i]] === Behavior.Flank);
       // a strike from afar and a slam come before a charge and never start in the middle of one
       const free = e.chargeState[i] === Charge.None;
       const striking = free && updateStrike(run, i, targetsHero, heroDist);
