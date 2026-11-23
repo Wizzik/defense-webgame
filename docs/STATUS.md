@@ -1,8 +1,8 @@
 # Status
 
-Updated 2026-11-23 (multiplayer migration step 6 on branch `mp-revive`, PR open). Read this first when you resume work.
+Updated 2026-11-23 (multiplayer migration step 6 merged as PR #35 `21f17cc`). Read this first when you resume work.
 
-## Multiplayer migration step 6: revive, chests and enemy strength per player (branch `mp-revive`, PR open, 2026-11-23)
+## Multiplayer migration step 6: revive, chests and enemy strength per player (merged as PR #35 `21f17cc`, 2026-11-23)
 
 - Petr (2026-11-23): "go on with step 6". Done inline in one chat; `npm run check` (1214 tests) and the build pass. Rulings, numbers and the probe: `docs/DECISIONS.md`, section Multiplayer migration, step 6.
 - **Single player unchanged:** the matrix digest stays `4bc81413`.
