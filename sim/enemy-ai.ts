@@ -14,18 +14,20 @@ import { heroFlow } from "./world-map/hero-flow";
 import { weatherSpeedScale } from "./weather";
 import { groundSpeedScale, pushOut as pushOutOfMap, pushX as mapPushX, pushY as mapPushY } from "./world-map/geometry";
 import type { Run } from "./run";
+import { enemyTarget } from "./targets";
 
 const MAX_NEIGHBOURS = 64;
 const neighbours = new Int32Array(MAX_NEIGHBOURS);
 
 /**
- * Moves, targets and attacks every living enemy in slot order. The walking direction of a type comes
+ * Moves, targets and attacks every living enemy in slot order. Each enemy goes for the hero of its target player
+ * (sim/targets.ts; `run.current` is that player while the enemy acts, 0 after) and keeps out of every hero. The walking direction of a type comes
  * from `steer` (flankers come from the side, skirmishers back off, supports follow an ally). Separation looks at the
  * neighbours within twice the collision radius; if more than MAX_NEIGHBOURS (64) are
  * in range, the rest are ignored, which only matters in an extreme pile-up.
  */
 export function updateEnemies(run: Run): void {
-  const { enemies: e, hero, castle, grid, data } = run;
+  const { enemies: e, castle, grid, data } = run;
   const { rules, enemies: defs, constants } = data;
   const arenaX = rules.arena.width / 2;
   const arenaY = rules.arena.height / 2;
@@ -47,6 +49,9 @@ export function updateEnemies(run: Run): void {
     const def = defs[e.type[i]];
     const x = e.x[i];
     const y = e.y[i];
+    // the hero this enemy goes for (multiplayer migration step 3): run.hero, damageHero and the snares read him
+    run.current = enemyTarget(run, i);
+    const hero = run.hero;
     if (e.attackCooldown[i] > 0) e.attackCooldown[i]--;
     if (e.chargeCooldown[i] > 0) e.chargeCooldown[i]--;
     if (e.slamCooldown[i] > 0) e.slamCooldown[i]--;
@@ -181,9 +186,12 @@ export function updateEnemies(run: Run): void {
       e.knockTicks[i]--;
     }
 
-    // Keep out of the hero and the castle.
-    nx = pushOut(nx, ny, hero.x, hero.y, hero.stats.collision + def.collision);
-    ny = pushOutY;
+    // Keep out of every hero and the castle.
+    for (let p = 0; p < run.players.length; p++) {
+      const other = run.players[p]!.hero;
+      nx = pushOut(nx, ny, other.x, other.y, other.stats.collision + def.collision);
+      ny = pushOutY;
+    }
     nx = pushOut(nx, ny, castle.x, castle.y, castle.radius + def.collision);
     ny = pushOutY;
     // Out of the wall and the islands; a charge or a leap flies over them and is pushed out after it lands.
@@ -208,6 +216,7 @@ export function updateEnemies(run: Run): void {
       e.facingY[i] = vy / speed;
     }
   }
+  run.current = 0;
 }
 
 /** Second result of pushOut (avoids allocating a pair). */

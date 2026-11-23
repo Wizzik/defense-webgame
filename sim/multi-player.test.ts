@@ -77,12 +77,12 @@ describe("a run with several players", () => {
     expect(run.result).toBe("hero");
   });
 
-  it("opens the card offer of the player who leveled and takes his card", () => {
+  it("opens the card offer of a player with level-ups and takes his card", () => {
     const run = twoPlayers();
-    run.current = 1;
-    gainXp(run, 1);
     while (run.players[1]!.hero.pendingLevelUps === 0) gainXp(run, 50);
-    run.current = 0;
+    // the XP is shared (step 4): player 0 leveled too; his offer is spent here, so player 1's comes
+    expect(run.players[0]!.hero.pendingLevelUps).toBe(run.players[1]!.hero.pendingLevelUps);
+    run.players[0]!.hero.pendingLevelUps = 0;
     run.step([NO_INPUT, NO_INPUT]);
     expect(run.state).toBe("levelUp");
     expect(run.choosing).toBe(1);

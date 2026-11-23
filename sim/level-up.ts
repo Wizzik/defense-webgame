@@ -20,11 +20,24 @@ export function refreshHeroStats(run: Run): void {
   if (hero.hp > 0) hero.hp += hero.stats.maxHp - before;
 }
 
-/** Adds XP; every threshold crossed is a level-up with per-level attribute growth. */
+/**
+ * Adds XP to the shared pool (multiplayer migration step 4): every player's hero gains it, so all heroes level
+ * together; every threshold crossed is a level-up of each hero with per-level attribute growth. Counted once in
+ * the run's stats. Leaves `run.current` as it found it.
+ */
 export function gainXp(run: Run, amount: number): void {
+  run.stats.xpGained += amount;
+  const current = run.current;
+  for (let p = 0; p < run.players.length; p++) {
+    run.current = p;
+    heroGainXp(run, amount);
+  }
+  run.current = current;
+}
+
+function heroGainXp(run: Run, amount: number): void {
   const { hero, data } = run;
   hero.xp += amount;
-  run.stats.xpGained += amount;
   let leveled = false;
   while (hero.xp >= xpToNext(data.rules, hero.level)) {
     hero.xp -= xpToNext(data.rules, hero.level);
@@ -35,7 +48,7 @@ export function gainXp(run: Run, amount: number): void {
     hero.int += a.int.perLevel;
     hero.pendingLevelUps++;
     leveled = true;
-    run.events.push(EventKind.LevelUp, hero.level, 0, hero.x, hero.y, 0, 0);
+    run.events.push(EventKind.LevelUp, hero.level, 0, hero.x, hero.y, 0, run.current);
   }
   if (leveled) refreshHeroStats(run);
 }

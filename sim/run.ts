@@ -28,6 +28,7 @@ import { applyActions, heroStats, moveHero, updateHeroCombat } from "./hero";
 import { InputAction, NO_INPUT, type TickInput } from "./input";
 import { Rng } from "./rng";
 import { buildWorldMap, type WorldMap } from "./world-map/map";
+import { FlowField } from "./world-map/flow";
 import { spawnEnemies } from "./spawner";
 import { applyStartPhase } from "./start-phase";
 import { checkCourse, type DifficultyMods, difficultyMods } from "./difficulty";
@@ -110,6 +111,8 @@ export class Run {
   /** The obstacle map of the run's world (sim/world-map/), its islands drawn from `mapRng` only. */
   readonly mapRng: Rng;
   readonly map: WorldMap;
+  /** Flow field towards each player's hero (sim/world-map/hero-flow.ts); player 0's is `map.toHero`. */
+  readonly heroFlows: FlowField[];
   readonly chestRng: Rng;
   chestsOpened = 0;
   /** Bosses that fell in this run; the order of a boss's death picks its drop (meta/drop.ts). */
@@ -177,7 +180,7 @@ export class Run {
   readonly sustainRng: Rng;
   /** The world's natural event (sim/hazard.ts) and its own rng. */
   readonly hazardRng: Rng;
-  readonly hazard = new HazardState();
+  readonly hazard: HazardState;
   /** The orb places on the map (sim/orbs.ts). */
   readonly orbs: OrbStore;
   /** The step in which the final boss comes. The run goes on until it falls. */
@@ -240,9 +243,11 @@ export class Run {
     };
     this.mapRng = new Rng((options.seed ^ 0x68e31da4) >>> 0);
     this.map = buildWorldMap(data, this.world, this.mapRng);
+    this.heroFlows = this.players.map((_, p) => (p === 0 ? this.map.toHero : new FlowField()));
     this.chestRng = new Rng((options.seed ^ 0x5bd1e995) >>> 0);
     this.sustainRng = new Rng((options.seed ^ 0x27d4eb2f) >>> 0);
     this.hazardRng = new Rng((options.seed ^ 0x1b873593) >>> 0);
+    this.hazard = new HazardState(this.players.length);
     this.orbs = createOrbs(this);
     this.chestPriceRaw = rules.chests.basePrice;
     this.chests = new ChestStore(rules.chests.count);
@@ -306,7 +311,7 @@ export class Run {
    *   updateTimeline(this);       // phase 2b-3 (elite rushes and bosses by time)
    *   spawnEnemies(this);         // Task 4
    *   updateEnemies(this);        // Task 4
-   *   updateClouds(this);         // enemy factions: poison clouds hurt the hero
+   *   updateClouds(this);         // enemy factions: poison clouds hurt the hero (once per player)
    *   healEnemies(this);          // phase 2b-1 (reads the grid built by updateEnemies)
    *   updateHeroCombat(this);     // Task 5
    *   updateAbilities(this);      // Task 6
@@ -329,7 +334,8 @@ export class Run {
    * him, each in its own loop at its line above: applyActions, moveHero, tickSnares, updateHeroCombat, updateAbilities,
    * updateGearEffects and updateBuffs; savePrevious covers every hero. Allies and bolts act as their owner. The offer
    * goes to the first player with level-ups, else the first player on a chest opens it; `choosing` is that player.
-   * Enemies, pickups, orbs and the hazard still see player 0 (steps 3 and 4). The run is lost when every hero has fallen.
+   * updateClouds runs once per player. Enemies pick their target player themselves (sim/targets.ts, step 3); pickups
+   * and orbs go to the nearest hero and XP to all (step 4). The run is lost when every hero has fallen.
    *
    * In the "chest" state only chooseChestCard runs (the KeepWorn bit keeps the worn item of a Choice), like chooseCard in "levelUp".
    */
@@ -370,7 +376,11 @@ export class Run {
     updateTimeline(this);
     spawnEnemies(this);
     updateEnemies(this);
-    updateClouds(this);
+    for (let p = 0; p < count; p++) {
+      this.current = p;
+      updateClouds(this);
+    }
+    this.current = 0;
     healEnemies(this);
     for (let p = 0; p < count; p++) {
       this.current = p;

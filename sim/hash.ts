@@ -105,6 +105,8 @@ export function stateHash(run: Run): number {
     mixInt(e.stunTicks[i]);
     mixInt(e.healCooldown[i]);
     mixInt(e.aggro[i]);
+    // mixed only with several players, so a one-player run hashes as before
+    if (run.players.length > 1) mixInt(e.target[i]);
     mixInt(e.action[i]);
     mixFloat(e.knockVX[i]);
     mixFloat(e.knockVY[i]);

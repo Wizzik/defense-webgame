@@ -3,6 +3,7 @@ import { TICKS_PER_SECOND } from "./constants";
 import { EventKind } from "./events";
 import { isFree, nearestFree, pushX, pushY } from "./world-map/geometry";
 import type { Run } from "./run";
+import { nearestPlayer, nearestSq } from "./targets";
 
 /** Places tried for an orb before the last one in the band is taken. */
 const PLACE_TRIES = 40;
@@ -101,11 +102,11 @@ function spawnAt(run: Run, index: number, kind: number, x: number, y: number): v
 }
 
 /**
- * Once per step: counts the empty places down and spawns their orbs; the hero within pickupRadius of a living orb
- * picks it up (its effect starts, the place waits respawnSeconds for the next orb).
+ * Once per step: counts the empty places down and spawns their orbs; the nearest hero (sim/targets.ts) within
+ * pickupRadius of a living orb picks it up for himself (its effect starts, the place waits respawnSeconds for the next orb).
  */
 export function updateOrbs(run: Run): void {
-  const { orbs, hero } = run;
+  const { orbs } = run;
   const rules = run.data.rules.sustain.orbs;
   const pickupSq = rules.pickupRadius * rules.pickupRadius;
   for (let i = 0; i < orbs.alive.length; i++) {
@@ -114,16 +115,17 @@ export function updateOrbs(run: Run): void {
       if (orbs.timer[i] === 0) placeOrb(run, i);
       continue;
     }
-    const dx = hero.x - orbs.x[i]!;
-    const dy = hero.y - orbs.y[i]!;
-    if (dx * dx + dy * dy > pickupSq) continue;
+    const p = nearestPlayer(run, orbs.x[i]!, orbs.y[i]!);
+    if (nearestSq > pickupSq) continue;
     const kind = orbs.kind[i] as OrbKind;
     orbs.alive[i] = 0;
+    run.current = p;
     startBuff(run, kind);
+    run.current = 0;
     if (kind === OrbKind.Boots) run.stats.orbsBoots++;
     else if (kind === OrbKind.Berserk) run.stats.orbsBerserk++;
     else run.stats.orbsHeal++;
-    run.events.push(EventKind.OrbPickup, i, kind, orbs.x[i]!, orbs.y[i]!, 0, 0);
+    run.events.push(EventKind.OrbPickup, i, kind, orbs.x[i]!, orbs.y[i]!, p, 0);
     const { min, max } = rules.respawnSeconds;
     orbs.timer[i] = Math.max(Math.round((min + run.sustainRng.next() * (max - min)) * TICKS_PER_SECOND), 1);
   }

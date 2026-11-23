@@ -2,11 +2,14 @@ export const EventKind = {
   Hit: 1,
   Death: 2,
   Cast: 3,
-  /** The hero lost hp: a = the enemy slot (-1 none), value = hp, x/y = the hero, u = HeroHitSource (sim/combat.ts). */
+  /** The hero lost hp: a = the enemy slot (-1 none), value = hp, x/y = the hero, u = HeroHitSource (sim/combat.ts),
+   *  v = the player. */
   HeroHit: 4,
   CastleHit: 5,
-  /** A crystal, a coin or a heart was collected: value = XP, gold or hp gained, u = 0 crystal / 1 coin / 2 heart. */
+  /** A crystal, a coin or a heart was collected: value = XP, gold or hp gained, u = 0 crystal / 1 coin / 2 heart,
+   *  v = the player who collected it (XP is shared by all). */
   Pickup: 6,
+  /** A hero reached a level: a = the level, x/y = the hero, v = the player (the level is shared: one per player). */
   LevelUp: 7,
   RunEnd: 8,
   Blast: 9,
@@ -42,13 +45,13 @@ export const EventKind = {
   HeroHeal: 23,
   /** An orb appeared: a = its place, value = its kind (OrbKind), x/y = where. */
   OrbSpawn: 24,
-  /** The hero picked an orb up: a = its place, value = its kind (OrbKind), x/y = the orb. */
+  /** A hero picked an orb up: a = its place, value = its kind (OrbKind), x/y = the orb, u = the player. */
   OrbPickup: 25,
   /** A new enemy faction: a = its index in rules.factions, value = the phase (1-based), x/y = the hero. */
   Faction: 26,
   /** A bloodcaller cast bloodlust: a = its slot, value = enemies lusted, x/y = the caster. */
   Bloodlust: 27,
-  /** The hero was snared: value = 0 web (slow) / 1 roots, x/y = the hero, u = seconds. */
+  /** A hero was snared: value = 0 web (slow) / 1 roots, x/y = the hero, u = seconds, v = the player. */
   HeroSnared: 28,
   /** A gravebinder raised an enemy: a = the new slot, value = the raiser's type index, x/y = where. */
   Raise: 29,
