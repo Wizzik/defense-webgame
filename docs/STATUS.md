@@ -1,8 +1,8 @@
 # Status
 
-Updated 2026-11-23 (multiplayer migration steps 3-4 on branch `mp-targets-pickups`). Read this first when you resume work.
+Updated 2026-11-23 (multiplayer migration steps 3-4 merged as PR #33 `612cf90`). Read this first when you resume work.
 
-## Multiplayer migration steps 3-4: enemies pick a hero, shared XP, own gold (branch `mp-targets-pickups`, 2026-11-23)
+## Multiplayer migration steps 3-4: enemies pick a hero, shared XP, own gold (merged as PR #33 `612cf90`, 2026-11-23)
 
 - Petr (2026-11-23): "go on with steps 3 and 4". Done inline in one chat; `npm run check` (1197 tests) and the build pass. Rulings: `docs/DECISIONS.md`, section Multiplayer migration, steps 3-4.
 - **One player is unchanged:** the matrix digest stays `4bc81413`.
