@@ -160,4 +160,20 @@ describe("Lockstep", () => {
     expect(lock.recordHash(0, 59, 7)).toBe("desync");
     expect(lock.desyncAt).toBe(59);
   });
+
+  it("plays on without a player who left", () => {
+    const host = new Lockstep(2, 0);
+    const out = [{ ...NO_INPUT }, { ...NO_INPUT }];
+    host.receive(1, INPUT_DELAY, { moveX: 1, moveY: 0, card: -1, actions: 0 });
+    while (host.canQueue()) host.queueLocal({ moveX: 0, moveY: 1, card: -1, actions: 0 });
+    for (let k = 0; k <= INPUT_DELAY; k++) host.take(out);
+    expect(out[1]!.moveX).toBe(1);
+    host.queueLocal({ moveX: 0, moveY: 1, card: -1, actions: 0 });
+    expect(host.ready()).toBe(false);
+    host.drop(1);
+    expect(host.ready()).toBe(true);
+    host.take(out);
+    expect(out[1]).toEqual({ moveX: 0, moveY: 0, card: -1, actions: 0 });
+    expect(out[0]!.moveY).toBe(1);
+  });
 });

@@ -8,6 +8,8 @@ import { groundSpeedScale,
 } from "../../sim";
 import { latestBoss, runPhase } from "./boss";
 import type { Backend, GpuInfo } from "../render/gpu";
+import type { PlayerSnapshot } from "./net-snapshot";
+import type { NetStats } from "../net/coop-net";
 
 const CHEST_ACTIONS = ["new", "choice", "level"] as const;
 /** Orb kinds by OrbKind value. */
@@ -54,6 +56,10 @@ export interface GameSnapshot {
   slams: number;
   /** What the renderer built: `heroModels` is how many hero figures stand in the scene (refreshed every frame), `slamRings` how many slam circles lie on the floor, `particles` how many weather particles are drawn. */
   render: { enemyMeshes: number; heroModels: number; shadows: boolean; slamRings: number; hazardRings: number; particles: number };
+  /** Co-op (multiplayer migration step 7): the player this window steers, every player, and the net loop's numbers (null alone). */
+  local: number;
+  players: PlayerSnapshot[];
+  net: NetStats | null;
   /** Gold the hero holds. */
   gold: number;
   /** Gold the next chest costs. */
@@ -130,6 +136,8 @@ export interface GameSnapshot {
     dropHeart(): void;
     /** A wave of the world's storm, or its weather, at once (nothing in a thicket world). */
     hazard(): void;
+    /** Co-op (?mate): player `p`'s hero falls (hp 0); a teammate standing on him revives him. Only a local run. */
+    down(p: number): void;
   };
 }
 
@@ -146,6 +154,7 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], abilityIds: [], ultimateAuto: true, allies: 0,
     projectiles: 0, packArrows: 0, charging: 0, phase: 1, boss: null, slams: 0,
     render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0, hazardRings: 0, particles: 0 },
+    local: 0, players: [], net: null,
     gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, settingsOpen: false, gear: [], collection: {}, gearSaved: false,
     orbs: [], hearts: 0, buffs: { boots: 0, berserk: 0, heal: 0 }, lifesteal: 0,
     faction: "human", slowed: 0, rooted: 0, world: 1, difficulty: "normal", unlocked: [], progressSaved: false,
@@ -244,6 +253,10 @@ export function addDebugHooks(
     dropHeart(): void {
       const run = getRun();
       if (run) debugDropHeart(run);
+    },
+    down(p: number): void {
+      const hero = getRun()?.players[p]?.hero;
+      if (hero) hero.hp = 0;
     },
     hazard(): void {
       const run = getRun();

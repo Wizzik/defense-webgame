@@ -61,6 +61,14 @@ export class GearPanel {
     }
     const run = this.session.run;
     if (!run || run.state !== "playing" || this.session.paused || this.menuOpen()) return;
+    // a key comes between frames: read the local player's hero (the guest of a co-op run is player 1)
+    this.session.asLocal((local) => this.show(local));
+    // a co-op run goes on while the panel is open
+    this.session.paused = true;
+    this.root.hidden = false;
+  }
+
+  private show(run: Run): void {
     const lang = this.getLang();
     const { hero } = run;
     setText(this.title, t(lang, "gear.title"));
@@ -72,8 +80,6 @@ export class GearPanel {
       magicFind: hero.gear.magicFind,
       lifesteal: hero.gear.lifesteal,
     });
-    this.session.paused = true;
-    this.root.hidden = false;
   }
 
   close(): void {

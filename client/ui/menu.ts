@@ -17,6 +17,7 @@ export class Menu {
   private readonly heroes: readonly Hero[];
   private heroId: string;
   private readonly start: HTMLButtonElement;
+  private readonly coop: HTMLButtonElement;
   private readonly gear: HTMLButtonElement;
   private readonly settings: HTMLButtonElement;
   private readonly controls: HTMLElement;
@@ -34,7 +35,7 @@ export class Menu {
     parent: HTMLElement,
     heroes: readonly Hero[],
     heroId: string,
-    handlers: { onStart(): void; onLang(lang: Lang): void; onSound(): void; onHero(id: string): void; onGear(): void; onSettings(): void },
+    handlers: { onStart(): void; onLang(lang: Lang): void; onSound(): void; onHero(id: string): void; onGear(): void; onSettings(): void; onCoop(): void },
   ) {
     this.heroes = heroes;
     this.heroId = heroId;
@@ -62,6 +63,9 @@ export class Menu {
     this.start = el("button", "button primary", panel);
     this.start.id = "start";
     this.start.addEventListener("click", handlers.onStart);
+    this.coop = el("button", "button", panel);
+    this.coop.id = "coop";
+    this.coop.addEventListener("click", handlers.onCoop);
     this.gear = el("button", "button", panel);
     this.gear.id = "gear";
     this.gear.addEventListener("click", handlers.onGear);
@@ -87,6 +91,7 @@ export class Menu {
     this.lang = lang;
     this.renderStart();
     this.gear.textContent = t(lang, "menu.gear");
+    this.coop.textContent = t(lang, "menu.coop");
     this.settings.textContent = t(lang, "menu.settings");
     this.controls.textContent = t(lang, "menu.controls");
     this.languageLabel.textContent = t(lang, "menu.language");
@@ -130,6 +135,7 @@ export class Menu {
   private renderStart(): void {
     this.start.textContent = t(this.lang, this.loading ? "menu.loading" : "menu.start");
     this.start.disabled = this.loading || this.failed;
+    this.coop.disabled = this.loading || this.failed;
   }
 
   setSound(on: boolean): void {

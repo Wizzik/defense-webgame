@@ -17,6 +17,11 @@ export interface GameParams {
   /** ?world=N (1 to 5) and ?difficulty=normal|insane|hell; main.ts keeps them only when unlocked (or with debug=1). */
   world?: number;
   difficulty?: DifficultyId;
+  /**
+   * ?mate=<hero id>, only with debug=1: a co-op run in this window with a second hero steered by the autopilot
+   * (no network), to see and test the co-op HUD and cards. The caller checks the id against the data.
+   */
+  mate?: string;
 }
 
 /** Worlds of the ladder (design/worlds.yaml). */
@@ -45,6 +50,7 @@ export function readGameParams(search: string, randomSeed: () => number): GamePa
   const phase = readInt(params.get("phase"));
   const world = readInt(params.get("world"));
   const difficulty = params.get("difficulty");
+  const mate = params.get("mate")?.trim();
   return {
     seed: readInt(params.get("seed")) ?? randomSeed(),
     speed: speed === undefined ? 1 : clamp(speed, 1, 16),
@@ -58,5 +64,6 @@ export function readGameParams(search: string, randomSeed: () => number): GamePa
     startPhase: debug && phase !== undefined && phase >= 1 && phase <= MAX_START_PHASE ? phase : undefined,
     world: world !== undefined && world >= 1 && world <= MAX_WORLD ? world : undefined,
     difficulty: (DIFFICULTY_IDS as readonly string[]).includes(difficulty ?? "") ? (difficulty as DifficultyId) : undefined,
+    mate: debug && mate ? mate : undefined,
   };
 }

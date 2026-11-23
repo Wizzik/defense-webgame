@@ -14,7 +14,11 @@ const RING_OUTER = 1.9;
 const RING_OPACITY = 0.7;
 const RING_LIFT = 0.04;
 
-/** The hero: a figure that idles, runs, punches on attacks and casts, and dies; a ring in the hero's colour lies under it. */
+/**
+ * The hero of player `player`: a figure that idles, runs, punches on attacks and casts, and dies; a ring in the hero's
+ * colour lies under it. In co-op a fallen hero lies down and stands up again when he is revived; a run without that
+ * player hides the view.
+ */
 export class HeroView implements RunView {
   /** Stays in the scene for good; the figure inside it is replaced by `setModel`. */
   readonly object = new Group();
@@ -22,8 +26,9 @@ export class HeroView implements RunView {
   private readonly ring = new Mesh(new RingGeometry(1, 1, 48), new MeshBasicNodeMaterial({ transparent: true, depthWrite: false }));
   private fitted = false;
   private lastRun: Run | null = null;
+  private down = false;
 
-  constructor() {
+  constructor(readonly player = 0) {
     const material = this.ring.material as MeshBasicNodeMaterial;
     material.opacity = RING_OPACITY;
     material.polygonOffset = true;
@@ -55,15 +60,18 @@ export class HeroView implements RunView {
     if (run.result === "hero") return;
     const { events } = run;
     for (let i = 0; i < events.count; i++) {
+      if (events.player[i] !== this.player) continue;
       const kind = events.kind[i];
       if (kind === EventKind.Cast || (kind === EventKind.Hit && events.u[i] === 0)) this.figure?.punch();
     }
   }
 
   update(run: Run, alpha: number, dt: number): void {
-    const { hero } = run;
+    const player = run.players[this.player];
+    this.object.visible = !!player;
     const figure = this.figure;
-    if (!figure) return;
+    if (!figure || !player) return;
+    const { hero } = player;
     if (!this.fitted) {
       figure.fit(2 * hero.stats.collision * BODY_FACTOR * SCENE_SCALE);
       this.fitted = true;
@@ -73,11 +81,18 @@ export class HeroView implements RunView {
       const color = heroBodyColor(hero.def.id);
       figure.setTint(color);
       figure.reset();
+      this.down = false;
       this.setRing(hero.stats.collision * SCENE_SCALE, color);
     }
 
-    if (run.result === "hero") figure.die();
-    else figure.setMoving(hero.moving);
+    // one player: the hero dies with the run; co-op: he lies down while his hp is 0 and stands up when revived
+    const down = run.result === "hero" || (run.players.length > 1 && hero.hp <= 0);
+    if (down) figure.die();
+    else {
+      if (this.down) figure.reset();
+      figure.setMoving(hero.moving);
+    }
+    this.down = down;
 
     const x = (hero.prevX + (hero.x - hero.prevX) * alpha) * SCENE_SCALE;
     const z = -(hero.prevY + (hero.y - hero.prevY) * alpha) * SCENE_SCALE;

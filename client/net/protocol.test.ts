@@ -11,6 +11,9 @@ describe("decodeMessage", () => {
     { t: "ping", n: 7, at: 1234.5 },
     { t: "pong", n: 7, at: 1234.5 },
     { t: "bye" },
+    { t: "ready" },
+    { t: "join", v: PROTOCOL_VERSION, hero: "sparkshot", g: [["head", "travelers-hood", 3]] },
+    { t: "start", v: PROTOCOL_VERSION, seed: 9, world: 2, d: "insane", heroes: ["stonehorn", "sparkshot"], g: [[], [["ring1", "moonlit-signet", 1]]] },
   ];
 
   it.each(valid.map((m) => [m.t, m] as const))("round-trips %s", (_t, m) => {
@@ -28,6 +31,11 @@ describe("decodeMessage", () => {
     ["an unknown type", { t: "nope" }],
     ["a step as a string", { t: "in", k: "1", mx: 0, my: 0, c: -1, a: 0 }],
     ["NaN", NaN],
+    ["a gear entry of two fields", { t: "join", v: 2, hero: "x", g: [["head", "hood"]] }],
+    ["a gear level of 0", { t: "join", v: 2, hero: "x", g: [["head", "hood", 0]] }],
+    ["an unknown difficulty", { t: "start", v: 2, seed: 1, world: 1, d: "easy", heroes: ["a", "b"], g: [[], []] }],
+    ["one hero in a start", { t: "start", v: 2, seed: 1, world: 1, d: "hell", heroes: ["a"], g: [[]] }],
+    ["gear lists not matching heroes", { t: "start", v: 2, seed: 1, world: 1, d: "hell", heroes: ["a", "b"], g: [[]] }],
     ["a NaN step", { t: "in", k: NaN, mx: 0, my: 0, c: -1, a: 0 }],
     ["a missing field", { t: "in", k: 1, mx: 0, my: 0, c: -1 }],
     ["mx out of range", { t: "in", k: 1, mx: 2, my: 0, c: -1, a: 0 }],

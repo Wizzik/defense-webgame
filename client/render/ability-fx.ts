@@ -1,3 +1,4 @@
+import { eventOwner } from "./event-owner";
 import { Group } from "three/webgpu";
 import { AllyKind, EventKind, PROJECTILE_CAPACITY, type Run, TICKS_PER_SECOND } from "../../sim";
 import type { RunView } from "../game/session";
@@ -108,7 +109,7 @@ export class AbilityFx implements RunView {
   /** A chain leaps from the last point of its bolt; an instant strikes from above; any other blast pops. */
   private onBlast(run: Run, event: number, now: number, x: number, z: number): void {
     const slot = run.events.a[event]!;
-    const kind = slot >= 0 ? run.abilities[slot]?.def.kind : undefined;
+    const kind = slot >= 0 ? eventOwner(run, event).abilities[slot]?.def.kind : undefined;
     if (kind === "chain") {
       this.bolts.add(now, this.chainX[slot] ?? x, this.chainZ[slot] ?? z, x, z, CHAIN_BOLT_COLOR, CHAIN_BOLT_LIFE);
       this.chainX[slot] = x;
@@ -123,7 +124,7 @@ export class AbilityFx implements RunView {
   private onCast(run: Run, event: number, now: number, x: number, z: number): void {
     const { events } = run;
     const radius = events.value[event]! * SCENE_SCALE;
-    switch (run.abilities[events.a[event]!]!.def.kind) {
+    switch (eventOwner(run, event).abilities[events.a[event]!]!.def.kind) {
       case "nova":
         this.rings.addRing(now, x, z, radius, NOVA_COLOR, false);
         break;
@@ -143,7 +144,8 @@ export class AbilityFx implements RunView {
   }
 
   private onHit(run: Run, event: number, now: number, x: number, z: number): void {
-    const { events, hero } = run;
+    const { events } = run;
+    const { hero, abilities } = eventOwner(run, event);
     const source = events.u[event];
     const heroX = hero.x * SCENE_SCALE;
     const heroZ = -hero.y * SCENE_SCALE;
@@ -152,7 +154,7 @@ export class AbilityFx implements RunView {
         this.bolts.add(now, heroX, heroZ, x, z, ATTACK_BOLT_COLOR, ATTACK_BOLT_LIFE);
       }
     } else if (source === 1) {
-      if (run.abilities[events.v[event]!]?.def.kind === "cone") {
+      if (abilities[events.v[event]!]?.def.kind === "cone") {
         this.bolts.add(now, heroX, heroZ, x, z, CONE_BOLT_COLOR, CONE_BOLT_LIFE);
       }
     } else if (source === 2) {
