@@ -48,6 +48,7 @@ export const HANDLED_EVENTS: Record<keyof typeof EventKind, "sound" | "skip"> = 
   HeroSnared: "sound",
   Raise: "sound",
   Hazard: "sound",
+  Revive: "skip", // co-op only; the client of step 7 gives it a sound
   HazardWave: "skip", // the storm: the warning of its first bolt is heard in the same step; a weather has no sound of its own
 };
 

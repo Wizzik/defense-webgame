@@ -83,6 +83,12 @@ export const MOVE_PIECE = 24;
 export function moveHero(run: Run, input: TickInput): void {
   const hero = run.hero;
   if (hero.dashCooldown > 0) hero.dashCooldown--;
+  if (hero.hp <= 0) {
+    // a fallen co-op hero lies where he fell until a teammate revives him (one player: the run has ended)
+    hero.dashTicks = 0;
+    hero.moving = false;
+    return;
+  }
   let dx: number;
   let dy: number;
   let step: number;

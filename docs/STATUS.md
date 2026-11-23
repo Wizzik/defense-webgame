@@ -1,6 +1,15 @@
 # Status
 
-Updated 2026-11-23 (multiplayer migration step 5 merged as PR #34 `6962c81`). Read this first when you resume work.
+Updated 2026-11-23 (multiplayer migration step 6 on branch `mp-revive`, PR open). Read this first when you resume work.
+
+## Multiplayer migration step 6: revive, chests and enemy strength per player (branch `mp-revive`, PR open, 2026-11-23)
+
+- Petr (2026-11-23): "go on with step 6". Done inline in one chat; `npm run check` (1214 tests) and the build pass. Rulings, numbers and the probe: `docs/DECISIONS.md`, section Multiplayer migration, step 6.
+- **Single player unchanged:** the matrix digest stays `4bc81413`.
+- **Co-op:** a fallen hero lies still; a teammate standing within 120 of him for 5 s revives him at 50 % hp (the progress resets when he walks away); the run is lost only when every hero is down or the castle falls. With n players enemies have hp x (1 + 0.75 (n - 1)), damage x (1 + 0.3 (n - 1)), packs x (1 + 0.3 (n - 1)), elites and bosses x (1 + 0.25 (n - 1)) more hp; one more chest per extra player; each player has his own chest price. New section `rules.coop` in `design/rules.yaml`. The autopilot walks to a fallen teammate and revives him.
+- Probe (world 1 Normal, no gear): stonehorn + sparkshot 6 of 8, nightglaive + tidecaller 1 of 8, three heroes 2 of 4, four heroes 0 of 4 (castle falls in the finale); solo stonehorn 6 of 6, sparkshot 1 of 6, nightglaive and tidecaller 3 of 8, mistwarden 0 of 8. Balance is step 8.
+- `/net-spike/` shows nothing new yet (no revive ring, no teammate hp): that is the client of step 7. On it Petr can see that a fallen hero (grey cross) stands up again when his teammate walks onto him for 5 s.
+- Next: step 7 (client: lobby, net loop, hero models, teammate HUD with a down marker and revive progress, the card panel), in a new chat.
 
 ## Multiplayer migration step 5: co-op without a pause (merged as PR #34 `6962c81`, 2026-11-23)
 

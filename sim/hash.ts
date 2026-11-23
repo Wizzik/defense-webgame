@@ -149,10 +149,13 @@ export function stateHash(run: Run): number {
   mixInt(run.chestRng.state);
   mixInt(run.chestsOpened);
   mixInt(run.bossesKilled);
-  mixFloat(run.chestPriceRaw);
+  // each player's chest price; one player mixes the one price in the same place as before
+  for (let i = 0; i < run.players.length; i++) mixFloat(run.players[i]!.chestPriceRaw);
   for (let i = 0; i < run.players.length; i++) mixInt(run.players[i]!.openChest + 1);
   // the co-op choice time, only with several players, so a one-player run hashes as before
   if (run.players.length > 1) for (let i = 0; i < run.players.length; i++) mixInt(run.players[i]!.choosingTicks);
+  // revive progress (step 6), likewise only with several players
+  if (run.players.length > 1) for (let i = 0; i < run.players.length; i++) mixInt(run.players[i]!.reviveTicks);
   for (let i = 0; i < run.chests.x.length; i++) {
     mixFloat(run.chests.x[i]!);
     mixFloat(run.chests.y[i]!);

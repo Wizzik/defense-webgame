@@ -2,6 +2,17 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Multiplayer migration, step 6: revive, the end of a co-op run, chests and enemy strength per player (2026-11-23; Petr's rules R5 and R6, the numbers and details are Claude's)
+
+- **One player is unchanged:** the matrix digest stays `4bc81413` (every co-op multiplier is x 1 for one player; the revive progress is hashed only with several players; the one player's chest price is mixed in the old place).
+- **Rules in `rules.coop`** (`design/rules.yaml`): `perPlayer` multipliers and `revive`. With n players enemy hp x (1 + 0.75 (n - 1)), damage x (1 + 0.3 (n - 1)), pack sizes x (1 + 0.3 (n - 1)) (still capped by `enemies.maxAlive`), elites' and bosses' hp x (1 + 0.25 (n - 1)) more, all on top of the world and difficulty (`difficultyMods(..., players)`); gold and magic find do not change with players.
+- **Chests (R5):** `rules.chests.count` + `perPlayer.chests` (1) per extra player lie on the map (3, 4, 5, 6). **Each player pays his own price curve** (`PlayerState.chestPriceRaw`, `run.chestPriceRaw` reads the current player): his gold is his own, so another player's chests must not make his dearer. `run.chestsOpened` still counts all.
+- **Revive (R6, `sim/revive.ts`, after the hazard):** a fallen co-op hero lies still (no walking, no dash) and is revived when a living teammate stands within `revive.radius` = 120 for `revive.seconds` = 5 without a break (`PlayerState.reviveTicks`; it resets when nobody is near); he stands up where he lies at `revive.hpShare` = 50 % of his max hp. A teammate in his choice time counts (he can walk). A fallen hero cannot revive another. Event `Revive` (a = revived player, value = hp, u = the reviver); `reviveShare(run, p)` for the HUD of step 7 (no sound yet).
+- **End of the run:** lost when every hero is down at the same moment (or the castle falls); a lone survivor keeps the run going.
+- **Autopilot:** walks to the nearest fallen teammate and stands by him (half the revive radius) before orbs, chests and fights; slams, bolts and charges are still dodged first.
+- **Claude's rulings** (Petr may change them): radius 120, 50 % hp, no immunity after a revive, a fallen hero's open offer keeps counting its choice time, his pending level-ups wait until he stands up.
+- **Probe** (autopilot, world 1 Normal, no gear, `sim/bot.ts` for every player): solo: stonehorn 6 of 6 and sparkshot 1 of 6 (seeds 1-6), nightglaive 3, tidecaller 3 and mistwarden 0 of 8 (seeds 1-8). Co-op with the chosen numbers: stonehorn + sparkshot 6 of 8, nightglaive + tidecaller 1 of 8, stonehorn + sparkshot + nightglaive 2 of 4, stonehorn + sparkshot + mistwarden + tidecaller 0 of 4. Without the co-op multipliers two heroes won 6 of 6 with nobody ever down. The losses are almost all the castle in the finale; shared XP from the bigger crowd lifts the heroes to level 60-67 (solo 49-50). Tried: hp 0.6 / damage 0.15 / packs 0.5 (2 players won everything), hp 0.9-1.2 / damage 0.4-0.6 (2 players 0-1 of 6, 4 players die in the first minutes). Tuning is step 8 (`sim:run --players`).
+
 ## Multiplayer migration, step 5: co-op offers and chests without a pause (2026-11-23; Petr's rules of 2026-11-21, the details are Claude's)
 
 - **One player keeps the pause** (Petr): the "levelUp" and "chest" states and `run.choosing` work as before; the matrix digest stays `4bc81413`.

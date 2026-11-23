@@ -15,6 +15,8 @@ import { cellOf } from "./world-map/grid";
 export const DEFEND_RADIUS = 1400;
 /** With no threat and nobody near, the bot stands at (castle.x, castle.y + HOME_OFFSET). */
 export const HOME_OFFSET = 400;
+/** The autopilot stands this share of the revive radius from a fallen teammate (co-op, step 6). */
+const REVIVE_STAND_SHARE = 0.5;
 const HOME_TOLERANCE = 100;
 /** With no threat the bot fights the enemy nearest to the hero within this distance. */
 export const CHASE_DISTANCE = 400;
@@ -246,6 +248,31 @@ export function botInput(run: Run, out: TickInput): TickInput {
     out.moveY = axis(ux);
     if (hero.dashCooldown === 0 && hero.dashTicks === 0) out.actions |= InputAction.Dash;
     return out;
+  }
+
+  // co-op (step 6): walk to the nearest fallen teammate and stand by him until he is up again
+  if (run.players.length > 1) {
+    let fx = 0;
+    let fy = 0;
+    let fallenSq = Infinity;
+    for (let q = 0; q < run.players.length; q++) {
+      if (q === run.current) continue;
+      const mate = run.players[q]!.hero;
+      if (mate.hp > 0) continue;
+      const tx = mate.x - hero.x;
+      const ty = mate.y - hero.y;
+      const sq = tx * tx + ty * ty;
+      if (sq < fallenSq) {
+        fallenSq = sq;
+        fx = mate.x;
+        fy = mate.y;
+      }
+    }
+    if (fallenSq < Infinity) {
+      const stand = run.data.rules.coop.revive.radius * REVIVE_STAND_SHARE;
+      if (fallenSq <= stand * stand) return out;
+      return walkTo(run, out, fx, fy);
+    }
   }
 
   if (run.finalBossSlot < 0) {

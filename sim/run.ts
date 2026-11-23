@@ -32,6 +32,7 @@ import { buildWorldMap, type WorldMap } from "./world-map/map";
 import { FlowField } from "./world-map/flow";
 import { spawnEnemies } from "./spawner";
 import { applyStartPhase } from "./start-phase";
+import { updateRevive } from "./revive";
 import { checkCourse, type DifficultyMods, difficultyMods } from "./difficulty";
 import { buildTimeline, type TimedEvent, updateTimeline } from "./timeline";
 import { buildPhaseTables, enemyType, type PhaseTable } from "./spawn-tables";
@@ -118,8 +119,6 @@ export class Run {
   chestsOpened = 0;
   /** Bosses that fell in this run; the order of a boss's death picks its drop (meta/drop.ts). */
   bossesKilled = 0;
-  /** Price of the next chest before rounding: basePrice x priceGrowth for every chest opened. */
-  chestPriceRaw: number;
   readonly projectiles = new ProjectileStore(PROJECTILE_CAPACITY);
   readonly allies = new AllyStore(ALLY_CAPACITY);
   /** Weighted enemy types per phase, built once here so a step does not allocate. */
@@ -195,7 +194,11 @@ export class Run {
     this.data = data;
     this.world = options.world ?? 1;
     this.difficulty = checkCourse(data, this.world, options.difficulty ?? "normal");
-    this.mods = difficultyMods(rules, this.world, this.difficulty);
+    const players: readonly PlayerOptions[] = options.players ?? [{ hero: options.hero, loadout: options.loadout }];
+    if (players.length < 1 || players.length > MAX_PLAYERS) {
+      throw new Error(`createRun: 1 to ${MAX_PLAYERS} players, got ${players.length}`);
+    }
+    this.mods = difficultyMods(rules, this.world, this.difficulty, players.length);
     this.rng = new Rng(options.seed);
     this.enemies = new EnemyStore(rules.enemies.maxAlive);
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);
@@ -222,10 +225,6 @@ export class Run {
       (options.durationSeconds ?? rules.run.durationSeconds) * TICKS_PER_SECOND,
     );
 
-    const players: readonly PlayerOptions[] = options.players ?? [{ hero: options.hero, loadout: options.loadout }];
-    if (players.length < 1 || players.length > MAX_PLAYERS) {
-      throw new Error(`createRun: 1 to ${MAX_PLAYERS} players, got ${players.length}`);
-    }
     for (let p = 0; p < players.length; p++) this.players.push(createPlayer(data, players[p]!, p));
     for (let p = 0; p < players.length; p++) {
       this.current = p;
@@ -250,9 +249,10 @@ export class Run {
     this.hazardRng = new Rng((options.seed ^ 0x1b873593) >>> 0);
     this.hazard = new HazardState(this.players.length);
     this.orbs = createOrbs(this);
-    this.chestPriceRaw = rules.chests.basePrice;
-    this.chests = new ChestStore(rules.chests.count);
-    for (let i = 0; i < rules.chests.count; i++) placeChest(this, i, true);
+    // co-op: more chests per extra player; each player pays his own price curve (PlayerState.chestPriceRaw)
+    const chestCount = rules.chests.count + rules.coop.perPlayer.chests * (this.players.length - 1);
+    this.chests = new ChestStore(chestCount);
+    for (let i = 0; i < chestCount; i++) placeChest(this, i, true);
     if (options.startPhase !== undefined) applyStartPhase(this, options.startPhase);
     for (let p = 0; p < this.players.length; p++) {
       this.current = p;
@@ -280,6 +280,9 @@ export class Run {
   set ultimateAuto(value: boolean) { this.players[this.current].ultimateAuto = value; }
   get ultimateRequested(): boolean { return this.players[this.current].ultimateRequested; }
   set ultimateRequested(value: boolean) { this.players[this.current].ultimateRequested = value; }
+  /** The current player's price of his next chest before rounding (each player pays his own curve). */
+  get chestPriceRaw(): number { return this.players[this.current].chestPriceRaw; }
+  set chestPriceRaw(value: number) { this.players[this.current].chestPriceRaw = value; }
   get shieldTicks(): number { return this.players[this.current].shieldTicks; }
   set shieldTicks(value: number) { this.players[this.current].shieldTicks = value; }
 
@@ -325,6 +328,7 @@ export class Run {
    *   updateOrbs(this);           // sustain plan, Task 4: orb spawns, respawns and pickups (no magnet)
    *   updateBuffs(this);          // sustain plan, Task 2: orb timers, heal over time, lifesteal budget and its event
    *   updateHazard(this);         // difficulties plan 2: the storm's bolts and waves
+   *   updateRevive(this);         // multiplayer step 6: a teammate standing by a fallen hero revives him (co-op only)
    *   regenCastle(this);          // Task 4
    *   this.tick++;
    *   checkEnd(this);             // castle (Task 4) -> hero (Task 5) -> the final boss fell (phase 2b-3); a loss wins over a win
@@ -339,7 +343,8 @@ export class Run {
    * picks through his own input at the start of a step (coopChoose) and opens his next offer or chest at its end
    * (coopOpen), with a choice time of CHOICE_SECONDS in which his hero is immune, idle and ignored (sim/coop-choice.ts).
    * updateClouds runs once per player. Enemies pick their target player themselves (sim/targets.ts, step 3); pickups
-   * and orbs go to the nearest hero and XP to all (step 4). The run is lost when every hero has fallen.
+   * and orbs go to the nearest hero and XP to all (step 4). The run is lost when every hero has fallen at once; a fallen
+   * hero does not move and is revived by a teammate standing by him (sim/revive.ts, step 6).
    *
    * In the "chest" state only chooseChestCard runs (the KeepWorn bit keeps the worn item of a Choice), like chooseCard in "levelUp".
    */
@@ -419,6 +424,7 @@ export class Run {
     }
     this.current = 0;
     updateHazard(this);
+    updateRevive(this);
     regenCastle(this);
     this.tick++;
     checkEnd(this);
@@ -488,7 +494,9 @@ function createPlayer(data: GameData, options: PlayerOptions, p: number): Player
   };
   heroStats(data, hero, stats);
   hero.hp = stats.maxHp;
-  return new PlayerState(hero, heroIndex, rules.enemies.maxAlive);
+  const player = new PlayerState(hero, heroIndex, rules.enemies.maxAlive);
+  player.chestPriceRaw = rules.chests.basePrice;
+  return player;
 }
 
 function savePrevious(run: Run): void {
