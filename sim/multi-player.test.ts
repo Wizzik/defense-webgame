@@ -105,4 +105,14 @@ describe("a run with several players", () => {
     for (let t = 0; t < 600; t++) solo.step(north);
     expect(stateHash(solo)).not.toBe(stateHash(a));
   });
+
+  it("gives the castle more hp per extra player (step 8, rules.coop.perPlayer.castleHp)", () => {
+    const data = gameData();
+    const base = data.rules.castle.hp;
+    const per = data.rules.coop.perPlayer.castleHp;
+    expect(createRun(data, { seed: 1 }).castle.maxHp).toBe(base);
+    const three = createRun(data, { seed: 1, players: [{ hero: "stonehorn" }, { hero: "sparkshot" }, { hero: "tidecaller" }] });
+    expect(three.castle.maxHp).toBeCloseTo(base * (1 + 2 * per));
+    expect(three.castle.hp).toBe(three.castle.maxHp);
+  });
 });

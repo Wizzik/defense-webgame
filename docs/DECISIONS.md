@@ -9,6 +9,27 @@ Decisions that still apply. Check here before you change a rule. Newest first in
 - **The hero can be changed in the lobby**, also after joining by the link: the lobby has the eight hero buttons (the menu's hero at first); a change before the start is sent again (`join` from the guest, `hello` from the host), and the host's start uses the latest heroes.
 - **Every ability has its own icon** (`client/ui/ability-icons.ts`, all 48: 32 hero spells and ultimates, 10 shared spells, 6 passives; a test checks that each has one and that no two share a glyph): a lit tile (radial gradient of the ability's colour, a thin frame) with a glowing glyph, colours by element and no orange. Shown at 38 px in every ability bar cell, 72 px over the name on every ability card (upgrade, learn, new), 36 px in the passive row.
 
+## Multiplayer migration, step 8: co-op balance (2026-11-23; Petr asked to go on, the target and the numbers are Claude's)
+
+- **Tool:** `npm run sim:run -- --players 2` (or `1-4`): every hero starts a group of n heroes in list order, wrapping around (8 groups), each steered by the autopilot (`tools/sim-run/coop.ts`); a line per run and per group (won, lost to the castle or with every hero down, the shared level, downs, revives, seconds with one hero left standing), then `players n: ... won (x %)`. `--quiet` prints only the group and total lines; `--gear`, `--world`, `--difficulty` and `--duration` work as alone, `--idle` and `--phase` do not.
+- **Target (Claude's reading of Petr's "co-op multiples harder per player"):** a co-op group wins about as often as one hero alone, a little less with every player, and the losses split between the castle and the heroes (before step 8 a hero in co-op was almost never down: the castle decided nearly every run).
+- **New knob `rules.coop.perPlayer.castleHp`:** the castle has hp x (1 + castleHp (n - 1)). Without it 4 players lost the castle in most runs (packs and their hp grow faster than one castle can hold).
+- **Numbers:** hp 0.75 -> 0.9, damage 0.3 -> 0.45, castleHp 0.25 (new); packs 0.3, elite hp 0.25 and +1 chest per extra player unchanged. One player is unchanged (digest `4bc81413`).
+- **Sweep** (world 1 Normal, no gear, seeds 1-5, 40 runs per count; solo 18 of 40 = 45 %):
+
+| perPlayer | 2 players | 3 players | 4 players |
+|---|---|---|---|
+| hp 0.75, damage 0.3 (step 6) | 60 % (6 all down) | 50 % (3) | 38 % (2) |
+| + castleHp 0.3 | 63 % | 68 % | 73 % |
+| + castleHp 0.1 | 60 % | 58 % | - |
+| hp 0.9, castleHp 0.15 | 63 % | 50 % | 53 % |
+| hp 0.9, damage 0.45, castleHp 0.2 | 48 % (7) | 45 % (8) | 38 % (6) |
+| hp 0.9, damage 0.45, castleHp 0.3 | 55 % (7) | 50 % (8) | 43 % (6) |
+
+- **Check on other seeds** with the chosen numbers (seeds 6-10): solo 22 of 40 (55 %); 2 players 55 % (9 castle, 9 all down), 3 players 48 % (15, 6), 4 players 43 % (17, 6).
+- **What decides a group:** its weakest kits. Groups of Stonehorn, Nightglaive, Gravecaller and Serpent Shaman win all; Mistwarden, Sparkshot, Redcleaver and Tidecaller together lose early (all down at 3-6 minutes, level 23-30). A group of 3-4 reaches level 61-67 (solo 49-50) from the shared XP of the bigger crowd.
+- **Open for Petr:** these are autopilot numbers; human teams revive and split the map differently. His co-op playtests decide; every number is one line in `rules.coop` of `design/rules.yaml`.
+
 ## Multiplayer migration, step 7: the co-op client (2026-11-23; Petr asked for step 7, the design and details are Claude's)
 
 - **Two players for now:** the lockstep (`client/net/lockstep.ts`) and the protocol are for a host and one guest; 3-4 players need a star or mesh of links and stay for later (the sim already takes 4).
