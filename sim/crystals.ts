@@ -4,6 +4,7 @@ import { EventKind } from "./events";
 import { onGearGold } from "./gear-effects";
 import { gainXp } from "./level-up";
 import type { Run } from "./run";
+import { nearestPlayer } from "./targets";
 
 export const CRYSTAL_CAPACITY = 512;
 export const COIN_CAPACITY = 512;
@@ -57,7 +58,7 @@ export class CrystalStore {
   }
 }
 
-/** Adds gold to the hero's purse: the coin's value times (1 + goldFind + the gold passive), rounded. Returns the gold gained. */
+/** Adds gold to the current player's purse (gold is per player): the coin's value times (1 + goldFind + the gold passive), rounded. Returns the gold gained. */
 export function gainGold(run: Run, value: number): number {
   const amount = Math.round(value * run.mods.gold * (1 + run.hero.gear.goldFind + run.hero.passive.gold));
   run.gold += amount;
@@ -72,24 +73,26 @@ export function debugGrantGold(run: Run, amount: number): void {
 }
 
 /**
- * Attracts the pickups of a store near the hero, flies them in without overshooting and collects them.
- * `kind`: 0 XP crystals, 1 gold coins, 2 hearts. The Pickup event carries the XP, the gold or the hp gained and the
- * kind in `u`. A heart heals rules.sustain.hearts.healShare x max hp (nothing for a fallen hero).
+ * Attracts the pickups of a store to the nearest hero (multiplayer migration step 4; sim/targets.ts: the living
+ * heroes, all of them when every hero has fallen), flies them in without overshooting, and the hero they reach collects
+ * them. `kind`: 0 XP crystals (shared by every hero), 1 gold coins (the collector's purse), 2 hearts (heal the collector;
+ * nothing for a fallen hero). The magnet is the reach of that hero. The Pickup event carries the XP, the gold or the hp
+ * gained, the kind in `u` and the collector in `v`. `run.current` is the collector while a pickup takes effect, 0 after.
  */
 export function updatePickups(run: Run, c: CrystalStore, kind: 0 | 1 | 2): void {
-  const hero = run.hero;
   if (c.count === 0) return;
   const { magnetRadius, crystalSpeed, pickupRadius } = run.data.rules.progression;
-  const reach = magnetRadius + hero.gear.magnet + hero.passive.magnet;
-  const magnetSq = reach * reach;
   const pickupSq = pickupRadius * pickupRadius;
   const stepLen = crystalSpeed * TICK_SECONDS;
   for (let i = 0; i < c.capacity; i++) {
     if (c.alive[i] === 0) continue;
+    const p = nearestPlayer(run, c.x[i], c.y[i]);
+    const hero = run.players[p]!.hero;
+    const reach = magnetRadius + hero.gear.magnet + hero.passive.magnet;
     let dx = hero.x - c.x[i];
     let dy = hero.y - c.y[i];
     let sq = dx * dx + dy * dy;
-    if (sq < magnetSq) c.attracted[i] = 1;
+    if (sq < reach * reach) c.attracted[i] = 1;
     if (c.attracted[i] !== 0 && sq > 0) {
       const d = Math.sqrt(sq);
       if (d <= stepLen) {
@@ -110,18 +113,20 @@ export function updatePickups(run: Run, c: CrystalStore, kind: 0 | 1 | 2): void 
       const x = c.x[i];
       const y = c.y[i];
       c.collect(i);
+      run.current = p;
       if (kind === 0) {
-        run.events.push(EventKind.Pickup, i, value, x, y, 0, 0);
+        run.events.push(EventKind.Pickup, i, value, x, y, 0, p);
         gainXp(run, value);
       } else if (kind === 1) {
-        run.events.push(EventKind.Pickup, i, gainGold(run, value), x, y, 1, 0);
+        run.events.push(EventKind.Pickup, i, gainGold(run, value), x, y, 1, p);
         onGearGold(run, value);
       } else {
         const healed = healHero(run, run.data.rules.sustain.hearts.healShare * hero.stats.maxHp);
         run.stats.hearts++;
         run.stats.healedHearts += healed;
-        run.events.push(EventKind.Pickup, i, healed, x, y, 2, 0);
+        run.events.push(EventKind.Pickup, i, healed, x, y, 2, p);
       }
+      run.current = 0;
     }
   }
 }

@@ -35,21 +35,24 @@ export function heroDamageScale(run: Run): number {
 }
 
 /**
- * Subtracts `amount` x heroDamageScale from the hero (nothing while the shield runs) and returns what it took.
- * `attacker` is the enemy slot (-1 for none); `source` goes to the event's u (HeroHitSource).
+ * Subtracts `amount` x heroDamageScale from the hero of the current player (nothing while his shield runs) and returns
+ * what it took. `attacker` is the enemy slot (-1 for none); `source` goes to the event's u (HeroHitSource), the player
+ * to its v.
  */
 export function damageHero(run: Run, amount: number, attacker: number, source: number = HeroHitSource.Hit): number {
-  if (run.shieldTicks > 0) return 0;
   const hero = run.hero;
+  if (run.shieldTicks > 0) return 0;
+  // a fallen hero of a co-op run takes nothing more (one player: the run ends in this step anyway)
+  if (hero.hp <= 0 && run.players.length > 1) return 0;
   const dealt = amount * heroDamageScale(run);
   hero.hp -= dealt;
-  run.events.push(EventKind.HeroHit, attacker, dealt, hero.x, hero.y, source, 0);
+  run.events.push(EventKind.HeroHit, attacker, dealt, hero.x, hero.y, source, run.current);
   return dealt;
 }
 
-/** Subtracts `amount` from the castle (nothing while the shield runs) and records the hit tick. */
+/** Subtracts `amount` from the castle (nothing while any player's shield runs) and records the hit tick. */
 export function damageCastle(run: Run, amount: number, attacker: number): void {
-  if (run.shieldTicks > 0) return;
+  for (let p = 0; p < run.players.length; p++) if (run.players[p]!.shieldTicks > 0) return;
   const castle = run.castle;
   castle.hp -= amount;
   castle.lastHitTick = run.tick;

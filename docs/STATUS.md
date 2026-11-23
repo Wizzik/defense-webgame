@@ -1,6 +1,16 @@
 # Status
 
-Updated 2026-11-22 (multiplayer migration steps 1-2 and the net loop fix merged as PR #31 `b56a300`). Read this first when you resume work.
+Updated 2026-11-23 (multiplayer migration steps 3-4 on branch `mp-targets-pickups`). Read this first when you resume work.
+
+## Multiplayer migration steps 3-4: enemies pick a hero, shared XP, own gold (branch `mp-targets-pickups`, 2026-11-23)
+
+- Petr (2026-11-23): "go on with steps 3 and 4". Done inline in one chat; `npm run check` (1197 tests) and the build pass. Rulings: `docs/DECISIONS.md`, section Multiplayer migration, steps 3-4.
+- **One player is unchanged:** the matrix digest stays `4bc81413`.
+- **Step 3:** each enemy goes for the nearest living hero and keeps him until another is 100 nearer (`sim/targets.ts`, `enemies.target`); it hits only him, keeps out of every hero; slams, boss strikes, roots, clouds and storm bolts hit every hero inside; a storm wave drops bolts around every living hero; the castle is safe while any player's shield runs.
+- **Step 4:** XP is shared (every hero levels together, each gets his own offer); coins go to the purse of the hero who collects them, hearts heal him, orbs buff him; pickups fly to the nearest hero.
+- Autopilot probe with two heroes (stonehorn + sparkshot, seeds 1-4): all won, both at level 48-49, gold apart, the enemies split about evenly between the heroes. Co-op is far too easy until step 6 (difficulty per player).
+- What Petr can check after the merge on https://wizzik.github.io/defense-webgame/net-spike/ (host + guest): enemies now go for the guest's hero too, both heroes level together, each hero's gold is his own. The single-player game should play exactly as before.
+- Next: step 5 (level-up without pause in co-op: 10 s choice, the hero immune and ignored while choosing; single player keeps the pause), then step 6 (down and revive, chests and difficulty per player).
 
 ## Multiplayer migration steps 1-2 and the net loop (merged as PR #31 `b56a300`, 2026-11-22)
 

@@ -9,11 +9,11 @@ import { cellOf } from "./grid";
 export const MIN_GAP = 2;
 
 /**
- * map.toHero, recomputed in place (no allocation) when it is due. Lazy: only an enemy that needs the field (behind the
+ * The flow field towards the current player's hero (map.toHero for player 0, `run.heroFlows`), recomputed in place (no allocation) when it is due. Lazy: only an enemy that needs the field (behind the
  * wall from the hero) asks for it, so a step without one pays nothing.
  */
 export function heroFlow(run: Run): FlowField {
-  const field = run.map.toHero;
+  const field = run.heroFlows[run.current]!;
   const hero = run.hero;
   const age = run.tick - field.tick;
   if (age >= MIN_GAP && cellOf(hero.x, hero.y) !== field.targetCell) {

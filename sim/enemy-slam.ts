@@ -17,14 +17,13 @@ const START_SHARE = 0.8;
  * and the caller skips the charge, targeting and the attack.
  *
  * None -> Windup: the slam is ready and the hero or the castle is near. The circle stays where the enemy
- * stood. After the windup the hero inside the circle and the castle the circle reaches take the damage
+ * stood. After the windup every hero inside the circle and the castle the circle reaches take the damage
  * (allies do not), and a random cooldown starts. A stun cancels the windup (cancelSlam).
  */
 export function updateSlam(run: Run, i: number, heroDist: number): boolean {
   const e = run.enemies;
   const slam = run.data.enemies[e.type[i]].slam;
   if (slam === undefined || e.slamState[i] === Slam.Strike) return false;
-  const { hero, castle } = run;
 
   if (e.slamState[i] === Slam.None) {
     if (e.slamCooldown[i] > 0) return false;
@@ -45,11 +44,18 @@ export function updateSlam(run: Run, i: number, heroDist: number): boolean {
   const cy = e.slamY[i];
   const raw = slam.damage * e.damageScale[i];
   run.events.push(EventKind.Slam, i, SlamEvent.Hit, cx, cy, slam.radius, 0);
-  const hx = hero.x - cx;
-  const hy = hero.y - cy;
-  if (hx * hx + hy * hy <= slam.radius * slam.radius) {
-    damageHero(run, raw * (1 - armorReduction(hero.stats.armor, run.data.constants.defenseArmor)), i);
+  // every hero inside is hit (multiplayer migration step 3), each through his own armor and shield
+  const target = run.current;
+  for (let p = 0; p < run.players.length; p++) {
+    run.current = p;
+    const hit = run.hero;
+    const hx = hit.x - cx;
+    const hy = hit.y - cy;
+    if (hx * hx + hy * hy <= slam.radius * slam.radius) {
+      damageHero(run, raw * (1 - armorReduction(hit.stats.armor, run.data.constants.defenseArmor)), i);
+    }
   }
+  run.current = target;
   if (wallDistance(run, cx, cy) <= slam.radius) damageCastle(run, raw, i);
   endSlam(run, i);
   return true;

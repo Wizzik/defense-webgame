@@ -2,6 +2,18 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Multiplayer migration, steps 3-4: enemies pick a hero, shared XP, own gold, pickups to the collector (2026-11-23; Petr's rules R2 and R6, the details are Claude's)
+
+- One player is unchanged: the matrix digest stays `4bc81413` (the target column, like the owners, is hashed only with several players; the storm's bolt arrays are `HAZARD_CAPACITY` x players long, so one player keeps 8).
+- **Targeting (`sim/targets.ts`):** every enemy stores the player it goes for in `enemies.target` (-1 at spawn): the nearest living hero, but a living target stays until another hero is nearer by more than `TARGET_SWITCH_MARGIN` = 100, so a crowd between two heroes does not flicker. A fallen hero is left at once. While an enemy acts, `run.current` is its target, so the sieger's aggro and leash, flank and skirmish steering, a support fleeing, the charge, the boss strike's circle, the web and the melee blow all read that hero without a changed line; `run.current` is 0 after `updateEnemies`.
+- Enemies keep out of **every** hero (a fallen one too: his body still blocks). Each player has his own flow field to his hero behind the wall (`run.heroFlows`, player 0's is `map.toHero`).
+- **Area hits hit everyone inside:** a slam and a strike from afar hit (or root) every hero in the circle, each through his own armor and shield; a poison cloud runs once per player; a storm wave sends `bolts.min-max` bolts around **every living hero** (drawn player after player, so one player draws as before), and a bolt hurts every hero inside. Storm and cloud kills still count for player 0.
+- A charge only touches its target (it runs past the other hero). The castle takes no damage while **any** player's spirit shield runs. A fallen hero of a co-op run takes no more damage (one player: the run ends in that step anyway).
+- **Shared XP (R2):** `gainXp` adds the XP to every hero (all heroes always share level and XP; each has his own `pendingLevelUps`, so each gets his own offer per level), `stats.xpGained` counts it once; the debug start phase grants its XP once. XP stays on `HeroState` instead of moving to `Run` (the inventory's proposal): the same numbers without touching the ~40 readers of `hero.level`.
+- **Pickups:** a crystal, coin or heart is pulled by the nearest hero (`nearestPlayer`: the living heroes, all of them when every hero has fallen) within that hero's own magnet, and the hero it reaches collects it: the coin's gold (with his gold find and Fortune) into **his purse (R2)**, the heart's heal to him, a crystal's XP to everyone. An orb's effect goes to the nearest hero within its pickup radius. A coin that finds no room in the store goes to the killer's purse.
+- Events with a player: `HeroHit`, `HeroSnared`, `Pickup` and `LevelUp` carry him in `v`, `OrbPickup` in `u` (both 0 for one player).
+- Autopilot probe (stonehorn + sparkshot, world 1 Normal, seeds 1-4, no co-op difficulty yet): all four won at 17.4 minutes, both heroes level 48-49, gold apart (e.g. 631 / 1035), 21-22 chests, the enemies' targets split about evenly (1283-1626 per hero in the samples). The difficulty per player (R6) is step 6.
+
 ## Multiplayer migration, steps 1-2: players and several heroes in the simulation (2026-11-22; Petr asked to go on with multiplayer, the choices are Claude's)
 
 - `run.players` (`sim/player.ts`) holds what belongs to one player; the matrix digest stays `4bc81413` (pinned now by `client/determinism/digest.test.ts`, `npm run sim:digest`).

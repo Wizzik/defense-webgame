@@ -9,6 +9,8 @@ export class EnemyStore {
   readonly type: Uint16Array;
   readonly role: Uint8Array;
   readonly aggro: Uint8Array;
+  /** The player whose hero this enemy goes for (sim/targets.ts `enemyTarget`); -1 until it first looks. */
+  readonly target: Int8Array;
   readonly action: Uint8Array;
   readonly x: Float64Array;
   readonly y: Float64Array;
@@ -62,6 +64,7 @@ export class EnemyStore {
     this.type = new Uint16Array(capacity);
     this.role = new Uint8Array(capacity);
     this.aggro = new Uint8Array(capacity);
+    this.target = new Int8Array(capacity);
     this.action = new Uint8Array(capacity);
     this.x = new Float64Array(capacity);
     this.y = new Float64Array(capacity);
@@ -119,6 +122,7 @@ export class EnemyStore {
     this.type[slot] = type;
     this.role[slot] = role;
     this.aggro[slot] = 0;
+    this.target[slot] = -1;
     this.action[slot] = Action.Move;
     this.x[slot] = x;
     this.y[slot] = y;
