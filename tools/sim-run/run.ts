@@ -7,6 +7,7 @@ import type { TickInput } from "../../sim/input";
 import { gameData } from "../../sim/testing/game-data";
 import { DIFFICULTY_IDS, type DifficultyId, type GameData } from "../../data/schema";
 import { attackHit, BURST_PHASES, burstLine, spellBurst } from "./burst";
+import { formatCoop, formatCoopGroup, formatCoopTotal, heroGroups, playCoop, type CoopSummary } from "./coop";
 import { GEAR_PRESETS, type GearPresetName, gearPreset } from "./gear-presets";
 
 export interface RunSummary {
@@ -319,19 +320,24 @@ interface Args {
   /** Worlds and difficulties to play; every combination is played (`--world`, `--difficulty`). */
   worlds: number[];
   difficulties: DifficultyId[];
+  /** Player counts (`--players 2` or `--players 1-4`); above one every group of heroes plays co-op (tools/sim-run/coop.ts). */
+  players: number[];
+  /** Print only the summary lines, not one line per run. */
+  quiet?: boolean;
 }
 
-const SWITCHES = new Set(["--idle", "--phase-xp"]);
+const SWITCHES = new Set(["--idle", "--phase-xp", "--quiet"]);
 
 export function parseArgs(argv: string[], worldCount = gameData().worlds.length): Args {
   const out: Args = {
-    hero: "all", seed: 1, runs: 1, idle: false, phaseXp: false, gear: "none", worlds: [1], difficulties: ["normal"],
+    hero: "all", seed: 1, runs: 1, idle: false, phaseXp: false, gear: "none", worlds: [1], difficulties: ["normal"], players: [1],
   };
   for (let i = 0; i < argv.length; i += 2) {
     const flag = argv[i];
     if (SWITCHES.has(flag)) {
       // a switch with no value
       if (flag === "--idle") out.idle = true;
+      else if (flag === "--quiet") out.quiet = true;
       else out.phaseXp = true;
       i--;
       continue;
@@ -360,6 +366,14 @@ export function parseArgs(argv: string[], worldCount = gameData().worlds.length)
       else throw new Error("sim:run: --difficulty needs normal, insane, hell or all");
       continue;
     }
+    if (flag === "--players") {
+      const match = /^([1-4])(?:-([1-4]))?$/.exec(raw ?? "");
+      const lo = Number(match?.[1]);
+      const hi = Number(match?.[2] ?? match?.[1]);
+      if (!match || hi < lo) throw new Error("sim:run: --players needs 1 to 4 or a range like 1-4");
+      out.players = Array.from({ length: hi - lo + 1 }, (_, k) => lo + k);
+      continue;
+    }
     if (flag === "--seeds") {
       const match = /^(\d+)-(\d+)$/.exec(raw ?? "");
       if (!match || Number(match[2]) < Number(match[1])) throw new Error("sim:run: --seeds needs a range like 1-20");
@@ -386,6 +400,10 @@ function main(): void {
   for (const world of args.worlds) {
     for (const difficulty of args.difficulties) {
       if (several) console.log(`== world ${world} ${data.worlds[world - 1]!.id} / ${difficulty} ==`);
+      if (args.players.some((n) => n > 1)) {
+        coopMain(data, args, ids, world, difficulty);
+        continue;
+      }
       const all: RunSummary[] = [];
       for (const hero of ids) {
         const summaries: RunSummary[] = [];
@@ -401,6 +419,26 @@ function main(): void {
       }
       if (args.phaseXp) console.log(`phaseXp: ${phaseXpLine(all, data.rules.phases.length)}`);
     }
+  }
+}
+
+/** `--players`: every group of heroes (`heroGroups`) on every seed, then a total line per player count. */
+function coopMain(data: GameData, args: Args, ids: string[], world: number, difficulty: DifficultyId): void {
+  if (args.idle || args.phase !== undefined) throw new Error("sim:run: --players does not take --idle or --phase");
+  for (const n of args.players) {
+    const total: CoopSummary[] = [];
+    for (const group of heroGroups(ids, n)) {
+      const summaries: CoopSummary[] = [];
+      for (let i = 0; i < args.runs; i++) {
+        const loadouts = group.map((hero) => gearPreset(data, hero, args.gear));
+        const s = playCoop(data, args.seed + i, group, loadouts, world, difficulty, args.duration);
+        summaries.push(s);
+        if (!args.quiet) console.log(formatCoop(s));
+      }
+      total.push(...summaries);
+      console.log(formatCoopGroup(summaries));
+    }
+    console.log(formatCoopTotal(n, total));
   }
 }
 

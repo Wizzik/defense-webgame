@@ -242,9 +242,11 @@ export class Run {
     }
     this.current = 0;
 
+    // co-op (multiplayer migration step 8): every player after the first adds rules.coop.perPlayer.castleHp
+    const castleHp = rules.castle.hp * (1 + rules.coop.perPlayer.castleHp * (players.length - 1));
     this.castle = {
       x: rules.arena.castle.x, y: rules.arena.castle.y, radius: rules.castle.radius,
-      hp: rules.castle.hp, maxHp: rules.castle.hp, lastHitTick: -1,
+      hp: castleHp, maxHp: castleHp, lastHitTick: -1,
     };
     this.mapRng = new Rng((options.seed ^ 0x68e31da4) >>> 0);
     this.map = buildWorldMap(data, this.world, this.mapRng);
