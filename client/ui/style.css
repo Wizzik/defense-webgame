@@ -1279,3 +1279,226 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* co-op (multiplayer migration step 7): the cards as a compact column at the right edge, the fight stays visible */
+.cards.coop {
+  inset: 100px 14px auto auto;
+  width: 250px;
+  padding: 0;
+  background: none;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 2;
+}
+.cards.coop > * {
+  pointer-events: auto;
+}
+.cards.coop .cards-title {
+  order: -2;
+  font-size: 17px;
+  text-align: right;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+.cards.coop .cards-row {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+.cards.coop .card {
+  width: auto;
+  min-height: 0;
+  padding: 8px 10px 8px 38px;
+  gap: 3px;
+  background: rgba(16, 22, 32, 0.92);
+}
+.cards.coop .card-key {
+  top: 8px;
+  left: 10px;
+}
+.cards.coop .card-name {
+  font-size: 15px;
+}
+.cards.coop .card-badge {
+  position: static;
+  align-self: flex-start;
+  font-size: 11px;
+}
+.cards.coop .card-change {
+  font-size: 13px;
+}
+.cards.coop .card-desc,
+.cards.coop .cards-hint {
+  display: none;
+}
+.cards.coop .card-line {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+}
+.cards-timer {
+  position: relative;
+  margin: 0;
+  padding: 3px 12px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgba(10, 16, 26, 0.85);
+  border: 1px solid var(--edge);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.cards-timer::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 2px;
+  width: calc(var(--share, 0) * 100%);
+  background: #8fc8ff;
+}
+.cards.coop .cards-timer {
+  order: -1;
+}
+.cards-timer.over {
+  color: var(--bad);
+}
+
+/* co-op: the teammates under the own bars, the plates over their heroes, the banner when down */
+.team {
+  position: absolute;
+  top: 150px;
+  left: 14px;
+  width: min(220px, 26vw);
+  font-size: 13px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+.team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.team-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3px 8px;
+}
+.team-row .team-bar {
+  grid-column: 1 / -1;
+  height: 8px;
+}
+.team-row.down .team-name {
+  color: var(--muted);
+}
+.team-state {
+  color: #8fc8ff;
+}
+.team-row.down .team-state {
+  color: var(--bad);
+}
+.bar.revive .bar-fill {
+  background: #8fc8ff;
+}
+.team-banner {
+  position: fixed;
+  left: 50%;
+  top: 34%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: rgba(10, 16, 26, 0.85);
+  border: 1px solid var(--edge);
+  font-size: 15px;
+  white-space: nowrap;
+}
+.team-plates {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.team-plate {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.team-plate-bar {
+  width: 56px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.team-plate-fill {
+  height: 100%;
+  background: #6fcf97;
+}
+.team-plate-revive,
+.team-plate-cross {
+  display: none;
+}
+.team-plate.down .team-plate-bar {
+  display: none;
+}
+.team-plate.down .team-plate-revive {
+  display: block;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: conic-gradient(#8fc8ff calc(var(--share, 0) * 360deg), rgba(10, 16, 26, 0.7) 0);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.team-plate.down .team-plate-cross {
+  display: block;
+  margin-top: -27px;
+  font-size: 18px;
+  color: #c8d2dc;
+}
+
+/* co-op lobby */
+.coop-panel {
+  max-width: 520px;
+}
+.coop-join,
+.coop-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.coop-code,
+.coop-link-text {
+  font: inherit;
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--edge);
+  border-radius: 6px;
+  padding: 7px 10px;
+}
+.coop-code {
+  width: 130px;
+}
+.coop-link-text {
+  width: 330px;
+  font-size: 12px;
+}
+.coop-status {
+  margin: 0;
+  min-height: 1.3em;
+  text-align: center;
+}
+.coop-status.error {
+  color: var(--bad);
+}
+.coop-note,
+.coop-hero {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}

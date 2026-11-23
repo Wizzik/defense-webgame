@@ -1,3 +1,4 @@
+import { eventOwner } from "./event-owner";
 import {
   AdditiveBlending,
   Color,
@@ -154,7 +155,7 @@ export class Effects implements RunView {
 
   private addSpikes(run: Run, event: number, now: number): void {
     const { events } = run;
-    const slot = run.abilities[events.a[event]];
+    const slot = eventOwner(run, event).abilities[events.a[event]!]!;
     if (slot.def.kind !== "line") return;
     const { params } = slot.def;
     const speed = "waveSpeed" in params ? params.waveSpeed?.[slot.level - 1] : undefined;

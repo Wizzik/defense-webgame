@@ -1,3 +1,4 @@
+import { eventOwner } from "../render/event-owner";
 import type { AudioData, GameSound } from "../../data/schema/audio";
 import { EventKind, HeroHitSource, OrbKind, type Run, SlamEvent } from "../../sim";
 
@@ -76,26 +77,26 @@ export function resolveEventCues(run: Run, data: AudioData, enemyIds: readonly s
     r.world = world;
   };
   const sound = (name: GameSound, i: number, world = true): void => add(data.sounds[name], i, world);
-  const heroAttack = (): string | undefined => {
-    const hero = data.heroes[run.hero.def.id];
+  const heroAttack = (i: number): string | undefined => {
+    const hero = data.heroes[eventOwner(run, i).hero.def.id];
     return hero ? hero.attackHit ?? hero.attack : undefined;
   };
   for (let i = 0; i < events.count; i++) {
     switch (events.kind[i]) {
       case EventKind.Cast:
-        add(data.abilities[run.abilities[events.a[i]!]!.def.id]?.cast, i);
+        add(data.abilities[eventOwner(run, i).abilities[events.a[i]!]!.def.id]?.cast, i);
         break;
       case EventKind.Hit: {
         const source = events.u[i];
-        if (source === 0) add(heroAttack(), i);
+        if (source === 0) add(heroAttack(i), i);
         else if (source === 1) {
-          const slot = run.abilities[events.v[i]!];
+          const slot = eventOwner(run, i).abilities[events.v[i]!];
           if (slot) add(data.abilities[slot.def.id]?.hit, i);
         }
         break;
       }
       case EventKind.Blast:
-        add(heroAttack(), i);
+        add(heroAttack(i), i);
         break;
       case EventKind.Death:
         add(data.enemies[enemyIds[run.enemies.type[events.a[i]!]!]!]?.death, i);

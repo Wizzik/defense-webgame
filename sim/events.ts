@@ -75,6 +75,10 @@ export class EventLog {
   readonly y: Float64Array;
   readonly u: Float64Array;
   readonly v: Float64Array;
+  /** The player whose system pushed the event (`Run.current` at the push; an enemy's events name its target). */
+  readonly player: Uint8Array;
+  /** The player the next pushes are credited to; `Run` keeps it equal to `Run.current`. */
+  who = 0;
   count = 0;
   dropped = 0;
   private readonly capacity: number;
@@ -88,6 +92,7 @@ export class EventLog {
     this.y = new Float64Array(capacity);
     this.u = new Float64Array(capacity);
     this.v = new Float64Array(capacity);
+    this.player = new Uint8Array(capacity);
   }
 
   clear(): void {
@@ -108,5 +113,6 @@ export class EventLog {
     this.y[i] = y;
     this.u[i] = u;
     this.v[i] = v;
+    this.player[i] = this.who;
   }
 }

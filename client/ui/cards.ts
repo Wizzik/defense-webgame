@@ -1,4 +1,4 @@
-import { ChestAction, ULTIMATE_SLOT } from "../../sim";
+import { CHOICE_TICKS, ChestAction, TICKS_PER_SECOND, ULTIMATE_SLOT } from "../../sim";
 import type { Card, CardOffer, ChestCard, ChestOffer, Run } from "../../sim";
 import { cardLines } from "./card-lines";
 import { ChestCompare } from "./chest-compare";
@@ -21,6 +21,10 @@ const PICK_DELAY_MS = 300;
  * Three cards side by side, for a level-up or for an opened chest; a click or the keys 1 to 3 pick one. A chest
  * Choice card opens the compare instead (keep or take, Escape back to the cards); one key listener decides where
  * a key goes, so 1 in the compare does not pick the first card under it.
+ *
+ * In co-op (several players) the run does not pause: the cards are a panel at the bottom of the screen that leaves
+ * the fight visible, with the seconds of the choice time (multiplayer migration step 7). The run passed to `update`
+ * reads the local player (`run.current`); `asLocal` gives a click the same view.
  */
 export class Cards {
   private readonly root: HTMLElement;
@@ -30,12 +34,19 @@ export class Cards {
   private shown: CardOffer | ChestOffer | null = null;
   private shownLang: Lang | null = null;
   private shownRun: Run | null = null;
+  private shownChest = false;
+  private readonly timer: HTMLElement;
+  private timerText = "";
   private readonly onPick: (index: number, keep: boolean) => void;
   private readonly compare: ChestCompare;
   /** Picks before this real time (ms) are ignored: the player has not seen the offer (or the compare) yet. */
   private acceptAt = 0;
 
-  constructor(parent: HTMLElement, onPick: (index: number, keep: boolean) => void) {
+  constructor(
+    parent: HTMLElement,
+    onPick: (index: number, keep: boolean) => void,
+    private readonly asLocal: (fn: (run: Run) => void) => void = () => {},
+  ) {
     this.onPick = onPick;
     this.root = el("div", "screen cards", parent);
     this.root.id = "cards";
@@ -43,6 +54,8 @@ export class Cards {
     this.title = el("h2", "cards-title", this.root);
     this.row = el("div", "cards-row", this.root);
     this.hint = el("p", "cards-hint", this.root);
+    this.timer = el("p", "cards-timer", this.root);
+    this.timer.id = "cards-timer";
     this.compare = new ChestCompare(this.root, (index, keep) => this.choose(index, keep), () => this.closeCompare());
     addEventListener("keydown", (event) => {
       if (this.root.hidden || event.repeat) return;
@@ -62,10 +75,17 @@ export class Cards {
 
   /** Shows the offer of the run, or hides the cards when there is none. */
   update(run: Run, lang: Lang): void {
-    const chest = run.state === "chest" ? run.chestOffer : null;
-    const offer = run.state === "levelUp" ? run.offer : chest;
+    const coop = run.players.length > 1;
+    // co-op: the local player's own offer while the run goes on (not over the end screen); one player: the paused offer
+    const open = coop && run.state === "playing";
+    const chest = coop ? (open && !run.offer ? run.chestOffer : null) : run.state === "chest" ? run.chestOffer : null;
+    const offer = coop ? (open ? run.offer ?? chest : null) : run.state === "levelUp" ? run.offer : chest;
     this.root.hidden = !offer;
+    this.root.classList.toggle("coop", coop);
     this.shownRun = run;
+    this.shownChest = !!chest;
+    if (offer && coop) this.showTimer(run, lang);
+    else this.timer.hidden = true;
     if (!offer) this.closeCompare();
     if (!offer || (offer === this.shown && lang === this.shownLang)) return;
     if (offer !== this.shown) {
@@ -82,6 +102,21 @@ export class Cards {
     else if (run.offer) run.offer.cards.forEach((card, i) => this.row.appendChild(this.render(run, card, i, lang)));
     // a language switch while comparing redraws the compare in the new language
     if (chest && comparing !== null) this.compare.show(run, chest.cards[comparing]!, comparing, lang);
+  }
+
+  /** Co-op: the seconds left of the choice time (protected), then that the hero fights again while he chooses. */
+  private showTimer(run: Run, lang: Lang): void {
+    const ticks = run.players[run.current]!.choosingTicks;
+    const text = ticks > 0
+      ? t(lang, "cards.choiceTime", { n: Math.ceil(ticks / TICKS_PER_SECOND) })
+      : t(lang, "cards.choiceOver");
+    this.timer.hidden = false;
+    this.timer.classList.toggle("over", ticks <= 0);
+    this.timer.style.setProperty("--share", String(Math.max(0, ticks) / CHOICE_TICKS));
+    if (text !== this.timerText) {
+      this.timerText = text;
+      this.timer.textContent = text;
+    }
   }
 
   /** A chest card: the slot's glyph, the item in its rarity colour, the rarity, what the pick does and the stat rows. */
@@ -104,11 +139,14 @@ export class Cards {
   private pick(index: number): void {
     if (performance.now() < this.acceptAt) return;
     const run = this.shownRun;
-    const card = run && run.state === "chest" ? run.chestOffer?.cards[index] : undefined;
+    const card = run && this.shownChest ? (this.shown as ChestOffer | null)?.cards[index] : undefined;
     if (run && card && card.action === ChestAction.Choice && this.shownLang) {
+      const lang = this.shownLang;
       this.row.hidden = true;
       this.hint.hidden = true;
-      this.compare.show(run, card, index, this.shownLang);
+      // a click comes between frames: the compare reads the local player's gear like the cards did
+      if (run.players.length > 1) this.asLocal((local) => this.compare.show(local, card, index, lang));
+      else this.compare.show(run, card, index, lang);
       this.acceptAt = performance.now() + PICK_DELAY_MS;
       return;
     }

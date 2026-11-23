@@ -96,7 +96,12 @@ export class Run {
    * `players[current]`: `Run.step` sets it around every per-player system and around each ally and bolt
    * (their owner), and puts it back to 0 after; everything else (enemies, pickups, the castle) sees player 0.
    */
-  current = 0;
+  get current(): number { return this.currentPlayer; }
+  set current(value: number) {
+    this.currentPlayer = value;
+    this.events.who = value;
+  }
+  private currentPlayer = 0;
   /** The player whose card or chest offer holds the run in the "levelUp" or "chest" state. */
   choosing = 0;
   readonly castle: CastleState;

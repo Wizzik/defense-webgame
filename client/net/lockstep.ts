@@ -62,6 +62,8 @@ export class Lockstep {
 
   private readonly inputs: InputRing[];
   private readonly hashes: HashRing[];
+  /** Players who left: their missing inputs count as no input, so the rest play on. */
+  private readonly gone: boolean[] = [];
 
   constructor(players: 2, readonly local: 0 | 1) {
     this.inputs = [];
@@ -69,7 +71,13 @@ export class Lockstep {
     for (let p = 0; p < players; p++) {
       this.inputs.push(new InputRing());
       this.hashes.push(new HashRing());
+      this.gone.push(false);
     }
+  }
+
+  /** The player left: from now on a step he sent no input for gets none (his hero stands still). */
+  drop(player: 0 | 1): void {
+    this.gone[player] = true;
   }
 
   /** Whether a local input may be queued now (at most INPUT_DELAY steps ahead of the next step). */
@@ -100,7 +108,7 @@ export class Lockstep {
   ready(): boolean {
     if (this.tick < INPUT_DELAY) return true;
     for (let p = 0; p < this.inputs.length; p++) {
-      if (!this.inputs[p]!.has(this.tick)) {
+      if (!this.gone[p] && !this.inputs[p]!.has(this.tick)) {
         this.stalls++;
         return false;
       }
@@ -113,7 +121,7 @@ export class Lockstep {
     const k = this.tick;
     for (let p = 0; p < this.inputs.length; p++) {
       const o = out[p]!;
-      if (k < INPUT_DELAY) {
+      if (k < INPUT_DELAY || !this.inputs[p]!.has(k)) {
         o.moveX = 0;
         o.moveY = 0;
         o.card = -1;

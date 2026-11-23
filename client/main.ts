@@ -59,6 +59,11 @@ import { Hud } from "./ui/hud";
 import { type Lang, pickLang, t } from "./ui/i18n";
 import { Menu } from "./ui/menu";
 import { PackArrows } from "./ui/pack-arrows";
+import { CoopLobby } from "./ui/coop-lobby";
+import { TeamPanel } from "./ui/team-panel";
+import { CoopSetup, joinCodeOf } from "./game/coop-setup";
+import { parseSignal } from "./net/signal";
+import { updateNet } from "./game/net-snapshot";
 import "./ui/style.css";
 
 const LANG_KEY = "defense-webgame.lang";
@@ -201,8 +206,9 @@ async function start(): Promise<void> {
   session.difficulty = course.difficulty;
   // the run behind the menu starts once the first hero's model is loaded and uses this seed
   session.seed = params.seed;
-  const heroView = new HeroView();
-  scene.add(heroView.object);
+  // one view per player of a co-op run (two for now); the second hides in a run of one player
+  const heroViews = [new HeroView(0), new HeroView(1)];
+  for (const view of heroViews) scene.add(view.object);
   // one bake per model: a type that borrows a model shares its texture and gets its own copy of the geometry
   const bakedByModel = new Map<string, BakedVat>();
   const vats = data.enemies.map((enemy, type) => {
@@ -259,7 +265,7 @@ async function start(): Promise<void> {
   addEventListener("pointerdown", enableAudio, { once: true });
   addEventListener("keydown", enableAudio, { once: true });
   const packArrows = new PackArrows(document.getElementById("ui")!, followCamera.camera);
-  session.views.push(arenaView, weatherFx, particles, worldView, hazardFx, heroView, allyView, blobShadows, crowd, crystals, coins, hearts, orbView, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(audio, audioData, sound.director, followCamera.camera, data.enemies.map((e) => e.id), () => sound.active));
+  session.views.push(arenaView, weatherFx, particles, worldView, hazardFx, ...heroViews, allyView, blobShadows, crowd, crystals, coins, hearts, orbView, chestView, effects, abilityFx, enemyFx, numbers, packArrows, new SoundView(audio, audioData, sound.director, followCamera.camera, data.enemies.map((e) => e.id), () => sound.active));
 
   addEventListener("resize", () => {
     renderer.setSize(innerWidth, innerHeight);
@@ -284,9 +290,15 @@ async function start(): Promise<void> {
   };
   publishGear();
   session.views.push({ update: publishGear, onEvents: () => {}, dispose: () => {} });
+  // co-op: the heroes' models in player order on their views, the local hero's on the copies, and the world's
+  const loadCoopModels = async (heroes: readonly string[], local: number, world: number): Promise<void> => {
+    const [gltfs] = await Promise.all([Promise.all(heroes.map((id) => models.get(modelUrl("heroes", id)))), loadWorld(world)]);
+    gltfs.forEach((gltf, p) => heroViews[p]?.setModel(gltf));
+    allyView.setModel(gltfs[local]!);
+  };
   const ui = createUi(data, gear, progress, !params.debug && !gear.persistent, session, followCamera, sound, randomSeed, hero, gpu.software, (setLoading) =>
-    heroLoader(models, session, heroView, allyView, setLoading),
-  loadWorld);
+    heroLoader(models, session, heroViews, allyView, setLoading, data.heroes.some((h) => h.id === params.mate) ? params.mate : undefined),
+  loadWorld, loadCoopModels);
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
   if (overlay) {
     document.getElementById("overlay")!.hidden = false;
@@ -301,7 +313,12 @@ async function start(): Promise<void> {
   session.frame(0);
   await renderer.compileAsync(scene, followCamera.camera);
 
-  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows, heroView, enemyFx, hazardFx, particles, sunShadow, chestView);
+  runLoop(renderer, scene, followCamera, session, snapshot, overlay, ui, packArrows, heroViews, enemyFx, hazardFx, particles, sunShadow, chestView);
+  // closing the page tells a co-op teammate at once (else he waits for the connection to time out)
+  addEventListener("beforeunload", () => session.coop?.stop());
+  // a link with ?join=<code> opens the co-op lobby and joins the room
+  const joinCode = joinCodeOf(location.search);
+  if (joinCode !== null) ui.joinCoop(joinCode);
 }
 
 /** Switches the run to a hero: `useHero(id, seed)` returns when the hero's model is in place (or its loading failed and the error is shown). */
@@ -314,9 +331,10 @@ type UseHero = (id: string, seed?: number) => Promise<void>;
 function heroLoader(
   models: ModelCache,
   session: Session,
-  heroView: HeroView,
+  heroViews: readonly HeroView[],
   allyView: AllyView,
   setLoading: (loading: boolean, failed?: boolean) => void,
+  mate?: string,
 ): UseHero {
   let latest = 0;
   let errorShown = false;
@@ -325,8 +343,11 @@ function heroLoader(
     setLoading(true);
     try {
       const gltf = await models.get(modelUrl("heroes", id));
+      // ?debug=1&mate=<id>: the autopilot's hero of a local co-op run
+      const mateGltf = mate ? await models.get(modelUrl("heroes", mate)) : null;
       if (ticket !== latest) return;
-      heroView.setModel(gltf);
+      heroViews[0]!.setModel(gltf);
+      if (mateGltf) heroViews[1]!.setModel(mateGltf);
       allyView.setModel(gltf);
       session.start(seed, true, id);
       if (errorShown) document.getElementById("error")!.hidden = true;
@@ -360,6 +381,8 @@ interface Ui {
   /** The chest card whose compare is open, or null. */
   readonly chestCompare: number | null;
   useHero: UseHero;
+  /** Opens the co-op lobby and joins room `code`. */
+  joinCoop(code: string): void;
 }
 
 /** Builds the menu, HUD, cards, end screen and castle pointer, and wires them to the session. */
@@ -376,6 +399,7 @@ function createUi(
   softwareGpu: boolean,
   makeUseHero: (setLoading: (loading: boolean, failed?: boolean) => void) => UseHero,
   loadWorld: (world: number) => Promise<void>,
+  loadCoopModels: (heroes: readonly string[], local: number, world: number) => Promise<void>,
 ): Ui {
   const root = document.getElementById("ui")!;
   let heroId = initialHero;
@@ -410,10 +434,58 @@ function createUi(
     onSound: () => setMuted(!muted),
     onGear: () => gearScreen.open(heroId, lang),
     onSettings: () => openSettings(false),
+    onCoop: () => openCoop(),
+  });
+  // co-op: the lobby; the host's course comes from the world screen (`coopCourse` routes its Start and Back)
+  let coopCourse = false;
+  const heroName = (): string => data.heroes.find((h) => h.id === heroId)?.name[lang] ?? heroId;
+  const lobby = new CoopLobby(root, {
+    onHost: () => void coop.host(),
+    onJoin: (code) => void coop.join(code),
+    onStart: () => coop.chooseCourse(),
+    onBack: () => {
+      coop.drop();
+      lobby.close();
+      lobby.set({ kind: "idle" });
+      menu.setVisible(true);
+    },
+  });
+  const openCoop = (code = ""): void => {
+    sound.engine.enable();
+    void sound.engine.preload();
+    menu.setVisible(false);
+    lobby.open(lang, heroName(), code);
+  };
+  const coop = new CoopSetup({
+    data, session, lobby,
+    signal: parseSignal(new URLSearchParams(location.search).get("signal")),
+    lang: () => lang,
+    heroId: () => heroId,
+    loadout: (id) => gear.loadout(id),
+    loadModels: loadCoopModels,
+    chooseCourse: () => {
+      coopCourse = true;
+      lobby.close();
+      worldScreen.open(session.world, session.difficulty, lang);
+    },
+    onRunStarted: () => {
+      coopCourse = false;
+      lobby.close();
+      lobby.set({ kind: "idle" });
+      worldScreen.close();
+      menu.setVisible(false);
+      menuOpen = false;
+    },
+    onNote: (text) => team.setNote(text),
+    showError,
   });
   const worldScreen = new WorldScreen(root, {
     data, progress,
     onStart: async (world, difficulty) => {
+      if (coopCourse) {
+        await coop.startCourse(world, difficulty);
+        return;
+      }
       try {
         await loadWorld(world);
       } catch (error) {
@@ -432,7 +504,12 @@ function createUi(
       }
       menuOpen = false;
     },
-    onBack: () => menu.setVisible(true),
+    onBack: () => {
+      if (coopCourse) {
+        coopCourse = false;
+        lobby.open(lang, heroName());
+      } else menu.setVisible(true);
+    },
   });
   // the settings: from the menu button, or O in a run (pauses it until the panel closes)
   let settingsPausedRun = false;
@@ -497,7 +574,8 @@ function createUi(
   session.views.push({ update: () => {}, onEvents: (run) => hud.onEvents(run, lang), dispose: () => {} });
   const pointer = new CastlePointer(root);
   const chestPointer = new ChestPointer(root);
-  const cards = new Cards(root, (index, keep) => session.setCard(index, keep));
+  const cards = new Cards(root, (index, keep) => session.setCard(index, keep), (fn) => void session.asLocal(fn));
+  const team = new TeamPanel(root, followCamera.camera);
   new GearPanel(root, { data, session, getLang: () => lang, menuOpen: () => menuOpen });
   const end = new EndScreen(root, () => {
     void useHero(heroId, nextSeed());
@@ -508,6 +586,10 @@ function createUi(
 
   return {
     useHero,
+    joinCoop: (code) => {
+      openCoop(code);
+      void coop.join(code);
+    },
     get menuOpen() {
       return menuOpen;
     },
@@ -534,12 +616,14 @@ function createUi(
       if (menuOpen) {
         ended = false;
         cards.hide();
+        team.hide();
         pointer.hide();
         chestPointer.hide();
         return;
       }
       hud.update(run, lang);
       cards.update(run, lang);
+      team.update(run, lang, width, height);
       pointer.update(run, followCamera.camera, width, height);
       chestPointer.update(run, followCamera.camera, width, height);
       if ((run.state === "won" || run.state === "lost") && !ended) {
@@ -560,7 +644,7 @@ function runLoop(
   overlay: Overlay | null,
   ui: Ui,
   packArrows: PackArrows,
-  heroView: HeroView,
+  heroViews: readonly HeroView[],
   enemyFx: EnemyFx,
   hazardFx: HazardFx,
   particles: Particles,
@@ -580,9 +664,17 @@ function runLoop(
       }
       last = now;
       chestView.labelsVisible = !ui.menuOpen && !session.paused;
-      ui.update(innerWidth, innerHeight);
-      updateSnapshot(snapshot, session.run, ui.menuOpen, packArrows.visible);
-      snapshot.render.heroModels = heroView.modelCount;
+      // the HUD, the cards and the snapshot show the local player (the guest of a co-op run is player 1)
+      session.asLocal(() => {
+        ui.update(innerWidth, innerHeight);
+        updateSnapshot(snapshot, session.run, ui.menuOpen, packArrows.visible);
+      });
+      if (!session.run) {
+        ui.update(innerWidth, innerHeight);
+        updateSnapshot(snapshot, null, ui.menuOpen, packArrows.visible);
+      }
+      updateNet(snapshot, session);
+      snapshot.render.heroModels = heroViews.reduce((n, view) => n + (view.object.visible ? view.modelCount : 0), 0);
       snapshot.render.slamRings = enemyFx.slamRingCount;
       snapshot.render.hazardRings = hazardFx.ringCount;
       snapshot.render.particles = particles.visible;

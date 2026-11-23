@@ -1,6 +1,27 @@
 # Status
 
-Updated 2026-11-23 (multiplayer migration step 6 merged as PR #35 `21f17cc`). Read this first when you resume work.
+Updated 2026-11-23 (multiplayer migration step 7, the co-op client, on branch `coop-client`). Read this first when you resume work.
+
+## Multiplayer migration step 7: the co-op client (branch `coop-client`, 2026-11-23)
+
+- Petr (2026-11-23): "step 7: the client, lobby, net loop and teammates' HUD". Done inline in one chat; `npm run check`, the build and e2e `webgl2-fallback` pass (new `e2e/coop.spec.ts`). Rulings and details: `docs/DECISIONS.md`, section Multiplayer migration, step 7.
+- **Single player unchanged:** the matrix digest stays `4bc81413`; events got a player column that is not hashed.
+- What it brings (two players):
+  - menu **Co-op** → lobby: *Host a game* gives a link to send (Copy), the link or the room code joins; each plays the hero chosen in the menu with his own gear; the host chooses the course in the world screen and starts;
+  - the real game plays co-op over WebRTC in lockstep (the spike's worker heartbeat), never pauses (C and O open over the fight);
+  - both heroes in their own models; a fallen hero lies down and stands up when revived; a teammate's spells are drawn and heard as his;
+  - cards in co-op: a compact column at the right edge with the choice time (protected, then "you fight again"), keys 1-3; a card is sent once per offer;
+  - teammate HUD: his name, hp and "down" with a revive bar or "choosing" under the own bars; a plate over his hero (hp, or a cross in a filling revive ring); a banner when you are down yourself, when the teammate left (his hero stands, the run goes on) or on a desync;
+  - `?debug=1&mate=<hero>`: a local co-op run with the autopilot as the second hero (no network), `__game.debug.down(p)`.
+- Net test here (two headless windows, local PeerServer): lobby to start, 33 s both walking, hashes matched, no desync; a card pick of the guest reached both; the host closed his page and the guest played on. RTT about 190 ms only because two software-rendering windows share this container.
+- **What Petr checks after the merge** (https://wizzik.github.io/defense-webgame/):
+  - Chrome + Firefox on one computer: menu Co-op → Host a game, open the link in the other browser (choose a different hero there in the menu first, then open the link again or type the code), host: Choose the course and start; play 10 minutes, one window minimized for a while;
+  - the cards column at the right: readable, does choosing during the fight work, are 10 s enough;
+  - the teammate HUD: name, hp, "down" and revive bar; the plate and ring over the fallen hero; the banner when you are down;
+  - fell on purpose and let the other revive you; close one window and see that the other plays on;
+  - then two computers in different networks; send `window.__net` (or the numbers: step, rttMedian, stallsPerMinute, lastMatchedHash, desyncAt) from the console.
+- **Open for Petr:** a guest's win counts for his own world ladder; teammates' sounds are as loud as his own; the copies of a hero (mirror images) show the local hero's model; the end screen of a lost co-op run says "your hero has fallen". 3-4 players need more links (later).
+- Next: step 8 (co-op balance, `sim:run --players`, Petr's playtests), in a new chat.
 
 ## Multiplayer migration step 6: revive, chests and enemy strength per player (merged as PR #35 `21f17cc`, 2026-11-23)
 
