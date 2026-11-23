@@ -2,13 +2,21 @@
 
 Updated 2026-11-23 (multiplayer migration step 8, co-op balance). Read this first when you resume work.
 
-## Multiplayer migration step 8: co-op balance (2026-11-23)
+## Order (Petr, 2026-11-23 evening)
+
+1. **Co-op for 3-4 players** (lobby with more links / guests, HUD for several teammates; the sim already takes 1-4 players and `rules.coop` is tuned for 2-4).
+2. **More worlds:** difficulties plan 3b (Frostreach and Blightscar, their natural events and looks, the ladder tuned for world 5).
+3. Then the **remaining heroes** of the map and **better spell graphics** (effects of the spells).
+
+Points 1 and 2 start in the next chat.
+
+## Multiplayer migration step 8: co-op balance (merged as PR #38 `303f3b5`, 2026-11-23)
 
 - Petr (2026-11-23): "go on with development". Done inline in one chat; `npm run check` passes; the single-player digest stays `4bc81413`. Table and rulings: `docs/DECISIONS.md`, section Multiplayer migration, step 8.
 - `npm run sim:run -- --players 1-4 --seeds 1-5 --quiet`: every group of n heroes on the autopilot, wins, castle losses, all-down losses, downs and revives.
 - `rules.coop.perPlayer`: enemy hp 0.75 -> 0.9, damage 0.3 -> 0.45, new `castleHp` 0.25. Autopilot (seeds 6-10): solo 55 %, 2 players 55 %, 3 players 48 %, 4 players 43 %; heroes now fall in co-op too (before, the castle decided almost every co-op run).
 - What Petr checks: a co-op run with a friend: is it as hard as alone or a bit harder, do heroes fall and need reviving, does the castle hold long enough with 2 players.
-- The migration table (`docs/multiplayer/single-hero-inventory.md`) is done. Next by Petr's order of 2026-11-21: difficulties plan 3b (Frostreach and Blightscar), progression between runs, credits and legal check; or co-op for 3-4 players in the lobby.
+- The migration table (`docs/multiplayer/single-hero-inventory.md`) is done. Next: see Order (Petr, 2026-11-23 evening) above.
 
 ## After Petr's first co-op test: cards in the middle, 5 s choice, hero choice in the lobby, spell icons (merged as PR #37, 2026-11-23)
 
