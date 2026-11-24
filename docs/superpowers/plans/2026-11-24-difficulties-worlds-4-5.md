@@ -15,7 +15,7 @@
 - **Zeď světa 5 je osmiúhelník** o poloměru 1600 se čtyřmi trhlinami 400 posunutými z půlky stěn (nepravidelně), aby se lišila od pravidelného kruhu stromů světa 3.
 - **Promrznutí jen hrdina** (spec: „kdo stojí“): nepřátelé u hrdiny stojí pořád, promrznutí by je jen oslabilo a nedává to tah hráči. Promrznutí = rychlost útoku −20 % (doba mezi základními útoky × 1 / 0,8); kouzla ne. Trvá, dokud se hrdina nerozejde (i po konci vánice).
 - **Louže ohně** pálí hrdinu, nepřátele i bossy (menším podílem), hrad ne; jednu jednotku v jednom pulzu pálí nejvýš jedna louže (překryv se nesčítá).
-- **Cíl žebříčku:** spec chce svět 5 Normal se střední výbavou „zhruba polovinu“ výher (80 ze 160), ale svět 3 má dnes 78 a žebříček má klesat. Cíl tedy: svět 4 mid 64–76, svět 5 mid 52–68, svět 5 Hell full pod 80; bez výbavy svět 4 i 5 nad 0 u aspoň 4 hrdinů.
+- **Cíl žebříčku:** spec chce svět 5 Normal se střední výbavou „zhruba polovinu“ výher (80 ze 160), ale svět 3 má dnes 78 a žebříček má klesat. Petr (2026-11-24): „udělej to klidně těžší“. Cíl tedy: svět 4 mid 56–68, svět 5 mid 40–54, svět 5 Hell full pod 60; bez výbavy svět 4 i 5 nad 0 u aspoň 3 hrdinů.
 
 ## Global Constraints
 
@@ -199,7 +199,7 @@
 **Files:** `design/worlds.yaml`, případně `design/rules.yaml` (`difficulty.worldStep`), `data/generated/*`, `docs/DECISIONS.md`, `docs/STATUS.md`, `ARCHITECTURE.md` (`sim/chill.ts`, `sim/fire-pools.ts`, `client/render/fx/fire-pools.ts`), spec (stav: plán 3 hotový)
 
 - [ ] **Step 1: Měření** (Normal, seedy 1–20): `npm run sim:run -- --hero all --seeds 1-20 --world 4-5 --gear none|mid|full --quiet` a `--world 5 --difficulty hell --gear full`.
-- [ ] **Step 2: Ladění k cíli** (Rozhodnutí Clauda nahoře: svět 4 mid 64–76, svět 5 mid 52–68, svět 5 Hell full < 80, bez výbavy svět 4 i 5 > 0 u aspoň 4 hrdinů; světy 1–3 se nemění). Pořadí, každý krok s novým měřením: (1) čísla situací (`moveSlow`, `everySeconds` vánice, `chill.attackSlow`; `heroShare`, `bolts`, `everySeconds`, louže meteorů); (2) počty ostrůvků; (3) až pak `worldStep` (mění světy 2–3: přeměř je a zapiš).
+- [ ] **Step 2: Ladění k cíli** (Rozhodnutí Clauda nahoře: svět 4 mid 56–68, svět 5 mid 40–54, svět 5 Hell full < 60, bez výbavy svět 4 i 5 > 0 u aspoň 3 hrdinů; světy 1–3 se nemění). Pořadí, každý krok s novým měřením: (1) čísla situací (`moveSlow`, `everySeconds` vánice, `chill.attackSlow`; `heroShare`, `bolts`, `everySeconds`, louže meteorů); (2) počty ostrůvků; (3) až pak `worldStep` (mění světy 2–3: přeměř je a zapiš).
 - [ ] **Step 3: Výkon:** `sim:run --hero stonehorn --phase 16 --seeds 1-3 --world 4` a `5` proti `--world 1` (cíl ≤ 1,2×).
 - [ ] **Step 4:** `ready: true` u světů 4 a 5, data:build, `npm run check`, `npm run build`, `npx playwright test --project=webgl2-fallback --project=sim-chromium` → PASS.
 - [ ] **Step 5: DECISIONS** (sekce „Difficulties and worlds, plan 3b: Frostreach and Blightscar“): rozhodnutí Clauda výše, kostry, čísla vánice, promrznutí, meteorů a louží, vzhled, tabulka výher světů 1–5 × none / mid / full a Hell svět 5 full, krok simulace, digest. **STATUS**: nahoře co Petr kontroluje (vzhled a čitelnost obou světů, hřbet a průsmyk, zeď a trhliny, je vánice znát a nutí promrznutí k pohybu, nejsou meteory moc časté nebo louže moc silné, fps `?fps=1&debug=1&phase=16&world=5`), odkazy (`?debug=1&world=4`, `?debug=1&world=5`, `__game.debug.hazard()`, `__game.hazard`), a další krok z pořadí (zbylí hrdinové a lepší grafika kouzel). Krátká kopie do projektu (`claude/STATUS.md`).
