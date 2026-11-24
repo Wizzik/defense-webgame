@@ -137,7 +137,7 @@ describe("generated game data", () => {
     expect(worlds.map((w) => w.ready)).toEqual([true, true, true, true, true]);
     type Level = { hp: number; damage: number; packSize: number; eliteHp: number; magicFind: number; extraRushes: { atSeconds: number }[] };
     const rules = JSON.parse(read("rules.json")) as { run: { durationSeconds: number }; difficulty: { levels: Record<string, Level> } };
-    expect(rules.difficulty.levels.normal).toEqual({ hp: 1, damage: 1, packSize: 1, eliteHp: 1, magicFind: 0, extraRushes: [] });
+    expect(rules.difficulty.levels.normal).toEqual({ hp: 1, damage: 1, packSize: 2, eliteHp: 1, magicFind: 0, extraRushes: [] });
     for (const id of ["insane", "hell"]) {
       const times = rules.difficulty.levels[id]!.extraRushes.map((r) => r.atSeconds);
       expect(times.length, id).toBeGreaterThan(0);

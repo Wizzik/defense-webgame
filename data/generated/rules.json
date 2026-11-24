@@ -61,7 +61,7 @@
     "shieldBelow": 0.35
   },
   "enemies": {
-    "maxAlive": 150,
+    "maxAlive": 300,
     "siegerAggroRange": 250,
     "leashRange": 900,
     "knockback": {
@@ -659,7 +659,7 @@
       "normal": {
         "hp": 1,
         "damage": 1,
-        "packSize": 1,
+        "packSize": 2,
         "eliteHp": 1,
         "magicFind": 0,
         "extraRushes": []
@@ -667,7 +667,7 @@
       "insane": {
         "hp": 1.35,
         "damage": 1.35,
-        "packSize": 1.2,
+        "packSize": 2.4,
         "eliteHp": 1,
         "magicFind": 0.25,
         "extraRushes": [
@@ -701,7 +701,7 @@
       "hell": {
         "hp": 1.75,
         "damage": 1.75,
-        "packSize": 1.4,
+        "packSize": 2.8,
         "eliteHp": 1.2,
         "magicFind": 0.5,
         "extraRushes": [
