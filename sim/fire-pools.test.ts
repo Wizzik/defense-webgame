@@ -69,11 +69,11 @@ describe("fire pools", () => {
     expect(livePools(run)).toBe(0);
   });
 
-  it("a pool burns the hero 4 % of max hp a second", () => {
+  it("a pool burns the hero heroSharePerSecond of max hp a second", () => {
     const run = run5();
     addPool(run, run.hero.x, run.hero.y);
     const [taken] = burn(run, 30);
-    expect(taken).toBeCloseTo(0.04 * run.hero.stats.maxHp, 6);
+    expect(taken).toBeCloseTo((run.data.worlds[4]!.hazard as Meteors).pool.heroSharePerSecond * run.hero.stats.maxHp, 6);
     const shielded = run5();
     shielded.players[0]!.shieldTicks = 1000;
     addPool(shielded, shielded.hero.x, shielded.hero.y);
@@ -91,8 +91,9 @@ describe("fire pools", () => {
     const hp = [run.enemies.hp[common]!, run.enemies.hp[big]!];
     run.hero.hp = 1e9;
     for (let s = 0; s < 30; s++) run.step(NO_INPUT);
-    expect(hp[0]! - run.enemies.hp[common]!).toBeCloseTo(0.06 * run.enemies.maxHp[common]!, 6);
-    expect(hp[1]! - run.enemies.hp[big]!).toBeCloseTo(0.004 * run.enemies.maxHp[big]!, 6);
+    const { pool } = run.data.worlds[4]!.hazard as Meteors;
+    expect(hp[0]! - run.enemies.hp[common]!).toBeCloseTo(pool.enemySharePerSecond * run.enemies.maxHp[common]!, 6);
+    expect(hp[1]! - run.enemies.hp[big]!).toBeCloseTo(pool.bossSharePerSecond * run.enemies.maxHp[big]!, 6);
   });
 
   it("one pool per pulse", () => {

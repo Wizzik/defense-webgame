@@ -557,7 +557,8 @@
       "cs": "Sníh, led a studené šedé světlo na okraji světa."
     },
     "color": "#2a3a4c",
-    "ready": false,
+    "ready": true,
+    "strength": 1.03,
     "map": {
       "paths": {
         "width": 160,
@@ -736,7 +737,8 @@
       "cs": "Spálená černá země pod fialovou oblohou a zeleným ohněm."
     },
     "color": "#2a1c34",
-    "ready": false,
+    "ready": true,
+    "strength": 1.1,
     "map": {
       "paths": {
         "width": 160,
@@ -916,14 +918,14 @@
       "warnSeconds": 1.5,
       "radius": 150,
       "heroShare": 0.12,
-      "enemyShare": 0.2,
-      "bossShare": 0.02,
+      "enemyShare": 0.02,
+      "bossShare": 0.002,
       "pool": {
         "seconds": 6,
         "radius": 130,
         "heroSharePerSecond": 0.04,
-        "enemySharePerSecond": 0.06,
-        "bossSharePerSecond": 0.004
+        "enemySharePerSecond": 0.005,
+        "bossSharePerSecond": 0.0005
       },
       "name": {
         "en": "Green meteors",

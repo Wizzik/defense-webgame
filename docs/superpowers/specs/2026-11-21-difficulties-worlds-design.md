@@ -1,6 +1,6 @@
 # Obtížnosti a světy: návrh
 
-- **Stav:** schváleno (21. 11. 2026); plány 1 a 2 provedeny; plán 3 rozdělen na 3a (vzhled a načítání po světě, světy 2 a 3; proveden 22. 11. 2026) a 3b (světy 4 a 5); čísla v `docs/DECISIONS.md`, sekce Difficulties and worlds.
+- **Stav:** schváleno (21. 11. 2026); plány 1 a 2 provedeny; plán 3 rozdělen na 3a (vzhled a načítání po světě, světy 2 a 3; proveden 22. 11. 2026) a 3b (světy 4 a 5; proveden 24. 11. 2026); čísla v `docs/DECISIONS.md`, sekce Difficulties and worlds.
 - **Petr rozhodl:** prostředí jinak vypadá i jinak hraje (překážky, cesty, přírodní situace), poslední svět je nejtemnější, inspirace příběhem Warcraftu; vztah obtížnosti a prostředí je **žebříček světů plus volič obtížnosti** (B); překážky jsou **ostrůvky plus jeden prvek s průchodem na svět**; mapa vzniká jako **pevná kostra plus rozmístění ze seedu** (C). Vše ostatní jsou Claudova rozhodnutí (označená *návrh*), Petr může kterékoli změnit.
 - **Vychází z:** původního specu (`2026-11-04-defense-webgame-design.md`, 3.1 Obtížnost: Normal / Insane / Hell), Petrova přání z 2026-11-12 („obtížnosti jako kombinace jiného prostředí a zvolené obtížnosti, mají pohltit sílu výbavy“), inventury multiplayeru (`docs/multiplayer/single-hero-inventory.md`, kapitola 5: jedna tabulka násobků, kterou co-op vynásobí počtem hráčů).
 - **Staví na:** `main` po PR #27 (`c86fb8b`).

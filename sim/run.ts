@@ -203,7 +203,7 @@ export class Run {
     if (players.length < 1 || players.length > MAX_PLAYERS) {
       throw new Error(`createRun: 1 to ${MAX_PLAYERS} players, got ${players.length}`);
     }
-    this.mods = difficultyMods(rules, this.world, this.difficulty, players.length);
+    this.mods = difficultyMods(rules, this.world, this.difficulty, players.length, data.worlds[this.world - 1]!.strength ?? 1);
     this.rng = new Rng(options.seed);
     this.enemies = new EnemyStore(rules.enemies.maxAlive);
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);

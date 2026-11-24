@@ -784,6 +784,16 @@ describe("difficulty and worlds", () => {
     expect(stormOf(vw.worlds[1]!)).toBeNull();
   });
 
+  it("a world's strength is optional and positive", () => {
+    const ok = fixture();
+    ok.worlds[0].strength = 1.1;
+    expect(validateGameData(ok).worlds[0]!.strength).toBe(1.1);
+    expect(validateGameData(fixture()).worlds[0]!.strength).toBeUndefined();
+    const zero = fixture();
+    zero.worlds[0].strength = 0;
+    expect(errorMessage(zero)).toContain("strength");
+  });
+
   it("rejects an unknown hazard kind", () => {
     const odd = fixture();
     odd.worlds[0].hazard = { ...weather(), kind: "flood" };

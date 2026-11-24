@@ -1,7 +1,8 @@
 # The world ladder (spec 2026-11-21 difficulties and worlds 4.1). The order is the world's number, 1-5; winning
 # world N on a difficulty unlocks world N + 1 on it (meta/progress.ts). Names and blurbs are our own.
 # color: the dark card colour in the world screen (no orange). ready: false = playable with the look of world 1 and
-# marked "coming soon" until the worlds plan 3 gives it its own look.
+# marked "coming soon" (every world has its own look since plan 3b). strength: enemy hp and damage x this on top of
+# rules.difficulty.worldStep (default 1), to tune one world of the ladder.
 # hazard kinds: storm (bolts after a warning circle), weather (a timed event slowing everyone's walking: effect sand),
 # thicket (fixed zones [x, y, r] of brake slowing walking inside them; a path wins over a zone); weather effect snow may
 # carry chill (a hero standing stillSeconds in it attacks slower by attackSlow); meteors (waves like the storm, `bolts`
@@ -157,7 +158,9 @@
     en: "Snow, ice and a cold grey light at the edge of the world."
     cs: "Sníh, led a studené šedé světlo na okraji světa."
   color: "#2a3a4c"
-  ready: false
+  ready: true
+  # Enemy hp and damage x strength on top of the world step (plan 3b, tuned to the ladder; Petr: "make it harder").
+  strength: 1.03
   # An ice ridge in a horseshoe of radius 1500 (thickness 180) over the north and east of the castle with one pass
   # 400 wide around (1061, 1061); its arms end at 160° and -70°, inside the arrival ring.
   map:
@@ -207,7 +210,8 @@
     en: "Scorched black earth under a violet sky and green flame."
     cs: "Spálená černá země pod fialovou oblohou a zeleným ohněm."
   color: "#2a1c34"
-  ready: false
+  ready: true
+  strength: 1.1
   # A broken octagonal wall of radius 1600 (thickness 110) with four breaches 400 wide, off the middles of their sides.
   map:
     paths:
@@ -250,7 +254,7 @@
     warnSeconds: 1.5
     radius: 150
     heroShare: 0.12
-    enemyShare: 0.2
-    bossShare: 0.02
-    pool: { seconds: 6, radius: 130, heroSharePerSecond: 0.04, enemySharePerSecond: 0.06, bossSharePerSecond: 0.004 }
+    enemyShare: 0.02
+    bossShare: 0.002
+    pool: { seconds: 6, radius: 130, heroSharePerSecond: 0.04, enemySharePerSecond: 0.005, bossSharePerSecond: 0.0005 }
     name: { en: Green meteors, cs: Zelené meteory }

@@ -118,6 +118,8 @@ export const WorldSchema = z.object({
   color: z.string().regex(/^#[0-9a-f]{6}$/, "expected a lowercase hex colour like #1f3a44"),
   /** False: playable with the look of world 1 and marked "coming soon". */
   ready: z.boolean(),
+  /** Enemy hp and damage x this on top of the difficulty's world step (default 1): tunes one world of the ladder. */
+  strength: z.number().positive().optional(),
   map: WorldMapSchema,
   hazard: HazardSchema,
 }).strict();
