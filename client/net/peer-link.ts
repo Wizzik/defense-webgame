@@ -89,17 +89,14 @@ export interface Room {
 
 /**
  * Opens room `code`; resolves once the code is registered. Every guest whose data channel opens is given to
- * `onGuest`; one over `maxGuests` open links, or after `lock()`, is closed at once. A guest link that closes does not
- * close the room.
+ * `onGuest` (the caller refuses one too many, so he can be told why); after `lock()` a new one is closed at once.
+ * A guest link that closes does not close the room.
  */
-export function openRoom(
-  code: string, signal: SignalServer | null, onGuest: (link: PeerLink) => void, maxGuests = 3,
-): Promise<Room> {
+export function openRoom(code: string, signal: SignalServer | null, onGuest: (link: PeerLink) => void): Promise<Room> {
   return new Promise((resolve, reject) => {
     const peer = new Peer(code, peerOptions(signal));
     let open = false;
     let locked = false;
-    let guests = 0;
     peer.on("disconnected", () => {
       // losing the signalling server does not break open data channels; nothing to do
     });
@@ -123,16 +120,11 @@ export function openRoom(
     });
     peer.on("connection", (conn) => {
       conn.on("open", () => {
-        if (locked || guests >= maxGuests) {
+        if (locked) {
           conn.close();
           return;
         }
-        guests++;
-        let counted = true;
-        onGuest(wrap(peer, conn, () => {
-          if (counted) guests--;
-          counted = false;
-        }));
+        onGuest(wrap(peer, conn, () => {}));
       });
     });
   });

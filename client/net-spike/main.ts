@@ -226,7 +226,7 @@ function firstGuest(code: string): Promise<PeerLink> {
     openRoom(code, signal, (link) => {
       room?.lock();
       resolve(link);
-    }, 1).then((r) => { room = r; }, reject);
+    }).then((r) => { room = r; }, reject);
   });
 }
 

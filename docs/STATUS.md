@@ -1,14 +1,29 @@
 # Status
 
-Updated 2026-11-23 (multiplayer migration step 8, co-op balance). Read this first when you resume work.
+Updated 2026-11-24 (co-op for 3-4 players, PR open). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-23 evening)
 
-1. **Co-op for 3-4 players** (lobby with more links / guests, HUD for several teammates; the sim already takes 1-4 players and `rules.coop` is tuned for 2-4).
+1. **Co-op for 3-4 players**: done on branch `coop-four` (below), waiting for CI, the merge and Petr's test.
 2. **More worlds:** difficulties plan 3b (Frostreach and Blightscar, their natural events and looks, the ladder tuned for world 5).
 3. Then the **remaining heroes** of the map and **better spell graphics** (effects of the spells).
 
-Points 1 and 2 start in the next chat.
+Point 2 starts in the next chat.
+
+## Co-op for 3-4 players (branch `coop-four`, PR open, 2026-11-24)
+
+- Petr approved the short design (2026-11-24); plan `docs/superpowers/plans/2026-11-24-coop-four-players.md`, done inline in one chat. `npm run check`, the build and e2e `coop.spec.ts` pass. Details and rulings: `docs/DECISIONS.md`, section Co-op for 3-4 players.
+- What it brings:
+  - **one link for up to three friends:** the host sends the same link; the lobby lists who is in ("1. Stonehorn (host, you)"), each picks and may change his hero; the host starts once one guest is in; a 5th player sees "The room is full";
+  - a star through the host (guests link only to him; he relays inputs and hashes), protocol 3;
+  - a guest who leaves: the others play on, his hero stands still, the banner names him; the host who leaves: each guest plays on alone;
+  - `?debug=1&mate=gravecaller,tidecaller,stonehorn`: a local run of four heroes, the autopilot steering the other three.
+- Net test here: 4 headless windows stayed in sync (no desync), a guest leaving and the host leaving behaved as above; only about 8 steps a second on this container's CPU, so the speed is for Petr's test.
+- **What Petr checks after the merge** (https://wizzik.github.io/defense-webgame/):
+  - Host a game, open the link in two or three other browsers or send it to friends; the lobby lists all; change a hero after joining;
+  - play 10 minutes in 3-4; is the game smooth (send `window.__net` from each console: tick, rttMedian, stallsPerMinute, lastMatchedHash, desyncAt);
+  - one guest closes his page: the others go on; the HUD shows three teammates;
+  - does it feel as hard as alone with 3-4 (`rules.coop`, step 8).
 
 ## Multiplayer migration step 8: co-op balance (merged as PR #38 `303f3b5`, 2026-11-23)
 

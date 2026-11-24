@@ -57,7 +57,7 @@ export const messagesEn = {
   "cards.ultimate": "Ultimate",
   "cards.new": "New",
   "menu.coop": "Co-op",
-  "coop.title": "Co-op for two",
+  "coop.title": "Co-op for up to four",
   "coop.hero": "You play {name} with your own gear; you can change the hero until the run starts.",
   "coop.host": "Host a game",
   "coop.code": "Room code",

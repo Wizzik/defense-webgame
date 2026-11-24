@@ -114,7 +114,7 @@ export class CoopSetup {
     for (let attempt = 1; attempt <= HOST_TRIES; attempt++) {
       const code = newRoomCode(Math.random);
       try {
-        const room = await openRoom(code, signal, (link) => this.guestArrived(ticket, link), MAX_PLAYERS - 1);
+        const room = await openRoom(code, signal, (link) => this.guestArrived(ticket, link));
         if (ticket !== this.attempt) {
           room.close();
           return;

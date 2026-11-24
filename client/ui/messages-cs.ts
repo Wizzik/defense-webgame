@@ -59,7 +59,7 @@ export const messagesCs = {
   "cards.ultimate": "Ultimátka",
   "cards.new": "Nové",
   "menu.coop": "Co-op",
-  "coop.title": "Co-op pro dva",
+  "coop.title": "Co-op až pro čtyři",
   "coop.hero": "Hraješ za {name} se svou výbavou; hrdinu můžeš změnit, dokud hra nezačne.",
   "coop.host": "Založit hru",
   "coop.code": "Kód místnosti",

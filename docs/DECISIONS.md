@@ -2,6 +2,44 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Co-op for 3-4 players (2026-11-24; Petr approved the design, the details are Claude's)
+
+- Spec: `docs/superpowers/specs/2026-11-24-coop-four-players-design.md`, plan `docs/superpowers/plans/2026-11-24-coop-four-players.md`. The sim, `rules.coop` and the single-player digest `4bc81413` did not change.
+- **A star through the host:**
+  - Guests link only to the host. `client/net/relay.ts` decides whose an input or hash is: on the host the link's player, because the host trusts the link and not the field, so a guest cannot send for another. On a guest it is the host's `p`.
+  - The host passes every guest's input and hash on to the other guests **before** anything else, so the guests get a leaver's last inputs before his `left`. Everyone then holds the same set of his inputs, and the run stays in sync.
+  - A full mesh was dropped: up to 6 WebRTC links, and more NAT failures between players on different networks.
+- **Protocol 3** (`client/net/protocol.ts`):
+  - `in` and `hash` carry the player `p`.
+  - `room {v, you, heroes}` goes from the host to every guest when the lobby changes.
+  - `left {p}` goes from the host to the other guests.
+  - `start` carries `you`, the receiver's own number.
+  - `hello` stays only for `/net-spike/`.
+- **`Lockstep(n, local)`** waits for the inputs of every player still in the run. `recordHash` compares the local hash with every other player's known one.
+- **The host starts stepping when every guest has sent `ready`** (or left).
+- **The room** (`openRoom` in `client/net/peer-link.ts`):
+  - One link for everyone.
+  - Each guest's data channel goes to the lobby (`client/game/coop-roster.ts`: join order, player number = place + 1, packed again when a guest leaves the lobby).
+  - A 4th guest gets `room` with `you` = -1 and sees "The room is full (4 players)". A guest of another version also gets `you` = -1 with the host's version and sees "reload the page".
+  - After the start the room takes nobody.
+  - When a guest leaves while the models load, the host loads them again for the players who are left.
+- **The lobby** lists the players ("1. Stonehorn (host, you)"). The host keeps the link on show until there are 4 players, and starts as soon as 1 guest is in. Every guest can change his hero until the start.
+- **Leaving:**
+  - A guest who leaves: the host drops him, sends `left` to the others, and his hero stands still. Every window's banner names him.
+  - The host who leaves: every guest loses the others too. Each guest plays on alone, the other heroes stand still, and the banner says "The host left". Host migration was left out (Petr approved).
+  - `window.__net.gone` lists the players who left (it replaces `left`).
+- **Debug:** `?debug=1&mate=a,b,c` runs a local run of up to 4 heroes. The autopilot steers all but the first.
+- **Net test in the container** (local PeerServer, headless Chromium, software WebGL2):
+  - 4 windows: the lobby listed all four in every window, and a 5th window got "The room is full".
+  - About 40 s of play with everyone walking: the hashes matched in all four windows up to step 299, with no desync and 0 rejected.
+  - Guest 3 closed his page: `gone [2]` in all three remaining windows, the hashes still matched (up to 359), and the banner named Tidecaller.
+  - The host closed his page: the first guest showed `gone [0, 2, 3]` and played on alone.
+  - Only about 8 steps a second ran with 5 software-rendering windows on one container CPU (RTT about 440 ms). Petr's real test is the measure.
+- **Claude's rulings** (Petr may change them):
+  - Player numbers follow join order.
+  - A guest left alone after the host leaves catches up the steps he missed waiting (the wall-clock rule of the net loop).
+  - The lobby title is "Co-op for up to four".
+
 ## After Petr's first co-op test (2026-11-23)
 
 - **Co-op cards in the middle** as for one player (the right-edge column is gone); the run still goes on, the choice time shows under the title.

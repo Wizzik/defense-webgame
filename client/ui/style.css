@@ -1446,8 +1446,10 @@
 }
 
 .coop-roster-list {
+  display: inline-block;
   margin: 0 0 0.4rem;
   padding-left: 1.6rem;
+  text-align: left;
 }
 
 .coop-status.error {
