@@ -63,8 +63,8 @@ async function pickCard(page: Page): Promise<void> {
 }
 
 /** Wears the first common item of each type in all 16 gear slots of the run (chest items at level 1). */
-async function wearCommons(page: Page): Promise<void> {
-  const pairs = SLOTS.map(([slot, type]) => [slot, ITEMS.find((item) => item.slotType === type && item.rarity === "common")!.id]);
+async function wearCommons(page: Page, rarity = "common"): Promise<void> {
+  const pairs = SLOTS.map(([slot, type]) => [slot, ITEMS.find((item) => item.slotType === type && item.rarity === rarity)!.id]);
   await page.evaluate((list) => {
     for (const [slot, item] of list) window.__game!.debug!.wear(slot!, item!);
   }, pairs);
@@ -200,8 +200,13 @@ test("level-up shows three cards and a pick resumes the run", async ({ page }, t
 test("run ends with the end screen", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&duration=10&speed=8&debug=1&lang=en");
   await startRun(page);
-  // the duration brings the final boss; the run is won when it falls
-  await page.waitForFunction(() => window.__game?.boss?.id === "dread-regent", undefined, { timeout: 90_000, polling: 100 });
+  // the duration brings the final boss; the run is won when it falls (cards picked on the way: a level-up pauses)
+  const bossBy = Date.now() + 90_000;
+  while ((await page.evaluate(() => window.__game?.boss?.id)) !== "dread-regent" && Date.now() < bossBy) {
+    if ((await page.evaluate(() => window.__game?.screen)) === "levelUp") await pickCard(page);
+    await page.waitForTimeout(100);
+  }
+  expect(await page.evaluate(() => window.__game?.boss?.id)).toBe("dread-regent");
   expect(await page.evaluate(() => window.__game?.screen)).not.toBe("won");
   expect(await playToEnd(page)).toBe("won");
 
@@ -566,8 +571,9 @@ test("a slam shows a ring and hides it after the hit", async ({ page }, testInfo
   await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
   await page.waitForFunction(() => window.__game?.phase === 6, undefined, { timeout: 30_000 });
   expect(await page.evaluate(() => window.__game!.render.slamRings)).toBe(0);
-  // common gear in every slot: the Blood Clan's lusted warlord kills a bare Mistwarden before the first slam
-  await wearCommons(page);
+  // epic gear in every slot: the Blood Clan's lusted warlord and the doubled packs kill a lightly geared Mistwarden
+  // before the ring of the first slam is gone
+  await wearCommons(page, "epic");
   await startRun(page);
   await page.waitForFunction(() => window.__game?.boss?.id === "iron-marshal", undefined, { timeout: 30_000, polling: 50 });
   // stay next to the boss until its slam is ready (7 s after it came) and it winds up
