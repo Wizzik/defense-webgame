@@ -140,7 +140,7 @@ export const RulesSchema = z.object({
       everySeconds: positive,
     }).strict().refine((pack) => pack.min <= pack.max, "min is above max"),
     /** Packs sent at once in every interval, from different sides. */
-    packs: z.number().int().min(1).max(3),
+    packs: z.number().int().min(1).max(6),
     /** Chance that a pack hunts the hero in place of walking to the castle. */
     hunterShare: z.number().min(0).max(1),
     /** Elites that come once, with the first pack of the first interval of the phase. */

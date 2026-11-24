@@ -61,7 +61,7 @@
     "shieldBelow": 0.35
   },
   "enemies": {
-    "maxAlive": 300,
+    "maxAlive": 600,
     "siegerAggroRange": 250,
     "leashRange": 900,
     "knockback": {
@@ -82,7 +82,7 @@
         "max": 10,
         "everySeconds": 6
       },
-      "packs": 1,
+      "packs": 2,
       "hunterShare": 0.25,
       "elites": 0
     },
@@ -97,7 +97,7 @@
         "max": 11,
         "everySeconds": 6
       },
-      "packs": 1,
+      "packs": 2,
       "hunterShare": 0.3,
       "elites": 0
     },
@@ -114,7 +114,7 @@
         "max": 12,
         "everySeconds": 6
       },
-      "packs": 1,
+      "packs": 2,
       "hunterShare": 0.3,
       "elites": 1
     },
@@ -131,7 +131,7 @@
         "max": 13,
         "everySeconds": 6
       },
-      "packs": 1,
+      "packs": 2,
       "hunterShare": 0.3,
       "elites": 1
     },
@@ -148,7 +148,7 @@
         "max": 10,
         "everySeconds": 6
       },
-      "packs": 2,
+      "packs": 4,
       "hunterShare": 0.35,
       "elites": 1
     },
@@ -164,7 +164,7 @@
         "max": 12,
         "everySeconds": 6
       },
-      "packs": 2,
+      "packs": 4,
       "hunterShare": 0.35,
       "elites": 1
     },
@@ -180,7 +180,7 @@
         "max": 12,
         "everySeconds": 6
       },
-      "packs": 2,
+      "packs": 4,
       "hunterShare": 0.35,
       "elites": 1
     },
@@ -196,7 +196,7 @@
         "max": 12,
         "everySeconds": 6
       },
-      "packs": 2,
+      "packs": 4,
       "hunterShare": 0.35,
       "elites": 1
     },
@@ -212,7 +212,7 @@
         "max": 13,
         "everySeconds": 5
       },
-      "packs": 2,
+      "packs": 4,
       "hunterShare": 0.35,
       "elites": 2
     },
@@ -228,7 +228,7 @@
         "max": 13,
         "everySeconds": 5
       },
-      "packs": 2,
+      "packs": 4,
       "hunterShare": 0.35,
       "elites": 2
     },
@@ -244,7 +244,7 @@
         "max": 15,
         "everySeconds": 5
       },
-      "packs": 2,
+      "packs": 4,
       "hunterShare": 0.4,
       "elites": 2
     },
@@ -260,7 +260,7 @@
         "max": 15,
         "everySeconds": 5
       },
-      "packs": 2,
+      "packs": 4,
       "hunterShare": 0.4,
       "elites": 2
     },
@@ -276,7 +276,7 @@
         "max": 15,
         "everySeconds": 5
       },
-      "packs": 2,
+      "packs": 4,
       "hunterShare": 0.4,
       "elites": 2
     },
@@ -292,7 +292,7 @@
         "max": 14,
         "everySeconds": 5
       },
-      "packs": 3,
+      "packs": 6,
       "hunterShare": 0.4,
       "elites": 2
     },
@@ -308,7 +308,7 @@
         "max": 14,
         "everySeconds": 5
       },
-      "packs": 3,
+      "packs": 6,
       "hunterShare": 0.4,
       "elites": 2
     },
@@ -324,7 +324,7 @@
         "max": 15,
         "everySeconds": 5
       },
-      "packs": 3,
+      "packs": 6,
       "hunterShare": 0.4,
       "elites": 2
     },
@@ -340,7 +340,7 @@
         "max": 15,
         "everySeconds": 5
       },
-      "packs": 3,
+      "packs": 6,
       "hunterShare": 0.4,
       "elites": 2
     },
@@ -356,7 +356,7 @@
         "max": 15,
         "everySeconds": 5
       },
-      "packs": 3,
+      "packs": 6,
       "hunterShare": 0.4,
       "elites": 2
     },
@@ -372,7 +372,7 @@
         "max": 16,
         "everySeconds": 5
       },
-      "packs": 3,
+      "packs": 6,
       "hunterShare": 0.4,
       "elites": 3
     },
@@ -388,7 +388,7 @@
         "max": 16,
         "everySeconds": 5
       },
-      "packs": 3,
+      "packs": 6,
       "hunterShare": 0.4,
       "elites": 3
     }

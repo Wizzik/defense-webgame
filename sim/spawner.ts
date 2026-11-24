@@ -45,7 +45,9 @@ export function spawnEnemies(run: Run): void {
   const baseX = dirX;
   const baseY = dirY;
   for (let p = 0; p < phase.packs; p++) {
-    rotatedDirection(baseX, baseY, p, phase.packs);
+    // at most three directions (one, opposite, or 120° apart); packs beyond three come again from them
+    const directions = Math.min(phase.packs, 3);
+    rotatedDirection(baseX, baseY, p % directions, directions);
     const rolled = phase.pack.min + Math.floor(rng.next() * (phase.pack.max - phase.pack.min + 1));
     const sized = Math.max(1, Math.round(rolled * run.mods.packSize));
     const size = finale ? Math.max(1, Math.round(sized * rules.run.finale.packScale)) : sized;
