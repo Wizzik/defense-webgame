@@ -13,8 +13,9 @@ export function chillOf(run: Run): NonNullable<Weather["chill"]> | null {
 
 /**
  * Once per step for `run.current`, after his move: walking (or a dash) thaws him and restarts the count; standing
- * counts on, and a living hero who is not choosing freezes after chill.stillSeconds while the weather runs. He stays
- * chilled, even after the weather, until he walks.
+ * counts on, and a hero freezes after chill.stillSeconds while the weather runs. A fallen, choosing or rooted hero
+ * cannot walk, so his count starts over (he is not chilled the moment he can walk again). He stays chilled, even
+ * after the weather, until he walks.
  */
 export function updateChill(run: Run, moved: boolean): void {
   const p = run.players[run.current]!;
@@ -23,8 +24,12 @@ export function updateChill(run: Run, moved: boolean): void {
     p.chilled = false;
     return;
   }
+  if (run.hero.hp <= 0 || isChoosing(run) || run.hero.rootTicks > 0) {
+    p.stillTicks = 0;
+    return;
+  }
   p.stillTicks++;
-  if (p.chilled || run.hazard.weatherTicks === 0 || run.hero.hp <= 0 || isChoosing(run)) return;
+  if (p.chilled || run.hazard.weatherTicks === 0) return;
   const chill = chillOf(run);
   if (chill === null || p.stillTicks < Math.round(chill.stillSeconds * TICKS_PER_SECOND)) return;
   p.chilled = true;

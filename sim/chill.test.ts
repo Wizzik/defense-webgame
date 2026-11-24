@@ -104,6 +104,40 @@ describe("blizzard chill", () => {
     expect(run.players[2]!.chilled).toBe(true);
   });
 
+  it("standing through the choice time does not chill at its end", () => {
+    const run = run4([{ hero: "stonehorn" }, { hero: "sparkshot" }]);
+    run.players[1]!.hero.pendingLevelUps = 1;
+    run.step([NO_INPUT, NO_INPUT]);
+    debugHazard(run);
+    // the choice time (150 steps) runs out while player 1 stands; then he has 3 s before he freezes
+    stepN(run, 150, [NO_INPUT, NO_INPUT]);
+    expect(run.players[1]!.choosingTicks).toBe(0);
+    stepN(run, 60, [NO_INPUT, NO_INPUT]);
+    expect(run.players[1]!.chilled).toBe(false);
+  });
+
+  it("a revived hero is not chilled at once", () => {
+    const run = run4([{ hero: "stonehorn" }, { hero: "sparkshot" }]);
+    debugHazard(run);
+    run.players[1]!.hero.hp = 0;
+    for (let s = 0; s < 120; s++) {
+      run.players[0]!.hero.hp = run.players[0]!.hero.stats.maxHp;
+      run.castle.hp = run.castle.maxHp;
+      run.step([EAST, NO_INPUT]);
+    }
+    run.players[1]!.hero.hp = run.players[1]!.hero.stats.maxHp;
+    stepN(run, 30, [EAST, NO_INPUT]);
+    expect(run.players[1]!.chilled).toBe(false);
+  });
+
+  it("roots do not count as standing", () => {
+    const run = run4();
+    debugHazard(run);
+    run.hero.rootTicks = 200;
+    stepN(run, 150);
+    expect(run.players[0]!.chilled).toBe(false);
+  });
+
   it("each player has his own chill", () => {
     const run = run4([{ hero: "stonehorn" }, { hero: "sparkshot" }]);
     debugHazard(run);
