@@ -43,6 +43,8 @@ export interface CoopNetDeps {
   afterStep(run: Run): void;
   /** Player `player` left or his link broke; the run goes on with his hero idle (a guest gets 0 when the host left). */
   onLeft(player: number, reason: string): void;
+  /** After `stop()` closed the links (the host closes his room there). */
+  onStop?(): void;
   /** The simulations differ from `step` on; the run stops. */
   onDesync(step: number): void;
 }
@@ -120,6 +122,7 @@ export class CoopNet {
     this.ticker?.stop();
     clearInterval(this.pinger);
     for (const link of this.deps.links.values()) link.close();
+    this.deps.onStop?.();
   }
 
   private receive(from: number, m: NetMessage): void {

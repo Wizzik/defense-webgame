@@ -104,7 +104,7 @@ export class Session {
    * Starts a co-op run of `players` in which this window steers `local`; the returned net loop steps it once
    * started (a guest at once, the host when every guest is ready).
    */
-  startCoop(seed: number, players: readonly PlayerOptions[], local: number, net: Pick<CoopNetDeps, "links" | "onLeft" | "onDesync">): CoopNet {
+  startCoop(seed: number, players: readonly PlayerOptions[], local: number, net: Pick<CoopNetDeps, "links" | "onLeft" | "onDesync" | "onStop">): CoopNet {
     this.leaveCoop();
     this.run = createRun(this.data, { seed, players, world: this.world, difficulty: this.difficulty });
     this.onStart();

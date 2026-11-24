@@ -1,5 +1,5 @@
-// A thin PeerJS wrapper for the net spike (spec 2026-11-20, 5.4): one host, one guest, ordered JSON messages
-// through PeerJS's free cloud signalling. Every received message passes decodeMessage; a bad one is counted and dropped.
+// A thin PeerJS wrapper (spec 2026-11-20, 5.4; up to three guests since 2026-11-24): a host's room and the guests'
+// links to it, ordered JSON messages through PeerJS's free cloud signalling. Every received message passes decodeMessage; a bad one is counted and dropped.
 import Peer, { type DataConnection, type PeerOptions } from "peerjs";
 import { decodeMessage, type NetMessage } from "./protocol";
 import type { SignalServer } from "./signal";
@@ -30,7 +30,8 @@ function readable(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-function wrap(peer: Peer, conn: DataConnection): PeerLink {
+/** One data connection as a link; `onFinish` runs once when it closes or fails (a guest destroys his Peer there). */
+function wrap(peer: Peer, conn: DataConnection, onFinish: () => void): PeerLink {
   let messageCb: (m: NetMessage) => void = () => {};
   let closeCb: (reason: string) => void = () => {};
   let closed = false;
@@ -39,7 +40,7 @@ function wrap(peer: Peer, conn: DataConnection): PeerLink {
     if (closed) return;
     closed = true;
     closeCb(reason);
-    peer.destroy();
+    onFinish();
   };
   conn.on("data", (data) => {
     const m = decodeMessage(data);
@@ -51,9 +52,6 @@ function wrap(peer: Peer, conn: DataConnection): PeerLink {
   });
   conn.on("close", () => finish("the connection closed"));
   conn.on("error", (err) => finish(readable(err)));
-  peer.on("disconnected", () => {
-    // losing the signalling server does not break an open data channel; nothing to do
-  });
   peer.on("error", (err) => finish(readable(err)));
   return {
     send(m) {
@@ -69,7 +67,11 @@ function wrap(peer: Peer, conn: DataConnection): PeerLink {
       if (closed) return;
       if (conn.open) conn.send({ t: "bye" } satisfies NetMessage);
       closed = true;
-      setTimeout(() => peer.destroy(), 200);
+      // let "bye" leave before the channel goes
+      setTimeout(() => {
+        conn.close();
+        onFinish();
+      }, 200);
     },
     get rejected() {
       return state.rejected;
@@ -77,24 +79,61 @@ function wrap(peer: Peer, conn: DataConnection): PeerLink {
   };
 }
 
-/** Opens room `code` and resolves with the first guest; later guests are turned away. */
-export function hostRoom(code: string, signal: SignalServer | null = null): Promise<PeerLink> {
+/** A host's open room. */
+export interface Room {
+  /** Turns away every later guest (the run started). */
+  lock(): void;
+  /** Closes the room and every guest link. */
+  close(): void;
+}
+
+/**
+ * Opens room `code`; resolves once the code is registered. Every guest whose data channel opens is given to
+ * `onGuest`; one over `maxGuests` open links, or after `lock()`, is closed at once. A guest link that closes does not
+ * close the room.
+ */
+export function openRoom(
+  code: string, signal: SignalServer | null, onGuest: (link: PeerLink) => void, maxGuests = 3,
+): Promise<Room> {
   return new Promise((resolve, reject) => {
     const peer = new Peer(code, peerOptions(signal));
-    let taken = false;
+    let open = false;
+    let locked = false;
+    let guests = 0;
+    peer.on("disconnected", () => {
+      // losing the signalling server does not break open data channels; nothing to do
+    });
     peer.on("error", (err) => {
-      if (!taken) {
+      if (!open) {
         peer.destroy();
         reject(new Error(readable(err)));
       }
     });
+    peer.on("open", () => {
+      open = true;
+      resolve({
+        lock() {
+          locked = true;
+        },
+        close() {
+          locked = true;
+          setTimeout(() => peer.destroy(), 300);
+        },
+      });
+    });
     peer.on("connection", (conn) => {
-      if (taken) {
-        conn.on("open", () => conn.close());
-        return;
-      }
-      taken = true;
-      conn.on("open", () => resolve(wrap(peer, conn)));
+      conn.on("open", () => {
+        if (locked || guests >= maxGuests) {
+          conn.close();
+          return;
+        }
+        guests++;
+        let counted = true;
+        onGuest(wrap(peer, conn, () => {
+          if (counted) guests--;
+          counted = false;
+        }));
+      });
     });
   });
 }
@@ -114,7 +153,7 @@ export function joinRoom(code: string, signal: SignalServer | null = null): Prom
       const conn = peer.connect(code, CONNECT_OPTIONS);
       conn.on("open", () => {
         open = true;
-        resolve(wrap(peer, conn));
+        resolve(wrap(peer, conn, () => peer.destroy()));
       });
     });
   });

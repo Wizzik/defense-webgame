@@ -1440,6 +1440,16 @@
   min-height: 1.3em;
   text-align: center;
 }
+.coop-roster-title {
+  margin: 0.4rem 0 0.2rem;
+  opacity: 0.8;
+}
+
+.coop-roster-list {
+  margin: 0 0 0.4rem;
+  padding-left: 1.6rem;
+}
+
 .coop-status.error {
   color: var(--bad);
 }
