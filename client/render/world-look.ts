@@ -134,20 +134,20 @@ const FROSTREACH: WorldLook = {
   forest: ["tree-a", "tree-b", "trees-c", "rock-a", "mesa-c"],
   propTint: 0xd4e4f4,
   thicket: null,
-  weather: { color: 0xb4c4d6, fogNear: 30, fogFar: 70 },
+  weather: { color: 0x9aaabe, fogNear: 32, fogFar: 76 },
   particles: "snow",
   fire: null,
 };
 
 /** Scorched black earth with sick green, a violet sky, green embers and green fire (never orange). */
 const BLIGHTSCAR: WorldLook = {
-  ground: { a: 0x1c1a20, b: 0x221e26, c: 0x18161c, dirt: 0x2c3a24 },
-  sky: 0x1e1030,
+  ground: { a: 0x25232a, b: 0x2b2830, c: 0x201e25, dirt: 0x2e3e26 },
+  sky: 0x1a1226,
   fog: { near: 46, far: 90 },
-  hemi: { sky: 0xb49ad8, ground: 0x101014, intensity: 0.95 },
-  moon: { color: 0xd6c8ff, intensity: 2.2 },
+  hemi: { sky: 0x9c96ac, ground: 0x121414, intensity: 1.0 },
+  moon: { color: 0xe2deec, intensity: 2.3 },
   path: 0x2c2634,
-  stone: { wall: 0x4a4452, top: 0x5a5262, ruin: 0x3e3846 },
+  stone: { wall: 0x625c68, top: 0x736c7a, ruin: 0x4e4856 },
   water: 0x2e4a5c,
   feature: "broken",
   islands: { rock: ["rock-d", "rock-c", "mesa-a"], trees: ["stump-a", "stumps"], ruin: "blocks" },
@@ -156,7 +156,7 @@ const BLIGHTSCAR: WorldLook = {
   thicket: null,
   weather: null,
   particles: "embers",
-  fire: { ring: 0xc8ff4a, pool: 0x5ce03a },
+  fire: { ring: 0xc8ff4a, pool: 0x46b832 },
 };
 
 const LOOKS: Record<string, WorldLook> = {
