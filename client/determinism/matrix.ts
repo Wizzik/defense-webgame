@@ -51,6 +51,8 @@ export function matrixCases(data: GameData): MatrixCase[] {
     { id: "w3-thicket", hero: "stonehorn", seed: 13, startPhase: 2, gear: "mid", maxTicks: 4500, world: 3 },
     // the blizzard through a whole storm, with chill (difficulties plan 3b)
     { id: "w4-blizzard", hero: "tidecaller", seed: 15, startPhase: 3, gear: "mid", maxTicks: 6000, world: 4 },
+    // green meteors and their pools of fire from phase 1 (difficulties plan 3b)
+    { id: "w5-meteors", hero: "gravecaller", seed: 17, startPhase: 1, gear: "mid", maxTicks: 3600, world: 5 },
   );
   return cases;
 }

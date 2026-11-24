@@ -55,8 +55,9 @@ export const EventKind = {
   HeroSnared: 28,
   /** A gravebinder raised an enemy: a = the new slot, value = the raiser's type index, x/y = where. */
   Raise: 29,
-  /** A storm bolt (sim/hazard.ts): a = its place, value = 0 the warning starts / 1 it strikes, x/y = the centre,
-   *  u = radius, v = steps of the warning. */
+  /** A storm bolt or meteor (sim/hazard.ts): a = its place, value = 0 the warning starts / 1 it strikes, x/y = the
+   *  centre, u = radius, v = steps of the warning; value = 2 a pool of fire starts (sim/fire-pools.ts): a = the pool's
+   *  place, u = its radius, v = its steps. */
   Hazard: 30,
   /** The world's natural event: the first storm wave of a run (u = 0), or a weather phase (u = WeatherPhase of
    *  sim/weather.ts: 1 warning, 2 start, 3 end; value = seconds of the warning / of the weather / 0). x/y = the hero. */

@@ -1,7 +1,7 @@
 import { pathToFileURL } from "node:url";
 import { botInput, idleCard } from "../../sim/bot";
 import { TICKS_PER_SECOND } from "../../sim/constants";
-import { createRun, EventKind, HeroHitSource, inThicket, isEmptySlot, passiveSlotRange, sharedSlotRange } from "../../sim/index";
+import { createRun, EventKind, HeroHitSource, inThicket, isEmptySlot, poolAt, passiveSlotRange, sharedSlotRange } from "../../sim/index";
 import type { LoadoutEntry, Run, RunResult } from "../../sim/index";
 import type { TickInput } from "../../sim/input";
 import { gameData } from "../../sim/testing/game-data";
@@ -59,6 +59,8 @@ export interface RunSummary {
     kind?: "storm" | "weather" | "thicket" | "meteors"; effect?: "sand" | "snow"; sand?: number; thicketShare?: number;
     /** Share of the hero's steps he was chilled (a snow world). */
     chillShare?: number;
+    /** Seconds the hero stood in a pool of fire (a meteors world). */
+    fireSeconds?: number;
   };
 }
 
@@ -97,6 +99,7 @@ export function playBot(
   let boltHits = 0;
   let thicketSteps = 0;
   let chillSteps = 0;
+  let fireSteps = 0;
   let steps = 0;
   while (run.state !== "won" && run.state !== "lost") {
     while (phaseXp.length < data.rules.phases.length && run.tick >= phaseXp.length * phaseTicks) {
@@ -114,6 +117,7 @@ export function playBot(
     steps++;
     if (inThicket(run.map, run.hero.x, run.hero.y)) thicketSteps++;
     if (run.players[0]!.chilled) chillSteps++;
+    if (poolAt(run, run.hero.x, run.hero.y, 0) >= 0) fireSteps++;
     for (let i = 0; i < run.events.count; i++) {
       if (run.events.kind[i] === EventKind.HeroHit && run.events.u[i] === HeroHitSource.Storm) boltHits++;
     }
@@ -170,6 +174,7 @@ export function playBot(
       thicketShare: steps > 0 ? thicketSteps / steps : 0,
       ...weatherEffect(data, world),
       chillShare: steps > 0 ? chillSteps / steps : 0,
+      fireSeconds: fireSteps / TICKS_PER_SECOND,
     },
     factions: {
       rootedSeconds: run.stats.rootedTicks / TICKS_PER_SECOND,
@@ -284,8 +289,11 @@ export function factionLine(summaries: RunSummary[]): string {
  */
 export function worldLine(summaries: RunSummary[]): string {
   const avg = (f: (s: RunSummary["world"]) => number) => (summaries.reduce((a, s) => a + f(s.world), 0) / summaries.length).toFixed(1);
-  let line = `  world: islands ${avg((w) => w.islands)}, storm waves ${avg((w) => w.waves)}, bolts ${avg((w) => w.bolts)}, ` +
-    `bolts on the hero ${avg((w) => w.boltHits)}`;
+  const meteors = summaries.some((s) => s.world.kind === "meteors");
+  const [waves, bolts] = meteors ? ["meteor waves", "meteors"] : ["storm waves", "bolts"];
+  let line = `  world: islands ${avg((w) => w.islands)}, ${waves} ${avg((w) => w.waves)}, ${bolts} ${avg((w) => w.bolts)}, ` +
+    `${bolts} on the hero ${avg((w) => w.boltHits)}`;
+  if (meteors) line += `, fire ${avg((w) => w.fireSeconds ?? 0)} s`;
   if (summaries.some((s) => s.world.kind === "weather" && s.world.effect === "snow")) {
     line += `, snow ${avg((w) => w.sand ?? 0)}, chill ${avg((w) => 100 * (w.chillShare ?? 0))} %`;
   } else if (summaries.some((s) => s.world.kind === "weather")) line += `, sand ${avg((w) => w.sand ?? 0)}`;

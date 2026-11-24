@@ -4,6 +4,7 @@ import { damageEnemy, damageHero, heroDamageScale, HeroHitSource } from "./comba
 import { TICKS_PER_SECOND } from "./constants";
 import { EventKind } from "./events";
 import type { Run } from "./run";
+import { addPool, POOL_CAPACITY, updatePools } from "./fire-pools";
 import { debugWeather, updateWeather } from "./weather";
 
 /** Bolts that can wait at once per player (a wave has at most `bolts.max` around each hero, and waves are 35 s and more apart). */
@@ -26,11 +27,20 @@ export class HazardState {
   /** Steps until an announced weather starts; 0 = none announced. */
   warnTicks = 0;
   bolts = 0;
+  /** Pools of fire left by meteors (sim/fire-pools.ts): centre and steps left; 0 = a free place. */
+  readonly poolX: Float64Array;
+  readonly poolY: Float64Array;
+  readonly poolTicks: Int32Array;
+  /** Pools of fire started in the run. */
+  pools = 0;
 
   constructor(players = 1) {
     this.x = new Float64Array(HAZARD_CAPACITY * players);
     this.y = new Float64Array(HAZARD_CAPACITY * players);
     this.ticks = new Int32Array(HAZARD_CAPACITY * players);
+    this.poolX = new Float64Array(POOL_CAPACITY * players);
+    this.poolY = new Float64Array(POOL_CAPACITY * players);
+    this.poolTicks = new Int32Array(POOL_CAPACITY * players);
   }
 }
 
@@ -46,6 +56,7 @@ export function updateHazard(run: Run): void {
 
 function updateStorm(run: Run, storm: Storm | Meteors): void {
   const h = run.hazard;
+  updatePools(run);
   for (let i = 0; i < h.ticks.length; i++) {
     if (h.ticks[i] === 0) continue;
     h.ticks[i]--;
@@ -133,6 +144,7 @@ function strike(run: Run, storm: Storm | Meteors, i: number): void {
   const cy = h.y[i]!;
   const r2 = storm.radius * storm.radius;
   run.events.push(EventKind.Hazard, i, 1, cx, cy, storm.radius, 0);
+  if (storm.kind === "meteors") addPool(run, cx, cy);
   for (let p = 0; p < run.players.length; p++) {
     run.current = p;
     const hero = run.hero;

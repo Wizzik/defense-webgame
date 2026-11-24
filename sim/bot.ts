@@ -1,4 +1,5 @@
 import { RARITIES, stormOf } from "../data/schema";
+import { poolAt } from "./fire-pools";
 import { sharedSlotRange, ULTIMATE_SLOT } from "./abilities/slots";
 import { OrbKind } from "./buffs";
 import type { CardOffer } from "./cards";
@@ -225,6 +226,19 @@ export function botInput(run: Run, out: TickInput): TickInput {
       bolt = true;
       boltX = hazard.x[i]!;
       boltY = hazard.y[i]!;
+    }
+  }
+
+  // a pool of fire under the hero: walk out of it, away from its centre (no dash)
+  if (slammer < 0 && !bolt) {
+    const pool = poolAt(run, hero.x, hero.y, hero.stats.collision);
+    if (pool >= 0) {
+      const sx = hero.x - run.hazard.poolX[pool]!;
+      const sy = hero.y - run.hazard.poolY[pool]!;
+      const d = Math.sqrt(sx * sx + sy * sy);
+      out.moveX = axis(d > 1e-6 ? sx / d : 1);
+      out.moveY = axis(d > 1e-6 ? sy / d : 0);
+      return out;
     }
   }
 

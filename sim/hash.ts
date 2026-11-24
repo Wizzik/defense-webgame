@@ -1,3 +1,4 @@
+import { meteorsOf } from "./fire-pools";
 import { chillOf } from "./chill";
 import { DIFFICULTY_IDS } from "../data/schema";
 import type { PlayerState } from "./player";
@@ -157,6 +158,18 @@ export function stateHash(run: Run): number {
   if (run.players.length > 1) for (let i = 0; i < run.players.length; i++) mixInt(run.players[i]!.choosingTicks);
   // revive progress (step 6), likewise only with several players
   if (run.players.length > 1) for (let i = 0; i < run.players.length; i++) mixInt(run.players[i]!.reviveTicks);
+  // the meteors' pools of fire only in a meteors world, so the other worlds keep their hashes
+  if (meteorsOf(run) !== null) {
+    const hz = run.hazard;
+    mixInt(hz.pools);
+    for (let i = 0; i < hz.poolTicks.length; i++) {
+      mixInt(hz.poolTicks[i]!);
+      if (hz.poolTicks[i]! > 0) {
+        mixFloat(hz.poolX[i]!);
+        mixFloat(hz.poolY[i]!);
+      }
+    }
+  }
   // the blizzard's chill only in a world whose weather has one, so the other worlds keep their hashes
   if (chillOf(run) !== null) {
     for (let i = 0; i < run.players.length; i++) {
