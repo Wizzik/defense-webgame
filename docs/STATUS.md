@@ -1,16 +1,16 @@
 # Status
 
-Updated 2026-11-24 (difficulties 3b: worlds 4 and 5, PR open). Read this first when you resume work.
+Updated 2026-11-24 (difficulties 3b: worlds 4 and 5 merged as PR #40). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-23 evening)
 
 1. **Co-op for 3-4 players**: merged (PR #39, below); waits for Petr's test.
-2. **More worlds:** difficulties plan 3b: done (below), the PR waits for Petr.
+2. **More worlds:** difficulties plan 3b: merged (PR #40, below); waits for Petr's playtest.
 3. Then the **remaining heroes** of the map and **better spell graphics** (effects of the spells), in a new chat.
 
-## Difficulties 3b: Frostreach and Blightscar (branch `worlds-4-5`, PR open, 2026-11-24)
+## Difficulties 3b: Frostreach and Blightscar (merged as PR #40 `956e551`, 2026-11-24)
 
-- Plan `docs/superpowers/plans/2026-11-24-difficulties-worlds-4-5.md`, done inline in one chat; Petr: "make it harder". `npm run check` (1311 tests), the build, e2e `webgl2-fallback` and `sim-chromium` (51) pass. Numbers and rulings: `docs/DECISIONS.md`, section Difficulties and worlds, plan 3b.
+- Plan `docs/superpowers/plans/2026-11-24-difficulties-worlds-4-5.md`, done inline in one chat; Petr: "make it harder". A fresh review found one bug (a co-op hero chilled right after his choice time or a revive, roots counted as standing), fixed before the merge; merged at Petr's word after green CI. `npm run check` (1311 tests), the build, e2e `webgl2-fallback` and `sim-chromium` (51) pass. Numbers and rulings: `docs/DECISIONS.md`, section Difficulties and worlds, plan 3b.
 - What it brings:
   - **world 4 Frostreach:** blue-grey snow, an ice ridge in a horseshoe over the north and east of the castle with one pass in the north-east; the **blizzard** from phase 2 every 80-100 s: announced 5 s ahead, 15 s of thick snow and fog, -25 % walking for everyone; a hero who **stands 3 s** in it is chilled (base attacks 20 % slower) until he walks;
   - **world 5 Blightscar:** black earth, a violet sky, green embers, a broken octagonal wall with four breaches; **green meteors** from phase 1 every 18-24 s, 3-6 around every hero after a 1.5 s yellow-green circle (12 % of max hp), each leaving a **pool of green fire** for 6 s (4 % of max hp a second);
