@@ -4,12 +4,13 @@ import {
   runMagicFind,
   hazardPending,
   inThicket,
+  poolAt,
   WeatherPhase,
 } from "../../sim";
 import { abilityIconSvg } from "./ability-icons";
 import { Announcer } from "./announcer";
 import { BossBar } from "./boss-bar";
-import { BuffBar } from "./buff-bar";
+import { BuffBar, type HazardCells } from "./buff-bar";
 import { el, formatTime, setText } from "./dom";
 import type { Drop } from "../../meta";
 import { chestLootLine, dropLine } from "./drop-lines";
@@ -17,6 +18,8 @@ import { type Lang, type MessageKey, t } from "./i18n";
 
 /** How long the news of a boss or of an enrage stays (a rush stays for its warning time). */
 const ANNOUNCE_TICKS = 4 * TICKS_PER_SECOND;
+/** The chill makes news at most this often. */
+const CHILL_NEWS_TICKS = 20 * TICKS_PER_SECOND;
 /** The castle counts as under attack for this long after a hit. */
 const ATTACK_BANNER_TICKS = 2 * TICKS_PER_SECOND;
 
@@ -97,7 +100,11 @@ export class Hud {
   private readonly bossBar: BossBar;
   private readonly buffBar: BuffBar;
   private thicketRun: Run | null = null;
-  private readonly hazardCells = { stormTicks: 0, sandTicks: 0, inThicket: false };
+  private readonly hazardCells: HazardCells = {
+    stormTicks: 0, sandTicks: 0, inThicket: false, snowTicks: 0, chilled: false, meteorTicks: 0, inFire: false,
+  };
+  /** The tick the chill was last announced; the news names it at most every CHILL_NEWS_TICKS. */
+  private chillNewsAt = -Infinity;
   private lastRun: Run | null = null;
   /** What a boss that just fell dropped (boss id, its order in the run); main.ts sets it. */
   /** The drop of a fallen boss; `magicFind` is the hero's magic find at that moment. */
@@ -198,10 +205,18 @@ export class Hud {
           this.loot(line.tone);
         }
       } else if (kind === EventKind.HazardWave) {
-        // the storm's first wave (u = 0) and a weather's warning; a weather's start and end stay quiet
+        // the storm's (or the meteors') first wave (u = 0), a weather's warning and the local hero's chill; a
+        // weather's start and end stay quiet
         const u = events.u[i]!;
-        if (u === 0) this.announcer.push(t(lang, "announce.storm"), ANNOUNCE_TICKS);
-        else if (u === WeatherPhase.Warn) this.announcer.push(t(lang, "announce.sand"), ANNOUNCE_TICKS);
+        const hazard = run.data.worlds[run.world - 1]!.hazard;
+        if (u === 0) this.announcer.push(t(lang, hazard.kind === "meteors" ? "announce.meteors" : "announce.storm"), ANNOUNCE_TICKS);
+        else if (u === WeatherPhase.Warn) {
+          const snow = hazard.kind === "weather" && hazard.effect === "snow";
+          this.announcer.push(t(lang, snow ? "announce.blizzard" : "announce.sand"), ANNOUNCE_TICKS);
+        } else if (u === WeatherPhase.Chill && events.player[i] === run.current && run.tick - this.chillNewsAt >= CHILL_NEWS_TICKS) {
+          this.chillNewsAt = run.tick;
+          this.announcer.push(t(lang, "announce.chill"), ANNOUNCE_TICKS);
+        }
       } else if (kind === EventKind.Faction) {
         faction = run.data.rules.factions[events.a[i]!]!.id;
       } else if (kind === EventKind.Enrage) {
@@ -258,9 +273,16 @@ export class Hud {
     setText(this.muteKey, `${t(lang, "gear.key")} · ${t(lang, "settings.key")} · ${t(lang, "hud.muteKey")}`);
     setText(this.kills, t(lang, "hud.kills", { n: run.stats.kills }));
 
-    this.hazardCells.stormTicks = hazardPending(run);
-    this.hazardCells.sandTicks = run.hazard.weatherTicks;
+    const hazard = run.data.worlds[run.world - 1]!.hazard;
+    const pending = hazardPending(run);
+    const snow = hazard.kind === "weather" && hazard.effect === "snow";
+    this.hazardCells.stormTicks = hazard.kind === "meteors" ? 0 : pending;
+    this.hazardCells.meteorTicks = hazard.kind === "meteors" ? pending : 0;
+    this.hazardCells.sandTicks = snow ? 0 : run.hazard.weatherTicks;
+    this.hazardCells.snowTicks = snow ? run.hazard.weatherTicks : 0;
     this.hazardCells.inThicket = inThicket(run.map, run.hero.x, run.hero.y);
+    this.hazardCells.chilled = run.players[run.current]!.chilled;
+    this.hazardCells.inFire = poolAt(run, run.hero.x, run.hero.y, 0) >= 0;
     this.buffBar.update(run.buffs, run.hero, lang, this.hazardCells);
     this.updateAbilities(run, lang);
   }

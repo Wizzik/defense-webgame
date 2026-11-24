@@ -1,6 +1,6 @@
 import { eventOwner } from "../render/event-owner";
 import type { AudioData, GameSound } from "../../data/schema/audio";
-import { EventKind, HeroHitSource, OrbKind, type Run, SlamEvent } from "../../sim";
+import { EventKind, HeroHitSource, OrbKind, type Run, SlamEvent, WeatherPhase } from "../../sim";
 
 /** A cue to play: `world` sounds are panned by their place on the screen. */
 export interface CueRequest {
@@ -50,7 +50,7 @@ export const HANDLED_EVENTS: Record<keyof typeof EventKind, "sound" | "skip"> = 
   Raise: "sound",
   Hazard: "sound",
   Revive: "skip", // co-op only; the client of step 7 gives it a sound
-  HazardWave: "skip", // the storm: the warning of its first bolt is heard in the same step; a weather has no sound of its own
+  HazardWave: "sound", // only the chill of a hero; the storm's first bolt is heard in the same step, a weather has no sound of its own
 };
 
 const ORB_SOUNDS: Record<number, GameSound> = {
@@ -105,8 +105,9 @@ export function resolveEventCues(run: Run, data: AudioData, enemyIds: readonly s
         sound("bossDeath", i);
         break;
       case EventKind.HeroHit:
-        // a poison cloud hurts every step: the hp bar shows it, a sound would drown everything
-        if (events.u[i] !== HeroHitSource.Cloud) sound("heroHit", i, false);
+        // a poison cloud hurts every step and a pool of fire three times a second: the hp bar shows it, a sound would
+        // drown everything
+        if (events.u[i] !== HeroHitSource.Cloud && events.u[i] !== HeroHitSource.Fire) sound("heroHit", i, false);
         break;
       case EventKind.CastleHit:
         sound("castleHit", i);
@@ -157,8 +158,16 @@ export function resolveEventCues(run: Run, data: AudioData, enemyIds: readonly s
         else if (events.value[i] === SlamEvent.Hit && !roots) sound("slam.hit", i);
         break;
       }
-      case EventKind.Hazard:
-        sound(events.value[i] === 0 ? "storm.warn" : "storm.strike", i);
+      case EventKind.Hazard: {
+        // value 2 is a pool of fire starting: the meteor's strike is heard in the same step
+        if (events.value[i] === 2) break;
+        const meteors = run.data.worlds[run.world - 1]!.hazard.kind === "meteors";
+        if (events.value[i] === 0) sound(meteors ? "meteor.warn" : "storm.warn", i);
+        else sound(meteors ? "meteor.strike" : "storm.strike", i);
+        break;
+      }
+      case EventKind.HazardWave:
+        if (events.u[i] === WeatherPhase.Chill) sound("chill", i, false);
         break;
       case EventKind.Faction:
         sound("faction", i, false);
