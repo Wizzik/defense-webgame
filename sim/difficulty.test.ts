@@ -58,8 +58,11 @@ function alive(run: Run): number[] {
 }
 
 describe("difficultyMods", () => {
-  it("world 1 on normal changes nothing", () => {
-    expect(difficultyMods(rules(), 1, "normal")).toEqual({ hp: 1, damage: 1, packSize: 1, eliteHp: 1, gold: 1, magicFind: 0 });
+  it("world 1 on normal changes nothing but Normal's own pack size", () => {
+    const r = rules();
+    expect(difficultyMods(r, 1, "normal")).toEqual({
+      hp: 1, damage: 1, packSize: r.difficulty.levels.normal!.packSize, eliteHp: 1, gold: 1, magicFind: 0,
+    });
   });
 
   it("world 3 insane and world 5 hell", () => {
@@ -84,7 +87,7 @@ describe("difficultyMods", () => {
     const strong = difficultyMods(r, 5, "normal", 1, 1.2);
     expect(strong.hp).toBeCloseTo(2.4, 12);
     expect(strong.damage).toBeCloseTo(2.4, 12);
-    expect(strong.packSize).toBe(1);
+    expect(strong.packSize).toBe(r.difficulty.levels.normal!.packSize);
     expect(strong.gold).toBe(difficultyMods(r, 5, "normal").gold);
   });
 

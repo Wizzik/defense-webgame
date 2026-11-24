@@ -106,7 +106,7 @@ describe("co-op difficulty and chests per player", () => {
   it("leaves one player at x 1", () => {
     const { rules } = gameData();
     expect(difficultyMods(rules, 1, "normal", 1)).toEqual(difficultyMods(rules, 1, "normal"));
-    expect(difficultyMods(rules, 1, "normal")).toMatchObject({ hp: 1, damage: 1, packSize: 1, eliteHp: 1 });
+    expect(difficultyMods(rules, 1, "normal")).toMatchObject({ hp: 1, damage: 1, packSize: rules.difficulty.levels.normal!.packSize, eliteHp: 1 });
   });
 
   it("adds rules.coop.perPlayer for every player after the first", () => {

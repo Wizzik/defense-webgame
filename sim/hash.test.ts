@@ -5,6 +5,7 @@ import type { TickInput } from "./input";
 import { Rng } from "./rng";
 import { NO_INPUT } from "./input";
 import { createRun, type Run } from "./run";
+import { abilityRun, addEnemy } from "./testing/ability-run";
 import { gameData, openArena } from "./testing/game-data";
 
 function play(seed: number, inputSeed: number, steps: number): number {
@@ -85,8 +86,10 @@ describe("stateHash", () => {
   }
 
   it("covers a living projectile", () => {
-    const run = createRun(openArena(gameData()), { seed: 5, hero: "gravecaller" });
-    const i = stepUntil(run, () => run.projectiles.alive.indexOf(1), 3000);
+    // the Gravecaller's soul bolt at level 1, aimed at an enemy 1200 away
+    const run = abilityRun("gravecaller", { 2: 1 });
+    addEnemy(run, 0, 1200);
+    const i = stepUntil(run, () => run.projectiles.alive.indexOf(1), 30);
     expect(i).toBeGreaterThanOrEqual(0);
     const before = stateHash(run);
     run.projectiles.x[i] += 1;

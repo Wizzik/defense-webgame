@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { debugSetAbilityLevel } from "./abilities/slots";
 import { EventKind } from "./events";
 import { debugHazard, hazardPending } from "./hazard";
@@ -15,6 +15,9 @@ import { createRun } from "./run";
 import { spawnBoss } from "./timeline";
 import type { Run } from "./run";
 import { gameData, openArena } from "./testing/game-data";
+
+// whole runs with up to rules.enemies.maxAlive (600) enemies take longer than the global 30 s
+vi.setConfig({ testTimeout: 180_000 });
 
 function play(seed: number, onStep?: (run: Run) => void, record?: TickInput[], hero?: string): Run {
   const run = createRun(gameData(), { seed, hero });

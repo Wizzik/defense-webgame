@@ -23,6 +23,8 @@ function newRun(tweak?: (d: GameData) => void, seed = 1) {
   data.rules.run.firstPackSeconds = 0;
   data.rules.run.timeScaling = { seconds: 1200, cap: 2 };
   data.rules.enemies.maxAlive = 150;
+  // the spawner's own mechanics, at pack size 1 (Normal in the game data doubles packs)
+  data.rules.difficulty.levels.normal!.packSize = 1;
   data.rules.phases = [phase()];
   tweak?.(data);
   return createRun(data, { seed, durationSeconds: 100000 });
@@ -371,6 +373,7 @@ describe("spawner", () => {
       const data = gameData();
       data.rules.run.firstPackSeconds = 0;
       data.rules.run.finale.packScale = 0.5;
+      data.rules.difficulty.levels.normal!.packSize = 1;
       data.rules.phases = [phase({ pack: { min: 4, max: 4, everySeconds: 5 } }), phase({ pack: { min, max: min, everySeconds: 5 } })];
       data.rules.debug.phaseXp = [0, 0];
       const run = createRun(data, { seed: 1, durationSeconds: 10 });

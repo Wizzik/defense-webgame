@@ -403,8 +403,8 @@ describe("game data schemas", () => {
     expect(errorMessage(d)).toContain("charge.distance");
   });
 
-  it("rejects packs outside 1..3", () => {
-    for (const packs of [0, 4, 1.5]) {
+  it("rejects packs outside 1..6", () => {
+    for (const packs of [0, 7, 1.5]) {
       const d = fixture();
       d.rules.phases[1].packs = packs;
       expect(errorMessage(d)).toContain("rules.phases.1.packs");
