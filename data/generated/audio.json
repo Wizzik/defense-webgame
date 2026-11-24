@@ -1104,6 +1104,48 @@
       "category": "sfx"
     },
     {
+      "id": "meteor-warning",
+      "files": [
+        "audio/sfx/shared-firebolt-1.ogg",
+        "audio/sfx/shared-firebolt-2.ogg"
+      ],
+      "synth": "cast",
+      "gainDb": -8,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 2,
+      "category": "sfx"
+    },
+    {
+      "id": "meteor-strike",
+      "files": [
+        "audio/sfx/shared-meteor-1.ogg",
+        "audio/sfx/shared-meteor-2.ogg"
+      ],
+      "synth": "slam",
+      "gainDb": 0,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 3,
+      "category": "sfx"
+    },
+    {
+      "id": "hero-chill",
+      "files": [
+        "audio/sfx/shared-frost-1.ogg",
+        "audio/sfx/shared-frost-2.ogg"
+      ],
+      "synth": "cast",
+      "gainDb": -4,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 1,
+      "priority": 2,
+      "category": "sfx"
+    },
+    {
       "id": "boss-roar",
       "files": [
         "audio/sfx/boss-roar-1.ogg"
@@ -1524,6 +1566,9 @@
     "slam.hit": "slam-impact",
     "storm.warn": "storm-warning",
     "storm.strike": "storm-strike",
+    "meteor.warn": "meteor-warning",
+    "meteor.strike": "meteor-strike",
+    "chill": "hero-chill",
     "enrage": "boss-roar",
     "enemy.heal": "chaplain-mend",
     "enemy.charge": "enemy-charge",

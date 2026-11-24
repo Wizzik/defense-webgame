@@ -333,6 +333,24 @@ cues:
     synth: slam
     priority: 3
     maxVoices: 1
+  # the green meteors of world 5 and the chill of world 4's blizzard (difficulties plan 3b): spell files, no new download
+  - id: meteor-warning
+    files: [audio/sfx/shared-firebolt-1.ogg, audio/sfx/shared-firebolt-2.ogg]
+    synth: cast
+    priority: 2
+    maxVoices: 1
+    gainDb: -8
+  - id: meteor-strike
+    files: [audio/sfx/shared-meteor-1.ogg, audio/sfx/shared-meteor-2.ogg]
+    synth: slam
+    priority: 3
+    maxVoices: 1
+  - id: hero-chill
+    files: [audio/sfx/shared-frost-1.ogg, audio/sfx/shared-frost-2.ogg]
+    synth: cast
+    priority: 2
+    maxVoices: 1
+    gainDb: -4
   - id: boss-roar
     files: [audio/sfx/boss-roar-1.ogg]
     synth: enrage
@@ -503,6 +521,9 @@ sounds:
   slam.hit: slam-impact
   storm.warn: storm-warning
   storm.strike: storm-strike
+  meteor.warn: meteor-warning
+  meteor.strike: meteor-strike
+  chill: hero-chill
   enrage: boss-roar
   enemy.heal: chaplain-mend
   enemy.charge: enemy-charge

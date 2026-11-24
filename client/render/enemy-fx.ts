@@ -1,3 +1,4 @@
+import { ROOT_RING } from "./palette";
 import { Group } from "three/webgpu";
 import type { GameData } from "../../data/schema";
 import { EventKind, type Run, SlamEvent, TICKS_PER_SECOND } from "../../sim";
@@ -21,7 +22,7 @@ const AURA_OPACITY = 0.25;
 /** Warning circle of a boss slam. */
 const SLAM_COLOR = rgb(0xd94a4a);
 /** Warning circle of roots (grove druid, grove warden): green, not the bosses' red. */
-const ROOT_COLOR = rgb(0x5fd04a);
+const ROOT_COLOR = rgb(ROOT_RING);
 const ROOT_POOL = 8;
 /** The steady poison cloud on the floor around a rotgut and a bone tyrant. */
 const CLOUD_COLOR = rgb(0x8fa27a);
@@ -31,7 +32,7 @@ const FLOOR_POOL = 64;
 /** The web under a slowed hero and the roots around a rooted hero's feet (world units). */
 const WEB_COLOR = rgb(0xe4e8f0);
 const WEB_RADIUS = 70;
-const ROOT_RING_COLOR = rgb(0x5fd04a);
+const ROOT_RING_COLOR = rgb(ROOT_RING);
 const ROOT_RADIUS = 45;
 const SNARE_OPACITY = 0.8;
 /** A red flash over a bloodcaller that casts, a green one where a gravebinder raises (world units across). */

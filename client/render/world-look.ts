@@ -4,8 +4,8 @@ import {
   DIRT, GRASS_A, GRASS_B, GRASS_C, HEMI_GROUND, HEMI_SKY, MOON, PATH_COLOR, RUIN_STONE, SKY, WALL_STONE, WALL_TOP,
 } from "./palette";
 
-export type FeatureStyle = "wall" | "river" | "trees";
-export type Particles = "none" | "dust" | "fireflies";
+export type FeatureStyle = "wall" | "river" | "trees" | "ridge" | "broken";
+export type Particles = "none" | "dust" | "fireflies" | "snow" | "embers";
 
 export interface WorldLook {
   ground: { a: number; b: number; c: number; dirt: number };
@@ -25,8 +25,13 @@ export interface WorldLook {
   propTint: number;
   thicket: { ground: number; bush: string } | null;
   weather: { color: number; fogNear: number; fogFar: number } | null;
-  /** Always on in the world (fireflies); "dust" runs only during the weather. */
+  /**
+   * Always on in the world (fireflies, embers); "dust" runs only during the weather; "snow" falls lightly always and
+   * thickly during the weather.
+   */
   particles: Particles;
+  /** The meteors' warning ring and pools of fire (world 5), or null. */
+  fire: { ring: number; pool: number } | null;
 }
 
 /**
@@ -71,6 +76,7 @@ const SILVER: WorldLook = {
   thicket: null,
   weather: null,
   particles: "none",
+  fire: null,
 };
 
 /** Wine-red and brown-red clay, grey-pink sand and dry grass (hues 340-10°, never brick or orange). */
@@ -90,6 +96,7 @@ const RED_WASTE: WorldLook = {
   thicket: null,
   weather: { color: 0x6a5056, fogNear: 34, fogFar: 78 },
   particles: "dust",
+  fire: null,
 };
 
 /** Night in colours: deep blue-green ground, a cold moon, fireflies; the heroes and enemies stay readable. */
@@ -109,11 +116,54 @@ const SHADEWOOD: WorldLook = {
   thicket: { ground: 0x2a1e34, bush: "bush" },
   weather: null,
   particles: "fireflies",
+  fire: null,
 };
 
-const LOOKS: Record<string, WorldLook> = { "silver-march": SILVER, "red-waste": RED_WASTE, shadewood: SHADEWOOD };
+/** Snow and ice in a cold blue-grey light: the snow is a mid grey-blue, so pale enemies stay readable on it. */
+const FROSTREACH: WorldLook = {
+  ground: { a: 0x6f8297, b: 0x7a8da2, c: 0x66788c, dirt: 0x8aa0b8 },
+  sky: 0x1c2636,
+  fog: { near: 50, far: 96 },
+  hemi: { sky: 0xdfe9ff, ground: 0x2a3444, intensity: 1.15 },
+  moon: { color: 0xe8f0ff, intensity: 2.3 },
+  path: 0x4c5a6c,
+  stone: { wall: 0x9fb6cc, top: 0xc8daea, ruin: 0x7f90a4 },
+  water: 0x2e4a5c,
+  feature: "ridge",
+  islands: { rock: ["rock-a", "rock-b", "rock-c", "mesa-c"], trees: ["tree-a", "tree-b", "trees-c"], ruin: "blocks" },
+  forest: ["tree-a", "tree-b", "trees-c", "rock-a", "mesa-c"],
+  propTint: 0xd4e4f4,
+  thicket: null,
+  weather: { color: 0xb4c4d6, fogNear: 30, fogFar: 70 },
+  particles: "snow",
+  fire: null,
+};
 
-/** The look of a world by its id; worlds without a row (plan 3b) look like Silver March. */
+/** Scorched black earth with sick green, a violet sky, green embers and green fire (never orange). */
+const BLIGHTSCAR: WorldLook = {
+  ground: { a: 0x1c1a20, b: 0x221e26, c: 0x18161c, dirt: 0x2c3a24 },
+  sky: 0x1e1030,
+  fog: { near: 46, far: 90 },
+  hemi: { sky: 0xb49ad8, ground: 0x101014, intensity: 0.95 },
+  moon: { color: 0xd6c8ff, intensity: 2.2 },
+  path: 0x2c2634,
+  stone: { wall: 0x4a4452, top: 0x5a5262, ruin: 0x3e3846 },
+  water: 0x2e4a5c,
+  feature: "broken",
+  islands: { rock: ["rock-d", "rock-c", "mesa-a"], trees: ["stump-a", "stumps"], ruin: "blocks" },
+  forest: ["stumps", "stump-a", "rock-d", "mesa-a"],
+  propTint: 0x8c8498,
+  thicket: null,
+  weather: null,
+  particles: "embers",
+  fire: { ring: 0xc8ff4a, pool: 0x5ce03a },
+};
+
+const LOOKS: Record<string, WorldLook> = {
+  "silver-march": SILVER, "red-waste": RED_WASTE, shadewood: SHADEWOOD, frostreach: FROSTREACH, blightscar: BLIGHTSCAR,
+};
+
+/** The look of a world by its id; an unknown id looks like Silver March. */
 export function lookOf(worldId: string): WorldLook {
   return LOOKS[worldId] ?? SILVER;
 }

@@ -12,3 +12,6 @@ export const WALL_STONE = 0x6f7b8c;
 export const WALL_TOP = 0x5a6576;
 export const RUIN_STONE = 0x75808f;
 export const PATH_COLOR = 0x3a424c;
+
+/** The green ring of roots on the hero (client/render/enemy-fx.ts); the meteor ring of world 5 must differ from it. */
+export const ROOT_RING = 0x5fd04a;
