@@ -50,3 +50,4 @@ export { cellOf, PASS_MARGIN } from "./world-map/grid";
 export { groundSpeedScale, inThicket, isFree, nearestFree, pushOut, pushX, pushY } from "./world-map/geometry";
 export { debugWeather, updateWeather, WeatherPhase, weatherSpeedScale } from "./weather";
 export { debugHazard, HAZARD_CAPACITY, hazardPending, HazardState, updateHazard } from "./hazard";
+export { chillAttackScale, chillOf, updateChill } from "./chill";

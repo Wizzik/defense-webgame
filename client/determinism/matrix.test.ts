@@ -7,18 +7,28 @@ describe("matrixCases", () => {
   it("lists the eight heroes, four start phases, two harder courses and the natural events with unique ids", () => {
     const data = gameData();
     const cases = matrixCases(data);
-    expect(cases).toHaveLength(17);
+    expect(cases).toHaveLength(18);
     expect(cases.find((c) => c.id === "w1-storm")).toMatchObject({ hero: "sparkshot", seed: 9, startPhase: 3, maxTicks: 4500 });
     expect(cases.slice(0, 8).map((c) => c.id)).toEqual(data.heroes.map((h) => `h-${h.id}`));
-    expect(cases.slice(8).map((c) => c.id)).toEqual(["p6", "p11", "p16", "p21", "w3-insane", "w5-hell", "w1-storm", "w2-sand", "w3-thicket"]);
+    expect(cases.slice(8).map((c) => c.id)).toEqual(["p6", "p11", "p16", "p21", "w3-insane", "w5-hell", "w1-storm", "w2-sand", "w3-thicket", "w4-blizzard"]);
     expect(cases.find((c) => c.id === "w3-insane")).toMatchObject({ hero: "stonehorn", seed: 6, world: 3, difficulty: "insane" });
     expect(cases.find((c) => c.id === "w5-hell")).toMatchObject({ hero: "redcleaver", seed: 7, world: 5, difficulty: "hell", startPhase: 6 });
-    expect(new Set(cases.map((c) => c.id)).size).toBe(17);
+    expect(new Set(cases.map((c) => c.id)).size).toBe(18);
   });
 
   it("the sandstorm case runs a whole storm", () => {
     const data = gameData();
     const c = matrixCases(data).find((m) => m.id === "w2-sand")!;
+    const seen = new Set<number>();
+    runCase(data, c, undefined, (run) => {
+      for (let i = 0; i < run.events.count; i++) if (run.events.kind[i] === EventKind.HazardWave) seen.add(run.events.u[i]!);
+    });
+    expect(seen.has(WeatherPhase.Start) && seen.has(WeatherPhase.End)).toBe(true);
+  });
+
+  it("the blizzard case runs a whole blizzard", () => {
+    const data = gameData();
+    const c = matrixCases(data).find((m) => m.id === "w4-blizzard")!;
     const seen = new Set<number>();
     runCase(data, c, undefined, (run) => {
       for (let i = 0; i < run.events.count; i++) if (run.events.kind[i] === EventKind.HazardWave) seen.add(run.events.u[i]!);

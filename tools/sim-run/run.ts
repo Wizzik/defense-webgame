@@ -56,7 +56,9 @@ export interface RunSummary {
    */
   world: {
     islands: number; waves: number; bolts: number; boltHits: number;
-    kind?: "storm" | "weather" | "thicket" | "meteors"; sand?: number; thicketShare?: number;
+    kind?: "storm" | "weather" | "thicket" | "meteors"; effect?: "sand" | "snow"; sand?: number; thicketShare?: number;
+    /** Share of the hero's steps he was chilled (a snow world). */
+    chillShare?: number;
   };
 }
 
@@ -94,6 +96,7 @@ export function playBot(
   let fullKitPhase: number | null = null;
   let boltHits = 0;
   let thicketSteps = 0;
+  let chillSteps = 0;
   let steps = 0;
   while (run.state !== "won" && run.state !== "lost") {
     while (phaseXp.length < data.rules.phases.length && run.tick >= phaseXp.length * phaseTicks) {
@@ -110,6 +113,7 @@ export function playBot(
     run.step(input);
     steps++;
     if (inThicket(run.map, run.hero.x, run.hero.y)) thicketSteps++;
+    if (run.players[0]!.chilled) chillSteps++;
     for (let i = 0; i < run.events.count; i++) {
       if (run.events.kind[i] === EventKind.HeroHit && run.events.u[i] === HeroHitSource.Storm) boltHits++;
     }
@@ -164,6 +168,8 @@ export function playBot(
       kind: data.worlds[world - 1]!.hazard.kind,
       sand: data.worlds[world - 1]!.hazard.kind === "weather" ? run.hazard.waves : 0,
       thicketShare: steps > 0 ? thicketSteps / steps : 0,
+      ...weatherEffect(data, world),
+      chillShare: steps > 0 ? chillSteps / steps : 0,
     },
     factions: {
       rootedSeconds: run.stats.rootedTicks / TICKS_PER_SECOND,
@@ -274,13 +280,15 @@ export function factionLine(summaries: RunSummary[]): string {
 
 /**
  * Averages per run of the world: `  world: islands 35.5, storm waves 21.0, bolts 42.5, bolts on the hero 3.5`, with
- * `, sand 2.0` in a weather world and `, thicket 4.2 %` (the hero's steps in a thicket) in a thicket world.
+ * `, sand 2.0` in a sand world (`, snow 2.0, chill 1.5 %` in a snow world: the hero's chilled steps) and `, thicket 4.2 %` (the hero's steps in a thicket) in a thicket world.
  */
 export function worldLine(summaries: RunSummary[]): string {
   const avg = (f: (s: RunSummary["world"]) => number) => (summaries.reduce((a, s) => a + f(s.world), 0) / summaries.length).toFixed(1);
   let line = `  world: islands ${avg((w) => w.islands)}, storm waves ${avg((w) => w.waves)}, bolts ${avg((w) => w.bolts)}, ` +
     `bolts on the hero ${avg((w) => w.boltHits)}`;
-  if (summaries.some((s) => s.world.kind === "weather")) line += `, sand ${avg((w) => w.sand ?? 0)}`;
+  if (summaries.some((s) => s.world.kind === "weather" && s.world.effect === "snow")) {
+    line += `, snow ${avg((w) => w.sand ?? 0)}, chill ${avg((w) => 100 * (w.chillShare ?? 0))} %`;
+  } else if (summaries.some((s) => s.world.kind === "weather")) line += `, sand ${avg((w) => w.sand ?? 0)}`;
   if (summaries.some((s) => s.world.kind === "thicket")) line += `, thicket ${avg((w) => 100 * (w.thicketShare ?? 0))} %`;
   return line;
 }
@@ -443,3 +451,9 @@ function coopMain(data: GameData, args: Args, ids: string[], world: number, diff
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) main();
+
+/** `{ effect }` of a weather world, else nothing. */
+function weatherEffect(data: GameData, world: number): { effect?: "sand" | "snow" } {
+  const h = data.worlds[world - 1]!.hazard;
+  return h.kind === "weather" ? { effect: h.effect } : {};
+}

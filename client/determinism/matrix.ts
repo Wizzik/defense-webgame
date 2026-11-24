@@ -49,6 +49,8 @@ export function matrixCases(data: GameData): MatrixCase[] {
     // the sandstorm through a whole storm, and the thicket (difficulties plan 3a)
     { id: "w2-sand", hero: "mistwarden", seed: 11, startPhase: 4, gear: "none", maxTicks: 6000, world: 2 },
     { id: "w3-thicket", hero: "stonehorn", seed: 13, startPhase: 2, gear: "mid", maxTicks: 4500, world: 3 },
+    // the blizzard through a whole storm, with chill (difficulties plan 3b)
+    { id: "w4-blizzard", hero: "tidecaller", seed: 15, startPhase: 3, gear: "mid", maxTicks: 6000, world: 4 },
   );
   return cases;
 }
