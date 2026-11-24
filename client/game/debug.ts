@@ -106,7 +106,7 @@ export interface GameSnapshot {
    * weathers so far, seconds left of the running weather, seconds until an announced weather starts, and the walking
    * speed scale of the ground under the hero (paths 1.15, thicket 0.7, else 1).
    */
-  hazard: { kind: "storm" | "weather" | "thicket"; pending: number; waves: number; weather: number; warning: number; ground: number };
+  hazard: { kind: "storm" | "weather" | "thicket" | "meteors"; pending: number; waves: number; weather: number; warning: number; ground: number };
   /** Only with ?debug=1. */
   debug?: {
     grantXp(amount: number): void;

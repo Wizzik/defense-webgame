@@ -73,6 +73,39 @@ describe("hero collisions", () => {
     expect(isFree(run.map, run.hero.x, run.hero.y, 31)).toBe(true);
   });
 
+  it("a dash at the ice ridge stops before it", () => {
+    const data = gameData();
+    data.worlds[3]!.map.islands.count = { min: 0, max: 0 };
+    silenceSpawns(data);
+    const run = createRun(data, { seed: 1, world: 4 });
+    run.hero.x = 0;
+    run.hero.y = 1200;
+    run.hero.dashDirX = 0;
+    run.hero.dashDirY = 1;
+    run.hero.dashTicks = 12;
+    walk(run, 0, 0, 12);
+    // the ridge's segment (-260,1477)-(260,1477), half thickness 90
+    expect(run.hero.y).toBeLessThan(1477 - 90 - 32 + 1);
+    expect(isFree(run.map, run.hero.x, run.hero.y, 31)).toBe(true);
+  });
+
+  it("a dash at the broken wall stops before it", () => {
+    const data = gameData();
+    data.worlds[4]!.map.islands.count = { min: 0, max: 0 };
+    silenceSpawns(data);
+    const run = createRun(data, { seed: 1, world: 5 });
+    run.hero.x = -300;
+    run.hero.y = 1300;
+    run.hero.dashDirX = 0;
+    run.hero.dashDirY = 1;
+    run.hero.dashTicks = 12;
+    walk(run, 0, 0, 12);
+    // the wall's segment (0,1600)-(-1131,1131) at x = -300 lies at y = 1600 - 469 * 300 / 1131; half thickness 55
+    const axis = 1600 - (469 * 300) / 1131;
+    expect(run.hero.y).toBeLessThan(axis - 55 - 32 + 1);
+    expect(isFree(run.map, run.hero.x, run.hero.y, 31)).toBe(true);
+  });
+
   it("walks 1.15 times as far on a path", () => {
     const run = createRun(wallData(), { seed: 1 });
     run.hero.x = 0;

@@ -1,4 +1,4 @@
-import { stormOf, type Storm } from "../data/schema";
+import { stormOf, type Meteors, type Storm } from "../data/schema";
 import { berserkScale } from "./buffs";
 import { damageEnemy, damageHero, heroDamageScale, HeroHitSource } from "./combat";
 import { TICKS_PER_SECOND } from "./constants";
@@ -44,7 +44,7 @@ export function updateHazard(run: Run): void {
   else updateWeather(run);
 }
 
-function updateStorm(run: Run, storm: Storm): void {
+function updateStorm(run: Run, storm: Storm | Meteors): void {
   const h = run.hazard;
   for (let i = 0; i < h.ticks.length; i++) {
     if (h.ticks[i] === 0) continue;
@@ -75,13 +75,13 @@ export function hazardPending(run: Run): number {
   return best;
 }
 
-function gapTicks(run: Run, storm: Storm): number {
+function gapTicks(run: Run, storm: Storm | Meteors): number {
   const { everySeconds } = storm;
   const seconds = everySeconds.min + run.hazardRng.next() * (everySeconds.max - everySeconds.min);
   return Math.round(seconds * TICKS_PER_SECOND);
 }
 
-function startWave(run: Run, storm: Storm): void {
+function startWave(run: Run, storm: Storm | Meteors): void {
   const h = run.hazard;
   const first = run.players[0]!.hero;
   if (h.waves === 0) run.events.push(EventKind.HazardWave, 0, 0, first.x, first.y, 0, 0);
@@ -96,7 +96,7 @@ function startWave(run: Run, storm: Storm): void {
 }
 
 /** One wave's bolts.min to bolts.max bolts within storm.spread of (hx, hy). */
-function boltsAround(run: Run, storm: Storm, hx: number, hy: number): void {
+function boltsAround(run: Run, storm: Storm | Meteors, hx: number, hy: number): void {
   const h = run.hazard;
   const rng = run.hazardRng;
   const n = storm.bolts.min + Math.floor(rng.next() * (storm.bolts.max - storm.bolts.min + 1));
@@ -127,7 +127,7 @@ function boltsAround(run: Run, storm: Storm, hx: number, hy: number): void {
  * exact; the spirit shield stops it), enemyShare (bossShare for a boss) of each enemy's max hp in the circle (not
  * scaled by the berserk orb: the storm is not the hero's blow). The castle is spared.
  */
-function strike(run: Run, storm: Storm, i: number): void {
+function strike(run: Run, storm: Storm | Meteors, i: number): void {
   const h = run.hazard;
   const cx = h.x[i]!;
   const cy = h.y[i]!;

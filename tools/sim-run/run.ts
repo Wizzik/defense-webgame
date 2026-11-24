@@ -56,7 +56,7 @@ export interface RunSummary {
    */
   world: {
     islands: number; waves: number; bolts: number; boltHits: number;
-    kind?: "storm" | "weather" | "thicket"; sand?: number; thicketShare?: number;
+    kind?: "storm" | "weather" | "thicket" | "meteors"; sand?: number; thicketShare?: number;
   };
 }
 

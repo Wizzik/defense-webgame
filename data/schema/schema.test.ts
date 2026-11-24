@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { GameDataError, validateGameData } from "./index";
+import { GameDataError, stormOf, validateGameData } from "./index";
 
 const SLOT_TYPES = [
   "head", "neck", "shoulders", "back", "chest", "wrist", "hands", "waist", "legs", "feet", "ring", "trinket", "mainHand", "offHand",
@@ -744,6 +744,46 @@ describe("difficulty and worlds", () => {
     expect(errorMessage(flat)).toContain("hazard");
   });
 
+  it("parses a snow weather with chill", () => {
+    const ok = fixture();
+    ok.worlds[0].hazard = { ...weather(), effect: "snow", chill: { stillSeconds: 3, attackSlow: 0.2 } };
+    expect(validateGameData(ok).worlds[0].hazard).toMatchObject({ effect: "snow", chill: { stillSeconds: 3 } });
+    const strong = fixture();
+    strong.worlds[0].hazard = { ...weather(), effect: "snow", chill: { stillSeconds: 3, attackSlow: 1.5 } };
+    expect(errorMessage(strong)).toContain("hazard");
+    const rain = fixture();
+    rain.worlds[0].hazard = { ...weather(), effect: "rain" };
+    expect(errorMessage(rain)).toContain("hazard");
+  });
+
+  it("parses a meteors hazard", () => {
+    const ok = fixture();
+    ok.worlds[0].hazard = meteors();
+    expect(validateGameData(ok).worlds[0].hazard.kind).toBe("meteors");
+    const noPool = fixture();
+    const { pool: _pool, ...rest } = meteors();
+    noPool.worlds[0].hazard = rest;
+    expect(errorMessage(noPool)).toContain("hazard");
+    const flat = fixture();
+    flat.worlds[0].hazard = { ...meteors(), pool: { ...meteors().pool, radius: 0 } };
+    expect(errorMessage(flat)).toContain("hazard");
+  });
+
+  it("stormOf narrows storms and meteors", () => {
+    const data = fixture();
+    data.worlds[0].hazard = storm();
+    data.worlds[1].hazard = meteors();
+    const v = validateGameData(data);
+    expect(stormOf(v.worlds[0]!)?.kind).toBe("storm");
+    expect(stormOf(v.worlds[1]!)?.kind).toBe("meteors");
+    const w = fixture();
+    w.worlds[0].hazard = weather();
+    w.worlds[1].hazard = thicket([[0, 900, 200]]);
+    const vw = validateGameData(w);
+    expect(stormOf(vw.worlds[0]!)).toBeNull();
+    expect(stormOf(vw.worlds[1]!)).toBeNull();
+  });
+
   it("rejects an unknown hazard kind", () => {
     const odd = fixture();
     odd.worlds[0].hazard = { ...weather(), kind: "flood" };
@@ -780,6 +820,13 @@ function weather() {
   return {
     kind: "weather" as const, effect: "sand", fromPhase: 2, everySeconds: { min: 100, max: 130 }, durationSeconds: 15,
     warnSeconds: 5, moveSlow: 0.2, name: { en: "Sandstorm", cs: "Písečná bouře" },
+  };
+}
+
+function meteors() {
+  return {
+    ...storm(), kind: "meteors" as const, fromPhase: 1, bolts: { min: 3, max: 6 }, radius: 150,
+    pool: { seconds: 6, radius: 130, heroSharePerSecond: 0.04, enemySharePerSecond: 0.06, bossSharePerSecond: 0.004 },
   };
 }
 
