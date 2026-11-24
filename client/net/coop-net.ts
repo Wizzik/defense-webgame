@@ -1,10 +1,11 @@
-// The net loop of a co-op run (multiplayer migration step 7, from the spike page): both windows run the same
-// simulation in lockstep. Steps run from a worker heartbeat up to wall-clock time (ticker.ts, wall-clock.ts), so a
+// The net loop of a co-op run (multiplayer migration step 7, from the spike page; 2-4 players since 2026-11-24): every
+// window runs the same simulation in lockstep. Guests link only to the host, who relays inputs and hashes (relay.ts). Steps run from a worker heartbeat up to wall-clock time (ticker.ts, wall-clock.ts), so a
 // hidden or covered window keeps pace; the page draws on requestAnimationFrame and interpolates with `alpha`.
 import { stateHash, TICK_SECONDS, type Run, type TickInput } from "../../sim";
 import { HASH_EVERY, Lockstep } from "./lockstep";
 import type { PeerLink } from "./peer-link";
 import { inputMessage, type NetMessage, toInput } from "./protocol";
+import { inboundPlayer, relayTargets } from "./relay";
 import { startTicker, type Ticker } from "./ticker";
 import { WallClock } from "./wall-clock";
 
@@ -25,21 +26,24 @@ export interface NetStats {
   lastMatchedHash: number;
   desyncAt: number | null;
   rejected: number;
-  /** The teammate left (or the link broke); his hero stands still from then on. */
-  left: boolean;
+  /** Players who left (or whose link broke); their heroes stand still from then on. A guest whose host left lists everyone. */
+  gone: number[];
 }
 
 export interface CoopNetDeps {
-  peer: PeerLink;
-  local: 0 | 1;
+  /** The host: guest player number -> his link; a guest: 0 -> the host's link. */
+  links: ReadonlyMap<number, PeerLink>;
+  local: number;
+  /** Players in the run (2-4). */
+  players: number;
   run: Run;
   /** Fills the local input of the next queued step. */
   readInput(out: TickInput): void;
   /** After every step, before the next one. */
   afterStep(run: Run): void;
-  /** The teammate left or the link broke; the run goes on with his hero idle. */
-  onLeft(reason: string): void;
-  /** The two simulations differ from `step` on; the run stops. */
+  /** Player `player` left or his link broke; the run goes on with his hero idle (a guest gets 0 when the host left). */
+  onLeft(player: number, reason: string): void;
+  /** The simulations differ from `step` on; the run stops. */
   onDesync(step: number): void;
 }
 
@@ -52,31 +56,42 @@ export class CoopNet {
   readonly stats: NetStats;
   private readonly lock: Lockstep;
   private readonly clock = new WallClock(STEP_MS);
-  private readonly inputs: TickInput[] = [
-    { moveX: 0, moveY: 0, card: -1, actions: 0 },
-    { moveX: 0, moveY: 0, card: -1, actions: 0 },
-  ];
+  private readonly inputs: TickInput[];
   private readonly scratch: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   private readonly remote: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   private readonly rtts: number[] = [];
-  private readonly other: 0 | 1;
+  private readonly linkIds: number[];
   private ticker: Ticker | null = null;
   private pinger = 0;
   private pingN = 0;
   private started = 0;
+  private readonly readyGuests = new Set<number>();
   private lastStepAt = 0;
   private stopped = false;
   private desynced = false;
 
   constructor(private readonly deps: CoopNetDeps) {
-    this.lock = new Lockstep(2, deps.local);
-    this.other = deps.local === 0 ? 1 : 0;
+    this.lock = new Lockstep(deps.players, deps.local);
+    this.inputs = [];
+    for (let p = 0; p < deps.players; p++) this.inputs.push({ moveX: 0, moveY: 0, card: -1, actions: 0 });
+    this.linkIds = [...deps.links.keys()];
     this.stats = {
       role: deps.local === 0 ? "host" : "guest", connected: true, tick: 0, rttMedian: 0, rttP95: 0, stalls: 0,
-      stallsPerMinute: 0, lastMatchedHash: -1, desyncAt: null, rejected: 0, left: false,
+      stallsPerMinute: 0, lastMatchedHash: -1, desyncAt: null, rejected: 0, gone: [],
     };
-    deps.peer.onMessage((m) => this.receive(m));
-    deps.peer.onClose((reason) => this.leave(reason));
+    for (const [from, link] of deps.links) {
+      link.onMessage((m) => this.receive(from, m));
+      link.onClose((reason) => this.linkClosed(from, reason));
+    }
+  }
+
+  /** Sends `m` on every link still open. */
+  private broadcast(m: NetMessage): void {
+    for (const [p, link] of this.deps.links) if (!this.isGone(p)) link.send(m);
+  }
+
+  private isGone(player: number): boolean {
+    return this.stats.gone.includes(player);
   }
 
   /** Starts stepping (the host does this once the guest said `ready`). */
@@ -85,9 +100,7 @@ export class CoopNet {
     this.started = performance.now();
     this.lastStepAt = this.started;
     this.ticker = startTicker(BEAT_MS, () => this.pump());
-    this.pinger = window.setInterval(() => {
-      if (!this.stats.left) this.deps.peer.send({ t: "ping", n: this.pingN++, at: performance.now() });
-    }, 1000);
+    this.pinger = window.setInterval(() => this.broadcast({ t: "ping", n: this.pingN++, at: performance.now() }), 1000);
   }
 
   get running(): boolean {
@@ -100,37 +113,70 @@ export class CoopNet {
     return Math.min(1, Math.max(0, (now - this.lastStepAt) / STEP_MS));
   }
 
-  /** Stops stepping and closes the link (the player left the run). */
+  /** Stops stepping and closes every link (the player left the run). */
   stop(): void {
     if (this.stopped) return;
     this.stopped = true;
     this.ticker?.stop();
     clearInterval(this.pinger);
-    this.deps.peer.close();
+    for (const link of this.deps.links.values()) link.close();
   }
 
-  private receive(m: NetMessage): void {
-    if (m.t === "in") {
-      this.lock.receive(this.other, m.k, toInput(m, this.remote));
-      this.pump(); // run what the input made ready at once, not at the next beat
-    } else if (m.t === "hash") this.check(this.lock.recordHash(this.other, m.k, m.h));
-    else if (m.t === "ping") this.deps.peer.send({ t: "pong", n: m.n, at: m.at });
+  private receive(from: number, m: NetMessage): void {
+    const { deps } = this;
+    if (m.t === "in" || m.t === "hash") {
+      const player = inboundPlayer(deps.local, from, m.p, deps.players);
+      if (player === null || this.isGone(player)) return;
+      // the host passes it on before anything else, so the guests get a leaver's last inputs before his "left"
+      for (const to of relayTargets(deps.local, from, this.linkIds)) {
+        if (!this.isGone(to)) deps.links.get(to)!.send({ ...m, p: player });
+      }
+      if (m.t === "in") {
+        this.lock.receive(player, m.k, toInput(m, this.remote));
+        this.pump(); // run what the input made ready at once, not at the next beat
+      } else this.check(this.lock.recordHash(player, m.k, m.h));
+    } else if (m.t === "ping") deps.links.get(from)?.send({ t: "pong", n: m.n, at: m.at });
     else if (m.t === "pong") {
       this.rtts.push(performance.now() - m.at);
       if (this.rtts.length > RTT_SAMPLES) this.rtts.shift();
       const sorted = [...this.rtts].sort((a, b) => a - b);
       this.stats.rttMedian = percentile(sorted, 0.5);
       this.stats.rttP95 = percentile(sorted, 0.95);
-    } else if (m.t === "ready") this.start();
-    else if (m.t === "bye") this.leave("the other player left");
+    } else if (m.t === "ready") {
+      // the host steps once every guest is ready
+      this.readyGuests.add(from);
+      if (this.readyGuests.size + this.stats.gone.length >= this.linkIds.length) this.start();
+    } else if (m.t === "left" && deps.local !== 0 && from === 0) this.leave(m.p, "left");
+    else if (m.t === "bye") this.linkClosed(from, "the other player left");
   }
 
-  private leave(reason: string): void {
-    if (this.stats.left) return;
-    this.stats.left = true;
-    this.stats.connected = false;
-    this.lock.drop(this.other);
-    if (!this.stopped) this.deps.onLeft(reason);
+  /** A link closed: on the host one guest left; on a guest the host left, and with him every other player. */
+  private linkClosed(from: number, reason: string): void {
+    const { deps } = this;
+    if (this.isGone(from)) return;
+    if (deps.local === 0) {
+      this.leave(from, reason);
+      this.broadcast({ t: "left", p: from });
+    } else {
+      for (let p = 0; p < deps.players; p++) if (p !== deps.local && p !== from) this.drop(p);
+      this.leave(from, reason);
+    }
+    this.stats.connected = this.linkIds.some((p) => !this.isGone(p));
+    // a guest who left before every guest was ready no longer holds the start back
+    if (deps.local === 0 && !this.ticker && this.readyGuests.size > 0 && this.readyGuests.size + this.stats.gone.length >= this.linkIds.length) this.start();
+  }
+
+  private drop(player: number): void {
+    if (this.isGone(player)) return;
+    this.stats.gone.push(player);
+    this.stats.gone.sort((a, b) => a - b);
+    this.lock.drop(player);
+  }
+
+  private leave(player: number, reason: string): void {
+    if (this.isGone(player) || player === this.deps.local) return;
+    this.drop(player);
+    if (!this.stopped) this.deps.onLeft(player, reason);
     this.pump();
   }
 
@@ -146,23 +192,23 @@ export class CoopNet {
   private pump(): void {
     if (this.stopped || this.desynced || !this.ticker) return;
     const { lock, deps } = this;
-    const { run, peer } = deps;
+    const { run } = deps;
     const now = performance.now();
     const steps = this.clock.pending(now, lock.tick);
     for (let s = 0; s < steps && !this.desynced; s++) {
       if (lock.canQueue()) {
         deps.readInput(this.scratch);
         const k = lock.queueLocal(this.scratch);
-        if (!this.stats.left) peer.send(inputMessage(k, deps.local, this.scratch));
+        this.broadcast(inputMessage(k, deps.local, this.scratch));
       }
       if (run.state === "won" || run.state === "lost" || !lock.ready()) break;
       const k = lock.take(this.inputs);
       run.step(this.inputs);
       this.lastStepAt = now;
       deps.afterStep(run);
-      if ((k + 1) % HASH_EVERY === 0 && !this.stats.left) {
+      if ((k + 1) % HASH_EVERY === 0 && this.stats.connected) {
         const h = stateHash(run);
-        peer.send({ t: "hash", k, p: deps.local, h });
+        this.broadcast({ t: "hash", k, p: deps.local, h });
         this.check(lock.recordHash(deps.local, k, h));
       }
     }
@@ -176,6 +222,8 @@ export class CoopNet {
     stats.stallsPerMinute = lock.stalls / Math.max(1 / 60, (now - this.started) / 60_000);
     stats.lastMatchedHash = lock.lastMatchedHash;
     stats.desyncAt = lock.desyncAt;
-    stats.rejected = this.deps.peer.rejected;
+    let rejected = 0;
+    for (const link of this.deps.links.values()) rejected += link.rejected;
+    stats.rejected = rejected;
   }
 }

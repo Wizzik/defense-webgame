@@ -167,7 +167,7 @@ export class CoopSetup {
     }
     if (ticket !== this.attempt || this.peer !== peer) return;
     const seed = Math.floor(Math.random() * 0x1_0000_0000) >>> 0;
-    peer.send({ t: "start", v: PROTOCOL_VERSION, seed, world, d: difficulty, heroes, g: gear });
+    peer.send({ t: "start", v: PROTOCOL_VERSION, seed, world, d: difficulty, you: 1, heroes, g: gear });
     this.begin(peer, seed, world, difficulty, heroes, gear, 0);
   }
 
@@ -236,7 +236,7 @@ export class CoopSetup {
     const players: PlayerOptions[] = heroes.map((hero, p) => ({ hero, loadout: fromNet(gear[p] ?? []) }));
     this.deps.onNote("");
     const net = session.startCoop(seed, players, local, {
-      peer,
+      links: new Map([[local === 0 ? 1 : 0, peer]]),
       onLeft: () => this.deps.onNote(t(this.deps.lang(), "coop.left")),
       onDesync: (step) => this.deps.onNote(t(this.deps.lang(), "coop.desync", { n: step })),
     });

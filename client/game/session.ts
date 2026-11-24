@@ -102,9 +102,9 @@ export class Session {
 
   /**
    * Starts a co-op run of `players` in which this window steers `local`; the returned net loop steps it once
-   * started (the guest at once, the host when the guest is ready).
+   * started (a guest at once, the host when every guest is ready).
    */
-  startCoop(seed: number, players: readonly PlayerOptions[], local: 0 | 1, net: Pick<CoopNetDeps, "peer" | "onLeft" | "onDesync">): CoopNet {
+  startCoop(seed: number, players: readonly PlayerOptions[], local: number, net: Pick<CoopNetDeps, "links" | "onLeft" | "onDesync">): CoopNet {
     this.leaveCoop();
     this.run = createRun(this.data, { seed, players, world: this.world, difficulty: this.difficulty });
     this.onStart();
@@ -114,7 +114,7 @@ export class Session {
     this.pendingCard = -1;
     this.pendingKeep = false;
     this.coop = new CoopNet({
-      ...net, local, run: this.run,
+      ...net, local, players: players.length, run: this.run,
       readInput: (out) => this.coopInput(out),
       afterStep: (run) => this.afterStep(run),
     });

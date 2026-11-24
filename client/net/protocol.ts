@@ -2,8 +2,8 @@
 // the game state never does. Every received message passes `decodeMessage`, which never throws.
 import type { TickInput } from "../../sim";
 
-/** 2: the game's co-op lobby (`join` and `start`, multiplayer migration step 7). */
-export const PROTOCOL_VERSION = 2;
+/** 2: the game's co-op lobby (`join` and `start`, multiplayer migration step 7); 3: up to 4 players (`room`, `left`, `p`). */
+export const PROTOCOL_VERSION = 3;
 
 /** One worn permanent item as it travels: [slot id, item id, level]. */
 export type NetGear = [string, string, number];
@@ -16,8 +16,12 @@ export type NetMessage =
   | { t: "hello"; v: number; seed: number; hero: string }
   /** Guest to host in the game's lobby: his protocol, hero and permanent gear. */
   | { t: "join"; v: number; hero: string; g: NetGear[] }
-  /** Host to guest: the run both start; `heroes[p]` and `g[p]` are player p's (the host is player 0). */
-  | { t: "start"; v: number; seed: number; world: number; d: NetDifficulty; heroes: string[]; g: NetGear[][] }
+  /** Host to a guest: the run all start; `heroes[p]` and `g[p]` are player p's (the host is 0), `you` the guest's. */
+  | { t: "start"; v: number; seed: number; world: number; d: NetDifficulty; you: number; heroes: string[]; g: NetGear[][] }
+  /** Host to every guest when the lobby changes: the heroes in player order and the receiver's number (-1: the room is full). */
+  | { t: "room"; v: number; you: number; heroes: string[] }
+  /** Host to the other guests: guest `p` left the run. */
+  | { t: "left"; p: number }
   /** An input or a hash of player `p` for step `k` (the host sets `p` from the link a guest sent it on). */
   | { t: "in"; k: number; p: number; mx: number; my: number; c: number; a: number }
   | { t: "hash"; k: number; p: number; h: number }
@@ -33,7 +37,8 @@ const MAX_STEP = 1_000_000;
 const MAX_HERO_ID = 32;
 const MAX_ID = 48;
 const MAX_GEAR = 16;
-const MAX_PLAYERS = 4;
+/** The most players of a co-op run (the host and three guests). */
+export const MAX_PLAYERS = 4;
 const UINT32_MAX = 0xffffffff;
 
 function intIn(value: unknown, min: number, max: number): value is number {
@@ -79,6 +84,7 @@ export function decodeMessage(raw: unknown): NetMessage | null {
       if (!DIFFICULTIES.includes(m.d as NetDifficulty)) return null;
       if (!Array.isArray(m.heroes) || m.heroes.length < 2 || m.heroes.length > MAX_PLAYERS) return null;
       if (!m.heroes.every((h) => id(h, MAX_HERO_ID))) return null;
+      if (!intIn(m.you, 1, m.heroes.length - 1)) return null;
       if (!Array.isArray(m.g) || m.g.length !== m.heroes.length) return null;
       const g: NetGear[][] = [];
       for (const list of m.g) {
@@ -86,8 +92,14 @@ export function decodeMessage(raw: unknown): NetMessage | null {
         if (!one) return null;
         g.push(one);
       }
-      return { t: "start", v: m.v, seed: m.seed, world: m.world, d: m.d as NetDifficulty, heroes: m.heroes as string[], g };
+      return { t: "start", v: m.v, seed: m.seed, world: m.world, d: m.d as NetDifficulty, you: m.you, heroes: m.heroes as string[], g };
     }
+    case "room":
+      if (!intIn(m.v, 0, UINT32_MAX) || !Array.isArray(m.heroes) || m.heroes.length < 1 || m.heroes.length > MAX_PLAYERS) return null;
+      if (!m.heroes.every((h) => id(h, MAX_HERO_ID)) || !intIn(m.you, -1, m.heroes.length - 1)) return null;
+      return { t: "room", v: m.v, you: m.you, heroes: m.heroes as string[] };
+    case "left":
+      return intIn(m.p, 1, MAX_PLAYERS - 1) ? { t: "left", p: m.p } : null;
     case "in":
       if (!intIn(m.k, 0, MAX_STEP) || !intIn(m.p, 0, MAX_PLAYERS - 1) || !intIn(m.mx, -1, 1) || !intIn(m.my, -1, 1)) return null;
       if (!intIn(m.c, -1, 2) || !intIn(m.a, 0, 15)) return null;

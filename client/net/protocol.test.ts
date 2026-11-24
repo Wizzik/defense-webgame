@@ -13,8 +13,15 @@ describe("decodeMessage", () => {
     { t: "bye" },
     { t: "ready" },
     { t: "join", v: PROTOCOL_VERSION, hero: "sparkshot", g: [["head", "travelers-hood", 3]] },
-    { t: "start", v: PROTOCOL_VERSION, seed: 9, world: 2, d: "insane", heroes: ["stonehorn", "sparkshot"], g: [[], [["ring1", "moonlit-signet", 1]]] },
+    { t: "start", v: PROTOCOL_VERSION, seed: 9, world: 2, d: "insane", you: 1, heroes: ["stonehorn", "sparkshot"], g: [[], [["ring1", "moonlit-signet", 1]]] },
+    { t: "room", v: PROTOCOL_VERSION, you: 2, heroes: ["stonehorn", "sparkshot", "tidecaller"] },
+    { t: "room", v: PROTOCOL_VERSION, you: -1, heroes: ["stonehorn", "a", "b", "c"] },
+    { t: "left", p: 3 },
   ];
+
+  it("is version 3", () => {
+    expect(PROTOCOL_VERSION).toBe(3);
+  });
 
   it.each(valid.map((m) => [m.t, m] as const))("round-trips %s", (_t, m) => {
     expect(roundTrip(m)).toEqual(m);
@@ -33,9 +40,9 @@ describe("decodeMessage", () => {
     ["NaN", NaN],
     ["a gear entry of two fields", { t: "join", v: 2, hero: "x", g: [["head", "hood"]] }],
     ["a gear level of 0", { t: "join", v: 2, hero: "x", g: [["head", "hood", 0]] }],
-    ["an unknown difficulty", { t: "start", v: 2, seed: 1, world: 1, d: "easy", heroes: ["a", "b"], g: [[], []] }],
-    ["one hero in a start", { t: "start", v: 2, seed: 1, world: 1, d: "hell", heroes: ["a"], g: [[]] }],
-    ["gear lists not matching heroes", { t: "start", v: 2, seed: 1, world: 1, d: "hell", heroes: ["a", "b"], g: [[]] }],
+    ["an unknown difficulty", { t: "start", v: 2, seed: 1, world: 1, d: "easy", you: 1, heroes: ["a", "b"], g: [[], []] }],
+    ["one hero in a start", { t: "start", v: 2, seed: 1, world: 1, d: "hell", you: 1, heroes: ["a"], g: [[]] }],
+    ["gear lists not matching heroes", { t: "start", v: 2, seed: 1, world: 1, d: "hell", you: 1, heroes: ["a", "b"], g: [[]] }],
     ["a NaN step", { t: "in", k: NaN, p: 0, mx: 0, my: 0, c: -1, a: 0 }],
     ["a missing field", { t: "in", k: 1, p: 0, mx: 0, my: 0, c: -1 }],
     ["mx out of range", { t: "in", k: 1, p: 0, mx: 2, my: 0, c: -1, a: 0 }],
@@ -49,6 +56,10 @@ describe("decodeMessage", () => {
     ["an infinite ping time", { t: "ping", n: 1, at: Infinity }],
     ["a player of 4", { t: "in", k: 1, p: 4, mx: 0, my: 0, c: -1, a: 0 }],
     ["a hash without a player", { t: "hash", k: 30, h: 1 }],
+    ["a start for the host", { t: "start", v: 3, seed: 1, world: 1, d: "hell", you: 0, heroes: ["a", "b"], g: [[], []] }],
+    ["a start beyond its heroes", { t: "start", v: 3, seed: 1, world: 1, d: "hell", you: 2, heroes: ["a", "b"], g: [[], []] }],
+    ["a room of five", { t: "room", v: 3, you: 1, heroes: ["a", "b", "c", "d", "e"] }],
+    ["a left host", { t: "left", p: 0 }],
     ["an array", [1, 2]],
   ])("rejects %s", (_name, raw) => {
     expect(roundTrip(raw)).toBeNull();
