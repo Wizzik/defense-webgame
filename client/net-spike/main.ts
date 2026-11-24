@@ -175,14 +175,14 @@ function play(peer: PeerLink, local: 0 | 1, seed: number, hero: string): void {
     for (let s = 0; s < steps && !stopped; s++) {
       if (lock.canQueue()) {
         const input = localInput();
-        peer.send(inputMessage(lock.queueLocal(input), input));
+        peer.send(inputMessage(lock.queueLocal(input), local, input));
       }
       if (run.state === "won" || run.state === "lost" || !lock.ready()) break;
       const k = lock.take(inputs);
       run.step(inputs);
       if ((k + 1) % HASH_EVERY === 0) {
         const h = stateHash(run);
-        peer.send({ t: "hash", k, h });
+        peer.send({ t: "hash", k, p: local, h });
         check(lock.recordHash(local, k, h));
       }
     }

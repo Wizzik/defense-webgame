@@ -18,8 +18,9 @@ export type NetMessage =
   | { t: "join"; v: number; hero: string; g: NetGear[] }
   /** Host to guest: the run both start; `heroes[p]` and `g[p]` are player p's (the host is player 0). */
   | { t: "start"; v: number; seed: number; world: number; d: NetDifficulty; heroes: string[]; g: NetGear[][] }
-  | { t: "in"; k: number; mx: number; my: number; c: number; a: number }
-  | { t: "hash"; k: number; h: number }
+  /** An input or a hash of player `p` for step `k` (the host sets `p` from the link a guest sent it on). */
+  | { t: "in"; k: number; p: number; mx: number; my: number; c: number; a: number }
+  | { t: "hash"; k: number; p: number; h: number }
   | { t: "ping"; n: number; at: number }
   | { t: "pong"; n: number; at: number }
   /** Guest to host: his models are loaded and he steps; the host starts stepping too. */
@@ -88,12 +89,12 @@ export function decodeMessage(raw: unknown): NetMessage | null {
       return { t: "start", v: m.v, seed: m.seed, world: m.world, d: m.d as NetDifficulty, heroes: m.heroes as string[], g };
     }
     case "in":
-      if (!intIn(m.k, 0, MAX_STEP) || !intIn(m.mx, -1, 1) || !intIn(m.my, -1, 1)) return null;
+      if (!intIn(m.k, 0, MAX_STEP) || !intIn(m.p, 0, MAX_PLAYERS - 1) || !intIn(m.mx, -1, 1) || !intIn(m.my, -1, 1)) return null;
       if (!intIn(m.c, -1, 2) || !intIn(m.a, 0, 15)) return null;
-      return { t: "in", k: m.k, mx: m.mx, my: m.my, c: m.c, a: m.a };
+      return { t: "in", k: m.k, p: m.p, mx: m.mx, my: m.my, c: m.c, a: m.a };
     case "hash":
-      if (!intIn(m.k, 0, MAX_STEP) || !intIn(m.h, 0, UINT32_MAX)) return null;
-      return { t: "hash", k: m.k, h: m.h };
+      if (!intIn(m.k, 0, MAX_STEP) || !intIn(m.p, 0, MAX_PLAYERS - 1) || !intIn(m.h, 0, UINT32_MAX)) return null;
+      return { t: "hash", k: m.k, p: m.p, h: m.h };
     case "ping":
     case "pong":
       if (!intIn(m.n, 0, UINT32_MAX) || !finite(m.at)) return null;
@@ -107,8 +108,8 @@ export function decodeMessage(raw: unknown): NetMessage | null {
   }
 }
 
-export function inputMessage(k: number, input: TickInput): InputNetMessage {
-  return { t: "in", k, mx: input.moveX, my: input.moveY, c: input.card, a: input.actions };
+export function inputMessage(k: number, p: number, input: TickInput): InputNetMessage {
+  return { t: "in", k, p, mx: input.moveX, my: input.moveY, c: input.card, a: input.actions };
 }
 
 export function toInput(m: InputNetMessage, out: TickInput): TickInput {

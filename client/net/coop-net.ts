@@ -153,7 +153,7 @@ export class CoopNet {
       if (lock.canQueue()) {
         deps.readInput(this.scratch);
         const k = lock.queueLocal(this.scratch);
-        if (!this.stats.left) peer.send(inputMessage(k, this.scratch));
+        if (!this.stats.left) peer.send(inputMessage(k, deps.local, this.scratch));
       }
       if (run.state === "won" || run.state === "lost" || !lock.ready()) break;
       const k = lock.take(this.inputs);
@@ -162,7 +162,7 @@ export class CoopNet {
       deps.afterStep(run);
       if ((k + 1) % HASH_EVERY === 0 && !this.stats.left) {
         const h = stateHash(run);
-        peer.send({ t: "hash", k, h });
+        peer.send({ t: "hash", k, p: deps.local, h });
         this.check(lock.recordHash(deps.local, k, h));
       }
     }
