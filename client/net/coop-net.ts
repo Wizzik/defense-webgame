@@ -5,7 +5,7 @@ import { stateHash, TICK_SECONDS, type Run, type TickInput } from "../../sim";
 import { HASH_EVERY, Lockstep } from "./lockstep";
 import type { PeerLink } from "./peer-link";
 import { inputMessage, type NetMessage, toInput } from "./protocol";
-import { inboundPlayer, relayTargets } from "./relay";
+import { everyoneReady, inboundPlayer, relayTargets } from "./relay";
 import { startTicker, type Ticker } from "./ticker";
 import { WallClock } from "./wall-clock";
 
@@ -148,7 +148,7 @@ export class CoopNet {
     } else if (m.t === "ready") {
       // the host steps once every guest is ready
       this.readyGuests.add(from);
-      if (this.readyGuests.size + this.stats.gone.length >= this.linkIds.length) this.start();
+      if (everyoneReady(this.readyGuests, this.stats.gone, this.linkIds)) this.start();
     } else if (m.t === "left" && deps.local !== 0 && from === 0) this.leave(m.p, "left");
     else if (m.t === "bye") this.linkClosed(from, "the other player left");
   }
@@ -166,7 +166,7 @@ export class CoopNet {
     }
     this.stats.connected = this.linkIds.some((p) => !this.isGone(p));
     // a guest who left before every guest was ready no longer holds the start back
-    if (deps.local === 0 && !this.ticker && this.readyGuests.size > 0 && this.readyGuests.size + this.stats.gone.length >= this.linkIds.length) this.start();
+    if (deps.local === 0 && !this.ticker && everyoneReady(this.readyGuests, this.stats.gone, this.linkIds)) this.start();
   }
 
   private drop(player: number): void {

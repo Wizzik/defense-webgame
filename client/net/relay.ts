@@ -14,3 +14,8 @@ export function inboundPlayer(local: number, from: number, p: number, players: n
 export function relayTargets(local: number, from: number, links: readonly number[]): number[] {
   return local === 0 ? links.filter((p) => p !== from) : [];
 }
+
+/** Host: whether every guest link has said `ready` or left, each guest counted once (then the host starts stepping). */
+export function everyoneReady(ready: ReadonlySet<number>, gone: readonly number[], links: readonly number[]): boolean {
+  return links.length > 0 && links.every((p) => ready.has(p) || gone.includes(p));
+}

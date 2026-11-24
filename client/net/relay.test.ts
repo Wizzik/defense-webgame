@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { inboundPlayer, relayTargets } from "./relay";
+import { everyoneReady, inboundPlayer, relayTargets } from "./relay";
 
 describe("inboundPlayer", () => {
   it("host takes the player from the link", () => {
@@ -24,5 +24,14 @@ describe("relayTargets", () => {
 
   it("a guest relays nothing", () => {
     expect(relayTargets(2, 0, [0])).toEqual([]);
+  });
+});
+
+describe("everyoneReady", () => {
+  it("needs every guest ready or gone, each counted once", () => {
+    expect(everyoneReady(new Set([1]), [1], [1, 2])).toBe(false);
+    expect(everyoneReady(new Set([1]), [2], [1, 2])).toBe(true);
+    expect(everyoneReady(new Set([1, 2]), [], [1, 2])).toBe(true);
+    expect(everyoneReady(new Set(), [], [1])).toBe(false);
   });
 });
