@@ -55,7 +55,7 @@ export interface GameSnapshot {
   /** Slams winding up (warning circles on the ground). */
   slams: number;
   /** What the renderer built: `heroModels` is how many hero figures stand in the scene (refreshed every frame), `slamRings` how many slam circles lie on the floor, `particles` how many weather particles are drawn. */
-  render: { enemyMeshes: number; heroModels: number; shadows: boolean; slamRings: number; hazardRings: number; particles: number };
+  render: { enemyMeshes: number; heroModels: number; shadows: boolean; slamRings: number; hazardRings: number; particles: number; pools: number };
   /** Co-op (multiplayer migration step 7): the player this window steers, every player, and the net loop's numbers (null alone). */
   local: number;
   players: PlayerSnapshot[];
@@ -106,7 +106,13 @@ export interface GameSnapshot {
    * weathers so far, seconds left of the running weather, seconds until an announced weather starts, and the walking
    * speed scale of the ground under the hero (paths 1.15, thicket 0.7, else 1).
    */
-  hazard: { kind: "storm" | "weather" | "thicket"; pending: number; waves: number; weather: number; warning: number; ground: number };
+  hazard: {
+    kind: "storm" | "weather" | "thicket" | "meteors"; pending: number; waves: number; weather: number; warning: number; ground: number;
+    /** The local hero is chilled by the blizzard (world 4). */
+    chilled: boolean;
+    /** Burning pools of fire (world 5). */
+    pools: number;
+  };
   /** Only with ?debug=1. */
   debug?: {
     grantXp(amount: number): void;
@@ -153,12 +159,12 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     backend, gpu, frames: 0, screen: "menu", tick: 0, level: 0, kills: 0, heroHp: 0, castleHp: 0, enemies: 0, enemyTypes: 0,
     hero: "", heroX: 0, heroY: 0, abilityLevels: [], abilityCooldowns: [], abilityIds: [], ultimateAuto: true, allies: 0,
     projectiles: 0, packArrows: 0, charging: 0, phase: 1, boss: null, slams: 0,
-    render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0, hazardRings: 0, particles: 0 },
+    render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0, hazardRings: 0, particles: 0, pools: 0 },
     local: 0, players: [], net: null,
     gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, settingsOpen: false, gear: [], collection: {}, gearSaved: false,
     orbs: [], hearts: 0, buffs: { boots: 0, berserk: 0, heal: 0 }, lifesteal: 0,
     faction: "human", slowed: 0, rooted: 0, world: 1, difficulty: "normal", unlocked: [], progressSaved: false,
-    obstacles: 0, hazard: { kind: "storm", pending: 0, waves: 0, weather: 0, warning: 0, ground: 1 },
+    obstacles: 0, hazard: { kind: "storm", pending: 0, waves: 0, weather: 0, warning: 0, ground: 1, chilled: false, pools: 0 },
   };
   window.__game = snapshot;
   return snapshot;
@@ -311,6 +317,10 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
   snapshot.hazard.weather = run.hazard.weatherTicks / TICKS_PER_SECOND;
   snapshot.hazard.warning = run.hazard.warnTicks / TICKS_PER_SECOND;
   snapshot.hazard.ground = groundSpeedScale(run.map, run.hero.x, run.hero.y);
+  snapshot.hazard.chilled = run.players[run.current]!.chilled;
+  let pools = 0;
+  for (let i = 0; i < run.hazard.poolTicks.length; i++) if (run.hazard.poolTicks[i]! > 0) pools++;
+  snapshot.hazard.pools = pools;
   snapshot.difficulty = run.difficulty;
   snapshot.heroX = run.hero.x;
   snapshot.heroY = run.hero.y;

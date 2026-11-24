@@ -164,6 +164,13 @@ describe("data-build", () => {
     expect(data.rules.difficulty.levels.hell.extraRushes).toEqual([{ atSeconds: 30, elites: 1, heavies: 1 }]);
   });
 
+  it("passes a world's strength through, and only when it is set", () => {
+    const d = design();
+    d.worlds[0] = { ...d.worlds[0]!, strength: 1.12 };
+    expect(buildGameData(mapExport(), d, "test").worlds[0]!.strength).toBe(1.12);
+    expect("strength" in buildGameData(mapExport(), design(), "test").worlds[0]!).toBe(false);
+  });
+
   it("rejects a non-numeric misc constant with its name", () => {
     const src = mapExport();
     src.mapInfo.misc_constants.DefenseArmor = "n/a";

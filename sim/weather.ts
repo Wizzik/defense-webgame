@@ -3,8 +3,8 @@ import { TICKS_PER_SECOND } from "./constants";
 import { EventKind } from "./events";
 import type { Run } from "./run";
 
-/** `u` of a weather's HazardWave event (the summer storm sends u = 0). The event's value is seconds. */
-export const WeatherPhase = { Warn: 1, Start: 2, End: 3 } as const;
+/** `u` of a weather's HazardWave event (the summer storm sends u = 0); the value is seconds (0 for Chill: a hero froze). */
+export const WeatherPhase = { Warn: 1, Start: 2, End: 3, Chill: 4 } as const;
 
 /** The world's timed weather (spec 2026-11-21 difficulties 4.7 point 2), or null. */
 function weatherOf(run: Run): Weather | null {

@@ -46,6 +46,10 @@ export class PlayerState {
    * rules.coop.revive.seconds he stands up. 0 while he lives or nobody is near.
    */
   reviveTicks = 0;
+  /** Steps the hero stood without walking or dashing (sim/chill.ts); 0 after a step he walked. */
+  stillTicks = 0;
+  /** The blizzard froze him (base attacks slower) until he walks again (sim/chill.ts). */
+  chilled = false;
 
   constructor(hero: HeroState, heroIndex: number, maxEnemies: number) {
     this.hero = hero;

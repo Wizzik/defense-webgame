@@ -47,11 +47,11 @@ export const WorldMapSchema = z.object({
 }).strict();
 export type WorldMap = z.infer<typeof WorldMapSchema>;
 
-/** Bolts after a warning circle, in waves from a phase on (spec 4.7). Shares are of the target's max hp. */
-export const StormSchema = z.object({
-  kind: z.literal("storm"),
+/** The fields of a hazard that strikes in waves after warning circles (the storm and the meteors). */
+const strikeFields = {
   fromPhase: z.number().int().min(1),
   everySeconds: range(positive),
+  /** Strikes per wave around every living hero. */
   bolts: range(z.number().int().min(1)),
   spread: nonNegative,
   warnSeconds: positive,
@@ -60,6 +60,23 @@ export const StormSchema = z.object({
   enemyShare: share,
   bossShare: share,
   name: LocalizedText,
+};
+/** Bolts after a warning circle, in waves from a phase on (spec 4.7). Shares are of the target's max hp. */
+export const StormSchema = z.object({ kind: z.literal("storm"), ...strikeFields }).strict();
+/**
+ * Green meteors (spec 4.7 point 5): waves like the storm's, and every strike leaves a pool of fire for pool.seconds
+ * that burns heroes and enemies inside it by a share of their max hp a second.
+ */
+export const MeteorsSchema = z.object({
+  kind: z.literal("meteors"),
+  ...strikeFields,
+  pool: z.object({
+    seconds: positive,
+    radius: positive,
+    heroSharePerSecond: share,
+    enemySharePerSecond: share,
+    bossSharePerSecond: share,
+  }).strict(),
 }).strict();
 /**
  * A timed natural event that slows the walking of everyone while it runs (spec 4.7 point 2): a warning warnSeconds
@@ -67,12 +84,14 @@ export const StormSchema = z.object({
  */
 export const WeatherSchema = z.object({
   kind: z.literal("weather"),
-  effect: z.enum(["sand"]),
+  effect: z.enum(["sand", "snow"]),
   fromPhase: z.number().int().min(1),
   everySeconds: range(positive),
   durationSeconds: positive,
   warnSeconds: positive,
   moveSlow: share,
+  /** A hero standing still stillSeconds in the weather is chilled: his base attacks are slower by attackSlow (a share). */
+  chill: z.object({ stillSeconds: positive, attackSlow: share }).strict().optional(),
   name: LocalizedText,
 }).strict();
 /** Fixed zones of brake that slow walking inside them by `slow` (spec 4.7 point 3); [x, y, r] of each zone. */
@@ -82,11 +101,12 @@ export const ThicketSchema = z.object({
   zones: z.array(z.tuple([finite, finite, positive])).min(1),
   name: LocalizedText,
 }).strict();
-export const HazardSchema = z.discriminatedUnion("kind", [StormSchema, WeatherSchema, ThicketSchema]);
+export const HazardSchema = z.discriminatedUnion("kind", [StormSchema, WeatherSchema, ThicketSchema, MeteorsSchema]);
 export type Hazard = z.infer<typeof HazardSchema>;
 export type Storm = z.infer<typeof StormSchema>;
 export type Weather = z.infer<typeof WeatherSchema>;
 export type Thicket = z.infer<typeof ThicketSchema>;
+export type Meteors = z.infer<typeof MeteorsSchema>;
 
 /** One world of the ladder (design/worlds.yaml); its place in the list is its number, 1-based. */
 export const WorldSchema = z.object({
@@ -98,12 +118,14 @@ export const WorldSchema = z.object({
   color: z.string().regex(/^#[0-9a-f]{6}$/, "expected a lowercase hex colour like #1f3a44"),
   /** False: playable with the look of world 1 and marked "coming soon". */
   ready: z.boolean(),
+  /** Enemy hp and damage x this on top of the difficulty's world step (default 1): tunes one world of the ladder. */
+  strength: z.number().positive().optional(),
   map: WorldMapSchema,
   hazard: HazardSchema,
 }).strict();
 export type World = z.infer<typeof WorldSchema>;
 
-/** The world's summer storm, or null when its natural event is of another kind. */
-export function stormOf(world: World): Storm | null {
-  return world.hazard.kind === "storm" ? world.hazard : null;
+/** The world's hazard that strikes in waves (the summer storm or the meteors), or null for a weather or a thicket. */
+export function stormOf(world: World): Storm | Meteors | null {
+  return world.hazard.kind === "storm" || world.hazard.kind === "meteors" ? world.hazard : null;
 }

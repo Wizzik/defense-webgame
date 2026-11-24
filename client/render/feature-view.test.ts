@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildWorldMap, Rng } from "../../sim";
 import { gameData } from "../../sim/testing/game-data";
-import { featureInstances, TREE_STEP } from "./feature-view";
+import { featureInstances, RIDGE_STEP, TREE_STEP } from "./feature-view";
 import { lookOf } from "./world-look";
 import { WALL_PIECE } from "./world-view";
 
@@ -46,5 +46,34 @@ describe("featureInstances", () => {
     expect(list.filter((i) => i.model === "wall")).toHaveLength(pieces);
     expect(list.filter((i) => i.model === "gate-post")).toHaveLength(6);
     expect(list).toHaveLength(pieces + 6);
+  });
+});
+
+describe("featureInstances of worlds 4 and 5", () => {
+  it("the ice ridge has crystals along every segment and none in the pass", () => {
+    const map = buildWorldMap(data, 4, new Rng(1));
+    const items = featureInstances(map, "ridge", []);
+    const crystals = items.filter((i) => i.model === "crystal");
+    let length = 0;
+    for (let s = 0; s < map.segCount; s++) length += Math.hypot(map.segX2[s]! - map.segX1[s]!, map.segY2[s]! - map.segY1[s]!);
+    expect(crystals.length).toBeGreaterThanOrEqual(Math.floor(length / RIDGE_STEP));
+    expect(crystals.filter((c) => near(c, 1061, 1061, 150))).toEqual([]);
+    expect(items.filter((i) => i.model === "ridge-base")).toHaveLength(map.segCount);
+    for (const c of crystals) {
+      expect(c.scale).toBeGreaterThanOrEqual(0.8);
+      expect(c.scale).toBeLessThanOrEqual(1.8);
+    }
+  });
+
+  it("the broken wall has pieces, low pieces and rubble at every breach", () => {
+    const map = buildWorldMap(data, 5, new Rng(1));
+    const items = featureInstances(map, "broken", []);
+    expect(items.filter((i) => i.model === "rubble")).toHaveLength(8 * 3);
+    expect(items.filter((i) => i.model === "wall-low").length).toBeGreaterThan(0);
+    expect(items.filter((i) => i.model === "gate-post")).toEqual([]);
+    const pieces = items.filter((i) => i.model === "wall" || i.model === "wall-low");
+    for (const [x, y] of [[679, 1319], [-1412, 452], [-679, -1319], [1412, -452]] as const) {
+      expect(pieces.filter((p) => near(p, x, y, 150)), `${x},${y}`).toEqual([]);
+    }
   });
 });

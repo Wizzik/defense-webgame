@@ -77,6 +77,24 @@ describe("difficultyMods", () => {
     expect(hell.hp).toBe(6);
     expect(hell.eliteHp).toBe(1.5);
   });
+
+  it("a world's strength multiplies enemy hp and damage on top of the world step", () => {
+    const r = rules();
+    r.difficulty.worldStep = { hp: 0.25, damage: 0.25 };
+    const strong = difficultyMods(r, 5, "normal", 1, 1.2);
+    expect(strong.hp).toBeCloseTo(2.4, 12);
+    expect(strong.damage).toBeCloseTo(2.4, 12);
+    expect(strong.packSize).toBe(1);
+    expect(strong.gold).toBe(difficultyMods(r, 5, "normal").gold);
+  });
+
+  it("createRun takes the strength of its world from the data", () => {
+    const data = gameData();
+    data.worlds[3]!.strength = 1.5;
+    const run = createRun(data, { seed: 1, world: 4 });
+    expect(run.mods.hp).toBeCloseTo(1.5 * difficultyMods(data.rules, 4, "normal").hp, 12);
+    expect(createRun(data, { seed: 1, world: 3 }).mods.hp).toBeCloseTo(difficultyMods(data.rules, 3, "normal").hp, 12);
+  });
 });
 
 describe("run world and difficulty", () => {

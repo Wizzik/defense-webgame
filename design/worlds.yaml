@@ -1,9 +1,12 @@
 # The world ladder (spec 2026-11-21 difficulties and worlds 4.1). The order is the world's number, 1-5; winning
 # world N on a difficulty unlocks world N + 1 on it (meta/progress.ts). Names and blurbs are our own.
 # color: the dark card colour in the world screen (no orange). ready: false = playable with the look of world 1 and
-# marked "coming soon" until the worlds plan 3 gives it its own look.
+# marked "coming soon" (every world has its own look since plan 3b). strength: enemy hp and damage x this on top of
+# rules.difficulty.worldStep (default 1), to tune one world of the ladder.
 # hazard kinds: storm (bolts after a warning circle), weather (a timed event slowing everyone's walking: effect sand),
-# thicket (fixed zones [x, y, r] of brake slowing walking inside them; a path wins over a zone).
+# thicket (fixed zones [x, y, r] of brake slowing walking inside them; a path wins over a zone); weather effect snow may
+# carry chill (a hero standing stillSeconds in it attacks slower by attackSlow); meteors (waves like the storm, `bolts`
+# meteors per hero, each leaving a pool of fire that burns heroes and enemies inside by a share of max hp a second).
 - id: silver-march
   name: { en: Silver March, cs: Stříbrná marka }
   blurb:
@@ -14,7 +17,7 @@
   # The fixed skeleton of world 1 (spec 4.5; north is +y): the old wall with two gates 250 wide at x = -625 and 625,
   # its ends about 1960 from the castle (inside the arrival ring), four paths (+15 % speed). Worlds 2-5 share it until
   # the worlds plan 3.
-  map: &silverMap
+  map:
     paths:
       width: 160
       speedBonus: 0.15
@@ -38,7 +41,7 @@
       kinds: { rock: 5, trees: 4, ruin: 2 }
     clear: { castle: 600, ringInner: 2200, ringOuter: 2600, pathMargin: 60, featureMargin: 150 }
   # Bolts in waves from phase 3: a blue-white warning circle 1.2 s before each strike (spec 4.7).
-  hazard: &silverStorm
+  hazard:
     kind: storm
     fromPhase: 3
     everySeconds: { min: 55, max: 70 }
@@ -155,15 +158,103 @@
     en: "Snow, ice and a cold grey light at the edge of the world."
     cs: "Sníh, led a studené šedé světlo na okraji světa."
   color: "#2a3a4c"
-  ready: false
-  map: *silverMap
-  hazard: *silverStorm
+  ready: true
+  # Enemy hp and damage x strength on top of the world step (plan 3b, tuned to the ladder; Petr: "make it harder").
+  strength: 1.03
+  # An ice ridge in a horseshoe of radius 1500 (thickness 180) over the north and east of the castle with one pass
+  # 400 wide around (1061, 1061); its arms end at 160° and -70°, inside the arrival ring.
+  map:
+    paths:
+      width: 160
+      speedBonus: 0.15
+      lines:
+        - [[150, 150], [1061, 1061], [2000, 2000]]
+        - [[0, -200], [0, -2850]]
+        - [[-200, 0], [-1700, 200], [-2500, 1300]]
+    feature:
+      thickness: 180
+      segments:
+        - [-1410, 513, -1149, 964]
+        - [-1149, 964, -750, 1299]
+        - [-750, 1299, -260, 1477]
+        - [-260, 1477, 260, 1477]
+        - [260, 1477, 750, 1299]
+        - [750, 1299, 910, 1192]
+        - [1192, 910, 1410, 513]
+        - [1410, 513, 1500, 0]
+        - [1500, 0, 1410, -513]
+        - [1410, -513, 1149, -964]
+        - [1149, -964, 750, -1299]
+        - [750, -1299, 513, -1410]
+    islands:
+      count: { min: 30, max: 38 }
+      radius: { min: 40, max: 200 }
+      gap: 120
+      kinds: { rock: 6, trees: 3, ruin: 1 }
+    clear: { castle: 600, ringInner: 2200, ringOuter: 2600, pathMargin: 60, featureMargin: 170 }
+  # A blizzard from phase 2: announced 5 s ahead, then 15 s of -25 % walking speed; a hero standing 3 s in it is
+  # chilled (base attacks 20 % slower) until he walks again.
+  hazard:
+    kind: weather
+    effect: snow
+    fromPhase: 2
+    everySeconds: { min: 80, max: 100 }
+    durationSeconds: 15
+    warnSeconds: 5
+    moveSlow: 0.25
+    chill: { stillSeconds: 3, attackSlow: 0.2 }
+    name: { en: Blizzard, cs: Vánice }
 - id: blightscar
   name: { en: Blightscar, cs: Spálená říše }
   blurb:
     en: "Scorched black earth under a violet sky and green flame."
     cs: "Spálená černá země pod fialovou oblohou a zeleným ohněm."
   color: "#2a1c34"
-  ready: false
-  map: *silverMap
-  hazard: *silverStorm
+  ready: true
+  strength: 1.1
+  # A broken octagonal wall of radius 1600 (thickness 110) with four breaches 400 wide, off the middles of their sides.
+  map:
+    paths:
+      width: 160
+      speedBonus: 0.15
+      lines:
+        - [[82, 160], [679, 1319], [1304, 2534]]
+        - [[-171, 55], [-1412, 452], [-2714, 869]]
+        - [[-82, -160], [-679, -1319], [-1304, -2534]]
+        - [[171, -55], [1412, -452], [2714, -869]]
+    feature:
+      thickness: 110
+      segments:
+        - [1600, 0, 1131, 1131]
+        - [1131, 1131, 863, 1242]
+        - [494, 1395, 0, 1600]
+        - [0, 1600, -1131, 1131]
+        - [-1131, 1131, -1336, 637]
+        - [-1489, 268, -1600, 0]
+        - [-1600, 0, -1131, -1131]
+        - [-1131, -1131, -863, -1242]
+        - [-494, -1395, 0, -1600]
+        - [0, -1600, 1131, -1131]
+        - [1131, -1131, 1336, -637]
+        - [1489, -268, 1600, 0]
+    islands:
+      count: { min: 30, max: 40 }
+      radius: { min: 40, max: 200 }
+      gap: 120
+      kinds: { rock: 3, trees: 3, ruin: 4 }
+    clear: { castle: 600, ringInner: 2200, ringOuter: 2600, pathMargin: 60, featureMargin: 150 }
+  # Green meteors from phase 1: every 18-24 s, 3-6 around every hero after a 1.5 s warning circle; each leaves a pool
+  # of green fire for 6 s.
+  hazard:
+    kind: meteors
+    fromPhase: 1
+    everySeconds: { min: 18, max: 24 }
+    bolts: { min: 3, max: 6 }
+    spread: 400
+    warnSeconds: 1.5
+    radius: 150
+    heroShare: 0.12
+    enemyShare: 0.02
+    bossShare: 0.002
+    pool: { seconds: 6, radius: 130, heroSharePerSecond: 0.04, enemySharePerSecond: 0.005, bossSharePerSecond: 0.0005 }
+    name: { en: Green meteors, cs: Zelené meteory }

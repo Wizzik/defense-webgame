@@ -38,7 +38,7 @@ export function worldCard(
 /** The lines under the chosen card: the blurb, the enemy strength (hp multiplier), the reward and the natural event. */
 export function worldDetail(data: GameData, world: number, difficulty: DifficultyId, lang: Lang): string[] {
   const def = data.worlds[world - 1]!;
-  const mods = difficultyMods(data.rules, world, difficulty);
+  const mods = difficultyMods(data.rules, world, difficulty, 1, data.worlds[world - 1]!.strength ?? 1);
   const parts: string[] = [];
   if (mods.gold > 1) parts.push(t(lang, "world.rewardGold", { x: factor(mods.gold, lang) }));
   const mf = Math.round(mods.magicFind * 100);

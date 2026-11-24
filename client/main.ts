@@ -233,7 +233,7 @@ async function start(): Promise<void> {
   const abilityFx = new AbilityFx();
   const enemyFx = new EnemyFx(data);
   const worldView = new WorldView(data, worldModel);
-  const hazardFx = new HazardFx(() => followCamera.shakeEnabled);
+  const hazardFx = new HazardFx(data, () => followCamera.shakeEnabled);
   const weatherFx = new WeatherFx(data, scene);
   const particles = new Particles(data);
   const allyView = new AllyView(ALLY_CAPACITY);
@@ -688,6 +688,7 @@ function runLoop(
       snapshot.render.heroModels = heroViews.reduce((n, view) => n + (view.object.visible ? view.modelCount : 0), 0);
       snapshot.render.slamRings = enemyFx.slamRingCount;
       snapshot.render.hazardRings = hazardFx.ringCount;
+      snapshot.render.pools = hazardFx.poolCount;
       snapshot.render.particles = particles.visible;
       sunShadow.follow(followCamera.targetX, followCamera.targetZ);
       renderer.render(scene, followCamera.camera);

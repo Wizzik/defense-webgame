@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BuffState } from "../../sim";
-import { buffCells } from "./buff-bar";
+import { buffCells, type HazardCells } from "./buff-bar";
 
 const free = { slowTicks: 0, rootTicks: 0 };
 
@@ -66,8 +66,27 @@ describe("buff bar", () => {
     const cells = buffCells(buffs, free, "cs", hz({ inThicket: true }));
     expect(cells.map((c) => [c.kind, c.seconds, c.label])).toEqual([["thicket", 0, "Trnité houští"]]);
   });
+
+  it("a blizzard shows its seconds and chill its glyph", () => {
+    const buffs = new BuffState();
+    const cells = buffCells(buffs, free, "cs", hz({ snowTicks: 299, chilled: true }));
+    expect(cells.map((c) => [c.kind, c.seconds, c.label])).toEqual([["snow", 10, "Vánice"], ["chill", 0, "Promrznutí"]]);
+    expect(buffCells(buffs, free, "en", hz({ chilled: true }))[0]!.label).toBe("Frostbite");
+  });
+
+  it("world 5 shows the meteor countdown instead of the storm", () => {
+    const buffs = new BuffState();
+    const cells = buffCells(buffs, free, "en", hz({ meteorTicks: 45 }));
+    expect(cells.map((c) => [c.kind, c.seconds, c.label])).toEqual([["meteor", 2, "Green meteors"]]);
+  });
+
+  it("fire shows while the hero stands in a pool", () => {
+    const buffs = new BuffState();
+    expect(buffCells(buffs, free, "cs", hz({ inFire: true })).map((c) => [c.kind, c.seconds, c.label])).toEqual([["fire", 0, "Zelený oheň"]]);
+    expect(buffCells(buffs, free, "cs", hz({ inFire: false }))).toEqual([]);
+  });
 });
 
-function hz(over: Partial<{ stormTicks: number; sandTicks: number; inThicket: boolean }>) {
-  return { stormTicks: 0, sandTicks: 0, inThicket: false, ...over };
+function hz(over: Partial<HazardCells>): HazardCells {
+  return { stormTicks: 0, sandTicks: 0, inThicket: false, snowTicks: 0, chilled: false, meteorTicks: 0, inFire: false, ...over };
 }

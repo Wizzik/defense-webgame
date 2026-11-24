@@ -117,6 +117,27 @@ test("shot: world-3", async ({ page }) => {
   await shot(page, "world-3");
 });
 
+test("shot: world-4", async ({ page }) => {
+  // the ice ridge at its pass, ice shards, snow and a blizzard blowing
+  await startRun(page, "seed=7&hero=stonehorn&debug=1&lang=cs&world=4");
+  await page.evaluate(() => window.__game!.debug!.teleport(950, 950));
+  await page.evaluate(() => window.__game!.debug!.hazard());
+  await page.waitForTimeout(1_500);
+  await shot(page, "world-4");
+});
+
+test("shot: world-5", async ({ page }) => {
+  // the broken wall at its northern breach, enemies on the black earth, meteor circles and a pool of fire
+  await startRun(page, "seed=7&hero=stonehorn&debug=1&lang=cs&world=5");
+  await page.evaluate(() => window.__game!.debug!.teleport(679, 1180));
+  await page.evaluate(() => window.__game!.debug!.spawnEach());
+  await page.evaluate(() => window.__game!.debug!.hazard());
+  await page.waitForTimeout(1_000);
+  await page.evaluate(() => window.__game!.debug!.hazard());
+  await page.waitForTimeout(700);
+  await shot(page, "world-5");
+});
+
 test("shot: corner", async ({ page }) => {
   await startRun(page, "seed=7&hero=nightglaive&debug=1");
   await page.evaluate(() => window.__game!.debug!.teleport(2900, 2900));

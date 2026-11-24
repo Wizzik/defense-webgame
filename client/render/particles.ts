@@ -14,10 +14,21 @@ const HEIGHT = 20;
 /** Dust: the wind blows east this fast (scene units a second), with a little sway. */
 const WIND = 14;
 const FIREFLY_COLOR = 0xbfe8a8;
+/** Snow: light always, thick during the blizzard, falling this fast; the blizzard's wind blows east. */
+const SNOW_LIGHT = 150;
+const SNOW_COLOR = 0xe8f0ff;
+const SNOW_FALL = 2.5;
+const BLIZZARD_WIND = 10;
+/** Green embers of world 5 rise this fast and fade above EMBER_TOP. */
+const EMBERS = 200;
+const EMBER_COLOR = 0x9cff6a;
+const EMBER_RISE = 1;
+const EMBER_TOP = 6;
 
 /**
  * Weather particles (client only; `Math.random` is fine here): blown dust while a sandstorm runs, slow wandering
- * fireflies always in a world whose look has them. One `InstancedMesh` of tiny octahedrons (WebGPU draws points
+ * fireflies always in a world whose look has them, snow (light always, thick and blown in a blizzard), rising green
+ * embers. One `InstancedMesh` of tiny octahedrons (WebGPU draws points
  * only 1 pixel wide) of fixed size around the hero; positions wrap.
  */
 export class Particles implements RunView {
@@ -30,7 +41,7 @@ export class Particles implements RunView {
   private size = 0.1;
   /** Points drawn now, for `__game.render.particles`. */
   visible = 0;
-  private mode: "none" | "dust" | "fireflies" = "none";
+  private mode: "none" | "dust" | "fireflies" | "snow" | "embers" = "none";
 
   constructor(private readonly data: GameData) {
     for (let i = 0; i < CAPACITY; i++) {
@@ -49,7 +60,8 @@ export class Particles implements RunView {
 
   update(run: Run, _alpha: number, dt: number): void {
     const look = lookOf(this.data.worlds[run.world - 1]!.id);
-    const mode = look.particles === "dust" && run.hazard.weatherTicks > 0 ? "dust" : look.particles === "fireflies" ? "fireflies" : "none";
+    const weather = run.hazard.weatherTicks > 0;
+    const mode = look.particles === "dust" ? (weather ? "dust" : "none") : look.particles;
     if (mode !== this.mode) {
       this.mode = mode;
       if (mode === "dust") {
@@ -62,10 +74,21 @@ export class Particles implements RunView {
         this.size = 0.09;
         this.material.blending = AdditiveBlending;
         this.material.opacity = 0.9;
+      } else if (mode === "snow") {
+        this.material.color.setHex(SNOW_COLOR);
+        this.size = 0.06;
+        this.material.blending = NormalBlending;
+        this.material.opacity = 0.85;
+      } else if (mode === "embers") {
+        this.material.color.setHex(EMBER_COLOR);
+        this.size = 0.06;
+        this.material.blending = AdditiveBlending;
+        this.material.opacity = 0.9;
       }
       this.material.needsUpdate = true;
     }
-    this.visible = mode === "dust" ? CAPACITY : mode === "fireflies" ? FIREFLIES : 0;
+    this.visible = mode === "dust" ? CAPACITY : mode === "fireflies" ? FIREFLIES : mode === "embers" ? EMBERS
+      : mode === "snow" ? (weather ? CAPACITY : SNOW_LIGHT) : 0;
     this.object.visible = this.visible > 0;
     this.object.count = this.visible;
     if (this.visible === 0) return;
@@ -78,6 +101,16 @@ export class Particles implements RunView {
         p[k] += (WIND + d[k]! * 4) * step;
         p[k + 1] += d[k + 1]! * 0.8 * step;
         p[k + 2] += d[k + 2]! * 2 * step;
+      } else if (mode === "snow") {
+        p[k] += ((weather ? BLIZZARD_WIND : 0) + d[k]! * 0.6) * step;
+        p[k + 1] -= (SNOW_FALL + d[k + 1]! * 0.8) * step;
+        p[k + 2] += d[k + 2]! * 0.6 * step;
+        if (p[k + 1]! < 0) p[k + 1] += HEIGHT;
+      } else if (mode === "embers") {
+        p[k] += d[k]! * 0.4 * step;
+        p[k + 1] += (EMBER_RISE + d[k + 1]! * 0.4) * step;
+        p[k + 2] += d[k + 2]! * 0.4 * step;
+        if (p[k + 1]! > EMBER_TOP) p[k + 1] = 0;
       } else {
         d[k] += (Math.random() * 2 - 1) * step;
         d[k + 2] += (Math.random() * 2 - 1) * step;

@@ -273,6 +273,30 @@ describe("the world in the summaries", () => {
     expect(wood).toBe("  world: islands 40.0, storm waves 0.0, bolts 0.0, bolts on the hero 0.0, thicket 4.2 %");
   });
 
+  it("worldLine names the blizzards and the chilled share in a snow world", () => {
+    const snow = worldLine([summary({ world: { islands: 34, waves: 3, bolts: 0, boltHits: 0, kind: "weather", effect: "snow", sand: 3, thicketShare: 0, chillShare: 0.025 } })]);
+    expect(snow).toBe("  world: islands 34.0, storm waves 3.0, bolts 0.0, bolts on the hero 0.0, snow 3.0, chill 2.5 %");
+  });
+
+  it("worldLine names the meteors, their hits and the hero's seconds in fire in a meteors world", () => {
+    const fire = worldLine([summary({ world: { islands: 35, waves: 50, bolts: 220, boltHits: 6, kind: "meteors", sand: 0, thicketShare: 0, fireSeconds: 7.5 } })]);
+    expect(fire).toBe("  world: islands 35.0, meteor waves 50.0, meteors 220.0, meteors on the hero 6.0, fire 7.5 s");
+  });
+
+  it("playBot counts the hero's seconds in fire in world 5", () => {
+    const fire = playBot(gameData(), 1, 300, "stonehorn", false, undefined, [], 5);
+    expect(fire.world.kind).toBe("meteors");
+    expect(fire.world.bolts).toBeGreaterThan(0);
+    expect(fire.world.fireSeconds).toBeGreaterThanOrEqual(0);
+  });
+
+  it("playBot counts the blizzards of world 4", () => {
+    const snow = playBot(gameData(), 1, 400, "stonehorn", false, 2, [], 4);
+    expect(snow.world.effect).toBe("snow");
+    expect(snow.world.sand).toBeGreaterThanOrEqual(1);
+    expect(snow.world.chillShare).toBeGreaterThanOrEqual(0);
+  });
+
   it("playBot counts the sandstorms of world 2 and the thicket steps of world 3", () => {
     const sand = playBot(gameData(), 1, 400, "stonehorn", false, 2, [], 2);
     expect(sand.world.kind).toBe("weather");

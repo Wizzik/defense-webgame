@@ -1097,3 +1097,70 @@ test("switching worlds rebuilds the arena", async ({ page }) => {
   expect(new Set(envRequests).has("tent")).toBe(true);
   expect(new Set(envRequests).has("bush")).toBe(true);
 });
+
+test("world 4: the ridge, a blizzard and chill", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en&debug=1&world=4&hero=stonehorn");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await startRun(page);
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => window.__game!.hazard.kind)).toBe("weather");
+  await page.evaluate(() => window.__game!.debug!.hazard());
+  await page.waitForFunction(
+    () => window.__game!.hazard.weather > 0 && window.__game!.render.particles >= 600,
+    undefined, { timeout: 2_000, polling: 50 },
+  );
+  await expect(page.locator(".buff-cell.snow")).toBeVisible();
+  // standing 3 s in the blizzard chills the hero; walking thaws him
+  await page.waitForFunction(() => window.__game!.hazard.chilled, undefined, { timeout: 12_000, polling: 100 });
+  await expect(page.locator(".buff-cell.chill")).toBeVisible();
+  await page.keyboard.down("KeyD");
+  await page.waitForFunction(() => !window.__game!.hazard.chilled, undefined, { timeout: 3_000, polling: 50 });
+  await page.keyboard.up("KeyD");
+  await page.evaluate(() => window.__game!.debug!.teleport(0, 1200));
+  await page.keyboard.down("KeyW");
+  await page.waitForTimeout(1_000);
+  await page.keyboard.up("KeyW");
+  // the ridge's axis at x = 0 lies at y = 1477; half its thickness is 90
+  expect(await page.evaluate(() => window.__game!.heroY)).toBeLessThan(1477 - 90);
+});
+
+test("world 5: meteors leave fire", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en&debug=1&world=5&hero=stonehorn");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await startRun(page);
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => window.__game!.hazard.kind)).toBe("meteors");
+  expect(await page.evaluate(() => window.__game!.render.particles)).toBe(200);
+  await page.evaluate(() => window.__game!.debug!.hazard());
+  await page.waitForFunction(() => window.__game!.render.hazardRings > 0, undefined, { timeout: 2_000, polling: 50 });
+  await expect(page.locator(".buff-cell.meteor")).toBeVisible();
+  await page.waitForFunction(
+    () => window.__game!.hazard.pools > 0 && window.__game!.render.pools > 0,
+    undefined, { timeout: 6_000, polling: 50 },
+  );
+});
+
+test("a blizzard and fire do not outlive their world", async ({ page }) => {
+  await page.goto("/?seed=1&lang=en&debug=1&duration=5&hero=stonehorn");
+  await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
+  await page.locator("#start").click();
+  await page.locator('#world-screen [data-world="5"]').click();
+  await page.locator("#world-start").click();
+  await waitForScreen(page, "playing");
+  await page.evaluate(() => window.__game!.debug!.hazard());
+  await page.waitForFunction(() => window.__game!.render.pools > 0, undefined, { timeout: 6_000, polling: 50 });
+  const errors: string[] = [];
+  page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+  expect(await playToEnd(page)).toBeDefined();
+  await page.locator("#again").click();
+  await waitForScreen(page, "menu", 10_000);
+  await page.locator("#start").click();
+  await page.locator('#world-screen [data-world="4"]').click();
+  await page.locator("#world-start").click();
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => [window.__game!.world, window.__game!.hazard.kind])).toEqual([4, "weather"]);
+  expect(await page.evaluate(() => window.__game!.render.pools)).toBe(0);
+  // light snow only: no blizzard yet, and no embers left over
+  expect(await page.evaluate(() => window.__game!.render.particles)).toBe(150);
+  expect(errors).toEqual([]);
+});

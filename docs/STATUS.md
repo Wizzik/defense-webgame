@@ -1,14 +1,28 @@
 # Status
 
-Updated 2026-11-24 (co-op for 3-4 players merged as PR #39). Read this first when you resume work.
+Updated 2026-11-24 (difficulties 3b: worlds 4 and 5, PR open). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-23 evening)
 
 1. **Co-op for 3-4 players**: merged (PR #39, below); waits for Petr's test.
-2. **More worlds:** difficulties plan 3b (Frostreach and Blightscar, their natural events and looks, the ladder tuned for world 5).
-3. Then the **remaining heroes** of the map and **better spell graphics** (effects of the spells).
+2. **More worlds:** difficulties plan 3b: done (below), the PR waits for Petr.
+3. Then the **remaining heroes** of the map and **better spell graphics** (effects of the spells), in a new chat.
 
-Point 2 starts in the next chat.
+## Difficulties 3b: Frostreach and Blightscar (branch `worlds-4-5`, PR open, 2026-11-24)
+
+- Plan `docs/superpowers/plans/2026-11-24-difficulties-worlds-4-5.md`, done inline in one chat; Petr: "make it harder". `npm run check` (1311 tests), the build, e2e `webgl2-fallback` and `sim-chromium` (51) pass. Numbers and rulings: `docs/DECISIONS.md`, section Difficulties and worlds, plan 3b.
+- What it brings:
+  - **world 4 Frostreach:** blue-grey snow, an ice ridge in a horseshoe over the north and east of the castle with one pass in the north-east; the **blizzard** from phase 2 every 80-100 s: announced 5 s ahead, 15 s of thick snow and fog, -25 % walking for everyone; a hero who **stands 3 s** in it is chilled (base attacks 20 % slower) until he walks;
+  - **world 5 Blightscar:** black earth, a violet sky, green embers, a broken octagonal wall with four breaches; **green meteors** from phase 1 every 18-24 s, 3-6 around every hero after a 1.5 s yellow-green circle (12 % of max hp), each leaving a **pool of green fire** for 6 s (4 % of max hp a second);
+  - all five worlds are `ready`; the effect bar shows the blizzard, chill, the meteor countdown and fire under the hero.
+- **Harder ladder:** worlds 4 and 5 have their own enemy strength (x1.03 and x1.10 on top of the world step; worlds 1-3 unchanged). Autopilot wins of 160 with mid gear: world 1 104, 2 88, 3 78, **4 61, 5 43**; world 5 Hell with full gear 12.
+- What Petr checks in the playtest:
+  - the look and readability of both worlds: is the snow too bright, are pale enemies readable on it; is Blightscar too purple or too dark; the ridge and its pass, the wall and its breaches;
+  - the blizzard: noticeable, does chill make him keep moving, is -25 % too much;
+  - the meteors: is the yellow-green circle readable and different from the roots, are they too often, are the pools too strong (they barely hurt enemies on purpose);
+  - is world 5 hard enough (or too hard) with his gear;
+  - fps with a full crowd: `?fps=1&debug=1&phase=16&world=5` against world 1.
+  - quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1&world=4 and `?debug=1&world=5`; in the console `__game.debug.hazard()` (a blizzard or a meteor wave at once), `__game.hazard` (kind, weather seconds, `chilled`, `pools`).
 
 ## Co-op for 3-4 players (merged as PR #39 `8ca6505`, 2026-11-24)
 

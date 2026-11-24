@@ -13,7 +13,8 @@ export interface DifficultyMods {
   magicFind: number;
 }
 
-export function difficultyMods(rules: Rules, world: number, difficulty: DifficultyId, players = 1): DifficultyMods {
+/** `strength` is the world's own multiplier on enemy hp and damage (`World.strength`, default 1). */
+export function difficultyMods(rules: Rules, world: number, difficulty: DifficultyId, players = 1, strength = 1): DifficultyMods {
   const { worldStep, reward, levels } = rules.difficulty;
   const level = levels[difficulty];
   const above = world - 1;
@@ -21,8 +22,8 @@ export function difficultyMods(rules: Rules, world: number, difficulty: Difficul
   const more = players - 1;
   const per = rules.coop.perPlayer;
   return {
-    hp: level.hp * (1 + worldStep.hp * above) * (1 + per.hp * more),
-    damage: level.damage * (1 + worldStep.damage * above) * (1 + per.damage * more),
+    hp: level.hp * (1 + worldStep.hp * above) * strength * (1 + per.hp * more),
+    damage: level.damage * (1 + worldStep.damage * above) * strength * (1 + per.damage * more),
     packSize: level.packSize * (1 + per.packSize * more),
     eliteHp: level.eliteHp * (1 + per.eliteHp * more),
     gold: 1 + reward.goldPerWorld * above,

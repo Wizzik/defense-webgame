@@ -48,6 +48,10 @@ export function worldInstances(map: WorldMap, look: WorldLook = lookOf("silver-m
 
 /** Sizes in sim units. */
 const WALL_HEIGHT = 120;
+/** The ice ridge: a low bank of packed snow and ice shards on it (scaled 0.8-1.8 by featureInstances). */
+const RIDGE_BASE_HEIGHT = 45;
+const CRYSTAL_WIDTH = 55;
+const CRYSTAL_HEIGHT = 120;
 const POST_SIZE = 130;
 const POST_HEIGHT = 175;
 const RUIN_BLOCKS = 3;
@@ -154,6 +158,16 @@ export class WorldView implements RunView {
     if (look.feature === "wall") {
       group.add(this.boxes(byModel("wall"), this.material(look.stone.wall, 0.92), (w) => [w.scale * WALL_PIECE + 2, WALL_HEIGHT, thickness]));
       group.add(this.boxes(byModel("gate-post"), this.material(look.stone.top, 0.9), () => [POST_SIZE, POST_HEIGHT, POST_SIZE]));
+    } else if (look.feature === "broken") {
+      const wall = this.material(look.stone.wall, 0.95);
+      group.add(this.boxes(byModel("wall"), wall, (w) => [w.scale * WALL_PIECE + 2, WALL_HEIGHT, thickness]));
+      group.add(this.boxes(byModel("wall-low"), wall, (w) => [w.scale * WALL_PIECE + 2, WALL_HEIGHT * 0.45, thickness * 0.9]));
+      group.add(this.boxes(byModel("rubble"), this.material(look.stone.ruin, 0.95), (b) => [b.scale, b.scale * 0.6, b.scale * 0.7]));
+    } else if (look.feature === "ridge") {
+      group.add(this.boxes(byModel("ridge-base"), this.material(look.stone.wall, 0.8), (r) => [r.scale * 100 + thickness * 0.4, RIDGE_BASE_HEIGHT, thickness]));
+      // ice shards: tall thin boxes turned around the vertical, glossy and a little translucent
+      const ice = this.material(look.stone.top, 0.3, { metalness: 0.05, transparent: true, opacity: 0.92 });
+      group.add(this.boxes(byModel("crystal"), ice, (c) => [CRYSTAL_WIDTH * c.scale, CRYSTAL_HEIGHT * c.scale, CRYSTAL_WIDTH * 0.7 * c.scale]));
     } else if (look.feature === "river") {
       const water = byModel("water");
       group.add(this.flatStrips(water, thickness + BANK_EXTRA, BANK_LIFT, this.material(look.ground.dirt, 1)));

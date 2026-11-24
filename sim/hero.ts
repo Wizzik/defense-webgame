@@ -1,3 +1,4 @@
+import { chillAttackScale, updateChill } from "./chill";
 import { isChoosing } from "./player";
 import { snareSpeedScale } from "./hero-snares";
 import type { GameData } from "../data/schema";
@@ -81,6 +82,11 @@ export const MOVE_PIECE = 24;
  * arena and out of obstacles; roots hold it. A dash ends at an obstacle that stops more than half a piece of it.
  */
 export function moveHero(run: Run, input: TickInput): void {
+  walkHero(run, input);
+  updateChill(run, run.hero.moving);
+}
+
+function walkHero(run: Run, input: TickInput): void {
   const hero = run.hero;
   if (hero.dashCooldown > 0) hero.dashCooldown--;
   if (hero.hp <= 0) {
@@ -181,7 +187,7 @@ export function updateHeroCombat(run: Run): void {
     hero.facingX = bestDx / len;
     hero.facingY = bestDy / len;
   }
-  hero.attackCooldown = Math.round(stats.attackIntervalSeconds * TICKS_PER_SECOND);
+  hero.attackCooldown = Math.round(stats.attackIntervalSeconds * TICKS_PER_SECOND * chillAttackScale(run));
   const targetX = e.x[best];
   const targetY = e.y[best];
   const extra = extraTargets(run);

@@ -14,7 +14,7 @@ import { isChoosing } from "./player";
  * `u` of a HeroHit event: a hit, a step of a poison cloud (the client neither shakes nor plays the hurt sound) or a
  * bolt of the storm (sim/hazard.ts).
  */
-export const HeroHitSource = { Hit: 0, Cloud: 1, Storm: 2 } as const;
+export const HeroHitSource = { Hit: 0, Cloud: 1, Storm: 2, Fire: 3 } as const;
 
 /** Damage reduction from armor: 0 for armor <= 0, else armor * k / (1 + armor * k). */
 export function armorReduction(armor: number, k: number): number {
