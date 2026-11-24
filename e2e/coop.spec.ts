@@ -35,3 +35,17 @@ test("a local co-op run shows two heroes, non-pausing cards and the teammate", a
   expect(await page.evaluate(() => window.__game!.screen)).toBe("playing");
   expect(await page.evaluate(() => window.__game!.heroHp)).toBeGreaterThan(0);
 });
+
+test("a local four-player run shows four heroes and three teammates", async ({ page }) => {
+  await page.goto("/?debug=1&mate=gravecaller,tidecaller,stonehorn&hero=sparkshot&seed=4&lang=en");
+  await page.waitForFunction(() => (window.__game?.frames ?? 0) > 30, undefined, { timeout: 90_000, polling: 250 });
+  await startRun(page);
+  await page.waitForFunction(() => window.__game!.tick > 30, undefined, { timeout: 60_000, polling: 100 });
+  const players = await page.evaluate(() => window.__game!.players.map((p) => p.hero));
+  expect(players).toEqual(["sparkshot", "gravecaller", "tidecaller", "stonehorn"]);
+  expect(await page.evaluate(() => window.__game!.render.heroModels)).toBe(4);
+  await expect(page.locator(".team-name")).toHaveCount(3);
+  // the autopilot heroes walk on their own
+  const start = await page.evaluate(() => window.__game!.players.slice(1).map((p) => [p.x, p.y]));
+  await page.waitForFunction((s) => window.__game!.players.slice(1).every((p, i) => p.x !== s[i]![0] || p.y !== s[i]![1]), start, { timeout: 30_000, polling: 200 });
+});

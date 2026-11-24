@@ -1,13 +1,15 @@
-// The co-op lobby's link logic (multiplayer migration step 7): opening or joining a room, telling each other the
-// heroes and gear, and starting the same run on both sides. The host is player 0, the guest player 1.
+// The co-op lobby's link logic (multiplayer migration step 7; up to 4 players since 2026-11-24): opening or joining a
+// room, telling each other the heroes and gear, and starting the same run in every window. The host is player 0, the
+// guests 1-3 in join order (coop-roster.ts); guests link only to the host.
 import type { DifficultyId, GameData } from "../../data/schema";
 import type { LoadoutEntry, PlayerOptions, SlotId } from "../../sim";
-import { hostRoom, joinRoom, type PeerLink } from "../net/peer-link";
-import { type NetGear, type NetMessage, PROTOCOL_VERSION } from "../net/protocol";
+import { joinRoom, openRoom, type PeerLink, type Room } from "../net/peer-link";
+import { MAX_PLAYERS, type NetGear, type NetMessage, PROTOCOL_VERSION } from "../net/protocol";
 import { isRoomCode, newRoomCode } from "../net/room-code";
 import type { SignalServer } from "../net/signal";
 import type { CoopLobby } from "../ui/coop-lobby";
 import { type Lang, t } from "../ui/i18n";
+import { Roster } from "./coop-roster";
 import type { Session } from "./session";
 
 const HOST_TRIES = 3;
@@ -48,9 +50,12 @@ export function joinCodeOf(search: string): string | null {
 }
 
 export class CoopSetup {
+  /** Host: the open room and who is in it. */
+  private room: Room | null = null;
+  private roster = new Roster();
+  private code = "";
+  /** Guest: the link to the host. */
   private peer: PeerLink | null = null;
-  /** Host: the guest's hero and gear once he joined. */
-  private mate: { hero: string; gear: NetGear[] } | null = null;
   private role: "host" | "guest" | null = null;
   /** Bumped when the lobby is left, so a late answer of an old attempt is ignored. */
   private attempt = 0;
@@ -70,29 +75,34 @@ export class CoopSetup {
     this.deps.lobby.set({ kind: "error", message });
   }
 
-  /** Closes a link that has not started a run (Back, or a failure). */
+  /** Closes a room or link that has not started a run (Back, or a failure). */
   drop(): void {
     this.attempt++;
-    if (this.peer && !this.deps.session.coop) this.peer.close();
+    if (!this.deps.session.coop) {
+      this.peer?.close();
+      for (const link of this.roster.links().values()) link.close();
+      this.room?.close();
+    }
+    this.room = null;
+    this.roster = new Roster();
     this.peer = null;
-    this.mate = null;
     this.role = null;
   }
 
-  /** The local player picked another hero in the lobby: tell the teammate (the guest joins again with it). */
+  /** The local player picked another hero in the lobby: tell the room. */
   heroChanged(): void {
     const { peer, deps } = this;
-    if (!peer || deps.session.coop) return;
+    if (deps.session.coop) return;
     const own = deps.heroId();
-    if (this.role === "guest") peer.send({ t: "join", v: PROTOCOL_VERSION, hero: own, g: toNet(deps.loadout(own)) });
-    else if (this.role === "host" && this.mate) peer.send({ t: "hello", v: PROTOCOL_VERSION, seed: 0, hero: own });
+    if (this.role === "guest" && peer) peer.send({ t: "join", v: PROTOCOL_VERSION, hero: own, g: toNet(deps.loadout(own)) });
+    else if (this.role === "host") this.roomChanged();
   }
 
-  /** The link the guest opens: this page with `?join=<code>` (and the test signalling server, if any). */
+  /** The link a guest opens: this page with `?join=<code>` (and the test signalling server, if any). */
   private linkFor(code: string): string {
     const url = new URL(location.href);
     url.searchParams.delete("join");
-    for (const key of ["debug", "phase", "seed", "hero"]) url.searchParams.delete(key);
+    for (const key of ["debug", "phase", "seed", "hero", "mate"]) url.searchParams.delete(key);
     url.searchParams.set("join", code);
     return url.href;
   }
@@ -103,19 +113,16 @@ export class CoopSetup {
     lobby.set({ kind: "opening" });
     for (let attempt = 1; attempt <= HOST_TRIES; attempt++) {
       const code = newRoomCode(Math.random);
-      lobby.set({ kind: "waiting", code, link: this.linkFor(code) });
       try {
-        const peer = await hostRoom(code, signal);
+        const room = await openRoom(code, signal, (link) => this.guestArrived(ticket, link));
         if (ticket !== this.attempt) {
-          peer.close();
+          room.close();
           return;
         }
-        this.peer = peer;
+        this.room = room;
+        this.code = code;
         this.role = "host";
-        peer.onMessage((m) => this.hostMessage(peer, m));
-        peer.onClose((reason) => {
-          if (this.peer === peer && !this.deps.session.coop) this.fail(t(this.deps.lang(), "coop.closed", { reason }));
-        });
+        this.roomChanged();
         return;
       } catch (err) {
         if (ticket !== this.attempt) return;
@@ -128,47 +135,81 @@ export class CoopSetup {
     }
   }
 
-  private hostMessage(peer: PeerLink, m: NetMessage): void {
-    if (m.t !== "join") return;
-    const lang = this.deps.lang();
-    if (m.v !== PROTOCOL_VERSION) {
-      this.fail(t(lang, "coop.version"));
+  /** Host: a guest's data channel opened; he is in the room once he sends `join`. */
+  private guestArrived(ticket: number, link: PeerLink): void {
+    if (ticket !== this.attempt || this.deps.session.coop) {
+      link.close();
       return;
     }
-    if (!this.knownHero(m.hero)) {
-      this.fail(t(lang, "coop.version"));
-      return;
-    }
-    this.mate = { hero: m.hero, gear: m.g };
-    // the guest learns the host's hero for his lobby line
-    peer.send({ t: "hello", v: PROTOCOL_VERSION, seed: 0, hero: this.deps.heroId() });
-    this.deps.lobby.set({ kind: "ready", role: "host", mate: this.heroName(m.hero) });
+    link.onMessage((m) => this.hostMessage(link, m));
+    link.onClose(() => {
+      if (this.deps.session.coop || this.roster.numberOf(link) < 0) return;
+      this.roster.remove(link);
+      this.roomChanged();
+    });
   }
 
-  /** Host, after a teammate joined: opens the course choice. */
+  private hostMessage(link: PeerLink, m: NetMessage): void {
+    if (m.t !== "join" || this.deps.session.coop) return;
+    const own = this.deps.heroId();
+    if (m.v !== PROTOCOL_VERSION || !this.knownHero(m.hero)) {
+      // the guest reads the version and shows the "reload both pages" line
+      link.send({ t: "room", v: PROTOCOL_VERSION, you: -1, heroes: [own] });
+      link.close();
+      return;
+    }
+    if (this.roster.numberOf(link) >= 0) this.roster.setHero(link, m.hero, m.g);
+    else if (this.roster.add(link, m.hero, m.g) === null) {
+      link.send({ t: "room", v: PROTOCOL_VERSION, you: -1, heroes: this.roster.heroes(own) });
+      link.close();
+      return;
+    }
+    this.roomChanged();
+  }
+
+  /** Host: tells every guest who is in the room, and shows it in the own lobby. */
+  private roomChanged(): void {
+    const heroes = this.roster.heroes(this.deps.heroId());
+    for (const [you, link] of this.roster.links()) link.send({ t: "room", v: PROTOCOL_VERSION, you, heroes });
+    this.deps.lobby.set({
+      kind: "room", role: "host", code: this.code, link: this.linkFor(this.code), players: heroes.map((h) => this.heroName(h)), you: 0,
+    });
+  }
+
+  /** Host, once a teammate is in: opens the course choice. */
   chooseCourse(): void {
-    if (this.peer && this.mate) this.deps.chooseCourse();
+    if (this.role === "host" && this.roster.size > 0) this.deps.chooseCourse();
   }
 
-  /** Host: the course is chosen; both start the run (the host steps once the guest is ready). */
+  /** Host: the course is chosen; everyone starts the run (the host steps once every guest is ready). */
   async startCourse(world: number, difficulty: DifficultyId): Promise<void> {
-    const { peer, mate, deps } = this;
-    if (!peer || !mate) return;
+    const { room, deps } = this;
+    if (!room || this.roster.size === 0) return;
     const ticket = this.attempt;
-    const own = deps.heroId();
-    const heroes = [own, mate.hero];
-    const gear = [toNet(deps.loadout(own)), mate.gear];
+    room.lock();
     deps.lobby.set({ kind: "loading" });
-    try {
-      await deps.loadModels(heroes, 0, world);
-    } catch (error) {
-      deps.showError(error);
+    // a guest who leaves while the models load renumbers the rest: load again until the room holds still
+    let heroes: string[] = [];
+    do {
+      heroes = this.roster.heroes(deps.heroId());
+      try {
+        await deps.loadModels(heroes, 0, world);
+      } catch (error) {
+        deps.showError(error);
+        return;
+      }
+      if (ticket !== this.attempt) return;
+    } while (heroes.join() !== this.roster.heroes(deps.heroId()).join());
+    if (this.roster.size === 0) {
+      this.fail(t(deps.lang(), "coop.allLeft"));
       return;
     }
-    if (ticket !== this.attempt || this.peer !== peer) return;
     const seed = Math.floor(Math.random() * 0x1_0000_0000) >>> 0;
-    peer.send({ t: "start", v: PROTOCOL_VERSION, seed, world, d: difficulty, heroes, g: gear });
-    this.begin(peer, seed, world, difficulty, heroes, gear, 0);
+    const gear = this.roster.gear(toNet(deps.loadout(deps.heroId())));
+    const links = this.roster.links();
+    for (const [you, link] of links) link.send({ t: "start", v: PROTOCOL_VERSION, seed, world, d: difficulty, you, heroes, g: gear });
+    const closeRoom = room;
+    this.begin(links, seed, world, difficulty, heroes, gear, 0, () => closeRoom.close());
   }
 
   async join(code: string): Promise<void> {
@@ -202,33 +243,37 @@ export class CoopSetup {
   private async guestMessage(peer: PeerLink, m: NetMessage): Promise<void> {
     const { deps } = this;
     const lang = deps.lang();
-    if (m.t === "hello") {
+    if (m.t === "room") {
       if (m.v !== PROTOCOL_VERSION) this.fail(t(lang, "coop.version"));
-      else deps.lobby.set({ kind: "ready", role: "guest", mate: this.heroName(m.hero) });
+      else if (m.you < 0) this.fail(t(lang, "coop.full"));
+      else deps.lobby.set({ kind: "room", role: "guest", players: m.heroes.map((h) => this.heroName(h)), you: m.you });
       return;
     }
     if (m.t !== "start") return;
-    if (m.v !== PROTOCOL_VERSION || m.heroes.length !== 2 || !m.heroes.every((h) => this.knownHero(h)) || m.world > deps.data.worlds.length) {
+    if (
+      m.v !== PROTOCOL_VERSION || m.heroes.length < 2 || m.heroes.length > MAX_PLAYERS || m.you >= m.heroes.length ||
+      !m.heroes.every((h) => this.knownHero(h)) || m.world > deps.data.worlds.length
+    ) {
       this.fail(t(lang, "coop.version"));
       return;
     }
     const ticket = this.attempt;
     deps.lobby.set({ kind: "loading" });
     try {
-      await deps.loadModels(m.heroes, 1, m.world);
+      await deps.loadModels(m.heroes, m.you, m.world);
     } catch (error) {
       deps.showError(error);
       return;
     }
     if (ticket !== this.attempt || this.peer !== peer) return;
-    const net = this.begin(peer, m.seed, m.world, m.d, m.heroes, m.g, 1);
+    const net = this.begin(new Map([[0, peer]]), m.seed, m.world, m.d, m.heroes, m.g, m.you);
     peer.send({ t: "ready" });
     net.start();
   }
 
   private begin(
-    peer: PeerLink, seed: number, world: number, difficulty: DifficultyId,
-    heroes: readonly string[], gear: readonly NetGear[][], local: 0 | 1,
+    links: ReadonlyMap<number, PeerLink>, seed: number, world: number, difficulty: DifficultyId,
+    heroes: readonly string[], gear: readonly NetGear[][], local: number, onStop?: () => void,
   ) {
     const { session } = this.deps;
     session.world = world;
@@ -236,12 +281,17 @@ export class CoopSetup {
     const players: PlayerOptions[] = heroes.map((hero, p) => ({ hero, loadout: fromNet(gear[p] ?? []) }));
     this.deps.onNote("");
     const net = session.startCoop(seed, players, local, {
-      peer,
-      onLeft: () => this.deps.onNote(t(this.deps.lang(), "coop.left")),
+      links,
+      onStop,
+      onLeft: (p) => {
+        const lang = this.deps.lang();
+        this.deps.onNote(p === 0 ? t(lang, "coop.hostLeft") : t(lang, "coop.left", { name: this.heroName(heroes[p] ?? "") }));
+      },
       onDesync: (step) => this.deps.onNote(t(this.deps.lang(), "coop.desync", { n: step })),
     });
+    this.room = null;
+    this.roster = new Roster();
     this.peer = null;
-    this.mate = null;
     this.role = null;
     this.deps.onRunStarted();
     return net;

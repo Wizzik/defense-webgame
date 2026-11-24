@@ -33,7 +33,7 @@ function playPair(steps: number, tamper?: (peer: 1, run: Run) => void): {
         if (p === 0) botInput(run, scratch);
         else { scratch.moveX = wasd.int(3) - 1; scratch.moveY = wasd.int(3) - 1; scratch.card = -1; scratch.actions = 0; }
         const k = lock.queueLocal(scratch);
-        send(p, inputMessage(k, scratch), frame);
+        send(p, inputMessage(k, p, scratch), frame);
       }
     }
     const due = queue.filter((q) => q.at <= frame);
@@ -58,13 +58,117 @@ function playPair(steps: number, tamper?: (peer: 1, run: Run) => void): {
         if ((k + 1) % HASH_EVERY === 0) {
           const h = stateHash(run);
           if (lock.recordHash(p, k, h) === "desync") desyncs++;
-          send(p, { t: "hash", k, h }, frame);
+          send(p, { t: "hash", k, p, h }, frame);
         }
       }
     }
   }
   return { runs, locks, desyncs };
 }
+
+/** n peers of an n-player run; every message goes to every other peer, delayed 0-5 frames in random order. */
+function playGroup(n: number, steps: number, opts: { leaver?: number; leaveAt?: number; tamper?: number } = {}): {
+  runs: Run[]; locks: Lockstep[]; desyncs: number;
+} {
+  const data = gameData();
+  const heroes = ["stonehorn", "sparkshot", "gravecaller", "tidecaller"].slice(0, n);
+  const runs: Run[] = [];
+  const locks: Lockstep[] = [];
+  for (let p = 0; p < n; p++) {
+    runs.push(createRun(data, { seed: 9, players: heroes.map((hero) => ({ hero })) }));
+    locks.push(new Lockstep(n, p));
+  }
+  const net = new Rng(3);
+  const wasd = new Rng(4);
+  let queue: { at: number; from: number; to: number; raw: string }[] = [];
+  let desyncs = 0;
+  const left = (p: number, frame: number) => opts.leaver === p && frame >= (opts.leaveAt ?? Infinity);
+  const send = (from: number, m: NetMessage, now: number) => {
+    for (let to = 0; to < n; to++) if (to !== from) queue.push({ at: now + net.int(6), from, to, raw: JSON.stringify(m) });
+  };
+  const scratch = input();
+  const inputs: TickInput[] = heroes.map(() => input());
+  const active = (p: number) => opts.leaver !== p || runs[p]!.tick < (opts.leaveAt ?? Infinity);
+  for (let frame = 0; frame < steps * 6 && runs.some((r, p) => r.tick < steps && (p !== opts.leaver)); frame++) {
+    for (let p = 0; p < n; p++) {
+      const lock = locks[p]!;
+      if (left(p, frame) || !active(p) || !lock.canQueue()) continue;
+      scratch.moveX = wasd.int(3) - 1; scratch.moveY = wasd.int(3) - 1; scratch.card = -1; scratch.actions = 0;
+      const k = lock.queueLocal(scratch);
+      send(p, inputMessage(k, p, scratch), frame);
+    }
+    if (opts.leaver !== undefined && frame === opts.leaveAt) {
+      // as through the host: whatever the leaver sent reaches everyone (ordered relay) before "left"
+      for (const q of queue) if (q.from === opts.leaver) q.at = frame;
+    }
+    const due = queue.filter((q) => q.at <= frame);
+    queue = queue.filter((q) => q.at > frame);
+    for (const q of due) {
+      const m = decodeMessage(JSON.parse(q.raw));
+      if (m?.t === "in") locks[q.to]!.receive(q.from, m.k, toInput(m, input()));
+      if (m?.t === "hash" && locks[q.to]!.recordHash(q.from, m.k, m.h) === "desync") desyncs++;
+    }
+    if (opts.leaver !== undefined && frame === opts.leaveAt) {
+      for (let p = 0; p < n; p++) if (p !== opts.leaver) locks[p]!.drop(opts.leaver);
+    }
+    for (let p = 0; p < n; p++) {
+      if (p === opts.leaver && frame >= (opts.leaveAt ?? Infinity)) continue;
+      const lock = locks[p]!;
+      const run = runs[p]!;
+      while (run.tick < steps && lock.ready()) {
+        const k = lock.take(inputs);
+        run.step(inputs);
+        if (p === opts.tamper && k === 100) run.gold += 1;
+        if ((k + 1) % HASH_EVERY === 0) {
+          const h = stateHash(run);
+          if (lock.recordHash(p, k, h) === "desync") desyncs++;
+          send(p, { t: "hash", k, p, h }, frame);
+        }
+      }
+    }
+  }
+  return { runs, locks, desyncs };
+}
+
+describe("Lockstep for 3-4 players", () => {
+  it("three and four players stay in sync over 1500 steps", () => {
+    for (const n of [3, 4]) {
+      const { runs, locks, desyncs } = playGroup(n, 1500);
+      expect(desyncs).toBe(0);
+      for (const run of runs) {
+        expect(run.tick).toBe(1500);
+        expect(stateHash(run)).toBe(stateHash(runs[0]!));
+      }
+      expect(locks[0]!.lastMatchedHash).toBeGreaterThanOrEqual(1400);
+    }
+  });
+
+  it("three players play on without one who left", () => {
+    const { runs, desyncs } = playGroup(3, 600, { leaver: 2, leaveAt: 200 });
+    expect(runs[0]!.tick).toBe(600);
+    expect(runs[1]!.tick).toBe(600);
+    expect(desyncs).toBe(0);
+    expect(stateHash(runs[0]!)).toBe(stateHash(runs[1]!));
+  });
+
+  it("a hash differing in one of three players is a desync", () => {
+    const { desyncs, locks } = playGroup(3, 300, { tamper: 2 });
+    expect(desyncs).toBeGreaterThan(0);
+    expect(locks[0]!.desyncAt).not.toBeNull();
+  });
+
+  it("compares the local hash with every other player's", () => {
+    const lock = new Lockstep(3, 1);
+    expect(lock.recordHash(1, 29, 5)).toBe("pending");
+    expect(lock.recordHash(0, 29, 5)).toBe("ok");
+    expect(lock.recordHash(2, 29, 5)).toBe("ok");
+    expect(lock.recordHash(2, 59, 8)).toBe("pending");
+    expect(lock.recordHash(1, 59, 7)).toBe("desync");
+    expect(lock.desyncAt).toBe(59);
+    lock.drop(0);
+    expect(lock.recordHash(0, 89, 1)).toBe("pending");
+  });
+});
 
 describe("Lockstep", () => {
   it("two peers stay in sync over 3000 steps", () => {

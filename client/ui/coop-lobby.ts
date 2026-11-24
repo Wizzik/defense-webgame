@@ -16,9 +16,9 @@ export interface CoopLobbyHandlers {
 export type LobbyState =
   | { kind: "idle" }
   | { kind: "opening" }
-  | { kind: "waiting"; code: string; link: string }
   | { kind: "joining"; code: string }
-  | { kind: "ready"; role: "host" | "guest"; mate: string }
+  /** In a room: the heroes' names in player order (the host first) and the local player's number; the host also has the link. */
+  | { kind: "room"; role: "host" | "guest"; players: string[]; you: number; code?: string; link?: string }
   | { kind: "loading" }
   | { kind: "error"; message: string };
 
@@ -26,7 +26,7 @@ export type LobbyState =
  * The co-op lobby (multiplayer migration step 7): Host opens a room and shows its link to send; Join takes a room
  * code (or the link opens the lobby with it). Each player picks his hero here (the menu's hero at first; he can
  * change it until the run starts, also while connected) and wears his own gear; the host chooses the course and
- * starts. Two players for now.
+ * starts. Up to four players: the host sends one link to everyone, and the lobby lists who is in.
  */
 export class CoopLobby {
   private readonly root: HTMLElement;
@@ -39,6 +39,9 @@ export class CoopLobby {
   private readonly code: HTMLInputElement;
   private readonly join: HTMLButtonElement;
   private readonly status: HTMLElement;
+  private readonly roster: HTMLElement;
+  private readonly rosterTitle: HTMLElement;
+  private readonly rosterList: HTMLOListElement;
   private readonly link: HTMLInputElement;
   private readonly copy: HTMLButtonElement;
   private readonly start: HTMLButtonElement;
@@ -80,6 +83,10 @@ export class CoopLobby {
     });
     this.status = el("p", "coop-status", panel);
     this.status.id = "coop-status";
+    this.roster = el("div", "coop-roster", panel);
+    this.roster.id = "coop-roster";
+    this.rosterTitle = el("p", "coop-roster-title", this.roster);
+    this.rosterList = el("ol", "coop-roster-list", this.roster);
     const linkRow = el("div", "coop-link", panel);
     this.link = el("input", "coop-link-text", linkRow);
     this.link.id = "coop-link";
@@ -148,17 +155,31 @@ export class CoopLobby {
     this.host.disabled = busy;
     this.join.disabled = busy;
     this.code.disabled = busy;
-    this.link.parentElement!.hidden = state.kind !== "waiting";
-    if (state.kind === "waiting") this.link.value = state.link;
-    this.start.hidden = !(state.kind === "ready" && state.role === "host");
+    const room = state.kind === "room" ? state : null;
+    // the host keeps the link on show until the room is full
+    const link = room?.role === "host" && room.link !== undefined && room.players.length < 4 ? room.link : null;
+    this.link.parentElement!.hidden = link === null;
+    if (link !== null) this.link.value = link;
+    this.start.hidden = !(room?.role === "host" && room.players.length > 1);
+    this.roster.hidden = room === null;
+    if (room) {
+      setText(this.rosterTitle, t(lang, "coop.players", { n: room.players.length }));
+      this.rosterList.replaceChildren(...room.players.map((name, p) => {
+        const item = document.createElement("li");
+        const tags = [p === 0 ? t(lang, "coop.hostTag") : "", p === room.you ? t(lang, "coop.you") : ""].filter(Boolean);
+        item.textContent = tags.length > 0 ? `${name} (${tags.join(", ")})` : name;
+        return item;
+      }));
+    }
     this.status.classList.toggle("error", state.kind === "error");
     let text = "";
     switch (state.kind) {
       case "opening": text = t(lang, "coop.opening"); break;
-      case "waiting": text = t(lang, "coop.waiting", { code: state.code }); break;
       case "joining": text = t(lang, "coop.joining", { code: state.code }); break;
-      case "ready":
-        text = t(lang, state.role === "host" ? "coop.mateHost" : "coop.mateGuest", { name: state.mate });
+      case "room":
+        if (state.role === "guest") text = t(lang, "coop.guestReady", { n: state.you + 1 });
+        else if (state.players.length < 2) text = t(lang, "coop.waiting", { code: state.code ?? "" });
+        else text = t(lang, "coop.hostReady", { n: state.players.length });
         break;
       case "loading": text = t(lang, "menu.loading"); break;
       case "error": text = state.message; break;

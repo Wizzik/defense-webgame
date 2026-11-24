@@ -207,7 +207,7 @@ async function start(): Promise<void> {
   // the run behind the menu starts once the first hero's model is loaded and uses this seed
   session.seed = params.seed;
   // one view per player of a co-op run (two for now); the second hides in a run of one player
-  const heroViews = [new HeroView(0), new HeroView(1)];
+  const heroViews = [new HeroView(0), new HeroView(1), new HeroView(2), new HeroView(3)];
   for (const view of heroViews) scene.add(view.object);
   // one bake per model: a type that borrows a model shares its texture and gets its own copy of the geometry
   const bakedByModel = new Map<string, BakedVat>();
@@ -297,7 +297,7 @@ async function start(): Promise<void> {
     allyView.setModel(gltfs[local]!);
   };
   const ui = createUi(data, gear, progress, !params.debug && !gear.persistent, session, followCamera, sound, randomSeed, hero, gpu.software, (setLoading) =>
-    heroLoader(models, session, heroViews, allyView, setLoading, data.heroes.some((h) => h.id === params.mate) ? params.mate : undefined),
+    heroLoader(models, session, heroViews, allyView, setLoading, params.mates.filter((id) => data.heroes.some((h) => h.id === id))),
   loadWorld, loadCoopModels);
   const overlay = params.fps ? new Overlay(document.getElementById("overlay")!) : null;
   if (overlay) {
@@ -334,7 +334,7 @@ function heroLoader(
   heroViews: readonly HeroView[],
   allyView: AllyView,
   setLoading: (loading: boolean, failed?: boolean) => void,
-  mate?: string,
+  mates: readonly string[] = [],
 ): UseHero {
   let latest = 0;
   let errorShown = false;
@@ -343,15 +343,15 @@ function heroLoader(
     setLoading(true);
     try {
       const gltf = await models.get(modelUrl("heroes", id));
-      // ?debug=1&mate=<id>: the autopilot's hero of a local co-op run
-      const mateGltf = mate ? await models.get(modelUrl("heroes", mate)) : null;
+      // ?debug=1&mate=<id>,...: the autopilot's heroes of a local co-op run
+      const mateGltfs = await Promise.all(mates.map((id) => models.get(modelUrl("heroes", id))));
       // a co-op run that started meanwhile (a hero picked in the lobby just before) keeps its own models and run
       if (ticket !== latest || session.coop) {
         if (ticket === latest) setLoading(false);
         return;
       }
       heroViews[0]!.setModel(gltf);
-      if (mateGltf) heroViews[1]!.setModel(mateGltf);
+      mateGltfs.forEach((mateGltf, i) => heroViews[i + 1]?.setModel(mateGltf));
       allyView.setModel(gltf);
       session.start(seed, true, id);
       if (errorShown) document.getElementById("error")!.hidden = true;

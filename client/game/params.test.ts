@@ -16,6 +16,7 @@ describe("readGameParams", () => {
       lang: undefined,
       hero: undefined,
       startPhase: undefined,
+      mates: [],
     });
   });
 
@@ -77,9 +78,14 @@ describe("readGameParams", () => {
     expect(readGameParams("", () => 1)).toMatchObject({ world: undefined, difficulty: undefined });
   });
 
-  it("reads a debug co-op mate only with debug=1", () => {
-    expect(readGameParams("?debug=1&mate=gravecaller", () => 1).mate).toBe("gravecaller");
-    expect(readGameParams("?mate=gravecaller", () => 1).mate).toBeUndefined();
-    expect(readGameParams("?debug=1&mate=", () => 1).mate).toBeUndefined();
+  it("reads debug co-op mates only with debug=1", () => {
+    expect(readGameParams("?debug=1&mate=gravecaller", () => 1).mates).toEqual(["gravecaller"]);
+    expect(readGameParams("?mate=gravecaller", () => 1).mates).toEqual([]);
+    expect(readGameParams("?debug=1&mate=", () => 1).mates).toEqual([]);
+  });
+
+  it("reads at most three mates from a comma list", () => {
+    expect(readGameParams("?debug=1&mate=a,b,c,d", () => 1).mates).toEqual(["a", "b", "c"]);
+    expect(readGameParams("?debug=1&mate=a,,b", () => 1).mates).toEqual(["a", "b"]);
   });
 });

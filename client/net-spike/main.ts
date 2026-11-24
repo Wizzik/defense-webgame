@@ -11,7 +11,7 @@ const BOT_PICK_DELAY_TICKS = 2 * TICKS_PER_SECOND;
 import { loadGameData } from "../game/data";
 import { Keyboard } from "../game/keyboard";
 import { HASH_EVERY, Lockstep } from "../net/lockstep";
-import { hostRoom, joinRoom, type PeerLink } from "../net/peer-link";
+import { joinRoom, openRoom, type PeerLink, type Room } from "../net/peer-link";
 import { startTicker } from "../net/ticker";
 import { WallClock } from "../net/wall-clock";
 import { inputMessage, PROTOCOL_VERSION, toInput, type NetMessage } from "../net/protocol";
@@ -175,14 +175,14 @@ function play(peer: PeerLink, local: 0 | 1, seed: number, hero: string): void {
     for (let s = 0; s < steps && !stopped; s++) {
       if (lock.canQueue()) {
         const input = localInput();
-        peer.send(inputMessage(lock.queueLocal(input), input));
+        peer.send(inputMessage(lock.queueLocal(input), local, input));
       }
       if (run.state === "won" || run.state === "lost" || !lock.ready()) break;
       const k = lock.take(inputs);
       run.step(inputs);
       if ((k + 1) % HASH_EVERY === 0) {
         const h = stateHash(run);
-        peer.send({ t: "hash", k, h });
+        peer.send({ t: "hash", k, p: local, h });
         check(lock.recordHash(local, k, h));
       }
     }
@@ -219,6 +219,17 @@ function connected(peer: PeerLink, role: "host" | "guest"): void {
   showPanel();
 }
 
+/** Opens room `code` for one guest and resolves with his link (the spike page plays two). */
+function firstGuest(code: string): Promise<PeerLink> {
+  return new Promise((resolve, reject) => {
+    let room: Room | null = null;
+    openRoom(code, signal, (link) => {
+      room?.lock();
+      resolve(link);
+    }).then((r) => { room = r; }, reject);
+  });
+}
+
 async function host(): Promise<void> {
   setBusy(true);
   for (let attempt = 1; attempt <= HOST_TRIES; attempt++) {
@@ -228,7 +239,7 @@ async function host(): Promise<void> {
     url.searchParams.set("join", code);
     linkEl.textContent = `Room ${code}. Send this link: ${url.href}`;
     try {
-      const peer = await hostRoom(code, signal);
+      const peer = await firstGuest(code);
       connected(peer, "host");
       const seed = Math.floor(Math.random() * 0x100000000) >>> 0;
       peer.send({ t: "hello", v: PROTOCOL_VERSION, seed, hero: HERO });
