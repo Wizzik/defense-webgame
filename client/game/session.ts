@@ -50,9 +50,10 @@ export class Session {
   private readonly keyboard: Keyboard;
   private readonly loop = new FixedStepLoop(TICK_SECONDS, MAX_STEPS_PER_FRAME);
   private readonly input: TickInput = { ...NO_INPUT };
-  /** ?mate (debug): the autopilot's input for the second player of a local co-op run. */
-  private readonly mateInput: TickInput = { ...NO_INPUT };
-  private readonly inputs: TickInput[] = [this.input, this.mateInput];
+  /** ?mate (debug): the autopilot's inputs for players 1-3 of a local co-op run. */
+  private readonly mateInputs: TickInput[] = [{ ...NO_INPUT }, { ...NO_INPUT }, { ...NO_INPUT }];
+  /** The inputs of a local co-op run's step: the own, then the mates' (built once per run). */
+  private inputs: TickInput[] = [this.input];
   private pendingCard = -1;
   private pendingKeep = false;
   /** Co-op: the offer the last card was sent for; a card goes out once per offer (inputs travel a few steps ahead). */
@@ -127,11 +128,12 @@ export class Session {
     // a phase the data does not have is ignored: the run starts normally
     const phase = startPhase !== undefined && startPhase <= this.data.rules.phases.length + 1 ? startPhase : undefined;
     const loadout = this.loadoutFor(hero ?? this.data.rules.start.hero);
-    const mate = this.mate();
+    const mates = this.mates();
     this.run = createRun(this.data, {
       seed, durationSeconds, startPhase: phase, world: this.world, difficulty: this.difficulty,
-      ...(mate ? { players: [{ hero, loadout }, { hero: mate }] } : { hero, loadout }),
+      ...(mates.length > 0 ? { players: [{ hero, loadout }, ...mates.map((id) => ({ hero: id }))] } : { hero, loadout }),
     });
+    this.inputs = [this.input, ...this.mateInputs.slice(0, mates.length)];
     this.onStart();
     this.seed = seed;
     this.paused = paused;
@@ -139,10 +141,9 @@ export class Session {
     this.pendingKeep = false;
   }
 
-  /** The second hero of a local debug co-op run (?debug=1&mate=<id>), or undefined. */
-  private mate(): string | undefined {
-    const id = this.params.mate;
-    return id && this.data.heroes.some((h) => h.id === id) ? id : undefined;
+  /** The other heroes of a local debug co-op run (?debug=1&mate=<id>,...): the known ids, at most three. */
+  private mates(): string[] {
+    return this.params.mates.filter((id) => this.data.heroes.some((h) => h.id === id));
   }
 
   /** The next step gets `input.card = index`, once; `keep` adds the KeepWorn bit (keep the worn item of a chest Choice). */
@@ -196,9 +197,11 @@ export class Session {
       this.pendingCard = -1;
       this.pendingKeep = false;
       if (run.players.length > 1) {
-        // ?mate: the autopilot steers the second hero and picks his cards at once
-        run.current = 1;
-        botInput(run, this.mateInput);
+        // ?mate: the autopilot steers the other heroes and picks their cards at once
+        for (let p = 1; p < run.players.length; p++) {
+          run.current = p;
+          botInput(run, this.inputs[p]!);
+        }
         run.current = 0;
         run.step(this.inputs);
       } else run.step(input);
