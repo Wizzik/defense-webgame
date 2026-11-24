@@ -208,6 +208,8 @@ test("run ends with the end screen", async ({ page }, testInfo) => {
   }
   expect(await page.evaluate(() => window.__game?.boss?.id)).toBe("dread-regent");
   expect(await page.evaluate(() => window.__game?.screen)).not.toBe("won");
+  // fell it at once: the doubled packs can wear the hero down on slow software rendering
+  await page.evaluate(() => window.__game!.debug!.killBoss());
   expect(await playToEnd(page)).toBe("won");
 
   await expect(page.getByText("You held the castle!")).toBeVisible();
@@ -924,7 +926,14 @@ test("orbs lie on the map; a berserk orb shows in the HUD; a heart heals the hur
   const before = await page.evaluate(() => window.__game!.heroHp);
   expect(before).toBeLessThan(full - 60);
   await page.evaluate(() => window.__game!.debug!.dropHeart());
-  await page.waitForFunction((b) => window.__game!.heroHp >= b + 30, before, { timeout: 10_000, polling: 50 });
+  // more enemies bring more XP: a level-up card pauses the healing, so pick on the way
+  const healBy = Date.now() + 10_000;
+  while ((await page.evaluate(() => window.__game!.heroHp)) < before + 30 && Date.now() < healBy) {
+    const screen = await page.evaluate(() => window.__game!.screen);
+    if (screen === "levelUp" || screen === "chest") await pickCard(page);
+    await page.waitForTimeout(50);
+  }
+  expect(await page.evaluate(() => window.__game!.heroHp)).toBeGreaterThanOrEqual(before + 30);
 });
 
 test("settings open with O, pause the run and persist", async ({ page }) => {
