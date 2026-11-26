@@ -67,7 +67,7 @@ const common = {
   name: LocalizedText,
   description: LocalizedText,
   targeting: Targeting,
-  levels: z.number().int().min(1).max(5),
+  levels: z.number().int().min(1).max(10),
   cooldown: z.array(z.number().min(0)),
 };
 

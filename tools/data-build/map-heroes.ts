@@ -19,6 +19,7 @@ export function mapHero(exp: ExportHero, entry: HeroEntry): Hero {
         `of ${exp.id} in heroes.json; known: ${[...ATTACK_KINDS.keys()].join(", ")}`,
     );
   }
+  const attack = entry.attack ?? {};
   // The key order here is the order in data/generated. validateGameData (build.ts) checks the shape.
   return {
     id: entry.id,
@@ -35,10 +36,12 @@ export function mapHero(exp: ExportHero, entry: HeroEntry): Hero {
     },
     baseAttack: {
       kind,
-      range: exp.range,
-      cooldown: exp.cooldown,
+      range: Math.round(exp.range * (attack.rangeScale ?? 1)),
+      cooldown: exp.cooldown * (attack.cooldownScale ?? 1),
       damageMin: exp.damage_min,
       damageMax: exp.damage_max,
+      ...(attack.strikes === undefined ? {} : { strikes: attack.strikes }),
+      ...(attack.splash === undefined ? {} : { splash: attack.splash }),
     },
     signatureAbilities: entry.signatureAbilities,
     ultimate: entry.ultimate,
