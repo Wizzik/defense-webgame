@@ -9,7 +9,9 @@ run:
   durationSeconds: 1000   # the final boss comes at this time; the run is won when it falls
   phaseSeconds: 50
   firstPackSeconds: 2
-  timeScaling: { seconds: 1200, cap: 2 }   # enemy HP and damage x min(cap, 1 + t / seconds), spec 3.2
+  # enemy HP and damage x min(cap, 1 + t / seconds), spec 3.2; cap 1 since 2026-11-26: enemies grow with the hero's
+  # level instead (enemies.levelScaling), which gives about the same numbers on average
+  timeScaling: { seconds: 1200, cap: 1 }
   rushWarningSeconds: 7   # the map warns 7 s ahead too
   # packScale: pack sizes of the last phase while the finale lasts. The enrage counts from the boss's arrival.
   finale: { boss: dread-regent, packScale: 0.35, enrageAfterSeconds: 200, enrage: { damage: 2, moveSpeed: 1.3, slamCooldown: 0.5 } }
@@ -22,9 +24,15 @@ arena:   # the castle stands in the middle; packs come from random directions on
 castle: { hp: 58000, radius: 180, regenPercentPerMinute: 1 }
 hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.005,   # spec 2026-11-19 4.2: was 0.01
         cooldownSpeedPerInt: 0.01,
-        dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 } }
+        dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4, charges: { fromLevel: 20, count: 3 } },
+        # Petr 2026-11-26: 3 dash charges from level 20; the blink (F) from level 40: jump to the mouse, a stunning burst
+        blink: { fromLevel: 40, cooldownSeconds: 10, maxDistance: 900, radius: 300, damage: 300, stunSeconds: 0.5 } }
 autocast: { novaMinEnemies: 1, healBelow: 0.6, shieldBelow: 0.35 }
-enemies: { maxAlive: 600, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 }, bossStunScale: 0.25 }
+# Petr 2026-11-26: heroDefendRange: while the hero is within it of the castle every enemy goes for him (a solo hero
+# fighting on one side no longer loses the castle to the other); levelScaling: new enemies grow with the hero level
+# (hp and damage +0.9 % a level) in place of the time scaling: a hero ends a run near level 95, so the end is about
+# x1.85 as before, but a hero who levels faster meets stronger enemies.
+enemies: { maxAlive: 600, siegerAggroRange: 250, leashRange: 900, heroDefendRange: 1000, levelScaling: { hp: 0.009, damage: 0.009 }, knockback: { attack: 40, ability: 90, seconds: 0.15 }, bossStunScale: 0.25 }
 # A phase sends `packs` packs every interval, each from its own side: `mix` weights the enemy types, `pack` is
 # the size and the interval, `hunterShare` the chance that a pack hunts the hero, `elites` the elites
 # (the elite of the phase's faction) that come with the first pack of the phase.

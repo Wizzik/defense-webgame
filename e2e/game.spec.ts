@@ -475,7 +475,7 @@ test("a run from phase 6 meets the Blood Clan: its news follows the boss's, spaw
   });
   expect(unknown).toContain("unknown faction");
   await page.evaluate(() => {
-    for (let slot = 0; slot < 4; slot++) window.__game!.debug!.setAbilityLevel(slot, 5);
+    for (let slot = 0; slot < 4; slot++) window.__game!.debug!.setAbilityLevel(slot, 10);
   });
   await startRun(page);
   const announce = page.locator("#announce");
@@ -499,7 +499,7 @@ test("an elite rush is announced", async ({ page }) => {
   await page.waitForFunction(() => window.__game?.phase === 4, undefined, { timeout: 30_000 });
   // a full kit, so the hero lives to see the rush whatever XP the phase start gives
   await page.evaluate(() => {
-    for (let slot = 0; slot < 4; slot++) window.__game!.debug!.setAbilityLevel(slot, 5);
+    for (let slot = 0; slot < 4; slot++) window.__game!.debug!.setAbilityLevel(slot, 10);
   });
   await startRun(page);
   const announce = page.locator("#announce");

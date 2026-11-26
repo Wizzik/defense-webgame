@@ -304,6 +304,18 @@
 .buff-seconds {
   color: #e8ecf2;
 }
+/* the bar's cells take the pointer for their tooltip; the rest of the HUD lets it through */
+.hud-ability-row .cell,
+.hud-passive-row .passive-cell {
+  pointer-events: auto;
+}
+.ability-tooltip {
+  max-width: 320px;
+}
+.ability-tip-description {
+  margin-bottom: 4px;
+  color: #c9d4e3;
+}
 .hud-ability-row {
   display: flex;
   gap: 8px;
@@ -384,6 +396,13 @@
 }
 .cell.dash {
   margin-left: 10px;
+}
+.cell.blink {
+  margin-left: 0;
+  border-color: #b48cff;
+}
+.cell.blink.locked {
+  opacity: 0.45;
 }
 .cell.ultimate {
   border-color: var(--xp);

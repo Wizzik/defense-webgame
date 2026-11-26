@@ -1,9 +1,11 @@
 // Messages between two peers (spec 2026-11-20 multiplayer spike, 5.4). Only inputs, hashes and pings travel;
 // the game state never does. Every received message passes `decodeMessage`, which never throws.
-import type { TickInput } from "../../sim";
+import { InputAction, type TickInput } from "../../sim";
 
 /** 2: the game's co-op lobby (`join` and `start`, multiplayer migration step 7); 3: up to 4 players (`room`, `left`, `p`). */
-export const PROTOCOL_VERSION = 3;
+export const PROTOCOL_VERSION = 4;
+/** The longest blink aim an input may carry (world units from the hero). */
+const MAX_AIM = 4000;
 
 /** One worn permanent item as it travels: [slot id, item id, level]. */
 export type NetGear = [string, string, number];
@@ -23,7 +25,7 @@ export type NetMessage =
   /** Host to the other guests: guest `p` left the run. */
   | { t: "left"; p: number }
   /** An input or a hash of player `p` for step `k` (the host sets `p` from the link a guest sent it on). */
-  | { t: "in"; k: number; p: number; mx: number; my: number; c: number; a: number }
+  | { t: "in"; k: number; p: number; mx: number; my: number; c: number; a: number; ax?: number; ay?: number }
   | { t: "hash"; k: number; p: number; h: number }
   | { t: "ping"; n: number; at: number }
   | { t: "pong"; n: number; at: number }
@@ -102,7 +104,12 @@ export function decodeMessage(raw: unknown): NetMessage | null {
       return intIn(m.p, 1, MAX_PLAYERS - 1) ? { t: "left", p: m.p } : null;
     case "in":
       if (!intIn(m.k, 0, MAX_STEP) || !intIn(m.p, 0, MAX_PLAYERS - 1) || !intIn(m.mx, -1, 1) || !intIn(m.my, -1, 1)) return null;
-      if (!intIn(m.c, -1, 2) || !intIn(m.a, 0, 15)) return null;
+      if (!intIn(m.c, -1, 2) || !intIn(m.a, 0, 31)) return null;
+      // the blink's aim (whole world units from the hero), sent only with the Blink bit
+      if (m.ax !== undefined || m.ay !== undefined) {
+        if (!intIn(m.ax, -MAX_AIM, MAX_AIM) || !intIn(m.ay, -MAX_AIM, MAX_AIM)) return null;
+        return { t: "in", k: m.k, p: m.p, mx: m.mx, my: m.my, c: m.c, a: m.a, ax: m.ax, ay: m.ay };
+      }
       return { t: "in", k: m.k, p: m.p, mx: m.mx, my: m.my, c: m.c, a: m.a };
     case "hash":
       if (!intIn(m.k, 0, MAX_STEP) || !intIn(m.p, 0, MAX_PLAYERS - 1) || !intIn(m.h, 0, UINT32_MAX)) return null;
@@ -121,7 +128,10 @@ export function decodeMessage(raw: unknown): NetMessage | null {
 }
 
 export function inputMessage(k: number, p: number, input: TickInput): InputNetMessage {
-  return { t: "in", k, p, mx: input.moveX, my: input.moveY, c: input.card, a: input.actions };
+  const aimed = (input.actions & InputAction.Blink) !== 0 && input.aimX !== undefined && input.aimY !== undefined;
+  return aimed
+    ? { t: "in", k, p, mx: input.moveX, my: input.moveY, c: input.card, a: input.actions, ax: input.aimX, ay: input.aimY }
+    : { t: "in", k, p, mx: input.moveX, my: input.moveY, c: input.card, a: input.actions };
 }
 
 export function toInput(m: InputNetMessage, out: TickInput): TickInput {
@@ -129,5 +139,7 @@ export function toInput(m: InputNetMessage, out: TickInput): TickInput {
   out.moveY = m.my;
   out.card = m.c;
   out.actions = m.a;
+  out.aimX = m.ax;
+  out.aimY = m.ay;
   return out;
 }

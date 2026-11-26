@@ -82,6 +82,7 @@ describe("serpent wards", () => {
   it("wards bite the nearest enemy every attackInterval", () => {
     const data = quietData();
     const p = wardDef(data).params;
+    p.count = p.count!.map(() => 1); // one ward a cast: the test counts single wards
     const run = wardRun(1, data);
     const near = addEnemy(run, 300, 0);
     run.step(NO_INPUT);
@@ -125,6 +126,7 @@ describe("serpent wards", () => {
   it("ward cap removes the oldest", () => {
     const data = quietData();
     const p = wardDef(data).params;
+    p.count = p.count!.map(() => 1); // one ward a cast: the test counts single wards
     const run = wardRun(1, data);
     addEnemy(run, 300, 0);
     const castTicks: number[] = [];

@@ -18,6 +18,10 @@ export const HeroSchema = z.object({
     cooldown: z.number().positive(),
     damageMin: z.number(),
     damageMax: z.number(),
+    /** Blows per attack (two axes: 2); missing means 1. Each blow rolls its own damage. */
+    strikes: z.number().int().min(2).max(4).optional(),
+    /** Every blow also hits the other enemies within `radius` of its target for `share` of its damage. */
+    splash: z.object({ radius: z.number().positive(), share: z.number().positive().max(1) }).strict().optional(),
   }).strict(),
   signatureAbilities: z.tuple([Slug, Slug, Slug]),
   ultimate: Slug,

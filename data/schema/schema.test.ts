@@ -68,9 +68,10 @@ function fixture(): any {
       },
       castle: { hp: 3000, radius: 180, regenPercentPerMinute: 2 },
       hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
-        dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 } },
+        dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4, charges: { fromLevel: 20, count: 3 } },
+        blink: { fromLevel: 40, cooldownSeconds: 10, maxDistance: 900, radius: 300, damage: 300, stunSeconds: 0.5 } },
       autocast: { novaMinEnemies: 1, healBelow: 0.6, shieldBelow: 0.35 },
-      enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, knockback: { attack: 40, ability: 90, seconds: 0.15 }, bossStunScale: 0.25 },
+      enemies: { maxAlive: 150, siegerAggroRange: 250, leashRange: 900, heroDefendRange: 1000, levelScaling: { hp: 0.009, damage: 0.009 }, knockback: { attack: 40, ability: 90, seconds: 0.15 }, bossStunScale: 0.25 },
       events: [
         { atSeconds: 60, kind: "rush", elites: 1, heavies: 2 },
         { atSeconds: 100, kind: "boss", enemy: "warlord" },
@@ -233,8 +234,8 @@ describe("game data schemas", () => {
     expect(() => validateGameData(d)).not.toThrow();
   });
 
-  it("rejects levels 0 and 6", () => {
-    for (const levels of [0, 6]) {
+  it("rejects levels 0 and 11", () => {
+    for (const levels of [0, 11]) {
       const d = fixture();
       d.abilities[0].levels = levels;
       expect(errorMessage(d)).toContain("abilities.0 (pulse).levels");

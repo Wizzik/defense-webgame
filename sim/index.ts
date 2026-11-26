@@ -30,7 +30,7 @@ export { basicItemIndex, debugWear, GearState, itemStatAt, recomputeGear, SLOT_C
 export type { GearBonus, LoadoutEntry, SlotId } from "./gear";
 export { debugGrantXp, gainXp, xpToNext } from "./level-up";
 export { drawRarity, effectiveMagicFind, magicFindWeights } from "./magic-find";
-export { heroStats, moveHero } from "./hero";
+export { heroStats, maxDashCharges, moveHero } from "./hero";
 export { NO_INPUT } from "./input";
 export { InputAction } from "./input";
 export { CHOICE_SECONDS, CHOICE_TICKS } from "./coop-choice";

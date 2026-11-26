@@ -15,7 +15,7 @@ describe("cardLines", () => {
     const { spellPower } = run.hero.stats;
     expect(lines).toEqual([
       { label: "stat.damage", from: String(Math.round(params.damage[0] * spellPower)), to: String(Math.round(params.damage[1] * spellPower)) },
-      { label: "stat.width", from: "350", to: "400" },
+      { label: "stat.width", from: String(params.width[0]), to: String(params.width[1]) },
     ]);
   });
 

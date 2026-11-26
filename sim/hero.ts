@@ -8,6 +8,8 @@ import { TICKS_PER_SECOND, TICK_SECONDS } from "./constants";
 import { EventKind } from "./events";
 import { onGearAttack } from "./gear-effects";
 import { hitExtraTargets } from "./hero-multishot";
+import { blink } from "./hero-blink";
+import { splashBlow } from "./hero-splash";
 import { InputAction } from "./input";
 import type { TickInput } from "./input";
 import type { Run } from "./run";
@@ -54,7 +56,8 @@ export function applyActions(run: Run, input: TickInput): void {
   if ((actions & InputAction.Ultimate) !== 0) run.ultimateRequested = true;
   if ((actions & InputAction.ToggleAuto) !== 0) run.ultimateAuto = !run.ultimateAuto;
   const hero = run.hero;
-  if ((actions & InputAction.Dash) === 0 || hero.hp <= 0 || hero.dashCooldown > 0 || hero.dashTicks > 0) return;
+  if ((actions & InputAction.Blink) !== 0) blink(run, input);
+  if ((actions & InputAction.Dash) === 0 || hero.hp <= 0 || hero.dashCharges <= 0 || hero.dashTicks > 0) return;
   if (hero.rootTicks > 0) return;
   let dx = sign(input.moveX);
   let dy = sign(input.moveY);
@@ -70,8 +73,30 @@ export function applyActions(run: Run, input: TickInput): void {
   hero.dashDirX = dx;
   hero.dashDirY = dy;
   hero.dashTicks = Math.round(dash.seconds * TICKS_PER_SECOND);
-  hero.dashCooldown = Math.round(dash.cooldownSeconds * TICKS_PER_SECOND);
+  hero.dashCharges--;
+  if (hero.dashCooldown <= 0) hero.dashCooldown = Math.round(dash.cooldownSeconds * TICKS_PER_SECOND);
   run.events.push(EventKind.Dash, 0, dash.distance, hero.x, hero.y, dx, dy);
+}
+
+/** Dash charges the hero holds at most: 1, or `dash.charges.count` from `dash.charges.fromLevel` (Petr 2026-11-26). */
+export function maxDashCharges(run: Run): number {
+  const { charges } = run.data.rules.hero.dash;
+  return run.hero.level >= charges.fromLevel ? charges.count : 1;
+}
+
+/**
+ * Refills spent dash charges one at a time: `dashCooldown` counts down the charge being refilled; when it comes back
+ * and another is missing, the next one starts (so three spent charges take three cooldowns).
+ */
+function refillDash(run: Run): void {
+  const hero = run.hero;
+  if (hero.dashCooldown > 0) {
+    hero.dashCooldown--;
+    if (hero.dashCooldown === 0) hero.dashCharges++;
+  }
+  if (hero.dashCooldown === 0 && hero.dashCharges < maxDashCharges(run)) {
+    hero.dashCooldown = Math.round(run.data.rules.hero.dash.cooldownSeconds * TICKS_PER_SECOND);
+  }
 }
 
 /** The longest piece of one step's movement that is pushed out of obstacles on its own (the wall is 90 thick). */
@@ -88,7 +113,8 @@ export function moveHero(run: Run, input: TickInput): void {
 
 function walkHero(run: Run, input: TickInput): void {
   const hero = run.hero;
-  if (hero.dashCooldown > 0) hero.dashCooldown--;
+  refillDash(run);
+  if (hero.blinkCooldown > 0) hero.blinkCooldown--;
   if (hero.hp <= 0) {
     // a fallen co-op hero lies where he fell until a teammate revives him (one player: the run has ended)
     hero.dashTicks = 0;
@@ -181,7 +207,8 @@ export function updateHeroCombat(run: Run): void {
   const empower = consumeEmpower(run, e.x[best], e.y[best]);
   const bonus = onHitBonus(run, e.x[best], e.y[best]);
   const stun = onHitStunTicks;
-  const amount = (rollDamage(run.rng, stats.damageMin, stats.damageMax) * empower + bonus) * (1 - reduction);
+  const raw = rollDamage(run.rng, stats.damageMin, stats.damageMax) * empower + bonus;
+  const amount = raw * (1 - reduction);
   if (!hero.moving && bestSq > 0) {
     const len = Math.sqrt(bestSq);
     hero.facingX = bestDx / len;
@@ -192,6 +219,14 @@ export function updateHeroCombat(run: Run): void {
   const targetY = e.y[best];
   const extra = extraTargets(run);
   damageEnemy(run, best, amount, 0);
+  splashBlow(run, best, targetX, targetY, raw);
+  // more blows (two axes): each rolls its own damage on the same target, or on its splash ground once it fell
+  const strikes = hero.def.baseAttack.strikes ?? 1;
+  for (let s = 1; s < strikes; s++) {
+    const blow = rollDamage(run.rng, stats.damageMin, stats.damageMax) + bonus;
+    if (e.alive[best] === 1) damageEnemy(run, best, blow * (1 - reduction), 0);
+    splashBlow(run, best, targetX, targetY, blow);
+  }
   if (e.alive[best] === 1) stunEnemy(run, best, stun);
   hitExtraTargets(run, best, extra, stun, bonus);
   onGearAttack(run, best, targetX, targetY, amount);

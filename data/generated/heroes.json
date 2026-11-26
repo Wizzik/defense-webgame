@@ -72,7 +72,7 @@
     },
     "baseAttack": {
       "kind": "bounce",
-      "range": 350,
+      "range": 700,
       "cooldown": 0.75,
       "damageMin": 2,
       "damageMax": 24
@@ -114,7 +114,7 @@
     },
     "baseAttack": {
       "kind": "bounce",
-      "range": 600,
+      "range": 1200,
       "cooldown": 0.75,
       "damageMin": 2,
       "damageMax": 8
@@ -166,7 +166,8 @@
       "forked-bolt",
       "mending-tide"
     ],
-    "ultimate": "spirit-ward"
+    "ultimate": "spirit-ward",
+    "damageTaken": 0.75
   },
   {
     "id": "mistwarden",
@@ -198,7 +199,7 @@
     },
     "baseAttack": {
       "kind": "ranged",
-      "range": 600,
+      "range": 1200,
       "cooldown": 0.75,
       "damageMin": 2,
       "damageMax": 8
@@ -240,7 +241,7 @@
     },
     "baseAttack": {
       "kind": "bounce",
-      "range": 700,
+      "range": 1400,
       "cooldown": 0.75,
       "damageMin": 2,
       "damageMax": 24
@@ -283,9 +284,14 @@
     "baseAttack": {
       "kind": "melee",
       "range": 128,
-      "cooldown": 0.75,
+      "cooldown": 0.34,
       "damageMin": 2,
-      "damageMax": 12
+      "damageMax": 12,
+      "strikes": 2,
+      "splash": {
+        "radius": 160,
+        "share": 0.5
+      }
     },
     "signatureAbilities": [
       "cleaver-toss",
@@ -325,7 +331,7 @@
     },
     "baseAttack": {
       "kind": "bounce",
-      "range": 650,
+      "range": 1300,
       "cooldown": 0.75,
       "damageMin": 2,
       "damageMax": 8

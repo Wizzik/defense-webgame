@@ -2,6 +2,49 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Petr's solo playtest batch (2026-11-26; Petr's wishes, the numbers are Claude's unless Petr is named)
+
+Petr could not win alone: enemies from the far side walked to the castle while he fought on the other. Spec of the
+random items that come next: `docs/superpowers/specs/2026-11-26-random-items-design.md` (waits for Petr).
+
+- **Defence circle** (Petr: 1000). `rules.enemies.heroDefendRange` 1000: while the target hero stands within it of
+  the castle, every enemy goes for him (`sim/enemy-ai.ts`); beyond it the siegers turn to the castle again. The
+  autopilot keeps 150 inside the circle when it walks to a target beyond it (`sim/bot.ts`, `DEFEND_EDGE_MARGIN`).
+- **Enemy strength follows the hero's level.** It grew with time before (x1 to x1.83 at the final boss) and with the
+  phases' types. Now `rules.enemies.levelScaling` hp and damage +0.9 % a hero level (player 0's level; XP is
+  shared), and `run.timeScaling.cap` is 1. A hero ends a run near level 95 since the packs were doubled twice, so the
+  end is about x1.85 as before; a hero who levels faster meets stronger enemies. A first try at +1.5 % hp and +1 %
+  damage on top of the time scaling made the end x4.4 hp: Gravecaller won 1 of 6 instead of 8 of 8.
+- **Ranged reach x2** (Petr). `design/heroes.yaml` `attack.rangeScale: 2` on the five ranged heroes: Nightglaive 700,
+  Gravecaller and Mistwarden 1200, Tidecaller 1300, Sparkshot 1400. 1200-1400 reaches about the top and bottom edge
+  of the screen; Petr checks whether it shoots at enemies he cannot see.
+- **Redcleaver** (Petr: two axes, much faster, splash). `attack: { cooldownScale: 0.45, strikes: 2, splash:
+  { radius: 160, share: 0.5 } }`: an attack every 0.34 s, two blows each rolling its damage, every blow hits the
+  enemies within 160 of the target for half (`sim/hero-splash.ts`).
+- **Ultimates burst like Bone Stampede** (Petr). Beam Swarm, Rot Field and Drowned Lake: 10 / 11 bursts a second of
+  30 / 67 (x spell power) within 275 / 350, as the Gravecaller's. Rot Field lasts 10 / 12 s (was 10 / 20).
+- **Serpent wards** (Petr: x1.5 a level, with spell power). Damage 20, 30, 45, 68, 101 (design values 67, 150, 337,
+  770, 1700 before the scaling), then spread over 10 levels: 20 ... 101, x spell power as before.
+- **10 spell levels** (Petr: level 1 as now, the top as level 5 now). `design/scaling.yaml` `abilities.levels: 10`:
+  data-build spreads every ability with more than 2 levels last (`tools/data-build/spread-levels.ts`, linear between
+  the old levels; whole rows stay whole, shares keep 4 decimals, cooldowns 2). Ultimates keep 2 levels. With heroes at
+  level ~95 there are enough cards for the longer climb.
+- **Dash charges** (Petr). From level 20 the dash holds 3 charges; a spent one comes back after the 4 s cooldown, one
+  at a time (`rules.hero.dash.charges`, `maxDashCharges`).
+- **Blink, key F** (Petr: level 40, 10 s, a teleport to the mouse with area damage, not too strong).
+  `rules.hero.blink`: at most 900 to the pointer, then 300 x spell power within 300 and a 0.5 s stun; it ends a dash
+  and breaks roots. The aim travels in `TickInput.aimX/aimY` (whole world units from the hero), net protocol 4.
+- **Tooltip** (Petr). The pointer on a cell of the ability bar or the passive row shows the spell's level, its text
+  and its values against the next level (`client/ui/ability-tooltip.ts`).
+- **Serpent Shaman** (Claude, after the autopilot lost 7 of 8 before level 5 once every enemy came for him): 2
+  totems from level 1 (count 2, 2, 2, 3, 3 before the spread, cap 4, 4, 4, 6, 6) and `damageTaken` 0.75 like the
+  other melee heroes (his reach is 125).
+- **Balance** (autopilot, world 1 normal, mid gear, seeds 1-8): wins 20 -> 62 of 64 (table in `docs/STATUS.md`).
+  The determinism case `w2-sand` plays the Gravecaller now (the Mistwarden of seed 11 fell before the storm).
+  Digest `ff675613`.
+- **Weather on the map** (Petr). Snow, embers, dust and fireflies stay on the ground when the hero walks: positions are
+  world points wrapped into the box around the hero (`client/render/particles.ts`).
+
 ## Co-op for 3-4 players (2026-11-24; Petr approved the design, the details are Claude's)
 
 - Spec: `docs/superpowers/specs/2026-11-24-coop-four-players-design.md`, plan `docs/superpowers/plans/2026-11-24-coop-four-players.md`. The sim, `rules.coop` and the single-player digest `4bc81413` did not change.

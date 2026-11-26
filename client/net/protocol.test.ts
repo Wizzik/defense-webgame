@@ -7,6 +7,7 @@ describe("decodeMessage", () => {
   const valid: NetMessage[] = [
     { t: "hello", v: PROTOCOL_VERSION, seed: 4_000_000_000, hero: "stonehorn" },
     { t: "in", k: 33, p: 3, mx: -1, my: 1, c: 2, a: 15 },
+    { t: "in", k: 34, p: 1, mx: 0, my: 0, c: -1, a: 16, ax: -812, ay: 300 },
     { t: "hash", k: 30, p: 2, h: 4_294_967_295 },
     { t: "ping", n: 7, at: 1234.5 },
     { t: "pong", n: 7, at: 1234.5 },
@@ -19,8 +20,8 @@ describe("decodeMessage", () => {
     { t: "left", p: 3 },
   ];
 
-  it("is version 3", () => {
-    expect(PROTOCOL_VERSION).toBe(3);
+  it("is version 4", () => {
+    expect(PROTOCOL_VERSION).toBe(4);
   });
 
   it.each(valid.map((m) => [m.t, m] as const))("round-trips %s", (_t, m) => {
@@ -48,7 +49,9 @@ describe("decodeMessage", () => {
     ["mx out of range", { t: "in", k: 1, p: 0, mx: 2, my: 0, c: -1, a: 0 }],
     ["a fractional move", { t: "in", k: 1, p: 0, mx: 0.5, my: 0, c: -1, a: 0 }],
     ["c out of range", { t: "in", k: 1, p: 0, mx: 0, my: 0, c: 3, a: 0 }],
-    ["a out of range", { t: "in", k: 1, p: 0, mx: 0, my: 0, c: -1, a: 16 }],
+    ["a out of range", { t: "in", k: 1, p: 0, mx: 0, my: 0, c: -1, a: 32 }],
+    ["aim out of range", { t: "in", k: 1, p: 0, mx: 0, my: 0, c: -1, a: 16, ax: 5000, ay: 0 }],
+    ["aim not whole", { t: "in", k: 1, p: 0, mx: 0, my: 0, c: -1, a: 16, ax: 1.5, ay: 0 }],
     ["a huge step", { t: "in", k: 2e6, p: 0, mx: 0, my: 0, c: -1, a: 0 }],
     ["a negative step", { t: "hash", k: -1, p: 0, h: 0 }],
     ["a hash over 32 bits", { t: "hash", k: 30, p: 0, h: 2 ** 32 }],

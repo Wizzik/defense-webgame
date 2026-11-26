@@ -6,8 +6,10 @@ import {
   inThicket,
   poolAt,
   WeatherPhase,
+  maxDashCharges,
 } from "../../sim";
 import { abilityIconSvg } from "./ability-icons";
+import { AbilityTooltipView, abilityTooltip } from "./ability-tooltip";
 import { Announcer } from "./announcer";
 import { BossBar } from "./boss-bar";
 import { BuffBar, type HazardCells } from "./buff-bar";
@@ -93,6 +95,7 @@ export class Hud {
   /** Slot count the rows were built for (0 = not built yet). */
   private builtFor = 0;
   private dash!: Cell;
+  private blink!: Cell;
   private readonly banner: HTMLElement;
   private readonly muteKey: HTMLElement;
   private readonly announce: HTMLElement;
@@ -106,6 +109,10 @@ export class Hud {
   /** The tick the chill was last announced; the news names it at most every CHILL_NEWS_TICKS. */
   private chillNewsAt = -Infinity;
   private lastRun: Run | null = null;
+  private readonly abilityTip: AbilityTooltipView;
+  /** The slot and cell under the pointer in the ability bar or the passive row (-1: none). */
+  private hoverSlot = -1;
+  private hoverCell: HTMLElement | null = null;
   /** What a boss that just fell dropped (boss id, its order in the run); main.ts sets it. */
   /** The drop of a fallen boss; `magicFind` is the hero's magic find at that moment. */
   dropFor: ((bossId: string, order: number, magicFind: number) => Drop) | null = null;
@@ -136,6 +143,7 @@ export class Hud {
     this.buffBar = new BuffBar(abilities);
     this.abilityRow = el("div", "hud-ability-row", abilities);
     this.passiveRow = el("div", "hud-passive-row", abilities);
+    this.abilityTip = new AbilityTooltipView(parent);
   }
 
   /**
@@ -159,21 +167,45 @@ export class Hud {
       const extra = ultimate ? "ultimate" : slot >= sharedFirst ? "spell shared" : "spell";
       const view = cell(this.abilityRow, slot, extra, ultimate ? "R" : undefined, ultimate);
       view.root.dataset.slot = String(slot);
+      this.hoverable(view.root, slot);
       this.cells.push(view);
     }
     this.dash = cell(this.abilityRow, -1, "dash");
+    this.blink = cell(this.abilityRow, -1, "dash blink", "F");
     const [passiveFirst, passiveEnd] = passiveSlotRange(run);
     for (let slot = passiveFirst; slot < passiveEnd; slot++) {
       const root = el("div", "passive-cell empty", this.passiveRow);
       root.dataset.slot = String(slot);
+      this.hoverable(root, slot);
       const icon = el("span", "passive-icon", root);
       const level = el("span", "passive-level", root);
       this.passives.push({ slot, root, icon, level, shown: "" });
     }
   }
 
+  /** Shows the spell's tooltip while the pointer rests on its cell (Petr 2026-11-26: level and values). */
+  private hoverable(root: HTMLElement, slot: number): void {
+    root.addEventListener("pointerenter", () => {
+      this.hoverSlot = slot;
+      this.hoverCell = root;
+    });
+    root.addEventListener("pointerleave", () => {
+      if (this.hoverCell !== root) return;
+      this.hoverSlot = -1;
+      this.hoverCell = null;
+      this.abilityTip.hide();
+    });
+  }
+
+  private updateTooltip(run: Run, lang: Lang): void {
+    const info = this.hoverSlot >= 0 && this.hoverCell !== null ? abilityTooltip(run, this.hoverSlot, lang) : null;
+    if (info === null || this.hoverCell === null) this.abilityTip.hide();
+    else this.abilityTip.show(this.hoverCell, info);
+  }
+
   setVisible(visible: boolean): void {
     this.root.hidden = !visible;
+    if (!visible) this.abilityTip.hide();
   }
 
   /** After every simulation step: ages the news line and reads the events that make news. */
@@ -241,6 +273,7 @@ export class Hud {
 
   update(run: Run, lang: Lang): void {
     this.sync(run);
+    this.updateTooltip(run, lang);
     const { hero, castle, data } = run;
     setText(this.heroHp.label, `${Math.max(0, Math.ceil(hero.hp))} / ${Math.round(hero.stats.maxHp)}`);
     this.heroHp.fill.style.width = fraction(hero.hp, hero.stats.maxHp);
@@ -337,12 +370,32 @@ export class Hud {
       if (view.root.title !== title) view.root.title = title;
     }
     const { hero } = run;
-    const total = Math.round(run.data.rules.hero.dash.cooldownSeconds * TICKS_PER_SECOND);
+    const { dash, blink } = run.data.rules.hero;
+    const total = Math.round(dash.cooldownSeconds * TICKS_PER_SECOND);
+    const most = maxDashCharges(run);
     setText(this.dash.name, t(lang, "hud.dash"));
+    // with charges: "2 / 3 · 1.4 s" while one refills
+    const refill = hero.dashCooldown > 0 ? `${(hero.dashCooldown / TICKS_PER_SECOND).toFixed(1)} s` : "";
+    const charges = most > 1 ? `${hero.dashCharges} / ${most}` : "";
     setText(
       this.dash.state,
-      hero.dashCooldown <= 0 ? t(lang, "hud.ready") : `${(hero.dashCooldown / TICKS_PER_SECOND).toFixed(1)} s`,
+      most > 1
+        ? (refill ? `${charges} · ${refill}` : charges)
+        : hero.dashCharges > 0 ? t(lang, "hud.ready") : refill,
     );
     this.dash.fill.style.width = hero.dashCooldown <= 0 ? "100%" : fraction(total - hero.dashCooldown, total);
+
+    // the blink (F) from its level; before it the cell says when it comes
+    const blinkTotal = Math.round(blink.cooldownSeconds * TICKS_PER_SECOND);
+    setText(this.blink.name, t(lang, "hud.blink"));
+    const open = hero.level >= blink.fromLevel;
+    this.blink.root.classList.toggle("locked", !open);
+    setText(
+      this.blink.state,
+      !open ? t(lang, "hud.blinkAt", { n: blink.fromLevel })
+        : hero.blinkCooldown <= 0 ? t(lang, "hud.ready") : `${(hero.blinkCooldown / TICKS_PER_SECOND).toFixed(1)} s`,
+    );
+    this.blink.fill.style.width = !open ? "0%" : hero.blinkCooldown <= 0 ? "100%"
+      : fraction(blinkTotal - hero.blinkCooldown, blinkTotal);
   }
 }
