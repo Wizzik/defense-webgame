@@ -502,6 +502,8 @@ test("an elite rush is announced", async ({ page }) => {
     for (let slot = 0; slot < 4; slot++) window.__game!.debug!.setAbilityLevel(slot, 10);
   });
   await startRun(page);
+  // an idle hero outside the castle's defence circle (rules.enemies.heroDefendRange): the packs go for the castle
+  await page.evaluate(() => window.__game!.debug!.teleport(0, 1500));
   const announce = page.locator("#announce");
   const deadline = Date.now() + 90_000;
   let seen = false;
@@ -893,6 +895,8 @@ test("orbs lie on the map; a berserk orb shows in the HUD; a heart heals the hur
   await page.goto("/?seed=1&lang=en&debug=1&speed=4&hero=stonehorn");
   await startRun(page);
   await waitForScreen(page, "playing");
+  // an idle hero outside the castle's defence circle (rules.enemies.heroDefendRange): the packs go for the castle
+  await page.evaluate(() => window.__game!.debug!.teleport(0, 1500));
   // the first orb comes at 8 s; level-up cards pause the run on the way
   for (let i = 0; i < 400; i++) {
     const { tick, screen } = await page.evaluate(() => ({ tick: window.__game!.tick, screen: window.__game!.screen }));
