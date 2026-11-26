@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm run check)",
+      "Bash(npm run typecheck)",
+      "Bash(npm test)",
+      "Bash(npm test:*)",
+      "Bash(npx vitest run:*)",
+      "Bash(npm run build)",
+      "Bash(npm run e2e:*)",
+      "Bash(npm run shots)",
+      "Bash(npm run sim:run:*)",
+      "Bash(npm run sim:digest:*)",
+      "Bash(npm run sim:chests:*)",
+      "Bash(npm run audio:build)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)"
+    ],
+    "deny": [
+      "Read(./data-source/**)",
+      "Read(./xhero/**)",
+      "Read(./**/*.w3x)",
+      "Read(./assets-source/**)",
+      "Read(./audio-source/**)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/clean-room-guard.mjs\""
+          }
+        ]
+      }
+    ]
+  }
+}
