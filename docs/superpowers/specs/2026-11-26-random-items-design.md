@@ -48,9 +48,8 @@ Every affix has role tags; the base's flavour and the hero both weigh the draw:
 
 - **STR (tank):** str, hp, armor, regen, lifesteal, damage taken -x % (new), thorns (new: x % of melee damage back).
 - **AGI (assassin):** agi, attack speed, damage, move speed, crit chance and crit damage (new), dodge (new),
-  lifesteal and spell lifesteal (Petr 2026-11-27: an assassin sustains by both).
-- **INT (caster):** int, spell power, cooldown speed (new), ultimate cooldown (new), area size +x % (new),
-  spell lifesteal (new).
+  lifesteal (Petr 2026-11-27).
+- **INT (caster):** int, spell power, cooldown speed (new), ultimate cooldown (new), area size +x % (new).
 - **Any:** magnet, gold find, magic find.
 
 Smart loot (Diablo 3 style, which PD2 does not have): in a drop or chest, **60 %** of the affixes are drawn from the
@@ -105,4 +104,5 @@ its own point price added to the budget table.
 2. Unwanted items are **salvaged for gold** (gold for the next run's chests).
 3. **Smart loot 60 %** of the affixes from the hero's primary attribute's pool.
 4. The collection holds at most **200** items.
-5. AGI affixes may also roll **lifesteal and spell lifesteal** (section 3).
+5. AGI affixes may also roll **lifesteal** (section 3). There is **one lifesteal** for attacks and spells, as the game
+   has it now (`damageEnemy` heals by it for both, not for summons): no separate spell lifesteal.
