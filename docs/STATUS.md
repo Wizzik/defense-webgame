@@ -17,7 +17,26 @@ Updated 2026-11-27 (random items, stages 1-4 and the damage meter; Petr's batch 
 6. **Random items stage 4 and the damage meter** (PR #45, merged 2026-11-27, below).
 7. **Petr's batch 3** (2026-11-27, after the 3-player playtest), DONE on `main` (below), waits for Petr's playtest:
    co-op restart, no white hit flash, weaker co-op scaling, spell levels 6 (ultimates 3, passives 5) with STR / AGI /
-   INT cards after, level 60-70 at the end of a run, wards x5. NEXT: random items stage 5 (balance), stage 6 (icons).
+   INT cards after, level 60-70 at the end of a run, wards x5. Then Sentry Ward = Serpent Totem (10 s / 15 s),
+   dash 3 charges from level 10, blink from 20, and random items stage 5 (balance), DONE on `main`.
+   NEXT: random items stage 6 (icons, plan `docs/superpowers/plans/2026-11-27-random-items.md`, tasks 19-20).
+
+## Sentry Ward, dash, blink and random items stage 5 (straight to `main`, DONE, 2026-11-27)
+
+- Sentry Ward has Serpent Totem's numbers and lives 10 s, a serpent totem 15 s; dash 3 charges from level 10, blink
+  from level 20; hero power tuned again (2-5 autopilot wins of 20 each). Stage 5: `sim:run --gear rolled-mid |
+  rolled-full`, crit damage from gear capped at +150 %, a random mythic's budget 34. Numbers: `docs/DECISIONS.md`,
+  sections Random items, stage 5 and Sentry Ward, Serpent Totem, dash and blink.
+- **What Petr checks:**
+  - Sentry Ward (any hero, a shared spell) and Serpent Totem: many wards, short-lived (10 s and 15 s), similar damage:
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=serpent-shaman&phase=8 and in the console
+    `__game.debug.learn(4, "sentry-ward")`;
+  - 3 dash charges from level 10, F from level 20: https://wizzik.github.io/defense-webgame/?debug=1&phase=6
+  - a mythic random item feels like a named one, crits not absurd:
+    https://wizzik.github.io/defense-webgame/?debug=1 then `__game.debug.grantRolled("weapon", "mythic", 12)` and wear it
+    in the gear screen.
+- Generated json edited in the cloud again (`abilities.json`, `heroes.json`, `rules.json`): **run
+  `npm run data:build` locally and check that nothing changes.**
 
 ## Petr's batch 3 (straight to `main`, DONE, 2026-11-27)
 

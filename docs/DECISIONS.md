@@ -15,6 +15,35 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   `client/ui/messages-cs.ts` falls back to English, and a Czech browser no longer picks Czech by itself (`pickLang`).
   Where a data schema still requires `cs` (`{ en, cs }`, the gendered rare names), new rows repeat the English text.
 
+## Random items, stage 5: balance (2026-11-27)
+
+- `sim:run --gear rolled-mid` (a rare rolled at power 2, level 1, in every slot) and `rolled-full` (a mythic rolled
+  at power 12, level 5, tier 4), rolled for the hero's primary attribute from a seed fixed per hero and slot
+  (`tools/sim-run/gear-presets.ts`). Targets of the plan: rolled-mid about the named `mid`, rolled-full within the
+  named `full` + 10 %.
+- Stats at level 30 (average of 10 roll seeds, rolled / named): rolled-mid hp 0.86-1.02, attack 0.90-1.19, spell
+  0.96-1.04. Rolled-full first: the main attribute +30 % (spell x1.3 for Int heroes, hp x1.7 for Str heroes) and the
+  attack of Agi heroes x5: crit damage stacked over 16 slots (+3.6).
+- **`rules.loot.caps.critDamage` 1.5**: gear adds at most +150 % crit damage (a crit is then at most x2.0 at the
+  60 % crit chance cap). **A random mythic's budget 42 -> 34**; named mythics keep 42 (`design/items.yaml`).
+- Autopilot wins: world 1 normal, seeds 1-10, of 80: `mid` 46, `rolled-mid` 39. World 3 hell, seeds 1-10, of 80:
+  `full` 13, `rolled-full` 21 (budget 42) -> 13 (budget 34). Agi heroes still show a higher attack (crit) and a lower
+  spell power (0.62) with rolled-full; in wins they do not stand out.
+- Digest `4facf838` -> `62622e34`.
+
+## Sentry Ward, Serpent Totem, dash and blink (Petr, 2026-11-27, after batch 3)
+
+- "uprav hodnoty sentry wards na stejné hodnoty jako serpent totem, mělo by to mít ve výsledku podobné dps": Sentry
+  Ward takes Serpent Totem's cooldown, count, range, bite and cap. "jejich duration má být 10s pouze": a sentry ward
+  lives 10 s; "pro serpent totem platí 15s" (was 60). Both scale with the hero's `power`, so the same ward deals
+  more for a hero of a higher power.
+- Plan task 7 (Petr): 3 dash charges from level 10 (was 20), the blink (F) from level 20 (was 40).
+- Hero power after these: Gravecaller 0.29, Sparkshot 0.74, Redcleaver 0.38, Tidecaller 0.51 (others as in batch 3).
+  Wins of 20, gear none: Stonehorn 4, Nightglaive 4, Gravecaller 4, Serpent Shaman 3, Mistwarden 4, Sparkshot 2,
+  Redcleaver 4, Tidecaller 5 (30 of 160). Sentry Ward deals 9-26 % of the damage of the heroes who take it. Win counts
+  jump by 3-6 for a power step of 0.02-0.04 (a cliff), so read them as +-2.
+- Digest `4d1136d4` -> `4a120fc3` (wards) -> `4facf838` (dash, power, crit cap).
+
 ## Petr's batch 3 (2026-11-27; plan `docs/superpowers/plans/2026-11-27-petr-batch-3.md`, Petr's words, Claude's numbers)
 
 - **No white hit flash** (task 2): enemies no longer flash white after a hit; the type-colour glow and the red of

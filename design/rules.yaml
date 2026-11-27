@@ -145,7 +145,10 @@ drops:
 loot:
   smartShare: 0.6
   collectionLimit: 200
-  budget: { common: 6, rare: 12, epic: 20, legendary: 30, mythic: 42 }
+  # mythic 42 -> 34 (random items stage 5): a rolled mythic set (sim:run --gear rolled-full) came out about 30 % above
+  # the named full preset in the main attribute; with 34 it wins as often (world 3 hell, seeds 1-10: 13 of 80 both). Named mythics keep 42
+  # (design/items.yaml): their rows do not all lean to one attribute.
+  budget: { common: 6, rare: 12, epic: 20, legendary: 30, mythic: 34 }
   implicitPoints: 2
   rowRoll: 0.08
   affixCount: { common: 1, rare: 2, epic: 3, legendary: 4, mythic: 4 }
