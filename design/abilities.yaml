@@ -223,7 +223,8 @@
     # 2 totems from level 1 since 2026-11-26: with every enemy going for a hero near the castle the shaman could not
     # hold the first waves (autopilot: 7 of 8 died before level 5).
     count: { design: [2, 2, 2, 3, 3] }
-    duration: duration
+    # Petr 2026-11-27 (after batch 3): a totem lives 15 s (the map's 60); a sentry ward 10 s.
+    duration: { design: [15, 15, 15, 15, 15] }
     range: range
     # The map's totem attacks for 101, finds a target within 600 and has an attack interval of 1.0 s,
     # which is multiplied by heroes.attackCooldown 0.5. The cap on living totems is our own.
@@ -667,15 +668,18 @@
   kind: summon
   # The summon updater plants wards at the thickest crowd in range (like Serpent Totem).
   targeting: densest_cluster
+  # Petr 2026-11-27 (after batch 3): "uprav hodnoty sentry wards na stejné hodnoty jako serpent totem, mělo by to mít
+  # ve výsledku podobné dps": every row below is Serpent Totem's (cooldown, count, range, bite, cap) but the duration.
+  cooldown: { design: [15, 15, 15, 15, 15] }
   params:
-    count: { design: [1, 1, 1, 1, 2] }
-    duration: { design: [30, 30, 30, 30, 30] }
-    range: { design: [600, 600, 600, 600, 600] }
-    damage: { design: [40, 50, 60, 70, 80] }
+    count: { design: [2, 2, 2, 3, 3] }
+    # Petr: "jejich duration má být 10s pouze": a sentry ward lives 10 s (a serpent totem 15 s).
+    duration: { design: [10, 10, 10, 10, 10] }
+    range: { design: [500, 500, 500, 800, 800] }
+    damage: { design: [333, 810, 1510, 2410, 3520] }
     attackRange: { design: [600, 600, 600, 600, 600] }
     attackInterval: { design: [0.5, 0.5, 0.5, 0.5, 0.5] }
-    # x5 in Petr's batch 3 (2026-11-27), like the Serpent Shaman's totems; the count per cast stays.
-    maxAlive: { design: [5, 10, 10, 15, 15] }
+    maxAlive: { design: [20, 20, 20, 30, 30] }
 
 - id: second-wind
   source: A017
