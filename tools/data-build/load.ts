@@ -115,6 +115,8 @@ export interface HeroEntry {
   ultimate: string;
   /** Design value, copied as it is when present. */
   damageTaken?: number;
+  /** Design value, copied as it is when present. */
+  power?: number;
   /** Design changes of the base attack: range and cooldown multipliers on the map's numbers, blows, splash. */
   attack?: {
     rangeScale?: number;

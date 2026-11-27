@@ -28,7 +28,8 @@ export function heroStats(data: GameData, hero: HeroState, out: HeroStats): Hero
   const int = hero.int + gear.int;
   const primary = def.primary === "str" ? str : def.primary === "agi" ? agi : int;
   const bonus = primary * c.primaryAttackBonus;
-  const damage = 1 + hero.bonus.damage + gear.damage + passive.attack;
+  const power = def.power ?? 1;
+  const damage = (1 + hero.bonus.damage + gear.damage + passive.attack) * power;
   out.maxHp = (def.hp + str * c.strHitPointBonus + gear.hp) * (1 + passive.hp);
   out.regenPerSecond = rules.hero.baseRegen + str * rules.hero.regenPerStr + gear.regen + passive.regen;
   out.armor = def.armor + agi * c.agiDefenseBonus + gear.armor;
@@ -38,7 +39,7 @@ export function heroStats(data: GameData, hero: HeroState, out: HeroStats): Hero
       1 + c.attackSpeedCap);
   out.damageMin = (def.baseAttack.damageMin + bonus) * damage;
   out.damageMax = (def.baseAttack.damageMax + bonus) * damage;
-  out.spellPower = (1 + int * rules.hero.spellPowerPerInt) * (1 + gear.spellPower + passive.spellPower);
+  out.spellPower = (1 + int * rules.hero.spellPowerPerInt) * (1 + gear.spellPower + passive.spellPower) * power;
   out.cooldownScale = 1 / (1 + int * rules.hero.cooldownSpeedPerInt + passive.cooldown + gear.cooldownSpeed);
   out.moveSpeed = def.moveSpeed * (1 + hero.bonus.moveSpeed + gear.moveSpeed + passive.moveSpeed) * hero.speedScale;
   out.collision = rules.hero.collision;

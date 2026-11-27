@@ -46,5 +46,6 @@ export function mapHero(exp: ExportHero, entry: HeroEntry): Hero {
     signatureAbilities: entry.signatureAbilities,
     ultimate: entry.ultimate,
     ...(entry.damageTaken === undefined ? {} : { damageTaken: entry.damageTaken }),
+    ...(entry.power === undefined ? {} : { power: entry.power }),
   };
 }
