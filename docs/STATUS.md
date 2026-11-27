@@ -25,23 +25,34 @@ section Petr's batch 2. `npm run check` passes on every commit of the branch.
   - task 3, Serpent Totem: 100, 125 ... 325 over the ten levels;
   - task 4, blink: F teleports to the mouse at any distance (`rules.hero.blink.aheadDistance` without a mouse
     point), a flash at both ends, no streak; e2e "F teleports the hero ...";
-  - task 5, first half: bosses x3 hp, x2 damage (`enemies.bossHp`, `bossDamage` in scaling.yaml).
-  - Digest now `1000e1ab`.
+  - task 5, first half: bosses x3 hp, x2 damage (`enemies.bossHp`, `bossDamage` in scaling.yaml);
+  - task 6, chests: a card never offers a rarity at or below what its slot wears (Level card with
+    `rules.loot.upgradeShare` 0.5, else it moves to a slot where it is an upgrade; mythic slots only Level);
+    fix on the way: enemies push out of islands with at most `PASS_MARGIN`, so a big boss no longer sticks in a gap;
+  - task 5, second half: worlds 2-5 have their own four bosses (`design/worlds.yaml` `bosses`: name, borrowed model,
+    tint, size, ring colour; `client/render/boss-looks.ts`, `client/ui/boss-name.ts`); the sim type per slot and
+    `rules.drops` stay (keyed by the slot's type); `window.__game.boss.name`.
+  - Digest now `4316afa9`.
 - **Open, in this order:**
-  1. task 6, chests: cards for worn slots only as upgrades (Level of the worn item with `rules.loot.upgradeShare`
-     0.5, or a higher rarity in another slot; a mythic slot only Level cards); `sim/chests.ts`.
-  2. task 5, second half: each world its own four bosses (names EN/CS, look: model or tint, size, aura colour), same
-     mechanics per boss slot; world 1 keeps today's; `rules.drops` per boss slot, not per boss id
-     (`meta/drop.ts` reads `rules.drops` by boss id today).
-  3. task 2, casters: one caster type per faction (a spell bolt with its own look and sound, `skirmish`), at least
-     25 % of the phase mix from phase 3; a test of the share per phase.
-  4. task 7, balance toward about 10 % wins per hero (`--gear none`, seeds 1-20): today, seeds 1-10, Gravecaller 10,
-     Serpent Shaman 10, Redcleaver 7, Mistwarden 1, Sparkshot 1, Stonehorn 0, Nightglaive 0, Tidecaller 0 of 10.
-  5. e2e `webgl2-fallback`, `npm run shots` for the new bosses and casters, docs, PR.
+  1. task 2, casters: one caster type per faction (a spell bolt with its own look and sound, `skirmish`), at least
+     25 % of the phase mix from phase 3; a test of the share per phase. Notes for it: new types go at the end of
+     `design/enemies.yaml` (type index order); a type needs a map `source` (reuse one already in the file, e.g.
+     hmpr, oshm, unec, edoc, and derive the json row by the data-build rule: map number x multipliers, then
+     `design/scaling.yaml`) and either its own GLB or `model:` (borrow, then a tint in `client/render/enemy-tints.ts`
+     and a death cue in `design/audio.yaml`); enemy shots are drawn as `beam` in `client/render/enemy-fx.ts`
+     (one SHOT_COLOR today) and have no sound yet; the e2e `enemyMeshes` count follows the types.
+  2. task 7, balance toward about 10 % wins per hero (`--gear none`, seeds 1-20): last table (seeds 1-10, before
+     task 6 and casters) Gravecaller 10, Serpent Shaman 10, Redcleaver 7, Mistwarden 1, Sparkshot 1, Stonehorn 0,
+     Nightglaive 0, Tidecaller 0 of 10.
+  3. e2e `webgl2-fallback`, `npm run shots` for the new bosses (`?debug=1&world=2&phase=6`) and casters, docs,
+     the PR #43 description (in its balance table Sparkshot reads "0 -> 1"; it is before 8, after 1) and subscribe
+     to its activity.
 - **What Petr can check already** (after the merge; until then the branch has no page of its own):
   spell circles half as big (`?debug=1&phase=10&lang=cs`), the shaman's totem tooltip shows 100 at level 1,
   F teleports to the mouse from level 40 (`?debug=1&phase=20&lang=cs`, aim the mouse far and press F), the first
-  boss takes much longer (`?debug=1&phase=6&lang=cs`).
+  boss takes much longer (`?debug=1&phase=6&lang=cs`); world 2 has its own boss with a sand ring
+  (`?debug=1&world=2&phase=6&lang=cs`, the bar reads "Dunový pustošitel"); chest cards for a worn slot are only
+  Level cards or higher rarities.
 
 ## Random items, stage 3: meta and saves (merged into `claude/random-items-data`, PR #42, 2026-11-27)
 
