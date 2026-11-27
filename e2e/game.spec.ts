@@ -1277,11 +1277,11 @@ test("a blizzard and fire do not outlive their world", async ({ page }) => {
 });
 
 test("F teleports the hero to the mouse point at once, far beyond a dash", async ({ page }) => {
-  // a debug start at phase 20 spends its level-ups by the autopilot's rule: the hero is past the blink's level 40
+  // a debug start at phase 20 spends its level-ups by the autopilot's rule: the hero is past the blink's level 20
   await page.goto("/?seed=1&debug=1&phase=20&lang=cs");
   await startRun(page);
   await waitForScreen(page, "playing");
-  expect(await page.evaluate(() => window.__game!.level)).toBeGreaterThanOrEqual(40);
+  expect(await page.evaluate(() => window.__game!.level)).toBeGreaterThanOrEqual(20);
   const before = await page.evaluate(() => ({ x: window.__game!.heroX, y: window.__game!.heroY }));
   const box = (await page.locator("canvas").first().boundingBox())!;
   await page.mouse.move(box.x + 10, box.y + 10);

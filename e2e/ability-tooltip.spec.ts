@@ -13,7 +13,7 @@ test("the pointer on a spell of the ability bar shows its level and values", asy
   await expect(tip).toContainText("→");
   if (process.env.SHOTS) await page.screenshot({ path: "test-results/shots/ability-tooltip.png" });
   // the blink cell waits for its level
-  await expect(page.locator("#hud-abilities .cell.blink")).toContainText("from level 40");
+  await expect(page.locator("#hud-abilities .cell.blink")).toContainText("from level 20");
   await page.mouse.move(5, 5);
   await expect(tip).toBeHidden();
 });

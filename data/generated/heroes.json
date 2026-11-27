@@ -127,7 +127,7 @@
       "soul-bolt"
     ],
     "ultimate": "bone-stampede",
-    "power": 0.33
+    "power": 0.29
   },
   {
     "id": "serpent-shaman",
@@ -255,7 +255,7 @@
       "quickstep"
     ],
     "ultimate": "beam-swarm",
-    "power": 0.82
+    "power": 0.74
   },
   {
     "id": "redcleaver",
@@ -304,7 +304,7 @@
     ],
     "ultimate": "rot-field",
     "damageTaken": 0.5,
-    "power": 0.43
+    "power": 0.38
   },
   {
     "id": "tidecaller",
@@ -347,6 +347,6 @@
       "riptide"
     ],
     "ultimate": "drowned-lake",
-    "power": 0.64
+    "power": 0.51
   }
 ]

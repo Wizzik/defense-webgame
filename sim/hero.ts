@@ -45,7 +45,7 @@ export function heroStats(data: GameData, hero: HeroState, out: HeroStats): Hero
   out.collision = rules.hero.collision;
   const { caps } = rules.loot;
   out.critChance = Math.min(gear.critChance, caps.critChance);
-  out.critDamage = rules.loot.critDamage + gear.critDamage;
+  out.critDamage = rules.loot.critDamage + Math.min(gear.critDamage, caps.critDamage);
   out.dodge = Math.min(gear.dodge, caps.dodge);
   out.damageTakenScale = 1 - Math.min(gear.damageTaken, caps.damageTaken);
   out.thorns = gear.thorns;

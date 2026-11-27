@@ -128,7 +128,7 @@ function fixture(): any {
         tiers: [{ weight: 1, minPower: 0 }, { weight: 1.35, minPower: 3 }, { weight: 1.7, minPower: 6 }, { weight: 2, minPower: 9 }],
         power: { boss: [2], chestBase: 1, chestPerPhase: 0.3, perWorld: 0.5, difficulty: { normal: 0, insane: 1, hell: 2 } },
         levelAtPower: [0, 3, 6, 9, 12], critDamage: 0.5,
-        caps: { critChance: 0.6, dodge: 0.4, damageTaken: 0.5 },
+        caps: { critChance: 0.6, critDamage: 1.5, dodge: 0.4, damageTaken: 0.5 },
         mythicEffects: [{ kind: "slow_aura", params: { radius: 350, slow: 0.25 }, text: names("Slow") }],
       },
     },

@@ -52,6 +52,7 @@ describe("gear presets", () => {
   it("sim:run takes --gear", () => {
     expect(parseArgs([]).gear).toBe("none");
     expect(parseArgs(["--gear", "full", "--seeds", "1-2"]).gear).toBe("full");
-    expect(() => parseArgs(["--gear", "best"])).toThrow("--gear needs none, mid or full");
+    expect(() => parseArgs(["--gear", "best"])).toThrow("--gear needs none, mid, full, rolled-mid or rolled-full");
+    expect(parseArgs(["--gear", "rolled-full"]).gear).toBe("rolled-full");
   });
 });

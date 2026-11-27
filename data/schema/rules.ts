@@ -281,7 +281,7 @@ export const RulesSchema = z.object({
     /** Extra damage of a critical basic attack before gear adds crit damage (0.5: a crit deals 150 %). */
     critDamage: positive,
     /** The most the summed gear gives of these shares (sim/hero.ts heroStats). */
-    caps: z.object({ critChance: z.number().gt(0).max(1), dodge: z.number().gt(0).max(1), damageTaken: z.number().gt(0).max(1) }).strict(),
+    caps: z.object({ critChance: z.number().gt(0).max(1), critDamage: z.number().gt(0), dodge: z.number().gt(0).max(1), damageTaken: z.number().gt(0).max(1) }).strict(),
     /** The effect a mythic roll draws one of (sim/gear-effects.ts), with its fixed numbers. */
     mythicEffects: z.array(EffectSchema).min(1),
   }).strict(),

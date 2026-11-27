@@ -18,7 +18,7 @@
   signatureAbilities: [rock-rupture, enhanced-totem, seismic-echo]
   ultimate: groundbreaker
   damageTaken: 0.5   # melee: stands in the crowd
-  power: 0.38   # batch 3 balance pass: about 10 % autopilot wins with no gear
+  power: 0.38   # batch 3 balance pass (after Sentry Ward = Serpent Totem, dash 10, blink 20): about 10 % autopilot wins with no gear
 
 - id: nightglaive
   source: O008
@@ -28,7 +28,7 @@
   signatureAbilities: [falling-stars, hunters-focus, swift-pace]
   ultimate: shadow-sisters
   attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 0.62   # batch 3 balance pass: about 10 % autopilot wins with no gear
+  power: 0.62   # batch 3 balance pass (after Sentry Ward = Serpent Totem, dash 10, blink 20): about 10 % autopilot wins with no gear
 
 - id: gravecaller
   source: O00F
@@ -38,7 +38,7 @@
   signatureAbilities: [grave-grasp, skull-ring, soul-bolt]
   ultimate: bone-stampede
   attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 0.33   # batch 3 balance pass: about 10 % autopilot wins with no gear
+  power: 0.29   # batch 3 balance pass (after Sentry Ward = Serpent Totem, dash 10, blink 20): about 10 % autopilot wins with no gear
 
 - id: serpent-shaman
   source: O00X
@@ -48,7 +48,7 @@
   signatureAbilities: [serpent-totem, forked-bolt, mending-tide]
   ultimate: spirit-ward
   attack: { kind: ranged, range: 1200 }   # Petr (batch 2): the shaman shoots, as far as the other casters
-  power: 0.24   # batch 3 balance pass: about 10 % autopilot wins with no gear
+  power: 0.24   # batch 3 balance pass (after Sentry Ward = Serpent Totem, dash 10, blink 20): about 10 % autopilot wins with no gear
 
 # Phase 2b-2: four more heroes. Their spells use only the kinds the simulation already has.
 
@@ -69,7 +69,7 @@
   signatureAbilities: [rocket-fan, searing-rounds, quickstep]
   ultimate: beam-swarm
   attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 0.82   # batch 3 balance pass: about 10 % autopilot wins with no gear
+  power: 0.74   # batch 3 balance pass (after Sentry Ward = Serpent Totem, dash 10, blink 20): about 10 % autopilot wins with no gear
 
 - id: redcleaver
   source: O00U
@@ -80,7 +80,7 @@
   ultimate: rot-field
   attack: { cooldownScale: 0.45, strikes: 2, splash: { radius: 160, share: 0.5 } }   # two axes, fast, wide blows
   damageTaken: 0.5   # melee: stands in the crowd
-  power: 0.43   # batch 3 balance pass: about 10 % autopilot wins with no gear
+  power: 0.38   # batch 3 balance pass (after Sentry Ward = Serpent Totem, dash 10, blink 20): about 10 % autopilot wins with no gear
 
 - id: tidecaller
   source: O00N
@@ -90,4 +90,4 @@
   signatureAbilities: [crushing-wave, stunning-tide, riptide]
   ultimate: drowned-lake
   attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 0.64   # batch 3 balance pass: about 10 % autopilot wins with no gear
+  power: 0.51   # batch 3 balance pass (after Sentry Ward = Serpent Totem, dash 10, blink 20): about 10 % autopilot wins with no gear

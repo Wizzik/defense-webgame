@@ -369,7 +369,7 @@ export function parseArgs(argv: string[], worldCount = gameData().worlds.length)
       continue;
     }
     if (flag === "--gear") {
-      if (!(GEAR_PRESETS as readonly string[]).includes(raw ?? "")) throw new Error("sim:run: --gear needs none, mid or full");
+      if (!(GEAR_PRESETS as readonly string[]).includes(raw ?? "")) throw new Error("sim:run: --gear needs none, mid, full, rolled-mid or rolled-full");
       out.gear = raw as GearPresetName;
       continue;
     }

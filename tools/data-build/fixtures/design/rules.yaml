@@ -58,7 +58,7 @@ loot:
   power: { boss: [2], chestBase: 1, chestPerPhase: 0.3, perWorld: 0.5, difficulty: { normal: 0, insane: 1, hell: 2 } }
   levelAtPower: [0, 3, 6, 9, 12]
   critDamage: 0.5
-  caps: { critChance: 0.6, dodge: 0.4, damageTaken: 0.5 }
+  caps: { critChance: 0.6, critDamage: 1.5, dodge: 0.4, damageTaken: 0.5 }
   mythicEffects:
     - { kind: slow_aura, params: { radius: 350, slow: 0.25 }, text: { en: "Slow aura.", cs: "Zpomalující aura." } }
 progression: { xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3, ultimateFromLevel: 6, ultimateLevelStep: 6, sharedSpells: [zap], passives: [boon], sharedSpellSlots: 2, passiveSlots: 4, cardWeights: { signature: 4, sharedUpgrade: 3, newSpell: 2, newPassive: 2 } }

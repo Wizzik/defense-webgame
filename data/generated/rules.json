@@ -54,12 +54,12 @@
       "seconds": 0.15,
       "cooldownSeconds": 4,
       "charges": {
-        "fromLevel": 20,
+        "fromLevel": 10,
         "count": 3
       }
     },
     "blink": {
-      "fromLevel": 40,
+      "fromLevel": 20,
       "cooldownSeconds": 10,
       "aheadDistance": 900,
       "radius": 300,
@@ -721,6 +721,7 @@
     "critDamage": 0.5,
     "caps": {
       "critChance": 0.6,
+      "critDamage": 1.5,
       "dodge": 0.4,
       "damageTaken": 0.5
     },

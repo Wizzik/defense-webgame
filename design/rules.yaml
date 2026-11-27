@@ -24,11 +24,12 @@ arena:   # the castle stands in the middle; packs come from random directions on
 castle: { hp: 58000, radius: 180, regenPercentPerMinute: 1 }
 hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.005,   # spec 2026-11-19 4.2: was 0.01
         cooldownSpeedPerInt: 0.01,
-        dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4, charges: { fromLevel: 20, count: 3 } },
+        dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4, charges: { fromLevel: 10, count: 3 } },
         # Petr 2026-11-26: 3 dash charges from level 20; the blink (F) from level 40: jump to the mouse, a stunning burst
+        # Petr's batch 3 (fewer hero levels): 3 dash charges from level 10, the blink from level 20
         # Petr 2026-11-27 (batch 2): the blink is an instant teleport to the mouse at any distance (kept in the arena,
         # off the obstacles); aheadDistance is only the jump straight ahead when there is no mouse point
-        blink: { fromLevel: 40, cooldownSeconds: 10, aheadDistance: 900, radius: 300, damage: 300, stunSeconds: 0.5 } }
+        blink: { fromLevel: 20, cooldownSeconds: 10, aheadDistance: 900, radius: 300, damage: 300, stunSeconds: 0.5 } }
 autocast: { novaMinEnemies: 1, healBelow: 0.6, shieldBelow: 0.35 }
 # Petr 2026-11-26: heroDefendRange: while the hero is within it of the castle every enemy goes for him (a solo hero
 # fighting on one side no longer loses the castle to the other); levelScaling: new enemies grow with the hero level
@@ -140,7 +141,7 @@ drops:
 #   salvageGold: gold a salvaged item gives the next run's chests; the collection holds collectionLimit items.
 #   bankLimit: the most salvage gold the bank keeps; the next solo run starts with all of it (meta/salvage.ts).
 #   critDamage: the extra damage of a critical basic attack before gear; caps: the most gear gives of crit chance,
-#   dodge and damage taken (sim/hero.ts).
+#   crit damage (stage 5: a rolled mythic set stacked +3.6 crit damage, x5 attack), dodge and damage taken (sim/hero.ts).
 loot:
   smartShare: 0.6
   collectionLimit: 200
@@ -156,7 +157,7 @@ loot:
   power: { boss: [2, 4, 6, 8], chestBase: 1, chestPerPhase: 0.3, perWorld: 0.5, difficulty: { normal: 0, insane: 1, hell: 2 } }
   levelAtPower: [0, 3, 6, 9, 12]
   critDamage: 0.5
-  caps: { critChance: 0.6, dodge: 0.4, damageTaken: 0.5 }
+  caps: { critChance: 0.6, critDamage: 1.5, dodge: 0.4, damageTaken: 0.5 }
   mythicEffects:
     - kind: chain_on_attack
       params: { every: 4, damage: 120, jumps: 4, range: 380 }
