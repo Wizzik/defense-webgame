@@ -13,13 +13,13 @@ describe("damage taken by the hero", () => {
     expect(heroDamageScale(run)).toBe(2);
   });
 
-  it("stonehorn and redcleaver take a quarter less", () => {
+  it("stonehorn and redcleaver take half (melee fighters, Petr's batch 2)", () => {
     for (const id of ["stonehorn", "redcleaver"]) {
       const run = abilityRun(id, {});
       const hp = run.hero.hp;
       damageHero(run, 100, -1);
-      expect(hp - run.hero.hp).toBeCloseTo(150, 9);
-      expect(heroDamageScale(run)).toBe(1.5);
+      expect(hp - run.hero.hp).toBeCloseTo(100, 9);
+      expect(heroDamageScale(run)).toBe(1);
     }
   });
 

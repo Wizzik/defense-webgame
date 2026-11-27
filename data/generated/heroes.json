@@ -40,8 +40,7 @@
       "seismic-echo"
     ],
     "ultimate": "groundbreaker",
-    "damageTaken": 0.35,
-    "power": 2.0
+    "damageTaken": 0.5
   },
   {
     "id": "nightglaive",
@@ -83,9 +82,7 @@
       "hunters-focus",
       "swift-pace"
     ],
-    "ultimate": "shadow-sisters",
-    "damageTaken": 0.5,
-    "power": 1.6
+    "ultimate": "shadow-sisters"
   },
   {
     "id": "gravecaller",
@@ -127,8 +124,7 @@
       "skull-ring",
       "soul-bolt"
     ],
-    "ultimate": "bone-stampede",
-    "power": 0.4
+    "ultimate": "bone-stampede"
   },
   {
     "id": "serpent-shaman",
@@ -159,8 +155,8 @@
       }
     },
     "baseAttack": {
-      "kind": "melee",
-      "range": 125,
+      "kind": "ranged",
+      "range": 1200,
       "cooldown": 0.75,
       "damageMin": 2,
       "damageMax": 8
@@ -170,9 +166,7 @@
       "forked-bolt",
       "mending-tide"
     ],
-    "ultimate": "spirit-ward",
-    "damageTaken": 0.75,
-    "power": 0.55
+    "ultimate": "spirit-ward"
   },
   {
     "id": "mistwarden",
@@ -214,9 +208,7 @@
       "wisp-ward",
       "mist-surge"
     ],
-    "ultimate": "wailing-wave",
-    "damageTaken": 0.7,
-    "power": 1.0
+    "ultimate": "wailing-wave"
   },
   {
     "id": "sparkshot",
@@ -258,9 +250,7 @@
       "searing-rounds",
       "quickstep"
     ],
-    "ultimate": "beam-swarm",
-    "damageTaken": 0.5,
-    "power": 1.8
+    "ultimate": "beam-swarm"
   },
   {
     "id": "redcleaver",
@@ -308,8 +298,7 @@
       "swift-pace"
     ],
     "ultimate": "rot-field",
-    "damageTaken": 0.75,
-    "power": 0.8
+    "damageTaken": 0.5
   },
   {
     "id": "tidecaller",
@@ -351,8 +340,6 @@
       "stunning-tide",
       "riptide"
     ],
-    "ultimate": "drowned-lake",
-    "damageTaken": 0.5,
-    "power": 1.5
+    "ultimate": "drowned-lake"
   }
 ]

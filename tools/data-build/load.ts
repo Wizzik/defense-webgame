@@ -119,6 +119,9 @@ export interface HeroEntry {
   power?: number;
   /** Design changes of the base attack: range and cooldown multipliers on the map's numbers, blows, splash. */
   attack?: {
+    /** Design kind and range of the attack instead of the map's (Serpent Shaman shoots, Petr, batch 2). */
+    kind?: Hero["baseAttack"]["kind"];
+    range?: number;
     rangeScale?: number;
     cooldownScale?: number;
     strikes?: number;

@@ -32,7 +32,8 @@ describe("cone", () => {
     const hits = hitSlots(run);
     expect(hits.sort()).toEqual([a, b].sort());
     expect(hits).not.toContain(c);
-    const k = eventsOf(run, EventKind.Hit).find((i) => run.events.a[i] === a)!;
+    // the spell's hit (u = 1), not the shaman's own shot at the nearest enemy
+    const k = eventsOf(run, EventKind.Hit).find((i) => run.events.a[i] === a && run.events.u[i] === 1)!;
     expect(run.events.value[k]).toBeCloseTo(p.damage[0] * run.hero.stats.spellPower, 9);
   });
 

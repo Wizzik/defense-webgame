@@ -6,7 +6,8 @@
 # damageTaken: optional multiplier on the damage enemies deal to the hero (missing = 1).
 # power: optional balance multiplier on all the hero's damage and heals, base attack and spell power (missing = 1;
 #   Petr's batch 2, task 7: about 10 % autopilot wins with no gear for every hero).
-# attack: optional design changes of the base attack (2026-11-26, Petr): rangeScale and cooldownScale multiply the
+# attack: optional design changes of the base attack (2026-11-26, Petr): kind and range replace the map's (batch 2),
+#   rangeScale and cooldownScale multiply the
 #   map's range and cooldown (before design/scaling.yaml), strikes = blows per attack, splash = { radius, share }.
 
 - id: stonehorn
@@ -16,8 +17,7 @@
   role: { en: "Melee bruiser. Stuns with stone and quakes.", cs: "Rváč na blízko. Omračuje kamenem a otřesy." }
   signatureAbilities: [rock-rupture, enhanced-totem, seismic-echo]
   ultimate: groundbreaker
-  damageTaken: 0.35   # melee: stands in the crowd
-  power: 2.0   # balance (batch 2, task 7)
+  damageTaken: 0.5   # melee: stands in the crowd
 
 - id: nightglaive
   source: O008
@@ -27,8 +27,6 @@
   signatureAbilities: [falling-stars, hunters-focus, swift-pace]
   ultimate: shadow-sisters
   attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 1.6   # balance (batch 2, task 7)
-  damageTaken: 0.5
 
 - id: gravecaller
   source: O00F
@@ -38,7 +36,6 @@
   signatureAbilities: [grave-grasp, skull-ring, soul-bolt]
   ultimate: bone-stampede
   attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 0.4   # balance (batch 2, task 7)
 
 - id: serpent-shaman
   source: O00X
@@ -47,10 +44,9 @@
   role: { en: "Summoner. Totems, lightning and healing.", cs: "Vyvolávač. Totemy, blesky a léčení." }
   signatureAbilities: [serpent-totem, forked-bolt, mending-tide]
   ultimate: spirit-ward
-  damageTaken: 0.75   # melee (reach 125): stands in the crowd, 2026-11-26
+  attack: { kind: ranged, range: 1200 }   # Petr (batch 2): the shaman shoots, as far as the other casters
 
 # Phase 2b-2: four more heroes. Their spells use only the kinds the simulation already has.
-  power: 0.55   # balance (batch 2, task 7)
 
 - id: mistwarden
   source: O00H
@@ -60,8 +56,6 @@
   signatureAbilities: [soul-burst, wisp-ward, mist-surge]
   ultimate: wailing-wave
   attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 1.0   # balance (batch 2, task 7)
-  damageTaken: 0.7
 
 - id: sparkshot
   source: O010
@@ -71,8 +65,6 @@
   signatureAbilities: [rocket-fan, searing-rounds, quickstep]
   ultimate: beam-swarm
   attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 1.8   # balance (batch 2, task 7)
-  damageTaken: 0.5
 
 - id: redcleaver
   source: O00U
@@ -82,8 +74,7 @@
   signatureAbilities: [cleaver-toss, blood-fan, swift-pace]
   ultimate: rot-field
   attack: { cooldownScale: 0.45, strikes: 2, splash: { radius: 160, share: 0.5 } }   # two axes, fast, wide blows
-  damageTaken: 0.75   # melee: stands in the crowd
-  power: 0.8   # balance (batch 2, task 7)
+  damageTaken: 0.5   # melee: stands in the crowd
 
 - id: tidecaller
   source: O00N
@@ -93,5 +84,3 @@
   signatureAbilities: [crushing-wave, stunning-tide, riptide]
   ultimate: drowned-lake
   attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 1.5   # balance (batch 2, task 7)
-  damageTaken: 0.5
