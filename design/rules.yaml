@@ -82,7 +82,7 @@ events:
   - { atSeconds: 750, kind: boss, enemy: gunmaster }
   - { atSeconds: 900, kind: rush, elites: 8, heavies: 12 }
 # XP a hero has at the start of each phase, for ?phase=N. Filled from `npm run sim:run -- --phase-xp`.
-debug: { phaseXp: [0, 45, 105, 207, 374, 580, 975, 1235, 1561, 1922, 2314, 3086, 3663, 4176, 4822, 5623, 6708, 7628, 8513, 9579] }
+debug: { phaseXp: [0, 191, 476, 875, 1558, 2595, 4016, 5428, 6873, 8637, 10647, 12981, 15405, 17707, 20773, 24046, 27680, 31287, 34767, 38715] }
 # threat: multiplies all damage enemies deal to the hero (sim/combat.ts damageHero: hits, shots, charges, boss
 #   strikes, slams), times the hero's own damageTaken (heroes.yaml). The castle takes damage as before.
 threat: { heroDamageTaken: 2 }
@@ -188,7 +188,11 @@ loot:
       text:
         en: "Every gold you collect heals the castle by 1.5 HP."
         cs: "Každý sebraný zlaťák vyléčí hrad o 1,5 HP."
-progression: { xpFirst: 10, xpStep: 9, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3,
+# xpQuad 0.3 (Petr's batch 3, 2026-11-27): XP to leave level L is xpFirst + xpStep (L - 1) + xpQuad (L - 1)^2, so
+# the first levels come as fast as before and a won run ends near level 65 instead of 102 ("chtěli bychom tak level
+# 60-70"; a plain xpStep 22 slowed the first minute too and the heroes fell); co-op uses the same curve, each kill's
+# XP x 1 / (1 + coop.perPlayer.packSize x (n - 1)) (sim/difficulty.ts).
+progression: { xpFirst: 10, xpStep: 9, xpQuad: 0.3, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3,
   ultimateFromLevel: 6, ultimateLevelStep: 6,   # map: ultimates need hero level 10
   # Shared spells and passives (docs/DECISIONS.md, section Shared spells and passives): the pools, the
   # number of slots, and the weights of the four card groups (a group is drawn by weight, then a card in it).

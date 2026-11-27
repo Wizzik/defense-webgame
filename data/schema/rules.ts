@@ -293,6 +293,8 @@ export const RulesSchema = z.object({
   progression: z.object({
     xpFirst: positive,
     xpStep: nonNegative,
+    /** XP to leave a level grows by this x (level - 1)^2 on top of the step (Petr's batch 3); none when left out. */
+    xpQuad: nonNegative.optional(),
     magnetRadius: positive,
     crystalSpeed: positive,
     pickupRadius: positive,

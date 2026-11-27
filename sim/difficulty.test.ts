@@ -61,8 +61,15 @@ describe("difficultyMods", () => {
   it("world 1 on normal changes nothing but Normal's own pack size", () => {
     const r = rules();
     expect(difficultyMods(r, 1, "normal")).toEqual({
-      hp: 1, damage: 1, packSize: r.difficulty.levels.normal!.packSize, eliteHp: 1, gold: 1, magicFind: 0,
+      hp: 1, damage: 1, packSize: r.difficulty.levels.normal!.packSize, eliteHp: 1, gold: 1, magicFind: 0, xp: 1,
     });
+  });
+
+  it("a co-op group gains a kill's XP over its bigger packs (Petr's batch 3)", () => {
+    const r = rules();
+    r.coop.perPlayer.packSize = 0.3;
+    expect(difficultyMods(r, 1, "normal", 1).xp).toBe(1);
+    expect(difficultyMods(r, 1, "normal", 3).xp).toBeCloseTo(1 / 1.6, 12);
   });
 
   it("world 3 insane and world 5 hell", () => {

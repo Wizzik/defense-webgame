@@ -20,7 +20,7 @@ export function applyStartPhase(run: Run, phase: number): void {
   while (run.nextEvent < run.timeline.length && run.timeline[run.nextEvent].tick < run.tick) run.nextEvent++;
   run.nextPackTick = run.tick + Math.round(rules.run.firstPackSeconds * TICKS_PER_SECOND);
   // the XP is shared: one grant levels every hero, then each spends his level-ups
-  gainXp(run, rules.debug.phaseXp[Math.min(phase, count) - 1]);
+  gainXp(run, rules.debug.phaseXp[Math.min(phase, count) - 1], 1);
   for (let p = 0; p < run.players.length; p++) {
     run.current = p;
     if (run.hero.pendingLevelUps > 0) {

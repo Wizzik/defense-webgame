@@ -22,7 +22,7 @@ function twoPlayers(): Run {
 
 /** Levels both heroes once and steps, so each has an open offer with a fresh choice time. */
 function openOffers(run: Run): void {
-  gainXp(run, run.data.rules.progression.xpFirst);
+  gainXp(run, run.data.rules.progression.xpFirst, 1);
   run.step([NO_INPUT, NO_INPUT]);
 }
 
@@ -138,7 +138,7 @@ describe("co-op card choice without a pause", () => {
 
   it("leaves the one-player pause as it was", () => {
     const run = createRun(gameData(), { seed: 6 });
-    gainXp(run, run.data.rules.progression.xpFirst);
+    gainXp(run, run.data.rules.progression.xpFirst, 1);
     run.step(NO_INPUT);
     expect(run.state).toBe("levelUp");
     expect(run.players[0]!.choosingTicks).toBe(0);

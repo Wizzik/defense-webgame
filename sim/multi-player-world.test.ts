@@ -136,7 +136,7 @@ describe("enemy targeting with several heroes", () => {
 describe("shared XP, own gold and pickups with several heroes", () => {
   it("levels every hero together and counts the XP once", () => {
     const run = twoPlayers();
-    gainXp(run, 2000);
+    gainXp(run, 2000, 1);
     const [a, b] = run.players;
     expect(a!.hero.level).toBeGreaterThan(1);
     expect(b!.hero.level).toBe(a!.hero.level);
@@ -166,8 +166,9 @@ describe("shared XP, own gold and pickups with several heroes", () => {
     const b = run.players[1]!.hero;
     run.crystals.drop(b.x + 10, b.y, 7);
     updatePickups(run, run.crystals, 0);
-    expect(run.players[0]!.hero.xp).toBe(7);
-    expect(run.players[1]!.hero.xp).toBe(7);
+    // a kill's XP in co-op: x 1 / (1 + perPlayer.packSize) for two players (Petr's batch 3)
+    expect(run.players[0]!.hero.xp).toBeCloseTo(7 * run.mods.xp, 9);
+    expect(run.players[1]!.hero.xp).toBe(run.players[0]!.hero.xp);
   });
 
   it("heals the hero who takes a heart", () => {

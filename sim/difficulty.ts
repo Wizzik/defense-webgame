@@ -11,6 +11,11 @@ export interface DifficultyMods {
   gold: number;
   /** Added to the hero's magic find from gear. */
   magicFind: number;
+  /**
+   * Share of a kill's XP each hero gains: 1 alone, 1 / (1 + perPlayer.packSize x (n - 1)) in co-op, so the bigger
+   * packs of a group do not level it faster than one hero (Petr's batch 3: one XP curve, level 60-70 at the end).
+   */
+  xp: number;
 }
 
 /** `strength` is the world's own multiplier on enemy hp and damage (`World.strength`, default 1). */
@@ -28,6 +33,7 @@ export function difficultyMods(rules: Rules, world: number, difficulty: Difficul
     eliteHp: level.eliteHp * (1 + per.eliteHp * more),
     gold: 1 + reward.goldPerWorld * above,
     magicFind: reward.magicFindPerWorld * above + level.magicFind,
+    xp: 1 / (1 + per.packSize * more),
   };
 }
 

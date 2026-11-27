@@ -11,6 +11,12 @@ describe("level-up", () => {
     expect([1, 2, 3].map((l) => xpToNext(rules, l))).toEqual([4, 6, 8]);
   });
 
+  it("xpQuad adds a square term, rounded (Petr's batch 3)", () => {
+    const { rules } = progressionRun().data;
+    rules.progression = { ...rules.progression, xpFirst: 10, xpStep: 9, xpQuad: 0.3 };
+    expect([1, 2, 11, 65].map((l) => xpToNext(rules, l))).toEqual([10, 19, 130, 1815]);
+  });
+
   it("level-up adds the per-level growth", () => {
     const run = progressionRun();
     const maxBefore = run.hero.stats.maxHp;

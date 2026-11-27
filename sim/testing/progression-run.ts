@@ -24,7 +24,7 @@ export function progressionRun(options: ProgressionOptions = {}) {
   silenceSpawns(data);
   data.rules.progression = {
     ...data.rules.progression,
-    xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56,
+    xpFirst: 4, xpStep: 2, xpQuad: 0, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56,
     attributeCardAmount: 10, cardsPerOffer: options.cardsPerOffer ?? 3,
     ultimateFromLevel: 6, ultimateLevelStep: 6,
   };
