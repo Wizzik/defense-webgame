@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-27 (random items, stage 1: data). Read this first when you resume work.
+Updated 2026-11-27 (random items, stages 1-2: data and sim). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -10,24 +10,40 @@ Updated 2026-11-27 (random items, stage 1: data). Read this first when you resum
    `docs/superpowers/specs/2026-11-26-random-items-design.md`, approved by Petr on 2026-11-27 (answers in its section 9); plan `docs/superpowers/plans/2026-11-27-random-items.md` (6 stages), to build in fresh sessions.
 3. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
 
-## Random items, stage 1: data (branch `claude/random-items-data`, 2026-11-27)
+## Random items, stages 1-2: data and sim (branch `claude/random-items-data`, PR #42, 2026-11-27)
 
-- Plan `docs/superpowers/plans/2026-11-27-random-items.md`, tasks 1-5, done; rulings and numbers in
-  `docs/DECISIONS.md`, section Random items, stage 1.
-- New: `design/item-bases.yaml` (46 bases, str / agi / int on every slot type), `design/affixes.yaml` (22 affixes
-  with role tags, prices of the new stats, EN and CS prefixes in four forms and suffixes), `design/item-names.yaml`
-  (rare names), `rules.loot` (smart share 0.6, collection 200, named shares, tiers, item power, levels, salvage gold,
-  mythic effects). data-build copies them into `data/generated/loot.json` (`GameData.loot`).
-- `loot.json` and `rules.json` were written in the cloud with `mapLoot` of `tools/data-build/build.ts`; Petr reruns
-  `npm run data:build` locally once, the files must not change.
-- The game does not use the data yet: the digest stays, nothing changes in the browser.
-- **What Petr checks** (no game change, only the texts): read the Czech words in `design/affixes.yaml` and
-  `design/item-names.yaml` and the base names in `design/item-bases.yaml` (e.g. "Mocná železná přilba medvěda",
-  "Ponuré drápy"); say if a word sounds wrong. Number questions for him: is salvage gold 10-150 right, and should T4
-  come only from world 3 / Insane on (power 9)?
-- **Next, stage 2 (sim):** the new stats in the sim one at a time (crit, dodge, damage taken, thorns, cooldowns,
-  area), `sim/item-roll.ts` rolls items into typed rows of `GearState`, chests offer rolled or named cards, mythic
-  effects, `stateHash` and a new determinism case, the digest changes.
+Plan `docs/superpowers/plans/2026-11-27-random-items.md`; rulings and numbers in `docs/DECISIONS.md`, sections
+Random items, stage 1 and stage 2.
+
+- **Stage 1 (data, tasks 1-5):** `design/item-bases.yaml` (46 bases), `design/affixes.yaml` (22 affixes),
+  `design/item-names.yaml` (rare names), `rules.loot`; copied into `data/generated/loot.json` (`GameData.loot`).
+- **Stage 2 (sim, tasks 6-10):**
+  - new gear stats: crit chance and damage, dodge, damage taken, thorns, cooldown speed, ultimate cooldown, area size
+    (each with a test, `sim/gear-stats.test.ts`);
+  - `sim/item-roll.ts` rolls items (smart loot, tiers by item power, rows sharing the budget);
+  - **chests now offer random items**: named items only with the rarity's named share (epic 10 %, legendary 25 %,
+    mythic 40 %; common and rare cards are always random); a rolled mythic carries an effect;
+  - the hash covers the rolled rows; matrix case `loot-t3`; digest `ff675613` -> `36fd80a2`.
+  - Until stage 4 the client shows a rolled item through `client/ui/rolled-item.ts` (name, rows, effect) in the
+    chest cards, the compare and the gear panel.
+- `loot.json` and `rules.json` were written in the cloud by the data-build rule (`mapLoot`, a copy of
+  `design/rules.yaml`); Petr reruns `npm run data:build` locally once, the files must not change.
+- Checks: `npm run check` (1369 tests), build, e2e `webgl2-fallback` and `sim-chromium` (52) pass.
+- Autopilot, world 1 normal, mid gear, seeds 1-8 (wins of 8, castle of won runs), stage 1 -> stage 2: Stonehorn 8
+  (99 %) -> 8 (63 %); Nightglaive 8 (87 %) -> 8 (75 %); Gravecaller 8 (100 %) -> 8 (100 %); Serpent Shaman 7 (98 %)
+  -> 6 (92 %, both losses in the first 75 s, before any chest); Mistwarden 7 (97 %) -> 7 (99 %); Sparkshot 8 (96 %)
+  -> 8 (95 %); Redcleaver 8 (99 %) -> 8 (87 %); Tidecaller 8 (92 %) -> 8 (86 %). In sum 62 -> 61 of 64; the
+  strength heroes' castles fare worse (their rolled items lean to hp and armor). Balance is stage 5.
+- **What Petr checks** (after the merge, https://wizzik.github.io/defense-webgame/):
+  - open chests (`?debug=1&lang=cs`, in the console `__game.debug.grantGold(5000)`, walk onto a chest): most cards
+    are random items with their own names ("Mocná železná přilba medvěda", "Ponuré drápy"), rows and, on a mythic, an
+    effect line; do the Czech names sound right;
+  - a strength hero (Stonehorn) gets mostly heavy bases and str / hp / armor rows, a caster (Gravecaller) cloth and
+    int / spell rows;
+  - later phases give bigger rows: `?debug=1&phase=15&world=3&difficulty=insane&lang=cs`;
+  - the gear panel (C) shows the rolled items; the new stats (crit, dodge, thorns, cooldowns, spell area) read well.
+- **Next, stage 3 (meta and saves):** item records (`meta/item-record.ts`), save version 2 with the collection of up
+  to 200 records and the migration from version 1, boss drops that roll records, loadouts that carry rolled items.
 
 ## Solo playtest batch (branch `claude/gifted-gauss-k6wag4`, 2026-11-26)
 

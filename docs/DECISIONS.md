@@ -2,6 +2,34 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Random items, stage 2: sim (2026-11-27; the plan's tasks 6-10, the numbers and details are Claude's)
+
+- **New stats** (STAT_IDS, `GearBonus`, `HeroStats`; prices in `design/affixes.yaml`): crit chance and crit damage
+  (a crit multiplies one basic attack and its extra blows by 1 + `rules.loot.critDamage` 0.5 + gear crit damage),
+  dodge (an enemy's hit, not a cloud, a storm or fire; event `HeroDodge`), damage taken (a share off
+  `heroDamageScale`, so the hazards that divide by it stay exact shares of max hp), thorns (a share of the damage
+  a melee hit dealt, paid back by `applyThorns` right after `updateEnemies` as damage of source 2: no lifesteal, no
+  knockback; the enemy is never killed inside its own update), cooldown speed (joins the INT and passive cooldown
+  sum), ultimate cooldown (only the ultimate, on top) and area size (radius of nova, area, ticking area with its
+  bursts, and on-cast spells). Caps of the gear sum: crit chance 60 %, dodge 40 %, damage taken 50 %
+  (`rules.loot.caps`). Crit and dodge draw from the run's generator only for a hero who has them.
+- **Rolled items in the run:** `GearState.item` is ROLLED_ITEM (-2) for a rolled item, whose base, rarity, effect,
+  rare name and up to five rows (implicit + four affixes) sit in fixed typed arrays; `recomputeGear` sums the rows
+  like named stats, at the same item levels. The state hash mixes the rolled fields (named slots hash as before).
+- **Chests:** a card draws its rarity as before, then a free slot (no longer only slots with a named item of that
+  rarity), then a named item with `namedShare` (when one of that rarity fits), else a random item rolled for the
+  hero's primary attribute with the chest's item power (`chestPower`: phase, world, difficulty). A rolled card is New
+  or Choice, never Level (no two rolled items are the same). Common and rare cards are always rolled now, since
+  their named share is 0.
+- **Mythic rolls** draw one of `rules.loot.mythicEffects`; it works like the named item's effect (one per kind,
+  the later slot counts).
+- **Determinism:** the matrix gets `loot-t3` (gravecaller, world 3 insane from phase 11: 20 chests, T3 rows);
+  `w4-blizzard` moved to seed 16 (with seed 15 the tidecaller fell before the blizzard ended). Digest `ff675613` ->
+  `36fd80a2`.
+- **UI until stage 4:** a rolled item is shown as an `Item` with its own name (`client/ui/rolled-item.ts`): the
+  two-word name, or prefix + base + suffix; tooltips, chest cards, the compare and the gear panel read it like a
+  named item. The labels of the new stats exist in EN and CS.
+
 ## Random items, stage 1: data (2026-11-27; Petr approved the spec, the numbers and the words are Claude's)
 
 Spec `docs/superpowers/specs/2026-11-26-random-items-design.md` (Petr's answers in section 9), plan
