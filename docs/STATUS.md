@@ -18,7 +18,8 @@ Updated 2026-11-27 (random items, stages 1-4 and the damage meter; Petr's batch 
 7. **Petr's batch 3** (2026-11-27, after the 3-player playtest), NEXT: plan
    `docs/superpowers/plans/2026-11-27-petr-batch-3.md`: co-op restart when everyone is down, no white hit flash,
    weaker co-op scaling per player, spell levels 6 (ultimates 3, passives 5) with STR / AGI / INT cards after,
-   about level 60-70 at the end of a run. Straight to `main` (Petr). Then random items stage 5 (balance), stage 6
+   about level 60-70 at the end of a run (one XP curve solo and co-op), wards x5 (shaman's and the shared one).
+   Petr confirmed the open points (spells keep level 1 and top values). Straight to `main` (Petr). Then random items stage 5 (balance), stage 6
    (icons).
 
 ## Random items stage 4 (client) and the damage meter (branch `claude/random-items-client`, DONE, 2026-11-27)
