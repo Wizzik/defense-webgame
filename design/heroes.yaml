@@ -4,6 +4,8 @@
 #   data-build never writes it to data/generated.
 # signatureAbilities (in order) and ultimate are ability ids from design/abilities.yaml.
 # damageTaken: optional multiplier on the damage enemies deal to the hero (missing = 1).
+# attack: optional design changes of the base attack (2026-11-26, Petr): rangeScale and cooldownScale multiply the
+#   map's range and cooldown (before design/scaling.yaml), strikes = blows per attack, splash = { radius, share }.
 
 - id: stonehorn
   source: O00C
@@ -21,6 +23,7 @@
   role: { en: "Ranged hunter. Swift strikes and falling stars.", cs: "Lovkyně na dálku. Rychlé útoky a padající hvězdy." }
   signatureAbilities: [falling-stars, hunters-focus, swift-pace]
   ultimate: shadow-sisters
+  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
 
 - id: gravecaller
   source: O00F
@@ -29,6 +32,7 @@
   role: { en: "Spellcaster. Drains souls and hurls skulls.", cs: "Kouzelník. Vysává duše a metá lebky." }
   signatureAbilities: [grave-grasp, skull-ring, soul-bolt]
   ultimate: bone-stampede
+  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
 
 - id: serpent-shaman
   source: O00X
@@ -37,6 +41,7 @@
   role: { en: "Summoner. Totems, lightning and healing.", cs: "Vyvolávač. Totemy, blesky a léčení." }
   signatureAbilities: [serpent-totem, forked-bolt, mending-tide]
   ultimate: spirit-ward
+  damageTaken: 0.75   # melee (reach 125): stands in the crowd, 2026-11-26
 
 # Phase 2b-2: four more heroes. Their spells use only the kinds the simulation already has.
 
@@ -47,6 +52,7 @@
   role: { en: "Caster. Wards and zones that grind crowds down.", cs: "Kouzelník. Strážci a zóny, které drtí davy." }
   signatureAbilities: [soul-burst, wisp-ward, mist-surge]
   ultimate: wailing-wave
+  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
 
 - id: sparkshot
   source: O010
@@ -55,6 +61,7 @@
   role: { en: "Gunner. Fast shots and rocket bursts.", cs: "Střelec. Rychlé výstřely a raketové salvy." }
   signatureAbilities: [rocket-fan, searing-rounds, quickstep]
   ultimate: beam-swarm
+  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
 
 - id: redcleaver
   source: O00U
@@ -63,6 +70,7 @@
   role: { en: "Melee butcher. Wide blows at close range.", cs: "Řezník na blízko. Široké rány zblízka." }
   signatureAbilities: [cleaver-toss, blood-fan, swift-pace]
   ultimate: rot-field
+  attack: { cooldownScale: 0.45, strikes: 2, splash: { radius: 160, share: 0.5 } }   # two axes, fast, wide blows
   damageTaken: 0.75   # melee: stands in the crowd
 
 - id: tidecaller
@@ -72,3 +80,4 @@
   role: { en: "Tide mage. Waves that stun and push through.", cs: "Mág přílivu. Vlny, které omračují a prorážejí." }
   signatureAbilities: [crushing-wave, stunning-tide, riptide]
   ultimate: drowned-lake
+  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far

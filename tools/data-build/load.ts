@@ -112,6 +112,13 @@ export interface HeroEntry {
   ultimate: string;
   /** Design value, copied as it is when present. */
   damageTaken?: number;
+  /** Design changes of the base attack: range and cooldown multipliers on the map's numbers, blows, splash. */
+  attack?: {
+    rangeScale?: number;
+    cooldownScale?: number;
+    strikes?: number;
+    splash?: { radius: number; share: number };
+  };
 }
 
 /** One entry of design/enemies.yaml. */

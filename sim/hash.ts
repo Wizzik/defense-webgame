@@ -269,6 +269,8 @@ function mixPlayer(p: PlayerState): void {
   mixInt(hero.pendingLevelUps);
   mixInt(hero.dashTicks);
   mixInt(hero.dashCooldown);
+  mixInt(hero.dashCharges);
+  mixInt(hero.blinkCooldown);
   mixInt(hero.slowTicks);
   mixFloat(hero.slowShare);
   mixInt(hero.rootTicks);

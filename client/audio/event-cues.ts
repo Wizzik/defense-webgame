@@ -50,6 +50,7 @@ export const HANDLED_EVENTS: Record<keyof typeof EventKind, "sound" | "skip"> = 
   Raise: "sound",
   Hazard: "sound",
   Revive: "skip", // co-op only; the client of step 7 gives it a sound
+  Blink: "sound",
   HazardWave: "sound", // only the chill of a hero; the storm's first bolt is heard in the same step, a weather has no sound of its own
 };
 
@@ -130,6 +131,7 @@ export function resolveEventCues(run: Run, data: AudioData, enemyIds: readonly s
         sound("levelUp", i, false);
         break;
       case EventKind.Dash:
+      case EventKind.Blink:
         sound("dash", i, false);
         break;
       case EventKind.HeroHeal:

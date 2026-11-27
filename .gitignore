@@ -9,3 +9,5 @@ __pycache__/
 assets-source/
 audio-source/
 *.tsbuildinfo
+CLAUDE.local.md
+.claude/settings.local.json

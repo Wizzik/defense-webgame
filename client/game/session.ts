@@ -65,6 +65,14 @@ export class Session {
     this.scene = deps.scene;
     this.camera = deps.camera;
     this.keyboard = deps.keyboard;
+    // the blink (F) aims at the pointer: the floor point under it, as world units from the local hero
+    const floor = { x: 0, z: 0 };
+    this.keyboard.aimAt = (ndcX, ndcY) => {
+      const run = this.run;
+      if (!run || !this.camera.floorAt(ndcX, ndcY, floor)) return null;
+      const hero = run.players[this.local]!.hero;
+      return { x: floor.x / SCENE_SCALE - hero.x, y: -floor.z / SCENE_SCALE - hero.y };
+    };
   }
 
   /** The permanent items a hero wears into a run; main.ts sets it to the player's doll. */

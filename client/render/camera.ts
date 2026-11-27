@@ -1,4 +1,6 @@
-import { PerspectiveCamera } from "three/webgpu";
+import { PerspectiveCamera, Vector3 } from "three/webgpu";
+
+const ray = new Vector3();
 
 /** Camera pitch below the horizon. */
 const TILT_DEG = 55;
@@ -29,6 +31,20 @@ export class FollowCamera {
   constructor(aspect: number) {
     this.camera = new PerspectiveCamera(FOV_DEG, aspect, 1, 500);
     this.place();
+  }
+
+  /**
+   * The point of the floor (y = 0) under a screen point given in normalized device coordinates (-1..1, y up), as scene
+   * x and z in `out`; false when the ray does not reach the floor.
+   */
+  floorAt(ndcX: number, ndcY: number, out: { x: number; z: number }): boolean {
+    const cam = this.camera;
+    ray.set(ndcX, ndcY, 0.5).unproject(cam).sub(cam.position).normalize();
+    if (ray.y > -1e-6) return false;
+    const t = -cam.position.y / ray.y;
+    out.x = cam.position.x + ray.x * t;
+    out.z = cam.position.z + ray.z * t;
+    return true;
   }
 
   /** The point on the floor the camera looks at, without shake. */

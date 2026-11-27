@@ -70,7 +70,25 @@ export const RulesSchema = z.object({
     regenPerStr: nonNegative,
     spellPowerPerInt: nonNegative,
     cooldownSpeedPerInt: nonNegative,
-    dash: z.object({ distance: positive, seconds: positive, cooldownSeconds: positive }).strict(),
+    dash: z.object({
+      distance: positive,
+      seconds: positive,
+      cooldownSeconds: positive,
+      /** From hero level `fromLevel` the dash holds `count` charges; a spent charge comes back after cooldownSeconds, one at a time. */
+      charges: z.object({ fromLevel: z.number().int().min(1), count: z.number().int().min(2).max(5) }).strict(),
+    }).strict(),
+    /**
+     * The blink (key F) from hero level `fromLevel`: a jump of at most `maxDistance` to the aimed point, then a burst of
+     * `damage` x spell power within `radius` around the landing spot that stuns for `stunSeconds`.
+     */
+    blink: z.object({
+      fromLevel: z.number().int().min(1),
+      cooldownSeconds: positive,
+      maxDistance: positive,
+      radius: positive,
+      damage: positive,
+      stunSeconds: z.number().min(0),
+    }).strict(),
   }).strict(),
   autocast: z.object({
     novaMinEnemies: z.number().int().min(1),
@@ -81,6 +99,10 @@ export const RulesSchema = z.object({
     maxAlive: z.number().int().positive(),
     siegerAggroRange: positive,
     leashRange: positive,
+    /** While the hero stands within this distance of the castle, every enemy goes for him instead of the castle. */
+    heroDefendRange: positive,
+    /** New enemies get 1 + hp (damage) x (hero level - 1) times their hp (damage), on top of the time scaling. */
+    levelScaling: z.object({ hp: z.number().min(0), damage: z.number().min(0) }).strict(),
     /** Knockback for the base attack and for an ability: initial speed = value / `seconds` (world units),
      *  fading linearly to zero over `seconds`, so the enemy travels about 0.67 × value. */
     knockback: z.object({ attack: nonNegative, ability: nonNegative, seconds: positive }).strict(),

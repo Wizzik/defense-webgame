@@ -170,3 +170,27 @@ describe("enemy AI", () => {
     expect(dealt).toBeLessThanOrEqual(15 * f + 1e-9);
   });
 });
+
+describe("hero defending near the castle (rules.enemies.heroDefendRange)", () => {
+  it("a sieger far from the hero goes for him while he stands within the range of the castle", () => {
+    const run = newRun();
+    run.hero.x = 0;
+    run.hero.y = -2000 + 800; // 800 north of the castle
+    const s = add(run, Role.Sieger, -1500, -2000); // west of the castle: the castle lies due east, the hero north-east
+    for (let t = 0; t < 30; t++) tickAI(run);
+    expect(run.enemies.y[s]).toBeGreaterThan(-2000 + 50); // turns north towards the hero
+    expect(run.enemies.aggro[s]).toBe(0); // not by aggro: by the defend range
+  });
+
+  it("a sieger turns to the castle once the hero is beyond the range", () => {
+    const run = newRun();
+    run.hero.x = 2500;
+    run.hero.y = -2000;
+    const s = add(run, Role.Sieger, -1500, -2000);
+    const before = dist(run.enemies.x[s]! - 0, run.enemies.y[s]! + 2000);
+    for (let t = 0; t < 30; t++) tickAI(run);
+    const after = dist(run.enemies.x[s]! - 0, run.enemies.y[s]! + 2000);
+    expect(after).toBeLessThan(before);
+    expect(run.enemies.x[s]).toBeLessThan(-180); // stops at the castle wall, never past it to the hero
+  });
+});

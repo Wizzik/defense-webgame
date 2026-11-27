@@ -1,17 +1,18 @@
 import type { Ability, Enemy, Hero } from "../../data/schema";
+import { spreadLevels } from "./spread-levels";
 
 export const SCALING_YAML = "design/scaling.yaml";
 
 /** Uniform multipliers from the map's numbers to the survivors pace (design/scaling.yaml). */
 export interface Scaling {
   heroes: { moveSpeed: number; attackCooldown: number };
-  abilities: { cooldown: number; damage: number; levelGrowthExponent: number };
+  abilities: { cooldown: number; damage: number; levelGrowthExponent: number; levels: number };
   enemies: { hp: number; moveSpeed: number };
 }
 
 const SHAPE: { [G in keyof Scaling]: readonly string[] } = {
   heroes: ["moveSpeed", "attackCooldown"],
-  abilities: ["cooldown", "damage", "levelGrowthExponent"],
+  abilities: ["cooldown", "damage", "levelGrowthExponent", "levels"],
   enemies: ["hp", "moveSpeed"],
 };
 
@@ -41,6 +42,10 @@ export function parseScaling(value: unknown): Scaling {
   const exponent = (value.abilities as Record<string, number>).levelGrowthExponent;
   if (exponent > 1) {
     throw new Error(`${SCALING_YAML}: abilities.levelGrowthExponent: expected 0 < e <= 1, got ${exponent}`);
+  }
+  const levels = (value.abilities as Record<string, number>).levels;
+  if (!Number.isInteger(levels) || levels < 2 || levels > 10) {
+    throw new Error(`${SCALING_YAML}: abilities.levels: expected a whole number from 2 to 10, got ${levels}`);
   }
   return value as unknown as Scaling;
 }
@@ -80,7 +85,8 @@ export function scaleAbility(ability: Ability, s: Scaling): Ability {
         ? flattenGrowth(value.map((v) => whole(v * s.abilities.damage)), s.abilities.levelGrowthExponent)
         : value;
   }
-  return { ...ability, cooldown: ability.cooldown.map((c) => seconds(c * s.abilities.cooldown)), params } as Ability;
+  const scaled = { ...ability, cooldown: ability.cooldown.map((c) => seconds(c * s.abilities.cooldown)), params } as Ability;
+  return spreadLevels(scaled, s.abilities.levels);
 }
 
 export function scaleEnemy(enemy: Enemy, s: Scaling): Enemy {

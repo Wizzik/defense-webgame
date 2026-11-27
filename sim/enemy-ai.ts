@@ -88,8 +88,13 @@ export function updateEnemies(run: Run): void {
         if (heroDist < rules.enemies.siegerAggroRange) e.aggro[i] = 1;
         else if (heroDist > rules.enemies.leashRange) e.aggro[i] = 0;
       }
-      const targetsHero = !ignored && (e.role[i] === Role.Hunter || e.aggro[i] === 1 || run.enemyHunter[e.type[i]] === 1 ||
-        run.enemyBehavior[e.type[i]] === Behavior.Flank);
+      // a hero who defends near the castle draws every enemy; farther out the siegers turn to the castle
+      const cx = hero.x - castle.x;
+      const cy = hero.y - castle.y;
+      const defendRange = rules.enemies.heroDefendRange;
+      const defending = cx * cx + cy * cy <= defendRange * defendRange;
+      const targetsHero = !ignored && (defending || e.role[i] === Role.Hunter || e.aggro[i] === 1 ||
+        run.enemyHunter[e.type[i]] === 1 || run.enemyBehavior[e.type[i]] === Behavior.Flank);
       // a strike from afar and a slam come before a charge and never start in the middle of one
       const free = e.chargeState[i] === Charge.None;
       const striking = free && updateStrike(run, i, targetsHero, heroDist);

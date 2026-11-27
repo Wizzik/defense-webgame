@@ -124,7 +124,13 @@ describe("autopilot", () => {
     const run = postRun(meleeHero.id);
     run.hero.y = run.castle.y + DEFEND_RADIUS + 200;
     put(run, 0, run.hero.x + CHASE_DISTANCE - 50, run.hero.y);
+    // the enemy lies beyond the castle's defence circle: the bot walks to the circle's edge towards it, back south
+    expect(move(run).moveY).toBe(-1);
+    run.hero.y = run.castle.y + 400;
+    run.enemies.y[0] = run.hero.y;
     expect(move(run)).toMatchObject({ moveX: 1, moveY: 0 });
+    run.hero.y = run.castle.y + DEFEND_RADIUS + 200;
+    run.enemies.y[0] = run.hero.y;
     // farther than the chase distance it goes home instead
     run.enemies.x[0] = run.hero.x + CHASE_DISTANCE + 100;
     expect(move(run)).toMatchObject({ moveX: 0, moveY: -1 });
@@ -136,7 +142,12 @@ describe("autopilot", () => {
     // an enemy at its heels would make it back off farther; the leash wins
     put(run, 0, run.hero.x - 100, run.hero.y);
     expect(move(run)).toMatchObject({ moveX: -1 });
+    // beyond the castle's defence circle it walks back towards the castle too
     run.hero.x = run.castle.x + LEASH_DISTANCE - 300;
+    run.enemies.x[0] = run.hero.x - 100;
+    expect(move(run)).toMatchObject({ moveX: -1 });
+    // inside the circle a ranged hero backs off from an enemy at its heels
+    run.hero.x = run.castle.x + 300;
     run.enemies.x[0] = run.hero.x - 100;
     expect(move(run)).toMatchObject({ moveX: 1 });
   });
@@ -269,7 +280,7 @@ describe("autopilot", () => {
 
   it("a gravebinder or a bloodcaller in chase reach goes before a nearer enemy", () => {
     const run = postRun(meleeHero.id);
-    run.hero.y = run.castle.y + DEFEND_RADIUS + 300;
+    run.hero.y = run.castle.y + HOME_OFFSET; // inside the castle's defence circle
     put(run, 0, run.hero.x + 250, run.hero.y);
     put(run, 1, run.hero.x - CHASE_DISTANCE + 50, run.hero.y);
     run.enemies.type[1] = run.data.enemies.findIndex((e) => e.id === "gravebinder");
@@ -290,7 +301,8 @@ describe("autopilot", () => {
     run.enemies.y[boss] = run.castle.y + HOME_OFFSET;
     expect(move(run).moveX).toBe(-1); // not the final boss of this run yet
     run.finalBossSlot = boss;
-    expect(move(run)).toMatchObject({ moveX: 1, moveY: 0 });
+    // east, to the edge of the castle's defence circle towards the boss
+    expect(move(run).moveX).toBe(1);
   });
 
   it("picks card 0 in the level-up state when no offer is open", () => {

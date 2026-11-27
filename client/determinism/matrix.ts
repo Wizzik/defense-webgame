@@ -46,8 +46,8 @@ export function matrixCases(data: GameData): MatrixCase[] {
     { id: "w5-hell", hero: "redcleaver", seed: 7, startPhase: 6, gear: "full", maxTicks: 6000, world: 5, difficulty: "hell" },
     // obstacles and the summer storm from its first wave (difficulties plan 2)
     { id: "w1-storm", hero: "sparkshot", seed: 9, startPhase: 3, gear: "none", maxTicks: 4500 },
-    // the sandstorm through a whole storm, and the thicket (difficulties plan 3a)
-    { id: "w2-sand", hero: "mistwarden", seed: 11, startPhase: 4, gear: "mid", maxTicks: 6000, world: 2 },
+    // the sandstorm through a whole storm, and the thicket (difficulties plan 3a) (gravecaller since 2026-11-26: the mistwarden of seed 11 fell before the storm once every enemy went for her)
+    { id: "w2-sand", hero: "gravecaller", seed: 11, startPhase: 4, gear: "mid", maxTicks: 6000, world: 2 },
     { id: "w3-thicket", hero: "stonehorn", seed: 13, startPhase: 2, gear: "mid", maxTicks: 4500, world: 3 },
     // the blizzard through a whole storm, with chill (difficulties plan 3b)
     { id: "w4-blizzard", hero: "tidecaller", seed: 15, startPhase: 3, gear: "mid", maxTicks: 6000, world: 4 },

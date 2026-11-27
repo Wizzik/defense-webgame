@@ -217,18 +217,22 @@
   cooldown: { design: [15, 15, 15, 15, 15] }
   params:
     # The map's DataA is 1, 2, 3, 4, 5. Petr's values of 2026-11-12, shared with Wisp Ward.
-    count: { design: [1, 2, 2, 3, 3] }
+    # 2 totems from level 1 since 2026-11-26: with every enemy going for a hero near the castle the shaman could not
+    # hold the first waves (autopilot: 7 of 8 died before level 5).
+    count: { design: [2, 2, 2, 3, 3] }
     duration: duration
     range: range
     # The map's totem attacks for 101, finds a target within 600 and has an attack interval of 1.0 s,
     # which is multiplied by heroes.attackCooldown 0.5. The cap on living totems is our own.
     # The map's ward attacks for 101; Petr halved it on 2026-11-11 (the Serpent Shaman won every run).
     # 60 since 2026-11-12: with the cap of 2-6 totems and the slow cast, 50 won 1 of 5 test seeds and 75 won 15 of 15.
-    damage: { design: [60, 60, 60, 60, 60] }
+    # Petr 2026-11-26: the wards were weak late; every level x1.5 (20, 30, 45, 68, 101 in the game, times spell
+    # power): these design values give that row after abilities.damage and levelGrowthExponent.
+    damage: { design: [67, 150, 337, 770, 1700] }
     attackRange: { design: [600, 600, 600, 600, 600] }
     attackInterval: { design: [0.5, 0.5, 0.5, 0.5, 0.5] }
     # Petr's values of 2026-11-12 (was 3, 6, 9, 12, 15), shared with Wisp Ward.
-    maxAlive: { design: [2, 4, 4, 6, 6] }
+    maxAlive: { design: [4, 4, 4, 6, 6] }
 
 - id: forked-bolt
   source: A064
@@ -390,8 +394,10 @@
   params:
     radius: area
     # Tuned in phase 2b-2, task 6 (docs/DECISIONS.md): the plan's 150 and 400 x 0.48.
-    tickDamage: { design: [73, 193] }
-    ticksPerSecond: { design: [4, 4] }
+    # Petr 2026-11-26: bursts as often and as wide as the Gravecaller's Bone Stampede (same tick, rate, burst radius).
+    tickDamage: { design: [100, 500] }
+    ticksPerSecond: { design: [10, 11] }
+    hitRadius: { design: [275, 350] }
     duration: { design: [8, 8] }
   review:
     notes: >-
@@ -448,11 +454,14 @@
   targeting: densest_cluster
   params:
     radius: area
-    duration: duration
+    # The map's duration is 10, 20; 10, 12 since the bursts got as often as the Bone Stampede's.
+    duration: { design: [10, 12] }
     # The map drains a share of the target's life per second; the game has no percent damage, so the
-    # tick is a design value: the plan's 150 and 500 x 0.41 (tuned in phase 2b-2, task 6).
-    tickDamage: { design: [60, 203] }
-    ticksPerSecond: { design: [1, 1] }
+    # tick is a design value.
+    # Petr 2026-11-26: bursts as often and as wide as the Gravecaller's Bone Stampede (same tick, rate, burst radius).
+    tickDamage: { design: [100, 500] }
+    ticksPerSecond: { design: [10, 11] }
+    hitRadius: { design: [275, 350] }
 
 # Tidecaller
 
@@ -513,8 +522,10 @@
   params:
     radius: area
     # Tuned in phase 2b-2, task 6 (docs/DECISIONS.md): 500 and 900 (see review) x 0.6.
-    tickDamage: { design: [300, 550] }
-    ticksPerSecond: { design: [2, 2] }
+    # Petr 2026-11-26: bursts as often and as wide as the Gravecaller's Bone Stampede (same tick, rate, burst radius).
+    tickDamage: { design: [100, 500] }
+    ticksPerSecond: { design: [10, 11] }
+    hitRadius: { design: [275, 350] }
     duration: { design: [10, 10] }
   review:
     jassFunctions:

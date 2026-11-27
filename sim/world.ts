@@ -57,8 +57,12 @@ export interface HeroState {
   passive: PassiveBonus;
   /** Steps of the dash left; the hero moves along (dashDirX, dashDirY) while > 0. */
   dashTicks: number;
-  /** Steps until the next dash may start. */
+  /** Steps until the spent dash charge being refilled comes back (0: none is refilling). */
   dashCooldown: number;
+  /** Dash charges ready now (1 until rules.hero.dash.charges.fromLevel, then up to its count). */
+  dashCharges: number;
+  /** Steps until the blink (key F) may be used again. */
+  blinkCooldown: number;
   dashDirX: number;
   dashDirY: number;
   /** Steps until the next basic attack (Task 5). */

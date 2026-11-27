@@ -42,16 +42,25 @@ export function checkCourse(data: GameData, world: number, difficulty: string): 
   return difficulty as DifficultyId;
 }
 
-/** Hp of a new enemy of `type`: its base hp x time x the run's multipliers (elites and bosses x eliteHp). */
+/**
+ * Growth of new enemies with the heroes' level (`rules.enemies.levelScaling`, Petr 2026-11-26): 1 + per level x
+ * (level - 1); XP is shared, so player 0's hero has the level of every hero.
+ */
+function levelScale(run: Run, perLevel: number): number {
+  return 1 + perLevel * (run.players[0]!.hero.level - 1);
+}
+
+/** Hp of a new enemy of `type`: its base hp x time x hero level x the run's multipliers (elites and bosses x eliteHp). */
 export function enemyHp(run: Run, type: number, timeScale: number): number {
   const mods = run.mods;
   const strong = run.isElite[type] === 1 || run.isBoss[type] === 1;
-  return run.data.enemies[type]!.hp * timeScale * mods.hp * (strong ? mods.eliteHp : 1);
+  const level = levelScale(run, run.data.rules.enemies.levelScaling.hp);
+  return run.data.enemies[type]!.hp * timeScale * level * mods.hp * (strong ? mods.eliteHp : 1);
 }
 
-/** Damage multiplier of a new enemy. */
+/** Damage multiplier of a new enemy: time x hero level x the run's multiplier. */
 export function enemyDamageScale(run: Run, timeScale: number): number {
-  return timeScale * run.mods.damage;
+  return timeScale * levelScale(run, run.data.rules.enemies.levelScaling.damage) * run.mods.damage;
 }
 
 /** Magic find of chest rolls: gear plus the world's and difficulty's bonus. */

@@ -1,6 +1,39 @@
 # Status
 
-Updated 2026-11-24 (difficulties 3b: worlds 4 and 5 merged as PR #40). Read this first when you resume work.
+Updated 2026-11-26 (Petr's solo playtest batch, first work in Claude Code). Read this first when you resume work.
+
+## Order (Petr, 2026-11-26)
+
+1. **Solo playtest batch** (this branch, below): defence circle, level scaling, ranged reach, Redcleaver, ultimates,
+   wards, 10 spell levels, tooltip, dash charges, blink (F), weather fixed to the map. Waits for Petr's playtest.
+2. **Random items** like Diablo 2 / Project Diablo 2 with game-icons.net pictures: the spec
+   `docs/superpowers/specs/2026-11-26-random-items-design.md` waits for Petr's answers (its section 9).
+3. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
+
+## Solo playtest batch (branch `claude/gifted-gauss-k6wag4`, 2026-11-26)
+
+- Done in one Claude Code session; rulings and numbers: `docs/DECISIONS.md`, section Petr's solo playtest batch.
+- The Claude Code setup came first: `CLAUDE.md` (imports AGENTS.md, adds the workflow and the data rule for cloud
+  sessions), `.claude/settings.json` (allowed commands, a clean-room hook), skills `finish-task`, `data-change`,
+  `balance-check`.
+- Generated JSON was edited by the data-build rules in the container (no map there): Petr reruns `npm run data:build`
+  locally once; the files must not change.
+- Autopilot, world 1 normal, mid gear, seeds 1-8 (wins of 8, castle hp of won runs): before -> after
+  - Stonehorn 3 (55 %) -> 8 (99 %); Nightglaive 2 (37 %) -> 8 (87 %); Gravecaller 8 (90 %) -> 8 (100 %);
+    Serpent Shaman 3 (51 %) -> 7 (98 %); Mistwarden 3 (17 %) -> 7 (97 %); Sparkshot 1 (28 %) -> 8 (96 %);
+    Redcleaver 0 -> 8 (99 %); Tidecaller 0 -> 8 (92 %). In sum 20 -> 62 of 64; the castle stopped losing runs.
+  - **Open for Petr:** world 1 normal may now be too easy; if so, raise `rules.enemies.levelScaling` (0.009) or the
+    world steps. Worlds 2-5 and Insane / Hell were not measured again.
+- **What Petr checks** (https://wizzik.github.io/defense-webgame/ after the merge):
+  - a solo run on world 1: do enemies from the far side now come to you while you stay near the castle (1000), and
+    turn to the castle when you walk farther; can you win now;
+  - ranged heroes (Sparkshot, Tidecaller): do they shoot at enemies off the screen (reach 1300-1400);
+  - Redcleaver: fast double chops with splash; ultimates of Sparkshot, Redcleaver and Tidecaller: bursts as dense as
+    the Gravecaller's;
+  - hover the spells in the bottom bar: level, text, values now and next;
+  - level 20: dash shows "3 / 3", three dashes in a row; level 40: F jumps to the mouse (`?debug=1&phase=10` and
+    `__game.debug.grantXp(50000)` get there fast);
+  - worlds 4 and 5: snow and embers stay on the ground when you walk (`?debug=1&world=4`).
 
 ## Order (Petr, 2026-11-23 evening)
 

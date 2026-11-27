@@ -179,6 +179,7 @@ export function updateAbilities(run: Run): void {
 /** For debugging and e2e only: sets a slot's level and recomputes the stats. An empty slot stays empty. */
 export function debugSetAbilityLevel(run: Run, index: number, level: number): void {
   if (isEmptySlot(run.abilities[index])) return;
-  run.abilities[index].level = level;
+  const slot = run.abilities[index];
+  slot.level = Math.max(0, Math.min(slot.def.levels, level));
   refreshHeroStats(run);
 }

@@ -19,6 +19,8 @@ export const HOME_OFFSET = 400;
 /** The autopilot stands this share of the revive radius from a fallen teammate (co-op, step 6). */
 const REVIVE_STAND_SHARE = 0.5;
 const HOME_TOLERANCE = 100;
+/** The bot keeps this far inside the castle's defence circle when it walks to a target beyond the circle. */
+const DEFEND_EDGE_MARGIN = 150;
 /** With no threat the bot fights the enemy nearest to the hero within this distance. */
 export const CHASE_DISTANCE = 400;
 /** Farther than this from its post the bot walks back, whatever the enemies do (a retreat must not end in the spawn ring). */
@@ -346,6 +348,15 @@ export function botInput(run: Run, out: TickInput): TickInput {
     // Too far from the castle (a long retreat): walk back, whatever the enemies do.
     return walkTo(run, out, castle.x, castle.y + HOME_OFFSET);
   }
+  // Outside the castle's defence circle the castle's attackers leave the hero: step back inside it first (a ranged
+  // hero in reach of a target beyond the circle would otherwise stand and shoot from out there).
+  const ox = hero.x - castle.x;
+  const oy = hero.y - castle.y;
+  const edge = run.data.rules.enemies.heroDefendRange - DEFEND_EDGE_MARGIN;
+  const outside = Math.sqrt(ox * ox + oy * oy);
+  if (outside > edge + HOME_TOLERANCE) {
+    return walkTo(run, out, castle.x + (ox / outside) * edge, castle.y + (oy / outside) * edge);
+  }
   const nearDist = Math.sqrt(nearSq);
   const keep = hero.hp < hero.stats.maxHp * LOW_HP ? LOW_HP_DISTANCE : melee ? 0 : RETREAT_DISTANCE;
   if (near >= 0 && nearDist < keep) {
@@ -371,10 +382,26 @@ export function botInput(run: Run, out: TickInput): TickInput {
         }
       }
       if (d > stop) {
-        routeTo(run, enemies.x[target], enemies.y[target]);
-        dx = routeX;
-        dy = routeY;
-        routed = routeFlow;
+        // Stay inside the castle's defence circle (rules.enemies.heroDefendRange): out of it the castle's attackers
+        // turn back to the castle, so the bot walks only to the circle's edge towards a target beyond it.
+        let gx = enemies.x[target];
+        let gy = enemies.y[target];
+        const ex = gx - castle.x;
+        const ey = gy - castle.y;
+        const edge = run.data.rules.enemies.heroDefendRange - DEFEND_EDGE_MARGIN;
+        const far = Math.sqrt(ex * ex + ey * ey);
+        if (far > edge) {
+          gx = castle.x + (ex / far) * edge;
+          gy = castle.y + (ey / far) * edge;
+        }
+        const gdx = gx - hero.x;
+        const gdy = gy - hero.y;
+        if (gdx * gdx + gdy * gdy > HOME_TOLERANCE * HOME_TOLERANCE || far <= edge) {
+          routeTo(run, gx, gy);
+          dx = routeX;
+          dy = routeY;
+          routed = routeFlow;
+        }
       }
     } else {
       const homeX = castle.x - hero.x;

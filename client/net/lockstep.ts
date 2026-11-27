@@ -15,6 +15,10 @@ class InputRing {
   readonly my = new Int8Array(RING);
   readonly card = new Int8Array(RING);
   readonly actions = new Int8Array(RING);
+  /** The blink's aim; `aimed` 1 when the input carried one. */
+  readonly ax = new Int16Array(RING);
+  readonly ay = new Int16Array(RING);
+  readonly aimed = new Uint8Array(RING);
 
   has(k: number): boolean {
     return this.key[k % RING] === k + 1;
@@ -27,6 +31,10 @@ class InputRing {
     this.my[i] = input.moveY;
     this.card[i] = input.card;
     this.actions[i] = input.actions;
+    const aimed = input.aimX !== undefined && input.aimY !== undefined;
+    this.aimed[i] = aimed ? 1 : 0;
+    this.ax[i] = aimed ? input.aimX! : 0;
+    this.ay[i] = aimed ? input.aimY! : 0;
   }
 
   read(k: number, out: TickInput): void {
@@ -35,6 +43,8 @@ class InputRing {
     out.moveY = this.my[i]!;
     out.card = this.card[i]!;
     out.actions = this.actions[i]!;
+    out.aimX = this.aimed[i] === 1 ? this.ax[i]! : undefined;
+    out.aimY = this.aimed[i] === 1 ? this.ay[i]! : undefined;
   }
 }
 
@@ -126,6 +136,8 @@ export class Lockstep {
         o.moveY = 0;
         o.card = -1;
         o.actions = 0;
+        o.aimX = undefined;
+        o.aimY = undefined;
       } else this.inputs[p]!.read(k, o);
     }
     this.tick++;

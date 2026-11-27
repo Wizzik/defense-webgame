@@ -7,7 +7,7 @@ import { matrixCases, matrixDigest, runCase } from "./matrix";
  * a refactor must keep the one-player game, so the matrix digest stays. A change of the game on purpose
  * (balance, a new mechanic) changes it too: then put the new digest here (`npm run sim:digest`) and say so in the PR.
  */
-const EXPECTED_DIGEST = "1ba7488b";
+const EXPECTED_DIGEST = "ff675613";
 
 describe("determinism matrix digest", () => {
   it("stays the digest of the one-player game", () => {

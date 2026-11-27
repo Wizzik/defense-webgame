@@ -65,6 +65,9 @@ export const EventKind = {
   /** Co-op: a fallen hero stood up (sim/revive.ts): a = the revived player, value = his hp, x/y = where he lies,
    *  u = the teammate who revived him. */
   Revive: 32,
+  /** A hero blinked (key F, sim/hero-blink.ts): x/y = where he left, u/v = where he landed, value = the burst's radius,
+   *  a = enemies hit. */
+  Blink: 33,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

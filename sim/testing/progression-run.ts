@@ -18,7 +18,8 @@ export function progressionRun(options: ProgressionOptions = {}) {
   };
   data.rules.hero = {
     collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
-    dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4 },
+    dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4, charges: { fromLevel: 20, count: 3 } },
+      blink: { fromLevel: 40, cooldownSeconds: 10, maxDistance: 900, radius: 300, damage: 300, stunSeconds: 0.5 },
   };
   silenceSpawns(data);
   data.rules.progression = {

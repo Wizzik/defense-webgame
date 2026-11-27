@@ -29,8 +29,14 @@ const EMBER_TOP = 6;
  * Weather particles (client only; `Math.random` is fine here): blown dust while a sandstorm runs, slow wandering
  * fireflies always in a world whose look has them, snow (light always, thick and blown in a blizzard), rising green
  * embers. One `InstancedMesh` of tiny octahedrons (WebGPU draws points
- * only 1 pixel wide) of fixed size around the hero; positions wrap.
+ * only 1 pixel wide) of fixed size. Positions are in the scene (fixed to the map, Petr 2026-11-26) and wrap into the
+ * box around the hero, so walking does not drag the weather along.
  */
+/** `v` moved by whole periods into [from, from + size). */
+function wrap(v: number, from: number, size: number): number {
+  return from + ((((v - from) % size) + size) % size);
+}
+
 export class Particles implements RunView {
   readonly object: InstancedMesh;
   private readonly positions = new Float32Array(CAPACITY * 3);
@@ -95,6 +101,8 @@ export class Particles implements RunView {
     const step = Math.min(dt, 0.1);
     const p = this.positions;
     const d = this.drift;
+    const cx = run.hero.x * SCENE_SCALE;
+    const cz = -run.hero.y * SCENE_SCALE;
     for (let i = 0; i < this.visible; i++) {
       const k = i * 3;
       if (mode === "dust") {
@@ -120,16 +128,14 @@ export class Particles implements RunView {
         p[k + 1] = 0.4 + (((p[k + 1]! - 0.4 + d[k + 1]! * 0.3 * step) % 3) + 3) % 3;
         p[k + 2] += d[k + 2]! * 0.8 * step;
       }
-      if (p[k]! > HALF_X) p[k] -= 2 * HALF_X;
-      if (p[k]! < -HALF_X) p[k] += 2 * HALF_X;
-      if (p[k + 2]! > HALF_Z) p[k + 2] -= 2 * HALF_Z;
-      if (p[k + 2]! < -HALF_Z) p[k + 2] += 2 * HALF_Z;
+      // world positions, wrapped into the box around the hero: the weather stays on the map when he walks
+      p[k] = wrap(p[k]!, cx - HALF_X, 2 * HALF_X);
+      p[k + 2] = wrap(p[k + 2]!, cz - HALF_Z, 2 * HALF_Z);
       if (mode === "dust" && (p[k + 1]! < 0 || p[k + 1]! > HEIGHT)) p[k + 1] = Math.random() * HEIGHT;
       this.matrix.makeScale(this.size, this.size, this.size).setPosition(p[k]!, p[k + 1]!, p[k + 2]!);
       this.object.setMatrixAt(i, this.matrix);
     }
     this.object.instanceMatrix.needsUpdate = true;
-    this.object.position.set(run.hero.x * SCENE_SCALE, 0, -run.hero.y * SCENE_SCALE);
   }
 
   dispose(): void {

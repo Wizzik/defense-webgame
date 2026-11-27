@@ -24,6 +24,7 @@ const ALLY_BOLT_LIFE = 0.18;
 const CHAIN_BOLT_COLOR = rgb(0x8fc7ff);
 const CHAIN_BOLT_LIFE = 0.18;
 const SMITE_COLOR = rgb(0xd6e6ff);
+const BLINK_STREAK_LIFE = 0.25;
 /** Width of the strike from above, in scene units. */
 const SMITE_WIDTH = 0.7;
 
@@ -70,6 +71,16 @@ export class AbilityFx implements RunView {
         case EventKind.Heal:
           this.rings.addHeal(now, x, z);
           break;
+        case EventKind.Blink: {
+          // a streak from where the hero left to where he landed, a burst and a ring of the hero's colour there
+          const lx = events.u[i]! * SCENE_SCALE;
+          const lz = -events.v[i]! * SCENE_SCALE;
+          const radius = events.value[i]! * SCENE_SCALE;
+          this.bolts.add(now, x, z, lx, lz, this.heroColor, BLINK_STREAK_LIFE);
+          this.blasts.add(now, lx, lz, 2 * radius);
+          this.rings.addRing(now, lx, lz, radius, this.heroColor, false);
+          break;
+        }
       }
     }
   }

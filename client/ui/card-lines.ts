@@ -77,6 +77,18 @@ function statsWith(run: Run, attribute: "str" | "agi" | "int", amount: number): 
   return [before, after];
 }
 
+/**
+ * The values of a learned spell for its tooltip in the ability bar: the current level against the next one
+ * (`to` empty when the spell is at its top level). Empty for an empty slot.
+ */
+export function slotLines(run: Run, slot: number): CardLine[] {
+  const ability = run.abilities[slot];
+  if (ability === undefined || ability.level <= 0) return [];
+  const { def, level } = ability;
+  if (level >= def.levels) return abilityLines(run, def, 0, level).map((line) => ({ ...line, from: line.to, to: "" }));
+  return abilityLines(run, def, level, level + 1);
+}
+
 /** What a card changes, as before and after values ready to show. */
 export function cardLines(run: Run, card: Card): CardLine[] {
   if (card.kind === "ability") return abilityLines(run, run.abilities[card.slot].def, card.fromLevel, card.toLevel);
