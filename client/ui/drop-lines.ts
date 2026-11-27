@@ -3,11 +3,11 @@ import type { Drop } from "../../meta";
 import { ChestAction } from "../../sim";
 import { type Lang, t } from "./i18n";
 
-/** The line that tells what a boss dropped, and the CSS class of its rarity ("" when nothing dropped). */
+/** The line that tells what a boss dropped, and the CSS class of its rarity ("" when nothing dropped); a rolled item reads as new. */
 export function dropLine(lang: Lang, drop: Drop): { text: string; tone: string } {
   if (drop.kind === "none") return { text: t(lang, "drop.none"), tone: "" };
   const name = drop.item.name[lang];
-  const text = drop.kind === "new" ? t(lang, "drop.new", { name }) : t(lang, "drop.level", { name, n: drop.level });
+  const text = drop.kind === "level" ? t(lang, "drop.level", { name, n: drop.level }) : t(lang, "drop.new", { name });
   return { text, tone: `rarity-${drop.item.rarity}` };
 }
 

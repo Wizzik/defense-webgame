@@ -8,6 +8,32 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   phase 1) wins about 10 % of the runs, for every hero (1-4 of 20 per hero). Every balance change keeps to it;
   the plan of the changes that get there: `docs/superpowers/plans/2026-11-27-petr-batch-2.md`.
 
+## Random items, stage 3: meta and saves (2026-11-27; the plan's tasks 11-15, the details are Claude's)
+
+- **Item records** (`meta/item-record.ts`): one record per item of the collection, `uid` + rarity + permanent level,
+  and either `named` (a catalogue id) or a rolled item stored by value (`base`, rows `[stat, value at level 1,
+  tier]`, `effect`, two-word `name`), so a later change of the affix numbers never changes an owned item. A named
+  item is owned once and gains levels; every rolled item is its own record and keeps the level it dropped with.
+- **Save version 2** (`meta/save.ts`): `items: ItemRecord[]`, `nextUid`, loadouts by uid. Version 1 (item id to
+  level, loadouts by id) migrates on read: every item becomes a named record in key order, the dolls keep what they
+  wore. The reader keeps at most 2 x `rules.loot.collectionLimit` (200) records; salvaging a full collection is
+  stage 4. A rolled record whose base, rarity or rows the game does not know is left out and counted in `dropped`;
+  an unknown effect or name is dropped and the item kept. Import takes version 1 or 2 and refuses a file with no
+  item this game knows.
+- **Boss drops** (`meta/drop.ts`): the rarity is drawn as before (table + magic find); with the rarity's
+  `namedShare` the drop is a named item (new, or one more level of an owned one), else (and when every named item of
+  that rarity is at the top) a random item for a random slot, rolled for the local hero's primary attribute with the
+  boss's item power (`bossPower`: order, world, difficulty) at `levelAtPower` of that power. A boss therefore never
+  drops nothing any more. Common and rare drops are always random (named share 0). Same seed, order, course and
+  collection give the same drop.
+- **Loadouts** (`meta/equip.ts`, `sim/gear.ts`): `toLoadout` gives rolled entries (`item: rolled-<base>`, `rolled`);
+  `loadGear` wears them at their record's level; `rolledFits` refuses one in a slot of another type.
+- **Client:** the gear screen lists the named items as before, then the rolled records of the filter (highest
+  rarity first, then in the order they came); a click equips by uid. The count reads "records of 200". The end
+  screen and the news line read a rolled drop as new. `window.__game.collection` stays named id to level
+  (`namedLevels`); `collectionSize` counts every record.
+- **Determinism:** unchanged (`36fd80a2`); the matrix wears named loadouts only.
+
 ## Random items, stage 2: sim (2026-11-27; the plan's tasks 6-10, the numbers and details are Claude's)
 
 - **New stats** (STAT_IDS, `GearBonus`, `HeroStats`; prices in `design/affixes.yaml`): crit chance and crit damage

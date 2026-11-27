@@ -11,6 +11,7 @@ import type { Backend, GpuInfo } from "../render/gpu";
 import type { PlayerSnapshot } from "./net-snapshot";
 import type { NetStats } from "../net/coop-net";
 import { cardItem } from "../ui/rolled-item";
+import { namedLevels } from "../../meta";
 
 const CHEST_ACTIONS = ["new", "choice", "level"] as const;
 /** Orb kinds by OrbKind value. */
@@ -80,8 +81,10 @@ export interface GameSnapshot {
   /** The 16 gear slots in the order of `SLOT_IDS`: item id and levels, or null for an empty slot. */
   /** `item` of a rolled item is "rolled-<base id>" and `rolled` is true. */
   gear: ({ item: string; base: number; temp: number; rolled: boolean } | null)[];
-  /** The player's collection: item id to its permanent level. */
+  /** The named items of the collection: item id to its permanent level. */
   collection: Record<string, number>;
+  /** Records in the collection: named and rolled items. */
+  collectionSize: number;
   /** Whether the gear is stored in this browser (false with ?debug=1 and without storage). */
   gearSaved: boolean;
   /** The living orbs on the map, in simulation coordinates. */
@@ -166,7 +169,7 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     projectiles: 0, packArrows: 0, charging: 0, phase: 1, boss: null, slams: 0,
     render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0, hazardRings: 0, particles: 0, pools: 0 },
     local: 0, players: [], net: null,
-    gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, settingsOpen: false, gear: [], collection: {}, gearSaved: false,
+    gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, settingsOpen: false, gear: [], collection: {}, collectionSize: 0, gearSaved: false,
     orbs: [], hearts: 0, buffs: { boots: 0, berserk: 0, heal: 0 }, lifesteal: 0,
     faction: "human", slowed: 0, rooted: 0, world: 1, difficulty: "normal", unlocked: [], progressSaved: false,
     obstacles: 0, hazard: { kind: "storm", pending: 0, waves: 0, weather: 0, warning: 0, ground: 1, chilled: false, pools: 0 },
@@ -190,11 +193,13 @@ export function addDebugHooks(
     // depend on a frame having passed (a slow software renderer), so these two publish at once
     grantItem(id: string, level: number): void {
       gear.grant(id, level);
-      snapshot.collection = gear.save.items;
+      snapshot.collection = namedLevels(gear.save);
+      snapshot.collectionSize = gear.save.items.length;
     },
     clearGear(): void {
       gear.clear();
-      snapshot.collection = gear.save.items;
+      snapshot.collection = namedLevels(gear.save);
+      snapshot.collectionSize = gear.save.items.length;
     },
     grantGold(amount: number): void {
       const run = getRun();

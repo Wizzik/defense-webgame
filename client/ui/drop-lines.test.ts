@@ -3,15 +3,18 @@ import { gameData } from "../../sim/testing/game-data";
 import { Announcer } from "./announcer";
 import { ChestAction } from "../../sim";
 import { chestLootLine, dropLine } from "./drop-lines";
+import type { ItemRecord } from "../../meta";
 
 const item = gameData().items.find((i) => i.id === "oaken-shield")!;
+const record: ItemRecord = { uid: 1, rarity: "rare", level: 1, named: "oaken-shield" };
 
 describe("drop lines", () => {
   it("names a new item, a raised level and a full collection", () => {
-    expect(dropLine("en", { kind: "new", item, level: 1 })).toEqual({ text: "Loot: Oaken Shield (new)", tone: "rarity-rare" });
-    expect(dropLine("cs", { kind: "new", item, level: 1 })).toEqual({ text: "Kořist: Dubový štít (nový)", tone: "rarity-rare" });
-    expect(dropLine("en", { kind: "level", item, level: 3 }).text).toBe("Loot: Oaken Shield (level 3)");
-    expect(dropLine("cs", { kind: "level", item, level: 3 }).text).toBe("Kořist: Dubový štít (úroveň 3)");
+    expect(dropLine("en", { kind: "new", item, level: 1, record })).toEqual({ text: "Loot: Oaken Shield (new)", tone: "rarity-rare" });
+    expect(dropLine("cs", { kind: "new", item, level: 1, record })).toEqual({ text: "Kořist: Dubový štít (nový)", tone: "rarity-rare" });
+    expect(dropLine("en", { kind: "level", item, level: 3, uid: 1 }).text).toBe("Loot: Oaken Shield (level 3)");
+    expect(dropLine("cs", { kind: "level", item, level: 3, uid: 1 }).text).toBe("Kořist: Dubový štít (úroveň 3)");
+    expect(dropLine("en", { kind: "rolled", item, level: 2, record })).toEqual({ text: "Loot: Oaken Shield (new)", tone: "rarity-rare" });
     expect(dropLine("en", { kind: "none" })).toEqual({ text: "This boss has nothing new for you", tone: "" });
     expect(dropLine("cs", { kind: "none" })).toEqual({ text: "Sbírka tohoto bosse je úplná", tone: "" });
   });
