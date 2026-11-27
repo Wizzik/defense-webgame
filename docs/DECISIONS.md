@@ -2,6 +2,46 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Random items, stage 1: data (2026-11-27; Petr approved the spec, the numbers and the words are Claude's)
+
+Spec `docs/superpowers/specs/2026-11-26-random-items-design.md` (Petr's answers in section 9), plan
+`docs/superpowers/plans/2026-11-27-random-items.md`, tasks 1-5. The sim does not read the new data yet (stage 2).
+
+- **Files:** `design/item-bases.yaml` (46 bases), `design/affixes.yaml` (22 affixes, one per stat),
+  `design/item-names.yaml` (rare names), `rules.loot` in `design/rules.yaml`. data-build copies the three lists into
+  `data/generated/loot.json` (`GameData.loot`: `bases`, `affixes`, `names`); no map record behind them, so the cloud
+  writes the file with `mapLoot` of `tools/data-build/build.ts`, the same code `data:build` runs.
+- **Bases:** every slot type has a heavy (str), a light (agi) and a cloth (int) base; neck, ring, trinket and main hand
+  also a neutral one (`any`). The implicit row is worth 2 points (`rules.loot.implicitPoints`) and uses only stats the
+  sim reads today.
+- **Tiers split the budget, they never add points** (spec 4: "the rows of an item share its budget"): affix row i gets
+  (budget - 2) x weight_i / sum of the weights x a roll in [0.92, 1.08]. Weights T1-T4 1 / 1.35 / 1.7 / 2 (T4 = 2 x
+  T1), minPower 0 / 3 / 6 / 9. So every roll is within 8 % of the rarity budget (the test checks every tier combination
+  and both ends of every roll), a strong source gives a lopsided item (one big row of the stat you want), and an item
+  grows stronger only by its level. Deviation from the plan: the tier weights and minPower are one table in
+  `rules.loot.tiers`, not per stat; an affix only caps its tier (`maxTier`: lifesteal, move speed, dodge and damage
+  taken stop at T3). A one-row (common) item's tier changes nothing.
+- **Prices of the new stats** (1 point at item level 1, in `affixes.yaml`, `unit`): crit chance 1 % (a crit deals
+  +50 % at first), crit damage 5 %, dodge 0.5 %, damage taken 0.5 % less, thorns 5 % of a melee hit, cooldown speed
+  0.5 %, ultimate cooldown 1 %, area size 0.5 %. Stage 2 may retune them with the sim. The old stats keep the prices
+  of the `design/items.yaml` header (the test compares them).
+- **Roles:** str pool str, hp, armor, regen, damage taken, thorns, lifesteal; agi pool agi, attack speed, damage, move
+  speed, crit chance, crit damage, dodge, lifesteal; int pool int, spell power, cooldown speed, ultimate cooldown,
+  area size, lifesteal; any: magnet, gold find, magic find. Every role pool alone fills a mythic (4 affixes).
+- **Item power:** boss drops 2 / 4 / 6 / 8 by order, chests 1 + 0.3 x phase, + 0.5 per world above 1, + 1 Insane,
+  + 2 Hell. World 1 Normal: the first boss only T1, the final boss up to T3, chests up to T3 (phase 20: 7); T4 needs
+  power 9 (e.g. the final boss of world 3 or Insane); world 5 Hell's final boss is 12. A dropped item's level:
+  power 0 / 3 / 6 / 9 / 12 for level 1-5 (`levelAtPower`).
+- **Other numbers:** smart share 0.6, collection 200, named share epic 10 %, legendary 25 %, mythic 40 % (Petr),
+  salvage gold 10 / 25 / 50 / 90 / 150 by rarity (chest base price 100).
+- **Mythic effects:** the six existing kinds with fixed numbers between the named legendary and mythic items
+  (`rules.loot.mythicEffects`); new role effects later.
+- **Czech names:** a base carries the gender of its noun, `m`, `f`, `n` or `p`: a fourth form for plural nouns (boty,
+  rukavice, nárameníky), one plural form for inanimate masculine and feminine nouns. Every prefix and first word of a
+  rare name has the four forms; the test checks hard adjectives (-ý, -á, -é, -é) and soft ones (-í in all). The base's
+  CS name starts with a capital and is lowercased behind a prefix: "Mocná železná přilba medvěda". "Ghost" was a map
+  unit name (the clean-room test caught it): the rare name word is "Pale" / "Bledý".
+
 ## Petr's solo playtest batch (2026-11-26; Petr's wishes, the numbers are Claude's unless Petr is named)
 
 Petr could not win alone: enemies from the far side walked to the castle while he fought on the other. Spec of the

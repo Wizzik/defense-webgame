@@ -18,7 +18,7 @@ data/generated --> sim/ (pure, deterministic) --> client/ (Three.js rendering + 
 |---|---|---|
 | `tools/map-extract/` | Python toolkit: map → JSON export (`npm run map:extract`) | output untracked; map names allowed |
 | `tools/data-build/` | design YAML + export → `data/generated` (`npm run data:build`) | validates before it writes; cannot run in CI |
-| `design/` | hand-edited YAML: own names (EN/CS), map `source` codes, design values, porting notes (`review`) | map names allowed |
+| `design/` | hand-edited YAML: own names (EN/CS), map `source` codes, design values, porting notes (`review`); random items: `item-bases.yaml`, `affixes.yaml`, `item-names.yaml` → `data/generated/loot.json`, numbers in `rules.loot` | map names allowed |
 | `data/schema/` | zod schemas and `validateGameData`, shared by the game and the tools | |
 | `data/generated/` | game data the client bundles | generated only; carries no map codes (from phase 1 Task 1) |
 | `sim/` | simulation | pure and deterministic (AGENTS.md) |

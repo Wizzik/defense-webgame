@@ -24,7 +24,7 @@ The repository is public (decided 2026-11-04): never commit anything that must n
 - To change game data, edit `design/*.yaml`, then run `npm run map:extract -- <map.w3x> <label>` (local, output untracked) and `npm run data:build -- --source data-source/<label>/out --out data/generated`, and commit the regenerated files.
 - `data:build` cannot run in CI (no map data there).
 - Worlds live in `design/worlds.yaml` (order = world number; names, blurbs, card colour, `ready`, the map skeleton `map`: paths, the wall segments, island rules, kept-clear zones, and the natural event `hazard`), the difficulty table in `rules.difficulty` of `design/rules.yaml`.
-- Items live in `design/items.yaml` (budgets and units in its header and in `docs/DECISIONS.md`, section Gear, drops and chests); gold per enemy type in `design/enemies.yaml`; chest prices, gear levels and drop tables in `design/rules.yaml`.
+- Items live in `design/items.yaml` (budgets and units in its header and in `docs/DECISIONS.md`, section Gear, drops and chests); random items (from 2026-11-27) in `design/item-bases.yaml`, `design/affixes.yaml` and `design/item-names.yaml` (copied into `data/generated/loot.json`) with their numbers in `rules.loot`; gold per enemy type in `design/enemies.yaml`; chest prices, gear levels and drop tables in `design/rules.yaml`.
 
 ## Commands
 - `npm run check` - typecheck + tests (must pass before every commit)

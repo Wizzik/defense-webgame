@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-26 (Petr's solo playtest batch, first work in Claude Code). Read this first when you resume work.
+Updated 2026-11-27 (random items, stage 1: data). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -9,6 +9,25 @@ Updated 2026-11-26 (Petr's solo playtest batch, first work in Claude Code). Read
 2. **Random items** like Diablo 2 / Project Diablo 2 with game-icons.net pictures: the spec
    `docs/superpowers/specs/2026-11-26-random-items-design.md`, approved by Petr on 2026-11-27 (answers in its section 9); plan `docs/superpowers/plans/2026-11-27-random-items.md` (6 stages), to build in fresh sessions.
 3. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
+
+## Random items, stage 1: data (branch `claude/random-items-data`, 2026-11-27)
+
+- Plan `docs/superpowers/plans/2026-11-27-random-items.md`, tasks 1-5, done; rulings and numbers in
+  `docs/DECISIONS.md`, section Random items, stage 1.
+- New: `design/item-bases.yaml` (46 bases, str / agi / int on every slot type), `design/affixes.yaml` (22 affixes
+  with role tags, prices of the new stats, EN and CS prefixes in four forms and suffixes), `design/item-names.yaml`
+  (rare names), `rules.loot` (smart share 0.6, collection 200, named shares, tiers, item power, levels, salvage gold,
+  mythic effects). data-build copies them into `data/generated/loot.json` (`GameData.loot`).
+- `loot.json` and `rules.json` were written in the cloud with `mapLoot` of `tools/data-build/build.ts`; Petr reruns
+  `npm run data:build` locally once, the files must not change.
+- The game does not use the data yet: the digest stays, nothing changes in the browser.
+- **What Petr checks** (no game change, only the texts): read the Czech words in `design/affixes.yaml` and
+  `design/item-names.yaml` and the base names in `design/item-bases.yaml` (e.g. "Mocná železná přilba medvěda",
+  "Ponuré drápy"); say if a word sounds wrong. Number questions for him: is salvage gold 10-150 right, and should T4
+  come only from world 3 / Insane on (power 9)?
+- **Next, stage 2 (sim):** the new stats in the sim one at a time (crit, dodge, damage taken, thorns, cooldowns,
+  area), `sim/item-roll.ts` rolls items into typed rows of `GearState`, chests offer rolled or named cards, mythic
+  effects, `stateHash` and a new determinism case, the digest changes.
 
 ## Solo playtest batch (branch `claude/gifted-gauss-k6wag4`, 2026-11-26)
 
