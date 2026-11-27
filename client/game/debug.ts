@@ -13,6 +13,7 @@ import type { Backend, GpuInfo } from "../render/gpu";
 import type { PlayerSnapshot } from "./net-snapshot";
 import type { NetStats } from "../net/coop-net";
 import { cardItem } from "../ui/rolled-item";
+import { meterLines } from "../ui/damage-meter-lines";
 import { namedLevels } from "../../meta";
 
 const CHEST_ACTIONS = ["new", "choice", "level"] as const;
@@ -101,6 +102,11 @@ export interface GameSnapshot {
   buffs: { boots: number; berserk: number; heal: number };
   /** The hero's lifesteal from gear (a share). */
   lifesteal: number;
+  /**
+   * The local player's damage meter (sim/damage-meter.ts), refreshed every 15 steps: `total` and one row per source
+   * with damage, the biggest first (`source`: slot 0-9, 10 attack, 11 item effects, 12 thorns; `ability` id or "").
+   */
+  meter: { total: number; rows: { source: number; ability: string; damage: number; share: number }[] };
   /** Id of the enemy faction of the current phase (`human`, `orc`, `undead`, `elf`). */
   faction: string;
   /** Seconds left of the web's slow and of the roots on the hero (0 when none runs). */
@@ -188,7 +194,7 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0, hazardRings: 0, particles: 0, pools: 0 },
     local: 0, players: [], net: null,
     gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, settingsOpen: false, gear: [], collection: {}, collectionSize: 0, gearSaved: false,
-    orbs: [], hearts: 0, buffs: { boots: 0, berserk: 0, heal: 0 }, lifesteal: 0,
+    orbs: [], hearts: 0, buffs: { boots: 0, berserk: 0, heal: 0 }, lifesteal: 0, meter: { total: 0, rows: [] },
     faction: "human", slowed: 0, rooted: 0, world: 1, difficulty: "normal", unlocked: [], progressSaved: false,
     obstacles: 0, hazard: { kind: "storm", pending: 0, waves: 0, weather: 0, warning: 0, ground: 1, chilled: false, pools: 0 },
   };
@@ -450,6 +456,11 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
   snapshot.buffs.berserk = buffs.berserkTicks / TICKS_PER_SECOND;
   snapshot.buffs.heal = buffs.healTicks / TICKS_PER_SECOND;
   snapshot.lifesteal = run.hero.gear.lifesteal;
+  if (run.tick % 15 === 0 || run.state !== "playing") {
+    const lines = meterLines("en", run.players[run.current]!, run.tick);
+    snapshot.meter.total = lines.total;
+    snapshot.meter.rows = lines.rows.map((row) => ({ source: row.source, ability: row.ability, damage: row.damage, share: row.share }));
+  }
   snapshot.faction = run.data.rules.factions[run.phaseFaction[run.phaseIndex]!]!.id;
   snapshot.slowed = run.hero.slowTicks / TICKS_PER_SECOND;
   snapshot.rooted = run.hero.rootTicks / TICKS_PER_SECOND;

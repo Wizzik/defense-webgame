@@ -1,3 +1,4 @@
+import { METER_ITEM } from "./damage-meter";
 import { chainJumps } from "./abilities/chain-hits";
 import { damageEnemy } from "./combat";
 import { TICKS_PER_SECOND } from "./constants";
@@ -119,7 +120,7 @@ export function onGearAttack(run: Run, target: number, x: number, y: number, amo
       const reach = fx.splashRadius + run.data.enemies[e.type[i]!]!.collision;
       const dx = e.x[i]! - x;
       const dy = e.y[i]! - y;
-      if (dx * dx + dy * dy <= reach * reach) damageEnemy(run, i, damage, 0);
+      if (dx * dx + dy * dy <= reach * reach) damageEnemy(run, i, damage, 0, -1, METER_ITEM);
     }
   }
   if (fx.chainEvery <= 0) return;

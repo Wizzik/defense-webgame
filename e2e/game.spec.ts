@@ -1290,3 +1290,22 @@ test("F teleports the hero to the mouse point at once, far beyond a dash", async
   expect(after.x).toBeLessThan(before.x);
   expect(after.y).toBeGreaterThan(before.y);
 });
+
+test("the damage meter lists the hero's sources, the biggest first; N hides it", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&hero=tidecaller&phase=3&speed=4");
+  await waitForScreen(page, "menu");
+  await startRun(page);
+  await waitForScreen(page, "playing");
+  await page.evaluate(() => window.__game!.debug!.spawnEach());
+  await page.waitForFunction(() => window.__game!.meter.rows.length >= 2, null, { timeout: 60_000 });
+  const meter = await page.evaluate(() => window.__game!.meter);
+  const damages = meter.rows.map((row) => row.damage);
+  expect([...damages].sort((a, b) => b - a)).toEqual(damages);
+  expect(meter.rows.reduce((sum, row) => sum + row.share, 0)).toBeCloseTo(1, 5);
+  await expect(page.locator("#damage-meter")).toBeVisible();
+  await expect(page.locator("#damage-meter .meter-row").first()).toBeVisible();
+  await page.keyboard.press("KeyN");
+  await expect(page.locator("#damage-meter")).toBeHidden();
+  await page.keyboard.press("KeyN");
+  await expect(page.locator("#damage-meter")).toBeVisible();
+});

@@ -1,5 +1,6 @@
 import type { Drop } from "../../meta";
 import type { Run } from "../../sim";
+import { meterLines, shortNumber } from "./damage-meter-lines";
 import { el, formatTime } from "./dom";
 import { dropLine } from "./drop-lines";
 import { type Lang, type MessageKey, t } from "./i18n";
@@ -49,6 +50,14 @@ export class EndScreen {
       for (const drop of loot) {
         const line = dropLine(lang, drop);
         el("p", `end-line end-drop ${line.tone}`, this.stats, line.text.replace(/^[^:]+:\s*/, ""));
+      }
+    }
+    // the damage meter of the run, the five biggest sources
+    const meter = meterLines(lang, run.players[run.current]!, run.tick);
+    if (meter.rows.length > 0) {
+      el("p", "end-line end-drops-title", this.stats, t(lang, "end.damage", { total: shortNumber(meter.total), dps: shortNumber(meter.dps) }));
+      for (const row of meter.rows.slice(0, 5)) {
+        el("p", "end-line end-meter", this.stats, `${row.name}: ${shortNumber(row.damage)} (${Math.round(row.share * 100)} %)`);
       }
     }
     this.again.textContent = t(lang, "end.again");

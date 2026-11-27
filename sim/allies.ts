@@ -125,7 +125,7 @@ function updateWard(run: Run, i: number): void {
   face(run, i, e.x[target], e.y[target]);
   a.attackCooldown[i] = Math.round(p.attackInterval[L] * TICKS_PER_SECOND);
   a.lastAttackTick[i] = run.tick;
-  damageEnemy(run, target, p.damage[L] * run.hero.stats.spellPower * (1 - reduction), 2, i);
+  damageEnemy(run, target, p.damage[L] * run.hero.stats.spellPower * (1 - reduction), 2, i, a.ability[i]!);
 }
 
 function updateImage(run: Run, i: number): void {
@@ -177,7 +177,7 @@ function updateImage(run: Run, i: number): void {
   if (a.moving[i] === 0) face(run, i, e.x[best], e.y[best]);
   a.attackCooldown[i] = Math.round(stats.attackIntervalSeconds * TICKS_PER_SECOND);
   a.lastAttackTick[i] = run.tick;
-  damageEnemy(run, best, amount, 2, i);
+  damageEnemy(run, best, amount, 2, i, a.ability[i]!);
 }
 
 function face(run: Run, i: number, x: number, y: number): void {

@@ -43,6 +43,7 @@ export { isChoosing, PlayerState } from "./player";
 export { enemyTarget, nearestPlayer, TARGET_SWITCH_MARGIN } from "./targets";
 export type { TickInput } from "./input";
 export { Rng } from "./rng";
+export { DamageMeter, METER_ATTACK, METER_ITEM, METER_SOURCES, METER_THORNS } from "./damage-meter";
 export { createRun, Run } from "./run";
 export type { BossRecord, PlayerOptions, RunOptions, RunResult, RunState } from "./run";
 export { Slam, SlamEvent } from "./enemy-slam";

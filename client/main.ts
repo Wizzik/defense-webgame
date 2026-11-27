@@ -53,6 +53,7 @@ import { type BakedVat, bakeVat } from "./render/vat";
 import { Cards } from "./ui/cards";
 import { CastlePointer } from "./ui/castle-pointer";
 import { ChestPointer } from "./ui/chest-pointer";
+import { DamageMeterPanel } from "./ui/damage-meter";
 import { EndScreen } from "./ui/end-screen";
 import { GearPanel } from "./ui/gear-panel";
 import { GearScreen } from "./ui/gear-screen";
@@ -579,6 +580,7 @@ function createUi(
   addEventListener("keydown", (event) => {
     if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
     if (event.code === "KeyM") setMuted(!muted);
+    else if (event.code === "KeyN" && !menuOpen) meterPanel.toggle();
     else if (event.code === "KeyO") {
       if (settingsPanel.isOpen) {
         if (settingsPausedRun) closeSettings();
@@ -586,6 +588,7 @@ function createUi(
     }
   });
   const hud = new Hud(root);
+  const meterPanel = new DamageMeterPanel(root);
   hud.onLoot = (tone) => sound.engine.play(sound.data.sounds[tone === "rarity-mythic" ? "drop.mythic" : "drop.legendary"]);
   // the drop rolls for the run's course and the local hero's primary attribute (smart loot)
   hud.dropFor = (bossId, order, magicFind) => {
@@ -638,6 +641,7 @@ function createUi(
       hud.setVisible(!menuOpen);
       if (menuOpen) {
         ended = false;
+        meterPanel.hide();
         cards.hide();
         team.hide();
         pointer.hide();
@@ -645,6 +649,7 @@ function createUi(
         return;
       }
       hud.update(run, lang);
+      meterPanel.update(run, lang);
       cards.update(run, lang);
       team.update(run, lang, width, height);
       pointer.update(run, followCamera.camera, width, height);
