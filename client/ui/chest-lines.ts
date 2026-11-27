@@ -3,6 +3,7 @@ import { ChestAction, type ChestCard, type GearState, itemStatAt, slotTypeOf } f
 import { type Lang, type MessageKey, t } from "./i18n";
 import { itemLines, statLabel, statValue } from "./item-lines";
 import { type LineTone, tooltipLines } from "./item-tooltip";
+import { cardItem, wornItem } from "./rolled-item";
 
 /** What a chest card shows. */
 export interface ChestLines {
@@ -22,9 +23,8 @@ export interface ChestLines {
 /** The text of a chest card for the hero's current gear. */
 export function chestLines(lang: Lang, data: GameData, gear: GearState, card: ChestCard): ChestLines {
   const type = slotTypeOf(card.slot);
-  const item = data.items[card.item]!;
+  const item = cardItem(data, card);
   const rules = data.rules.gear;
-  const worn = gear.item[card.slot]!;
   const base = gear.base[card.slot]!;
   const temp = gear.temp[card.slot]!;
   const from = base + temp;
@@ -35,7 +35,7 @@ export function chestLines(lang: Lang, data: GameData, gear: GearState, card: Ch
     lines = itemLines(lang, item, 0, 1, rules).map((text) => ({ text, tone: "plain" as LineTone }));
     if (item.effect) lines.push({ text: item.effect.text[lang], tone: "effect" });
   } else if (card.action === ChestAction.Choice) {
-    const old = data.items[worn]!;
+    const old = wornItem(data, gear, card.slot)!;
     action = t(lang, "chest.choice", { name: old.name[lang] });
     lines = tooltipLines(lang, data, item, 0, from + 1, { item: old, level: base, temp }).lines;
   } else {

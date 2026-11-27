@@ -1,6 +1,7 @@
 import { meteorsOf } from "./fire-pools";
 import { chillOf } from "./chill";
 import { DIFFICULTY_IDS } from "../data/schema";
+import { MAX_ROWS, ROLLED_ITEM } from "./gear";
 import type { PlayerState } from "./player";
 import type { Run } from "./run";
 
@@ -279,10 +280,24 @@ function mixPlayer(p: PlayerState): void {
   mixFloat(hero.bonus.damage);
   mixFloat(hero.bonus.moveSpeed);
   mixFloat(hero.bonus.attackSpeed);
-  for (let i = 0; i < p.gear.item.length; i++) {
-    mixInt(p.gear.item[i]! + 1);
-    mixInt(p.gear.base[i]!);
-    mixInt(p.gear.temp[i]!);
+  const gear = p.gear;
+  for (let i = 0; i < gear.item.length; i++) {
+    mixInt(gear.item[i]! + 1);
+    mixInt(gear.base[i]!);
+    mixInt(gear.temp[i]!);
+    // a rolled item (random items): its base, rarity, effect, name and rows; named items keep the old hash
+    if (gear.item[i] !== ROLLED_ITEM) continue;
+    mixInt(gear.rolledBase[i]!);
+    mixInt(gear.rolledRarity[i]!);
+    mixInt(gear.rolledEffect[i]! + 1);
+    mixInt(gear.nameFirst[i]! + 1);
+    mixInt(gear.nameNoun[i]! + 1);
+    mixInt(gear.rowCount[i]!);
+    for (let r = 0; r < gear.rowCount[i]!; r++) {
+      mixInt(gear.rowStat[i * MAX_ROWS + r]!);
+      mixFloat(gear.rowValue[i * MAX_ROWS + r]!);
+      mixInt(gear.rowTier[i * MAX_ROWS + r]! + 1);
+    }
   }
   const fx = p.gear.fx;
   mixInt(fx.chainCount);

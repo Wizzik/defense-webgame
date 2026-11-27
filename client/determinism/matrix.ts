@@ -31,7 +31,8 @@ export const CHECKPOINT_EVERY = 300;
 /**
  * The cases of spec 5.2: every hero from phase 1, then four late starts with full gear; then a world 3 insane run
  * and a world 5 hell start at phase 6 (difficulties spec 2026-11-21 4.9), a world 1 run through the storm, a world 2
- * run through a sandstorm and a world 3 run in the thicket.
+ * run through a sandstorm and a world 3 run in the thicket; then worlds 4 and 5 and a run that opens chests of
+ * random items with T3 rows.
  */
 export function matrixCases(data: GameData): MatrixCase[] {
   const cases: MatrixCase[] = data.heroes.map((h) => ({
@@ -50,9 +51,12 @@ export function matrixCases(data: GameData): MatrixCase[] {
     { id: "w2-sand", hero: "gravecaller", seed: 11, startPhase: 4, gear: "mid", maxTicks: 6000, world: 2 },
     { id: "w3-thicket", hero: "stonehorn", seed: 13, startPhase: 2, gear: "mid", maxTicks: 4500, world: 3 },
     // the blizzard through a whole storm, with chill (difficulties plan 3b)
-    { id: "w4-blizzard", hero: "tidecaller", seed: 15, startPhase: 3, gear: "mid", maxTicks: 6000, world: 4 },
+    // (seed 16 since random items: with seed 15 the tidecaller fell before the blizzard ended)
+    { id: "w4-blizzard", hero: "tidecaller", seed: 16, startPhase: 3, gear: "mid", maxTicks: 6000, world: 4 },
     // green meteors and their pools of fire from phase 1 (difficulties plan 3b)
     { id: "w5-meteors", hero: "gravecaller", seed: 17, startPhase: 1, gear: "mid", maxTicks: 3600, world: 5 },
+    // random items from chests with item power for T3 rows (world 3 insane from phase 11, random items plan stage 2)
+    { id: "loot-t3", hero: "gravecaller", seed: 19, startPhase: 11, gear: "mid", maxTicks: 4500, world: 3, difficulty: "insane" },
   );
   return cases;
 }

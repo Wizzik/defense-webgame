@@ -5,7 +5,7 @@ import type { GameData, Rarity } from "../../data/schema";
 import { RARITIES } from "../../data/schema";
 import { botChestChoice, botChestKeep } from "../../sim/bot";
 import { applyChestCard, rollChestOffer } from "../../sim/chests";
-import { createRun, gainXp, xpToNext } from "../../sim/index";
+import { createRun, gainXp, wornRarity, xpToNext } from "../../sim/index";
 import type { HeroStats } from "../../sim/index";
 import { gameData } from "../../sim/testing/game-data";
 
@@ -46,7 +46,7 @@ export function chestPower(data: GameData, heroId: string, seed: number, options
     const keep = botChestKeep(run, card);
     picks[keep ? "level" : ACTION_NAMES[card.action]]++;
     applyChestCard(run, card, keep);
-    rarities[data.items[run.gear.item[card.slot]!]!.rarity]++;
+    rarities[RARITIES[wornRarity(data, run.gear, card.slot)]!]++;
     run.chestOffer = null;
   }
   const after = run.hero.stats;

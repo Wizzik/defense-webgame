@@ -1,4 +1,4 @@
-import type { GameData } from "../../data/schema";
+import type { Item } from "../../data/schema";
 import type { Drop } from "../../meta";
 import { ChestAction } from "../../sim";
 import { type Lang, t } from "./i18n";
@@ -13,10 +13,9 @@ export function dropLine(lang: Lang, drop: Drop): { text: string; tone: string }
 
 /** The news line of a chest pick that brings a legendary or mythic item (New or a taken Choice); null for any other pick. */
 export function chestLootLine(
-  lang: Lang, data: GameData, itemIndex: number, action: number,
+  lang: Lang, item: Item | null | undefined, action: number,
 ): { text: string; tone: string } | null {
   if (action !== ChestAction.New && action !== ChestAction.Choice) return null;
-  const item = data.items[itemIndex];
   if (!item || (item.rarity !== "legendary" && item.rarity !== "mythic")) return null;
   return { text: t(lang, "chest.loot", { name: item.name[lang] }), tone: `rarity-${item.rarity}` };
 }

@@ -21,10 +21,10 @@ describe("drop lines", () => {
     const sword = data.items.findIndex((i) => i.id === "skysplitter");
     const mythic = data.items.findIndex((i) => i.rarity === "mythic");
     const rare = data.items.findIndex((i) => i.rarity === "rare");
-    expect(chestLootLine("en", data, sword, ChestAction.New)).toEqual({ text: `Chest: ${data.items[sword]!.name.en}`, tone: "rarity-legendary" });
-    expect(chestLootLine("cs", data, mythic, ChestAction.Choice)).toEqual({ text: `Truhla: ${data.items[mythic]!.name.cs}`, tone: "rarity-mythic" });
-    expect(chestLootLine("en", data, sword, ChestAction.Level)).toBeNull();
-    expect(chestLootLine("en", data, rare, ChestAction.New)).toBeNull();
+    expect(chestLootLine("en", data.items[sword], ChestAction.New)).toEqual({ text: `Chest: ${data.items[sword]!.name.en}`, tone: "rarity-legendary" });
+    expect(chestLootLine("cs", data.items[mythic], ChestAction.Choice)).toEqual({ text: `Truhla: ${data.items[mythic]!.name.cs}`, tone: "rarity-mythic" });
+    expect(chestLootLine("en", data.items[sword], ChestAction.Level)).toBeNull();
+    expect(chestLootLine("en", data.items[rare], ChestAction.New)).toBeNull();
   });
 
   it("the announcer carries the tone of its line", () => {

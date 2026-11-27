@@ -631,8 +631,9 @@ test("a chest takes gold and offers three rolled items; the pick lands in the ge
   const cards = await page.evaluate(() => window.__game!.chestCards);
   expect(cards).toHaveLength(3);
   expect(cards!.every((card) => card.action === "new")).toBe(true);
-  const first = ITEMS.find((item) => item.id === cards![0]!.item)!;
-  expect(first.rarity).toBe(cards![0]!.rarity);
+  // a card offers a named item (its name in the catalogue) or a rolled one (a name of its own)
+  const first = cards![0]!;
+  if (!first.rolled) expect(ITEMS.find((item) => item.id === first.item)!.rarity).toBe(first.rarity);
   await expect(page.locator("button.card").first().locator(".card-name")).toHaveText(first.name.cs);
   await expect(page.locator("button.card").first()).toHaveClass(new RegExp(`rarity-${first.rarity}`));
   await expect(page.locator("#hud-gold")).toContainText("900");
@@ -678,7 +679,7 @@ test("a chest card for a worn slot opens the compare; Esc goes back, 1 keeps, th
   await expect(page.locator("#chest-compare")).toBeVisible();
   await expect(page.locator("#chest-compare .compare-col")).toHaveCount(2);
   await expect(page.locator(".compare-keep .card-name")).toHaveText(ITEMS.find((i) => i.id === worn.item)!.name.cs);
-  await expect(page.locator(".compare-take .card-name")).toHaveText(ITEMS.find((i) => i.id === cards[index]!.item)!.name.cs);
+  await expect(page.locator(".compare-take .card-name")).toHaveText(cards[index]!.name.cs);
   await expect(page.locator("button.card").first()).toBeHidden();
   expect(await page.evaluate(() => window.__game!.chestCompare)).toBe(index);
   const tick = await page.evaluate(() => window.__game!.tick);
@@ -867,8 +868,8 @@ test("the gear screen equips an item for one hero; the run starts with it", asyn
   await waitForScreen(page, "playing");
   const worn = await page.evaluate(() => window.__game!.gear.filter((slot) => slot !== null));
   expect(worn).toEqual([
-    { item: "band-of-resolve", base: 1, temp: 0 },
-    { item: "oaken-shield", base: 3, temp: 0 },
+    { item: "band-of-resolve", base: 1, temp: 0, rolled: false },
+    { item: "oaken-shield", base: 3, temp: 0, rolled: false },
   ]);
 });
 

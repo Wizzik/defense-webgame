@@ -5,6 +5,7 @@ import { OrbKind } from "./buffs";
 import type { CardOffer } from "./cards";
 import { ChestAction, type ChestCard, chestPrice } from "./chests";
 import { Charge } from "./enemy-charge";
+import { wornRarity } from "./gear";
 import { Slam, windupRadius } from "./enemy-slam";
 import { InputAction } from "./input";
 import type { TickInput } from "./input";
@@ -91,14 +92,14 @@ function cardRank(run: Run, card: CardOffer["cards"][number]): number {
   return shared ? 4 : 6;
 }
 
-/** Rarity rank of item `index` (common 0 .. mythic 4). */
-function rarityRank(run: Run, index: number): number {
-  return RARITIES.indexOf(run.data.items[index]!.rarity);
+/** Rarity rank (common 0 .. mythic 4) of the item a chest card offers (rolled or named). */
+function rarityRank(run: Run, card: ChestCard): number {
+  return card.rolled ? card.rolled.rarity : RARITIES.indexOf(run.data.items[card.item]!.rarity);
 }
 
-/** Whether `card` is a Choice whose rolled item has a higher rarity than the worn item. */
+/** Whether `card` is a Choice whose offered item has a higher rarity than the worn item. */
 function isUpgrade(run: Run, card: ChestCard): boolean {
-  return card.action === ChestAction.Choice && rarityRank(run, card.item) > rarityRank(run, run.gear.item[card.slot]!);
+  return card.action === ChestAction.Choice && rarityRank(run, card) > wornRarity(run.data, run.gear, card.slot);
 }
 
 /**
@@ -115,7 +116,7 @@ export function botChestChoice(run: Run): number {
     for (let i = 0; i < offer.cards.length; i++) {
       const card = offer.cards[i]!;
       if (upgrade ? !isUpgrade(run, card) : card.action !== ChestAction.New) continue;
-      const rank = rarityRank(run, card.item);
+      const rank = rarityRank(run, card);
       if (rank > bestRank) {
         bestRank = rank;
         best = i;

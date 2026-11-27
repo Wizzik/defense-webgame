@@ -36,7 +36,7 @@ export const EventKind = {
   /** The hero opened a chest: a = chest index, value = gold paid, x/y = the chest. */
   ChestOpen: 20,
   /** A slot of the open chest was chosen: a = slot, value = its new level (permanent + temporary), x/y = the hero,
-   *  u = index of the item in the slot. */
+   *  u = index of the item in the slot in data.items, or ROLLED_ITEM (-2) for a rolled one (sim/gear.ts). */
   ChestPick: 21,
   /** A boss fell: a = enemy type index, value = how many bosses fell in the run before it (0 for the first), x/y = where. */
   BossDeath: 22,

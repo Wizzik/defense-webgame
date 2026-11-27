@@ -1,8 +1,10 @@
 import { runMagicFind } from "./difficulty";
 import type { Rarity } from "../data/schema";
-import { RARITIES } from "../data/schema";
 import { EventKind } from "./events";
-import { recomputeGear, SLOT_COUNT, slotTypeOf } from "./gear";
+import {
+  EMPTY_ITEM, recomputeGear, ROLLED_ITEM, type RolledItem, SLOT_COUNT, slotTypeOf, wearNamed, wearRolled,
+} from "./gear";
+import { chestPower, rollItem } from "./item-roll";
 import { drawRarity, magicFindWeights } from "./magic-find";
 import { isFree, nearestFree, pushX, pushY } from "./world-map/geometry";
 import type { Run } from "./run";
@@ -29,12 +31,14 @@ export class ChestStore {
 export const ChestAction = { New: 0, Choice: 1, Level: 2 } as const;
 export type ChestAction = (typeof ChestAction)[keyof typeof ChestAction];
 
-/** One card of an open chest: a gear slot and an item (index into `data.items`). */
+/** One card of an open chest: a gear slot and a named item (index into `data.items`) or a rolled one. */
 export interface ChestCard {
   slot: number;
-  /** The rolled item for New and Choice, the worn item for Level. */
+  /** The offered named item for New and Choice, the worn item for Level; ROLLED_ITEM when `rolled` is set. */
   item: number;
   action: ChestAction;
+  /** A random item the card offers (New or Choice); missing or null for a named item. */
+  rolled?: RolledItem | null;
 }
 
 /** The cards a chest that was just opened offers; the player picks one by its index. */
@@ -129,55 +133,56 @@ function twinSlot(slot: number): number {
 
 /**
  * Rolls the cards of an open chest (randomness only from `run.chestRng`; rare, may allocate). For each card:
- * a rarity by `rules.chests.rarityWeights` raised by the hero's magic find; a slot not yet in the offer whose
- * type has an item of that rarity (one rarity lower when there is none); an item of that rarity and type,
- * preferring one the twin slot (ring, trinket) does not wear. The action follows the worn item: New for an
- * empty slot, Level when the rolled item is the worn one, else Choice (any rarity) with the rolled item on the card.
+ * a rarity by `rules.chests.rarityWeights` raised by the hero's magic find and a slot not yet in the offer. With
+ * `rules.loot.namedShare` of the rarity (when a named item of that rarity fits the slot) the card offers a named item,
+ * preferring one the twin slot (ring, trinket) does not wear; else a random item rolled for the hero's primary
+ * attribute with the chest's item power (sim/item-roll.ts). The action follows the worn item: New for an empty slot,
+ * Level when the named item is the worn one, else Choice (any rarity) with the offered item on the card.
  */
 export function rollChestOffer(run: Run): ChestOffer {
   const { data, gear, chestRng: rng } = run;
   const weights = magicFindWeights(data.rules.chests.rarityWeights, runMagicFind(run), data.rules.magicFind);
   const count = Math.min(data.rules.chests.slotsPerOffer, SLOT_COUNT);
+  const power = chestPower(data, run.phaseIndex + 1, run.world, run.difficulty);
   const taken = new Uint8Array(SLOT_COUNT);
   const cards: ChestCard[] = [];
   for (let c = 0; c < count; c++) {
-    let rank = RARITIES.indexOf(drawRarity(weights, rng));
-    let slots: number[] = [];
-    for (; rank >= 0; rank--) {
-      const rarity = RARITIES[rank]!;
-      slots = [];
-      for (let slot = 0; slot < SLOT_COUNT; slot++) {
-        if (taken[slot] === 0 && hasItem(run, rarity, slot)) slots.push(slot);
-      }
-      if (slots.length > 0) break;
-    }
-    if (rank < 0) throw new Error("chests: no free slot for a card");
-    const rarity = RARITIES[rank]!;
+    const rarity: Rarity = drawRarity(weights, rng);
+    const slots: number[] = [];
+    for (let slot = 0; slot < SLOT_COUNT; slot++) if (taken[slot] === 0) slots.push(slot);
+    if (slots.length === 0) throw new Error("chests: no free slot for a card");
     const slot = slots[rng.int(slots.length)]!;
     taken[slot] = 1;
-    const type = slotTypeOf(slot);
-    const twin = twinSlot(slot);
-    const twinItem = twin >= 0 ? gear.item[twin]! : -1;
-    const all: number[] = [];
-    for (let i = 0; i < data.items.length; i++) {
-      const item = data.items[i]!;
-      if (item.rarity === rarity && item.slotType === type) all.push(i);
-    }
-    const others = all.filter((i) => i !== twinItem);
-    const pool = others.length > 0 ? others : all;
-    const rolled = pool[rng.int(pool.length)]!;
     const worn = gear.item[slot]!;
-    if (worn < 0) cards.push({ slot, item: rolled, action: ChestAction.New });
-    else if (rolled === worn) cards.push({ slot, item: worn, action: ChestAction.Level });
-    else cards.push({ slot, item: rolled, action: ChestAction.Choice });
+    const named = namedPool(run, rarity, slot);
+    const share = data.rules.loot.namedShare[rarity];
+    if (named.length > 0 && share > 0 && rng.next() < share) {
+      const item = named[rng.int(named.length)]!;
+      if (worn === EMPTY_ITEM) cards.push({ slot, item, action: ChestAction.New, rolled: null });
+      else if (item === worn) cards.push({ slot, item: worn, action: ChestAction.Level, rolled: null });
+      else cards.push({ slot, item, action: ChestAction.Choice, rolled: null });
+      continue;
+    }
+    const rolled = rollItem(data, rng, slotTypeOf(slot), rarity, power, run.hero.def.primary);
+    const action = worn === EMPTY_ITEM ? ChestAction.New : ChestAction.Choice;
+    cards.push({ slot, item: ROLLED_ITEM, action, rolled });
   }
   return { cards };
 }
 
-/** Whether some item of `rarity` fits `slot`. */
-function hasItem(run: Run, rarity: Rarity, slot: number): boolean {
+/** The named items of `rarity` that fit `slot`, without the one the twin slot wears when there are others. */
+function namedPool(run: Run, rarity: Rarity, slot: number): number[] {
+  const { data, gear } = run;
   const type = slotTypeOf(slot);
-  return run.data.items.some((item) => item.rarity === rarity && item.slotType === type);
+  const twin = twinSlot(slot);
+  const twinItem = twin >= 0 ? gear.item[twin]! : EMPTY_ITEM;
+  const all: number[] = [];
+  for (let i = 0; i < data.items.length; i++) {
+    const item = data.items[i]!;
+    if (item.rarity === rarity && item.slotType === type) all.push(i);
+  }
+  const others = all.filter((i) => i !== twinItem);
+  return others.length > 0 ? others : all;
 }
 
 /**
@@ -192,19 +197,25 @@ export function applyChestCard(run: Run, card: ChestCard, keep = false): void {
   const slot = card.slot;
   let done: ChestAction = card.action;
   if (card.action === ChestAction.New) {
-    gear.item[slot] = card.item;
+    wearCard(run, card);
     gear.base[slot] = 0;
     gear.temp[slot] = 1;
   } else if (card.action === ChestAction.Choice && !keep) {
     gear.temp[slot] = gear.base[slot]! + gear.temp[slot]! + 1;
     gear.base[slot] = 0;
-    gear.item[slot] = card.item;
+    wearCard(run, card);
   } else {
     gear.temp[slot] = gear.temp[slot]! + 1;
     done = ChestAction.Level;
   }
   recomputeGear(run);
   run.events.push(EventKind.ChestPick, slot, gear.base[slot]! + gear.temp[slot]!, hero.x, hero.y, gear.item[slot]!, done);
+}
+
+/** Puts the card's item (rolled or named) into its slot. */
+function wearCard(run: Run, card: ChestCard): void {
+  if (card.rolled) wearRolled(run.gear, card.slot, card.rolled);
+  else wearNamed(run.gear, card.slot, card.item);
 }
 
 /**

@@ -3,6 +3,7 @@ import { type ChestCard, type GearState, itemStatAt } from "../../sim";
 import { type Lang, type MessageKey, t } from "./i18n";
 import { statLabel, statValue } from "./item-lines";
 import type { LineTone } from "./item-tooltip";
+import { cardItem, wornItem } from "./rolled-item";
 
 /** One column of the chest compare: an item as it would stand after the choice. */
 export interface CompareSide {
@@ -66,8 +67,8 @@ function tone(value: number | undefined, other: number | undefined): LineTone {
  */
 export function compareLines(lang: Lang, data: GameData, gear: GearState, card: ChestCard): CompareLines {
   const rules = data.rules.gear;
-  const worn = data.items[gear.item[card.slot]!]!;
-  const rolled = data.items[card.item]!;
+  const worn = wornItem(data, gear, card.slot)!;
+  const rolled = cardItem(data, card);
   const base = gear.base[card.slot]!;
   const temp = gear.temp[card.slot]!;
   const from = base + temp;
