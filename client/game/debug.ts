@@ -6,6 +6,7 @@ import { groundSpeedScale,
   type Run,
   EMPTY_ITEM, ROLLED_ITEM, SLOT_IDS, type SlotId, TICKS_PER_SECOND,
 } from "../../sim";
+import { enemyName } from "../ui/boss-name";
 import { latestBoss, runPhase } from "./boss";
 import type { Backend, GpuInfo } from "../render/gpu";
 import type { PlayerSnapshot } from "./net-snapshot";
@@ -53,7 +54,7 @@ export interface GameSnapshot {
   /** Phase of the run from 1; the finale is one past the last phase (21). */
   phase: number;
   /** The living boss that came last; `x`, `y` are simulation coordinates. */
-  boss: { id: string; hp: number; maxHp: number; x: number; y: number } | null;
+  boss: { id: string; name: string; hp: number; maxHp: number; x: number; y: number } | null;
   /** Slams winding up (warning circles on the ground). */
   slams: number;
   /** What the renderer built: `heroModels` is how many hero figures stand in the scene (refreshed every frame), `slamRings` how many slam circles lie on the floor, `particles` how many weather particles are drawn. */
@@ -421,8 +422,10 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
     snapshot.boss = null;
   } else {
     // one object, filled in place while a boss lives
-    const info = snapshot.boss ?? (snapshot.boss = { id: "", hp: 0, maxHp: 0, x: 0, y: 0 });
+    const info = snapshot.boss ?? (snapshot.boss = { id: "", name: "", hp: 0, maxHp: 0, x: 0, y: 0 });
     info.id = run.data.enemies[enemies.type[boss]!]!.id;
+    // the boss's name in the run's world (English), as the boss bar shows it
+    info.name = enemyName(run.data, run.world, enemies.type[boss]!, "en");
     info.hp = enemies.hp[boss]!;
     info.maxHp = enemies.maxHp[boss]!;
     info.x = enemies.x[boss]!;

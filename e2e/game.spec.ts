@@ -21,6 +21,9 @@ const xpFirst = (
 const enemies = JSON.parse(
   readFileSync(join(import.meta.dirname, "..", "data", "generated", "enemies.json"), "utf8"),
 ) as { id: string; boss?: true }[];
+const worlds = JSON.parse(
+  readFileSync(join(import.meta.dirname, "..", "data", "generated", "worlds.json"), "utf8"),
+) as { bosses?: Record<string, unknown> }[];
 /** Common enemy ids from the generated data, so adding a type extends the test. Bosses come by the timeline. */
 const enemyIds = enemies.filter((e) => !e.boss).map((e) => e.id);
 
@@ -121,7 +124,9 @@ test("menu starts a run on the available backend", async ({ page }, testInfo) =>
   const expected = testInfo.project.name === "webgpu-swiftshader" ? "WebGPU" : "WebGL2";
   expect(await page.evaluate(() => window.__game?.backend)).toBe(expected);
   expect(await page.evaluate(() => window.__game?.screen)).toBe("playing");
-  expect(await page.evaluate(() => window.__game?.render.enemyMeshes)).toBe(enemies.length);
+  // one mesh per enemy type and one per boss look of a world
+  const bossLooks = worlds.reduce((sum, world) => sum + Object.keys(world.bosses ?? {}).length, 0);
+  expect(await page.evaluate(() => window.__game?.render.enemyMeshes)).toBe(enemies.length + bossLooks);
 
   // enemies spawn a few seconds into the run
   await page.waitForFunction(() => (window.__game?.enemies ?? 0) > 0, undefined, {

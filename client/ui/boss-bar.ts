@@ -1,4 +1,5 @@
 import type { Run } from "../../sim";
+import { enemyName } from "./boss-name";
 import { latestBoss } from "../game/boss";
 import { el, setText } from "./dom";
 import type { Lang } from "./i18n";
@@ -25,7 +26,7 @@ export class BossBar {
       return;
     }
     const { enemies } = run;
-    setText(this.name, run.data.enemies[enemies.type[slot]!]!.name[lang]);
+    setText(this.name, enemyName(run.data, run.world, enemies.type[slot]!, lang));
     const share = Math.max(0, Math.min(1, enemies.hp[slot]! / enemies.maxHp[slot]!));
     this.fill.style.width = `${share * 100}%`;
     if (this.root.hidden) this.root.hidden = false;

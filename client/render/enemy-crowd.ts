@@ -11,6 +11,7 @@ import {
 import { Action, type Run, TICKS_PER_SECOND } from "../../sim";
 import type { RunView } from "../game/session";
 import { MODEL_HEIGHT_FACTOR, SCENE_SCALE } from "./coords";
+import { type CrowdSkins, meshIndex } from "./boss-looks";
 import { CrowdBuckets } from "./crowd-buckets";
 import { type BakedVat, type VatClip, vatPositionNode } from "./vat";
 
@@ -46,6 +47,8 @@ interface TypeMesh {
   /** 1 per instance while its enemy is lusted (bloodlust), else 0. */
   lust: Float32Array;
   lustAttribute: InstancedBufferAttribute;
+  /** Scale of the drawn model on top of the collision size (a boss's look in a world). */
+  size: number;
   walk: VatClip;
   punch: VatClip;
   idle: VatClip;
@@ -61,14 +64,19 @@ interface TypeMesh {
  */
 export class EnemyCrowd implements RunView {
   readonly object = new Group();
-  /** Instanced meshes in `object`: one per enemy type. */
+  /** Instanced meshes in `object`: one per enemy type, then one per boss look of a world (`crowdSkins`). */
   readonly meshCount: number;
   private readonly time: UniformNode<"float"> = uniform(0);
   private readonly types: TypeMesh[];
   private readonly buckets: CrowdBuckets;
+  private readonly skins: CrowdSkins | null;
 
-  /** `vats` and `tints` are indexed by enemy type; `tints`: linear rgb per type (`tintTable`). */
-  constructor(vats: BakedVat[], capacity: number, tints: Float32Array) {
+  /**
+   * `vats`, `tints` (linear rgb, `tintTable`) and the skins' `sizes` are indexed by mesh; without `skins` there is
+   * one mesh per enemy type.
+   */
+  constructor(vats: BakedVat[], capacity: number, tints: Float32Array, skins: CrowdSkins | null = null) {
+    this.skins = skins;
     this.types = vats.map((vat, type) => this.createType(vat, capacity, tints, type));
     this.meshCount = this.types.length;
     this.buckets = new CrowdBuckets(vats.length, capacity);
@@ -114,6 +122,7 @@ export class EnemyCrowd implements RunView {
       animAttribute,
       lust,
       lustAttribute,
+      size: this.skins ? this.skins.sizes[type]! : 1,
       walk: requireClip(vat, WALK_CLIP),
       punch: requireClip(vat, PUNCH_CLIP),
       idle: requireClip(vat, IDLE_CLIP),
@@ -133,10 +142,11 @@ export class EnemyCrowd implements RunView {
       const x = enemies.prevX[slot] + (enemies.x[slot] - enemies.prevX[slot]) * alpha;
       const y = enemies.prevY[slot] + (enemies.y[slot] - enemies.prevY[slot]) * alpha;
       const type = enemies.type[slot];
-      const { matrices, anim, lust, walk, punch, idle, height, feet } = types[type];
-      const n = buckets.push(type);
+      const mesh = this.skins ? meshIndex(this.skins, run.world, type) : type;
+      const { matrices, anim, lust, walk, punch, idle, height, feet, size } = types[mesh];
+      const n = buckets.push(mesh);
       const diameter = 2 * run.data.enemies[type].collision * SCENE_SCALE;
-      const scale = (MODEL_HEIGHT_FACTOR * diameter) / height;
+      const scale = (MODEL_HEIGHT_FACTOR * diameter * size) / height;
       // rotation about Y turning the model's +Z axis to the heading (north is -z in the scene)
       const cos = -enemies.facingY[slot] * scale;
       const sin = enemies.facingX[slot] * scale;

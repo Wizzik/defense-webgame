@@ -44,10 +44,15 @@ export function enemyTint(id: string): number {
 
 /** Linear rgb per type index (3 floats each). Allocates: call it once at start. */
 export function tintTable(enemies: readonly { id: string }[]): Float32Array {
-  const table = new Float32Array(enemies.length * 3);
+  return hexTintTable(enemies.map((enemy) => enemyTint(enemy.id)));
+}
+
+/** Linear rgb of each colour (3 floats each). Allocates: call it once at start. */
+export function hexTintTable(colors: readonly number[]): Float32Array {
+  const table = new Float32Array(colors.length * 3);
   const color = new Color();
-  enemies.forEach((enemy, i) => {
-    color.set(enemyTint(enemy.id));
+  colors.forEach((hex, i) => {
+    color.set(hex);
     table[i * 3] = color.r;
     table[i * 3 + 1] = color.g;
     table[i * 3 + 2] = color.b;

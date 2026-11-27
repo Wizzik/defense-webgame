@@ -108,6 +108,22 @@ export type Weather = z.infer<typeof WeatherSchema>;
 export type Thicket = z.infer<typeof ThicketSchema>;
 export type Meteors = z.infer<typeof MeteorsSchema>;
 
+const Hex = z.string().regex(/^#[0-9a-f]{6}$/, "expected a lowercase hex colour like #1f3a44");
+
+/**
+ * How a world shows one boss (Petr's batch 2, task 5): the sim keeps the boss's type (its mechanics per boss slot),
+ * the world gives it a name, a model (the id of a common enemy type, whose model it borrows), a body tint, a size
+ * (a scale of the drawn model only; the collision stays) and the colour of the ring under it.
+ */
+export const BossLookSchema = z.object({
+  name: LocalizedText,
+  model: Slug,
+  tint: Hex,
+  size: z.number().min(0.5).max(2),
+  aura: Hex,
+}).strict();
+export type BossLook = z.infer<typeof BossLookSchema>;
+
 /** One world of the ladder (design/worlds.yaml); its place in the list is its number, 1-based. */
 export const WorldSchema = z.object({
   id: Slug,
@@ -115,13 +131,15 @@ export const WorldSchema = z.object({
   /** One sentence shown under the world's card. */
   blurb: LocalizedText,
   /** Card colour, a lowercase hex. */
-  color: z.string().regex(/^#[0-9a-f]{6}$/, "expected a lowercase hex colour like #1f3a44"),
+  color: Hex,
   /** False: playable with the look of world 1 and marked "coming soon". */
   ready: z.boolean(),
   /** Enemy hp and damage x this on top of the difficulty's world step (default 1): tunes one world of the ladder. */
   strength: z.number().positive().optional(),
   map: WorldMapSchema,
   hazard: HazardSchema,
+  /** Boss id (a boss of rules.events or the finale) to its look in this world; a boss left out looks as in world 1. */
+  bosses: z.record(Slug, BossLookSchema).optional(),
 }).strict();
 export type World = z.infer<typeof WorldSchema>;
 

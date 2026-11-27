@@ -20,7 +20,7 @@ export type { Enemy, FactionId } from "./enemy";
 export { DIFFICULTY_IDS, PointSchema, RarityWeightsSchema, RulesSchema } from "./rules";
 export type { DifficultyId, Point, RarityWeights, Rules } from "./rules";
 export { stormOf, WorldSchema } from "./world";
-export type { World, WorldMap, Hazard, Storm, Weather, Thicket, Meteors } from "./world";
+export type { BossLook, World, WorldMap, Hazard, Storm, Weather, Thicket, Meteors } from "./world";
 export { HeroSchema } from "./hero";
 export type { Hero } from "./hero";
 export {
@@ -77,6 +77,11 @@ export function validateGameData(data: unknown): GameData {
   worlds.forEach((w, i) => {
     if (worldIds.has(w.id)) errors.push(`worlds.${i}.id: duplicate world id "${w.id}"`);
     worldIds.add(w.id);
+    for (const [id, look] of Object.entries(w.bosses ?? {})) {
+      if (enemies.find((e) => e.id === id)?.boss !== true) errors.push(`worlds.${i}.bosses.${id}: not a boss`);
+      const model = enemies.find((e) => e.id === look.model);
+      if (!model || model.boss === true) errors.push(`worlds.${i}.bosses.${id}.model: "${look.model}" is not a common enemy type`);
+    }
   });
 
   const abilityIds = new Set<string>();

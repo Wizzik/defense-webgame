@@ -8,6 +8,7 @@ import {
   WeatherPhase,
   maxDashCharges,
 } from "../../sim";
+import { enemyName } from "./boss-name";
 import { abilityIconSvg } from "./ability-icons";
 import { AbilityTooltipView, abilityTooltip } from "./ability-tooltip";
 import { Announcer } from "./announcer";
@@ -225,7 +226,7 @@ export class Hud {
       if (kind === EventKind.RushWarning) {
         this.announcer.push(t(lang, "announce.rush"), Math.round(events.value[i]! * TICKS_PER_SECOND));
       } else if (kind === EventKind.BossSpawn) {
-        const name = run.data.enemies[events.value[i]!]!.name[lang];
+        const name = enemyName(run.data, run.world, events.value[i]!, lang);
         this.announcer.push(t(lang, "announce.boss", { name }), ANNOUNCE_TICKS);
       } else if (kind === EventKind.BossDeath && this.dropFor) {
         const line = dropLine(lang, this.dropFor(run.data.enemies[events.a[i]!]!.id, events.value[i]!, runMagicFind(run)));
@@ -255,7 +256,7 @@ export class Hud {
       } else if (kind === EventKind.Faction) {
         faction = run.data.rules.factions[events.a[i]!]!.id;
       } else if (kind === EventKind.Enrage) {
-        const name = run.data.enemies[run.finalBossType]!.name[lang];
+        const name = enemyName(run.data, run.world, run.finalBossType, lang);
         this.announcer.push(t(lang, "announce.enrage", { name }), ANNOUNCE_TICKS);
       }
     }

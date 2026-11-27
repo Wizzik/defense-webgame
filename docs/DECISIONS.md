@@ -34,6 +34,15 @@ Decisions that still apply. Check here before you change a rule. Newest first in
 - **Boss strength** (task 5, first half, Petr): `design/scaling.yaml` `enemies.bossHp: 3` and `bossDamage: 2`; data-build
   multiplies a boss's rounded hp, its attack, slam and strike damage (the charge multiplies the attack). Boss hp
   targets 36 000, 60 000, 90 000 and 771 000 (`data/generated.test.ts`). Digest `e81a39b0` -> `1000e1ab`.
+- **Bosses per world** (task 5, second half; the plan's reading, "level" = world): every world has its own four
+  bosses; world 1 keeps today's. A boss stays the same sim type in every world (the slot: iron-marshal, pale-abbot,
+  gunmaster, dread-regent), so its mechanics, hp, xp, gold, sounds and `rules.drops` (keyed by that type = by slot)
+  do not change; `design/worlds.yaml` `bosses` gives it a name (EN, CS), a model borrowed from a common type, a body
+  tint, a drawn size (x1-1.25, the collision stays) and the colour of a new ring under every boss (the final boss's
+  ring is its aura's reach). Red Waste: Dune Reaver, Ash Oracle, Red Slinger, Sand Warlord; Shadewood: Thorn
+  Stalker, Hollow Druid, Bark Archer, Grove Colossus; Frostreach: Rime Charger, Frost Seer, Ice Marksman, Frost
+  Giant; Blightscar: Blight Rider, Plague Abbess, Cinder Spitter, Blight Lord. The crowd draws them as extra meshes
+  (`client/render/boss-looks.ts`), so the digest stays. The item tooltip still names the world 1 bosses as sources.
 - **Chest cards as upgrades** (task 6, Petr): a card never offers an item at or below the rarity its slot wears. The
   rarity and the slot are drawn as before; when the slot wears that rarity or a higher one, the card is a Level card
   of the worn item with `rules.loot.upgradeShare` 0.5, else it moves to another slot of the offer's free ones that is

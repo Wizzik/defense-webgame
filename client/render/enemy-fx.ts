@@ -7,7 +7,8 @@ import { SCENE_SCALE } from "./coords";
 import { AuraRings } from "./fx/aura-rings";
 import { BlastFx } from "./fx/blasts";
 import { BoltFx } from "./fx/bolts";
-import { rgb } from "./fx/instances";
+import { type Rgb, rgb } from "./fx/instances";
+import { bossLook } from "./boss-looks";
 import { SlamRings } from "./fx/slam-rings";
 
 const SHOT_COLOR = rgb(0xfff2b0);
@@ -19,6 +20,11 @@ const CHARGE_COLOR = rgb(0xff5a5a);
 const CHARGE_THICKNESS = 0.18;
 const AURA_COLOR = rgb(0xb84ad8);
 const AURA_OPACITY = 0.25;
+/** Rings under aura carriers and bosses drawn at most. */
+const AURA_POOL = 16;
+/** Radius of a boss's ring (without an aura of its own) in its collision radii, and its opacity. */
+const BOSS_RING = 1.6;
+const BOSS_RING_OPACITY = 0.45;
 /** Warning circle of a boss slam. */
 const SLAM_COLOR = rgb(0xd94a4a);
 /** Warning circle of roots (grove druid, grove warden): green, not the bosses' red. */
@@ -52,7 +58,9 @@ export class EnemyFx implements RunView {
   readonly object = new Group();
   private readonly bolts = new BoltFx();
   private readonly telegraphs: BoltFx;
-  private readonly auraRings = new AuraRings();
+  private readonly auraRings = new AuraRings(AURA_POOL);
+  /** Ring colour under each boss type per world: `bossAura[(world - 1) * types + type]` (null for a common type). */
+  private readonly bossAura: (Rgb | null)[];
   private readonly slamRings = new SlamRings(SLAM_COLOR);
   private readonly rootRings = new SlamRings(ROOT_COLOR, ROOT_POOL);
   private readonly floorRings = new AuraRings(FLOOR_POOL);
@@ -69,6 +77,8 @@ export class EnemyFx implements RunView {
     this.ranged = Uint8Array.from(data.enemies, (e) => (e.attack.kind === "ranged" ? 1 : 0));
     this.roots = Uint8Array.from(data.enemies, (e) => (e.strike?.effect === "root" ? 1 : 0));
     this.data = data;
+    this.bossAura = data.worlds.flatMap((_, w) =>
+      data.enemies.map((enemy, type) => (enemy.boss ? rgb(bossLook(data, w + 1, type).aura) : null)));
     const windup = Math.max(0.1, ...data.enemies.map((e) => e.charge?.windupSeconds ?? 0));
     this.telegraphs = new BoltFx(windup, CHARGE_THICKNESS);
     this.object.add(
@@ -141,12 +151,19 @@ export class EnemyFx implements RunView {
     this.updateFloor(run, alpha);
     this.auraRings.begin();
     const e = run.enemies;
+    const types = this.data.enemies.length;
+    const world = Math.min(Math.max(run.world, 1), this.data.worlds.length) - 1;
     for (let i = 0; i < e.capacity; i++) {
-      if (e.alive[i] === 0 || run.hasAura[e.type[i]!] === 0) continue;
-      const radius = this.data.enemies[e.type[i]!]!.aura!.radius * SCENE_SCALE;
-      const x = e.prevX[i]! + (e.x[i]! - e.prevX[i]!) * alpha;
-      const y = e.prevY[i]! + (e.y[i]! - e.prevY[i]!) * alpha;
-      this.auraRings.add(x * SCENE_SCALE, -y * SCENE_SCALE, radius, AURA_COLOR, AURA_OPACITY);
+      const type = e.type[i]!;
+      if (e.alive[i] === 0 || (run.hasAura[type] === 0 && run.isBoss[type] === 0)) continue;
+      const def = this.data.enemies[type]!;
+      const x = (e.prevX[i]! + (e.x[i]! - e.prevX[i]!) * alpha) * SCENE_SCALE;
+      const z = -(e.prevY[i]! + (e.y[i]! - e.prevY[i]!) * alpha) * SCENE_SCALE;
+      // a boss's ring is in its world's aura colour: its aura's reach, else a ring just outside its body
+      const boss = this.bossAura[world * types + type];
+      const radius = (def.aura ? def.aura.radius : def.collision * BOSS_RING) * SCENE_SCALE;
+      if (boss) this.auraRings.add(x, z, radius, boss, BOSS_RING_OPACITY);
+      else this.auraRings.add(x, z, radius, AURA_COLOR, AURA_OPACITY);
     }
     this.auraRings.end();
   }
