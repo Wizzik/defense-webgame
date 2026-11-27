@@ -2,11 +2,13 @@ import { damageEnemy } from "../combat";
 import type { Run } from "../run";
 import { CastMode, castMode, startCast } from "./slots";
 import type { AbilitySlot } from "./slots";
-import { nearestEnemy } from "./targeting";
+import { densestLine } from "./targeting";
 
 export const CONE_START_HALF_WIDTH = 60;
 
-/** Auto-casts a widening cone at the nearest enemy and strikes the nearest maxTargets enemies inside it. */
+/**
+ * Auto-casts a widening cone at the densest line of enemies (its mean half width; Petr, batch 2: it aims itself, never
+ * where the hero walks) and strikes the nearest maxTargets enemies inside it. */
 export function updateCone(run: Run, slot: AbilitySlot, index: number): void {
   const def = slot.def;
   if (def.kind !== "cone") return;
@@ -16,7 +18,7 @@ export function updateCone(run: Run, slot: AbilitySlot, index: number): void {
   const hero = run.hero;
   const e = run.enemies;
   const length = p.length[L];
-  const lead = nearestEnemy(run, hero.x, hero.y, length);
+  const lead = densestLine(run, hero.x, hero.y, length, (CONE_START_HALF_WIDTH + p.endWidth[L] / 2) / 2);
   if (lead < 0) return;
   const dx = e.x[lead] - hero.x;
   const dy = e.y[lead] - hero.y;

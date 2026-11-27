@@ -70,6 +70,7 @@ describe("aura", () => {
     const { constants: c } = data;
     const primary = run.hero.def.primary === "str" ? run.hero.str : run.hero.def.primary === "agi" ? run.hero.agi : run.hero.int;
     expect(run.hero.stats.damageMax).toBeCloseTo(
-      (run.hero.def.baseAttack.damageMax + primary * c.primaryAttackBonus) * (1 + p.damageBonus[0]), 9);
+      (run.hero.def.baseAttack.damageMax + primary * c.primaryAttackBonus) * (1 + p.damageBonus[0])
+      * (run.hero.def.power ?? 1), 9);
   });
 });

@@ -48,8 +48,8 @@ describe("scaling", () => {
   it("rounds speeds and hp to integers and cooldowns to 2 decimals", () => {
     const s = parseScaling({
       heroes: { moveSpeed: 1.4, attackCooldown: 0.5 },
-      abilities: { cooldown: 0.33, damage: 0.5, levelGrowthExponent: 1, levels: 2 },
-      enemies: { hp: 0.3, moveSpeed: 1.22 },
+      abilities: { cooldown: 0.33, damage: 0.5, levelGrowthExponent: 1, levels: 2, areaScale: 1 },
+      enemies: { hp: 0.3, moveSpeed: 1.22, bossHp: 1, bossDamage: 1 },
     });
     const enemy = scaleEnemy({ hp: 421, moveSpeed: 270 } as never, s);
     expect(enemy.hp).toBe(126);
@@ -64,8 +64,8 @@ describe("scaling", () => {
   it("scales damage, tickDamage and amount but not other params", () => {
     const s = parseScaling({
       heroes: { moveSpeed: 1, attackCooldown: 1 },
-      abilities: { cooldown: 1, damage: 0.5, levelGrowthExponent: 1, levels: 2 },
-      enemies: { hp: 1, moveSpeed: 1 },
+      abilities: { cooldown: 1, damage: 0.5, levelGrowthExponent: 1, levels: 2, areaScale: 1 },
+      enemies: { hp: 1, moveSpeed: 1, bossHp: 1, bossDamage: 1 },
     });
     const ability = scaleAbility(
       {
@@ -77,6 +77,46 @@ describe("scaling", () => {
     expect(ability.params).toEqual({
       damage: [51, 250], tickDamage: [50, 250], amount: [250, 501], empower: [3, 5], radius: [350, 400], damageBonus: [0.05, 0.1],
     });
+  });
+
+  it("areaScale shrinks radius, hitRadius, width and endWidth, rounded, and keeps the reach", () => {
+    const s = parseScaling({
+      heroes: { moveSpeed: 1, attackCooldown: 1 },
+      abilities: { cooldown: 1, damage: 1, levelGrowthExponent: 1, levels: 2, areaScale: 0.5 },
+      enemies: { hp: 1, moveSpeed: 1, bossHp: 1, bossDamage: 1 },
+    });
+    const ability = scaleAbility(
+      {
+        cooldown: [1, 1],
+        params: {
+          radius: [350, 401], hitRadius: [275, 350], width: [250, 250], endWidth: [99, 100],
+          range: [800, 900], length: [1500, 1500], attackRange: [600, 600], damage: [100, 200],
+        },
+      } as never,
+      s,
+    );
+    expect(ability.params).toEqual({
+      radius: [175, 201], hitRadius: [138, 175], width: [125, 125], endWidth: [50, 50],
+      range: [800, 900], length: [1500, 1500], attackRange: [600, 600], damage: [100, 200],
+    });
+  });
+
+  it("a boss takes bossHp on its rounded hp and bossDamage on its attack, slam and strike", () => {
+    const s = parseScaling({
+      heroes: { moveSpeed: 1, attackCooldown: 1 },
+      abilities: { cooldown: 1, damage: 1, levelGrowthExponent: 1, levels: 2, areaScale: 1 },
+      enemies: { hp: 0.35, moveSpeed: 1, bossHp: 3, bossDamage: 2 },
+    });
+    const boss = {
+      hp: 1001, moveSpeed: 300, boss: true, attack: { kind: "melee", damageMin: 42, damageMax: 50 },
+      slam: { damage: 120 }, strike: { damage: 150 },
+    };
+    const scaled = scaleEnemy(boss as never, s);
+    expect(scaled.hp).toBe(Math.round(1001 * 0.35) * 3);
+    expect([scaled.attack.damageMin, scaled.attack.damageMax, scaled.slam!.damage, scaled.strike!.damage]).toEqual([84, 100, 240, 300]);
+    const common = scaleEnemy({ ...boss, boss: undefined } as never, s);
+    expect(common.hp).toBe(Math.round(1001 * 0.35));
+    expect(common.attack.damageMin).toBe(42);
   });
 
   it("scales every hero, ability and enemy in buildGameData", () => {
@@ -97,25 +137,25 @@ describe("scaling", () => {
   it("rejects a missing key, an unknown key and a non-positive multiplier", () => {
     const ok = {
       heroes: { moveSpeed: 1, attackCooldown: 1 },
-      abilities: { cooldown: 1, damage: 1, levelGrowthExponent: 1, levels: 2 },
-      enemies: { hp: 1, moveSpeed: 1 },
+      abilities: { cooldown: 1, damage: 1, levelGrowthExponent: 1, levels: 2, areaScale: 1 },
+      enemies: { hp: 1, moveSpeed: 1, bossHp: 1, bossDamage: 1 },
     };
     expect(() => parseScaling(ok)).not.toThrow();
     expect(errorMessage(() => parseScaling({ ...ok, enemies: { hp: 1 } }))).toContain("design/scaling.yaml");
     expect(errorMessage(() => parseScaling({ ...ok, enemies: { hp: 1 } }))).toContain("moveSpeed");
     expect(errorMessage(() => parseScaling({ ...ok, extra: {} }))).toContain("extra");
-    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 0, damage: 1, levelGrowthExponent: 1, levels: 2 } }))).toContain("cooldown");
-    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1, damage: 0, levelGrowthExponent: 1, levels: 2 } }))).toContain("abilities.damage");
-    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1, levelGrowthExponent: 1, levels: 2 } }))).toContain("damage");
-    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1, damage: -1, levelGrowthExponent: 1, levels: 2 } }))).toContain("design/scaling.yaml");
+    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 0, damage: 1, levelGrowthExponent: 1, levels: 2, areaScale: 1 } }))).toContain("cooldown");
+    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1, damage: 0, levelGrowthExponent: 1, levels: 2, areaScale: 1 } }))).toContain("abilities.damage");
+    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1, levelGrowthExponent: 1, levels: 2, areaScale: 1 } }))).toContain("damage");
+    expect(errorMessage(() => parseScaling({ ...ok, abilities: { cooldown: 1, damage: -1, levelGrowthExponent: 1, levels: 2, areaScale: 1 } }))).toContain("design/scaling.yaml");
     expect(errorMessage(() => parseScaling(null))).toContain("design/scaling.yaml");
   });
   describe("level growth", () => {
     const withGrowth = (damage: number, levelGrowthExponent: unknown) =>
       parseScaling({
         heroes: { moveSpeed: 1, attackCooldown: 1 },
-        abilities: { cooldown: 1, damage, levelGrowthExponent, levels: 2 },
-        enemies: { hp: 1, moveSpeed: 1 },
+        abilities: { cooldown: 1, damage, levelGrowthExponent, levels: 2, areaScale: 1 },
+        enemies: { hp: 1, moveSpeed: 1, bossHp: 1, bossDamage: 1 },
       });
 
     it("flattens the growth of damage and heal rows from level 1", () => {
@@ -154,8 +194,8 @@ describe("scaling", () => {
     it("rejects a missing or out-of-range levelGrowthExponent", () => {
       const missing = {
         heroes: { moveSpeed: 1, attackCooldown: 1 },
-        abilities: { cooldown: 1, damage: 1, levels: 2 },
-        enemies: { hp: 1, moveSpeed: 1 },
+        abilities: { cooldown: 1, damage: 1, levels: 2, areaScale: 1 },
+        enemies: { hp: 1, moveSpeed: 1, bossHp: 1, bossDamage: 1 },
       };
       expect(errorMessage(() => parseScaling(missing))).toContain("abilities.levelGrowthExponent");
       expect(errorMessage(() => withGrowth(1, 0))).toContain("abilities.levelGrowthExponent");

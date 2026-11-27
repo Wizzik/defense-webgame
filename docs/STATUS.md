@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-27 (random items, stages 1-3: data, sim, meta and saves). Read this first when you resume work.
+Updated 2026-11-27 (random items, stages 1-3; Petr's batch 2 in progress). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -8,11 +8,67 @@ Updated 2026-11-27 (random items, stages 1-3: data, sim, meta and saves). Read t
    wards, 10 spell levels, tooltip, dash charges, blink (F), weather fixed to the map. Waits for Petr's playtest.
 2. **Random items** like Diablo 2 / Project Diablo 2 with game-icons.net pictures: the spec
    `docs/superpowers/specs/2026-11-26-random-items-design.md`, approved by Petr on 2026-11-27 (answers in its section 9); plan `docs/superpowers/plans/2026-11-27-random-items.md` (6 stages), to build in fresh sessions.
-3. **Petr's batch 2** (2026-11-27): plan `docs/superpowers/plans/2026-11-27-petr-batch-2.md` (AoE -50 %, a quarter
+3. **Petr's batch 2** (2026-11-27, done in PR #43, waits for the playtest): plan `docs/superpowers/plans/2026-11-27-petr-batch-2.md` (AoE -50 %, a quarter
    of the enemies casters, Serpent Totem 100 damage + 25 % a level, F teleports to the mouse, bosses x3 hp x2
    damage with their own names and looks per world, chest cards for worn slots only as upgrades, balance target
    about 10 % autopilot wins with no gear). After stage 3 of random items, before its stage 4.
 4. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
+
+## Petr's batch 2 (branch `claude/petr-batch-2`, PR #43, DONE, waits for Petr's playtest, 2026-11-27)
+
+Plan `docs/superpowers/plans/2026-11-27-petr-batch-2.md`; rulings and the autopilot tables in `docs/DECISIONS.md`,
+section Petr's batch 2. `npm run check` passes on every commit of the branch.
+
+- **Done:**
+  - task 1, AoE -50 %: `design/scaling.yaml` `abilities.areaScale: 0.5` (radius, hitRadius, width, endWidth of every
+    ability);
+  - task 3, Serpent Totem: 100, 125 ... 325 over the ten levels;
+  - task 4, blink: F teleports to the mouse at any distance (`rules.hero.blink.aheadDistance` without a mouse
+    point), a flash at both ends, no streak; e2e "F teleports the hero ...";
+  - task 5, first half: bosses x3 hp, x2 damage (`enemies.bossHp`, `bossDamage` in scaling.yaml);
+  - task 6, chests: a card never offers a rarity at or below what its slot wears (Level card with
+    `rules.loot.upgradeShare` 0.5, else it moves to a slot where it is an upgrade; mythic slots only Level);
+    fix on the way: enemies push out of islands with at most `PASS_MARGIN`, so a big boss no longer sticks in a gap;
+  - task 5, second half: worlds 2-5 have their own four bosses (`design/worlds.yaml` `bosses`: name, borrowed model,
+    tint, size, ring colour; `client/render/boss-looks.ts`, `client/ui/boss-name.ts`); the sim type per slot and
+    `rules.drops` stay (keyed by the slot's type); `window.__game.boss.name`.
+  - task 2, casters: Battle Mage, Fire Caller, Bone Acolyte, Moon Priestess (`caster: true`, skirmish, own KayKit
+    models, faction-coloured spell bolts and cues), 25-28 % of the phase mix from phase 3 (`data/generated.test.ts`);
+    model budget 10 -> 11 MB;
+  - the autopilot kites (Petr, mid-session): ranged heroes keep 60 % of their reach (max 450) from the nearest enemy,
+    run to the emptiest side (every enemy within 1000, weight 1/d^2) and sideways towards the castle, dash out of a
+    crowd of 4 within 220; melee heroes (Stonehorn, Redcleaver) never back off and take half (`damageTaken` 0.5);
+    Serpent Shaman shoots (`attack: { kind: ranged, range: 1200 }` in heroes.yaml, data-build override);
+  - balance knob `power` per hero (heroes.yaml, multiplies the base attack and spell power);
+  - task 7, balance: line spells and cones aim themselves at the thickest crowd (Petr), Falling Stars is an area at the
+    crowd, Rocket Fan a self-aimed cone, per-hero `power`; autopilot with no gear, seeds 1-20: 2-4 wins of 20 for
+    every hero (23 of 160); table in DECISIONS;
+  - Digest now `fa569e92`.
+- **Checks:** `npm run check` (1408 tests), e2e `webgl2-fallback` (52; the orb test now picks level-up cards while
+  it waits for the berserk buff), `npm run shots` (the `fight` shot at 15 s: an idle Stonehorn with no gear falls at
+  about 23 s).
+- **Open question for Petr:** with no gear most autopilot losses come in the first 4 minutes, and an idle hero falls
+  in under half a minute; a run that survives phase 4 usually wins. If a fresh player should last longer, the
+  next knob is the early phases (spawn rate or enemy hp in phases 1-4), not hero power.
+- **What Petr checks** (after the merge, https://wizzik.github.io/defense-webgame/):
+  - **spells aim themselves**: Tidecaller's wave and Stonehorn's rupture go into the thickest pack, also while you
+    run away (https://wizzik.github.io/defense-webgame/?debug=1&hero=tidecaller&lang=cs and
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=stonehorn&lang=cs);
+  - **Falling Stars** (Nightglaive) fall on the crowd within 800, not around you
+    (https://wizzik.github.io/defense-webgame/?debug=1&hero=nightglaive&lang=cs); **Rocket Fan** (Sparkshot) is a fan
+    that aims itself at the crowd (https://wizzik.github.io/defense-webgame/?debug=1&hero=sparkshot&lang=cs);
+  - **balance with no gear** (a fresh browser or `debug=1`): each hero should be hard, the autopilot wins about one
+    run in seven; does it feel too hard in the first minutes;
+  - spell circles half as big (https://wizzik.github.io/defense-webgame/?debug=1&phase=10&lang=cs), the shaman's
+    totem tooltip shows 100 at level 1 and the shaman shoots;
+  - F teleports to the mouse from level 40 (https://wizzik.github.io/defense-webgame/?debug=1&phase=20&lang=cs, aim
+    far and press F);
+  - bosses: much tougher (https://wizzik.github.io/defense-webgame/?debug=1&phase=6&lang=cs); world 2 has its own
+    boss "Dunový pustošitel" (https://wizzik.github.io/defense-webgame/?debug=1&world=2&phase=6&lang=cs), worlds 3-5
+    too (`world=3`, `4`, `5`);
+  - chest cards for a worn slot are only Level cards or higher rarities (`__game.debug.grantGold(5000)`);
+  - casters from phase 3 (https://wizzik.github.io/defense-webgame/?debug=1&phase=3&lang=cs, blue bolts with a
+    flash; `__game.debug.spawnEach()` shows all seven human types).
 
 ## Random items, stage 3: meta and saves (merged into `claude/random-items-data`, PR #42, 2026-11-27)
 

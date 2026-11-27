@@ -82,7 +82,8 @@ describe("passives", () => {
     learn(r, 6, "arcane-focus", 5);
     learn(r, 7, "fortune", 5);
     const intPart = 1 + (r.hero.int + r.hero.gear.int) * r.data.rules.hero.spellPowerPerInt;
-    expect(r.hero.stats.spellPower).toBeCloseTo(intPart * (1 + 0.2 + param(r, "arcane-focus", "spellPowerBonus", 5)), 9);
+    expect(r.hero.stats.spellPower).toBeCloseTo(intPart * (1 + 0.2 + param(r, "arcane-focus", "spellPowerBonus", 5))
+      * (r.hero.def.power ?? 1), 9);
     expect(r.hero.passive.gold + r.hero.gear.goldFind).toBeCloseTo(0.1 + param(r, "fortune", "goldBonus", 5), 9);
   });
 

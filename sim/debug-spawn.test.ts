@@ -17,15 +17,16 @@ describe("debugSpawnEach", () => {
     const run = newRun();
     debugSpawnEach(run);
     const e = run.enemies;
-    const types = run.data.enemies.filter((d) => d.faction === "human").length;
-    expect(types).toBe(6);
+    const human = run.data.enemies.flatMap((d, t) => (d.faction === "human" ? [t] : []));
+    const types = human.length;
+    expect(types).toBe(7);
     expect(run.bossCount).toBe(0);
     expect(e.aliveCount).toBe(types);
     for (let i = 0; i < types; i++) {
-      expect(e.type[i]).toBe(i);
+      expect(e.type[i]).toBe(human[i]);
       expect(e.role[i]).toBe(Role.Hunter);
       expect(e.y[i]).toBe(run.hero.y + 600);
-      expect(e.hp[i]).toBe(run.data.enemies[i]!.hp);
+      expect(e.hp[i]).toBe(run.data.enemies[human[i]!]!.hp);
       if (i > 0) expect(e.x[i]! - e.x[i - 1]!).toBe(300);
     }
     // the row is centred on the hero
@@ -38,7 +39,7 @@ describe("debugSpawnEach", () => {
     run.factionIndex = 2;
     debugSpawnEach(run);
     const ids = Array.from(run.enemies.type.subarray(0, run.enemies.aliveCount), (t) => run.data.enemies[t]!.id);
-    expect(ids).toEqual(["ghoul", "webcrawler", "rotgut", "gravebinder", "bone-tyrant"]);
+    expect(ids).toEqual(["ghoul", "webcrawler", "rotgut", "gravebinder", "bone-tyrant", "bone-acolyte"]);
   });
 
   it("a full store skips the rest", () => {

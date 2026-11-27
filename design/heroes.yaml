@@ -4,7 +4,10 @@
 #   data-build never writes it to data/generated.
 # signatureAbilities (in order) and ultimate are ability ids from design/abilities.yaml.
 # damageTaken: optional multiplier on the damage enemies deal to the hero (missing = 1).
-# attack: optional design changes of the base attack (2026-11-26, Petr): rangeScale and cooldownScale multiply the
+# power: optional balance multiplier on all the hero's damage and heals, base attack and spell power (missing = 1;
+#   Petr's batch 2, task 7: about 10 % autopilot wins with no gear for every hero).
+# attack: optional design changes of the base attack (2026-11-26, Petr): kind and range replace the map's (batch 2),
+#   rangeScale and cooldownScale multiply the
 #   map's range and cooldown (before design/scaling.yaml), strikes = blows per attack, splash = { radius, share }.
 
 - id: stonehorn
@@ -14,7 +17,8 @@
   role: { en: "Melee bruiser. Stuns with stone and quakes.", cs: "Rváč na blízko. Omračuje kamenem a otřesy." }
   signatureAbilities: [rock-rupture, enhanced-totem, seismic-echo]
   ultimate: groundbreaker
-  damageTaken: 0.75   # melee: stands in the crowd
+  damageTaken: 0.5   # melee: stands in the crowd
+  power: 0.42   # batch 2, task 7: about 10 % autopilot wins with no gear
 
 - id: nightglaive
   source: O008
@@ -24,6 +28,7 @@
   signatureAbilities: [falling-stars, hunters-focus, swift-pace]
   ultimate: shadow-sisters
   attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
+  power: 0.7   # batch 2, task 7: about 10 % autopilot wins with no gear
 
 - id: gravecaller
   source: O00F
@@ -33,6 +38,7 @@
   signatureAbilities: [grave-grasp, skull-ring, soul-bolt]
   ultimate: bone-stampede
   attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
+  power: 0.33   # batch 2, task 7: about 10 % autopilot wins with no gear
 
 - id: serpent-shaman
   source: O00X
@@ -41,7 +47,8 @@
   role: { en: "Summoner. Totems, lightning and healing.", cs: "Vyvolávač. Totemy, blesky a léčení." }
   signatureAbilities: [serpent-totem, forked-bolt, mending-tide]
   ultimate: spirit-ward
-  damageTaken: 0.75   # melee (reach 125): stands in the crowd, 2026-11-26
+  attack: { kind: ranged, range: 1200 }   # Petr (batch 2): the shaman shoots, as far as the other casters
+  power: 0.38   # batch 2, task 7: about 10 % autopilot wins with no gear
 
 # Phase 2b-2: four more heroes. Their spells use only the kinds the simulation already has.
 
@@ -62,6 +69,7 @@
   signatureAbilities: [rocket-fan, searing-rounds, quickstep]
   ultimate: beam-swarm
   attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
+  power: 0.85   # batch 2, task 7: about 10 % autopilot wins with no gear
 
 - id: redcleaver
   source: O00U
@@ -71,7 +79,8 @@
   signatureAbilities: [cleaver-toss, blood-fan, swift-pace]
   ultimate: rot-field
   attack: { cooldownScale: 0.45, strikes: 2, splash: { radius: 160, share: 0.5 } }   # two axes, fast, wide blows
-  damageTaken: 0.75   # melee: stands in the crowd
+  damageTaken: 0.5   # melee: stands in the crowd
+  power: 0.39   # batch 2, task 7: about 10 % autopilot wins with no gear
 
 - id: tidecaller
   source: O00N
@@ -81,3 +90,4 @@
   signatureAbilities: [crushing-wave, stunning-tide, riptide]
   ultimate: drowned-lake
   attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
+  power: 0.6   # batch 2, task 7: about 10 % autopilot wins with no gear

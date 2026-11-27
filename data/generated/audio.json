@@ -1256,6 +1256,62 @@
       "maxVoices": 1,
       "priority": 3,
       "category": "ui"
+    },
+    {
+      "id": "enemy-bolt-arcane",
+      "files": [
+        "audio/sfx/shared-arc-1.ogg",
+        "audio/sfx/shared-arc-2.ogg"
+      ],
+      "synth": "hit",
+      "gainDb": -16,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 2,
+      "priority": 0,
+      "category": "sfx"
+    },
+    {
+      "id": "enemy-bolt-fire",
+      "files": [
+        "audio/sfx/shared-firebolt-1.ogg",
+        "audio/sfx/shared-firebolt-2.ogg"
+      ],
+      "synth": "hit",
+      "gainDb": -16,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 2,
+      "priority": 0,
+      "category": "sfx"
+    },
+    {
+      "id": "enemy-bolt-bone",
+      "files": [
+        "audio/sfx/grave-bolt-1.ogg",
+        "audio/sfx/grave-bolt-2.ogg"
+      ],
+      "synth": "hit",
+      "gainDb": -16,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 2,
+      "priority": 0,
+      "category": "sfx"
+    },
+    {
+      "id": "enemy-bolt-moon",
+      "files": [
+        "audio/sfx/moon-glimmer-1.ogg",
+        "audio/sfx/moon-glimmer-2.ogg"
+      ],
+      "synth": "hit",
+      "gainDb": -16,
+      "pitchSpread": 0.06,
+      "gainSpreadDb": 2,
+      "maxVoices": 2,
+      "priority": 0,
+      "category": "sfx"
     }
   ],
   "tracks": [
@@ -1543,6 +1599,22 @@
     },
     "grove-warden": {
       "death": "elf-fall-heavy"
+    },
+    "battle-mage": {
+      "death": "human-fall",
+      "attack": "enemy-bolt-arcane"
+    },
+    "fire-caller": {
+      "death": "orc-fall",
+      "attack": "enemy-bolt-fire"
+    },
+    "bone-acolyte": {
+      "death": "bone-rattle",
+      "attack": "enemy-bolt-bone"
+    },
+    "moon-priestess": {
+      "death": "elf-fall",
+      "attack": "enemy-bolt-moon"
     }
   },
   "sounds": {

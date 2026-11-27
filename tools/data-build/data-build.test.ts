@@ -15,8 +15,8 @@ const unscaledDesign = () => ({
   ...design(),
   scaling: {
     heroes: { moveSpeed: 1, attackCooldown: 1 },
-    abilities: { cooldown: 1, damage: 1, levelGrowthExponent: 1, levels: 2 },
-    enemies: { hp: 1, moveSpeed: 1 },
+    abilities: { cooldown: 1, damage: 1, levelGrowthExponent: 1, levels: 2, areaScale: 1 },
+    enemies: { hp: 1, moveSpeed: 1, bossHp: 1, bossDamage: 1 },
   },
 });
 
@@ -171,6 +171,18 @@ describe("data-build", () => {
     expect("strength" in buildGameData(mapExport(), design(), "test").worlds[0]!).toBe(false);
   });
 
+  it("passes a world's boss looks through, and refuses a look for a common type or with a boss's model", () => {
+    const look = { name: { en: "Sand King", cs: "Písečný král" }, model: "grunt", tint: "#5a1e1e", size: 1.2, aura: "#e8c070" };
+    const d = design();
+    d.worlds[0] = { ...d.worlds[0]!, bosses: { warlord: look } };
+    expect(buildGameData(mapExport(), d, "test").worlds[0]!.bosses).toEqual({ warlord: look });
+    expect("bosses" in buildGameData(mapExport(), design(), "test").worlds[0]!).toBe(false);
+    d.worlds[0] = { ...d.worlds[0]!, bosses: { grunt: look } };
+    expect(() => buildGameData(mapExport(), d, "test")).toThrow(/not a boss/);
+    d.worlds[0] = { ...d.worlds[0]!, bosses: { warlord: { ...look, model: "warlord" } } };
+    expect(() => buildGameData(mapExport(), d, "test")).toThrow(/not a common enemy type/);
+  });
+
   it("rejects a non-numeric misc constant with its name", () => {
     const src = mapExport();
     src.mapInfo.misc_constants.DefenseArmor = "n/a";
@@ -233,7 +245,7 @@ describe("data-build", () => {
 
   it("applies enemy multipliers before scaling", () => {
     const d = unscaledDesign();
-    d.scaling.enemies = { hp: 0.3, moveSpeed: 1.22 };
+    d.scaling.enemies = { hp: 0.3, moveSpeed: 1.22, bossHp: 1, bossDamage: 1 };
     d.enemies[0].multipliers = { hp: 0.5, moveSpeed: 1.5, collision: 0.8, damage: 0.6 };
     const enemy = buildGameData(mapExport(), d, "test").enemies[0];
     expect(enemy.hp).toBe(63);

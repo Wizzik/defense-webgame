@@ -84,6 +84,11 @@ export function resolveEventCues(run: Run, data: AudioData, enemyIds: readonly s
     const hero = data.heroes[eventOwner(run, i).hero.def.id];
     return hero ? hero.attackHit ?? hero.attack : undefined;
   };
+  /** The attack cue of the enemy that hit (a caster's spell bolt); `a` is the attacker or -1. */
+  const enemyAttack = (i: number): void => {
+    const a = events.a[i]!;
+    if (a >= 0) add(data.enemies[enemyIds[run.enemies.type[a]!]!]?.attack, i);
+  };
   for (let i = 0; i < events.count; i++) {
     switch (events.kind[i]) {
       case EventKind.Cast:
@@ -111,9 +116,11 @@ export function resolveEventCues(run: Run, data: AudioData, enemyIds: readonly s
         // a poison cloud hurts every step and a pool of fire three times a second: the hp bar shows it, a sound would
         // drown everything
         if (events.u[i] !== HeroHitSource.Cloud && events.u[i] !== HeroHitSource.Fire) sound("heroHit", i, false);
+        enemyAttack(i);
         break;
       case EventKind.CastleHit:
         sound("castleHit", i);
+        enemyAttack(i);
         break;
       case EventKind.Pickup:
         sound(PICKUP_SOUNDS[events.u[i]!] ?? "pickup.xp", i);

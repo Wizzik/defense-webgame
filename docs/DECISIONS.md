@@ -8,6 +8,108 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   phase 1) wins about 10 % of the runs, for every hero (1-4 of 20 per hero). Every balance change keeps to it;
   the plan of the changes that get there: `docs/superpowers/plans/2026-11-27-petr-batch-2.md`.
 
+## Petr's batch 2 (2026-11-27; plan `docs/superpowers/plans/2026-11-27-petr-batch-2.md`, Petr's words, Claude's numbers)
+
+- **Balance target** (Petr): about 10 % autopilot wins with no gear, every hero
+  (`npm run sim:run -- --hero all --seeds 1-20 --gear none`); the table of every balance step is below.
+- **AoE -50 %** (task 1): `design/scaling.yaml` `abilities.areaScale: 0.5` multiplies `radius`, `hitRadius`, `width`
+  and `endWidth` of every ability (heroes, shared spells, passives, ultimates), applied last on the spread rows and
+  rounded; reach (`range`, `length`, `attackRange`, `bounceRange`) stays. Radius x 0.5 as said (a quarter of the
+  area); gear's `areaSize` multiplies on top. The cone's start half width (60) stays, so cones grow less now.
+  Tests that sit enemies at fixed distances moved them in; the world tests of `sim-run` and the matrix cases
+  `w4-blizzard` (gear full) and `loot-t3` (seed 27) keep their heroes alive long enough; the 4-player lockstep test
+  softens hits to 0.25. Digest `36fd80a2` -> `22ae189d`.
+- Autopilot, world 1 normal, gear none, seeds 1-10 (wins of 10), before -> after AoE -50 %: Stonehorn 10 -> 0,
+  Nightglaive 8 -> 1, Gravecaller 10 -> 10, Serpent Shaman 2 -> 2, Mistwarden 3 -> 1, Sparkshot 8 -> 0, Redcleaver
+  10 -> 9, Tidecaller 10 -> 0; in sum 61 -> 23 of 80. Gravecaller (summons) and Redcleaver (melee) barely feel it;
+  the tuning toward 10 % each comes after the bosses and casters (task 7 of the plan).
+- **Serpent Totem** (task 3, Petr): a bite of 100 at level 1 and +25 % of that a level, linear: 100, 125 ... 325 at
+  level 10 (times spell power). Written as design values (333, 810, 1510, 2410, 3520) that give this row after
+  `abilities.damage`, `levelGrowthExponent` and the spread to 10 levels; `data/generated.test.ts` pins the row.
+  Serpent Shaman, gear none, seeds 1-10: 2 -> 10 wins. Digest `22ae189d` -> `e81a39b0`.
+- **Blink** (task 4, Petr): F puts the hero at the mouse point in the same step at any distance, only kept in the
+  arena and off the obstacles; `rules.hero.blink.maxDistance` became `aheadDistance` (900), the jump straight ahead
+  when there is no mouse point. The burst, the stun and the 10 s cooldown stay. The look: a flash where the hero
+  left and the burst where he landed, no streak between them. The autopilot does not blink, so the digest stays.
+- **Boss strength** (task 5, first half, Petr): `design/scaling.yaml` `enemies.bossHp: 3` and `bossDamage: 2`; data-build
+  multiplies a boss's rounded hp, its attack, slam and strike damage (the charge multiplies the attack). Boss hp
+  targets 36 000, 60 000, 90 000 and 771 000 (`data/generated.test.ts`). Digest `e81a39b0` -> `1000e1ab`.
+- **Bosses per world** (task 5, second half; the plan's reading, "level" = world): every world has its own four
+  bosses; world 1 keeps today's. A boss stays the same sim type in every world (the slot: iron-marshal, pale-abbot,
+  gunmaster, dread-regent), so its mechanics, hp, xp, gold, sounds and `rules.drops` (keyed by that type = by slot)
+  do not change; `design/worlds.yaml` `bosses` gives it a name (EN, CS), a model borrowed from a common type, a body
+  tint, a drawn size (x1-1.25, the collision stays) and the colour of a new ring under every boss (the final boss's
+  ring is its aura's reach). Red Waste: Dune Reaver, Ash Oracle, Red Slinger, Sand Warlord; Shadewood: Thorn
+  Stalker, Hollow Druid, Bark Archer, Grove Colossus; Frostreach: Rime Charger, Frost Seer, Ice Marksman, Frost
+  Giant; Blightscar: Blight Rider, Plague Abbess, Cinder Spitter, Blight Lord. The crowd draws them as extra meshes
+  (`client/render/boss-looks.ts`), so the digest stays. The item tooltip still names the world 1 bosses as sources.
+- **Chest cards as upgrades** (task 6, Petr): a card never offers an item at or below the rarity its slot wears. The
+  rarity and the slot are drawn as before; when the slot wears that rarity or a higher one, the card is a Level card
+  of the worn item with `rules.loot.upgradeShare` 0.5, else it moves to another slot of the offer's free ones that is
+  empty or wears a lower rarity (New or Choice there); with no such slot it is a Level card too, so a mythic slot only
+  ever gets Level cards. A Level card of a worn random item carries a copy of it (`rolled`) for the UI. The bot's
+  order (upgrades first) is unchanged. Digest `1000e1ab` -> `4316afa9` (with the fix below).
+- **Big enemies and island gaps** (fix found with task 6): islands keep gaps of 120 and the flow field routes for a
+  radius of `PASS_MARGIN` (36), but an enemy was pushed out of the islands with its whole collision, so the final boss
+  (96) stuck in a gap for good (Gravecaller, seed 2: no end of the run). The push-out radius is now at most
+  `PASS_MARGIN`; a big enemy overlaps an island a little where it squeezes through. Charges and leaps as before.
+- **Casters** (task 2, Petr: "at least 25 % casters"): each faction gets a new caster type at the end of
+  `design/enemies.yaml` (the type index order stays): Battle Mage / Bitevní mág (human), Fire Caller / Vyvolavač ohně
+  (orc), Bone Acolyte / Kostěný akolyta (undead), Moon Priestess / Měsíční kněžka (elf). `behavior: skirmish` and the
+  new flag `caster: true` (schema, data-build). Numbers: the source and multipliers of the faction's support caster
+  (Priest x0.65, Shaman x0.6, Necromancer x0.65; the elf one the Priest), so each hits like the chaplain, bloodcaller
+  or gravebinder (13-14 every 1.5-2.1 s from 600) without the support spell; the json rows were written in the cloud
+  by that rule (no map export there): `data:build` must give the same files. From phase 3 the caster is at least a
+  quarter of `rules.phases[].mix` (25-28 %), its weight mostly taken from the foot types (shieldbearer, scout, brute,
+  ghoul, huntress), the other roles keep theirs; phases 1-2 have none (`data/generated.test.ts`). The look: a
+  thicker beam (0.14) that lives 0.22 s in the faction's colour (arcane blue, fire orange, grave green, moon violet)
+  and a flash where it lands (`client/render/enemy-fx.ts`); the sound: the enemy's `attack` cue in
+  `design/audio.yaml` (`enemy-bolt-arcane`, `-fire`, `-bone`, `-moon` on files already encoded, -16 dB, two voices,
+  priority 0) when the bolt hits the hero or the castle. The hit stays instant like every enemy shot.
+- **Caster models and the model budget:** each caster has its own KayKit model (`tools/assets-build/manifest.ts`: a
+  mage with a wand, a barbarian with a staff, a skeleton rogue with a staff, a caped rogue with a staff), about
+  250-300 kB each. The common models plus the heaviest world grew to 10.9 MB, so the budget went 10 -> 11 MB
+  (`tests/assets.test.ts`, AGENTS.md). Quantizing the meshes (gltf-transform `quantize`) was measured first: it
+  saves only about 20 % and dropped the skin, so it was not taken; borrowing a model would break the rule that every
+  common type has its own. Digest `4316afa9` -> `2b384fc3`.
+- **The autopilot kites** (Petr, 2026-11-27: "it must move like a player and run from the enemies; the melee ones with
+  axes do not run, they fight and take less damage"): balance is measured with a bot that moves. A ranged hero keeps
+  the nearest enemy at 60 % of its attack range (at most 450; +150 below 30 % hp), walks away from every enemy within
+  1000 weighted by 1/d^2 and sideways towards the castle (it circles), loses the outward part near the edge of the
+  castle's defence circle and dashes out of 4 enemies within 220. Melee heroes (Stonehorn, Redcleaver) never back off
+  and take half (`damageTaken` 0.75 -> 0.5). The late-phase speed test may take 15 s (more enemies alive).
+- **Serpent Shaman shoots** (Petr): `attack: { kind: ranged, range: 1200 }` in heroes.yaml replaces the map's melee
+  125 (data-build: `attack.kind`, `attack.range`); its `damageTaken` 0.75 went.
+- **Hero power** (balance knob): `power` in heroes.yaml multiplies the base attack and the spell power (damage and
+  heals of every ability and summon); `damageTaken` may go up to 2. Four rounds against the old standing bot were
+  thrown away when the bot changed.
+- **Spells aim themselves at the thickest crowd** (Petr, 2026-11-27: "line spells must target the biggest nearest
+  pack: five enemies side by side beat one alone"; "never at the enemies in front of you, that does not work while we
+  run, it must aim itself"): a line spell (`sim/abilities/line.ts`) and a cone (`cone.ts`) no longer fly where the hero
+  walks or at the nearest enemy; they aim at the enemy whose direction puts the most enemies inside the line of the
+  spell's length and half width (`densestLine`, `sim/abilities/targeting.ts`; a cone counts with its mean half width;
+  ties: the nearer, then the lower slot). The autopilot no longer stops to aim a line.
+- **Novas around the hero become aimed spells** (task 7, Petr: "maybe the type of the heroes' spells must change"): a
+  ranged hero keeps its distance, so a nova around it never had an enemy inside. Falling Stars (Nightglaive) is an
+  `area` at the thickest crowd within 800 that slows (area takes `slow`, `slowSeconds`); Rocket Fan (Sparkshot) is a
+  cone of length 900, end width 300 (600 before areaScale) and 16 targets that aims itself. Forked Bolt and Blade Fan
+  (cones) aim at the crowd too; their texts and the three `targeting` fields read `densest_cluster`.
+- **Hero power** (task 7): Stonehorn 0.42, Nightglaive 0.7, Gravecaller 0.33, Serpent Shaman 0.38, Mistwarden 1,
+  Sparkshot 0.85, Redcleaver 0.39, Tidecaller 0.6. The Int card shows the spell power without the hero's power (the
+  player's bonus, `client/ui/card-lines.ts`); spell values in the tooltips include it (what the spell really deals).
+- Autopilot, world 1 normal, gear none, seeds 1-20 (wins of 20): kiting bot -> aimed lines and cones, Falling Stars
+  and Rocket Fan, no power -> with power. Stonehorn 0 -> 18 -> 2; Nightglaive 0 -> 18 -> 4; Gravecaller 20 -> 20 -> 4;
+  Serpent Shaman 20 -> 19 -> 2; Mistwarden 1 -> 3 -> 3; Sparkshot 1 -> 7 -> 2; Redcleaver 9 -> 19 -> 2; Tidecaller
+  1 -> 18 -> 4. In sum 23 of 160 (14 %). Most losses come in the first 4 minutes (the run is won or lost in phases
+  1-4); a win is a cliff in power: a step of 0.05 moves a hero by 3-6 wins, so 20 seeds give about +-2.
+- Autopilot, gear none, seeds 1-20, with casters, before -> after the kiting bot (no power): Stonehorn 0 -> 0,
+  Nightglaive 0 -> 0, Gravecaller 18 -> 20, Serpent Shaman 20 -> 20, Mistwarden 1 -> 1, Sparkshot 0 -> 1,
+  Redcleaver 9 -> 9, Tidecaller 1 -> 1. The ranged heroes die in 0-2 min: their early damage is too low (task 7).
+- Autopilot, gear none, seeds 1-10, after tasks 1, 3, 4 and boss strength: Stonehorn 0, Nightglaive 0, Gravecaller
+  10, Serpent Shaman 10, Mistwarden 1, Sparkshot 1, Redcleaver 7, Tidecaller 0 (29 of 80). Far from 10 % each:
+  the summoners (Gravecaller, Serpent Shaman) and Redcleaver are too strong, the rest die early (Stonehorn and
+  Tidecaller before 3 min). Tuning per hero is task 7, after the casters (task 2) and the chest rule (task 6).
+
 ## Random items, stage 3: meta and saves (2026-11-27; the plan's tasks 11-15, the details are Claude's)
 
 - **Item records** (`meta/item-record.ts`): one record per item of the collection, `uid` + rarity + permanent level,
@@ -549,7 +651,7 @@ Spec: `docs/superpowers/specs/2026-11-18-shared-spells-passives-design.md`. Plan
 | sentry-ward | summon, densest_cluster | AUcb (Carrion Beetles) | cooldown 10 | 1-2 wards, at most 1-3 alive, damage 40-80, 0.5 s, 30 s |
 | second-wind | heal, self | A017 (Healing Wave) | cooldown 15 | heal 600-3000 |
 
-  Blade Fan and Sentry Ward use the targeting their updaters read (`cone` aims at the nearest enemy, `summon` wards go to the densest cluster), not the spec's `move_direction` and `around_self`. At level 5 a shared spell is about a signature spell of its kind at level 3-4.
+  Blade Fan and Sentry Ward use the targeting their updaters read (`cone` aims at the nearest enemy (since batch 2 at the thickest crowd), `summon` wards go to the densest cluster), not the spec's `move_direction` and `around_self`. At level 5 a shared spell is about a signature spell of its kind at level 3-4.
 - **Passives (design only, level 1 -> 5):** Might attack damage +8 -> +40 %; Arcane Focus spell power +8 -> +40 %; Haste cooldown speed +5 -> +25 %; Vigor max hp +8 -> +40 % and regen +1 -> +5 /s; Fleet Foot move speed +4 -> +20 % and attack speed +6 -> +30 %; Fortune gold +8 -> +40 % and pickup range +40 -> +200. The spec's values; no change in the tuning.
 - **Cards.** Each card of an offer draws a group by `rules.progression.cardWeights` (signature 4, shared upgrade 3, new spell 2, new passive 2; only groups with cards left), then a card of the group uniformly; the card leaves the group. Attribute cards (STR, AGI, INT without repeats) fill the offer only when all groups are empty. Signature 6 was tried: no hero gained, Tidecaller and Stonehorn lost wins.
 - **Autopilot.** Ultimate, signature (upgrade or learn), new shared spell, shared upgrade, new passive, passive upgrade, attribute; the earlier card on a tie. The idle player of the balance tests and `sim:run --idle` takes an attribute, else the card the autopilot wants least (attribute cards are rare now).
@@ -731,7 +833,7 @@ Open after the tuning:
 - 2026-11-11 (phase 2b-2, tuning result of task 6, not Petr's choice):
   - targets per hero over seeds 1–5: the autopilot wins 2–4, an idle run loses within 2:30, the hero drops below 50 % HP in at least 4 runs, the castle of the won runs ends below 60 % on average, the average level is 10–18 and 700–1200 enemies come;
   - what the measurements showed first: Musketeers dealt most of the damage to the hero and the castle (they stand off and fire all the time), and the autopilot lost half of its runs around 2:30 for two reasons of its own: it took a random card at a level-up (often an attribute instead of a spell) and it retreated as far as the spawn ring;
-  - autopilot (`sim/bot.ts`): it defends the castle (the enemy nearest to the castle within 1400, else the enemy nearest to the hero within 400, else its post 400 from the castle); **it takes the first spell card of an offer before an attribute**; it never goes farther than 2150 from its post; below 30 % HP it keeps 350 from every enemy; it stands still for a step to aim a line spell that is ready (a line flies where the hero walks); it sidesteps a charge that winds up within 700 and dashes when it can;
+  - autopilot (`sim/bot.ts`): it defends the castle (the enemy nearest to the castle within 1400, else the enemy nearest to the hero within 400, else its post 400 from the castle); **it takes the first spell card of an offer before an attribute**; it never goes farther than 2150 from its post; below 30 % HP it keeps 350 from every enemy; it sidesteps a charge that winds up within 700 and dashes when it can;
   - enemy numbers: damage multipliers Shieldbearer 0.5, Scout 0.3, Musketeer 0.32, Chaplain 0.65, Lancer 0.5, Captain 0.75 (of the map's damage); charge multiplier 1.5 (plan: 2); `scaling.yaml` enemy HP 0.35 (was 0.3) and speed 1.32 (was 1.22);
   - rules: castle 14000 HP (was 12000) with 1 % regeneration a minute (was 2); `xpFirst` 10 and `xpStep` 8 (was 7 and 4.5); packs 6–10, 8–11, 8–12 × 2, 10–14 × 2, 9–13 × 2 and 11–15 × 3; `hunterShare` as in the plan;
   - new heroes' spells against the first numbers of task 5: Wisp Ward 93 damage, Wailing Wave 933 / 4660, Mist Surge ticks × 0.6, Rocket Fan and Beam Swarm × 0.48, Cleaver Toss and Rot Field × 0.41, Riptide and Drowned Lake × 0.6, Crushing Wave level 1 400 (map 500);

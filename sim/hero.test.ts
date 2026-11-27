@@ -9,7 +9,7 @@ describe("heroStats", () => {
     data.rules.hero = {
       collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.01, cooldownSpeedPerInt: 0.01,
       dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4, charges: { fromLevel: 20, count: 3 } },
-      blink: { fromLevel: 40, cooldownSeconds: 10, maxDistance: 900, radius: 300, damage: 300, stunSeconds: 0.5 },
+      blink: { fromLevel: 40, cooldownSeconds: 10, aheadDistance: 900, radius: 300, damage: 300, stunSeconds: 0.5 },
     };
     const def = data.heroes.find((h) => h.id === data.rules.start.hero);
     if (!def) throw new Error("start hero is missing");
@@ -19,9 +19,11 @@ describe("heroStats", () => {
     expect(s.regenPerSecond).toBeCloseTo(2, 6);
     expect(s.armor).toBeCloseTo(7, 6);
     expect(s.attackIntervalSeconds).toBeCloseTo(def.baseAttack.cooldown / 1.04, 6);
-    expect(s.damageMin).toBeCloseTo(37, 6);
-    expect(s.damageMax).toBeCloseTo(47, 6);
-    expect(s.spellPower).toBeCloseTo(1.24, 6);
+    // power: the hero's balance multiplier (heroes.yaml, batch 2)
+    const power = def.power ?? 1;
+    expect(s.damageMin).toBeCloseTo(37 * power, 6);
+    expect(s.damageMax).toBeCloseTo(47 * power, 6);
+    expect(s.spellPower).toBeCloseTo(1.24 * power, 6);
     expect(s.cooldownScale).toBeCloseTo(1 / 1.24, 6);
     expect(s.moveSpeed).toBeCloseTo(def.moveSpeed, 6);
     expect(s.collision).toBeCloseTo(32, 6);

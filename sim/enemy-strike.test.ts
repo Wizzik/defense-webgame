@@ -10,7 +10,7 @@ import { distance, enemyRun, eventsOf, type EnemyRun, place, typeOf } from "./te
 const WINDUP = 30;
 /** Iron Marshal: strike radius, damage and cooldown of design/enemies.yaml. */
 const RADIUS = 260;
-const DAMAGE = 150;
+const DAMAGE = 300; // 150 in design/enemies.yaml x scaling.yaml bossDamage 2
 const COOLDOWN = 6 * 30;
 
 /** A boss of type `id` at (x, y) whose strike is ready and whose slam, charge and own attack never come. */

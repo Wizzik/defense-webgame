@@ -9,7 +9,7 @@ import { countEvents, enemyRun, eventsOf, type EnemyRun, place, typeOf } from ".
 
 const WINDUP = 30;
 const RADIUS = 350;
-const DAMAGE = 120;
+const DAMAGE = 240; // 120 in design/enemies.yaml x scaling.yaml bossDamage 2
 
 /** An Iron Marshal at (x, y) whose slam is ready and whose own attack never comes. */
 function boss(run: EnemyRun, role: number, x: number, y: number): number {

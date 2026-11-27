@@ -185,7 +185,7 @@
       "cs": "Železný maršál"
     },
     "level": 1,
-    "hp": 12010,
+    "hp": 36030,
     "hpRegen": 0.25,
     "armor": 8,
     "moveSpeed": 396,
@@ -195,8 +195,8 @@
       "kind": "melee",
       "range": 100,
       "cooldown": 1.4,
-      "damageMin": 42,
-      "damageMax": 50
+      "damageMin": 84,
+      "damageMax": 100
     },
     "behavior": "charge",
     "xp": 150,
@@ -214,7 +214,7 @@
     "model": "lancer",
     "slam": {
       "radius": 350,
-      "damage": 120,
+      "damage": 240,
       "windupSeconds": 1,
       "cooldownSeconds": [
         7,
@@ -225,7 +225,7 @@
       "minRange": 450,
       "maxRange": 1300,
       "radius": 260,
-      "damage": 150,
+      "damage": 300,
       "windupSeconds": 1,
       "cooldownSeconds": 6,
       "leap": true
@@ -238,7 +238,7 @@
       "cs": "Bledý opat"
     },
     "level": 2,
-    "hp": 19917,
+    "hp": 59751,
     "hpRegen": 0.25,
     "armor": 3,
     "moveSpeed": 356,
@@ -248,8 +248,8 @@
       "kind": "ranged",
       "range": 600,
       "cooldown": 1.5,
-      "damageMin": 14,
-      "damageMax": 14
+      "damageMin": 28,
+      "damageMax": 28
     },
     "behavior": "siege",
     "xp": 300,
@@ -263,7 +263,7 @@
     "model": "chaplain",
     "slam": {
       "radius": 400,
-      "damage": 180,
+      "damage": 360,
       "windupSeconds": 1,
       "cooldownSeconds": [
         7,
@@ -274,7 +274,7 @@
       "minRange": 450,
       "maxRange": 1300,
       "radius": 280,
-      "damage": 220,
+      "damage": 440,
       "windupSeconds": 1,
       "cooldownSeconds": 6,
       "leap": true
@@ -287,7 +287,7 @@
       "cs": "Mistr střelby"
     },
     "level": 1,
-    "hp": 30035,
+    "hp": 90105,
     "hpRegen": 0.25,
     "armor": 4,
     "moveSpeed": 356,
@@ -297,8 +297,8 @@
       "kind": "ranged",
       "range": 700,
       "cooldown": 1.5,
-      "damageMin": 16,
-      "damageMax": 19
+      "damageMin": 32,
+      "damageMax": 38
     },
     "behavior": "skirmish",
     "xp": 450,
@@ -307,7 +307,7 @@
     "model": "musketeer",
     "slam": {
       "radius": 400,
-      "damage": 240,
+      "damage": 480,
       "windupSeconds": 1,
       "cooldownSeconds": [
         7,
@@ -318,7 +318,7 @@
       "minRange": 450,
       "maxRange": 1500,
       "radius": 240,
-      "damage": 260,
+      "damage": 520,
       "windupSeconds": 1,
       "cooldownSeconds": 4,
       "leap": false
@@ -331,7 +331,7 @@
       "cs": "Hrůzný regent"
     },
     "level": 1,
-    "hp": 256900,
+    "hp": 770700,
     "hpRegen": 0.25,
     "armor": 8,
     "moveSpeed": 317,
@@ -341,8 +341,8 @@
       "kind": "melee",
       "range": 100,
       "cooldown": 1.4,
-      "damageMin": 63,
-      "damageMax": 75
+      "damageMin": 126,
+      "damageMax": 150
     },
     "behavior": "charge",
     "xp": 1,
@@ -365,7 +365,7 @@
     "model": "captain",
     "slam": {
       "radius": 500,
-      "damage": 350,
+      "damage": 700,
       "windupSeconds": 1,
       "cooldownSeconds": [
         7,
@@ -376,7 +376,7 @@
       "minRange": 450,
       "maxRange": 1300,
       "radius": 300,
-      "damage": 400,
+      "damage": 800,
       "windupSeconds": 1,
       "cooldownSeconds": 5,
       "leap": true
@@ -873,5 +873,109 @@
     },
     "hunter": true,
     "knockbackScale": 0.3
+  },
+  {
+    "id": "battle-mage",
+    "name": {
+      "en": "Battle Mage",
+      "cs": "Bitevní mág"
+    },
+    "level": 2,
+    "hp": 130,
+    "hpRegen": 0.25,
+    "armor": 3,
+    "moveSpeed": 356,
+    "collision": 16,
+    "acquireRange": 600,
+    "attack": {
+      "kind": "ranged",
+      "range": 600,
+      "cooldown": 1.5,
+      "damageMin": 14,
+      "damageMax": 14
+    },
+    "behavior": "skirmish",
+    "faction": "human",
+    "xp": 2,
+    "gold": 2,
+    "caster": true
+  },
+  {
+    "id": "fire-caller",
+    "name": {
+      "en": "Fire Caller",
+      "cs": "Vyvolavač ohně"
+    },
+    "level": 2,
+    "hp": 115,
+    "hpRegen": 0.25,
+    "armor": 3,
+    "moveSpeed": 356,
+    "collision": 16,
+    "acquireRange": 600,
+    "attack": {
+      "kind": "ranged",
+      "range": 600,
+      "cooldown": 2.1,
+      "damageMin": 13,
+      "damageMax": 13
+    },
+    "behavior": "skirmish",
+    "faction": "orc",
+    "xp": 2,
+    "gold": 2,
+    "caster": true
+  },
+  {
+    "id": "bone-acolyte",
+    "name": {
+      "en": "Bone Acolyte",
+      "cs": "Kostěný akolyta"
+    },
+    "level": 2,
+    "hp": 109,
+    "hpRegen": 2,
+    "armor": 3,
+    "moveSpeed": 356,
+    "collision": 16,
+    "acquireRange": 600,
+    "attack": {
+      "kind": "ranged",
+      "range": 600,
+      "cooldown": 1.8,
+      "damageMin": 12,
+      "damageMax": 12
+    },
+    "behavior": "skirmish",
+    "faction": "undead",
+    "xp": 2,
+    "gold": 2,
+    "caster": true
+  },
+  {
+    "id": "moon-priestess",
+    "name": {
+      "en": "Moon Priestess",
+      "cs": "Měsíční kněžka"
+    },
+    "level": 2,
+    "hp": 130,
+    "hpRegen": 0.25,
+    "armor": 3,
+    "moveSpeed": 356,
+    "collision": 16,
+    "acquireRange": 600,
+    "attack": {
+      "kind": "ranged",
+      "range": 600,
+      "cooldown": 1.5,
+      "damageMin": 14,
+      "damageMax": 14
+    },
+    "behavior": "skirmish",
+    "faction": "elf",
+    "xp": 2,
+    "gold": 2,
+    "caster": true
   }
 ]

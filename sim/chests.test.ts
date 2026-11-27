@@ -43,6 +43,26 @@ const cardRarity = (run: Run, card: ChestCard): Rarity =>
 const cardType = (run: Run, card: ChestCard) =>
   card.rolled ? run.data.loot.bases[card.rolled.base]!.slotType : run.data.items[card.item]!.slotType;
 
+/** Rarity rank of what `slot` wears, -1 for an empty slot. */
+function wornRank(run: Run, slot: number): number {
+  const item = run.gear.item[slot]!;
+  if (item === -1) return -1;
+  if (item === ROLLED_ITEM) return run.gear.rolledRarity[slot]!;
+  return rank(run.data.items[item]!.rarity);
+}
+
+/** A loadout with a named item of `rarity` in every slot (the first of its type, the second for the twin slot). */
+function wornEverywhere(data: GameData, rarity: Rarity): LoadoutEntry[] {
+  const used = new Map<string, number>();
+  return SLOT_IDS.map((slot, index) => {
+    const type = slotTypeOf(index);
+    const pool = data.items.filter((item) => item.slotType === type && item.rarity === rarity);
+    const n = used.get(type) ?? 0;
+    used.set(type, n + 1);
+    return { slot, item: pool[n % pool.length]!.id, level: 1 };
+  });
+}
+
 function pick(index: number): TickInput {
   return { moveX: 0, moveY: 0, card: index, actions: 0 };
 }
@@ -335,15 +355,85 @@ describe("chests", () => {
     expect(worn.data.items[up.item]!.rarity).toBe("epic");
   });
 
-  it("a different item of a lower or equal rarity in a worn slot is a Choice with the rolled item", () => {
+  it("a slot that wears the drawn rarity or a higher one gets a Level card of the worn item", () => {
     const low = quietRun(3, chestData({ common: 1 }, 16), [{ slot: "head", item: "wardens-helm", level: 2 }]);
     const down = rollChestOffer(low).cards.find((card) => card.slot === slotOf("head"))!;
-    expect(down).toEqual({ slot: slotOf("head"), item: itemIndex(low, "travelers-hood"), action: ChestAction.Choice, rolled: null });
+    expect(down).toEqual({ slot: slotOf("head"), item: itemIndex(low, "wardens-helm"), action: ChestAction.Level, rolled: null });
     const epic = quietRun(3, chestData({ rare: 1 }, 16), [{ slot: "head", item: "helm-of-the-unbroken-line", level: 1 }]);
     const rare = rollChestOffer(epic).cards.find((card) => card.slot === slotOf("head"))!;
-    expect(rare.action).toBe(ChestAction.Choice);
-    expect(epic.data.items[rare.item]!.rarity).toBe("rare");
-    expect(epic.data.items[rare.item]!.slotType).toBe("head");
+    expect(rare.action).toBe(ChestAction.Level);
+    expect(rare.item).toBe(itemIndex(epic, "helm-of-the-unbroken-line"));
+  });
+
+  it("no Choice card offers a rarity at or below the worn one, named or rolled, over many offers", () => {
+    for (const named of [true, false]) {
+      const data = chestData({ common: 3, rare: 3, epic: 2, legendary: 1, mythic: 1 }, 3, named);
+      const run = quietRun(11, data, wornEverywhere(data, "rare"));
+      for (let offer = 0; offer < 200; offer++) {
+        for (const card of rollChestOffer(run).cards) {
+          if (card.action === ChestAction.Choice) {
+            expect(rank(cardRarity(run, card))).toBeGreaterThan(wornRank(run, card.slot));
+          }
+          if (card.action === ChestAction.Level) expect(card.item).toBe(run.gear.item[card.slot]);
+        }
+      }
+    }
+  });
+
+  it("a card for a worn slot is a Level card with upgradeShare, else it moves to a slot where it is an upgrade", () => {
+    const always = chestData({ rare: 1 }, 1, false);
+    always.rules.loot.upgradeShare = 1;
+    const never = chestData({ rare: 1 }, 1, false);
+    never.rules.loot.upgradeShare = 0;
+    const head = slotOf("head");
+    let levels = 0;
+    for (let seed = 1; seed <= 40; seed++) {
+      // every slot but the head is empty, so a card drawn for the head can always move
+      const moved = rollChestOffer(quietRun(seed, never, [{ slot: "head", item: "wardens-helm", level: 1 }])).cards[0]!;
+      expect(moved.slot).not.toBe(head);
+      expect(moved.action).toBe(ChestAction.New);
+      const kept = rollChestOffer(quietRun(seed, always, [{ slot: "head", item: "wardens-helm", level: 1 }])).cards[0]!;
+      if (kept.slot === head) {
+        levels++;
+        expect(kept.action).toBe(ChestAction.Level);
+      }
+    }
+    expect(levels).toBeGreaterThan(0);
+  });
+
+  it("with no slot where the rarity is an upgrade every card is a Level card", () => {
+    const data = chestData({ common: 1, rare: 1 }, 3, false);
+    data.rules.loot.upgradeShare = 0;
+    const run = quietRun(4, data, wornEverywhere(data, "rare"));
+    for (let offer = 0; offer < 50; offer++) {
+      for (const card of rollChestOffer(run).cards) expect(card.action).toBe(ChestAction.Level);
+    }
+  });
+
+  it("a mythic slot only ever gets Level cards", () => {
+    const data = chestData({ legendary: 1, mythic: 1 }, 16, false);
+    const mythic = data.items.find((item) => item.rarity === "mythic" && item.slotType === "mainHand")!;
+    const mainHand = slotOf("mainHand");
+    for (let seed = 1; seed <= 20; seed++) {
+      const run = quietRun(seed, data, [{ slot: "mainHand", item: mythic.id, level: 1 }]);
+      const card = rollChestOffer(run).cards.find((c) => c.slot === mainHand)!;
+      expect(card.action).toBe(ChestAction.Level);
+    }
+  });
+
+  it("a Level card of a worn random item carries a copy of it and only levels it", () => {
+    const head = slotOf("head");
+    const rolledRun = quietRun(6, chestData({ epic: 1 }, 16, false), []);
+    const epicCard = rollChestOffer(rolledRun).cards.find((c) => c.slot === head && c.rolled)!;
+    applyChestCard(rolledRun, epicCard);
+    expect(rolledRun.gear.item[head]).toBe(ROLLED_ITEM);
+    rolledRun.data.rules.chests.rarityWeights = { rare: 1 };
+    const level = rollChestOffer(rolledRun).cards.find((c) => c.slot === head)!;
+    expect(level.action).toBe(ChestAction.Level);
+    expect(level.item).toBe(ROLLED_ITEM);
+    expect(level.rolled).toEqual(epicCard.rolled);
+    applyChestCard(rolledRun, level);
+    expect(rolledRun.gear.temp[head]).toBe(2);
   });
 
   it("the same item as the worn one is a Level card", () => {
@@ -539,7 +629,7 @@ describe("chests with random items", () => {
   });
 
   it("a rolled card over a worn item is a Choice; take wears the rolled item, keep levels the worn one", () => {
-    const run = quietRun(5, chestData({ rare: 1 }, 16, false), [{ slot: "head", item: "wardens-helm", level: 2 }]);
+    const run = quietRun(5, chestData({ epic: 1 }, 16, false), [{ slot: "head", item: "wardens-helm", level: 2 }]);
     const head = slotOf("head");
     const card = rollChestOffer(run).cards.find((c) => c.slot === head && c.rolled);
     if (!card) return; // the named share took the head card for this seed

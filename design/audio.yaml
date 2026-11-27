@@ -392,6 +392,32 @@ cues:
     priority: 3
     category: ui
     maxVoices: 1
+  # the spell bolts of the faction casters (Petr's batch 2): own cues on files already encoded, quiet, low priority
+  # and two voices, so a crowd of casters never drowns the hero
+  - id: enemy-bolt-arcane
+    files: [audio/sfx/shared-arc-1.ogg, audio/sfx/shared-arc-2.ogg]
+    synth: hit
+    gainDb: -16
+    maxVoices: 2
+    priority: 0
+  - id: enemy-bolt-fire
+    files: [audio/sfx/shared-firebolt-1.ogg, audio/sfx/shared-firebolt-2.ogg]
+    synth: hit
+    gainDb: -16
+    maxVoices: 2
+    priority: 0
+  - id: enemy-bolt-bone
+    files: [audio/sfx/grave-bolt-1.ogg, audio/sfx/grave-bolt-2.ogg]
+    synth: hit
+    gainDb: -16
+    maxVoices: 2
+    priority: 0
+  - id: enemy-bolt-moon
+    files: [audio/sfx/moon-glimmer-1.ogg, audio/sfx/moon-glimmer-2.ogg]
+    synth: hit
+    gainDb: -16
+    maxVoices: 2
+    priority: 0
 
 # Music (all CC0, sources and authors in tools/audio-build/manifest.ts and assets/LICENSES.md).
 tracks:
@@ -499,6 +525,11 @@ enemies:
   stone-warden: { death: elf-fall-heavy }
   grove-druid: { death: elf-fall }
   grove-warden: { death: elf-fall-heavy }
+  # casters: the spell bolt is heard when it hits the hero or the castle
+  battle-mage: { death: human-fall, attack: enemy-bolt-arcane }
+  fire-caller: { death: orc-fall, attack: enemy-bolt-fire }
+  bone-acolyte: { death: bone-rattle, attack: enemy-bolt-bone }
+  moon-priestess: { death: elf-fall, attack: enemy-bolt-moon }
 
 sounds:
   pickup.xp: none

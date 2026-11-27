@@ -35,8 +35,8 @@ export function mapHero(exp: ExportHero, entry: HeroEntry): Hero {
       int: { base: exp.int, perLevel: exp.int_per_level },
     },
     baseAttack: {
-      kind,
-      range: Math.round(exp.range * (attack.rangeScale ?? 1)),
+      kind: attack.kind ?? kind,
+      range: attack.range ?? Math.round(exp.range * (attack.rangeScale ?? 1)),
       cooldown: exp.cooldown * (attack.cooldownScale ?? 1),
       damageMin: exp.damage_min,
       damageMax: exp.damage_max,
@@ -46,5 +46,6 @@ export function mapHero(exp: ExportHero, entry: HeroEntry): Hero {
     signatureAbilities: entry.signatureAbilities,
     ultimate: entry.ultimate,
     ...(entry.damageTaken === undefined ? {} : { damageTaken: entry.damageTaken }),
+    ...(entry.power === undefined ? {} : { power: entry.power }),
   };
 }

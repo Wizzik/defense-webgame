@@ -32,18 +32,22 @@ describe("cone", () => {
     const hits = hitSlots(run);
     expect(hits.sort()).toEqual([a, b].sort());
     expect(hits).not.toContain(c);
-    const k = eventsOf(run, EventKind.Hit).find((i) => run.events.a[i] === a)!;
+    // the spell's hit (u = 1), not the shaman's own shot at the nearest enemy
+    const k = eventsOf(run, EventKind.Hit).find((i) => run.events.a[i] === a && run.events.u[i] === 1)!;
     expect(run.events.value[k]).toBeCloseTo(p.damage[0] * run.hero.stats.spellPower, 9);
   });
 
   it("misses enemies behind or outside the cone", () => {
     const { run } = coneRun();
-    const lead = addEnemy(run, 0, 50);
+    // two in a row ahead: the cone aims at them, the densest line (Petr, batch 2)
+    const lead = addEnemy(run, 0, 300);
+    const second = addEnemy(run, 0, 340);
     const behind = addEnemy(run, 0, -200);
     const outside = addEnemy(run, 400, 500);
     run.step(NO_INPUT);
     const hits = hitSlots(run);
     expect(hits).toContain(lead);
+    expect(hits).toContain(second);
     expect(hits).not.toContain(behind);
     expect(hits).not.toContain(outside);
   });
@@ -51,8 +55,9 @@ describe("cone", () => {
   it("width grows with distance", () => {
     const { run } = coneRun();
     addEnemy(run, 0, 50);
-    const far = addEnemy(run, 130, 800);
-    const near = addEnemy(run, 130, 100);
+    // half width 60 at the hero, endWidth / 2 at the far end, plus the enemy's collision
+    const far = addEnemy(run, 98, 800);
+    const near = addEnemy(run, 98, 100);
     run.step(NO_INPUT);
     const hits = hitSlots(run);
     expect(hits).toContain(far);

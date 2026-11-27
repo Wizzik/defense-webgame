@@ -6,14 +6,14 @@ export const SCALING_YAML = "design/scaling.yaml";
 /** Uniform multipliers from the map's numbers to the survivors pace (design/scaling.yaml). */
 export interface Scaling {
   heroes: { moveSpeed: number; attackCooldown: number };
-  abilities: { cooldown: number; damage: number; levelGrowthExponent: number; levels: number };
-  enemies: { hp: number; moveSpeed: number };
+  abilities: { cooldown: number; damage: number; levelGrowthExponent: number; levels: number; areaScale: number };
+  enemies: { hp: number; moveSpeed: number; bossHp: number; bossDamage: number };
 }
 
 const SHAPE: { [G in keyof Scaling]: readonly string[] } = {
   heroes: ["moveSpeed", "attackCooldown"],
-  abilities: ["cooldown", "damage", "levelGrowthExponent", "levels"],
-  enemies: ["hp", "moveSpeed"],
+  abilities: ["cooldown", "damage", "levelGrowthExponent", "levels", "areaScale"],
+  enemies: ["hp", "moveSpeed", "bossHp", "bossDamage"],
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -77,6 +77,22 @@ function flattenGrowth(row: number[], exponent: number): number[] {
   return row.map((v, level) => (level === 0 || !(v > 0) ? v : whole(first * Math.pow(v / first, exponent))));
 }
 
+/**
+ * Param keys of an ability's area that `abilities.areaScale` multiplies (Petr 2026-11-27, batch 2: "AoE of every
+ * spell -50 %"): the radius of novas, areas, auras and rings, the burst radius of ticking areas, and the width of
+ * lines and cones. Reach (`range`, `length`, `attackRange`, `bounceRange`) stays. Applied last, on the spread rows.
+ */
+const AREA_PARAMS: readonly string[] = ["radius", "hitRadius", "width", "endWidth"];
+
+function scaleArea(ability: Ability, factor: number): Ability {
+  if (factor === 1) return ability;
+  const params: Record<string, number[]> = {};
+  for (const [key, value] of Object.entries(ability.params as Record<string, number[]>)) {
+    params[key] = AREA_PARAMS.includes(key) && Array.isArray(value) ? value.map((v) => whole(v * factor)) : value;
+  }
+  return { ...ability, params } as Ability;
+}
+
 export function scaleAbility(ability: Ability, s: Scaling): Ability {
   const params: Record<string, number[]> = {};
   for (const [key, value] of Object.entries(ability.params as Record<string, number[]>)) {
@@ -86,13 +102,21 @@ export function scaleAbility(ability: Ability, s: Scaling): Ability {
         : value;
   }
   const scaled = { ...ability, cooldown: ability.cooldown.map((c) => seconds(c * s.abilities.cooldown)), params } as Ability;
-  return spreadLevels(scaled, s.abilities.levels);
+  return scaleArea(spreadLevels(scaled, s.abilities.levels), s.abilities.areaScale);
 }
 
+/**
+ * A boss (Petr 2026-11-27, batch 2: "hp na 3x a dmg na 2x") takes `bossHp` on its scaled hp and `bossDamage` on its
+ * attack, slam and strike damage, after the rounding, so whole numbers stay whole.
+ */
 export function scaleEnemy(enemy: Enemy, s: Scaling): Enemy {
-  return {
-    ...enemy,
-    hp: whole(enemy.hp * s.enemies.hp),
-    moveSpeed: whole(enemy.moveSpeed * s.enemies.moveSpeed),
-  };
+  const hp = whole(enemy.hp * s.enemies.hp);
+  const scaled: Enemy = { ...enemy, hp, moveSpeed: whole(enemy.moveSpeed * s.enemies.moveSpeed) };
+  if (!enemy.boss) return scaled;
+  const d = s.enemies.bossDamage;
+  scaled.hp = whole(hp * s.enemies.bossHp);
+  scaled.attack = { ...enemy.attack, damageMin: whole(enemy.attack.damageMin * d), damageMax: whole(enemy.attack.damageMax * d) };
+  if (enemy.slam) scaled.slam = { ...enemy.slam, damage: whole(enemy.slam.damage * d) };
+  if (enemy.strike?.damage !== undefined) scaled.strike = { ...enemy.strike, damage: whole(enemy.strike.damage * d) };
+  return scaled;
 }

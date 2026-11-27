@@ -45,7 +45,8 @@ test("shot: fight", async ({ page }) => {
   for (let i = 0; i < 600; i++) {
     const { tick, screen } = await page.evaluate(() => ({ tick: window.__game!.tick, screen: window.__game!.screen }));
     if (screen === "levelUp") await page.keyboard.press("1");
-    else if (tick >= 2700) break;
+    // 15 s: an idle hero with no gear falls in about 25 s since the batch 2 balance
+    else if (tick >= 450) break;
     await page.waitForTimeout(250);
   }
   await page.waitForFunction(() => window.__game?.screen === "playing", undefined, { timeout: 10_000 });

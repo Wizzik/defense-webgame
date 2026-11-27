@@ -31,7 +31,8 @@ import { OrbView } from "./render/orb-view";
 import { AbilityFx } from "./render/ability-fx";
 import { Effects } from "./render/effects";
 import { EnemyFx } from "./render/enemy-fx";
-import { tintTable } from "./render/enemy-tints";
+import { crowdSkins } from "./render/boss-looks";
+import { hexTintTable } from "./render/enemy-tints";
 import { EnemyCrowd, IDLE_CLIP, PUNCH_CLIP, VAT_FPS, WALK_CLIP } from "./render/enemy-crowd";
 import { AllyView } from "./render/ally-view";
 import { HeroView } from "./render/hero-view";
@@ -211,18 +212,21 @@ async function start(): Promise<void> {
   for (const view of heroViews) scene.add(view.object);
   // one bake per model: a type that borrows a model shares its texture and gets its own copy of the geometry
   const bakedByModel = new Map<string, BakedVat>();
-  const vats = data.enemies.map((enemy, type) => {
-    const id = enemyModelId(enemy);
+  // one mesh per enemy type, then one per boss look of a world (design/worlds.yaml bosses), all from loaded models
+  const skins = crowdSkins(data);
+  const modelById = new Map(data.enemies.map((enemy, type) => [enemyModelId(enemy), enemyModels[type]!]));
+  const vats = skins.models.map((id) => {
     const baked = bakedByModel.get(id);
     if (baked) return { ...baked, geometry: baked.geometry.clone() };
-    const vat = bakeVat(enemyModels[type], [WALK_CLIP, PUNCH_CLIP, IDLE_CLIP], VAT_FPS);
+    const vat = bakeVat(modelById.get(id)!, [WALK_CLIP, PUNCH_CLIP, IDLE_CLIP], VAT_FPS);
     bakedByModel.set(id, vat);
     return vat;
   });
   const crowd = new EnemyCrowd(
     vats,
     data.rules.enemies.maxAlive,
-    tintTable(data.enemies),
+    hexTintTable(skins.tints),
+    skins,
   );
   const crystals = new CrystalView(CRYSTAL_CAPACITY, (run) => run.crystals, crystalLook());
   const coins = new CrystalView(COIN_CAPACITY, (run) => run.coins, coinLook());

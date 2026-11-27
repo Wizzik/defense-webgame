@@ -107,7 +107,7 @@ describe("gear", () => {
     hero.gear.spellPower = 0.2;
     const out = heroStats(run.data, hero, { ...hero.stats });
     const int = hero.int + 10;
-    expect(out.spellPower).toBeCloseTo((1 + int * run.data.rules.hero.spellPowerPerInt) * 1.2, 9);
+    expect(out.spellPower).toBeCloseTo((1 + int * run.data.rules.hero.spellPowerPerInt) * 1.2 * (hero.def.power ?? 1), 9);
     expect(out.cooldownScale).toBeCloseTo(1 / (1 + int * run.data.rules.hero.cooldownSpeedPerInt), 9);
   });
 

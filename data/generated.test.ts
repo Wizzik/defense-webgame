@@ -103,12 +103,10 @@ describe("generated game data", () => {
     expect(rows(JSON.parse(read("items.json")))).toEqual(rows(designEntries("items.yaml") as unknown as Row[]));
   });
 
-  it("melee heroes take a quarter less and enemies hit the hero twice as hard", () => {
-    const heroes = JSON.parse(read("heroes.json")) as { id: string; damageTaken?: number }[];
-    for (const hero of heroes) {
-      if (hero.id === "stonehorn" || hero.id === "redcleaver" || hero.id === "serpent-shaman") expect(hero.damageTaken, hero.id).toBe(0.75);
-      else expect(hero, hero.id).not.toHaveProperty("damageTaken");
-    }
+  it("heroes carry the damageTaken and power of design/heroes.yaml, and enemies hit the hero twice as hard", () => {
+    type Knobs = { id: string; damageTaken?: number; power?: number };
+    const knobs = (list: Knobs[]) => list.map(({ id, damageTaken, power }) => ({ id, damageTaken, power }));
+    expect(knobs(JSON.parse(read("heroes.json")) as Knobs[])).toEqual(knobs(designEntries("heroes.yaml") as unknown as Knobs[]));
     expect(JSON.parse(read("rules.json")).threat).toEqual({ heroDamageTaken: 2 });
   });
 
@@ -120,13 +118,14 @@ describe("generated game data", () => {
       "brute", "spearthrower", "hornback", "bloodcaller", "warlord",
       "ghoul", "webcrawler", "rotgut", "gravebinder", "risen", "bone-tyrant",
       "huntress", "moon-archer", "stone-warden", "grove-druid", "grove-warden",
+      "battle-mage", "fire-caller", "bone-acolyte", "moon-priestess",
     ]);
     expect(enemies.filter((e) => e.faction === undefined).map((e) => e.id)).toEqual(enemies.filter((e) => e.boss).map((e) => e.id));
     expect(enemies.filter((e) => e.boss).map((e) => e.id)).toEqual(["iron-marshal", "pale-abbot", "gunmaster", "dread-regent"]);
     const ranged = enemies.filter((e) => e.attack.kind === "ranged").map((e) => e.id);
     expect(ranged).toEqual([
       "musketeer", "chaplain", "pale-abbot", "gunmaster", "spearthrower", "bloodcaller", "webcrawler", "gravebinder",
-      "huntress", "moon-archer",
+      "huntress", "moon-archer", "battle-mage", "fire-caller", "bone-acolyte", "moon-priestess",
     ]);
     expect(enemies.filter((e) => e.attack.kind !== "ranged").every((e) => e.attack.kind === "melee")).toBe(true);
     expect(enemies.filter((e) => e.heal !== undefined).map((e) => e.id)).toEqual(["chaplain", "pale-abbot", "grove-druid"]);
@@ -158,7 +157,8 @@ describe("generated game data", () => {
 
   it("boss hp matches the design targets", () => {
     const enemies = JSON.parse(read("enemies.json")) as { id: string; hp: number; boss?: true }[];
-    const targets: Record<string, number> = { "iron-marshal": 12000, "pale-abbot": 20000, gunmaster: 30000, "dread-regent": 257000 };
+    // Petr 2026-11-27 (batch 2): x3 of 12 000, 20 000, 30 000 and 257 000
+    const targets: Record<string, number> = { "iron-marshal": 36000, "pale-abbot": 60000, gunmaster: 90000, "dread-regent": 771000 };
     for (const boss of enemies.filter((e) => e.boss)) {
       const target = targets[boss.id]!;
       expect(Math.abs(boss.hp - target) / target, boss.id).toBeLessThanOrEqual(0.01);
@@ -222,6 +222,25 @@ describe("generated game data", () => {
       brute: "siege", spearthrower: "skirmish", hornback: "charge", bloodcaller: "support", warlord: "charge",
       ghoul: "flank", webcrawler: "skirmish", rotgut: "siege", gravebinder: "support", risen: "siege", "bone-tyrant": "siege",
       huntress: "flank", "moon-archer": "skirmish", "stone-warden": "siege", "grove-druid": "support", "grove-warden": "charge",
+      "battle-mage": "skirmish", "fire-caller": "skirmish", "bone-acolyte": "skirmish", "moon-priestess": "skirmish",
+    });
+  });
+
+  it("one caster per faction, at least a quarter of every phase mix from phase 3 (Petr's batch 2)", () => {
+    const enemies = JSON.parse(read("enemies.json")) as { id: string; caster?: true; faction?: string; attack: { kind: string } }[];
+    const casters = enemies.filter((e) => e.caster);
+    expect(casters.map((e) => [e.id, e.faction, e.attack.kind])).toEqual([
+      ["battle-mage", "human", "ranged"], ["fire-caller", "orc", "ranged"],
+      ["bone-acolyte", "undead", "ranged"], ["moon-priestess", "elf", "ranged"],
+    ]);
+    const ids = new Set(casters.map((e) => e.id));
+    const phases = (JSON.parse(read("rules.json")) as { phases: { mix: Record<string, number> }[] }).phases;
+    phases.forEach((phase, i) => {
+      const weights = Object.entries(phase.mix);
+      const total = weights.reduce((sum, [, w]) => sum + w, 0);
+      const cast = weights.reduce((sum, [id, w]) => sum + (ids.has(id) ? w : 0), 0);
+      if (i >= 2) expect(cast / total, `phase ${i + 1}`).toBeGreaterThanOrEqual(0.25);
+      else expect(cast, `phase ${i + 1}`).toBe(0);
     });
   });
 
@@ -248,6 +267,8 @@ describe("generated game data", () => {
     expect(ability("seismic-echo").kind).toBe("on_cast");
     expect(heroes.find((h) => h.id === "nightglaive")!.signatureAbilities[0]).toBe("falling-stars");
     expect(ability("serpent-totem").params.maxAlive).toBeDefined();
+    // Petr 2026-11-27: a totem bites for 100 at level 1 and 25 % of that more every level
+    expect(ability("serpent-totem").params.damage).toEqual([100, 125, 150, 175, 200, 225, 250, 275, 300, 325]);
   });
 
   it("carries no map texts", () => {

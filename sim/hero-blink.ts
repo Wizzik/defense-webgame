@@ -7,22 +7,17 @@ import type { Run } from "./run";
 import { nearestFree, pushX, pushY } from "./world-map/geometry";
 
 /**
- * The blink (key F, Petr 2026-11-26), every hero's own from `rules.hero.blink.fromLevel`: the hero jumps to the aimed
- * point (input aimX, aimY from the hero; missing: straight ahead), at most `maxDistance` away, kept in the arena and
- * moved to the nearest free spot off the obstacles, and a burst of `damage` x spell power within `radius` around the
+ * The blink (key F, Petr 2026-11-26), every hero's own from `rules.hero.blink.fromLevel`: the hero is put at the aimed
+ * point in the same step (input aimX, aimY from the hero; missing: `aheadDistance` straight ahead), at any distance
+ * (Petr 2026-11-27), kept in the arena and moved to the nearest free spot off the obstacles, and a burst of `damage` x spell power within `radius` around the
  * landing spot hurts and stuns the enemies there. It ends a dash and works through roots (a jump, not a walk).
  */
 export function blink(run: Run, input: TickInput): void {
   const hero = run.hero;
   const rule = run.data.rules.hero.blink;
   if (hero.hp <= 0 || hero.level < rule.fromLevel || hero.blinkCooldown > 0 || isChoosing(run)) return;
-  let dx = input.aimX ?? hero.facingX * rule.maxDistance;
-  let dy = input.aimY ?? hero.facingY * rule.maxDistance;
-  const len = Math.sqrt(dx * dx + dy * dy);
-  if (len > rule.maxDistance) {
-    dx = (dx / len) * rule.maxDistance;
-    dy = (dy / len) * rule.maxDistance;
-  }
+  const dx = input.aimX ?? hero.facingX * rule.aheadDistance;
+  const dy = input.aimY ?? hero.facingY * rule.aheadDistance;
   const halfX = run.data.rules.arena.width / 2 - hero.stats.collision;
   const halfY = run.data.rules.arena.height / 2 - hero.stats.collision;
   const fromX = hero.x;

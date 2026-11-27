@@ -1,9 +1,13 @@
+import { gearPreset } from "./gear-presets";
 import { describe, expect, it } from "vitest";
 import { botInput, idleCard } from "../../sim/bot";
 import { createRun } from "../../sim/index";
 import type { TickInput } from "../../sim/input";
 import { gameData } from "../../sim/testing/game-data";
 import { worldLine, factionLine, formatHeroSummary, formatSummary, idleInput, kitLine, lossWindows, parseArgs, phaseXpLine, playBot, type RunSummary, sustainLine } from "./run";
+
+/** The full gear preset: the world tests need a hero who lives long enough to see the world's events. */
+const sturdy = () => gearPreset(gameData(), "stonehorn", "full");
 
 describe("formatSummary", () => {
   it("formats a lost run", () => {
@@ -192,7 +196,9 @@ describe("bot run speed", () => {
     }
     expect(run.state).toBe("won");
     expect(run.tick).toBeGreaterThan(300 * 30);
-    expect(performance.now() - start).toBeLessThan(8000);
+    // 8 -> 15 s in Petr's batch 2: casters keep their range and the autopilot kites, so far more enemies are alive at
+    // the end of this immortal run (about 340 instead of 190); a step costs the same per enemy
+    expect(performance.now() - start).toBeLessThan(15000);
   });
 });
 
@@ -284,24 +290,24 @@ describe("the world in the summaries", () => {
   });
 
   it("playBot counts the hero's seconds in fire in world 5", () => {
-    const fire = playBot(gameData(), 1, 300, "stonehorn", false, undefined, [], 5);
+    const fire = playBot(gameData(), 1, 300, "stonehorn", false, undefined, sturdy(), 5);
     expect(fire.world.kind).toBe("meteors");
     expect(fire.world.bolts).toBeGreaterThan(0);
     expect(fire.world.fireSeconds).toBeGreaterThanOrEqual(0);
   });
 
   it("playBot counts the blizzards of world 4", () => {
-    const snow = playBot(gameData(), 1, 400, "stonehorn", false, 2, [], 4);
+    const snow = playBot(gameData(), 1, 400, "stonehorn", false, 2, sturdy(), 4);
     expect(snow.world.effect).toBe("snow");
     expect(snow.world.sand).toBeGreaterThanOrEqual(1);
     expect(snow.world.chillShare).toBeGreaterThanOrEqual(0);
   });
 
   it("playBot counts the sandstorms of world 2 and the thicket steps of world 3", () => {
-    const sand = playBot(gameData(), 1, 400, "stonehorn", false, 2, [], 2);
+    const sand = playBot(gameData(), 1, 400, "stonehorn", false, 2, sturdy(), 2);
     expect(sand.world.kind).toBe("weather");
     expect(sand.world.sand).toBeGreaterThanOrEqual(1);
-    const wood = playBot(gameData(), 1, 200, "stonehorn", false, undefined, [], 3);
+    const wood = playBot(gameData(), 1, 200, "stonehorn", false, undefined, sturdy(), 3);
     expect(wood.world.kind).toBe("thicket");
     expect(wood.world.thicketShare).toBeGreaterThanOrEqual(0);
     expect(wood.world.thicketShare).toBeLessThanOrEqual(1);
@@ -312,7 +318,7 @@ describe("the world in the summaries", () => {
   });
 
   it("playBot counts the islands and the storm", () => {
-    const s = playBot(gameData(), 1, 200, "stonehorn");
+    const s = playBot(gameData(), 1, 200, "stonehorn", false, undefined, sturdy());
     expect(s.world.islands).toBeGreaterThanOrEqual(30);
     expect(s.world.waves).toBeGreaterThanOrEqual(1);
     expect(s.world.bolts).toBeGreaterThanOrEqual(s.world.waves);

@@ -26,16 +26,29 @@ const DEFEND_EDGE_MARGIN = 150;
 export const CHASE_DISTANCE = 400;
 /** Farther than this from its post the bot walks back, whatever the enemies do (a retreat must not end in the spawn ring). */
 export const LEASH_DISTANCE = 2150;
-/** A ranged hero backs off from an enemy nearer than this. */
-const RETREAT_DISTANCE = 180;
+/**
+ * A ranged hero kites like a player (Petr, batch 2): it keeps the nearest enemy at least KITE_KEEP_SHARE of its attack
+ * range away (at most KITE_KEEP_MAX), walking away from the weight of every enemy within KITE_REACH and a
+ * little sideways (KITE_SIDE, the side towards the castle), so it circles instead of backing into a corner. With
+ * KITE_CROWD enemies within KITE_CROWD_RADIUS it dashes out. Below LOW_HP it keeps LOW_HP_DISTANCE more.
+ */
+const KITE_KEEP_SHARE = 0.6;
+const KITE_KEEP_MAX = 450;
+/** Every enemy within this distance pushes the kite, by 1 / distance squared: the hero runs to the emptiest side. */
+const KITE_REACH = 1000;
+const KITE_SIDE = 0.6;
+const KITE_CROWD = 4;
+const KITE_CROWD_RADIUS = 220;
+/** Near the edge of the castle's defence circle the kite loses its outward part within this margin. */
+const KITE_EDGE = 250;
 /** A melee hero walks up to this distance from its target; a ranged hero up to its attack range minus this. */
 const MELEE_STOP = 150;
 const RANGED_MARGIN = 50;
 /** A charge winding up nearer than this makes the bot step out of its line. */
 const DODGE_DISTANCE = 700;
-/** Below this share of its hp the hero keeps this far from every enemy, as a careful player would. */
+/** Below this share of its hp a ranged hero kites this much farther (melee heroes fight on, Petr, batch 2). */
 const LOW_HP = 0.3;
-const LOW_HP_DISTANCE = 350;
+const LOW_HP_DISTANCE = 150;
 /** A target with a poison cloud is fought from its edge: the bot keeps between radius + CLOUD_INSIDE and radius + CLOUD_MARGIN. */
 const CLOUD_MARGIN = 60;
 const CLOUD_INSIDE = 10;
@@ -359,10 +372,11 @@ export function botInput(run: Run, out: TickInput): TickInput {
     return walkTo(run, out, castle.x + (ox / outside) * edge, castle.y + (oy / outside) * edge);
   }
   const nearDist = Math.sqrt(nearSq);
-  const keep = hero.hp < hero.stats.maxHp * LOW_HP ? LOW_HP_DISTANCE : melee ? 0 : RETREAT_DISTANCE;
+  const keep = melee ? 0
+    : Math.min(KITE_KEEP_MAX, def.baseAttack.range * KITE_KEEP_SHARE) + (hero.hp < hero.stats.maxHp * LOW_HP ? LOW_HP_DISTANCE : 0);
   if (near >= 0 && nearDist < keep) {
-    dx = hero.x - enemies.x[near];
-    dy = hero.y - enemies.y[near];
+    kite(run, out, keep, ox, oy, outside, edge);
+    return out;
   } else {
     // In the finale the final boss is the target: the run is won when it falls.
     const target = run.finalBossSlot >= 0 ? run.finalBossSlot
@@ -415,14 +429,6 @@ export function botInput(run: Run, out: TickInput): TickInput {
       }
     }
   }
-  if (near >= 0) {
-    // A line spell flies where the hero walks, or at the nearest enemy when it stands: stand still to aim it.
-    for (let s = 0; s < run.abilities.length; s++) {
-      const slot = run.abilities[s];
-      if (slot.level < 1 || slot.cooldown > 1 || slot.active || slot.def.kind !== "line") continue;
-      if (nearDist <= slot.def.params.length[slot.level - 1]) return out;
-    }
-  }
   if (routed) {
     out.moveX = axis(dx);
     out.moveY = axis(dy);
@@ -431,6 +437,62 @@ export function botInput(run: Run, out: TickInput): TickInput {
   out.moveX = Math.abs(dx) > AXIS_DEADZONE ? Math.sign(dx) : 0;
   out.moveY = Math.abs(dy) > AXIS_DEADZONE ? Math.sign(dy) : 0;
   return out;
+}
+
+/**
+ * The kite of a ranged hero: away from the weight of the enemies within KITE_REACH (1 / distance squared), plus a
+ * sideways part towards the castle; near the edge of the defence circle the outward part goes. `ox`, `oy` is the
+ * hero's offset from the castle, `outside` its length, `edge` the circle the bot keeps inside. Does not allocate.
+ */
+function kite(run: Run, out: TickInput, keep: number, ox: number, oy: number, outside: number, edge: number): void {
+  const { hero, enemies } = run;
+  const reach = KITE_REACH;
+  let px = 0;
+  let py = 0;
+  let crowd = 0;
+  for (let i = 0; i < enemies.capacity; i++) {
+    if (enemies.alive[i] === 0) continue;
+    const ex = hero.x - enemies.x[i];
+    const ey = hero.y - enemies.y[i];
+    const sq = ex * ex + ey * ey;
+    if (sq >= reach * reach) continue;
+    const d = Math.sqrt(sq);
+    if (d < KITE_CROWD_RADIUS) crowd++;
+    if (d < 1e-6) continue;
+    const w = 1 / (sq * d);
+    px += ex * w;
+    py += ey * w;
+  }
+  let len = Math.sqrt(px * px + py * py);
+  if (len < 1e-9) {
+    px = 1;
+    py = 0;
+    len = 1;
+  }
+  px /= len;
+  py /= len;
+  // sideways: of the two perpendiculars the one that points more towards the castle
+  let sx = -py;
+  let sy = px;
+  if (sx * ox + sy * oy > 0) {
+    sx = -sx;
+    sy = -sy;
+  }
+  let mx = px + sx * KITE_SIDE;
+  let my = py + sy * KITE_SIDE;
+  if (outside > edge - KITE_EDGE && outside > 1e-6) {
+    const rx = ox / outside;
+    const ry = oy / outside;
+    const radial = mx * rx + my * ry;
+    if (radial > 0) {
+      mx -= rx * radial;
+      my -= ry * radial;
+    }
+  }
+  const m = Math.sqrt(mx * mx + my * my);
+  out.moveX = axis(m > 1e-6 ? mx / m : px);
+  out.moveY = axis(m > 1e-6 ? my / m : py);
+  if (crowd >= KITE_CROWD && hero.dashCooldown === 0 && hero.dashTicks === 0) out.actions |= InputAction.Dash;
 }
 
 /** Result of routeTo: the walking direction (a unit vector when routeFlow, else the straight offset to the target). */

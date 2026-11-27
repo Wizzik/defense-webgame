@@ -7,18 +7,32 @@ import { SCENE_SCALE } from "./coords";
 import { AuraRings } from "./fx/aura-rings";
 import { BlastFx } from "./fx/blasts";
 import { BoltFx } from "./fx/bolts";
-import { rgb } from "./fx/instances";
+import { type Rgb, rgb } from "./fx/instances";
+import { bossLook } from "./boss-looks";
 import { SlamRings } from "./fx/slam-rings";
 
 const SHOT_COLOR = rgb(0xfff2b0);
 const SHOT_LIFE = 0.12;
 const HEAL_COLOR = rgb(0x7dff9a);
+/**
+ * The spell bolt of a caster (Petr's batch 2): a thicker beam that lives longer, in its faction's colour, with a flash
+ * where it lands. Human arcane blue, orc fire, undead grave green, elf moon violet.
+ */
+const SPELL_COLORS: Readonly<Record<string, number>> = { human: 0x7fb2ff, orc: 0xff7a2a, undead: 0x9cff6a, elf: 0xc9a2ff };
+const SPELL_LIFE = 0.22;
+const SPELL_THICKNESS = 0.14;
+const SPELL_FLASH = 60;
 const HEAL_LIFE = 0.18;
 /** Charge telegraph: a line from the lancer along its charge, for the windup. */
 const CHARGE_COLOR = rgb(0xff5a5a);
 const CHARGE_THICKNESS = 0.18;
 const AURA_COLOR = rgb(0xb84ad8);
 const AURA_OPACITY = 0.25;
+/** Rings under aura carriers and bosses drawn at most. */
+const AURA_POOL = 16;
+/** Radius of a boss's ring (without an aura of its own) in its collision radii, and its opacity. */
+const BOSS_RING = 1.6;
+const BOSS_RING_OPACITY = 0.45;
 /** Warning circle of a boss slam. */
 const SLAM_COLOR = rgb(0xd94a4a);
 /** Warning circle of roots (grove druid, grove warden): green, not the bosses' red. */
@@ -52,12 +66,20 @@ export class EnemyFx implements RunView {
   readonly object = new Group();
   private readonly bolts = new BoltFx();
   private readonly telegraphs: BoltFx;
-  private readonly auraRings = new AuraRings();
+  private readonly auraRings = new AuraRings(AURA_POOL);
+  /** Ring colour under each boss type per world: `bossAura[(world - 1) * types + type]` (null for a common type). */
+  private readonly bossAura: (Rgb | null)[];
   private readonly slamRings = new SlamRings(SLAM_COLOR);
   private readonly rootRings = new SlamRings(ROOT_COLOR, ROOT_POOL);
   private readonly floorRings = new AuraRings(FLOOR_POOL);
   private readonly lustFlashes = new BlastFx(LUST_FLASH);
   private readonly raiseFlashes = new BlastFx(RAISE_FLASH);
+  private readonly spellBolts = new BoltFx(SPELL_LIFE, SPELL_THICKNESS);
+  /** The spell bolt colour of each caster type, `null` for the other types. */
+  private readonly spellColor: (Rgb | null)[];
+  /** One flash pool per faction colour (index into `spellFlashes` per type, -1 for no caster). */
+  private readonly spellFlashes: BlastFx[];
+  private readonly spellFlashOf: Int8Array;
   /** 1 for enemy types whose strike roots. */
   private readonly roots: Uint8Array;
   private readonly data: GameData;
@@ -69,11 +91,21 @@ export class EnemyFx implements RunView {
     this.ranged = Uint8Array.from(data.enemies, (e) => (e.attack.kind === "ranged" ? 1 : 0));
     this.roots = Uint8Array.from(data.enemies, (e) => (e.strike?.effect === "root" ? 1 : 0));
     this.data = data;
+    const factions = Object.keys(SPELL_COLORS);
+    this.spellFlashes = factions.map((f) => new BlastFx(SPELL_COLORS[f]!));
+    this.spellFlashOf = Int8Array.from(data.enemies, (e) => (e.caster ? factions.indexOf(e.faction ?? "") : -1));
+    this.spellColor = data.enemies.map((e) => {
+      const hex = e.caster && e.faction !== undefined ? SPELL_COLORS[e.faction] : undefined;
+      return hex === undefined ? null : rgb(hex);
+    });
+    this.bossAura = data.worlds.flatMap((_, w) =>
+      data.enemies.map((enemy, type) => (enemy.boss ? rgb(bossLook(data, w + 1, type).aura) : null)));
     const windup = Math.max(0.1, ...data.enemies.map((e) => e.charge?.windupSeconds ?? 0));
     this.telegraphs = new BoltFx(windup, CHARGE_THICKNESS);
     this.object.add(
       this.bolts.mesh, this.telegraphs.mesh, this.auraRings.mesh, this.slamRings.outlines, this.slamRings.fills,
       this.rootRings.outlines, this.rootRings.fills, this.floorRings.mesh, this.lustFlashes.mesh, this.raiseFlashes.mesh,
+      this.spellBolts.mesh, ...this.spellFlashes.map((f) => f.mesh),
     );
   }
 
@@ -92,11 +124,11 @@ export class EnemyFx implements RunView {
       if (kind === EventKind.HeroHit) {
         // the event carries the hero's position
         if (a < 0 || this.ranged[e.type[a]!] !== 1) continue;
-        this.beam(now, e.x[a]!, e.y[a]!, events.x[i]!, events.y[i]!, true);
+        this.shot(now, e.type[a]!, e.x[a]!, e.y[a]!, events.x[i]!, events.y[i]!);
       } else if (kind === EventKind.CastleHit) {
         // the event carries the attacker's position
         if (a < 0 || this.ranged[e.type[a]!] !== 1) continue;
-        this.beam(now, events.x[i]!, events.y[i]!, castle.x, castle.y, true);
+        this.shot(now, e.type[a]!, events.x[i]!, events.y[i]!, castle.x, castle.y);
       } else if (kind === EventKind.EnemyHeal) {
         const healer = events.u[i]!;
         // a chaplain healing itself has no beam (zero length)
@@ -138,15 +170,24 @@ export class EnemyFx implements RunView {
     this.rootRings.write(now);
     this.lustFlashes.write(now);
     this.raiseFlashes.write(now);
+    this.spellBolts.write(now);
+    for (const f of this.spellFlashes) f.write(now);
     this.updateFloor(run, alpha);
     this.auraRings.begin();
     const e = run.enemies;
+    const types = this.data.enemies.length;
+    const world = Math.min(Math.max(run.world, 1), this.data.worlds.length) - 1;
     for (let i = 0; i < e.capacity; i++) {
-      if (e.alive[i] === 0 || run.hasAura[e.type[i]!] === 0) continue;
-      const radius = this.data.enemies[e.type[i]!]!.aura!.radius * SCENE_SCALE;
-      const x = e.prevX[i]! + (e.x[i]! - e.prevX[i]!) * alpha;
-      const y = e.prevY[i]! + (e.y[i]! - e.prevY[i]!) * alpha;
-      this.auraRings.add(x * SCENE_SCALE, -y * SCENE_SCALE, radius, AURA_COLOR, AURA_OPACITY);
+      const type = e.type[i]!;
+      if (e.alive[i] === 0 || (run.hasAura[type] === 0 && run.isBoss[type] === 0)) continue;
+      const def = this.data.enemies[type]!;
+      const x = (e.prevX[i]! + (e.x[i]! - e.prevX[i]!) * alpha) * SCENE_SCALE;
+      const z = -(e.prevY[i]! + (e.y[i]! - e.prevY[i]!) * alpha) * SCENE_SCALE;
+      // a boss's ring is in its world's aura colour: its aura's reach, else a ring just outside its body
+      const boss = this.bossAura[world * types + type];
+      const radius = (def.aura ? def.aura.radius : def.collision * BOSS_RING) * SCENE_SCALE;
+      if (boss) this.auraRings.add(x, z, radius, boss, BOSS_RING_OPACITY);
+      else this.auraRings.add(x, z, radius, AURA_COLOR, AURA_OPACITY);
     }
     this.auraRings.end();
   }
@@ -181,6 +222,19 @@ export class EnemyFx implements RunView {
     this.floorRings.dispose();
     this.lustFlashes.dispose();
     this.raiseFlashes.dispose();
+    this.spellBolts.dispose();
+    for (const f of this.spellFlashes) f.dispose();
+  }
+
+  /** A ranged hit from (ax, ay) to (bx, by): a caster's spell bolt with its flash, else the plain shot. */
+  private shot(now: number, type: number, ax: number, ay: number, bx: number, by: number): void {
+    const color = this.spellColor[type];
+    if (!color) {
+      this.beam(now, ax, ay, bx, by, true);
+      return;
+    }
+    this.spellBolts.add(now, ax * SCENE_SCALE, -ay * SCENE_SCALE, bx * SCENE_SCALE, -by * SCENE_SCALE, color, SPELL_LIFE);
+    this.spellFlashes[this.spellFlashOf[type]!]!.add(now, bx * SCENE_SCALE, -by * SCENE_SCALE, SPELL_FLASH * SCENE_SCALE);
   }
 
   private beam(now: number, ax: number, ay: number, bx: number, by: number, shot: boolean): void {
@@ -200,5 +254,7 @@ export class EnemyFx implements RunView {
     this.rootRings.reset();
     this.lustFlashes.reset();
     this.raiseFlashes.reset();
+    this.spellBolts.reset();
+    for (const f of this.spellFlashes) f.reset();
   }
 }

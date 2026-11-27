@@ -48,15 +48,17 @@ export function matrixCases(data: GameData): MatrixCase[] {
     // obstacles and the summer storm from its first wave (difficulties plan 2)
     { id: "w1-storm", hero: "sparkshot", seed: 9, startPhase: 3, gear: "none", maxTicks: 4500 },
     // the sandstorm through a whole storm, and the thicket (difficulties plan 3a) (gravecaller since 2026-11-26: the mistwarden of seed 11 fell before the storm once every enemy went for her)
-    { id: "w2-sand", hero: "gravecaller", seed: 11, startPhase: 4, gear: "mid", maxTicks: 6000, world: 2 },
+    { id: "w2-sand", hero: "gravecaller", seed: 11, startPhase: 4, gear: "full", maxTicks: 6000, world: 2 },
     { id: "w3-thicket", hero: "stonehorn", seed: 13, startPhase: 2, gear: "mid", maxTicks: 4500, world: 3 },
     // the blizzard through a whole storm, with chill (difficulties plan 3b)
-    // (seed 16 since random items: with seed 15 the tidecaller fell before the blizzard ended)
-    { id: "w4-blizzard", hero: "tidecaller", seed: 16, startPhase: 3, gear: "mid", maxTicks: 6000, world: 4 },
+    // (seed 16 since random items: with seed 15 the tidecaller fell before the blizzard ended; seed 17 since the
+    // kiting autopilot of batch 2, and the sandstorm case wears full gear, else the hero falls before the storm ends)
+    { id: "w4-blizzard", hero: "tidecaller", seed: 17, startPhase: 3, gear: "full", maxTicks: 6000, world: 4 },
     // green meteors and their pools of fire from phase 1 (difficulties plan 3b)
     { id: "w5-meteors", hero: "gravecaller", seed: 17, startPhase: 1, gear: "mid", maxTicks: 3600, world: 5 },
-    // random items from chests with item power for T3 rows (world 3 insane from phase 11, random items plan stage 2)
-    { id: "loot-t3", hero: "gravecaller", seed: 19, startPhase: 11, gear: "mid", maxTicks: 4500, world: 3, difficulty: "insane" },
+    // random items from chests with item power for T3 rows (world 3 insane from phase 11, random items plan stage 2);
+    // full gear since the kiting autopilot (batch 2): with mid gear it falls before it opens a chest
+    { id: "loot-t3", hero: "gravecaller", seed: 27, startPhase: 11, gear: "full", maxTicks: 4500, world: 3, difficulty: "insane" },
   );
   return cases;
 }

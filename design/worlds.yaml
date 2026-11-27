@@ -7,6 +7,9 @@
 # thicket (fixed zones [x, y, r] of brake slowing walking inside them; a path wins over a zone); weather effect snow may
 # carry chill (a hero standing stillSeconds in it attacks slower by attackSlow); meteors (waves like the storm, `bolts`
 # meteors per hero, each leaving a pool of fire that burns heroes and enemies inside by a share of max hp a second).
+# bosses (Petr's batch 2): how the world shows each boss of the run (keyed by the boss's type, which keeps its
+# mechanics: the boss slot); name in EN and CS, model (a common enemy type whose model it borrows), body tint, size (a
+# scale of the drawn model only) and the colour of the ring under it. World 1 has none: it keeps today's bosses.
 - id: silver-march
   name: { en: Silver March, cs: Stříbrná marka }
   blurb:
@@ -96,6 +99,11 @@
     warnSeconds: 5
     moveSlow: 0.2
     name: { en: Sandstorm, cs: Písečná bouře }
+  bosses:
+    iron-marshal: { name: { en: Dune Reaver, cs: Dunový pustošitel }, model: hornback, tint: "#8e3b2f", size: 1, aura: "#d9a066" }
+    pale-abbot: { name: { en: Ash Oracle, cs: Popelavá věštkyně }, model: bloodcaller, tint: "#c9a98a", size: 1.05, aura: "#e0c48a" }
+    gunmaster: { name: { en: Red Slinger, cs: Rudý vrhač }, model: spearthrower, tint: "#7a2e2a", size: 1, aura: "#c46a4a" }
+    dread-regent: { name: { en: Sand Warlord, cs: Písečný vojevůdce }, model: warlord, tint: "#5a1e1e", size: 1.15, aura: "#e8c070" }
 - id: shadewood
   name: { en: Shadewood, cs: Stínový hvozd }
   blurb:
@@ -152,6 +160,11 @@
       - [0, 900, 200]
       - [-325, -893, 200]
     name: { en: Thornbrake, cs: Trnité houští }
+  bosses:
+    iron-marshal: { name: { en: Thorn Stalker, cs: Trnitý slídil }, model: huntress, tint: "#3f6b3a", size: 1, aura: "#7fd06a" }
+    pale-abbot: { name: { en: Hollow Druid, cs: Dutý druid }, model: grove-druid, tint: "#7fae78", size: 1.05, aura: "#a6e0a0" }
+    gunmaster: { name: { en: Bark Archer, cs: Kůrový lučištník }, model: moon-archer, tint: "#5a6b2f", size: 1, aura: "#c8d070" }
+    dread-regent: { name: { en: Grove Colossus, cs: Hájový kolos }, model: stone-warden, tint: "#2f4f2a", size: 1.2, aura: "#5fe0a0" }
 - id: frostreach
   name: { en: Frostreach, cs: Mrazivý sever }
   blurb:
@@ -204,6 +217,11 @@
     moveSlow: 0.25
     chill: { stillSeconds: 3, attackSlow: 0.2 }
     name: { en: Blizzard, cs: Vánice }
+  bosses:
+    iron-marshal: { name: { en: Rime Charger, cs: Jinovatý útočník }, model: lancer, tint: "#a8d8f0", size: 1, aura: "#9fe0ff" }
+    pale-abbot: { name: { en: Frost Seer, cs: Mrazivý věštec }, model: chaplain, tint: "#dff4ff", size: 1.05, aura: "#c8f0ff" }
+    gunmaster: { name: { en: Ice Marksman, cs: Ledový střelec }, model: musketeer, tint: "#6fa8d0", size: 1, aura: "#7fc8ff" }
+    dread-regent: { name: { en: Frost Giant, cs: Mrazivý obr }, model: shieldbearer, tint: "#8fc8e8", size: 1.25, aura: "#e8f8ff" }
 - id: blightscar
   name: { en: Blightscar, cs: Spálená říše }
   blurb:
@@ -258,3 +276,8 @@
     bossShare: 0.002
     pool: { seconds: 6, radius: 130, heroSharePerSecond: 0.04, enemySharePerSecond: 0.005, bossSharePerSecond: 0.0005 }
     name: { en: Green meteors, cs: Zelené meteory }
+  bosses:
+    iron-marshal: { name: { en: Blight Rider, cs: Morový jezdec }, model: ghoul, tint: "#5f8a3a", size: 1, aura: "#8fe040" }
+    pale-abbot: { name: { en: Plague Abbess, cs: Morová abatyše }, model: gravebinder, tint: "#9ac76a", size: 1.05, aura: "#b8f070" }
+    gunmaster: { name: { en: Cinder Spitter, cs: Škvárový plivač }, model: webcrawler, tint: "#3a4a2a", size: 1.1, aura: "#6fd040" }
+    dread-regent: { name: { en: Blight Lord, cs: Pán zhouby }, model: bone-tyrant, tint: "#2f3f1f", size: 1.2, aura: "#40ff60" }

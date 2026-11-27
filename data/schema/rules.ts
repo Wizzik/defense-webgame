@@ -78,13 +78,14 @@ export const RulesSchema = z.object({
       charges: z.object({ fromLevel: z.number().int().min(1), count: z.number().int().min(2).max(5) }).strict(),
     }).strict(),
     /**
-     * The blink (key F) from hero level `fromLevel`: a jump of at most `maxDistance` to the aimed point, then a burst of
+     * The blink (key F) from hero level `fromLevel`: an instant teleport to the aimed point at any distance (straight
+     * ahead by `aheadDistance` without an aim), then a burst of
      * `damage` x spell power within `radius` around the landing spot that stuns for `stunSeconds`.
      */
     blink: z.object({
       fromLevel: z.number().int().min(1),
       cooldownSeconds: positive,
-      maxDistance: positive,
+      aheadDistance: positive,
       radius: positive,
       damage: positive,
       stunSeconds: z.number().min(0),
@@ -250,6 +251,11 @@ export const RulesSchema = z.object({
       common: z.number().min(0).max(1), rare: z.number().min(0).max(1), epic: z.number().min(0).max(1),
       legendary: z.number().min(0).max(1), mythic: z.number().min(0).max(1),
     }).strict(),
+    /**
+     * Share of the chest cards drawn for a slot that already wears the drawn rarity or a higher one that become a
+     * Level card of the worn item; the rest move to a slot where the rarity is an upgrade (sim/chests.ts).
+     */
+    upgradeShare: z.number().min(0).max(1),
     /** Gold a salvaged item of the rarity gives for the next run's chests. */
     salvageGold: z.object({
       common: nonNegative, rare: nonNegative, epic: nonNegative, legendary: nonNegative, mythic: nonNegative,

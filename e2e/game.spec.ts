@@ -21,6 +21,9 @@ const xpFirst = (
 const enemies = JSON.parse(
   readFileSync(join(import.meta.dirname, "..", "data", "generated", "enemies.json"), "utf8"),
 ) as { id: string; boss?: true }[];
+const worlds = JSON.parse(
+  readFileSync(join(import.meta.dirname, "..", "data", "generated", "worlds.json"), "utf8"),
+) as { bosses?: Record<string, unknown> }[];
 /** Common enemy ids from the generated data, so adding a type extends the test. Bosses come by the timeline. */
 const enemyIds = enemies.filter((e) => !e.boss).map((e) => e.id);
 
@@ -121,7 +124,9 @@ test("menu starts a run on the available backend", async ({ page }, testInfo) =>
   const expected = testInfo.project.name === "webgpu-swiftshader" ? "WebGPU" : "WebGL2";
   expect(await page.evaluate(() => window.__game?.backend)).toBe(expected);
   expect(await page.evaluate(() => window.__game?.screen)).toBe("playing");
-  expect(await page.evaluate(() => window.__game?.render.enemyMeshes)).toBe(enemies.length);
+  // one mesh per enemy type and one per boss look of a world
+  const bossLooks = worlds.reduce((sum, world) => sum + Object.keys(world.bosses ?? {}).length, 0);
+  expect(await page.evaluate(() => window.__game?.render.enemyMeshes)).toBe(enemies.length + bossLooks);
 
   // enemies spawn a few seconds into the run
   await page.waitForFunction(() => (window.__game?.enemies ?? 0) > 0, undefined, {
@@ -922,7 +927,9 @@ test("every hero has its own doll", async ({ page }) => {
 });
 
 test("orbs lie on the map; a berserk orb shows in the HUD; a heart heals the hurt hero", async ({ page }) => {
-  await page.goto("/?seed=1&lang=en&debug=1&speed=4&hero=stonehorn");
+  // speed 1: a slow renderer runs at most 0.25 s of the game per frame, so the weak hero of the batch 2 balance
+  // cannot die among the hunters between two frames before it steps away
+  await page.goto("/?seed=1&lang=en&debug=1&speed=1&hero=stonehorn");
   await startRun(page);
   await waitForScreen(page, "playing");
   // an idle hero outside the castle's defence circle (rules.enemies.heroDefendRange): the packs go for the castle
@@ -943,19 +950,31 @@ test("orbs lie on the map; a berserk orb shows in the HUD; a heart heals the hur
     const orb = g.orbs.find((o) => o.type === "berserk")!;
     g.debug!.teleport(orb.x, orb.y);
   });
-  await page.waitForFunction(() => window.__game!.buffs.berserk > 0, undefined, { timeout: 10_000, polling: 50 });
+  // a level-up card may pause the run before the hero picks the orb up
+  const buffBy = Date.now() + 10_000;
+  while ((await page.evaluate(() => window.__game!.buffs.berserk)) <= 0 && Date.now() < buffBy) {
+    const screen = await page.evaluate(() => window.__game!.screen);
+    if (screen === "levelUp" || screen === "chest") await pickCard(page);
+    await page.waitForTimeout(50);
+  }
+  expect(await page.evaluate(() => window.__game!.buffs.berserk)).toBeGreaterThan(0);
   await expect(page.locator(".buff-cell.berserk")).toBeVisible();
 
   // let the hunters hurt the hero, then step away from them and drop a heart
   const full = await page.evaluate(() => window.__game!.heroHp);
   await page.evaluate(() => window.__game!.debug!.spawnEach());
-  for (let i = 0; i < 300; i++) {
-    const { hp, screen } = await page.evaluate(() => ({ hp: window.__game!.heroHp, screen: window.__game!.screen }));
-    if (screen === "levelUp" || screen === "chest") await pickCard(page);
-    else if (hp < full - 120) break;
-    await page.waitForTimeout(100);
+  // the hero steps away in the same frame its hp drops (a weak hero with no gear dies fast on a slow renderer)
+  for (let i = 0; i < 30; i++) {
+    const hurt = await page.waitForFunction((limit) => {
+      const g = window.__game!;
+      if (g.screen === "levelUp" || g.screen === "chest") return "card";
+      if (g.heroHp >= limit) return false;
+      g.debug!.teleport(2600, 2200);
+      return "hurt";
+    }, full - 120, { polling: "raf", timeout: 30_000 }).then((h) => h.jsonValue());
+    if (hurt === "hurt") break;
+    await pickCard(page);
   }
-  await page.evaluate(() => window.__game!.debug!.teleport(2600, 2200));
   await page.waitForTimeout(300);
   const before = await page.evaluate(() => window.__game!.heroHp);
   expect(before).toBeLessThan(full - 60);
@@ -1212,4 +1231,24 @@ test("a blizzard and fire do not outlive their world", async ({ page }) => {
   // light snow only: no blizzard yet, and no embers left over
   expect(await page.evaluate(() => window.__game!.render.particles)).toBe(150);
   expect(errors).toEqual([]);
+});
+
+test("F teleports the hero to the mouse point at once, far beyond a dash", async ({ page }) => {
+  // a debug start at phase 20 spends its level-ups by the autopilot's rule: the hero is past the blink's level 40
+  await page.goto("/?seed=1&debug=1&phase=20&lang=cs");
+  await startRun(page);
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => window.__game!.level)).toBeGreaterThanOrEqual(40);
+  const before = await page.evaluate(() => ({ x: window.__game!.heroX, y: window.__game!.heroY }));
+  const box = (await page.locator("canvas").first().boundingBox())!;
+  await page.mouse.move(box.x + 10, box.y + 10);
+  await page.keyboard.press("KeyF");
+  await page.waitForFunction(
+    (from) => Math.hypot(window.__game!.heroX - from.x, window.__game!.heroY - from.y) > 1000,
+    before,
+  );
+  const after = await page.evaluate(() => ({ x: window.__game!.heroX, y: window.__game!.heroY }));
+  // the top left corner of the screen lies to the north west
+  expect(after.x).toBeLessThan(before.x);
+  expect(after.y).toBeGreaterThan(before.y);
 });

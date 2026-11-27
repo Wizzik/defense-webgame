@@ -61,7 +61,7 @@
     "blink": {
       "fromLevel": 40,
       "cooldownSeconds": 10,
-      "maxDistance": 900,
+      "aheadDistance": 900,
       "radius": 300,
       "damage": 300,
       "stunSeconds": 0.5
@@ -120,11 +120,12 @@
     },
     {
       "mix": {
-        "shieldbearer": 5,
-        "scout": 3,
+        "shieldbearer": 3,
+        "scout": 2,
         "musketeer": 2,
         "chaplain": 1,
-        "lancer": 1
+        "lancer": 1,
+        "battle-mage": 3
       },
       "pack": {
         "min": 8,
@@ -137,11 +138,12 @@
     },
     {
       "mix": {
-        "shieldbearer": 4,
-        "scout": 3,
+        "shieldbearer": 2,
+        "scout": 2,
         "musketeer": 3,
         "chaplain": 2,
-        "lancer": 2
+        "lancer": 2,
+        "battle-mage": 4
       },
       "pack": {
         "min": 9,
@@ -154,11 +156,12 @@
     },
     {
       "mix": {
-        "shieldbearer": 4,
-        "scout": 2,
+        "shieldbearer": 2,
+        "scout": 1,
         "musketeer": 3,
         "chaplain": 2,
-        "lancer": 3
+        "lancer": 3,
+        "battle-mage": 4
       },
       "pack": {
         "min": 7,
@@ -171,10 +174,11 @@
     },
     {
       "mix": {
-        "brute": 7,
+        "brute": 4,
         "spearthrower": 3,
         "hornback": 3,
-        "bloodcaller": 2
+        "bloodcaller": 2,
+        "fire-caller": 4
       },
       "pack": {
         "min": 8,
@@ -187,10 +191,11 @@
     },
     {
       "mix": {
-        "brute": 7,
+        "brute": 4,
         "spearthrower": 3,
         "hornback": 3,
-        "bloodcaller": 2
+        "bloodcaller": 2,
+        "fire-caller": 4
       },
       "pack": {
         "min": 8,
@@ -203,10 +208,11 @@
     },
     {
       "mix": {
-        "brute": 7,
+        "brute": 4,
         "spearthrower": 3,
         "hornback": 3,
-        "bloodcaller": 2
+        "bloodcaller": 2,
+        "fire-caller": 4
       },
       "pack": {
         "min": 8,
@@ -219,10 +225,11 @@
     },
     {
       "mix": {
-        "brute": 6,
+        "brute": 3,
         "spearthrower": 3,
         "hornback": 3,
-        "bloodcaller": 2
+        "bloodcaller": 2,
+        "fire-caller": 4
       },
       "pack": {
         "min": 9,
@@ -235,10 +242,11 @@
     },
     {
       "mix": {
-        "brute": 6,
+        "brute": 3,
         "spearthrower": 3,
         "hornback": 3,
-        "bloodcaller": 2
+        "bloodcaller": 2,
+        "fire-caller": 4
       },
       "pack": {
         "min": 9,
@@ -251,10 +259,11 @@
     },
     {
       "mix": {
-        "ghoul": 6,
+        "ghoul": 3,
         "webcrawler": 3,
         "rotgut": 3,
-        "gravebinder": 2
+        "gravebinder": 2,
+        "bone-acolyte": 4
       },
       "pack": {
         "min": 11,
@@ -267,10 +276,11 @@
     },
     {
       "mix": {
-        "ghoul": 6,
+        "ghoul": 3,
         "webcrawler": 3,
         "rotgut": 3,
-        "gravebinder": 2
+        "gravebinder": 2,
+        "bone-acolyte": 4
       },
       "pack": {
         "min": 11,
@@ -283,10 +293,11 @@
     },
     {
       "mix": {
-        "ghoul": 6,
+        "ghoul": 3,
         "webcrawler": 3,
         "rotgut": 3,
-        "gravebinder": 2
+        "gravebinder": 2,
+        "bone-acolyte": 4
       },
       "pack": {
         "min": 11,
@@ -299,10 +310,11 @@
     },
     {
       "mix": {
-        "ghoul": 6,
+        "ghoul": 3,
         "webcrawler": 4,
         "rotgut": 3,
-        "gravebinder": 2
+        "gravebinder": 2,
+        "bone-acolyte": 4
       },
       "pack": {
         "min": 10,
@@ -315,10 +327,11 @@
     },
     {
       "mix": {
-        "ghoul": 6,
+        "ghoul": 3,
         "webcrawler": 4,
         "rotgut": 3,
-        "gravebinder": 2
+        "gravebinder": 2,
+        "bone-acolyte": 4
       },
       "pack": {
         "min": 10,
@@ -331,10 +344,11 @@
     },
     {
       "mix": {
-        "huntress": 6,
+        "huntress": 4,
         "moon-archer": 4,
         "stone-warden": 4,
-        "grove-druid": 2
+        "grove-druid": 2,
+        "moon-priestess": 5
       },
       "pack": {
         "min": 11,
@@ -347,10 +361,11 @@
     },
     {
       "mix": {
-        "huntress": 6,
+        "huntress": 4,
         "moon-archer": 4,
         "stone-warden": 4,
-        "grove-druid": 2
+        "grove-druid": 2,
+        "moon-priestess": 5
       },
       "pack": {
         "min": 11,
@@ -363,10 +378,11 @@
     },
     {
       "mix": {
-        "huntress": 6,
+        "huntress": 4,
         "moon-archer": 4,
         "stone-warden": 4,
-        "grove-druid": 2
+        "grove-druid": 2,
+        "moon-priestess": 5
       },
       "pack": {
         "min": 11,
@@ -379,10 +395,11 @@
     },
     {
       "mix": {
-        "huntress": 5,
+        "huntress": 3,
         "moon-archer": 4,
         "stone-warden": 4,
-        "grove-druid": 2
+        "grove-druid": 2,
+        "moon-priestess": 5
       },
       "pack": {
         "min": 12,
@@ -395,10 +412,11 @@
     },
     {
       "mix": {
-        "huntress": 5,
+        "huntress": 3,
         "moon-archer": 4,
         "stone-warden": 4,
-        "grove-druid": 2
+        "grove-druid": 2,
+        "moon-priestess": 5
       },
       "pack": {
         "min": 12,
@@ -650,6 +668,7 @@
       "legendary": 0.25,
       "mythic": 0.4
     },
+    "upgradeShare": 0.5,
     "salvageGold": {
       "common": 10,
       "rare": 25,
