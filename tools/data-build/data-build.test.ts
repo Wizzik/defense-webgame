@@ -16,7 +16,7 @@ const unscaledDesign = () => ({
   scaling: {
     heroes: { moveSpeed: 1, attackCooldown: 1 },
     abilities: { cooldown: 1, damage: 1, levelGrowthExponent: 1, levels: 2, areaScale: 1 },
-    enemies: { hp: 1, moveSpeed: 1 },
+    enemies: { hp: 1, moveSpeed: 1, bossHp: 1, bossDamage: 1 },
   },
 });
 
@@ -233,7 +233,7 @@ describe("data-build", () => {
 
   it("applies enemy multipliers before scaling", () => {
     const d = unscaledDesign();
-    d.scaling.enemies = { hp: 0.3, moveSpeed: 1.22 };
+    d.scaling.enemies = { hp: 0.3, moveSpeed: 1.22, bossHp: 1, bossDamage: 1 };
     d.enemies[0].multipliers = { hp: 0.5, moveSpeed: 1.5, collision: 0.8, damage: 0.6 };
     const enemy = buildGameData(mapExport(), d, "test").enemies[0];
     expect(enemy.hp).toBe(63);

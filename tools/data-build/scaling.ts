@@ -7,13 +7,13 @@ export const SCALING_YAML = "design/scaling.yaml";
 export interface Scaling {
   heroes: { moveSpeed: number; attackCooldown: number };
   abilities: { cooldown: number; damage: number; levelGrowthExponent: number; levels: number; areaScale: number };
-  enemies: { hp: number; moveSpeed: number };
+  enemies: { hp: number; moveSpeed: number; bossHp: number; bossDamage: number };
 }
 
 const SHAPE: { [G in keyof Scaling]: readonly string[] } = {
   heroes: ["moveSpeed", "attackCooldown"],
   abilities: ["cooldown", "damage", "levelGrowthExponent", "levels", "areaScale"],
-  enemies: ["hp", "moveSpeed"],
+  enemies: ["hp", "moveSpeed", "bossHp", "bossDamage"],
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -105,10 +105,18 @@ export function scaleAbility(ability: Ability, s: Scaling): Ability {
   return scaleArea(spreadLevels(scaled, s.abilities.levels), s.abilities.areaScale);
 }
 
+/**
+ * A boss (Petr 2026-11-27, batch 2: "hp na 3x a dmg na 2x") takes `bossHp` on its scaled hp and `bossDamage` on its
+ * attack, slam and strike damage, after the rounding, so whole numbers stay whole.
+ */
 export function scaleEnemy(enemy: Enemy, s: Scaling): Enemy {
-  return {
-    ...enemy,
-    hp: whole(enemy.hp * s.enemies.hp),
-    moveSpeed: whole(enemy.moveSpeed * s.enemies.moveSpeed),
-  };
+  const hp = whole(enemy.hp * s.enemies.hp);
+  const scaled: Enemy = { ...enemy, hp, moveSpeed: whole(enemy.moveSpeed * s.enemies.moveSpeed) };
+  if (!enemy.boss) return scaled;
+  const d = s.enemies.bossDamage;
+  scaled.hp = whole(hp * s.enemies.bossHp);
+  scaled.attack = { ...enemy.attack, damageMin: whole(enemy.attack.damageMin * d), damageMax: whole(enemy.attack.damageMax * d) };
+  if (enemy.slam) scaled.slam = { ...enemy.slam, damage: whole(enemy.slam.damage * d) };
+  if (enemy.strike?.damage !== undefined) scaled.strike = { ...enemy.strike, damage: whole(enemy.strike.damage * d) };
+  return scaled;
 }

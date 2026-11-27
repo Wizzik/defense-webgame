@@ -49,7 +49,7 @@ describe("scaling", () => {
     const s = parseScaling({
       heroes: { moveSpeed: 1.4, attackCooldown: 0.5 },
       abilities: { cooldown: 0.33, damage: 0.5, levelGrowthExponent: 1, levels: 2, areaScale: 1 },
-      enemies: { hp: 0.3, moveSpeed: 1.22 },
+      enemies: { hp: 0.3, moveSpeed: 1.22, bossHp: 1, bossDamage: 1 },
     });
     const enemy = scaleEnemy({ hp: 421, moveSpeed: 270 } as never, s);
     expect(enemy.hp).toBe(126);
@@ -65,7 +65,7 @@ describe("scaling", () => {
     const s = parseScaling({
       heroes: { moveSpeed: 1, attackCooldown: 1 },
       abilities: { cooldown: 1, damage: 0.5, levelGrowthExponent: 1, levels: 2, areaScale: 1 },
-      enemies: { hp: 1, moveSpeed: 1 },
+      enemies: { hp: 1, moveSpeed: 1, bossHp: 1, bossDamage: 1 },
     });
     const ability = scaleAbility(
       {
@@ -83,7 +83,7 @@ describe("scaling", () => {
     const s = parseScaling({
       heroes: { moveSpeed: 1, attackCooldown: 1 },
       abilities: { cooldown: 1, damage: 1, levelGrowthExponent: 1, levels: 2, areaScale: 0.5 },
-      enemies: { hp: 1, moveSpeed: 1 },
+      enemies: { hp: 1, moveSpeed: 1, bossHp: 1, bossDamage: 1 },
     });
     const ability = scaleAbility(
       {
@@ -99,6 +99,24 @@ describe("scaling", () => {
       radius: [175, 201], hitRadius: [138, 175], width: [125, 125], endWidth: [50, 50],
       range: [800, 900], length: [1500, 1500], attackRange: [600, 600], damage: [100, 200],
     });
+  });
+
+  it("a boss takes bossHp on its rounded hp and bossDamage on its attack, slam and strike", () => {
+    const s = parseScaling({
+      heroes: { moveSpeed: 1, attackCooldown: 1 },
+      abilities: { cooldown: 1, damage: 1, levelGrowthExponent: 1, levels: 2, areaScale: 1 },
+      enemies: { hp: 0.35, moveSpeed: 1, bossHp: 3, bossDamage: 2 },
+    });
+    const boss = {
+      hp: 1001, moveSpeed: 300, boss: true, attack: { kind: "melee", damageMin: 42, damageMax: 50 },
+      slam: { damage: 120 }, strike: { damage: 150 },
+    };
+    const scaled = scaleEnemy(boss as never, s);
+    expect(scaled.hp).toBe(Math.round(1001 * 0.35) * 3);
+    expect([scaled.attack.damageMin, scaled.attack.damageMax, scaled.slam!.damage, scaled.strike!.damage]).toEqual([84, 100, 240, 300]);
+    const common = scaleEnemy({ ...boss, boss: undefined } as never, s);
+    expect(common.hp).toBe(Math.round(1001 * 0.35));
+    expect(common.attack.damageMin).toBe(42);
   });
 
   it("scales every hero, ability and enemy in buildGameData", () => {
@@ -120,7 +138,7 @@ describe("scaling", () => {
     const ok = {
       heroes: { moveSpeed: 1, attackCooldown: 1 },
       abilities: { cooldown: 1, damage: 1, levelGrowthExponent: 1, levels: 2, areaScale: 1 },
-      enemies: { hp: 1, moveSpeed: 1 },
+      enemies: { hp: 1, moveSpeed: 1, bossHp: 1, bossDamage: 1 },
     };
     expect(() => parseScaling(ok)).not.toThrow();
     expect(errorMessage(() => parseScaling({ ...ok, enemies: { hp: 1 } }))).toContain("design/scaling.yaml");
@@ -137,7 +155,7 @@ describe("scaling", () => {
       parseScaling({
         heroes: { moveSpeed: 1, attackCooldown: 1 },
         abilities: { cooldown: 1, damage, levelGrowthExponent, levels: 2, areaScale: 1 },
-        enemies: { hp: 1, moveSpeed: 1 },
+        enemies: { hp: 1, moveSpeed: 1, bossHp: 1, bossDamage: 1 },
       });
 
     it("flattens the growth of damage and heal rows from level 1", () => {
@@ -177,7 +195,7 @@ describe("scaling", () => {
       const missing = {
         heroes: { moveSpeed: 1, attackCooldown: 1 },
         abilities: { cooldown: 1, damage: 1, levels: 2, areaScale: 1 },
-        enemies: { hp: 1, moveSpeed: 1 },
+        enemies: { hp: 1, moveSpeed: 1, bossHp: 1, bossDamage: 1 },
       };
       expect(errorMessage(() => parseScaling(missing))).toContain("abilities.levelGrowthExponent");
       expect(errorMessage(() => withGrowth(1, 0))).toContain("abilities.levelGrowthExponent");

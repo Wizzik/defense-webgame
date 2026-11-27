@@ -31,6 +31,13 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   arena and off the obstacles; `rules.hero.blink.maxDistance` became `aheadDistance` (900), the jump straight ahead
   when there is no mouse point. The burst, the stun and the 10 s cooldown stay. The look: a flash where the hero
   left and the burst where he landed, no streak between them. The autopilot does not blink, so the digest stays.
+- **Boss strength** (task 5, first half, Petr): `design/scaling.yaml` `enemies.bossHp: 3` and `bossDamage: 2`; data-build
+  multiplies a boss's rounded hp, its attack, slam and strike damage (the charge multiplies the attack). Boss hp
+  targets 36 000, 60 000, 90 000 and 771 000 (`data/generated.test.ts`). Digest `e81a39b0` -> `1000e1ab`.
+- Autopilot, gear none, seeds 1-10, after tasks 1, 3, 4 and boss strength: Stonehorn 0, Nightglaive 0, Gravecaller
+  10, Serpent Shaman 10, Mistwarden 1, Sparkshot 1, Redcleaver 7, Tidecaller 0 (29 of 80). Far from 10 % each:
+  the summoners (Gravecaller, Serpent Shaman) and Redcleaver are too strong, the rest die early (Stonehorn and
+  Tidecaller before 3 min). Tuning per hero is task 7, after the casters (task 2) and the chest rule (task 6).
 
 ## Random items, stage 3: meta and saves (2026-11-27; the plan's tasks 11-15, the details are Claude's)
 

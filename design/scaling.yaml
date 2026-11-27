@@ -8,4 +8,6 @@ abilities: { cooldown: 0.33, damage: 0.3, levelGrowthExponent: 0.5, levels: 10, 
 # of every ability x this, applied last on the spread rows (rounded); reach (range, length) stays.
 # levels (Petr 2026-11-26): every ability with more than 2 levels (all but the ultimates) is spread over this many
 # levels last: level 1 and the top level keep the map's (scaled) values, the levels between interpolate them.
-enemies: { hp: 0.35, moveSpeed: 1.32 }   # phase 2b-2: tougher and faster packs (hp 0.3 -> 0.35, moveSpeed 1.22 -> 1.32)
+enemies: { hp: 0.35, moveSpeed: 1.32, bossHp: 3, bossDamage: 2 }   # phase 2b-2: tougher and faster packs (hp 0.3 -> 0.35, moveSpeed 1.22 -> 1.32)
+# bossHp, bossDamage (Petr 2026-11-27, batch 2): every boss x3 hp and x2 damage (attack, slam, strike), on the
+# rounded numbers after hp.
