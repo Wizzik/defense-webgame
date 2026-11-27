@@ -18,7 +18,7 @@ describe("parseSave", () => {
   it("nothing saved yet is an empty save of version 2 with nothing dropped", () => {
     expect(parseSave(null, data)).toEqual({ save: emptySave(), dropped: 0 });
     expect(parseSave(undefined, data)).toEqual({ save: emptySave(), dropped: 0 });
-    expect(emptySave()).toEqual({ version: 2, items: [], nextUid: 1, loadouts: {} });
+    expect(emptySave()).toEqual({ version: 2, items: [], nextUid: 1, loadouts: {}, bankGold: 0 });
   });
 
   it("data that is not a save of version 1 or 2 gives an empty save and counts as dropped", () => {
@@ -34,7 +34,7 @@ describe("parseSave", () => {
       expect(dropped).toBe(0);
       expect(save).toEqual({
         version: 2, items: [named(1, helm, 3), named(2, ring, 1)], nextUid: 3,
-        loadouts: { stonehorn: { head: 1, ring2: 2 } },
+        loadouts: { stonehorn: { head: 1, ring2: 2 } }, bankGold: 0,
       });
       expect(namedLevels(save)).toEqual({ [helm]: 3, [ring]: 1 });
     });
@@ -76,11 +76,22 @@ describe("parseSave", () => {
     it("keeps a valid save as it is, named and rolled records", () => {
       const raw = {
         version: 2, items: [named(1, helm, 3), rolledHead(4), named(2, ring, 1)], nextUid: 7,
-        loadouts: { stonehorn: { head: 4, ring2: 2 }, sparkshot: { head: 1 } },
+        loadouts: { stonehorn: { head: 4, ring2: 2 }, sparkshot: { head: 1 } }, bankGold: 120,
       };
       const { save, dropped } = parseSave(JSON.parse(JSON.stringify(raw)), data);
       expect(dropped).toBe(0);
       expect(save).toEqual(raw);
+    });
+
+    it("reads the bank: missing is empty, too much is cut to the limit, a broken one is dropped", () => {
+      const base = { version: 2, items: [named(1, helm, 3)], nextUid: 2, loadouts: {} };
+      expect(parseSave(base, data).save.bankGold).toBe(0);
+      expect(parseSave({ ...base, bankGold: 99_999 }, data).save.bankGold).toBe(data.rules.loot.bankLimit);
+      for (const bankGold of [-5, 2.5, "40", null]) {
+        const { save, dropped } = parseSave({ ...base, bankGold }, data);
+        expect(save.bankGold).toBe(0);
+        expect(dropped).toBe(1);
+      }
     });
 
     it("drops broken records, a uid twice, a named item twice, and keeps the rest", () => {

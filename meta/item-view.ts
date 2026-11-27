@@ -37,8 +37,20 @@ export function rolledName(data: GameData, rolled: RolledItem, slotType: SlotTyp
   return { en, cs };
 }
 
+/**
+ * An item as the UI shows it: a named item, or a rolled one with the tier of each row (`tiers[r]`: -1 for the base's
+ * own row, 0-3 for T1-T4 of an affix row).
+ */
+export type ShownItem = Item & { tiers?: readonly number[] };
+
+/** The tier of row `row` of an item (1-4 for T1-T4), or 0 for a named item's row or a base's own row. */
+export function rowTier(item: Item, row: number): number {
+  const tier = (item as ShownItem).tiers?.[row];
+  return tier === undefined || tier < 0 ? 0 : tier + 1;
+}
+
 /** A rolled item as an `Item` (not validated: its row count is 1 + affixes). Its id is "rolled-<base id>". */
-export function rolledAsItem(data: GameData, rolled: RolledItem): Item {
+export function rolledAsItem(data: GameData, rolled: RolledItem): ShownItem {
   const base = data.loot.bases[rolled.base]!;
   const effect = rolled.effect >= 0 ? data.rules.loot.mythicEffects[rolled.effect] : undefined;
   return {
@@ -47,6 +59,7 @@ export function rolledAsItem(data: GameData, rolled: RolledItem): Item {
     slotType: base.slotType,
     rarity: RARITIES[rolled.rarity]!,
     stats: rolled.stats.map((stat, r) => ({ stat: STAT_IDS[stat]!, value: rolled.values[r]! })),
+    tiers: rolled.tiers.slice(),
     ...(effect ? { effect } : {}),
   };
 }

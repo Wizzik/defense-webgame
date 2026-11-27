@@ -6,21 +6,24 @@ import { type ItemRecord, namedRecord, parseRecord, recordSlotType } from "./ite
  * What a player keeps between runs (version 2, random items plan stage 3). `items`: the collection, one record per
  * item (named items once each, rolled items each on their own). `loadouts`: hero id to the uid of the item its doll
  * wears, by slot. `nextUid`: the uid the next new record gets. The collection is shared by all heroes.
- * `rules.loot.collectionLimit` is the size the game keeps to (a drop into a full collection still lands; the end
- * screen asks to salvage, stage 4); the reader keeps at most STORED_LIMIT x that, so broken data cannot grow it.
+ * `rules.loot.collectionLimit` is the size the game keeps to (a drop into a full collection still lands; the gear
+ * screen shows at most that many and offers salvage); the reader keeps at most STORED_LIMIT x that, so broken data
+ * cannot grow it. `bankGold`: gold of salvaged items, at most `rules.loot.bankLimit`; the next solo run starts with
+ * it (meta/salvage.ts).
  */
 export interface SaveData {
   version: 2;
   items: ItemRecord[];
   nextUid: number;
   loadouts: Record<string, Partial<Record<SlotId, number>>>;
+  bankGold: number;
 }
 
 /** The reader keeps at most this many times rules.loot.collectionLimit records. */
 const STORED_LIMIT = 2;
 
 export function emptySave(): SaveData {
-  return { version: 2, items: [], nextUid: 1, loadouts: {} };
+  return { version: 2, items: [], nextUid: 1, loadouts: {}, bankGold: 0 };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -147,5 +150,9 @@ export function parseSave(raw: unknown, data: GameData): { save: SaveData; dropp
   const next = raw.nextUid;
   save.nextUid = Math.max(top + 1, typeof next === "number" && Number.isInteger(next) ? next : 1);
   dropped += readLoadouts(raw.loadouts, data, save, (value) => (typeof value === "number" && uids.has(value) ? value : undefined));
+  // the bank came after the first saves of version 2: a missing one is empty, a broken one counts as dropped
+  const bank = raw.bankGold;
+  if (typeof bank === "number" && Number.isInteger(bank) && bank >= 0) save.bankGold = Math.min(bank, data.rules.loot.bankLimit);
+  else if (bank !== undefined) dropped++;
   return { save, dropped };
 }

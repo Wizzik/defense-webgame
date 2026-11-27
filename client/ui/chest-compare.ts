@@ -2,7 +2,7 @@ import type { ChestCard, Run } from "../../sim";
 import { type CompareSide, compareLines } from "./chest-compare-lines";
 import { el } from "./dom";
 import { iconSvg } from "./item-icons";
-import type { LineTone } from "./item-tooltip";
+import { type LineTone, tierMark } from "./item-tooltip";
 import { type Lang, t } from "./i18n";
 
 /** The arrow after a stat value: which side of the compare is better. */
@@ -53,8 +53,8 @@ export class ChestCompare {
     const keep = this.column(info.keep, "keep", t(lang, "chest.keep"), "1");
     const take = this.column(info.take, "take", t(lang, "chest.take"), "2");
     for (const row of info.rows) {
-      this.row(keep.rows, row.keep, row.keepTone, "");
-      this.row(take.rows, row.take, row.takeTone, row.takeNew ? ` ${t(lang, "chest.statNew")}` : "");
+      this.row(keep.rows, row.keep, row.keepTone, "", row.keep === "" ? 0 : row.keepTier);
+      this.row(take.rows, row.take, row.takeTone, row.takeNew ? ` ${t(lang, "chest.statNew")}` : "", row.take === "" ? 0 : row.takeTier);
     }
     this.effect(keep.col, info.keep.effect);
     this.effect(take.col, info.take.effect);
@@ -95,9 +95,10 @@ export class ChestCompare {
     return { col, rows, button };
   }
 
-  private row(parent: HTMLElement, text: string, tone: LineTone, note: string): void {
+  private row(parent: HTMLElement, text: string, tone: LineTone, note: string, tier: number): void {
     // an empty row keeps its height, so the rows of both columns stay level
-    el("span", `compare-row tooltip-line ${tone}`, parent, text === "" ? " " : `${text}${arrow(tone)}${note}`);
+    const row = el("span", `compare-row tooltip-line ${tone}`, parent, text === "" ? " " : `${text}${arrow(tone)}${note}`);
+    if (tier > 0) tierMark(row, tier);
   }
 
   /** The effect band is always there (empty without an effect), so both columns have the same grid bands. */

@@ -1,8 +1,9 @@
-import type { GameData } from "../../data/schema";
+import type { GameData, Rarity, RoleTag, SlotType } from "../../data/schema";
 import {
-  applyDrop, type Drop, type DropCourse, emptySave, equip, grantNamed, parseSave, rollDrop, type SaveData, toLoadout, unequip,
+  applyDrop, canSalvage, type Drop, type DropCourse, emptySave, equip, grantNamed, parseSave, rollDrop, salvage,
+  rolledAsItem, rolledRecord, type SaveData, takeBank, toLoadout, unequip,
 } from "../../meta";
-import type { LoadoutEntry, SlotId } from "../../sim";
+import { levelAtPower, type LoadoutEntry, Rng, rollItem, type SlotId } from "../../sim";
 import type { SaveBackend } from "./save-store";
 
 /**
@@ -83,9 +84,35 @@ export class GearSession {
     this.commit(unequip(this.save, heroId, slot));
   }
 
+  /** Salvages the random item `uid` (meta/salvage.ts); returns whether it was salvaged. */
+  salvage(uid: number): boolean {
+    if (!canSalvage(this.save, uid)) return false;
+    this.commit(salvage(this.data, this.save, uid));
+    return true;
+  }
+
+  /** A solo run starts: it takes the whole bank, which is empty afterwards. */
+  takeBank(): number {
+    const { save, gold } = takeBank(this.save);
+    this.commit(save);
+    return gold;
+  }
+
   /** For debugging: puts a named item into the collection at a level (clamped to the top level). Unknown items are ignored. */
   grant(itemId: string, level: number): void {
     this.commit(grantNamed(this.save, this.data, itemId, level));
+  }
+
+  /**
+   * For debugging: rolls a random item of a slot type, rarity and item power for a hero's primary attribute (seeded
+   * by the collection's next uid) and puts it into the collection at the level of that power; returns its uid.
+   */
+  grantRolled(slotType: SlotType, rarity: Rarity, power: number, primary: RoleTag): number {
+    const uid = this.save.nextUid;
+    const rolled = rollItem(this.data, new Rng(uid * 7919 + 1), slotType, rarity, power, primary);
+    const level = levelAtPower(this.data, power);
+    this.commit(applyDrop(this.save, { kind: "rolled", item: rolledAsItem(this.data, rolled), level, record: rolledRecord(this.data, uid, rolled, level) }));
+    return uid;
   }
 
   /** For debugging: an empty collection and empty dolls. */

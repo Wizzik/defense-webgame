@@ -873,8 +873,8 @@ test("the gear screen equips an item for one hero; the run starts with it", asyn
   await waitForScreen(page, "playing");
   const worn = await page.evaluate(() => window.__game!.gear.filter((slot) => slot !== null));
   expect(worn).toEqual([
-    { item: "band-of-resolve", base: 1, temp: 0, rolled: false },
-    { item: "oaken-shield", base: 3, temp: 0, rolled: false },
+    { item: "band-of-resolve", base: 1, temp: 0, rolled: false, rows: [] },
+    { item: "oaken-shield", base: 3, temp: 0, rolled: false, rows: [] },
   ]);
 });
 
@@ -903,8 +903,46 @@ test("a save file of version 2 brings a random item; the gear screen lists it an
   await page.locator("#gear-back").click();
   await startRun(page);
   await waitForScreen(page, "playing");
-  expect(await page.evaluate(() => window.__game!.gear.filter((slot) => slot !== null)))
-    .toEqual([{ item: "rolled-iron-helm", base: 3, temp: 0, rolled: true }]);
+  const worn = await page.evaluate(() => window.__game!.gear.filter((slot) => slot !== null));
+  expect(worn).toMatchObject([{ item: "rolled-iron-helm", base: 3, temp: 0, rolled: true }]);
+  expect(worn[0]!.rows.map((row) => [row.stat, row.tier])).toEqual([["armor", 0], ["cooldownSpeed", 2], ["regen", 1], ["thorns", 1]]);
+});
+
+test("the gear screen filters random items, sorts them by power and salvages them into the next run's gold", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&hero=stonehorn");
+  await page.waitForFunction(() => window.__game?.screen === "menu");
+  const uids = await page.evaluate(() => {
+    const debug = window.__game!.debug!;
+    return [debug.grantRolled("head", "mythic", 12), debug.grantRolled("ring1", "rare", 2), debug.grantRolled("feet", "common", 0)];
+  });
+  expect(uids).toEqual([1, 2, 3]);
+  await page.locator("#gear").click();
+  await expect(page.locator("#gear-count")).toHaveText("Collection: 3 of 200");
+  // the rarity filter: only the mythic one
+  await page.locator('#gear-screen .gear-filter[data-rarity="mythic"]').click();
+  await expect(page.locator("#gear-screen .gear-grid .doll-slot:not(.missing)")).toHaveCount(1);
+  await page.locator('#gear-screen .gear-grid [data-uid="1"]').hover();
+  await expect(page.locator("#gear-screen .item-tooltip")).toContainText("Mythic random item");
+  await expect(page.locator("#gear-screen .item-tooltip .tier-mark").first()).toBeVisible();
+  await page.locator('#gear-screen .gear-filter[data-rarity="all"]').click();
+  // the sort by power puts the mythic first
+  await page.locator("#gear-sort").click();
+  await expect(page.locator("#gear-screen .gear-grid .doll-slot").first()).toHaveAttribute("data-uid", "1");
+  // wear the rare ring, then salvage: the worn ring stays, the common boots turn into gold
+  await page.locator("#gear-sort").click();
+  await page.locator('#gear-screen .gear-grid [data-uid="2"]').click();
+  await page.locator("#gear-salvage").click();
+  await page.locator('#gear-screen .gear-grid [data-uid="2"]').click();
+  await expect(page.locator("#gear-message")).toHaveText("Only random items that no hero wears can be salvaged.");
+  await page.locator('#gear-screen .gear-grid [data-uid="3"]').click();
+  await expect(page.locator("#gear-message")).toHaveText("Salvaged for 10 gold.");
+  await expect(page.locator('#gear-screen .gear-grid [data-uid="3"]')).toHaveCount(0);
+  await expect(page.locator("#gear-bank")).toContainText("Bank: 10 gold");
+  await page.locator("#gear-back").click();
+  await startRun(page);
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => window.__game!.gold)).toBeGreaterThanOrEqual(10);
+  expect(await page.evaluate(() => window.__game!.collectionSize)).toBe(2);
 });
 
 test("every hero has its own doll", async ({ page }) => {
@@ -1092,11 +1130,14 @@ test("world 1 has its wall and islands; the storm's bolt warns with a circle", a
   await startRun(page);
   await waitForScreen(page, "playing");
   expect(await page.evaluate(() => window.__game!.obstacles)).toBeGreaterThanOrEqual(35);
-  await page.evaluate(() => window.__game!.debug!.hazard());
-  // 10 s: the first warning ring compiles its shader, which can block a software WebGPU page for over a second;
-  // the game does not advance while the page is blocked, so the 1.2 s warning is still pending afterwards
+  // the warning lasts 1.2 s of the game: a slow software frame can step past it, and the first ring compiles its shader
+  // (10 s limit). The wave and the pause (O opens the settings) come in one evaluate, so no step runs between them
+  await page.evaluate(() => {
+    window.__game!.debug!.hazard();
+    dispatchEvent(new KeyboardEvent("keydown", { code: "KeyO" }));
+  });
   await page.waitForFunction(
-    () => window.__game!.render.hazardRings > 0 && window.__game!.hazard.pending > 0,
+    () => window.__game!.settingsOpen && window.__game!.render.hazardRings > 0 && window.__game!.hazard.pending > 0,
     undefined, { timeout: 10_000, polling: 50 },
   );
   await expect(page.locator(".buff-cell.storm")).toBeVisible();
@@ -1253,4 +1294,23 @@ test("F teleports the hero to the mouse point at once, far beyond a dash", async
   // the top left corner of the screen lies to the north west
   expect(after.x).toBeLessThan(before.x);
   expect(after.y).toBeGreaterThan(before.y);
+});
+
+test("the damage meter lists the hero's sources, the biggest first; N hides it", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&hero=tidecaller&phase=3&speed=4");
+  await waitForScreen(page, "menu");
+  await startRun(page);
+  await waitForScreen(page, "playing");
+  await page.evaluate(() => window.__game!.debug!.spawnEach());
+  await page.waitForFunction(() => window.__game!.meter.rows.length >= 2, null, { timeout: 60_000 });
+  const meter = await page.evaluate(() => window.__game!.meter);
+  const damages = meter.rows.map((row) => row.damage);
+  expect([...damages].sort((a, b) => b - a)).toEqual(damages);
+  expect(meter.rows.reduce((sum, row) => sum + row.share, 0)).toBeCloseTo(1, 5);
+  await expect(page.locator("#damage-meter")).toBeVisible();
+  await expect(page.locator("#damage-meter .meter-row").first()).toBeVisible();
+  await page.keyboard.press("KeyN");
+  await expect(page.locator("#damage-meter")).toBeHidden();
+  await page.keyboard.press("KeyN");
+  await expect(page.locator("#damage-meter")).toBeVisible();
 });

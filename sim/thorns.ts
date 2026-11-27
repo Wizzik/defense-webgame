@@ -1,3 +1,4 @@
+import { METER_THORNS } from "./damage-meter";
 import { damageEnemy } from "./combat";
 import type { Run } from "./run";
 
@@ -32,6 +33,6 @@ export function applyThorns(run: Run): void {
     const amount = owed[i]!;
     if (amount <= 0) continue;
     owed[i] = 0;
-    if (e.alive[i] === 1) damageEnemy(run, i, amount, 2);
+    if (e.alive[i] === 1) damageEnemy(run, i, amount, 2, -1, METER_THORNS);
   }
 }

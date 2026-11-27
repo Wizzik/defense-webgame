@@ -13,7 +13,7 @@ describe("GearSession", () => {
     const backend = memoryBackend({ version: 1, items: { [helm]: 2 }, loadouts: { stonehorn: { head: helm } } });
     const gear = await GearSession.load(data, backend);
     expect(gear.persistent).toBe(true);
-    expect(gear.save).toEqual({ version: 2, items: [helmRecord(2)], nextUid: 2, loadouts: { stonehorn: { head: 1 } } });
+    expect(gear.save).toEqual({ version: 2, items: [helmRecord(2)], nextUid: 2, loadouts: { stonehorn: { head: 1 } }, bankGold: 0 });
     expect(gear.loadout("stonehorn")).toEqual([{ slot: "head", item: helm, level: 2 }]);
     expect(gear.droppedOnLoad).toBe(0);
   });

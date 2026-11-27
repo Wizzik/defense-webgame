@@ -1,3 +1,4 @@
+import { METER_ATTACK, METER_ITEM } from "./damage-meter";
 import { berserkScale, lifestealOnHit } from "./buffs";
 import { TICKS_PER_SECOND } from "./constants";
 import { Role } from "./enemies";
@@ -81,9 +82,14 @@ export function damageCastle(run: Run, amount: number, attacker: number): void {
 /**
  * Subtracts `amount` (x the berserk orb's scale) from an enemy, wakes a sieger and kills it at 0 hp.
  * `source`: 0 base attack, 1 spell, 2 summoned unit. `ref`: spell slot (1), ally index (2), else -1.
- * Only sources 0 and 1 knock back and heal the hero by lifesteal (sim/buffs.ts).
+ * Only sources 0 and 1 knock back and heal the hero by lifesteal (sim/buffs.ts). `meter`: the damage meter's
+ * source the hit counts for (sim/damage-meter.ts): by default the basic attack (0), the spell slot or item effects
+ * (1 with ref -1), nobody (2: the world's hazards); allies, thorns and item splash name theirs.
  */
-export function damageEnemy(run: Run, slot: number, raw: number, source: 0 | 1 | 2, ref = -1): void {
+export function damageEnemy(
+  run: Run, slot: number, raw: number, source: 0 | 1 | 2, ref = -1,
+  meter = source === 0 ? METER_ATTACK : source === 1 ? (ref >= 0 ? ref : METER_ITEM) : -1,
+): void {
   const e = run.enemies;
   if (e.alive[slot] === 0) return;
   const amount = raw * berserkScale(run);
@@ -95,6 +101,7 @@ export function damageEnemy(run: Run, slot: number, raw: number, source: 0 | 1 |
   run.stats.damageDealt += dealt;
   if (source !== 2) lifestealOnHit(run, dealt);
   run.events.push(EventKind.Hit, slot, amount, e.x[slot], e.y[slot], source, ref);
+  if (meter >= 0) run.players[run.current]!.meter.add(meter, dealt, e.hp[slot] <= 0);
   if (e.hp[slot] <= 0) killEnemy(run, slot);
   else if (source !== 2) knockBack(run, slot, source);
 }

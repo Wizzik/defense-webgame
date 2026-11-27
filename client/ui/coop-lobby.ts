@@ -10,6 +10,9 @@ export interface CoopLobbyHandlers {
   /** Host only, once a teammate is in: choose the course and start. */
   onStart(): void;
   onBack(): void;
+  /** The gear screen for the chosen hero (its doll, the collection, import and export); disabled while loading. */
+  onGear(): void;
+  onSettings(): void;
 }
 
 /** What the lobby shows; `main` drives it from the link's state. */
@@ -46,6 +49,8 @@ export class CoopLobby {
   private readonly copy: HTMLButtonElement;
   private readonly start: HTMLButtonElement;
   private readonly back: HTMLButtonElement;
+  private readonly gear: HTMLButtonElement;
+  private readonly settings: HTMLButtonElement;
   private readonly note: HTMLElement;
   private lang: Lang = "en";
   private state: LobbyState = { kind: "idle" };
@@ -65,6 +70,13 @@ export class CoopLobby {
       button.addEventListener("click", () => handlers.onHero(hero.id));
       this.heroButtons.set(hero.id, button);
     }
+    const tools = el("div", "coop-tools", panel);
+    this.gear = el("button", "button small", tools);
+    this.gear.id = "coop-gear";
+    this.gear.addEventListener("click", () => handlers.onGear());
+    this.settings = el("button", "button small", tools);
+    this.settings.id = "coop-settings";
+    this.settings.addEventListener("click", () => handlers.onSettings());
     this.host = el("button", "button primary", panel);
     this.host.id = "coop-host";
     this.host.addEventListener("click", () => handlers.onHost());
@@ -150,9 +162,12 @@ export class CoopLobby {
     setText(this.copy, t(lang, "coop.copy"));
     setText(this.start, t(lang, "coop.start"));
     setText(this.back, t(lang, "coop.back"));
+    setText(this.gear, t(lang, "menu.gear"));
+    setText(this.settings, t(lang, "menu.settings"));
     setText(this.note, t(lang, "coop.note"));
     const busy = state.kind !== "idle" && state.kind !== "error";
     this.host.disabled = busy;
+    this.gear.disabled = state.kind === "loading";
     this.join.disabled = busy;
     this.code.disabled = busy;
     const room = state.kind === "room" ? state : null;

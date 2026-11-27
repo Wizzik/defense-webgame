@@ -2,6 +2,7 @@ import type { AbilitySlot } from "./abilities/slots";
 import { BuffState } from "./buffs";
 import type { CardOffer } from "./cards";
 import type { ChestOffer } from "./chests";
+import { DamageMeter } from "./damage-meter";
 import { GearState } from "./gear";
 import type { Run } from "./run";
 import type { HeroState } from "./world";
@@ -21,6 +22,8 @@ export class PlayerState {
   readonly gear: GearState;
   /** Orb effects and the lifesteal budget (sim/buffs.ts). */
   readonly buffs = new BuffState();
+  /** The damage his sources dealt in this run (a readout: not in the state hash). */
+  readonly meter = new DamageMeter();
   /** Gold the player holds; it pays for chests and is gone after the run. */
   gold = 0;
   offer: CardOffer | null = null;

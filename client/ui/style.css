@@ -1041,6 +1041,19 @@
 .tooltip-line.worse { color: var(--bad); }
 .tooltip-line.temp { color: #7fe0d0; }
 .tooltip-line.effect { margin-top: 4px; color: #9fd0ff; }
+/* the tier of a rolled affix row: T1 grey to T4 gold */
+.tier-mark {
+  margin-left: 6px;
+  padding: 0 4px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: 0.75em;
+  vertical-align: 1px;
+}
+.tier-mark.tier-1 { color: #9a9a9a; }
+.tier-mark.tier-2 { color: #6fcf7a; }
+.tier-mark.tier-3 { color: #5aa8ff; }
+.tier-mark.tier-4 { color: #f2c14e; }
 .tooltip-source {
   margin-top: 6px;
   color: var(--muted);
@@ -1112,12 +1125,52 @@
   border-color: #7f95bd;
   background: #1b2740;
 }
+/* role and rarity filters, the sort and the salvage mode */
+.gear-subfilters .gear-filter[data-role],
+.gear-subfilters .gear-filter[data-rarity="all"],
+#gear-sort,
+#gear-salvage {
+  width: auto;
+  padding: 5px 8px;
+}
+.gear-subfilters .gear-filter[class*="rarity-"] { font-weight: 700; }
+.gear-subfilters .gear-filter.rarity-common { color: var(--rarity-common); }
+.gear-subfilters .gear-filter.rarity-rare { color: var(--rarity-rare); }
+.gear-subfilters .gear-filter.rarity-epic { color: var(--rarity-epic); }
+.gear-subfilters .gear-filter.rarity-legendary { color: var(--rarity-legendary); }
+.gear-subfilters .gear-filter.rarity-mythic { color: var(--rarity-mythic); }
+.gear-filter-gap { width: 8px; }
+#gear-salvage[aria-pressed="true"] {
+  color: #ffd9a0;
+  border-color: #d08a3a;
+  background: #3a2410;
+}
+.gear-grid.salvaging .doll-slot:not([data-salvage]) { opacity: 0.35; }
+.gear-grid.salvaging .doll-slot[data-salvage]:hover { box-shadow: 0 0 0 2px #d08a3a; }
+.gear-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.gear-tool-buttons {
+  display: flex;
+  gap: 4px;
+}
+.gear-bank {
+  margin: 0;
+  font-size: 13px;
+  color: #e8c66a;
+}
+.gear-count.full { color: var(--bad); }
 .gear-grid {
   display: grid;
   grid-template-columns: repeat(10, 44px);
   gap: 6px;
   align-content: start;
-  min-height: 344px;
+  min-height: 268px;
+  max-height: 268px;
+  overflow-y: auto;
 }
 .gear-grid .doll-slot {
   width: 44px;
@@ -1529,4 +1582,69 @@
 }
 .card-new svg {
   display: none;
+}
+
+/* the damage meter (client/ui/damage-meter.ts): bars like the WoW addon Details */
+.damage-meter {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 240px;
+  padding: 6px;
+  font-size: 12px;
+  color: #e6edf7;
+  background: rgba(8, 12, 20, 0.72);
+  border: 1px solid #2c3a54;
+  border-radius: 6px;
+  pointer-events: auto;
+  z-index: 2;
+}
+.meter-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+.meter-sum { color: var(--muted); font-weight: 400; }
+.meter-rows { display: flex; flex-direction: column; gap: 2px; }
+.meter-row {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  height: 18px;
+  padding: 0 5px;
+  line-height: 18px;
+  background: #121b2c;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.meter-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: #3f6fb5;
+  opacity: 0.75;
+}
+.meter-name, .meter-value { position: relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meter-value { flex: none; }
+.meter-source-0 .meter-fill { background: #3f6fb5; }
+.meter-source-1 .meter-fill { background: #6a4fb5; }
+.meter-source-2 .meter-fill { background: #2f8f9d; }
+.meter-source-3 .meter-fill { background: #b5543f; }
+.meter-source-4 .meter-fill, .meter-source-5 .meter-fill { background: #4f8f4a; }
+.meter-source-6 .meter-fill, .meter-source-7 .meter-fill, .meter-source-8 .meter-fill, .meter-source-9 .meter-fill { background: #7a7f3a; }
+.meter-source-10 .meter-fill { background: #8a7a5a; }
+.meter-source-11 .meter-fill { background: #b5853f; }
+.meter-source-12 .meter-fill { background: #3f8f6a; }
+.meter-empty { color: var(--muted); }
+@media (max-width: 700px) {
+  .damage-meter { width: 180px; font-size: 11px; }
+}
+
+/* gear and settings in the co-op lobby */
+.coop-tools {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
 }

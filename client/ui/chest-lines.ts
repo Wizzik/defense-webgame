@@ -1,4 +1,5 @@
 import type { GameData, Rarity, SlotType } from "../../data/schema";
+import { rowTier } from "../../meta";
 import { ChestAction, type ChestCard, type GearState, itemStatAt, slotTypeOf } from "../../sim";
 import { type Lang, type MessageKey, t } from "./i18n";
 import { itemLines, statLabel, statValue } from "./item-lines";
@@ -17,7 +18,11 @@ export interface ChestLines {
   /** What the pick does: "new for this run", "compare with X", "level 3 → 4". */
   action: string;
   /** Stat rows: the item at level 1, the comparison with the worn item, or the worn item's "from → to". */
-  lines: { text: string; tone: LineTone }[];
+  lines: { text: string; tone: LineTone; tier?: number }[];
+}
+
+function withTier<T extends object>(line: T, tier: number): T & { tier?: number } {
+  return tier > 0 ? { ...line, tier } : line;
 }
 
 /** The text of a chest card for the hero's current gear. */
@@ -32,7 +37,7 @@ export function chestLines(lang: Lang, data: GameData, gear: GearState, card: Ch
   let lines: ChestLines["lines"];
   if (card.action === ChestAction.New) {
     action = t(lang, "chest.new");
-    lines = itemLines(lang, item, 0, 1, rules).map((text) => ({ text, tone: "plain" as LineTone }));
+    lines = itemLines(lang, item, 0, 1, rules).map((text, r) => withTier({ text, tone: "plain" as LineTone }, rowTier(item, r)));
     if (item.effect) lines.push({ text: item.effect.text[lang], tone: "effect" });
   } else if (card.action === ChestAction.Choice) {
     const old = wornItem(data, gear, card.slot)!;
@@ -40,18 +45,20 @@ export function chestLines(lang: Lang, data: GameData, gear: GearState, card: Ch
     lines = tooltipLines(lang, data, item, 0, from + 1, { item: old, level: base, temp }).lines;
   } else {
     action = t(lang, "chest.level", { from, to: from + 1 });
-    lines = item.stats.map((row) => ({
+    lines = item.stats.map((row, r) => withTier({
       text: `${statValue(row.stat, itemStatAt(row.value, base, temp, rules))} → ` +
         `${statValue(row.stat, itemStatAt(row.value, base, temp + 1, rules))} ${statLabel(lang, row.stat)}`,
       tone: "better" as LineTone,
-    }));
+    }, rowTier(item, r)));
   }
   return {
     title: item.name[lang],
     slot: t(lang, `slot.${type}` as MessageKey),
     slotType: type,
     rarity: item.rarity,
-    rarityName: t(lang, `rarity.${item.rarity}` as MessageKey),
+    rarityName: item.id.startsWith("rolled-")
+      ? t(lang, "tooltip.random", { rarity: t(lang, `rarity.${item.rarity}` as MessageKey) })
+      : t(lang, `rarity.${item.rarity}` as MessageKey),
     action,
     lines,
   };

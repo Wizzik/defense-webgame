@@ -53,6 +53,7 @@ import { type BakedVat, bakeVat } from "./render/vat";
 import { Cards } from "./ui/cards";
 import { CastlePointer } from "./ui/castle-pointer";
 import { ChestPointer } from "./ui/chest-pointer";
+import { DamageMeterPanel } from "./ui/damage-meter";
 import { EndScreen } from "./ui/end-screen";
 import { GearPanel } from "./ui/gear-panel";
 import { GearScreen } from "./ui/gear-screen";
@@ -447,6 +448,8 @@ function createUi(
   });
   // co-op: the lobby; the host's course comes from the world screen (`coopCourse` routes its Start and Back)
   let coopCourse = false;
+  // the gear screen opened from the lobby goes back there (and a guest tells the host his new gear)
+  let gearFromLobby = false;
   const lobby = new CoopLobby(root, data.heroes, {
     onHero: (id) => {
       heroId = id;
@@ -459,6 +462,12 @@ function createUi(
     onHost: () => void coop.host(),
     onJoin: (code) => void coop.join(code),
     onStart: () => coop.chooseCourse(),
+    onGear: () => {
+      gearFromLobby = true;
+      lobby.close();
+      gearScreen.open(heroId, lang);
+    },
+    onSettings: () => openSettings(false),
     onBack: () => {
       coop.drop();
       lobby.close();
@@ -486,6 +495,9 @@ function createUi(
     },
     onRunStarted: () => {
       coopCourse = false;
+      // the host started while this player looked at his gear: the screen closes, the run comes up
+      gearFromLobby = false;
+      gearScreen.close();
       lobby.close();
       lobby.set({ kind: "idle" });
       worldScreen.close();
@@ -518,6 +530,8 @@ function createUi(
         session.difficulty = difficulty;
         session.start(session.seed, false, heroId);
       }
+      // the salvage bank (meta/salvage.ts) goes to a run that has not stepped yet, the same as RunOptions.gold
+      if (session.run && session.run.tick === 0) session.run.gold += gear.takeBank();
       menuOpen = false;
     },
     onBack: () => {
@@ -560,7 +574,11 @@ function createUi(
     onEquip: () => sound.engine.play(sound.data.sounds["gear.equip"]),
     onClose: (changed) => {
       if (changed) void useHero(heroId);
-      menu.setVisible(true);
+      if (gearFromLobby) {
+        gearFromLobby = false;
+        lobby.open(lang, heroId);
+        if (changed) coop.heroChanged();
+      } else menu.setVisible(true);
     },
   });
   const useHero = makeUseHero((loading, failed) => menu.setLoading(loading, failed));
@@ -577,6 +595,7 @@ function createUi(
   addEventListener("keydown", (event) => {
     if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
     if (event.code === "KeyM") setMuted(!muted);
+    else if (event.code === "KeyN" && !menuOpen) meterPanel.toggle();
     else if (event.code === "KeyO") {
       if (settingsPanel.isOpen) {
         if (settingsPausedRun) closeSettings();
@@ -584,6 +603,7 @@ function createUi(
     }
   });
   const hud = new Hud(root);
+  const meterPanel = new DamageMeterPanel(root);
   hud.onLoot = (tone) => sound.engine.play(sound.data.sounds[tone === "rarity-mythic" ? "drop.mythic" : "drop.legendary"]);
   // the drop rolls for the run's course and the local hero's primary attribute (smart loot)
   hud.dropFor = (bossId, order, magicFind) => {
@@ -636,6 +656,7 @@ function createUi(
       hud.setVisible(!menuOpen);
       if (menuOpen) {
         ended = false;
+        meterPanel.hide();
         cards.hide();
         team.hide();
         pointer.hide();
@@ -643,6 +664,7 @@ function createUi(
         return;
       }
       hud.update(run, lang);
+      meterPanel.update(run, lang);
       cards.update(run, lang);
       team.update(run, lang, width, height);
       pointer.update(run, followCamera.camera, width, height);

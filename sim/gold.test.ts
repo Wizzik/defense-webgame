@@ -6,6 +6,8 @@ import { EventKind } from "./events";
 import { stateHash } from "./hash";
 import { NO_INPUT } from "./input";
 import { progressionRun } from "./testing/progression-run";
+import { createRun } from "./run";
+import { gameData } from "./testing/game-data";
 
 type TestRun = ReturnType<typeof progressionRun>;
 
@@ -31,6 +33,15 @@ function pickups(run: TestRun): { value: number; kind: number }[] {
 }
 
 describe("gold", () => {
+  it("a player starts with the gold of his options (the salvage bank), whole and never below 0", () => {
+    const data = gameData();
+    expect(createRun(data, { seed: 1 }).gold).toBe(0);
+    expect(createRun(data, { seed: 1, gold: 250 }).gold).toBe(250);
+    const run = createRun(data, { seed: 1, players: [{ gold: 40.7 }, { hero: "sparkshot", gold: -3 }] });
+    expect(run.players.map((p) => p.gold)).toEqual([40, 0]);
+    expect(stateHash(createRun(data, { seed: 1, gold: 250 }))).not.toBe(stateHash(createRun(data, { seed: 1 })));
+  });
+
   it("a killed enemy drops a coin of its gold, 24 units east of the crystal", () => {
     const run = killRun(2);
     run.step(NO_INPUT);

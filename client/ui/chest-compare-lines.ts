@@ -1,4 +1,5 @@
 import type { GameData, Item, Rarity, SlotType, StatId } from "../../data/schema";
+import { rowTier } from "../../meta";
 import { type ChestCard, type GearState, itemStatAt } from "../../sim";
 import { type Lang, type MessageKey, t } from "./i18n";
 import { statLabel, statValue } from "./item-lines";
@@ -26,6 +27,9 @@ export interface CompareRow {
   takeTone: LineTone;
   /** Only the new item has this stat. */
   takeNew: boolean;
+  /** Tier of the row on each side, 1-4 for a rolled affix row (T1-T4), else 0. */
+  keepTier: number;
+  takeTier: number;
 }
 
 export interface CompareLines {
@@ -41,11 +45,18 @@ function statsAt(item: Item, base: number, temp: number, gear: GameData["rules"]
   return out;
 }
 
+/** The tier of `stat`'s row on `item` (rowTier), 0 when the item has no such row. */
+function tierOf(item: Item, stat: StatId): number {
+  const row = item.stats.findIndex((r) => r.stat === stat);
+  return row < 0 ? 0 : rowTier(item, row);
+}
+
 function side(lang: Lang, item: Item, level: string): CompareSide {
+  const rarity = t(lang, `rarity.${item.rarity}` as MessageKey);
   return {
     title: item.name[lang],
     rarity: item.rarity,
-    rarityName: t(lang, `rarity.${item.rarity}` as MessageKey),
+    rarityName: item.id.startsWith("rolled-") ? t(lang, "tooltip.random", { rarity }) : rarity,
     slotType: item.slotType,
     level,
     effect: item.effect ? item.effect.text[lang] : null,
@@ -91,6 +102,8 @@ export function compareLines(lang: Lang, data: GameData, gear: GearState, card: 
         keepTone: tone(k, v),
         takeTone: tone(v, k),
         takeNew: k === undefined,
+        keepTier: tierOf(worn, stat),
+        takeTier: tierOf(rolled, stat),
       };
     }),
   };

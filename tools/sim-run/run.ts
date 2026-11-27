@@ -7,6 +7,7 @@ import type { TickInput } from "../../sim/input";
 import { gameData } from "../../sim/testing/game-data";
 import { DIFFICULTY_IDS, type DifficultyId, type GameData } from "../../data/schema";
 import { attackHit, BURST_PHASES, burstLine, spellBurst } from "./burst";
+import { meterLine, meterOf } from "./meter";
 import { formatCoop, formatCoopGroup, formatCoopTotal, heroGroups, playCoop, type CoopSummary } from "./coop";
 import { GEAR_PRESETS, type GearPresetName, gearPreset } from "./gear-presets";
 
@@ -42,6 +43,8 @@ export interface RunSummary {
   chests: number;
   /** Gold gained in the run. */
   gold: number;
+  /** Damage by source (meterOf: ability id, attack, item, thorns). */
+  meter: Record<string, number>;
   /** One cast of the strongest signature spell at the start of each of `BURST_PHASES` (null: not reached). */
   burst: (number | null)[];
   /** The average base attack hit at the start of each of `BURST_PHASES` (null: not reached). */
@@ -133,6 +136,7 @@ export function playBot(
   return {
     hero: data.heroes[run.heroIndex].id,
     seed,
+    meter: meterOf(run.players[0]!),
     result: run.result ?? "won",
     seconds: Math.floor(run.tick / TICKS_PER_SECOND),
     kills: run.stats.kills,
@@ -263,7 +267,7 @@ export function formatHeroSummary(
     `enraged in ${summaries.filter((s) => s.enraged).length}; losses by minutes: ${lossWindows(summaries)}`;
   const wonChests = wonRuns.length > 0 ? (wonRuns.reduce((a, s) => a + s.chests, 0) / wonRuns.length).toFixed(1) : "-";
   const gear = `  chests avg ${avg((s) => s.chests).toFixed(1)} (won runs ${wonChests}), gold avg ${Math.round(avg((s) => s.gold))}`;
-  return `${head}\n${tail}\n${gear}\n${kitLine(summaries)}\n${burstLine(summaries, data)}\n${sustainLine(summaries)}\n${factionLine(summaries)}\n${worldLine(summaries)}`;
+  return `${head}\n${tail}\n${gear}\n${kitLine(summaries)}\n${burstLine(summaries, data)}\n${meterLine(summaries.map((s) => s.meter))}\n${sustainLine(summaries)}\n${factionLine(summaries)}\n${worldLine(summaries)}`;
 }
 
 /** Hearts, orbs by kind and hp healed by lifesteal, hearts and the heal orb: averages per run. */

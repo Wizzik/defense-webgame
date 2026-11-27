@@ -676,6 +676,7 @@
       "legendary": 90,
       "mythic": 150
     },
+    "bankLimit": 500,
     "tiers": [
       {
         "weight": 1,
