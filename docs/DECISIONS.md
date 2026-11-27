@@ -34,6 +34,16 @@ Decisions that still apply. Check here before you change a rule. Newest first in
 - **Boss strength** (task 5, first half, Petr): `design/scaling.yaml` `enemies.bossHp: 3` and `bossDamage: 2`; data-build
   multiplies a boss's rounded hp, its attack, slam and strike damage (the charge multiplies the attack). Boss hp
   targets 36 000, 60 000, 90 000 and 771 000 (`data/generated.test.ts`). Digest `e81a39b0` -> `1000e1ab`.
+- **Chest cards as upgrades** (task 6, Petr): a card never offers an item at or below the rarity its slot wears. The
+  rarity and the slot are drawn as before; when the slot wears that rarity or a higher one, the card is a Level card
+  of the worn item with `rules.loot.upgradeShare` 0.5, else it moves to another slot of the offer's free ones that is
+  empty or wears a lower rarity (New or Choice there); with no such slot it is a Level card too, so a mythic slot only
+  ever gets Level cards. A Level card of a worn random item carries a copy of it (`rolled`) for the UI. The bot's
+  order (upgrades first) is unchanged. Digest `1000e1ab` -> `4316afa9` (with the fix below).
+- **Big enemies and island gaps** (fix found with task 6): islands keep gaps of 120 and the flow field routes for a
+  radius of `PASS_MARGIN` (36), but an enemy was pushed out of the islands with its whole collision, so the final boss
+  (96) stuck in a gap for good (Gravecaller, seed 2: no end of the run). The push-out radius is now at most
+  `PASS_MARGIN`; a big enemy overlaps an island a little where it squeezes through. Charges and leaps as before.
 - Autopilot, gear none, seeds 1-10, after tasks 1, 3, 4 and boss strength: Stonehorn 0, Nightglaive 0, Gravecaller
   10, Serpent Shaman 10, Mistwarden 1, Sparkshot 1, Redcleaver 7, Tidecaller 0 (29 of 80). Far from 10 % each:
   the summoners (Gravecaller, Serpent Shaman) and Redcleaver are too strong, the rest die early (Stonehorn and

@@ -106,9 +106,10 @@ sustain:
 gear: { levelStep: 0.15, chestLevelStep: 0.25, maxPermanentLevel: 5 }
 # chests: `count` chests lie between min and maxCastleDistance from the castle and minSpacing apart. The n-th chest
 #   opened costs basePrice x priceGrowth^(n - 1) gold and offers slotsPerOffer cards. Each card rolls a rarity by
-#   rarityWeights (raised by the hero's magic find), then a free slot whose type has an item of that rarity (one
-#   rarity lower when none is free) and an item of it (sim/chests.ts). An empty slot takes the item at chest level 1,
-#   a higher rarity replaces the worn item with the slot's whole level + 1, else the worn item gains a level.
+#   rarityWeights (raised by the hero's magic find), then a slot not yet in the offer; a slot that wears that rarity
+#   or a higher one gets a Level card of its item (loot.upgradeShare) or the card moves to a slot where the rarity is
+#   an upgrade (sim/chests.ts). An empty slot takes the item at chest level 1, a taken higher rarity replaces the worn
+#   item with the slot's whole level + 1, a Level card or a kept one adds a level to the worn item.
 chests: { count: 3, basePrice: 100, priceGrowth: 1.12, minCastleDistance: 700, maxCastleDistance: 2000, minSpacing: 600, pickupRadius: 80, slotsPerOffer: 3,
   rarityWeights: { common: 25, rare: 30, epic: 37, legendary: 6, mythic: 2 } }
 # magicFind: the hero's magic find MF (sum over worn items, 0.12 = 12 %) has diminishing returns:
@@ -132,6 +133,8 @@ drops:
 #   (design/items.yaml) with namedShare, else a rolled one; a mythic roll draws one of mythicEffects.
 #   Item power: power.boss[boss order] for a drop, chestBase + chestPerPhase x phase for a chest, + perWorld x
 #   (world - 1) + power.difficulty; a dropped item has the highest level whose levelAtPower the power reaches.
+#   upgradeShare (Petr's batch 2): a chest card never offers a rarity at or below what its slot wears; a card drawn
+#   for such a slot is a Level card of the worn item with this share, else it moves to a slot where it is an upgrade.
 #   salvageGold: gold a salvaged item gives the next run's chests; the collection holds collectionLimit items.
 #   critDamage: the extra damage of a critical basic attack before gear; caps: the most gear gives of crit chance,
 #   dodge and damage taken (sim/hero.ts).
@@ -143,6 +146,7 @@ loot:
   rowRoll: 0.08
   affixCount: { common: 1, rare: 2, epic: 3, legendary: 4, mythic: 4 }
   namedShare: { common: 0, rare: 0, epic: 0.1, legendary: 0.25, mythic: 0.4 }
+  upgradeShare: 0.5
   salvageGold: { common: 10, rare: 25, epic: 50, legendary: 90, mythic: 150 }
   tiers: [{ weight: 1, minPower: 0 }, { weight: 1.35, minPower: 3 }, { weight: 1.7, minPower: 6 }, { weight: 2, minPower: 9 }]
   power: { boss: [2, 4, 6, 8], chestBase: 1, chestPerPhase: 0.3, perWorld: 0.5, difficulty: { normal: 0, insane: 1, hell: 2 } }

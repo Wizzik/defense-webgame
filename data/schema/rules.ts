@@ -251,6 +251,11 @@ export const RulesSchema = z.object({
       common: z.number().min(0).max(1), rare: z.number().min(0).max(1), epic: z.number().min(0).max(1),
       legendary: z.number().min(0).max(1), mythic: z.number().min(0).max(1),
     }).strict(),
+    /**
+     * Share of the chest cards drawn for a slot that already wears the drawn rarity or a higher one that become a
+     * Level card of the worn item; the rest move to a slot where the rarity is an upgrade (sim/chests.ts).
+     */
+    upgradeShare: z.number().min(0).max(1),
     /** Gold a salvaged item of the rarity gives for the next run's chests. */
     salvageGold: z.object({
       common: nonNegative, rare: nonNegative, epic: nonNegative, legendary: nonNegative, mythic: nonNegative,

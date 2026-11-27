@@ -12,6 +12,7 @@ import { avoidIslands, Behavior, steer, steerHold, steerX, steerY } from "./enem
 import { crossesFeature, flowDir, flowX, flowY } from "./world-map/flow";
 import { heroFlow } from "./world-map/hero-flow";
 import { weatherSpeedScale } from "./weather";
+import { PASS_MARGIN } from "./world-map/grid";
 import { groundSpeedScale, pushOut as pushOutOfMap, pushX as mapPushX, pushY as mapPushY } from "./world-map/geometry";
 import type { Run } from "./run";
 import { enemyTarget } from "./targets";
@@ -203,9 +204,11 @@ export function updateEnemies(run: Run): void {
     }
     nx = pushOut(nx, ny, castle.x, castle.y, castle.radius + def.collision);
     ny = pushOutY;
-    // Out of the wall and the islands; a charge or a leap flies over them and is pushed out after it lands.
+    // Out of the wall and the islands; a charge or a leap flies over them and is pushed out after it lands. The radius
+    // is at most the one the flow field routes for (PASS_MARGIN): islands keep gaps of 120, so a bigger enemy (a boss)
+    // pushed out with its whole collision stuck in a gap the field sends it through.
     if (!charging && !leaping) {
-      pushOutOfMap(run.map, nx, ny, def.collision);
+      pushOutOfMap(run.map, nx, ny, def.collision < PASS_MARGIN ? def.collision : PASS_MARGIN);
       nx = mapPushX;
       ny = mapPushY;
     }

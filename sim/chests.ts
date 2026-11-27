@@ -1,8 +1,9 @@
 import { runMagicFind } from "./difficulty";
-import type { Rarity } from "../data/schema";
+import { RARITIES, type Rarity } from "../data/schema";
 import { EventKind } from "./events";
 import {
-  EMPTY_ITEM, recomputeGear, ROLLED_ITEM, type RolledItem, SLOT_COUNT, slotTypeOf, wearNamed, wearRolled,
+  EMPTY_ITEM, type GearState, recomputeGear, ROLLED_ITEM, rolledAt, type RolledItem, SLOT_COUNT, slotTypeOf, wearNamed,
+  wearRolled, wornRarity,
 } from "./gear";
 import { chestPower, rollItem } from "./item-roll";
 import { drawRarity, magicFindWeights } from "./magic-find";
@@ -24,9 +25,8 @@ export class ChestStore {
 }
 
 /**
- * What a chest card does: put a new item into an empty slot; offer a choice between the worn item and a different
- * rolled one (keep: a level for the worn item, take: the rolled item replaces it); or add a level to the worn item
- * when the rolled item is the same.
+ * What a chest card does: put a new item into an empty slot; offer a choice between the worn item and one of a higher
+ * rarity (keep: a level for the worn item, take: the offered item replaces it); or add a level to the worn item.
  */
 export const ChestAction = { New: 0, Choice: 1, Level: 2 } as const;
 export type ChestAction = (typeof ChestAction)[keyof typeof ChestAction];
@@ -34,10 +34,10 @@ export type ChestAction = (typeof ChestAction)[keyof typeof ChestAction];
 /** One card of an open chest: a gear slot and a named item (index into `data.items`) or a rolled one. */
 export interface ChestCard {
   slot: number;
-  /** The offered named item for New and Choice, the worn item for Level; ROLLED_ITEM when `rolled` is set. */
+  /** The offered named item for New and Choice, the worn item for Level; ROLLED_ITEM for a rolled item. */
   item: number;
   action: ChestAction;
-  /** A random item the card offers (New or Choice); missing or null for a named item. */
+  /** A random item the card offers (New or Choice) or a copy of the worn one (Level); missing or null for a named item. */
   rolled?: RolledItem | null;
 }
 
@@ -133,11 +133,14 @@ function twinSlot(slot: number): number {
 
 /**
  * Rolls the cards of an open chest (randomness only from `run.chestRng`; rare, may allocate). For each card:
- * a rarity by `rules.chests.rarityWeights` raised by the hero's magic find and a slot not yet in the offer. With
- * `rules.loot.namedShare` of the rarity (when a named item of that rarity fits the slot) the card offers a named item,
- * preferring one the twin slot (ring, trinket) does not wear; else a random item rolled for the hero's primary
- * attribute with the chest's item power (sim/item-roll.ts). The action follows the worn item: New for an empty slot,
- * Level when the named item is the worn one, else Choice (any rarity) with the offered item on the card.
+ * a rarity by `rules.chests.rarityWeights` raised by the hero's magic find and a slot not yet in the offer. A card
+ * never offers an item at or below the rarity a slot wears (Petr's batch 2, task 6): when the drawn slot wears that
+ * rarity or a higher one, the card is a Level card of the worn item with `rules.loot.upgradeShare`, else it moves to
+ * another slot of the offer's free ones that is empty or wears a lower rarity; with no such slot it is a Level card
+ * too (so a mythic slot only ever gets Level cards). Otherwise, with `rules.loot.namedShare` of the rarity (when a
+ * named item of that rarity fits the slot) the card offers a named item, preferring one the twin slot (ring,
+ * trinket) does not wear; else a random item rolled for the hero's primary attribute with the chest's item power
+ * (sim/item-roll.ts). New for an empty slot, else Choice.
  */
 export function rollChestOffer(run: Run): ChestOffer {
   const { data, gear, chestRng: rng } = run;
@@ -148,26 +151,41 @@ export function rollChestOffer(run: Run): ChestOffer {
   const cards: ChestCard[] = [];
   for (let c = 0; c < count; c++) {
     const rarity: Rarity = drawRarity(weights, rng);
+    const rank = RARITIES.indexOf(rarity);
     const slots: number[] = [];
     for (let slot = 0; slot < SLOT_COUNT; slot++) if (taken[slot] === 0) slots.push(slot);
     if (slots.length === 0) throw new Error("chests: no free slot for a card");
-    const slot = slots[rng.int(slots.length)]!;
+    let slot = slots[rng.int(slots.length)]!;
+    if (wornRarity(data, gear, slot) >= rank) {
+      const lower = rng.next() < data.rules.loot.upgradeShare
+        ? []
+        : slots.filter((other) => wornRarity(data, gear, other) < rank);
+      if (lower.length === 0) {
+        taken[slot] = 1;
+        cards.push(levelCard(gear, slot));
+        continue;
+      }
+      slot = lower[rng.int(lower.length)]!;
+    }
     taken[slot] = 1;
     const worn = gear.item[slot]!;
+    const action = worn === EMPTY_ITEM ? ChestAction.New : ChestAction.Choice;
     const named = namedPool(run, rarity, slot);
     const share = data.rules.loot.namedShare[rarity];
     if (named.length > 0 && share > 0 && rng.next() < share) {
-      const item = named[rng.int(named.length)]!;
-      if (worn === EMPTY_ITEM) cards.push({ slot, item, action: ChestAction.New, rolled: null });
-      else if (item === worn) cards.push({ slot, item: worn, action: ChestAction.Level, rolled: null });
-      else cards.push({ slot, item, action: ChestAction.Choice, rolled: null });
+      cards.push({ slot, item: named[rng.int(named.length)]!, action, rolled: null });
       continue;
     }
     const rolled = rollItem(data, rng, slotTypeOf(slot), rarity, power, run.hero.def.primary);
-    const action = worn === EMPTY_ITEM ? ChestAction.New : ChestAction.Choice;
     cards.push({ slot, item: ROLLED_ITEM, action, rolled });
   }
   return { cards };
+}
+
+/** A Level card of what `slot` wears; a rolled worn item rides on the card (a copy) so the UI can show it. */
+function levelCard(gear: GearState, slot: number): ChestCard {
+  const item = gear.item[slot]!;
+  return { slot, item, action: ChestAction.Level, rolled: item === ROLLED_ITEM ? rolledAt(gear, slot) : null };
 }
 
 /** The named items of `rarity` that fit `slot`, without the one the twin slot wears when there are others. */

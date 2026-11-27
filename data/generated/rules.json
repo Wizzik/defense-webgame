@@ -650,6 +650,7 @@
       "legendary": 0.25,
       "mythic": 0.4
     },
+    "upgradeShare": 0.5,
     "salvageGold": {
       "common": 10,
       "rare": 25,
