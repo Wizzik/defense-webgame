@@ -41,7 +41,7 @@
     ],
     "ultimate": "groundbreaker",
     "damageTaken": 0.5,
-    "power": 0.42
+    "power": 0.38
   },
   {
     "id": "nightglaive",
@@ -84,7 +84,7 @@
       "swift-pace"
     ],
     "ultimate": "shadow-sisters",
-    "power": 0.7
+    "power": 0.62
   },
   {
     "id": "gravecaller",
@@ -170,7 +170,7 @@
       "mending-tide"
     ],
     "ultimate": "spirit-ward",
-    "power": 0.38
+    "power": 0.24
   },
   {
     "id": "mistwarden",
@@ -255,7 +255,7 @@
       "quickstep"
     ],
     "ultimate": "beam-swarm",
-    "power": 0.85
+    "power": 0.82
   },
   {
     "id": "redcleaver",
@@ -304,7 +304,7 @@
     ],
     "ultimate": "rot-field",
     "damageTaken": 0.5,
-    "power": 0.39
+    "power": 0.43
   },
   {
     "id": "tidecaller",
@@ -347,6 +347,6 @@
       "riptide"
     ],
     "ultimate": "drowned-lake",
-    "power": 0.6
+    "power": 0.64
   }
 ]
