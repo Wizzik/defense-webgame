@@ -196,7 +196,9 @@ describe("bot run speed", () => {
     }
     expect(run.state).toBe("won");
     expect(run.tick).toBeGreaterThan(300 * 30);
-    expect(performance.now() - start).toBeLessThan(8000);
+    // 8 -> 11 s with the casters (Petr's batch 2): they keep their range, so about 340 enemies are alive at the end of
+    // this immortal run instead of 190; a step costs the same per enemy
+    expect(performance.now() - start).toBeLessThan(11000);
   });
 });
 
