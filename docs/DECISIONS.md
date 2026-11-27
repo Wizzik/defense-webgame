@@ -117,6 +117,37 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   the summoners (Gravecaller, Serpent Shaman) and Redcleaver are too strong, the rest die early (Stonehorn and
   Tidecaller before 3 min). Tuning per hero is task 7, after the casters (task 2) and the chest rule (task 6).
 
+## Damage meter (Petr, 2026-11-27: "we need a damage meter to know which spell deals the most", after the WoW addon Details; the design is Claude's)
+- The sim counts, per player, the damage that landed (no overkill), hits, the top hit and kills of each source
+  (`sim/damage-meter.ts`): the ten ability slots (a summon's hits count for the slot that summoned it), the basic
+  attack (with multishot and the hero's splash), item effects (the chain and splash of gear) and thorns. World
+  damage (storm, meteors, fire pools) counts for nobody. It is a readout: no system reads it and the state hash
+  leaves it out, so it never changes a run (digest unchanged).
+- In the run a panel on the right lists the bars, the biggest first, with damage and share, total and damage per
+  second in its head; a hover gives hits, average, top hit and kills. N shows or hides it (remembered in the
+  browser); it steps aside while a level-up or chest offer is open. The end screen lists the five biggest sources.
+  `window.__game.meter` and the `meter` line of `sim:run` give the same numbers for tests and balance.
+
+## Random items, stage 4: client (2026-11-27; the plan's tasks 15-17, English only, the details are Claude's)
+- **Tooltips, chest cards, compare:** a random item says "<Rarity> random item"; each affix row carries a tier mark
+  T1-T4 (grey, green, blue, gold), the base's own row none; the effect line as before; the source line reads "From
+  chests and bosses" (the boss list is for named items).
+- **Gear screen:** filters by slot, role and rarity; the role of a random item is its base's flavour (heavy str,
+  light agi, cloth int, neutral any), of a named item the first primary attribute among its rows, else any. Sort by
+  rarity (as before) or by power: the item's rows in budget points (value / the affix unit of its stat) at its
+  level, owned before not owned. The grid draws at most `rules.loot.collectionLimit` (200) entries and says
+  "showing N of M" beyond that; the count turns red at 200.
+- **Salvage** (Petr's answer 9.2): the Salvage button switches the grid into salvage mode, where a click on a random
+  item that no hero's doll wears removes it and puts `rules.loot.salvageGold` of its rarity (10 / 25 / 50 / 90 /
+  150) into the bank; named items (owned once, they level up) and worn items cannot be salvaged. The bank holds at
+  most `rules.loot.bankLimit` 500 (about the first four chests); the next solo run takes the whole bank as starting
+  gold (`RunOptions.gold`, `PlayerOptions.gold` in the sim) and empties it. Co-op runs leave the bank alone (every
+  peer would have to know it). Deviation from the plan: the bank lives in the gear save (`SaveData.bankGold`), not in
+  `progress`, so a salvage removes the item and adds its gold in one write.
+- **Debug:** `debug.grantRolled(slot, rarity, power)`; `window.__game.gear[]` has `rows` for random items.
+- **Determinism:** the matrix case `loot-t3` starts with 300 gold; digest `fa569e92` -> `f0490b01`.
+- The gear screen's grid is 268 px high (it scrolls), so the doll, the filters and the buttons still fit.
+
 ## Random items, stage 3: meta and saves (2026-11-27; the plan's tasks 11-15, the details are Claude's)
 
 - **Item records** (`meta/item-record.ts`): one record per item of the collection, `uid` + rarity + permanent level,

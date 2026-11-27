@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-27 (random items, stages 1-3; Petr's batch 2 merged in PR #43; English only for now). Read this first when you resume work.
+Updated 2026-11-27 (random items, stages 1-4 and the damage meter; Petr's batch 2 merged in PR #43; English only for now). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -13,8 +13,43 @@ Updated 2026-11-27 (random items, stages 1-3; Petr's batch 2 merged in PR #43; E
    damage with their own names and looks per world, chest cards for worn slots only as upgrades, balance target
    about 10 % autopilot wins with no gear). After stage 3 of random items, before its stage 4.
 4. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
-5. **English only for now** (Petr, 2026-11-27): new texts need no Czech (DECISIONS, English only). Next work: random
-   items stage 4 (client), in English.
+5. **English only for now** (Petr, 2026-11-27): new texts need no Czech (DECISIONS, English only).
+6. **Random items stage 4 and the damage meter** (branch `claude/random-items-client`, done, below). Next: random
+   items stage 5 (balance with rolled gear presets), then stage 6 (icons).
+
+## Random items stage 4 (client) and the damage meter (branch `claude/random-items-client`, DONE, 2026-11-27)
+
+Plan `docs/superpowers/plans/2026-11-27-random-items.md`, tasks 15-17; rulings in `docs/DECISIONS.md`, sections
+Damage meter and Random items, stage 4. English only. `npm run check` passes on every commit of the branch.
+
+- **Done:**
+  - task 15: random items say "<Rarity> random item" and mark each affix row T1-T4 in tooltips, chest cards and the
+    keep / take compare;
+  - task 16: gear screen filters by role and rarity (plus slot), sort by power, at most 200 shown, **salvage** mode
+    (a random item nobody wears -> 10-150 gold into a bank of at most 500, the next solo run starts with it);
+  - task 17: `window.__game.gear[].rows`, `debug.grantRolled(slot, rarity, power)` (AGENTS.md);
+  - **damage meter** (Petr's wish mid-session): a panel of bars per source (spells, attack, item effects, thorns)
+    with damage, share, total and DPS; N toggles it; the end screen lists the top five; `window.__game.meter`;
+    `sim:run` prints a `meter` line per hero.
+  - Digest `fa569e92` -> `f0490b01` (matrix case `loot-t3` starts with 300 gold; the meter itself changes nothing).
+- **Checks:** `npm run check` (1425 tests), e2e `webgl2-fallback` (gear, chest, random item, damage meter specs),
+  `npm run shots`.
+- **What the meter already says** (autopilot, no gear, seeds 1-3): Stonehorn rock-rupture 49 %, Nightglaive
+  falling-stars 37 %, Gravecaller grave-grasp 55 %, Serpent Shaman forked-bolt 60 %, Mistwarden soul-burst 82 %.
+- **What Petr checks** (after the merge, https://wizzik.github.io/defense-webgame/):
+  - **damage meter**: https://wizzik.github.io/defense-webgame/?debug=1&hero=tidecaller&phase=5 - the panel on
+    the right fills with bars, hover one for hits and the top hit, N hides it; at the end of a run (lost or won)
+    the five biggest sources stand on the end screen;
+  - **random item tooltips**: https://wizzik.github.io/defense-webgame/?debug=1 then in the console
+    `__game.debug.grantRolled("head", "mythic", 12)` and open Gear: the hover says "Mythic random item", the rows
+    have coloured T1-T4 marks, the effect line under them;
+  - **filters and sort**: grant a few (`grantRolled("ring1", "rare", 3)`, `grantRolled("chest", "epic", 6)`), try
+    the STR / AGI / INT / Neutral and C / R / E / L / M buttons and "Sort: power";
+  - **salvage**: click Salvage, then a random item that no hero wears: it is gone and "Bank: N gold" grows; start a
+    run: the gold counter starts with it (`debug=1` keeps nothing between pages, so try it without debug for the
+    real save);
+  - **chest compare with tiers**: `?debug=1&phase=12&world=3&difficulty=insane`, `__game.debug.grantGold(5000)`,
+    open chests: the cards and the compare show T marks.
 
 ## Petr's batch 2 (branch `claude/petr-batch-2`, PR #43, DONE, waits for Petr's playtest, 2026-11-27)
 

@@ -213,6 +213,7 @@ export const messagesEn = {
   "gear.salvageRefused": "Only random items that no hero wears can be salvaged.",
   "gear.salvaged": "Salvaged for {gold} gold.",
   "meter.title": "Damage (N)",
+  "meter.key": "N: damage",
   "end.damage": "Damage: {total} ({dps} per second)",
   "meter.attack": "Attack",
   "meter.item": "Item effects",

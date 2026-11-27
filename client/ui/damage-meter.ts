@@ -59,8 +59,9 @@ export class DamageMeterPanel {
 
   /** Redraws from the local player's meter (`run.current`) every REDRAW_TICKS steps. */
   update(run: Run, lang: Lang): void {
-    this.root.hidden = !this.visible;
-    if (!this.visible) return;
+    // a level-up or chest offer covers the arena: the meter steps aside
+    this.root.hidden = !this.visible || run.state === "levelUp" || run.state === "chest";
+    if (this.root.hidden) return;
     if (run === this.lastRun && this.lastTick >= 0 && run.tick - this.lastTick < REDRAW_TICKS && run.tick >= this.lastTick) return;
     this.lastRun = run;
     this.lastTick = run.tick;
