@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-27 (random items, stages 1-3; Petr's batch 2 in progress). Read this first when you resume work.
+Updated 2026-11-27 (random items, stages 1-3; Petr's batch 2 merged in PR #43; English only for now). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -13,6 +13,8 @@ Updated 2026-11-27 (random items, stages 1-3; Petr's batch 2 in progress). Read 
    damage with their own names and looks per world, chest cards for worn slots only as upgrades, balance target
    about 10 % autopilot wins with no gear). After stage 3 of random items, before its stage 4.
 4. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
+5. **English only for now** (Petr, 2026-11-27): new texts need no Czech (DECISIONS, English only). Next work: random
+   items stage 4 (client), in English.
 
 ## Petr's batch 2 (branch `claude/petr-batch-2`, PR #43, DONE, waits for Petr's playtest, 2026-11-27)
 

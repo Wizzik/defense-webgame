@@ -8,6 +8,13 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   phase 1) wins about 10 % of the runs, for every hero (1-4 of 20 per hero). Every balance change keeps to it;
   the plan of the changes that get there: `docs/superpowers/plans/2026-11-27-petr-batch-2.md`.
 
+## English only (Petr, 2026-11-27)
+
+- "Let's not deal with Czech, keep it all in English for now; it saves work." New player-facing texts are English
+  only. The existing Czech stays in the game: `?lang=cs` or a stored choice still shows it, a message key missing from
+  `client/ui/messages-cs.ts` falls back to English, and a Czech browser no longer picks Czech by itself (`pickLang`).
+  Where a data schema still requires `cs` (`{ en, cs }`, the gendered rare names), new rows repeat the English text.
+
 ## Petr's batch 2 (2026-11-27; plan `docs/superpowers/plans/2026-11-27-petr-batch-2.md`, Petr's words, Claude's numbers)
 
 - **Balance target** (Petr): about 10 % autopilot wins with no gear, every hero

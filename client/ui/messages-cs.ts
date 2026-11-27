@@ -267,4 +267,4 @@ export const messagesCs = {
   "world.start": "Hrát",
   "world.back": "Zpět",
   "world.lockedHint": "Otevře se výhrou předchozího světa.",
-} satisfies Record<MessageKey, string>;
+} satisfies Partial<Record<MessageKey, string>>;

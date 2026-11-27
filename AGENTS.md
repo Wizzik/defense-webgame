@@ -60,7 +60,9 @@ The page `/net-spike/` runs one game with two heroes in lockstep between two bro
 - `sim/` is deterministic: same seed and same inputs give the same state in any browser. Fixed step of 30 ticks per second, time counted in ticks. Randomness only from the seeded `Rng`. No `Math.random`, `Date`, `performance`, `setTimeout`, `setInterval` or `requestAnimationFrame`. No `Math.sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|exp|expm1|log|log1p|log2|log10|pow|cbrt|hypot` and no `**` (engines may differ); compute directions with vectors and `Math.sqrt`.
 - `Run.step()` does not allocate in a normal step: entities live in typed arrays of fixed capacity. Only a rare event (the card offer) may allocate.
 - Systems run in the fixed order of `Run.step` in `sim/run.ts`.
-- Code, identifiers and comments are in English; player-facing texts exist in EN and CS.
+- Code, identifiers and comments are in English. Player-facing texts: English only for now (Petr, 2026-11-27). New
+  texts need no Czech; the existing Czech stays, and a message key missing from `client/ui/messages-cs.ts` shows
+  the English text. Data texts (`{ en, cs }` in `design/*.yaml`) keep their schema until Czech is dropped or revived.
 - Every asset must be listed in `assets/LICENSES.md`.
 - Keep files small, one role per file.
 - Use Conventional Commits; commit only after `npm run check` passes.

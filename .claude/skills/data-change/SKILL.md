@@ -21,5 +21,6 @@ The source of truth is `design/*.yaml`; `data/generated/*.json` is what the game
 
 ## Always
 - No map codes (`source`, `review`) in `data/generated/`.
-- New player-facing text in EN and CS, written fresh (never from the map).
+- New player-facing text in EN, written fresh (never from the map). English only for now (Petr, 2026-11-27): where
+  a data schema still requires `cs`, repeat the English text there.
 - A balance change moves the determinism digest (skill `finish-task`, step 2).
