@@ -26,7 +26,9 @@ hero: { collision: 32, baseRegen: 0.25, regenPerStr: 0.05, spellPowerPerInt: 0.0
         cooldownSpeedPerInt: 0.01,
         dash: { distance: 350, seconds: 0.15, cooldownSeconds: 4, charges: { fromLevel: 20, count: 3 } },
         # Petr 2026-11-26: 3 dash charges from level 20; the blink (F) from level 40: jump to the mouse, a stunning burst
-        blink: { fromLevel: 40, cooldownSeconds: 10, maxDistance: 900, radius: 300, damage: 300, stunSeconds: 0.5 } }
+        # Petr 2026-11-27 (batch 2): the blink is an instant teleport to the mouse at any distance (kept in the arena,
+        # off the obstacles); aheadDistance is only the jump straight ahead when there is no mouse point
+        blink: { fromLevel: 40, cooldownSeconds: 10, aheadDistance: 900, radius: 300, damage: 300, stunSeconds: 0.5 } }
 autocast: { novaMinEnemies: 1, healBelow: 0.6, shieldBelow: 0.35 }
 # Petr 2026-11-26: heroDefendRange: while the hero is within it of the castle every enemy goes for him (a solo hero
 # fighting on one side no longer loses the castle to the other); levelScaling: new enemies grow with the hero level

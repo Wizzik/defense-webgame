@@ -74,16 +74,28 @@ describe("blink (key F)", () => {
     expect(run.enemies.hp[far]!).toBe(hpFar);
   });
 
-  it("reaches at most maxDistance and then waits for its cooldown", () => {
+  it("teleports at any distance, stops at the arena's edge and then waits for its cooldown", () => {
     const run = abilityRun("stonehorn", {});
     run.hero.level = rule.fromLevel;
-    run.step(blinkTo(0, 5000));
-    expect(run.hero.y).toBeLessThanOrEqual(rule.maxDistance + 1);
-    expect(run.hero.y).toBeGreaterThan(rule.maxDistance - 50);
+    const edge = run.data.rules.arena.height / 2 - run.hero.stats.collision;
+    run.step(blinkTo(0, 2500));
+    expect(run.hero.y).toBeGreaterThan(2400);
+    run.hero.blinkCooldown = 0;
+    run.step(blinkTo(0, 50_000));
+    expect(run.hero.y).toBeCloseTo(edge, 0);
     const y = run.hero.y;
     run.step(blinkTo(0, 500));
     expect(eventsOf(run, EventKind.Blink)).toHaveLength(0);
     expect(run.hero.y).toBeCloseTo(y, 0);
     expect(run.hero.blinkCooldown).toBeGreaterThan(Math.round(rule.cooldownSeconds * 30) - 3);
+  });
+
+  it("without an aim jumps aheadDistance along the facing", () => {
+    const run = abilityRun("stonehorn", {});
+    run.hero.level = rule.fromLevel;
+    run.hero.facingX = 1;
+    run.hero.facingY = 0;
+    run.step({ ...NO_INPUT, actions: InputAction.Blink });
+    expect(run.hero.x).toBeCloseTo(rule.aheadDistance, 0);
   });
 });

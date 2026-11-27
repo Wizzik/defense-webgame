@@ -61,7 +61,7 @@
     "blink": {
       "fromLevel": 40,
       "cooldownSeconds": 10,
-      "maxDistance": 900,
+      "aheadDistance": 900,
       "radius": 300,
       "damage": 300,
       "stunSeconds": 0.5

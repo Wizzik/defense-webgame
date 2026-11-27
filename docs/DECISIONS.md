@@ -27,6 +27,10 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   level 10 (times spell power). Written as design values (333, 810, 1510, 2410, 3520) that give this row after
   `abilities.damage`, `levelGrowthExponent` and the spread to 10 levels; `data/generated.test.ts` pins the row.
   Serpent Shaman, gear none, seeds 1-10: 2 -> 10 wins. Digest `22ae189d` -> `e81a39b0`.
+- **Blink** (task 4, Petr): F puts the hero at the mouse point in the same step at any distance, only kept in the
+  arena and off the obstacles; `rules.hero.blink.maxDistance` became `aheadDistance` (900), the jump straight ahead
+  when there is no mouse point. The burst, the stun and the 10 s cooldown stay. The look: a flash where the hero
+  left and the burst where he landed, no streak between them. The autopilot does not blink, so the digest stays.
 
 ## Random items, stage 3: meta and saves (2026-11-27; the plan's tasks 11-15, the details are Claude's)
 

@@ -1213,3 +1213,23 @@ test("a blizzard and fire do not outlive their world", async ({ page }) => {
   expect(await page.evaluate(() => window.__game!.render.particles)).toBe(150);
   expect(errors).toEqual([]);
 });
+
+test("F teleports the hero to the mouse point at once, far beyond a dash", async ({ page }) => {
+  // a debug start at phase 20 spends its level-ups by the autopilot's rule: the hero is past the blink's level 40
+  await page.goto("/?seed=1&debug=1&phase=20&lang=cs");
+  await startRun(page);
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => window.__game!.level)).toBeGreaterThanOrEqual(40);
+  const before = await page.evaluate(() => ({ x: window.__game!.heroX, y: window.__game!.heroY }));
+  const box = (await page.locator("canvas").first().boundingBox())!;
+  await page.mouse.move(box.x + 10, box.y + 10);
+  await page.keyboard.press("KeyF");
+  await page.waitForFunction(
+    (from) => Math.hypot(window.__game!.heroX - from.x, window.__game!.heroY - from.y) > 1000,
+    before,
+  );
+  const after = await page.evaluate(() => ({ x: window.__game!.heroX, y: window.__game!.heroY }));
+  // the top left corner of the screen lies to the north west
+  expect(after.x).toBeLessThan(before.x);
+  expect(after.y).toBeGreaterThan(before.y);
+});

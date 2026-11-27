@@ -78,13 +78,14 @@ export const RulesSchema = z.object({
       charges: z.object({ fromLevel: z.number().int().min(1), count: z.number().int().min(2).max(5) }).strict(),
     }).strict(),
     /**
-     * The blink (key F) from hero level `fromLevel`: a jump of at most `maxDistance` to the aimed point, then a burst of
+     * The blink (key F) from hero level `fromLevel`: an instant teleport to the aimed point at any distance (straight
+     * ahead by `aheadDistance` without an aim), then a burst of
      * `damage` x spell power within `radius` around the landing spot that stuns for `stunSeconds`.
      */
     blink: z.object({
       fromLevel: z.number().int().min(1),
       cooldownSeconds: positive,
-      maxDistance: positive,
+      aheadDistance: positive,
       radius: positive,
       damage: positive,
       stunSeconds: z.number().min(0),
