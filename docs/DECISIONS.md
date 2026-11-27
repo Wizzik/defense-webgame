@@ -117,6 +117,17 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   the summoners (Gravecaller, Serpent Shaman) and Redcleaver are too strong, the rest die early (Stonehorn and
   Tidecaller before 3 min). Tuning per hero is task 7, after the casters (task 2) and the chest rule (task 6).
 
+## Co-op lobby: gear and settings (Petr, 2026-11-27: "in multiplayer you cannot choose gear, import, or open the settings")
+- The co-op lobby has Gear and Settings buttons. Gear opens the menu's gear screen for the chosen hero (doll,
+  collection, filters, salvage, import and export) and Back returns to the lobby; a guest who changed his gear sends
+  it to the host again (`join`), the host's own is read at Start. When the host starts while a guest looks at his
+  gear, the screen closes and the run comes up. Settings opens the same panel as the menu's. In a co-op run C (gear)
+  and O (settings) open as in a solo run, without pausing it.
+- Fix: a worn random item did not travel in co-op (the wire carried only slot, id and level, so the teammates'
+  windows skipped it). Protocol version 5: a random item's entry carries its roll (`NetRolled`: base, rarity,
+  effect, name, stats, values, tiers; `client/net/net-gear.ts`); every window checks it against its game data and
+  leaves out the same entries, so the run stays in lockstep. A window of version 4 and one of 5 refuse each other.
+
 ## Damage meter (Petr, 2026-11-27: "we need a damage meter to know which spell deals the most", after the WoW addon Details; the design is Claude's)
 - The sim counts, per player, the damage that landed (no overkill), hits, the top hit and kills of each source
   (`sim/damage-meter.ts`): the ten ability slots (a summon's hits count for the slot that summoned it), the basic

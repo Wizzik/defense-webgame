@@ -31,6 +31,8 @@ Damage meter and Random items, stage 4. English only. `npm run check` passes on 
   - **damage meter** (Petr's wish mid-session): a panel of bars per source (spells, attack, item effects, thorns)
     with damage, share, total and DPS; N toggles it; the end screen lists the top five; `window.__game.meter`;
     `sim:run` prints a `meter` line per hero.
+  - **co-op lobby** (Petr's wish): Gear and Settings buttons; a worn random item now travels to the teammates
+    (protocol version 5), before it was left out of their windows;
   - Digest `fa569e92` -> `f0490b01` (matrix case `loot-t3` starts with 300 gold; the meter itself changes nothing).
 - **Checks:** `npm run check` (1425 tests), e2e `webgl2-fallback` (gear, chest, random item, damage meter specs),
   `npm run shots`.
@@ -48,6 +50,8 @@ Damage meter and Random items, stage 4. English only. `npm run check` passes on 
   - **salvage**: click Salvage, then a random item that no hero wears: it is gone and "Bank: N gold" grows; start a
     run: the gold counter starts with it (`debug=1` keeps nothing between pages, so try it without debug for the
     real save);
+  - **co-op lobby**: menu Co-op -> the Gear and Settings buttons; with a friend (or two windows), wear a random
+    item in the lobby's gear screen, host and join: the teammate's window shows your item (C in the run);
   - **chest compare with tiers**: `?debug=1&phase=12&world=3&difficulty=insane`, `__game.debug.grantGold(5000)`,
     open chests: the cards and the compare show T marks.
 

@@ -2,13 +2,23 @@
 // the game state never does. Every received message passes `decodeMessage`, which never throws.
 import { InputAction, type TickInput } from "../../sim";
 
-/** 2: the game's co-op lobby (`join` and `start`, multiplayer migration step 7); 3: up to 4 players (`room`, `left`, `p`). */
-export const PROTOCOL_VERSION = 4;
+/**
+ * 2: the game's co-op lobby (`join` and `start`, multiplayer migration step 7); 3: up to 4 players (`room`, `left`,
+ * `p`); 5: a worn random item travels with its rows (NetRolled).
+ */
+export const PROTOCOL_VERSION = 5;
 /** The longest blink aim an input may carry (world units from the hero). */
 const MAX_AIM = 4000;
 
-/** One worn permanent item as it travels: [slot id, item id, level]. */
-export type NetGear = [string, string, number];
+/**
+ * A worn random item's roll as it travels: [base, rarity, effect, name first, name noun, stats, values, tiers]
+ * (indices of the game data, as `RolledItem` of sim/item-roll.ts; client/net/net-gear.ts checks them against it).
+ */
+export type NetRolled = [number, number, number, number, number, number[], number[], number[]];
+/** One worn permanent item as it travels: [slot id, item id, level], and its roll for a random item. */
+export type NetGear = [string, string, number] | [string, string, number, NetRolled];
+/** The most rows a random item has (sim MAX_ROWS). */
+const MAX_NET_ROWS = 5;
 
 /** Difficulty ids that may travel; the game checks them against its data. */
 const DIFFICULTIES = ["normal", "insane", "hell"] as const;
@@ -55,14 +65,35 @@ function id(value: unknown, max: number): value is string {
   return typeof value === "string" && value.length > 0 && value.length <= max;
 }
 
+/** A random item's roll of the right shape (whole indices, positive finite values), or null. */
+function rolledOf(value: unknown): NetRolled | null {
+  if (!Array.isArray(value) || value.length !== 8) return null;
+  const [base, rarity, effect, first, noun, stats, values, tiers] = value as unknown[];
+  if (!intIn(base, 0, 9999) || !intIn(rarity, 0, 9) || !intIn(effect, -1, 999) || !intIn(first, -1, 9999) || !intIn(noun, -1, 9999)) {
+    return null;
+  }
+  if (!Array.isArray(stats) || !Array.isArray(values) || !Array.isArray(tiers)) return null;
+  const rows = stats.length;
+  if (rows < 1 || rows > MAX_NET_ROWS || values.length !== rows || tiers.length !== rows) return null;
+  if (!stats.every((v) => intIn(v, 0, 255)) || !tiers.every((v) => intIn(v, -1, 3))) return null;
+  if (!values.every((v) => finite(v) && v > 0)) return null;
+  return [base, rarity, effect, first, noun, stats as number[], values as number[], tiers as number[]];
+}
+
 function gearList(value: unknown): NetGear[] | null {
   if (!Array.isArray(value) || value.length > MAX_GEAR) return null;
   const out: NetGear[] = [];
   for (const entry of value) {
-    if (!Array.isArray(entry) || entry.length !== 3) return null;
-    const [slot, item, level] = entry as unknown[];
+    if (!Array.isArray(entry) || (entry.length !== 3 && entry.length !== 4)) return null;
+    const [slot, item, level, roll] = entry as unknown[];
     if (!id(slot, MAX_ID) || !id(item, MAX_ID) || !intIn(level, 1, 99)) return null;
-    out.push([slot, item, level]);
+    if (entry.length === 3) {
+      out.push([slot, item, level]);
+      continue;
+    }
+    const rolled = rolledOf(roll);
+    if (!rolled) return null;
+    out.push([slot, item, level, rolled]);
   }
   return out;
 }

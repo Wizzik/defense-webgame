@@ -20,8 +20,8 @@ describe("decodeMessage", () => {
     { t: "left", p: 3 },
   ];
 
-  it("is version 4", () => {
-    expect(PROTOCOL_VERSION).toBe(4);
+  it("is version 5 (random items travel with their roll)", () => {
+    expect(PROTOCOL_VERSION).toBe(5);
   });
 
   it.each(valid.map((m) => [m.t, m] as const))("round-trips %s", (_t, m) => {

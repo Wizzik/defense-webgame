@@ -2,8 +2,9 @@
 // room, telling each other the heroes and gear, and starting the same run in every window. The host is player 0, the
 // guests 1-3 in join order (coop-roster.ts); guests link only to the host.
 import type { DifficultyId, GameData } from "../../data/schema";
-import type { LoadoutEntry, PlayerOptions, SlotId } from "../../sim";
+import type { LoadoutEntry, PlayerOptions } from "../../sim";
 import { joinRoom, openRoom, type PeerLink, type Room } from "../net/peer-link";
+import { fromNet, toNet } from "../net/net-gear";
 import { MAX_PLAYERS, type NetGear, type NetMessage, PROTOCOL_VERSION } from "../net/protocol";
 import { isRoomCode, newRoomCode } from "../net/room-code";
 import type { SignalServer } from "../net/signal";
@@ -35,13 +36,6 @@ export interface CoopSetupDeps {
   showError(error: unknown): void;
 }
 
-function toNet(loadout: readonly LoadoutEntry[]): NetGear[] {
-  return loadout.map((e) => [e.slot, e.item, e.level]);
-}
-
-function fromNet(gear: readonly NetGear[]): LoadoutEntry[] {
-  return gear.map(([slot, item, level]) => ({ slot: slot as SlotId, item, level }));
-}
 
 /** Whether a link with `?join=` should open the lobby at once. */
 export function joinCodeOf(search: string): string | null {
@@ -278,7 +272,7 @@ export class CoopSetup {
     const { session } = this.deps;
     session.world = world;
     session.difficulty = difficulty;
-    const players: PlayerOptions[] = heroes.map((hero, p) => ({ hero, loadout: fromNet(gear[p] ?? []) }));
+    const players: PlayerOptions[] = heroes.map((hero, p) => ({ hero, loadout: fromNet(this.deps.data, gear[p] ?? []) }));
     this.deps.onNote("");
     const net = session.startCoop(seed, players, local, {
       links,

@@ -448,6 +448,8 @@ function createUi(
   });
   // co-op: the lobby; the host's course comes from the world screen (`coopCourse` routes its Start and Back)
   let coopCourse = false;
+  // the gear screen opened from the lobby goes back there (and a guest tells the host his new gear)
+  let gearFromLobby = false;
   const lobby = new CoopLobby(root, data.heroes, {
     onHero: (id) => {
       heroId = id;
@@ -460,6 +462,12 @@ function createUi(
     onHost: () => void coop.host(),
     onJoin: (code) => void coop.join(code),
     onStart: () => coop.chooseCourse(),
+    onGear: () => {
+      gearFromLobby = true;
+      lobby.close();
+      gearScreen.open(heroId, lang);
+    },
+    onSettings: () => openSettings(false),
     onBack: () => {
       coop.drop();
       lobby.close();
@@ -487,6 +495,9 @@ function createUi(
     },
     onRunStarted: () => {
       coopCourse = false;
+      // the host started while this player looked at his gear: the screen closes, the run comes up
+      gearFromLobby = false;
+      gearScreen.close();
       lobby.close();
       lobby.set({ kind: "idle" });
       worldScreen.close();
@@ -563,7 +574,11 @@ function createUi(
     onEquip: () => sound.engine.play(sound.data.sounds["gear.equip"]),
     onClose: (changed) => {
       if (changed) void useHero(heroId);
-      menu.setVisible(true);
+      if (gearFromLobby) {
+        gearFromLobby = false;
+        lobby.open(lang, heroId);
+        if (changed) coop.heroChanged();
+      } else menu.setVisible(true);
     },
   });
   const useHero = makeUseHero((loading, failed) => menu.setLoading(loading, failed));

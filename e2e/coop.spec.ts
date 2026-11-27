@@ -49,3 +49,25 @@ test("a local four-player run shows four heroes and three teammates", async ({ p
   const start = await page.evaluate(() => window.__game!.players.slice(1).map((p) => [p.x, p.y]));
   await page.waitForFunction((s) => window.__game!.players.slice(1).every((p, i) => p.x !== s[i]![0] || p.y !== s[i]![1]), start, { timeout: 30_000, polling: 200 });
 });
+
+test("the co-op lobby opens the gear screen and the settings, and comes back", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&hero=stonehorn");
+  await page.waitForFunction(() => window.__game?.screen === "menu");
+  await page.evaluate(() => window.__game!.debug!.grantRolled("head", "epic", 6));
+  await page.locator("#coop").click();
+  await expect(page.locator("#coop-lobby")).toBeVisible();
+  await page.locator("#coop-gear").click();
+  await expect(page.locator("#gear-screen")).toBeVisible();
+  await expect(page.locator("#coop-lobby")).toBeHidden();
+  await page.locator('#gear-screen .gear-grid [data-uid="1"]').click();
+  await expect(page.locator('#gear-screen .gear-left .doll-slot[data-slot="head"]')).not.toHaveClass(/empty/);
+  await page.locator("#gear-back").click();
+  await expect(page.locator("#gear-screen")).toBeHidden();
+  await expect(page.locator("#coop-lobby")).toBeVisible();
+  await expect(page.locator("#menu")).toBeHidden();
+  await page.locator("#coop-settings").click();
+  await expect(page.locator("#settings-panel")).toBeVisible();
+  await page.locator("#settings-close").click();
+  await expect(page.locator("#settings-panel")).toBeHidden();
+  await expect(page.locator("#coop-lobby")).toBeVisible();
+});
