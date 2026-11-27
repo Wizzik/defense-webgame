@@ -4,6 +4,7 @@ export { equip, grantNamed, loadoutEntry, toLoadout, unequip } from "./equip";
 export { namedRecord, parseRecord, recordItem, recordSlotType, rolledOf, rolledRecord } from "./item-record";
 export type { ItemRecord } from "./item-record";
 export { rolledAsItem, rolledName, rowTier, type ShownItem } from "./item-view";
+export { canSalvage, salvage, salvageValue, takeBank } from "./salvage";
 export { emptySave, namedLevels, namedRecordOf, parseSave, recordByUid } from "./save";
 export type { SaveData } from "./save";
 export { courseKey, emptyProgress, firstUnlocked, isUnlocked, parseProgress, recordResult } from "./progress";

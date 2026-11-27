@@ -260,6 +260,8 @@ export const RulesSchema = z.object({
     salvageGold: z.object({
       common: nonNegative, rare: nonNegative, epic: nonNegative, legendary: nonNegative, mythic: nonNegative,
     }).strict(),
+    /** The most salvage gold the bank keeps; the next solo run starts with it. */
+    bankLimit: z.number().int().nonnegative(),
     /** T1-T4 from the lowest; a higher tier is a bigger share of the budget. */
     tiers: z.array(z.object({ weight: positive, minPower: nonNegative }).strict()).length(4)
       .refine((t) => t.every((tier, i) => i === 0 || (tier.weight > t[i - 1]!.weight && tier.minPower > t[i - 1]!.minPower)), {

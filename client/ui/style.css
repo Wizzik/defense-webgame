@@ -1125,12 +1125,42 @@
   border-color: #7f95bd;
   background: #1b2740;
 }
+/* role and rarity filters, the sort and the salvage mode */
+.gear-subfilters .gear-filter[data-role],
+.gear-subfilters .gear-filter[data-rarity="all"],
+#gear-sort,
+#gear-salvage {
+  width: auto;
+  padding: 5px 8px;
+}
+.gear-subfilters .gear-filter[class*="rarity-"] { font-weight: 700; }
+.gear-subfilters .gear-filter.rarity-common { color: var(--rarity-common); }
+.gear-subfilters .gear-filter.rarity-rare { color: var(--rarity-rare); }
+.gear-subfilters .gear-filter.rarity-epic { color: var(--rarity-epic); }
+.gear-subfilters .gear-filter.rarity-legendary { color: var(--rarity-legendary); }
+.gear-subfilters .gear-filter.rarity-mythic { color: var(--rarity-mythic); }
+.gear-filter-gap { width: 8px; }
+#gear-salvage[aria-pressed="true"] {
+  color: #ffd9a0;
+  border-color: #d08a3a;
+  background: #3a2410;
+}
+.gear-grid.salvaging .doll-slot:not([data-salvage]) { opacity: 0.35; }
+.gear-grid.salvaging .doll-slot[data-salvage]:hover { box-shadow: 0 0 0 2px #d08a3a; }
+.gear-bank {
+  margin: 0;
+  font-size: 13px;
+  color: #e8c66a;
+}
+.gear-count.full { color: var(--bad); }
 .gear-grid {
   display: grid;
   grid-template-columns: repeat(10, 44px);
   gap: 6px;
   align-content: start;
   min-height: 344px;
+  max-height: 344px;
+  overflow-y: auto;
 }
 .gear-grid .doll-slot {
   width: 44px;

@@ -1,10 +1,11 @@
 import type { GearSession } from "./gear-session";
-import type { DifficultyId, Rarity } from "../../data/schema";
+import type { DifficultyId, Rarity, SlotType, StatId } from "../../data/schema";
+import { RARITIES, SLOT_TYPES, STAT_IDS } from "../../data/schema";
 import { groundSpeedScale,
   type ChestOffer, chestPrice, debugDropHeart, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, debugSpawnOrb,
   debugWear, killEnemy, learnAbility, OrbKind, debugHazard, hazardPending,
   type Run,
-  EMPTY_ITEM, ROLLED_ITEM, SLOT_IDS, type SlotId, TICKS_PER_SECOND,
+  EMPTY_ITEM, itemStatAt, MAX_ROWS, ROLLED_ITEM, SLOT_IDS, type SlotId, slotTypeOf, TICKS_PER_SECOND,
 } from "../../sim";
 import { enemyName } from "../ui/boss-name";
 import { latestBoss, runPhase } from "./boss";
@@ -80,8 +81,12 @@ export interface GameSnapshot {
   /** The settings panel is open. */
   settingsOpen: boolean;
   /** The 16 gear slots in the order of `SLOT_IDS`: item id and levels, or null for an empty slot. */
-  /** `item` of a rolled item is "rolled-<base id>" and `rolled` is true. */
-  gear: ({ item: string; base: number; temp: number; rolled: boolean } | null)[];
+  /**
+   * `item` of a rolled item is "rolled-<base id>" and `rolled` is true; `rows` are its rows (the base's own first):
+   * stat id, value at the slot's levels (base + temp) and tier (1-4 for T1-T4, 0 for the base's row); a named item
+   * has no rows.
+   */
+  gear: ({ item: string; base: number; temp: number; rolled: boolean; rows: GearRowSnapshot[] } | null)[];
   /** The named items of the collection: item id to its permanent level. */
   collection: Record<string, number>;
   /** Records in the collection: named and rolled items. */
@@ -130,6 +135,11 @@ export interface GameSnapshot {
     grantItem(id: string, level: number): void;
     /** Empties the collection and the dolls. */
     clearGear(): void;
+    /**
+     * Rolls a random item into the collection: slot type or slot id, rarity, item power (0-12: tiers and level), for
+     * the local hero's primary attribute; returns its uid. Throws an Error for an unknown slot or rarity.
+     */
+    grantRolled(slot: string, rarity: string, power: number): number;
     setAbilityLevel(slot: number, level: number): void;
     /** Learns a shared spell or passive (by id) into an empty slot; throws an Error when the rules refuse it. */
     learn(slot: number, abilityId: string): void;
@@ -160,6 +170,13 @@ declare global {
   interface Window {
     __game?: GameSnapshot;
   }
+}
+
+/** One row of a worn random item in `window.__game.gear`. */
+export interface GearRowSnapshot {
+  stat: StatId;
+  value: number;
+  tier: number;
 }
 
 /** Creates the snapshot and publishes it as `window.__game`. */
@@ -196,6 +213,16 @@ export function addDebugHooks(
       gear.grant(id, level);
       snapshot.collection = namedLevels(gear.save);
       snapshot.collectionSize = gear.save.items.length;
+    },
+    grantRolled(slot: string, rarity: string, power: number): number {
+      const index = (SLOT_IDS as readonly string[]).indexOf(slot);
+      const type = index >= 0 ? slotTypeOf(index) : (SLOT_TYPES as readonly string[]).includes(slot) ? (slot as SlotType) : null;
+      if (!type) throw new Error(`debug.grantRolled: unknown slot "${slot}"`);
+      if (!(RARITIES as readonly string[]).includes(rarity)) throw new Error(`debug.grantRolled: unknown rarity "${rarity}"`);
+      const primary = getRun()?.hero.def.primary ?? "str";
+      const uid = gear.grantRolled(type, rarity as Rarity, Math.max(0, power), primary);
+      snapshot.collectionSize = gear.save.items.length;
+      return uid;
     },
     clearGear(): void {
       gear.clear();
@@ -390,11 +417,21 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
       snapshot.gear[slot] = null;
       continue;
     }
-    const entry = snapshot.gear[slot] ?? (snapshot.gear[slot] = { item: "", base: 0, temp: 0, rolled: false });
+    const entry = snapshot.gear[slot] ?? (snapshot.gear[slot] = { item: "", base: 0, temp: 0, rolled: false, rows: [] });
     entry.rolled = index === ROLLED_ITEM;
     entry.item = entry.rolled ? `rolled-${run.data.loot.bases[gear.rolledBase[slot]!]!.id}` : run.data.items[index]!.id;
     entry.base = gear.base[slot]!;
     entry.temp = gear.temp[slot]!;
+    // read straight from the typed arrays and filled in place, like the orbs below
+    const count = entry.rolled ? gear.rowCount[slot]! : 0;
+    entry.rows.length = count;
+    for (let r = 0; r < count; r++) {
+      const at = slot * MAX_ROWS + r;
+      const row = entry.rows[r] ?? (entry.rows[r] = { stat: "str", value: 0, tier: 0 });
+      row.stat = STAT_IDS[gear.rowStat[at]!]!;
+      row.value = itemStatAt(gear.rowValue[at]!, entry.base, entry.temp, run.data.rules.gear);
+      row.tier = gear.rowTier[at]! < 0 ? 0 : gear.rowTier[at]! + 1;
+    }
   }
   // the orb objects are made once per place and filled in place; the array holds the living ones
   const { orbs, buffs } = run;

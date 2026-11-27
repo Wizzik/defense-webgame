@@ -14,6 +14,8 @@ export interface MatrixCase {
   maxTicks: number;
   /** No movement and the idle card pick instead of the autopilot (tests only). */
   idle?: boolean;
+  /** Gold the hero starts with (the salvage bank); defaults to 0. */
+  gold?: number;
   /** Defaults: world 1, normal. */
   world?: number;
   difficulty?: DifficultyId;
@@ -58,7 +60,8 @@ export function matrixCases(data: GameData): MatrixCase[] {
     { id: "w5-meteors", hero: "gravecaller", seed: 17, startPhase: 1, gear: "mid", maxTicks: 3600, world: 5 },
     // random items from chests with item power for T3 rows (world 3 insane from phase 11, random items plan stage 2);
     // full gear since the kiting autopilot (batch 2): with mid gear it falls before it opens a chest
-    { id: "loot-t3", hero: "gravecaller", seed: 27, startPhase: 11, gear: "full", maxTicks: 4500, world: 3, difficulty: "insane" },
+    // (since the salvage bank of stage 4 it starts with 300 gold: its first chests come at once)
+    { id: "loot-t3", hero: "gravecaller", seed: 27, startPhase: 11, gear: "full", maxTicks: 4500, world: 3, difficulty: "insane", gold: 300 },
   );
   return cases;
 }
@@ -81,7 +84,7 @@ export function runCase(
   const loadout = c.gear === "none" ? [] : gearPreset(data, c.hero, c.gear);
   const run = createRun(data, {
     seed: c.seed, hero: c.hero, startPhase: c.startPhase, durationSeconds: c.durationSeconds, loadout,
-    world: c.world, difficulty: c.difficulty,
+    world: c.world, difficulty: c.difficulty, gold: c.gold,
   });
   const input: TickInput = { moveX: 0, moveY: 0, card: -1, actions: 0 };
   const checkpoints: number[] = [];

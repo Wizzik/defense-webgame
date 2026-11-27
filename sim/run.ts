@@ -50,6 +50,8 @@ export interface PlayerOptions {
   hero?: string;
   /** Permanent items the hero wears (sim/gear.ts). */
   loadout?: readonly LoadoutEntry[];
+  /** Gold the player starts with (salvage gold of the bank, meta/salvage.ts); defaults to 0. */
+  gold?: number;
 }
 
 /** How far apart the heroes of several players start, east and west of `arena.heroStart` (player 0 stands on it). */
@@ -66,6 +68,8 @@ export interface RunOptions {
   startPhase?: number;
   /** Permanent items the hero wears; entries that do not fit are skipped (sim/gear.ts). */
   loadout?: readonly LoadoutEntry[];
+  /** Gold the single player starts with; see PlayerOptions.gold. */
+  gold?: number;
   /** World of the ladder, 1 to `data.worlds.length`; defaults to 1. */
   world?: number;
   /** Defaults to "normal". */
@@ -202,7 +206,7 @@ export class Run {
     this.data = data;
     this.world = options.world ?? 1;
     this.difficulty = checkCourse(data, this.world, options.difficulty ?? "normal");
-    const players: readonly PlayerOptions[] = options.players ?? [{ hero: options.hero, loadout: options.loadout }];
+    const players: readonly PlayerOptions[] = options.players ?? [{ hero: options.hero, loadout: options.loadout, gold: options.gold }];
     if (players.length < 1 || players.length > MAX_PLAYERS) {
       throw new Error(`createRun: 1 to ${MAX_PLAYERS} players, got ${players.length}`);
     }
@@ -243,6 +247,7 @@ export class Run {
       const loadout = players[p]!.loadout;
       if (loadout !== undefined) loadGear(this, loadout);
       recomputeGear(this); // a living hero's hp grows with maxHp, so the hero starts full
+      player.gold = Math.max(0, Math.floor(players[p]!.gold ?? 0));
     }
     this.current = 0;
 

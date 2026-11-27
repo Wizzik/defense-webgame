@@ -518,6 +518,8 @@ function createUi(
         session.difficulty = difficulty;
         session.start(session.seed, false, heroId);
       }
+      // the salvage bank (meta/salvage.ts) goes to a run that has not stepped yet, the same as RunOptions.gold
+      if (session.run && session.run.tick === 0) session.run.gold += gear.takeBank();
       menuOpen = false;
     },
     onBack: () => {
