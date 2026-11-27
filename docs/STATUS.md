@@ -14,6 +14,41 @@ Updated 2026-11-27 (random items, stages 1-2: data and sim). Read this first whe
    about 10 % autopilot wins with no gear). After stage 3 of random items, before its stage 4.
 4. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
 
+## Random items, stage 3: meta and saves (branch `claude/random-items-stage3`, IN PROGRESS, handed over 2026-11-27)
+
+Started in the session of PR #42 and handed to a fresh session (the context grew too large; CLAUDE.md, Long
+sessions). The branch starts from `claude/random-items-data` (PR #42) and **does not pass `npm run check` yet**.
+
+- Done (tasks 11, 12 and 14 of the plan):
+  - `meta/item-record.ts`: `ItemRecord` (uid, rarity, level; `named` id, or `base` + `rows` [stat, value, tier] +
+    `effect` + `name`), `namedRecord`, `rolledRecord`, `rolledOf`, `recordItem`, `recordSlotType`, `parseRecord`.
+  - `meta/item-view.ts`: `rolledName`, `rolledAsItem` (moved from the client; `client/ui/rolled-item.ts` uses them).
+  - `meta/save.ts` version 2 (`items: ItemRecord[]`, `nextUid`, loadouts by uid), the migration of version 1,
+    `recordByUid`, `namedRecordOf`, `namedLevels`; at most 2 x `collectionLimit` records are read.
+  - `meta/equip.ts`: `equip` by uid, `toLoadout` with rolled entries, `loadoutEntry`, `grantNamed`.
+  - `sim/gear.ts`: `LoadoutEntry.rolled`; `loadGear` wears rolled items at their level (`rolledFits` checks them).
+  - `meta/drop.ts` rewritten (task 13): named with `namedShare`, else a rolled record for a random slot with
+    `bossPower` at `levelAtPower`; `rollDrop(..., course: { world, difficulty, primary })`; Drop kind `rolled`;
+    `applyDrop` gives a new record the save's `nextUid`.
+  - Tests rewritten and passing: `meta/save.test.ts`, `meta/equip.test.ts`.
+- Open, in this order:
+  1. `meta/drop.test.ts`: rewrite for the new drops (named share per rarity, rolled level by power, same seed and
+     order give the same drop, magic find still raises the rarities, `applyDrop` for new / level / rolled).
+  2. `meta/item-record.test.ts`: round trip rolled -> record -> rolled, parseRecord refusals.
+  3. Client: `client/game/gear-session.ts` (equip by uid, `grantNamed`, `rollDrop` with the course: `client/main.ts`
+     `hud.dropFor` passes the run's world, difficulty and hero primary; `importText` takes version 1 or 2),
+     `client/ui/collection-grid.ts` (entries carry the record's uid; rolled records after the named ones; compare
+     by uid), `client/ui/gear-screen.ts` (equip by uid; doll slots via `recordItem`), `client/game/debug.ts` and
+     `client/main.ts` (`snapshot.collection = namedLevels(save)`), `client/ui/drop-lines.ts` and `end-screen.ts`
+     (Drop kind `rolled` reads like `new`), and the client tests that build v1 saves (`gear-session.test.ts`,
+     `progress-session.test.ts`, `save-store.test.ts`, `collection-grid.test.ts`).
+  4. e2e `e2e/game.spec.ts` "a boss that falls drops an item into the collection": the first boss now drops a
+     rolled item (common and rare have named share 0), so `collection` (named levels) stays empty; check a new
+     snapshot field (for example `collectionSize`) instead.
+  5. `npm run check`, build, e2e `webgl2-fallback`; docs (`docs/DECISIONS.md` section Random items, stage 3;
+     this section with what Petr checks: an old save keeps its items, boss drops are random items, they can be
+     worn into a run); then merge this branch into PR #42's branch (or open its own draft PR on top of it).
+
 ## Random items, stages 1-2: data and sim (branch `claude/random-items-data`, PR #42, 2026-11-27)
 
 Plan `docs/superpowers/plans/2026-11-27-random-items.md`; rulings and numbers in `docs/DECISIONS.md`, sections

@@ -22,13 +22,15 @@ export function slotTypeOf(slot: number): SlotType {
   return SLOT_TYPES[slot]!;
 }
 
-/** One permanent item a hero wears into a run. */
+/** One permanent item a hero wears into a run: a named item by id, or a rolled one (random items). */
 export interface LoadoutEntry {
   slot: SlotId;
-  /** Item id. */
+  /** Item id of a named item; for a rolled item any text (meta writes "rolled-<base id>"), `rolled` decides. */
   item: string;
   /** Permanent level, 1 to `rules.gear.maxPermanentLevel`. */
   level: number;
+  /** The rolled item, when the entry is one. */
+  rolled?: RolledItem;
 }
 
 /** Sum of the worn items' stats; `heroStats` reads it. Shares are fractions (0.05 = 5 %). */
@@ -162,21 +164,42 @@ export function basicItemIndex(data: GameData, type: SlotType): number {
   return index;
 }
 
-/** Puts the valid entries of a loadout into the gear slots. An entry that does not fit is skipped. */
+/** Puts the valid entries of a loadout (named or rolled) into the gear slots. An entry that does not fit is skipped. */
 export function loadGear(run: Run, loadout: readonly LoadoutEntry[]): void {
   const { data, gear } = run;
   const maxLevel = data.rules.gear.maxPermanentLevel;
   for (const entry of loadout) {
     const slot = SLOT_IDS.indexOf(entry.slot);
     if (slot < 0 || gear.item[slot] !== EMPTY_ITEM) continue;
+    if (!Number.isInteger(entry.level) || entry.level < 1 || entry.level > maxLevel) continue;
+    if (entry.rolled) {
+      if (!rolledFits(data, entry.rolled, slot)) continue;
+      wearRolled(gear, slot, entry.rolled);
+      gear.base[slot] = entry.level;
+      continue;
+    }
     const index = data.items.findIndex((item) => item.id === entry.item);
     if (index < 0 || data.items[index]!.slotType !== slotTypeOf(slot)) continue;
-    if (!Number.isInteger(entry.level) || entry.level < 1 || entry.level > maxLevel) continue;
     // A player owns one piece of an item, so it is worn in one slot only.
     if (gear.item.includes(index)) continue;
     wearNamed(gear, slot, index);
     gear.base[slot] = entry.level;
   }
+}
+
+/** Whether a rolled item of a loadout is sound for `slot`: a base of the slot's type, a rarity, rows of known stats. */
+function rolledFits(data: GameData, rolled: RolledItem, slot: number): boolean {
+  const base = data.loot.bases[rolled.base];
+  if (!base || base.slotType !== slotTypeOf(slot)) return false;
+  if (!Number.isInteger(rolled.rarity) || rolled.rarity < 0 || rolled.rarity >= RARITIES.length) return false;
+  const rows = rolled.stats.length;
+  if (rows < 1 || rows > MAX_ROWS || rolled.values.length !== rows || rolled.tiers.length !== rows) return false;
+  for (let r = 0; r < rows; r++) {
+    const stat = rolled.stats[r]!;
+    if (!Number.isInteger(stat) || stat < 0 || stat >= STAT_IDS.length || !Number.isFinite(rolled.values[r]!)) return false;
+  }
+  const effects = data.rules.loot.mythicEffects.length;
+  return Number.isInteger(rolled.effect) && rolled.effect >= -1 && rolled.effect < effects;
 }
 
 /** Sums the worn items into `hero.gear` and refreshes the hero's stats. Called at the start and after a chest pick. */
