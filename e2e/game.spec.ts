@@ -1130,8 +1130,8 @@ test("world 1 has its wall and islands; the storm's bolt warns with a circle", a
   await startRun(page);
   await waitForScreen(page, "playing");
   expect(await page.evaluate(() => window.__game!.obstacles)).toBeGreaterThanOrEqual(35);
-  // the warning lasts 1.2 s of the game, less than one slow frame of a software renderer can step: the wave and the
-  // pause (O opens the settings) come in one evaluate, so no step runs between them and the circle stays
+  // the warning lasts 1.2 s of the game: a slow software frame can step past it, and the first ring compiles its shader
+  // (10 s limit). The wave and the pause (O opens the settings) come in one evaluate, so no step runs between them
   await page.evaluate(() => {
     window.__game!.debug!.hazard();
     dispatchEvent(new KeyboardEvent("keydown", { code: "KeyO" }));
