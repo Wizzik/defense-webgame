@@ -6,6 +6,7 @@ import { chestLines } from "./chest-lines";
 import { el } from "./dom";
 import { abilityIconSvg } from "./ability-icons";
 import { iconSvg } from "./item-icons";
+import { tierMark } from "./item-tooltip";
 import { type Lang, type MessageKey, t } from "./i18n";
 
 const ATTRIBUTE_KEYS: Record<"str" | "agi" | "int", MessageKey> = {
@@ -131,7 +132,10 @@ export class Cards {
     el("span", "card-name", head, info.title);
     el("span", "chest-rarity", button, info.rarityName);
     el("span", "card-desc", button, info.action);
-    for (const line of info.lines) el("span", `card-line item-line tooltip-line ${line.tone}`, button, line.text);
+    for (const line of info.lines) {
+      const row = el("span", `card-line item-line tooltip-line ${line.tone}`, button, line.text);
+      if (line.tier) tierMark(row, line.tier);
+    }
     button.addEventListener("click", () => this.pick(index));
     return button;
   }

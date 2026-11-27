@@ -196,6 +196,8 @@ export const messagesEn = {
   "tooltip.temp.many": "+{n} levels from chests in this run",
   "tooltip.source": "Drops from: {names}",
   "tooltip.empty": "Empty",
+  "tooltip.random": "{rarity} random item",
+  "tooltip.sourceRandom": "From chests and bosses",
   "gear.title": "Gear",
   "gear.close": "C: close",
   "gear.key": "C: gear",

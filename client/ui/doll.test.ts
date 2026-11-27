@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Item } from "../../data/schema";
-import { createRun } from "../../sim";
+import { rolledAsItem, rolledName } from "../../meta";
+import { createRun, Rng, rollItem } from "../../sim";
 import { gameData } from "../../sim/testing/game-data";
 import { totalTexts } from "./doll";
 import { iconSvg } from "./item-icons";
@@ -102,5 +103,22 @@ describe("doll totals", () => {
     expect(totalTexts({ ...totals, magicFind: 0 }).magicFind).toBe("0 %");
     expect(totalTexts({ ...totals, magicFind: 0.1725 }).magicFind).toBe("17.3 %");
     expect(totalTexts({ ...totals, lifesteal: 0.0175 }).lifesteal).toBe("1.8 %");
+  });
+});
+
+describe("tooltip of a random item", () => {
+  const data = gameData();
+
+  it("names it, says random, marks each affix row with its tier and has no boss list", () => {
+    const rolled = rollItem(data, new Rng(3), "chest", "mythic", 12, "int");
+    const item = rolledAsItem(data, rolled);
+    const tip = tooltipLines("en", data, item, 2, 0);
+    expect(tip.name).toBe(rolledName(data, rolled, "chest").en);
+    expect(tip.sub).toBe("Mythic random item · Chest · level 2");
+    expect(tip.source).toBe("From chests and bosses");
+    const rows = tip.lines.slice(0, rolled.stats.length);
+    expect(rows[0]!.tier).toBeUndefined();
+    for (let r = 1; r < rows.length; r++) expect(rows[r]!.tier).toBe(rolled.tiers[r]! + 1);
+    expect(tip.lines[rolled.stats.length]).toEqual({ text: item.effect!.text.en, tone: "effect" });
   });
 });

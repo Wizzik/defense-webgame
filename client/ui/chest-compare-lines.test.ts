@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ChestAction, GearState, itemStatAt } from "../../sim";
+import { STAT_IDS } from "../../data/schema";
+import { ChestAction, GearState, itemStatAt, Rng, rollItem } from "../../sim";
 import { gameData } from "../../sim/testing/game-data";
 import { compareLines } from "./chest-compare-lines";
 import { statLabel, statValue } from "./item-lines";
@@ -52,10 +53,10 @@ describe("chest compare lines", () => {
     const info = compareLines("en", data, gear, { slot: 0, item: crown, action: ChestAction.Choice });
     expect(info.rows.map((row) => row.stat)).toEqual(["str", "hp", "armor", "magicFind"]);
     const [str, hp, armor, mf] = info.rows;
-    expect(str).toEqual({ stat: "str", keep: keep("str", 14), take: take("str", 20), keepTone: "worse", takeTone: "better", takeNew: false });
-    expect(hp).toEqual({ stat: "hp", keep: keep("hp", 120), take: take("hp", 50), keepTone: "better", takeTone: "worse", takeNew: false });
-    expect(armor).toEqual({ stat: "armor", keep: keep("armor", 4), take: "", keepTone: "better", takeTone: "plain", takeNew: false });
-    expect(mf).toEqual({ stat: "magicFind", keep: "", take: take("magicFind", 0.1), keepTone: "plain", takeTone: "better", takeNew: true });
+    expect(str).toEqual({ stat: "str", keep: keep("str", 14), take: take("str", 20), keepTone: "worse", takeTone: "better", takeNew: false, keepTier: 0, takeTier: 0 });
+    expect(hp).toEqual({ stat: "hp", keep: keep("hp", 120), take: take("hp", 50), keepTone: "better", takeTone: "worse", takeNew: false, keepTier: 0, takeTier: 0 });
+    expect(armor).toEqual({ stat: "armor", keep: keep("armor", 4), take: "", keepTone: "better", takeTone: "plain", takeNew: false, keepTier: 0, takeTier: 0 });
+    expect(mf).toEqual({ stat: "magicFind", keep: "", take: take("magicFind", 0.1), keepTone: "plain", takeTone: "better", takeNew: true, keepTier: 0, takeTier: 0 });
   });
 
   it("a lifesteal row shows a percent on the side that has it", () => {
@@ -78,7 +79,7 @@ describe("chest compare lines", () => {
     data.items[crown]!.stats = [{ stat: "armor", value: 4 }];
     const info = compareLines("en", data, gear, { slot: 0, item: crown, action: ChestAction.Choice });
     expect(info.rows).toEqual([
-      { stat: "armor", keep: info.rows[0]!.keep, take: info.rows[0]!.take, keepTone: "plain", takeTone: "plain", takeNew: false },
+      { stat: "armor", keep: info.rows[0]!.keep, take: info.rows[0]!.take, keepTone: "plain", takeTone: "plain", takeNew: false, keepTier: 0, takeTier: 0 },
     ]);
     expect(info.rows[0]!.keep).toBe(info.rows[0]!.take);
   });
@@ -97,5 +98,18 @@ describe("chest compare lines", () => {
     const back = compareLines("cs", data, worn, { slot: 14, item: gear.item[14]!, action: ChestAction.Choice });
     expect(back.keep.effect).toBe(data.items[sword]!.effect!.text.cs);
     expect(back.take.effect).toBeNull();
+  });
+
+  it("a rolled item's affix rows carry their tier, its base row none, and its rarity says random", () => {
+    const { data, gear } = setup();
+    gear.item[0] = data.items.findIndex((i) => i.slotType === "head" && i.rarity === "common");
+    const rolled = rollItem(data, new Rng(5), "head", "epic", 9, "str");
+    const info = compareLines("en", data, gear, { slot: 0, item: -1, action: ChestAction.Choice, rolled });
+    expect(info.take.rarityName).toBe("Epic random item");
+    for (const [r, stat] of rolled.stats.entries()) {
+      const row = info.rows.find((candidate) => candidate.stat === STAT_IDS[stat])!;
+      expect(row.takeTier).toBe(r === 0 ? 0 : rolled.tiers[r]! + 1);
+    }
+    expect(info.rows.every((row) => row.keepTier === 0)).toBe(true);
   });
 });

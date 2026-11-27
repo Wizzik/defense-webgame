@@ -1041,6 +1041,19 @@
 .tooltip-line.worse { color: var(--bad); }
 .tooltip-line.temp { color: #7fe0d0; }
 .tooltip-line.effect { margin-top: 4px; color: #9fd0ff; }
+/* the tier of a rolled affix row: T1 grey to T4 gold */
+.tier-mark {
+  margin-left: 6px;
+  padding: 0 4px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: 0.75em;
+  vertical-align: 1px;
+}
+.tier-mark.tier-1 { color: #9a9a9a; }
+.tier-mark.tier-2 { color: #6fcf7a; }
+.tier-mark.tier-3 { color: #5aa8ff; }
+.tier-mark.tier-4 { color: #f2c14e; }
 .tooltip-source {
   margin-top: 6px;
   color: var(--muted);
