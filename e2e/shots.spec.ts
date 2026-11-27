@@ -45,13 +45,18 @@ test("shot: fight", async ({ page }) => {
   for (let i = 0; i < 600; i++) {
     const { tick, screen } = await page.evaluate(() => ({ tick: window.__game!.tick, screen: window.__game!.screen }));
     if (screen === "levelUp") await page.keyboard.press("1");
-    // 15 s: an idle hero with no gear falls in about 25 s since the batch 2 balance
-    else if (tick >= 450) break;
+    // 10 s: an idle hero with no gear falls in about 15-20 s since the batch 3 balance
+    else if (tick >= 300) break;
     await page.waitForTimeout(250);
   }
   await page.waitForFunction(() => window.__game?.screen === "playing", undefined, { timeout: 10_000 });
   await page.evaluate(() => window.__game!.debug!.spawnEach());
   await page.waitForTimeout(1_000);
+  // a kill of the spawned hunters may level the hero: pick a card so the shot shows the fight
+  for (let i = 0; i < 5 && (await page.evaluate(() => window.__game!.screen)) === "levelUp"; i++) {
+    await page.keyboard.press("1");
+    await page.waitForTimeout(300);
+  }
   await shot(page, "fight");
 });
 

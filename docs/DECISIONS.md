@@ -15,6 +15,54 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   `client/ui/messages-cs.ts` falls back to English, and a Czech browser no longer picks Czech by itself (`pickLang`).
   Where a data schema still requires `cs` (`{ en, cs }`, the gendered rare names), new rows repeat the English text.
 
+## Petr's batch 3 (2026-11-27; plan `docs/superpowers/plans/2026-11-27-petr-batch-3.md`, Petr's words, Claude's numbers)
+
+- **No white hit flash** (task 2): enemies no longer flash white after a hit; the type-colour glow and the red of
+  bloodlust stay (`client/render/enemy-crowd.ts`; `anim.w` is unused, 0).
+- **Co-op restart** (task 1): a co-op run that ended (lost or won) shows the host **Again (same group)**: he sends a
+  new `start` (new seed, same course) over the links he already has; a guest who left is not in it and the rest are
+  numbered again (`client/game/coop-restart.ts`). A guest's end screen says "Waiting for the host to start again..."
+  and its button is **Leave** (back to the menu, which closes his link). The old net loop is detached (links stay
+  open), the guest detaches his at once when the new `start` comes, so nothing of the old run is in flight. Only an
+  ended run can restart. Guests keep the gear of the last start (the host's is read again); a guest who wants other
+  gear leaves and joins a new room. Protocol version stays 5 (`start` may now come again). Tested: unit test of the
+  new group, e2e local co-op (`?debug=1&mate=`), and by hand two windows over a local PeerServer (lost -> Again ->
+  a new run, hashes matched, no desync).
+- **Spell levels** (task 4, Petr confirmed: "the same strength, fewer steps"): signature and shared spells 6 levels
+  (was 10), ultimates 3 (was 2; the middle is halfway), passives 5 (was 10). Level 1 and the top keep today's values;
+  data-build spreads each kind over its own count (`design/scaling.yaml` `levels 6`, `ultimateLevels 3`,
+  `passiveLevels 5`; an ultimate is the hero's `ultimate` in `heroes.yaml`). Serpent Totem's bite: 100, 145, 190,
+  235, 280, 325. When nothing is left to learn or raise, an offer holds only STR, AGI, INT; attribute cards always come
+  last and in that order. The kit is 3 x 6 + 3 + 2 x 6 + 4 x 5 = 53 picks.
+- **Wards x5** (task 6): `serpent-totem` maxAlive 20 ... 30 and the shared `sentry-ward` 5 ... 15 over the 6 levels
+  (the design rows x5, spread); the count per cast stays. `ALLY_CAPACITY` 32 -> 256 (4 players x 45 wards and images).
+- **Hero levels** (task 5): XP to leave level L is `xpFirst + xpStep (L - 1) + xpQuad (L - 1)^2`, rounded:
+  10, 9, **0.3** (`rules.progression.xpQuad`, new and optional). The first levels come as fast as before; a won run
+  ends at level 65-69 (was about 102). A plain xpStep 22 also slowed the first minute and the autopilot fell in it.
+  **Co-op** (Petr: one curve for both): every kill's XP is x `1 / (1 + coop.perPlayer.packSize x (n - 1))`
+  (`DifficultyMods.xp`), so the bigger packs of a group do not level it faster; a won 3-player run ends near level
+  66. Debug grants and `?phase=` XP are not scaled. `rules.debug.phaseXp` from `sim:run --phase-xp`.
+- **Balance pass** (task 7, target of batch 2: 1-4 autopilot wins of 20 per hero, gear none, world 1 normal): only
+  `power` moved. Wins of 20 after tasks 4-6 -> after the pass: Stonehorn 6 -> 3 (power 0.42 -> 0.38), Nightglaive
+  6 -> 4 (0.7 -> 0.62), Gravecaller 2 -> 2 (0.33), Serpent Shaman 18 -> 4 (0.38 -> 0.24; the wards x5), Mistwarden
+  3 -> 3 (1), Sparkshot 5 -> 3 (0.85 -> 0.82), Redcleaver 0 -> 3 (0.39 -> 0.43), Tidecaller 1 -> 4 (0.6 -> 0.64);
+  in sum 41 -> 26 of 160 (16 %). Most losses still come in minutes 0-4.
+- **Co-op strength** (task 3, done after the balance pass so the group is measured against the tuned heroes):
+  `rules.coop.perPlayer` hp 0.9 -> **0.5**, damage 0.45 -> **0.22** (packSize, eliteHp, castleHp, chests stay).
+  Autopilot, gear none, seeds 1-10, wins of 80 per group size:
+
+  | perPlayer (hp, damage) | 2 players | 3 players | 4 players |
+  |---|---|---|---|
+  | 0.9, 0.45 (before, old power) | - | 0 of 16 (seeds 1-2) | - |
+  | 0.5, 0.25 | 20 | 7 | 5 |
+  | 0.45, 0.2 | 29 | 21 | 12 |
+  | **0.5, 0.22** | 28 | 14 | 6 |
+
+  3 players win about as often as one hero (18 % against 16 %); 2 players are easier and 4 a little harder (a linear
+  rule per player cannot hold all three). Full gear: 3 and 4 players win 40 of 40.
+- Digest `f0490b01` -> `f874baf3` (spell levels) -> `207b558f` (wards) -> `8820dd81` (XP curve) -> `4d1136d4` (power);
+  the co-op numbers and the restart leave it.
+
 ## Petr's batch 2 (2026-11-27; plan `docs/superpowers/plans/2026-11-27-petr-batch-2.md`, Petr's words, Claude's numbers)
 
 - **Balance target** (Petr): about 10 % autopilot wins with no gear, every hero

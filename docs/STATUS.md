@@ -15,12 +15,45 @@ Updated 2026-11-27 (random items, stages 1-4 and the damage meter; Petr's batch 
 4. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
 5. **English only for now** (Petr, 2026-11-27): new texts need no Czech (DECISIONS, English only).
 6. **Random items stage 4 and the damage meter** (PR #45, merged 2026-11-27, below).
-7. **Petr's batch 3** (2026-11-27, after the 3-player playtest), NEXT: plan
-   `docs/superpowers/plans/2026-11-27-petr-batch-3.md`: co-op restart when everyone is down, no white hit flash,
-   weaker co-op scaling per player, spell levels 6 (ultimates 3, passives 5) with STR / AGI / INT cards after,
-   about level 60-70 at the end of a run (one XP curve solo and co-op), wards x5 (shaman's and the shared one).
-   Petr confirmed the open points (spells keep level 1 and top values). Straight to `main` (Petr). Then random items stage 5 (balance), stage 6
-   (icons).
+7. **Petr's batch 3** (2026-11-27, after the 3-player playtest), DONE on `main` (below), waits for Petr's playtest:
+   co-op restart, no white hit flash, weaker co-op scaling, spell levels 6 (ultimates 3, passives 5) with STR / AGI /
+   INT cards after, level 60-70 at the end of a run, wards x5. NEXT: random items stage 5 (balance), stage 6 (icons).
+
+## Petr's batch 3 (straight to `main`, DONE, 2026-11-27)
+
+Plan `docs/superpowers/plans/2026-11-27-petr-batch-3.md`; rulings and numbers in `docs/DECISIONS.md`, section Petr's
+batch 3. `npm run check` (1434 tests) on every commit, e2e `webgl2-fallback`, `npm run shots`.
+
+- **Done:**
+  - no white flash on hit (task 2);
+  - co-op **Again (same group)** for the host after a run ended; guests wait ("Waiting for the host...") or Leave
+    (task 1); tested by hand in two windows over a local PeerServer, no desync;
+  - spells 6 levels, ultimates 3, passives 5, level 1 and top unchanged; a full kit offers STR, AGI, INT in that
+    order (task 4);
+  - wards x5: Serpent Totem 20-30, Sentry Ward 5-15 alive (task 6);
+  - XP curve with a square term (`xpQuad` 0.3): a won run ends at level 65-69; co-op XP x 1 / pack-size multiplier,
+    the same curve, a won 3-player run ends near 66 (task 5);
+  - balance pass by hero `power`: 2-4 autopilot wins of 20 per hero with no gear (task 7);
+  - co-op enemies per extra player hp +0.5, damage +0.22 (was 0.9 / 0.45): 3 players without gear win about as often
+    as one hero (task 3).
+  - Digest `f0490b01` -> `4d1136d4`.
+- **Generated data edited in the cloud** (no `data-source/`): `abilities.json`, `heroes.json`, `rules.json` by the
+  data-build rule. **Petr: run `npm run data:build` locally and check that `data/generated/` does not change.**
+- **Not done / open:** a guest keeps the gear of the last start on Again (to change gear he leaves and joins again);
+  2 players are easier (35 % autopilot wins) than 3 (18 %) and 4 (8 %) with one linear rule.
+- **What Petr checks** (https://wizzik.github.io/defense-webgame/):
+  - enemies hit by spells: no white flash, the type colours and the red bloodlust stay:
+    https://wizzik.github.io/defense-webgame/?debug=1&phase=3
+  - co-op: Host, two friends join, play until everyone is down; the host's end screen shows "Again (same group)",
+    the guests "Waiting for the host"; Again starts a fresh run with the same heroes in every window; a guest who
+    pressed Leave is not in it. Locally: https://wizzik.github.io/defense-webgame/?debug=1&mate=gravecaller,tidecaller
+    then `__game.debug.down(0); __game.debug.down(1); __game.debug.down(2)` and Play again;
+  - spell tooltips show "Level N / 6" (ultimates / 3, passives / 5); maxed spells feel as strong as before; late
+    level-ups offer STR, AGI, INT in that order: https://wizzik.github.io/defense-webgame/?debug=1&phase=18
+  - Serpent Shaman holds many more totems (up to 30), Sentry Ward up to 15:
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=serpent-shaman&phase=10
+  - level at the end of a run about 60-70 (solo and in 3-player co-op), far fewer clicks;
+  - 3-player co-op without gear on normal is winnable, with full gear easy.
 
 ## Random items stage 4 (client) and the damage meter (branch `claude/random-items-client`, DONE, 2026-11-27)
 
