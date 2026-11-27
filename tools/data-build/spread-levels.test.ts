@@ -23,9 +23,18 @@ describe("spreadLevels", () => {
     expect(out.cooldown[6]).toBeCloseTo(3.33, 2); // 2/3 of the way from 4 (level 3) to 3 (level 4)
   });
 
-  it("leaves the ultimates (2 levels) and rows already long enough", () => {
-    const ult = nova(2, [10, 20], [1, 1], [9, 9]);
-    expect(spreadLevels(ult, 10)).toBe(ult);
+  it("spreads an ultimate's 2 levels over 3, the middle halfway", () => {
+    const out = spreadLevels(nova(2, [10, 20], [1, 2], [9, 8]), 3);
+    expect((out.params as Record<string, number[]>).damage).toEqual([10, 15, 20]);
+    expect((out.params as Record<string, number[]>).stunSeconds).toEqual([1, 2, 2]);
+    expect(out.cooldown).toEqual([9, 8.5, 8]);
+  });
+
+  it("leaves one level and rows already long enough", () => {
+    const one = nova(1, [10], [1], [9]);
+    expect(spreadLevels(one, 6)).toBe(one);
+    const five = nova(5, [1, 2, 3, 4, 5], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]);
+    expect(spreadLevels(five, 5)).toBe(five);
     const ten = nova(10, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
     expect(spreadLevels(ten, 10)).toBe(ten);
   });

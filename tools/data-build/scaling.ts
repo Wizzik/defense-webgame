@@ -6,13 +6,16 @@ export const SCALING_YAML = "design/scaling.yaml";
 /** Uniform multipliers from the map's numbers to the survivors pace (design/scaling.yaml). */
 export interface Scaling {
   heroes: { moveSpeed: number; attackCooldown: number };
-  abilities: { cooldown: number; damage: number; levelGrowthExponent: number; levels: number; areaScale: number };
+  abilities: {
+    cooldown: number; damage: number; levelGrowthExponent: number; levels: number; ultimateLevels: number; passiveLevels: number;
+    areaScale: number;
+  };
   enemies: { hp: number; moveSpeed: number; bossHp: number; bossDamage: number };
 }
 
 const SHAPE: { [G in keyof Scaling]: readonly string[] } = {
   heroes: ["moveSpeed", "attackCooldown"],
-  abilities: ["cooldown", "damage", "levelGrowthExponent", "levels", "areaScale"],
+  abilities: ["cooldown", "damage", "levelGrowthExponent", "levels", "ultimateLevels", "passiveLevels", "areaScale"],
   enemies: ["hp", "moveSpeed", "bossHp", "bossDamage"],
 };
 
@@ -43,9 +46,11 @@ export function parseScaling(value: unknown): Scaling {
   if (exponent > 1) {
     throw new Error(`${SCALING_YAML}: abilities.levelGrowthExponent: expected 0 < e <= 1, got ${exponent}`);
   }
-  const levels = (value.abilities as Record<string, number>).levels;
-  if (!Number.isInteger(levels) || levels < 2 || levels > 10) {
-    throw new Error(`${SCALING_YAML}: abilities.levels: expected a whole number from 2 to 10, got ${levels}`);
+  for (const key of ["levels", "ultimateLevels", "passiveLevels"]) {
+    const levels = (value.abilities as Record<string, number>)[key]!;
+    if (!Number.isInteger(levels) || levels < 2 || levels > 10) {
+      throw new Error(`${SCALING_YAML}: abilities.${key}: expected a whole number from 2 to 10, got ${levels}`);
+    }
   }
   return value as unknown as Scaling;
 }
@@ -93,7 +98,14 @@ function scaleArea(ability: Ability, factor: number): Ability {
   return { ...ability, params } as Ability;
 }
 
-export function scaleAbility(ability: Ability, s: Scaling): Ability {
+/** The levels an ability is spread over: an ultimate's, a passive's (kind passive) or a spell's. */
+export function levelsFor(ability: Ability, s: Scaling, ultimate: boolean): number {
+  if (ultimate) return s.abilities.ultimateLevels;
+  return ability.kind === "passive" ? s.abilities.passiveLevels : s.abilities.levels;
+}
+
+/** `ultimate`: the ability is a hero's ultimate (design/heroes.yaml). */
+export function scaleAbility(ability: Ability, s: Scaling, ultimate = false): Ability {
   const params: Record<string, number[]> = {};
   for (const [key, value] of Object.entries(ability.params as Record<string, number[]>)) {
     params[key] =
@@ -102,7 +114,7 @@ export function scaleAbility(ability: Ability, s: Scaling): Ability {
         : value;
   }
   const scaled = { ...ability, cooldown: ability.cooldown.map((c) => seconds(c * s.abilities.cooldown)), params } as Ability;
-  return scaleArea(spreadLevels(scaled, s.abilities.levels), s.abilities.areaScale);
+  return scaleArea(spreadLevels(scaled, levelsFor(scaled, s, ultimate)), s.abilities.areaScale);
 }
 
 /**

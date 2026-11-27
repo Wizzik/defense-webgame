@@ -1,15 +1,15 @@
 import type { Ability } from "../../data/schema";
 
 /**
- * Spreads an ability's rows over `target` levels (Petr 2026-11-26: 10 levels for every spell but the ultimates):
- * new level 1 is the old level 1, the new top level the old top level, and the levels between interpolate the old
- * rows linearly at position (L - 1) x (old - 1) / (target - 1). A row of whole numbers stays whole (rounded), any
- * other row keeps four decimals (shares like 0.175) and the cooldown two. Abilities with at most `keepUpTo` levels (the ultimates: 2) or
- * already `target` levels are returned as they are.
+ * Spreads an ability's rows over `target` levels (Petr 2026-11-26; batch 3: 6 for spells, 3 for ultimates, 5 for
+ * passives): new level 1 is the old level 1, the new top level the old top level, and the levels between interpolate
+ * the old rows linearly at position (L - 1) x (old - 1) / (target - 1). A row of whole numbers stays whole (rounded),
+ * any other row keeps four decimals (shares like 0.175) and the cooldown two. An ability of one level or already
+ * `target` levels or more is returned as it is.
  */
-export function spreadLevels(ability: Ability, target: number, keepUpTo = 2): Ability {
+export function spreadLevels(ability: Ability, target: number): Ability {
   const old = ability.cooldown.length;
-  if (old <= keepUpTo || old >= target) return ability;
+  if (old <= 1 || old >= target) return ability;
   const spread = (row: readonly number[], round: (n: number) => number): number[] => {
     const out: number[] = [];
     for (let level = 0; level < target; level++) {

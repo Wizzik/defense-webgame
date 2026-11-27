@@ -194,11 +194,11 @@ describe("generated game data", () => {
     expect([p.sharedSpellSlots, p.passiveSlots]).toEqual([2, 4]);
     for (const id of p.sharedSpells) {
       expect(abilities.get(id)?.kind, id).not.toBe("passive");
-      expect(abilities.get(id)?.levels, id).toBe(10); // design/scaling.yaml abilities.levels
+      expect(abilities.get(id)?.levels, id).toBe(6); // design/scaling.yaml abilities.levels
     }
     for (const id of p.passives) {
       expect(abilities.get(id)?.kind, id).toBe("passive");
-      expect(abilities.get(id)?.levels, id).toBe(10); // design/scaling.yaml abilities.levels
+      expect(abilities.get(id)?.levels, id).toBe(5); // design/scaling.yaml abilities.passiveLevels
     }
     expect(new Set(p.sharedSpells.map((id) => abilities.get(id)?.kind))).toContain("chain");
     expect(new Set(p.sharedSpells.map((id) => abilities.get(id)?.kind))).toContain("instant");
@@ -207,11 +207,11 @@ describe("generated game data", () => {
   it("the new on_hit abilities carry a bonus, and the chance is a share of 1", () => {
     const abilities = JSON.parse(read("abilities.json")) as { id: string; params: Record<string, number[]> }[];
     const of = (id: string) => abilities.find((a) => a.id === id)!.params;
-    expect(of("stunning-tide").chance).toEqual(Array(10).fill(0.175));
+    expect(of("stunning-tide").chance).toEqual(Array(6).fill(0.175));
     expect(of("stunning-tide").bonusDamage!.every((v) => v > 0)).toBe(true);
     expect(of("searing-rounds").bonusDamage!.every((v) => v > 0)).toBe(true);
-    // the map's 1.25, 2.5, 3.75, 5, 7.5 spread over 10 levels
-    expect(of("grave-grasp").healPerHit).toEqual([1.25, 1.8056, 2.3611, 2.9167, 3.4722, 4.0278, 4.5833, 5.2778, 6.3889, 7.5]);
+    // the map's 1.25, 2.5, 3.75, 5, 7.5 spread over 6 levels
+    expect(of("grave-grasp").healPerHit).toEqual([1.25, 2.25, 3.25, 4.25, 5.5, 7.5]);
   });
 
   it("every enemy type has its behavior", () => {
@@ -263,12 +263,12 @@ describe("generated game data", () => {
     const abilities = JSON.parse(read("abilities.json")) as { id: string; kind: string; params: Record<string, number[]> }[];
     const heroes = JSON.parse(read("heroes.json")) as { id: string; signatureAbilities: string[] }[];
     const ability = (id: string) => abilities.find((a) => a.id === id)!;
-    expect(ability("enhanced-totem").params.empower).toEqual([3, 4, 5, 6, 7, 7, 8, 9, 10, 10]);
+    expect(ability("enhanced-totem").params.empower).toEqual([3, 5, 6, 8, 9, 10]);
     expect(ability("seismic-echo").kind).toBe("on_cast");
     expect(heroes.find((h) => h.id === "nightglaive")!.signatureAbilities[0]).toBe("falling-stars");
     expect(ability("serpent-totem").params.maxAlive).toBeDefined();
-    // Petr 2026-11-27: a totem bites for 100 at level 1 and 25 % of that more every level
-    expect(ability("serpent-totem").params.damage).toEqual([100, 125, 150, 175, 200, 225, 250, 275, 300, 325]);
+    // Petr 2026-11-27: a totem bites for 100 at level 1 and 325 at the top (batch 3: over 6 levels, +45 a level)
+    expect(ability("serpent-totem").params.damage).toEqual([100, 145, 190, 235, 280, 325]);
   });
 
   it("carries no map texts", () => {

@@ -1,13 +1,15 @@
 # Uniform multipliers from the map's numbers to the survivors pace (spec 5).
 # data-build applies them to every hero, ability and enemy, so the map's ratios stay.
 heroes: { moveSpeed: 1.4, attackCooldown: 0.5 }
-abilities: { cooldown: 0.33, damage: 0.3, levelGrowthExponent: 0.5, levels: 10, areaScale: 0.5 }   # damage: direct, tick and heal amounts of every ability; empower is untouched
+abilities: { cooldown: 0.33, damage: 0.3, levelGrowthExponent: 0.5, levels: 6, ultimateLevels: 3, passiveLevels: 5, areaScale: 0.5 }   # damage: direct, tick and heal amounts of every ability; empower is untouched
 # levelGrowthExponent (Petr 2026-11-19, path A; spec 2026-11-19 4.1): after the damage multiplier every damage and heal row
 # grows from level 1 as value[L] = value[1] * (value[L] / value[1]) ^ e; level 1 does not change (0.5 = square root).
 # areaScale (Petr 2026-11-27, batch 2: "Aoe všech spellů musíme snížit o 50 %"): radius, hitRadius, width and endWidth
 # of every ability x this, applied last on the spread rows (rounded); reach (range, length) stays.
-# levels (Petr 2026-11-26): every ability with more than 2 levels (all but the ultimates) is spread over this many
-# levels last: level 1 and the top level keep the map's (scaled) values, the levels between interpolate them.
+# levels (Petr 2026-11-26; batch 3, 2026-11-27: 10 -> 6): every signature and shared spell is spread over this many
+# levels last, the ultimates over ultimateLevels (2 -> 3), the passives (kind passive) over passiveLevels (5): level 1
+# and the top level keep the map's (scaled) values, the levels between interpolate them ("spelly stejně silné jako
+# dnes, jen ty kroky mezi nimi snížit"). A row already that long stays.
 enemies: { hp: 0.35, moveSpeed: 1.32, bossHp: 3, bossDamage: 2 }   # phase 2b-2: tougher and faster packs (hp 0.3 -> 0.35, moveSpeed 1.22 -> 1.32)
 # bossHp, bossDamage (Petr 2026-11-27, batch 2): every boss x3 hp and x2 damage (attack, slam, strike), on the
 # rounded numbers after hp.

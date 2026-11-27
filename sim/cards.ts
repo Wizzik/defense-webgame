@@ -70,8 +70,12 @@ export function cardGroups(run: Run): { weight: number; cards: Card[] }[] {
 /**
  * Builds an offer of distinct cards and pauses the run. Each card draws a group by weight (only groups with
  * cards left), then a card of that group uniformly; the card leaves its group. When every group is empty the
- * offer is filled with attribute cards (STR, AGI, INT without repeats). Rare, may allocate.
+ * offer is filled with attribute cards (STR, AGI, INT without repeats, last and in that order). Rare, may allocate.
  */
+function attributeOrder(card: Card): number {
+  return card.kind === "attribute" ? ATTRIBUTES.indexOf(card.attribute) : -1;
+}
+
 export function openOffer(run: Run): void {
   const { progression } = run.data.rules;
   const groups = cardGroups(run);
@@ -94,13 +98,17 @@ export function openOffer(run: Run): void {
   const attributes: Card[] = ATTRIBUTES.map((attribute) => ({
     kind: "attribute", attribute, amount: progression.attributeCardAmount,
   }));
-  for (let i = 0; cards.length < progression.cardsPerOffer && i < attributes.length; i++) {
+  const fill: Card[] = [];
+  for (let i = 0; cards.length + fill.length < progression.cardsPerOffer && i < attributes.length; i++) {
     const j = i + run.rng.int(attributes.length - i);
     const t = attributes[i];
     attributes[i] = attributes[j];
     attributes[j] = t;
-    cards.push(attributes[i]);
+    fill.push(attributes[i]);
   }
+  // the attribute cards come last, always as STR, AGI, INT (Petr's batch 3)
+  fill.sort((a, b) => attributeOrder(a) - attributeOrder(b));
+  for (const card of fill) cards.push(card);
   run.offer = { cards };
   run.state = "levelUp";
 }

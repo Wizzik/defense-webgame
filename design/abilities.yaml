@@ -232,7 +232,8 @@
     # Petr 2026-11-26: the wards were weak late; every level x1.5 (20, 30, 45, 68, 101 in the game).
     # Petr 2026-11-27 (batch 2): "100 dmg + 25 % každý level": 100, 125, 150 ... 325 over the 10 levels in the game
     # (linear, +25 % of level 1 a level; times spell power). These design values give that row after
-    # abilities.damage (x0.3), levelGrowthExponent (0.5) and the spread to 10 levels.
+    # abilities.damage (x0.3), levelGrowthExponent (0.5) and the spread to 10 levels. Batch 3 (6 levels, the ends
+    # kept): 100, 145, 190, 235, 280, 325.
     damage: { design: [333, 810, 1510, 2410, 3520] }
     attackRange: { design: [600, 600, 600, 600, 600] }
     attackInterval: { design: [0.5, 0.5, 0.5, 0.5, 0.5] }

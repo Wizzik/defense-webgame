@@ -19,12 +19,14 @@ export function buildGameData(src: MapExport, design: Design, mapVersion: string
   const heroes = design.heroes.map((entry) =>
     scaleHero(mapHero(findSource(src.heroes, entry, HEROES_YAML, "heroes.json"), entry), design.scaling),
   );
+  const ultimates = new Set(design.heroes.map((entry) => entry.ultimate));
   const abilities = design.abilities.map((entry) =>
     scaleAbility(
       entry.source === undefined
         ? mapDesignAbility(entry)
         : mapAbility(findSource(src.abilities, { ...entry, source: entry.source }, ABILITIES_YAML, "abilities.json"), entry),
       design.scaling,
+      ultimates.has(entry.id),
     ),
   );
   const enemies = design.enemies.map((entry) =>

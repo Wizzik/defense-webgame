@@ -52,14 +52,14 @@ describe("card groups", () => {
     expect(learns()).toEqual([]);
   });
 
-  it("with the whole kit at its top level an offer holds only the three attributes", () => {
+  it("with the whole kit at its top level an offer holds only the three attributes, as STR, AGI, INT", () => {
     const run = progressionRun();
     for (const [slot, id] of [[4, "meteor"], [5, "smite"], [6, "might"], [7, "haste"], [8, "vigor"], [9, "fortune"]] as const) {
       learnAbility(run, slot, indexOf(run, id));
     }
     for (const slot of run.abilities) slot.level = slot.def.levels;
     const cards = offer(run);
-    expect(cards.map((c) => (c.kind === "attribute" ? c.attribute : "x")).sort()).toEqual(["agi", "int", "str"]);
+    expect(cards.map((c) => (c.kind === "attribute" ? c.attribute : "x"))).toEqual(["str", "agi", "int"]);
   });
 
   it("the first card of an offer follows the group weights", () => {
