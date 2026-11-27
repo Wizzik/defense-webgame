@@ -72,6 +72,20 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   (`tests/assets.test.ts`, AGENTS.md). Quantizing the meshes (gltf-transform `quantize`) was measured first: it
   saves only about 20 % and dropped the skin, so it was not taken; borrowing a model would break the rule that every
   common type has its own. Digest `4316afa9` -> `2b384fc3`.
+- **The autopilot kites** (Petr, 2026-11-27: "it must move like a player and run from the enemies; the melee ones with
+  axes do not run, they fight and take less damage"): balance is measured with a bot that moves. A ranged hero keeps
+  the nearest enemy at 60 % of its attack range (at most 450; +150 below 30 % hp), walks away from every enemy within
+  1000 weighted by 1/d^2 and sideways towards the castle (it circles), loses the outward part near the edge of the
+  castle's defence circle and dashes out of 4 enemies within 220. Melee heroes (Stonehorn, Redcleaver) never back off
+  and take half (`damageTaken` 0.75 -> 0.5). The late-phase speed test may take 15 s (more enemies alive).
+- **Serpent Shaman shoots** (Petr): `attack: { kind: ranged, range: 1200 }` in heroes.yaml replaces the map's melee
+  125 (data-build: `attack.kind`, `attack.range`); its `damageTaken` 0.75 went.
+- **Hero power** (balance knob): `power` in heroes.yaml multiplies the base attack and the spell power (damage and
+  heals of every ability and summon); `damageTaken` may go up to 2. Four rounds against the old standing bot were
+  thrown away when the bot changed; no hero has power now.
+- Autopilot, gear none, seeds 1-20, with casters, before -> after the kiting bot (no power): Stonehorn 0 -> 0,
+  Nightglaive 0 -> 0, Gravecaller 18 -> 20, Serpent Shaman 20 -> 20, Mistwarden 1 -> 1, Sparkshot 0 -> 1,
+  Redcleaver 9 -> 9, Tidecaller 1 -> 1. The ranged heroes die in 0-2 min: their early damage is too low (task 7).
 - Autopilot, gear none, seeds 1-10, after tasks 1, 3, 4 and boss strength: Stonehorn 0, Nightglaive 0, Gravecaller
   10, Serpent Shaman 10, Mistwarden 1, Sparkshot 1, Redcleaver 7, Tidecaller 0 (29 of 80). Far from 10 % each:
   the summoners (Gravecaller, Serpent Shaman) and Redcleaver are too strong, the rest die early (Stonehorn and

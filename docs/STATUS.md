@@ -32,27 +32,38 @@ section Petr's batch 2. `npm run check` passes on every commit of the branch.
   - task 5, second half: worlds 2-5 have their own four bosses (`design/worlds.yaml` `bosses`: name, borrowed model,
     tint, size, ring colour; `client/render/boss-looks.ts`, `client/ui/boss-name.ts`); the sim type per slot and
     `rules.drops` stay (keyed by the slot's type); `window.__game.boss.name`.
-  - Digest now `4316afa9`.
+  - task 2, casters: Battle Mage, Fire Caller, Bone Acolyte, Moon Priestess (`caster: true`, skirmish, own KayKit
+    models, faction-coloured spell bolts and cues), 25-28 % of the phase mix from phase 3 (`data/generated.test.ts`);
+    model budget 10 -> 11 MB;
+  - the autopilot kites (Petr, mid-session): ranged heroes keep 60 % of their reach (max 450) from the nearest enemy,
+    run to the emptiest side (every enemy within 1000, weight 1/d^2) and sideways towards the castle, dash out of a
+    crowd of 4 within 220; melee heroes (Stonehorn, Redcleaver) never back off and take half (`damageTaken` 0.5);
+    Serpent Shaman shoots (`attack: { kind: ranged, range: 1200 }` in heroes.yaml, data-build override);
+  - balance knob `power` per hero (heroes.yaml, multiplies the base attack and spell power; no hero uses it yet).
+  - Digest now `b4e96637`.
 - **Open, in this order:**
-  1. task 2, casters: one caster type per faction (a spell bolt with its own look and sound, `skirmish`), at least
-     25 % of the phase mix from phase 3; a test of the share per phase. Notes for it: new types go at the end of
-     `design/enemies.yaml` (type index order); a type needs a map `source` (reuse one already in the file, e.g.
-     hmpr, oshm, unec, edoc, and derive the json row by the data-build rule: map number x multipliers, then
-     `design/scaling.yaml`) and either its own GLB or `model:` (borrow, then a tint in `client/render/enemy-tints.ts`
-     and a death cue in `design/audio.yaml`); enemy shots are drawn as `beam` in `client/render/enemy-fx.ts`
-     (one SHOT_COLOR today) and have no sound yet; the e2e `enemyMeshes` count follows the types.
-  2. task 7, balance toward about 10 % wins per hero (`--gear none`, seeds 1-20): last table (seeds 1-10, before
-     task 6 and casters) Gravecaller 10, Serpent Shaman 10, Redcleaver 7, Mistwarden 1, Sparkshot 1, Stonehorn 0,
-     Nightglaive 0, Tidecaller 0 of 10.
-  3. e2e `webgl2-fallback`, `npm run shots` for the new bosses (`?debug=1&world=2&phase=6`) and casters, docs,
-     the PR #43 description (in its balance table Sparkshot reads "0 -> 1"; it is before 8, after 1) and subscribe
-     to its activity.
+  1. task 7, balance toward about 10 % wins per hero (`--gear none`, seeds 1-20, world 1 normal) with the kiting
+     autopilot. Table with the kiting bot and no power (k0): Stonehorn 0, Nightglaive 0, Sparkshot 1, Mistwarden 1,
+     Tidecaller 1, Redcleaver 9, Gravecaller 20, Serpent Shaman 20 of 20. The ranged heroes die in 0-2 min at level
+     3-8: with no gear they barely hurt phase 1 enemies (Tidecaller, seed 1: 14 kills in 18 s), kiting alone cannot
+     save them. Petr: "maybe the damage or the type of the heroes' spells must change". Plan: first per-hero `power`
+     (strong ones down, weak ones up), then targeted spell changes where the halved AoE leaves a hero with no way to
+     clear a phase 1 pack (level 1 damage, radius or targets in `design/abilities.yaml`, json by the data-build rule,
+     skill `data-change`). Runs in parallel: the scratchpad helpers of the old session are gone; run
+     `npx tsx tools/sim-run/run.ts --hero <id> --seeds 1-20 --gear none --quiet` for 4 heroes at once (4 cores).
+     Each balance commit: `npm run sim:digest` into `client/determinism/digest.test.ts`; record the before/after
+     tables in DECISIONS (section Petr's batch 2).
+  2. e2e `webgl2-fallback`, `npm run shots` for the new bosses (`?debug=1&world=2&phase=6`) and casters
+     (`?debug=1&phase=3`), docs (STATUS: what Petr checks, with links), the PR #43 description (base is now `main`;
+     its balance table has Sparkshot "0 -> 1", it was before 8, after 1; add tasks 2, 5b, 6, the kiting bot, the
+     ranged shaman, the island-gap fix) and subscribe to its activity (PR #42 is merged, nobody else watches #43).
 - **What Petr can check already** (after the merge; until then the branch has no page of its own):
   spell circles half as big (`?debug=1&phase=10&lang=cs`), the shaman's totem tooltip shows 100 at level 1,
   F teleports to the mouse from level 40 (`?debug=1&phase=20&lang=cs`, aim the mouse far and press F), the first
   boss takes much longer (`?debug=1&phase=6&lang=cs`); world 2 has its own boss with a sand ring
   (`?debug=1&world=2&phase=6&lang=cs`, the bar reads "Dunový pustošitel"); chest cards for a worn slot are only
-  Level cards or higher rarities.
+  Level cards or higher rarities; casters from phase 3 (`?debug=1&phase=3&lang=cs`, blue bolts with a flash;
+  `__game.debug.spawnEach()` shows all seven human types).
 
 ## Random items, stage 3: meta and saves (merged into `claude/random-items-data`, PR #42, 2026-11-27)
 
