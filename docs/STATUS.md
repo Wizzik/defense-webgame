@@ -8,13 +8,13 @@ Updated 2026-11-27 (random items, stages 1-3; Petr's batch 2 in progress). Read 
    wards, 10 spell levels, tooltip, dash charges, blink (F), weather fixed to the map. Waits for Petr's playtest.
 2. **Random items** like Diablo 2 / Project Diablo 2 with game-icons.net pictures: the spec
    `docs/superpowers/specs/2026-11-26-random-items-design.md`, approved by Petr on 2026-11-27 (answers in its section 9); plan `docs/superpowers/plans/2026-11-27-random-items.md` (6 stages), to build in fresh sessions.
-3. **Petr's batch 2** (2026-11-27): plan `docs/superpowers/plans/2026-11-27-petr-batch-2.md` (AoE -50 %, a quarter
+3. **Petr's batch 2** (2026-11-27, done in PR #43, waits for the playtest): plan `docs/superpowers/plans/2026-11-27-petr-batch-2.md` (AoE -50 %, a quarter
    of the enemies casters, Serpent Totem 100 damage + 25 % a level, F teleports to the mouse, bosses x3 hp x2
    damage with their own names and looks per world, chest cards for worn slots only as upgrades, balance target
    about 10 % autopilot wins with no gear). After stage 3 of random items, before its stage 4.
 4. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
 
-## Petr's batch 2 (branch `claude/petr-batch-2`, on top of PR #42, IN PROGRESS, 2026-11-27)
+## Petr's batch 2 (branch `claude/petr-batch-2`, PR #43, DONE, waits for Petr's playtest, 2026-11-27)
 
 Plan `docs/superpowers/plans/2026-11-27-petr-batch-2.md`; rulings and the autopilot tables in `docs/DECISIONS.md`,
 section Petr's batch 2. `npm run check` passes on every commit of the branch.
@@ -44,18 +44,31 @@ section Petr's batch 2. `npm run check` passes on every commit of the branch.
     crowd, Rocket Fan a self-aimed cone, per-hero `power`; autopilot with no gear, seeds 1-20: 2-4 wins of 20 for
     every hero (23 of 160); table in DECISIONS;
   - Digest now `fa569e92`.
-- **Open, in this order:**
-  1. e2e `webgl2-fallback`, `npm run shots` for the new bosses (`?debug=1&world=2&phase=6`) and casters
-     (`?debug=1&phase=3`), docs (STATUS: what Petr checks, with links), the PR #43 description (base is now `main`;
-     its balance table has Sparkshot "0 -> 1", it was before 8, after 1; add tasks 2, 5b, 6, the kiting bot, the
-     ranged shaman, the island-gap fix) and subscribe to its activity (PR #42 is merged, nobody else watches #43).
-- **What Petr can check already** (after the merge; until then the branch has no page of its own):
-  spell circles half as big (`?debug=1&phase=10&lang=cs`), the shaman's totem tooltip shows 100 at level 1,
-  F teleports to the mouse from level 40 (`?debug=1&phase=20&lang=cs`, aim the mouse far and press F), the first
-  boss takes much longer (`?debug=1&phase=6&lang=cs`); world 2 has its own boss with a sand ring
-  (`?debug=1&world=2&phase=6&lang=cs`, the bar reads "Dunový pustošitel"); chest cards for a worn slot are only
-  Level cards or higher rarities; casters from phase 3 (`?debug=1&phase=3&lang=cs`, blue bolts with a flash;
-  `__game.debug.spawnEach()` shows all seven human types).
+- **Checks:** `npm run check` (1408 tests), e2e `webgl2-fallback` (52; the orb test now picks level-up cards while
+  it waits for the berserk buff), `npm run shots` (the `fight` shot at 15 s: an idle Stonehorn with no gear falls at
+  about 23 s).
+- **Open question for Petr:** with no gear most autopilot losses come in the first 4 minutes, and an idle hero falls
+  in under half a minute; a run that survives phase 4 usually wins. If a fresh player should last longer, the
+  next knob is the early phases (spawn rate or enemy hp in phases 1-4), not hero power.
+- **What Petr checks** (after the merge, https://wizzik.github.io/defense-webgame/):
+  - **spells aim themselves**: Tidecaller's wave and Stonehorn's rupture go into the thickest pack, also while you
+    run away (https://wizzik.github.io/defense-webgame/?debug=1&hero=tidecaller&lang=cs and
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=stonehorn&lang=cs);
+  - **Falling Stars** (Nightglaive) fall on the crowd within 800, not around you
+    (https://wizzik.github.io/defense-webgame/?debug=1&hero=nightglaive&lang=cs); **Rocket Fan** (Sparkshot) is a fan
+    that aims itself at the crowd (https://wizzik.github.io/defense-webgame/?debug=1&hero=sparkshot&lang=cs);
+  - **balance with no gear** (a fresh browser or `debug=1`): each hero should be hard, the autopilot wins about one
+    run in seven; does it feel too hard in the first minutes;
+  - spell circles half as big (https://wizzik.github.io/defense-webgame/?debug=1&phase=10&lang=cs), the shaman's
+    totem tooltip shows 100 at level 1 and the shaman shoots;
+  - F teleports to the mouse from level 40 (https://wizzik.github.io/defense-webgame/?debug=1&phase=20&lang=cs, aim
+    far and press F);
+  - bosses: much tougher (https://wizzik.github.io/defense-webgame/?debug=1&phase=6&lang=cs); world 2 has its own
+    boss "Dunový pustošitel" (https://wizzik.github.io/defense-webgame/?debug=1&world=2&phase=6&lang=cs), worlds 3-5
+    too (`world=3`, `4`, `5`);
+  - chest cards for a worn slot are only Level cards or higher rarities (`__game.debug.grantGold(5000)`);
+  - casters from phase 3 (https://wizzik.github.io/defense-webgame/?debug=1&phase=3&lang=cs, blue bolts with a
+    flash; `__game.debug.spawnEach()` shows all seven human types).
 
 ## Random items, stage 3: meta and saves (merged into `claude/random-items-data`, PR #42, 2026-11-27)
 

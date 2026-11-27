@@ -948,7 +948,14 @@ test("orbs lie on the map; a berserk orb shows in the HUD; a heart heals the hur
     const orb = g.orbs.find((o) => o.type === "berserk")!;
     g.debug!.teleport(orb.x, orb.y);
   });
-  await page.waitForFunction(() => window.__game!.buffs.berserk > 0, undefined, { timeout: 10_000, polling: 50 });
+  // a level-up card may pause the run before the hero picks the orb up
+  const buffBy = Date.now() + 10_000;
+  while ((await page.evaluate(() => window.__game!.buffs.berserk)) <= 0 && Date.now() < buffBy) {
+    const screen = await page.evaluate(() => window.__game!.screen);
+    if (screen === "levelUp" || screen === "chest") await pickCard(page);
+    await page.waitForTimeout(50);
+  }
+  expect(await page.evaluate(() => window.__game!.buffs.berserk)).toBeGreaterThan(0);
   await expect(page.locator(".buff-cell.berserk")).toBeVisible();
 
   // let the hunters hurt the hero, then step away from them and drop a heart
