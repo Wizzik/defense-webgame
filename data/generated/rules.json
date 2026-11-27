@@ -926,8 +926,8 @@
   },
   "coop": {
     "perPlayer": {
-      "hp": 0.9,
-      "damage": 0.45,
+      "hp": 0.5,
+      "damage": 0.22,
       "packSize": 0.3,
       "eliteHp": 0.25,
       "castleHp": 0.25,
