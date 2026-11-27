@@ -51,8 +51,9 @@ describe("cone", () => {
   it("width grows with distance", () => {
     const { run } = coneRun();
     addEnemy(run, 0, 50);
-    const far = addEnemy(run, 130, 800);
-    const near = addEnemy(run, 130, 100);
+    // half width 60 at the hero, endWidth / 2 at the far end, plus the enemy's collision
+    const far = addEnemy(run, 98, 800);
+    const near = addEnemy(run, 98, 100);
     run.step(NO_INPUT);
     const hits = hitSlots(run);
     expect(hits).toContain(far);

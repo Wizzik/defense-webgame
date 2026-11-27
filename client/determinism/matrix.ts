@@ -52,11 +52,11 @@ export function matrixCases(data: GameData): MatrixCase[] {
     { id: "w3-thicket", hero: "stonehorn", seed: 13, startPhase: 2, gear: "mid", maxTicks: 4500, world: 3 },
     // the blizzard through a whole storm, with chill (difficulties plan 3b)
     // (seed 16 since random items: with seed 15 the tidecaller fell before the blizzard ended)
-    { id: "w4-blizzard", hero: "tidecaller", seed: 16, startPhase: 3, gear: "mid", maxTicks: 6000, world: 4 },
+    { id: "w4-blizzard", hero: "tidecaller", seed: 16, startPhase: 3, gear: "full", maxTicks: 6000, world: 4 },
     // green meteors and their pools of fire from phase 1 (difficulties plan 3b)
     { id: "w5-meteors", hero: "gravecaller", seed: 17, startPhase: 1, gear: "mid", maxTicks: 3600, world: 5 },
     // random items from chests with item power for T3 rows (world 3 insane from phase 11, random items plan stage 2)
-    { id: "loot-t3", hero: "gravecaller", seed: 19, startPhase: 11, gear: "mid", maxTicks: 4500, world: 3, difficulty: "insane" },
+    { id: "loot-t3", hero: "gravecaller", seed: 27, startPhase: 11, gear: "mid", maxTicks: 4500, world: 3, difficulty: "insane" },
   );
   return cases;
 }

@@ -14,8 +14,9 @@ function playPair(steps: number, tamper?: (peer: 1, run: Run) => void): {
   runs: Run[]; locks: Lockstep[]; desyncs: number;
 } {
   const data = gameData();
-  // the lockstep only: one pack per wave at size 1, so the group lives the whole 1500 steps
+  // the lockstep only: one pack per wave at size 1 and soft hits, so the group lives the whole 1500 steps
   data.rules.difficulty.levels.normal!.packSize = 1;
+  data.rules.difficulty.levels.normal!.damage = 0.25;
   for (const phase of data.rules.phases) phase.packs = 1;
   const runs = [createRun(data, { seed: 7, hero: "stonehorn" }), createRun(data, { seed: 7, hero: "stonehorn" })];
   const locks = [new Lockstep(2, 0), new Lockstep(2, 1)];
@@ -74,8 +75,9 @@ function playGroup(n: number, steps: number, opts: { leaver?: number; leaveAt?: 
   runs: Run[]; locks: Lockstep[]; desyncs: number;
 } {
   const data = gameData();
-  // the lockstep only: one pack per wave at size 1, so the group lives the whole 1500 steps
+  // the lockstep only: one pack per wave at size 1 and soft hits, so the group lives the whole 1500 steps
   data.rules.difficulty.levels.normal!.packSize = 1;
+  data.rules.difficulty.levels.normal!.damage = 0.25;
   for (const phase of data.rules.phases) phase.packs = 1;
   const heroes = ["stonehorn", "sparkshot", "gravecaller", "tidecaller"].slice(0, n);
   const runs: Run[] = [];

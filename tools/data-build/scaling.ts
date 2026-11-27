@@ -6,13 +6,13 @@ export const SCALING_YAML = "design/scaling.yaml";
 /** Uniform multipliers from the map's numbers to the survivors pace (design/scaling.yaml). */
 export interface Scaling {
   heroes: { moveSpeed: number; attackCooldown: number };
-  abilities: { cooldown: number; damage: number; levelGrowthExponent: number; levels: number };
+  abilities: { cooldown: number; damage: number; levelGrowthExponent: number; levels: number; areaScale: number };
   enemies: { hp: number; moveSpeed: number };
 }
 
 const SHAPE: { [G in keyof Scaling]: readonly string[] } = {
   heroes: ["moveSpeed", "attackCooldown"],
-  abilities: ["cooldown", "damage", "levelGrowthExponent", "levels"],
+  abilities: ["cooldown", "damage", "levelGrowthExponent", "levels", "areaScale"],
   enemies: ["hp", "moveSpeed"],
 };
 
@@ -77,6 +77,22 @@ function flattenGrowth(row: number[], exponent: number): number[] {
   return row.map((v, level) => (level === 0 || !(v > 0) ? v : whole(first * Math.pow(v / first, exponent))));
 }
 
+/**
+ * Param keys of an ability's area that `abilities.areaScale` multiplies (Petr 2026-11-27, batch 2: "AoE of every
+ * spell -50 %"): the radius of novas, areas, auras and rings, the burst radius of ticking areas, and the width of
+ * lines and cones. Reach (`range`, `length`, `attackRange`, `bounceRange`) stays. Applied last, on the spread rows.
+ */
+const AREA_PARAMS: readonly string[] = ["radius", "hitRadius", "width", "endWidth"];
+
+function scaleArea(ability: Ability, factor: number): Ability {
+  if (factor === 1) return ability;
+  const params: Record<string, number[]> = {};
+  for (const [key, value] of Object.entries(ability.params as Record<string, number[]>)) {
+    params[key] = AREA_PARAMS.includes(key) && Array.isArray(value) ? value.map((v) => whole(v * factor)) : value;
+  }
+  return { ...ability, params } as Ability;
+}
+
 export function scaleAbility(ability: Ability, s: Scaling): Ability {
   const params: Record<string, number[]> = {};
   for (const [key, value] of Object.entries(ability.params as Record<string, number[]>)) {
@@ -86,7 +102,7 @@ export function scaleAbility(ability: Ability, s: Scaling): Ability {
         : value;
   }
   const scaled = { ...ability, cooldown: ability.cooldown.map((c) => seconds(c * s.abilities.cooldown)), params } as Ability;
-  return spreadLevels(scaled, s.abilities.levels);
+  return scaleArea(spreadLevels(scaled, s.abilities.levels), s.abilities.areaScale);
 }
 
 export function scaleEnemy(enemy: Enemy, s: Scaling): Enemy {

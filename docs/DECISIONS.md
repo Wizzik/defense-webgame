@@ -8,6 +8,22 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   phase 1) wins about 10 % of the runs, for every hero (1-4 of 20 per hero). Every balance change keeps to it;
   the plan of the changes that get there: `docs/superpowers/plans/2026-11-27-petr-batch-2.md`.
 
+## Petr's batch 2 (2026-11-27; plan `docs/superpowers/plans/2026-11-27-petr-batch-2.md`, Petr's words, Claude's numbers)
+
+- **Balance target** (Petr): about 10 % autopilot wins with no gear, every hero
+  (`npm run sim:run -- --hero all --seeds 1-20 --gear none`); the table of every balance step is below.
+- **AoE -50 %** (task 1): `design/scaling.yaml` `abilities.areaScale: 0.5` multiplies `radius`, `hitRadius`, `width`
+  and `endWidth` of every ability (heroes, shared spells, passives, ultimates), applied last on the spread rows and
+  rounded; reach (`range`, `length`, `attackRange`, `bounceRange`) stays. Radius x 0.5 as said (a quarter of the
+  area); gear's `areaSize` multiplies on top. The cone's start half width (60) stays, so cones grow less now.
+  Tests that sit enemies at fixed distances moved them in; the world tests of `sim-run` and the matrix cases
+  `w4-blizzard` (gear full) and `loot-t3` (seed 27) keep their heroes alive long enough; the 4-player lockstep test
+  softens hits to 0.25. Digest `36fd80a2` -> `22ae189d`.
+- Autopilot, world 1 normal, gear none, seeds 1-10 (wins of 10), before -> after AoE -50 %: Stonehorn 10 -> 0,
+  Nightglaive 8 -> 1, Gravecaller 10 -> 10, Serpent Shaman 2 -> 2, Mistwarden 3 -> 1, Sparkshot 8 -> 0, Redcleaver
+  10 -> 9, Tidecaller 10 -> 0; in sum 61 -> 23 of 80. Gravecaller (summons) and Redcleaver (melee) barely feel it;
+  the tuning toward 10 % each comes after the bosses and casters (task 7 of the plan).
+
 ## Random items, stage 3: meta and saves (2026-11-27; the plan's tasks 11-15, the details are Claude's)
 
 - **Item records** (`meta/item-record.ts`): one record per item of the collection, `uid` + rarity + permanent level,

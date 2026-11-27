@@ -14,7 +14,7 @@ describe("nova", () => {
     const data = quietData();
     const p = novaParams(data, "skull-ring");
     const run = abilityRun("gravecaller", { 1: 1 }, data);
-    const e = addEnemy(run, 300, 0);
+    const e = addEnemy(run, 150, 0);
     run.step(NO_INPUT);
     const casts = eventsOf(run, EventKind.Cast);
     expect(casts.length).toBe(1);
@@ -30,12 +30,12 @@ describe("nova", () => {
     const data = quietData();
     data.rules.autocast.novaMinEnemies = 3;
     const run = abilityRun("gravecaller", { 1: 1 }, data);
-    addEnemy(run, 300, 0);
-    addEnemy(run, 0, 300);
+    addEnemy(run, 150, 0);
+    addEnemy(run, 0, 150);
     run.step(NO_INPUT);
     expect(eventsOf(run, EventKind.Cast).length).toBe(0);
     expect(run.abilities[1].cooldown).toBe(0);
-    addEnemy(run, -300, 0);
+    addEnemy(run, -150, 0);
     run.step(NO_INPUT);
     expect(eventsOf(run, EventKind.Cast).length).toBe(1);
   });
@@ -52,6 +52,7 @@ describe("nova", () => {
   it("slows for slowSeconds", () => {
     const data = quietData();
     const p = novaParams(data, "falling-stars");
+    p.radius = p.radius.map(() => 400); // room for the enemy to walk while slowed
     const run = abilityRun("nightglaive", { 0: 1 }, data);
     const e = addEnemy(run, 0, 350);
     run.enemies.stunTicks[e] = 0;
@@ -60,13 +61,13 @@ describe("nova", () => {
     run.step(NO_INPUT);
     expect(eventsOf(run, EventKind.Cast).length).toBe(1);
     const slowSteps = Math.round(p.slowSeconds![0] * 30);
-    for (let k = 0; k < slowSteps; k++) {
-      const before = run.enemies.y[e];
+    const moved = (): number => {
+      const x = run.enemies.x[e];
+      const y = run.enemies.y[e];
       run.step(NO_INPUT);
-      expect(before - run.enemies.y[e]).toBeCloseTo((1 - p.slow![0]) * speed / 30, 9);
-    }
-    const before = run.enemies.y[e];
-    run.step(NO_INPUT);
-    expect(before - run.enemies.y[e]).toBeCloseTo(speed / 30, 9);
+      return Math.sqrt((x - run.enemies.x[e]) * (x - run.enemies.x[e]) + (y - run.enemies.y[e]) * (y - run.enemies.y[e]));
+    };
+    for (let k = 0; k < slowSteps; k++) expect(moved()).toBeCloseTo((1 - p.slow![0]) * speed / 30, 9);
+    expect(moved()).toBeCloseTo(speed / 30, 9);
   });
 });
