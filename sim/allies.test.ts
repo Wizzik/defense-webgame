@@ -143,7 +143,7 @@ describe("serpent wards", () => {
 
   it("full ally store stops spawning", () => {
     const data = quietData();
-    wardDef(data).params.maxAlive = [100, 100, 100, 100, 100];
+    wardDef(data).params.maxAlive = [1000, 1000, 1000, 1000, 1000];
     const run = wardRun(2, data);
     for (let i = 0; i < ALLY_CAPACITY - 1; i++) {
       run.allies.spawn(AllyKind.Ward, WARD, 0, 2000, 2000, 0, 1e9);

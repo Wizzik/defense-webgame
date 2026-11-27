@@ -5,7 +5,11 @@ import { IMAGE_OFFSETS, IMAGE_SPEED_FACTOR, IMAGE_STAND_DISTANCE } from "./abili
 import type { Run } from "./run";
 
 export const AllyKind = { Ward: 0, Image: 1 } as const;
-export const ALLY_CAPACITY = 32;
+/**
+ * Room for 4 players' wards and images: since Petr's batch 3 (wards x5) a Serpent Shaman holds up to 30 totems and
+ * any hero 15 sentry wards, so 4 x 45 plus the images of an ultimate.
+ */
+export const ALLY_CAPACITY = 256;
 
 /**
  * Summoned allies (serpent wards and shadow copies) in typed arrays of fixed capacity.
