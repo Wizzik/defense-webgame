@@ -26,6 +26,8 @@ export class GearScreen {
   private readonly grid: HTMLElement;
   private readonly count: HTMLElement;
   private readonly bank: HTMLElement;
+  /** The sort and salvage buttons, beside the count under the grid. */
+  private readonly tools: HTMLElement;
   private readonly message: HTMLElement;
   private readonly exportButton: HTMLButtonElement;
   private readonly importButton: HTMLButtonElement;
@@ -70,8 +72,10 @@ export class GearScreen {
     this.filters = el("div", "gear-filters", right);
     this.subFilters = el("div", "gear-filters gear-subfilters", right);
     this.grid = el("div", "gear-grid", right);
-    this.count = el("p", "gear-count", right);
+    const tools = el("div", "gear-tools", right);
+    this.count = el("p", "gear-count", tools);
     this.count.id = "gear-count";
+    this.tools = el("span", "gear-tool-buttons", tools);
     this.bank = el("p", "gear-bank", right);
     this.bank.id = "gear-bank";
     const bottom = el("div", "gear-bottom", frame);
@@ -265,13 +269,14 @@ export class GearScreen {
     this.render();
   }
 
-  /** The second row: role and rarity filters, the sort and the salvage mode. */
+  /** The second row of filters (role, rarity), and the sort and salvage buttons under the grid. */
   private renderSubFilters(): void {
     const { lang } = this;
     const row = this.subFilters;
     row.replaceChildren();
-    const button = (label: string, pressed: boolean, onClick: () => void, cls = ""): HTMLButtonElement => {
-      const b = el("button", `gear-filter ${cls}`.trim(), row, label);
+    this.tools.replaceChildren();
+    const button = (label: string, pressed: boolean, onClick: () => void, cls = "", parent = row): HTMLButtonElement => {
+      const b = el("button", `gear-filter ${cls}`.trim(), parent, label);
       b.type = "button";
       b.setAttribute("aria-pressed", String(pressed));
       b.addEventListener("click", onClick);
@@ -295,17 +300,16 @@ export class GearScreen {
       b.title = label;
       b.setAttribute("aria-label", label);
     }
-    el("span", "gear-filter-gap", row);
     const sort = button(t(lang, this.sort === "power" ? "gear.sortPower" : "gear.sortRarity"), this.sort === "power", () => {
       this.sort = this.sort === "power" ? "rarity" : "power";
       this.render();
-    });
+    }, "", this.tools);
     sort.id = "gear-sort";
     const salvage = button(t(lang, "gear.salvage"), this.salvaging, () => {
       this.salvaging = !this.salvaging;
       setText(this.message, this.salvaging ? t(lang, "gear.salvageHint") : "");
       this.render();
-    }, "gear-salvage");
+    }, "gear-salvage", this.tools);
     salvage.id = "gear-salvage";
   }
 }

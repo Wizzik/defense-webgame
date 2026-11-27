@@ -1147,6 +1147,16 @@
 }
 .gear-grid.salvaging .doll-slot:not([data-salvage]) { opacity: 0.35; }
 .gear-grid.salvaging .doll-slot[data-salvage]:hover { box-shadow: 0 0 0 2px #d08a3a; }
+.gear-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.gear-tool-buttons {
+  display: flex;
+  gap: 4px;
+}
 .gear-bank {
   margin: 0;
   font-size: 13px;
@@ -1158,8 +1168,8 @@
   grid-template-columns: repeat(10, 44px);
   gap: 6px;
   align-content: start;
-  min-height: 344px;
-  max-height: 344px;
+  min-height: 268px;
+  max-height: 268px;
   overflow-y: auto;
 }
 .gear-grid .doll-slot {

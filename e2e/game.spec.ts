@@ -873,8 +873,8 @@ test("the gear screen equips an item for one hero; the run starts with it", asyn
   await waitForScreen(page, "playing");
   const worn = await page.evaluate(() => window.__game!.gear.filter((slot) => slot !== null));
   expect(worn).toEqual([
-    { item: "band-of-resolve", base: 1, temp: 0, rolled: false },
-    { item: "oaken-shield", base: 3, temp: 0, rolled: false },
+    { item: "band-of-resolve", base: 1, temp: 0, rolled: false, rows: [] },
+    { item: "oaken-shield", base: 3, temp: 0, rolled: false, rows: [] },
   ]);
 });
 
@@ -903,8 +903,46 @@ test("a save file of version 2 brings a random item; the gear screen lists it an
   await page.locator("#gear-back").click();
   await startRun(page);
   await waitForScreen(page, "playing");
-  expect(await page.evaluate(() => window.__game!.gear.filter((slot) => slot !== null)))
-    .toEqual([{ item: "rolled-iron-helm", base: 3, temp: 0, rolled: true }]);
+  const worn = await page.evaluate(() => window.__game!.gear.filter((slot) => slot !== null));
+  expect(worn).toMatchObject([{ item: "rolled-iron-helm", base: 3, temp: 0, rolled: true }]);
+  expect(worn[0]!.rows.map((row) => [row.stat, row.tier])).toEqual([["armor", 0], ["cooldownSpeed", 2], ["regen", 1], ["thorns", 1]]);
+});
+
+test("the gear screen filters random items, sorts them by power and salvages them into the next run's gold", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&hero=stonehorn");
+  await page.waitForFunction(() => window.__game?.screen === "menu");
+  const uids = await page.evaluate(() => {
+    const debug = window.__game!.debug!;
+    return [debug.grantRolled("head", "mythic", 12), debug.grantRolled("ring1", "rare", 2), debug.grantRolled("feet", "common", 0)];
+  });
+  expect(uids).toEqual([1, 2, 3]);
+  await page.locator("#gear").click();
+  await expect(page.locator("#gear-count")).toHaveText("Collection: 3 of 200");
+  // the rarity filter: only the mythic one
+  await page.locator('#gear-screen .gear-filter[data-rarity="mythic"]').click();
+  await expect(page.locator("#gear-screen .gear-grid .doll-slot:not(.missing)")).toHaveCount(1);
+  await page.locator('#gear-screen .gear-grid [data-uid="1"]').hover();
+  await expect(page.locator("#gear-screen .item-tooltip")).toContainText("Mythic random item");
+  await expect(page.locator("#gear-screen .item-tooltip .tier-mark").first()).toBeVisible();
+  await page.locator('#gear-screen .gear-filter[data-rarity="all"]').click();
+  // the sort by power puts the mythic first
+  await page.locator("#gear-sort").click();
+  await expect(page.locator("#gear-screen .gear-grid .doll-slot").first()).toHaveAttribute("data-uid", "1");
+  // wear the rare ring, then salvage: the worn ring stays, the common boots turn into gold
+  await page.locator("#gear-sort").click();
+  await page.locator('#gear-screen .gear-grid [data-uid="2"]').click();
+  await page.locator("#gear-salvage").click();
+  await page.locator('#gear-screen .gear-grid [data-uid="2"]').click();
+  await expect(page.locator("#gear-message")).toHaveText("Only random items that no hero wears can be salvaged.");
+  await page.locator('#gear-screen .gear-grid [data-uid="3"]').click();
+  await expect(page.locator("#gear-message")).toHaveText("Salvaged for 10 gold.");
+  await expect(page.locator('#gear-screen .gear-grid [data-uid="3"]')).toHaveCount(0);
+  await expect(page.locator("#gear-bank")).toContainText("Bank: 10 gold");
+  await page.locator("#gear-back").click();
+  await startRun(page);
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => window.__game!.gold)).toBeGreaterThanOrEqual(10);
+  expect(await page.evaluate(() => window.__game!.collectionSize)).toBe(2);
 });
 
 test("every hero has its own doll", async ({ page }) => {
