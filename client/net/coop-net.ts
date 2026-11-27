@@ -47,7 +47,11 @@ export interface CoopNetDeps {
   onStop?(): void;
   /** The simulations differ from `step` on; the run stops. */
   onDesync(step: number): void;
+  /** A guest: the host started the next run of the group over the same link (after a run ended). */
+  onRestart?(m: StartMessage): void;
 }
+
+export type StartMessage = Extract<NetMessage, { t: "start" }>;
 
 function percentile(sorted: number[], p: number): number {
   if (sorted.length === 0) return 0;
@@ -125,6 +129,17 @@ export class CoopNet {
     this.deps.onStop?.();
   }
 
+  /**
+   * Stops stepping but keeps the links open: the next run of the group takes them over (its net loop sets their
+   * handlers). `stop()` afterwards does nothing.
+   */
+  detach(): void {
+    if (this.stopped) return;
+    this.stopped = true;
+    this.ticker?.stop();
+    clearInterval(this.pinger);
+  }
+
   private receive(from: number, m: NetMessage): void {
     const { deps } = this;
     if (m.t === "in" || m.t === "hash") {
@@ -151,6 +166,7 @@ export class CoopNet {
       if (everyoneReady(this.readyGuests, this.stats.gone, this.linkIds)) this.start();
     } else if (m.t === "left" && deps.local !== 0 && from === 0) this.leave(m.p, "left");
     else if (m.t === "bye") this.linkClosed(from, "the other player left");
+    else if (m.t === "start" && deps.local !== 0 && from === 0) deps.onRestart?.(m);
   }
 
   /** A link closed: on the host one guest left; on a guest the host left, and with him every other player. */

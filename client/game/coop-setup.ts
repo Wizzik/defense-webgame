@@ -8,8 +8,10 @@ import { fromNet, toNet } from "../net/net-gear";
 import { MAX_PLAYERS, type NetGear, type NetMessage, PROTOCOL_VERSION } from "../net/protocol";
 import { isRoomCode, newRoomCode } from "../net/room-code";
 import type { SignalServer } from "../net/signal";
+import type { StartMessage } from "../net/coop-net";
 import type { CoopLobby } from "../ui/coop-lobby";
 import { type Lang, t } from "../ui/i18n";
+import { restartGroup } from "./coop-restart";
 import { Roster } from "./coop-roster";
 import type { Session } from "./session";
 
@@ -43,7 +45,19 @@ export function joinCodeOf(search: string): string | null {
   return code === null ? null : code.trim().toLowerCase();
 }
 
+/** The group of the co-op run on screen, so it can start again (Petr's batch 3). */
+interface LastRun {
+  links: ReadonlyMap<number, PeerLink>;
+  heroes: readonly string[];
+  gear: readonly NetGear[][];
+  world: number;
+  difficulty: DifficultyId;
+  local: number;
+  onStop?: () => void;
+}
+
 export class CoopSetup {
+  private last: LastRun | null = null;
   /** Host: the open room and who is in it. */
   private room: Room | null = null;
   private roster = new Roster();
@@ -244,10 +258,7 @@ export class CoopSetup {
       return;
     }
     if (m.t !== "start") return;
-    if (
-      m.v !== PROTOCOL_VERSION || m.heroes.length < 2 || m.heroes.length > MAX_PLAYERS || m.you >= m.heroes.length ||
-      !m.heroes.every((h) => this.knownHero(h)) || m.world > deps.data.worlds.length
-    ) {
+    if (!this.validStart(m)) {
       this.fail(t(lang, "coop.version"));
       return;
     }
@@ -260,6 +271,76 @@ export class CoopSetup {
       return;
     }
     if (ticket !== this.attempt || this.peer !== peer) return;
+    const net = this.begin(new Map([[0, peer]]), m.seed, m.world, m.d, m.heroes, m.g, m.you);
+    peer.send({ t: "ready" });
+    net.start();
+  }
+
+  private validStart(m: StartMessage): boolean {
+    return m.v === PROTOCOL_VERSION && m.heroes.length >= 2 && m.heroes.length <= MAX_PLAYERS && m.you < m.heroes.length &&
+      m.heroes.every((h) => this.knownHero(h)) && m.world <= this.deps.data.worlds.length;
+  }
+
+  /** "host" when this window can start the group's next run, "guest" when it waits for the host, else null. */
+  restartRole(): "host" | "guest" | null {
+    const { coop: net, run } = this.deps.session;
+    const last = this.last;
+    // only a run that ended: its windows step no more, so no input or hash of it is still on the way
+    if (!net || !last || !run || (run.state !== "won" && run.state !== "lost")) return null;
+    const gone = net.stats.gone;
+    if (last.local === 0) return [...last.links.keys()].some((p) => !gone.includes(p)) ? "host" : null;
+    return gone.includes(0) ? null : "guest";
+  }
+
+  /** Host, after a run ended: the same group (without the guests who left) plays the same course again. */
+  async restart(): Promise<boolean> {
+    const { deps } = this;
+    const last = this.last;
+    const old = deps.session.coop;
+    if (!last || !old || this.restartRole() !== "host") return false;
+    const hostHero = last.heroes[0] ?? deps.heroId();
+    let group = restartGroup(last.heroes, last.gear, last.links, old.stats.gone, toNet(deps.loadout(hostHero)));
+    if (!group) return false;
+    try {
+      await deps.loadModels(group.heroes, 0, last.world);
+    } catch (error) {
+      deps.showError(error);
+      return false;
+    }
+    // a guest may have left while the models loaded
+    const net = deps.session.coop;
+    if (this.last !== last || !net) return false;
+    group = restartGroup(last.heroes, last.gear, last.links, net.stats.gone, group.gear[0]!);
+    if (!group) return false;
+    net.detach();
+    const seed = Math.floor(Math.random() * 0x1_0000_0000) >>> 0;
+    const { heroes, gear, links } = group;
+    for (const [you, link] of links) {
+      link.send({ t: "start", v: PROTOCOL_VERSION, seed, world: last.world, d: last.difficulty, you, heroes, g: gear });
+    }
+    this.begin(links, seed, last.world, last.difficulty, heroes, gear, 0, last.onStop);
+    return true;
+  }
+
+  /** Guest: the host started the group's next run over the same link. */
+  private async guestRestart(m: StartMessage): Promise<void> {
+    const { deps } = this;
+    const last = this.last;
+    const peer = last?.links.get(0);
+    if (!last || !peer || last.local === 0) return;
+    if (!this.validStart(m)) {
+      deps.onNote(t(deps.lang(), "coop.version"));
+      return;
+    }
+    // the old loop sends nothing more from here; the link waits for the new one
+    deps.session.coop?.detach();
+    try {
+      await deps.loadModels(m.heroes, m.you, m.world);
+    } catch (error) {
+      deps.showError(error);
+      return;
+    }
+    if (this.last !== last || !deps.session.coop) return;
     const net = this.begin(new Map([[0, peer]]), m.seed, m.world, m.d, m.heroes, m.g, m.you);
     peer.send({ t: "ready" });
     net.start();
@@ -282,7 +363,9 @@ export class CoopSetup {
         this.deps.onNote(p === 0 ? t(lang, "coop.hostLeft") : t(lang, "coop.left", { name: this.heroName(heroes[p] ?? "") }));
       },
       onDesync: (step) => this.deps.onNote(t(this.deps.lang(), "coop.desync", { n: step })),
+      onRestart: (m) => void this.guestRestart(m),
     });
+    this.last = { links, heroes, gear, world, difficulty, local, onStop };
     this.room = null;
     this.roster = new Roster();
     this.peer = null;

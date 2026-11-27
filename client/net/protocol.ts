@@ -28,7 +28,7 @@ export type NetMessage =
   | { t: "hello"; v: number; seed: number; hero: string }
   /** Guest to host in the game's lobby: his protocol, hero and permanent gear. */
   | { t: "join"; v: number; hero: string; g: NetGear[] }
-  /** Host to a guest: the run all start; `heroes[p]` and `g[p]` are player p's (the host is 0), `you` the guest's. */
+  /** Host to a guest: the run all start; `heroes[p]` and `g[p]` are player p's (the host is 0), `you` the guest's. It comes again over the same link when the host starts the group's next run after one ended (Again). */
   | { t: "start"; v: number; seed: number; world: number; d: NetDifficulty; you: number; heroes: string[]; g: NetGear[][] }
   /** Host to every guest when the lobby changes: the heroes in player order and the receiver's number (-1: the room is full). */
   | { t: "room"; v: number; you: number; heroes: string[] }

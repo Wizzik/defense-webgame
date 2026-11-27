@@ -30,8 +30,11 @@ export class EndScreen {
     this.again.addEventListener("click", onAgain);
   }
 
-  /** `drops`: what the bosses of the run dropped; the items are kept whatever the result is. */
-  show(run: Run, seed: number, lang: Lang, drops: readonly Drop[] = []): void {
+  /**
+   * `drops`: what the bosses of the run dropped; the items are kept whatever the result is. `coop`: "host" when
+   * Again starts the same group's next run, "guest" when this window waits for the host (the button leaves).
+   */
+  show(run: Run, seed: number, lang: Lang, drops: readonly Drop[] = [], coop: "host" | "guest" | null = null): void {
     const result = run.result ?? "castle";
     this.root.dataset.result = result;
     this.title.textContent = t(lang, RESULT_KEYS[result]);
@@ -60,7 +63,9 @@ export class EndScreen {
         el("p", "end-line end-meter", this.stats, `${row.name}: ${shortNumber(row.damage)} (${Math.round(row.share * 100)} %)`);
       }
     }
-    this.again.textContent = t(lang, "end.again");
+    if (coop === "guest") el("p", "end-line end-wait", this.stats, t(lang, "end.waitHost"));
+    this.root.dataset.coop = coop ?? "";
+    this.again.textContent = t(lang, coop === "guest" ? "end.leave" : coop === "host" ? "end.againGroup" : "end.again");
     this.root.hidden = false;
     this.again.focus();
   }

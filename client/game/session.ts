@@ -101,7 +101,7 @@ export class Session {
     }
   }
 
-  /** Ends a co-op run's net loop (and its link); the session is a one-player session again. */
+  /** Ends a co-op run's net loop (and its link, unless the loop was detached for the next run); the session is a one-player session again. */
   private leaveCoop(): void {
     this.coop?.stop();
     this.coop = null;
@@ -113,7 +113,7 @@ export class Session {
    * Starts a co-op run of `players` in which this window steers `local`; the returned net loop steps it once
    * started (a guest at once, the host when every guest is ready).
    */
-  startCoop(seed: number, players: readonly PlayerOptions[], local: number, net: Pick<CoopNetDeps, "links" | "onLeft" | "onDesync" | "onStop">): CoopNet {
+  startCoop(seed: number, players: readonly PlayerOptions[], local: number, net: Pick<CoopNetDeps, "links" | "onLeft" | "onDesync" | "onStop" | "onRestart">): CoopNet {
     this.leaveCoop();
     this.run = createRun(this.data, { seed, players, world: this.world, difficulty: this.difficulty });
     this.onStart();

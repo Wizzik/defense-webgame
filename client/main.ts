@@ -495,6 +495,9 @@ function createUi(
     },
     onRunStarted: () => {
       coopCourse = false;
+      // the group's next run (Again after a co-op run) comes up over the end screen
+      end.hide();
+      ended = false;
       // the host started while this player looked at his gear: the screen closes, the run comes up
       gearFromLobby = false;
       gearScreen.close();
@@ -619,6 +622,15 @@ function createUi(
   const team = new TeamPanel(root, followCamera.camera);
   new GearPanel(root, { data, session, getLang: () => lang, menuOpen: () => menuOpen });
   const end = new EndScreen(root, () => {
+    // co-op: the host starts the group's next run over the same links (Petr's batch 3); a guest leaves
+    if (coop.restartRole() === "host") {
+      void coop.restart().then((started) => {
+        if (started) return;
+        void useHero(heroId, nextSeed());
+        showMenu();
+      });
+      return;
+    }
     void useHero(heroId, nextSeed());
     showMenu();
   });
@@ -672,7 +684,7 @@ function createUi(
       if ((run.state === "won" || run.state === "lost") && !ended) {
         ended = true;
         progress.record(run.world, run.difficulty, { won: run.state === "won", phase: run.inFinale ? 21 : run.phaseIndex + 1 });
-        end.show(run, session.seed, lang, gear.drops);
+        end.show(run, session.seed, lang, gear.drops, coop.restartRole());
       }
     },
   };

@@ -71,3 +71,21 @@ test("the co-op lobby opens the gear screen and the settings, and comes back", a
   await expect(page.locator("#settings-panel")).toBeHidden();
   await expect(page.locator("#coop-lobby")).toBeVisible();
 });
+
+test("a local co-op run lost with every hero down starts again with the same heroes", async ({ page }) => {
+  await page.goto("/?debug=1&mate=gravecaller&hero=sparkshot&seed=4&lang=en");
+  await page.waitForFunction(() => (window.__game?.frames ?? 0) > 30, undefined, { timeout: 90_000, polling: 250 });
+  await startRun(page);
+  await page.waitForFunction(() => window.__game!.tick > 30, undefined, { timeout: 60_000, polling: 100 });
+  await page.evaluate(() => {
+    window.__game!.debug!.down(0);
+    window.__game!.debug!.down(1);
+  });
+  await page.waitForFunction(() => window.__game!.screen === "lost", undefined, { timeout: 30_000, polling: 100 });
+  await expect(page.locator("#again")).toBeVisible();
+  await page.locator("#again").click();
+  await startRun(page);
+  await page.waitForFunction(() => window.__game!.screen === "playing" && window.__game!.tick > 5, undefined, { timeout: 60_000, polling: 100 });
+  expect(await page.evaluate(() => window.__game!.players.map((p) => p.hero))).toEqual(["sparkshot", "gravecaller"]);
+  expect(await page.evaluate(() => window.__game!.players.every((p) => !p.down))).toBe(true);
+});
