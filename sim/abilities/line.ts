@@ -3,9 +3,9 @@ import { TICKS_PER_SECOND, TICK_SECONDS } from "../constants";
 import type { Run } from "../run";
 import { CastMode, castMode, startCast } from "./slots";
 import type { AbilitySlot } from "./slots";
-import { nearestEnemy } from "./targeting";
+import { densestLine } from "./targeting";
 
-/** Auto-casts a line wave at the nearest enemy and advances the wave in flight. */
+/** Auto-casts a line wave through the densest line of enemies and advances the wave in flight. */
 export function updateLine(run: Run, slot: AbilitySlot, index: number): void {
   const def = slot.def;
   if (def.kind !== "line") return;
@@ -16,19 +16,14 @@ export function updateLine(run: Run, slot: AbilitySlot, index: number): void {
   const e = run.enemies;
 
   if (!slot.active && castMode(run, index) !== CastMode.None) {
-    const best = nearestEnemy(run, hero.x, hero.y, length);
+    // aimed at the densest line of enemies within reach, not where the hero walks (Petr, batch 2)
+    const best = densestLine(run, hero.x, hero.y, length, p.width[L] / 2);
     if (best < 0) return;
     const dx = e.x[best] - hero.x;
     const dy = e.y[best] - hero.y;
-    const sq = dx * dx + dy * dy;
-
-    let dirX = hero.facingX;
-    let dirY = hero.facingY;
-    if (!hero.moving && sq > 0) {
-      const len = Math.sqrt(sq);
-      dirX = dx / len;
-      dirY = dy / len;
-    }
+    const len = Math.sqrt(dx * dx + dy * dy);
+    const dirX = dx / len;
+    const dirY = dy / len;
     slot.originX = hero.x;
     slot.originY = hero.y;
     slot.dirX = dirX;

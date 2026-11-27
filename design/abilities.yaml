@@ -95,12 +95,15 @@
 - id: falling-stars
   source: A01B
   name: { en: Falling Stars, cs: Padající hvězdy }
-  description: { en: "Stars strike around you and slow enemies.", cs: "Kolem tebe dopadají hvězdy a zpomalují nepřátele." }
-  kind: nova
-  targeting: around_self
+  description: { en: "Stars fall on the thickest crowd and slow it.", cs: "Hvězdy dopadnou na největší shluk a zpomalí ho." }
+  # Petr's batch 2, task 7: an area at the thickest crowd within 800 instead of a nova around the hero; a ranged hero
+  # keeps its distance and the nova never had enemies inside it.
+  kind: area
+  targeting: densest_cluster
   params:
     damage: DataA
     radius: area
+    range: { design: [800, 800, 800, 800, 800] }
     slow: DataC
     slowSeconds: duration
 
@@ -239,9 +242,9 @@
 - id: forked-bolt
   source: A064
   name: { en: Forked Bolt, cs: Rozvětvený blesk }
-  description: { en: "Lightning forks through the enemies in front of you.", cs: "Blesk se rozvětví mezi nepřátele před tebou." }
+  description: { en: "Lightning forks through the thickest crowd.", cs: "Blesk se rozvětví největším shlukem nepřátel." }
   kind: cone
-  targeting: nearest
+  targeting: densest_cluster
   params:
     damage: DataA
     maxTargets: DataB
@@ -343,13 +346,17 @@
 - id: rocket-fan
   source: A06L
   name: { en: Rocket Fan, cs: Raketový vějíř }
-  description: { en: "Rockets hit every enemy around you.", cs: "Rakety zasáhnou každého nepřítele kolem tebe." }
-  kind: nova
-  targeting: around_self
+  description: { en: "A fan of rockets aims itself at the thickest crowd.", cs: "Vějíř raket sám zamíří na největší shluk." }
+  # Petr's batch 2, task 7: a cone that aims itself at the thickest crowd instead of a nova around the hero; a
+  # ranged hero keeps its distance and the nova never had enemies inside it.
+  kind: cone
+  targeting: densest_cluster
   params:
     # Tuned in phase 2b-2, task 6 (docs/DECISIONS.md): 400 doubling per level (see review) x 0.48.
     damage: { design: [193, 383, 760, 1520, 3040] }
-    radius: { design: [600, 600, 600, 600, 600] }
+    length: { design: [900, 900, 900, 900, 900] }
+    endWidth: { design: [600, 600, 600, 600, 600] }
+    maxTargets: { design: [16, 16, 16, 16, 16] }
   review:
     jassFunctions:
       - Trig_Fan_of_Rocket_Func002A
@@ -628,10 +635,10 @@
 - id: blade-fan
   source: A0AD
   name: { en: Blade Fan, cs: Vějíř dýk }
-  description: { en: "Throws a fan of blades towards the nearest enemy.", cs: "Vrhne vějíř dýk směrem k nejbližšímu nepříteli." }
+  description: { en: "Throws a fan of blades at the thickest crowd.", cs: "Vrhne vějíř dýk do největšího shluku." }
   kind: cone
   # The cone updater aims at the nearest enemy (like Forked Bolt).
-  targeting: nearest
+  targeting: densest_cluster
   params:
     damage: DataA
     length: DataC

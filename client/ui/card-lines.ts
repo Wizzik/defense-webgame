@@ -110,10 +110,13 @@ export function cardLines(run: Run, card: Card): CardLine[] {
           to: percent(base / b.attackIntervalSeconds),
         },
       ];
-    case "int":
+    case "int": {
+      // the hero's balance power (heroes.yaml) is not the player's bonus: the card shows the bonus from Int and gear
+      const power = run.hero.def.power ?? 1;
       return [
-        { label: "stat.spellPower", from: percent(a.spellPower), to: percent(b.spellPower) },
+        { label: "stat.spellPower", from: percent(a.spellPower / power), to: percent(b.spellPower / power) },
         { label: "stat.cooldownScale", from: percent(a.cooldownScale), to: percent(b.cooldownScale) },
       ];
+    }
   }
 }

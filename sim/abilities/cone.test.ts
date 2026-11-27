@@ -39,12 +39,15 @@ describe("cone", () => {
 
   it("misses enemies behind or outside the cone", () => {
     const { run } = coneRun();
-    const lead = addEnemy(run, 0, 50);
+    // two in a row ahead: the cone aims at them, the densest line (Petr, batch 2)
+    const lead = addEnemy(run, 0, 300);
+    const second = addEnemy(run, 0, 340);
     const behind = addEnemy(run, 0, -200);
     const outside = addEnemy(run, 400, 500);
     run.step(NO_INPUT);
     const hits = hitSlots(run);
     expect(hits).toContain(lead);
+    expect(hits).toContain(second);
     expect(hits).not.toContain(behind);
     expect(hits).not.toContain(outside);
   });

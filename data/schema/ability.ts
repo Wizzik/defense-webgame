@@ -85,7 +85,7 @@ export const AbilitySchema = z
         ctx.addIssue({ code: "custom", path: ["bounces"], message: `bounces must be integers 0-${MAX_BOUNCES}` });
       }
     })),
-    variant("area", params(["damage", "radius", "range"], ["healPerHit"])),
+    variant("area", params(["damage", "radius", "range"], ["healPerHit", "slow", "slowSeconds"])),
     variant("line", params(["damage", "length", "width"], ["stunSeconds", "waveSpeed"])),
     variant("nova", params(["damage", "radius"], ["slow", "slowSeconds"])),
     variant("cone", params(["damage", "length", "endWidth", "maxTargets"])),

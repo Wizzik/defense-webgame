@@ -119,9 +119,10 @@ describe("hero combat", () => {
       updateHeroCombat(run);
       seen.push(run.events.value[hits(run)[0]]);
     }
+    const power = run.hero.def.power ?? 1; // the hero's balance multiplier (heroes.yaml, batch 2)
     for (const v of seen) {
-      expect(v).toBeGreaterThanOrEqual(37 * (1 - REDUCTION) - 1e-9);
-      expect(v).toBeLessThanOrEqual(47 * (1 - REDUCTION) + 1e-9);
+      expect(v).toBeGreaterThanOrEqual(Math.round(37 * power) * (1 - REDUCTION) - 1e-9);
+      expect(v).toBeLessThanOrEqual(Math.round(47 * power) * (1 - REDUCTION) + 1e-9);
     }
     expect(Math.min(...seen)).toBeLessThan(Math.max(...seen));
     expect(run.stats.damageDealt).toBeCloseTo(seen.reduce((a, b) => a + b, 0), 6);

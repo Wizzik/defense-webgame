@@ -266,11 +266,11 @@
       "cs": "Padající hvězdy"
     },
     "description": {
-      "en": "Stars strike around you and slow enemies.",
-      "cs": "Kolem tebe dopadají hvězdy a zpomalují nepřátele."
+      "en": "Stars fall on the thickest crowd and slow it.",
+      "cs": "Hvězdy dopadnou na největší shluk a zpomalí ho."
     },
-    "kind": "nova",
-    "targeting": "around_self",
+    "kind": "area",
+    "targeting": "densest_cluster",
     "levels": 10,
     "cooldown": [
       2.64,
@@ -308,6 +308,18 @@
         278,
         289,
         300
+      ],
+      "range": [
+        800,
+        800,
+        800,
+        800,
+        800,
+        800,
+        800,
+        800,
+        800,
+        800
       ],
       "slow": [
         0.5,
@@ -774,11 +786,11 @@
       "cs": "Rozvětvený blesk"
     },
     "description": {
-      "en": "Lightning forks through the enemies in front of you.",
-      "cs": "Blesk se rozvětví mezi nepřátele před tebou."
+      "en": "Lightning forks through the thickest crowd.",
+      "cs": "Blesk se rozvětví největším shlukem nepřátel."
     },
     "kind": "cone",
-    "targeting": "nearest",
+    "targeting": "densest_cluster",
     "levels": 10,
     "cooldown": [
       1.98,
@@ -1230,11 +1242,11 @@
       "cs": "Raketový vějíř"
     },
     "description": {
-      "en": "Rockets hit every enemy around you.",
-      "cs": "Rakety zasáhnou každého nepřítele kolem tebe."
+      "en": "A fan of rockets aims itself at the thickest crowd.",
+      "cs": "Vějíř raket sám zamíří na největší shluk."
     },
-    "kind": "nova",
-    "targeting": "around_self",
+    "kind": "cone",
+    "targeting": "densest_cluster",
     "levels": 10,
     "cooldown": [
       3.3,
@@ -1261,7 +1273,19 @@
         200,
         230
       ],
-      "radius": [
+      "length": [
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900,
+        900
+      ],
+      "endWidth": [
         300,
         300,
         300,
@@ -1272,6 +1296,18 @@
         300,
         300,
         300
+      ],
+      "maxTargets": [
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16
       ]
     }
   },
@@ -2258,11 +2294,11 @@
       "cs": "Vějíř dýk"
     },
     "description": {
-      "en": "Throws a fan of blades towards the nearest enemy.",
-      "cs": "Vrhne vějíř dýk směrem k nejbližšímu nepříteli."
+      "en": "Throws a fan of blades at the thickest crowd.",
+      "cs": "Vrhne vějíř dýk do největšího shluku."
     },
     "kind": "cone",
-    "targeting": "nearest",
+    "targeting": "densest_cluster",
     "levels": 10,
     "cooldown": [
       3.3,

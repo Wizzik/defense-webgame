@@ -76,25 +76,25 @@ describe("line ability", () => {
     expect(run.abilities[0].active).toBe(false);
   });
 
-  it("fires along the move direction while moving", () => {
-    const run = newRun();
-    const e = add(run, 500, 0);
-    run.step({ ...NO_INPUT, moveY: 1 });
-    const c = ofKind(run, EventKind.Cast);
-    expect(c.length).toBe(1);
-    expect(run.events.u[c[0]]).toBe(0);
-    expect(run.events.v[c[0]]).toBe(1);
-    expect(run.enemies.hp[e]).toBe(100000);
-  });
-
-  it("targets the nearest enemy when standing", () => {
+  it("aims at the nearest enemy when every direction holds one, also while moving", () => {
     const run = newRun();
     add(run, 0, 900);
     add(run, 400, 0);
+    run.step({ ...NO_INPUT, moveY: 1 });
+    const c = ofKind(run, EventKind.Cast);
+    // the hero stepped up before the cast: the wave still goes to the enemy on the right, not up where it walks
+    expect(run.events.u[c[0]]).toBeGreaterThan(0.99);
+    expect(run.events.v[c[0]]).toBeLessThan(0);
+  });
+
+  it("aims at five enemies side by side, not at one alone nearer (Petr, batch 2)", () => {
+    const run = newRun();
+    add(run, 300, 0);
+    for (let k = 0; k < 5; k++) add(run, -40 + k * 20, 800 + k * 30);
     run.step(NO_INPUT);
     const c = ofKind(run, EventKind.Cast);
-    expect(run.events.u[c[0]]).toBeCloseTo(1, 9);
-    expect(run.events.v[c[0]]).toBeCloseTo(0, 9);
+    expect(c.length).toBe(1);
+    expect(run.events.v[c[0]]).toBeGreaterThan(0.99);
   });
 
   it("hits each enemy on the line once and stuns it", () => {
@@ -136,7 +136,7 @@ describe("line ability", () => {
         expect(run.events.u[k]).toBe(1);
       }
     }
-    expect(dmg).toBeCloseTo(620, 9);
+    expect(dmg).toBeCloseTo(620 * (run.hero.def.power ?? 1), 9);
   });
 
   it("front travels at waveSpeed", () => {

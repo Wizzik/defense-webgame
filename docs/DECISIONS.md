@@ -82,7 +82,26 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   125 (data-build: `attack.kind`, `attack.range`); its `damageTaken` 0.75 went.
 - **Hero power** (balance knob): `power` in heroes.yaml multiplies the base attack and the spell power (damage and
   heals of every ability and summon); `damageTaken` may go up to 2. Four rounds against the old standing bot were
-  thrown away when the bot changed; no hero has power now.
+  thrown away when the bot changed.
+- **Spells aim themselves at the thickest crowd** (Petr, 2026-11-27: "line spells must target the biggest nearest
+  pack: five enemies side by side beat one alone"; "never at the enemies in front of you, that does not work while we
+  run, it must aim itself"): a line spell (`sim/abilities/line.ts`) and a cone (`cone.ts`) no longer fly where the hero
+  walks or at the nearest enemy; they aim at the enemy whose direction puts the most enemies inside the line of the
+  spell's length and half width (`densestLine`, `sim/abilities/targeting.ts`; a cone counts with its mean half width;
+  ties: the nearer, then the lower slot). The autopilot no longer stops to aim a line.
+- **Novas around the hero become aimed spells** (task 7, Petr: "maybe the type of the heroes' spells must change"): a
+  ranged hero keeps its distance, so a nova around it never had an enemy inside. Falling Stars (Nightglaive) is an
+  `area` at the thickest crowd within 800 that slows (area takes `slow`, `slowSeconds`); Rocket Fan (Sparkshot) is a
+  cone of length 900, end width 300 (600 before areaScale) and 16 targets that aims itself. Forked Bolt and Blade Fan
+  (cones) aim at the crowd too; their texts and the three `targeting` fields read `densest_cluster`.
+- **Hero power** (task 7): Stonehorn 0.42, Nightglaive 0.7, Gravecaller 0.33, Serpent Shaman 0.38, Mistwarden 1,
+  Sparkshot 0.85, Redcleaver 0.39, Tidecaller 0.6. The Int card shows the spell power without the hero's power (the
+  player's bonus, `client/ui/card-lines.ts`); spell values in the tooltips include it (what the spell really deals).
+- Autopilot, world 1 normal, gear none, seeds 1-20 (wins of 20): kiting bot -> aimed lines and cones, Falling Stars
+  and Rocket Fan, no power -> with power. Stonehorn 0 -> 18 -> 2; Nightglaive 0 -> 18 -> 4; Gravecaller 20 -> 20 -> 4;
+  Serpent Shaman 20 -> 19 -> 2; Mistwarden 1 -> 3 -> 3; Sparkshot 1 -> 7 -> 2; Redcleaver 9 -> 19 -> 2; Tidecaller
+  1 -> 18 -> 4. In sum 23 of 160 (14 %). Most losses come in the first 4 minutes (the run is won or lost in phases
+  1-4); a win is a cliff in power: a step of 0.05 moves a hero by 3-6 wins, so 20 seeds give about +-2.
 - Autopilot, gear none, seeds 1-20, with casters, before -> after the kiting bot (no power): Stonehorn 0 -> 0,
   Nightglaive 0 -> 0, Gravecaller 18 -> 20, Serpent Shaman 20 -> 20, Mistwarden 1 -> 1, Sparkshot 0 -> 1,
   Redcleaver 9 -> 9, Tidecaller 1 -> 1. The ranged heroes die in 0-2 min: their early damage is too low (task 7).
@@ -632,7 +651,7 @@ Spec: `docs/superpowers/specs/2026-11-18-shared-spells-passives-design.md`. Plan
 | sentry-ward | summon, densest_cluster | AUcb (Carrion Beetles) | cooldown 10 | 1-2 wards, at most 1-3 alive, damage 40-80, 0.5 s, 30 s |
 | second-wind | heal, self | A017 (Healing Wave) | cooldown 15 | heal 600-3000 |
 
-  Blade Fan and Sentry Ward use the targeting their updaters read (`cone` aims at the nearest enemy, `summon` wards go to the densest cluster), not the spec's `move_direction` and `around_self`. At level 5 a shared spell is about a signature spell of its kind at level 3-4.
+  Blade Fan and Sentry Ward use the targeting their updaters read (`cone` aims at the nearest enemy (since batch 2 at the thickest crowd), `summon` wards go to the densest cluster), not the spec's `move_direction` and `around_self`. At level 5 a shared spell is about a signature spell of its kind at level 3-4.
 - **Passives (design only, level 1 -> 5):** Might attack damage +8 -> +40 %; Arcane Focus spell power +8 -> +40 %; Haste cooldown speed +5 -> +25 %; Vigor max hp +8 -> +40 % and regen +1 -> +5 /s; Fleet Foot move speed +4 -> +20 % and attack speed +6 -> +30 %; Fortune gold +8 -> +40 % and pickup range +40 -> +200. The spec's values; no change in the tuning.
 - **Cards.** Each card of an offer draws a group by `rules.progression.cardWeights` (signature 4, shared upgrade 3, new spell 2, new passive 2; only groups with cards left), then a card of the group uniformly; the card leaves the group. Attribute cards (STR, AGI, INT without repeats) fill the offer only when all groups are empty. Signature 6 was tried: no hero gained, Tidecaller and Stonehorn lost wins.
 - **Autopilot.** Ultimate, signature (upgrade or learn), new shared spell, shared upgrade, new passive, passive upgrade, attribute; the earlier card on a tie. The idle player of the balance tests and `sim:run --idle` takes an attribute, else the card the autopilot wants least (attribute cards are rare now).
@@ -814,7 +833,7 @@ Open after the tuning:
 - 2026-11-11 (phase 2b-2, tuning result of task 6, not Petr's choice):
   - targets per hero over seeds 1–5: the autopilot wins 2–4, an idle run loses within 2:30, the hero drops below 50 % HP in at least 4 runs, the castle of the won runs ends below 60 % on average, the average level is 10–18 and 700–1200 enemies come;
   - what the measurements showed first: Musketeers dealt most of the damage to the hero and the castle (they stand off and fire all the time), and the autopilot lost half of its runs around 2:30 for two reasons of its own: it took a random card at a level-up (often an attribute instead of a spell) and it retreated as far as the spawn ring;
-  - autopilot (`sim/bot.ts`): it defends the castle (the enemy nearest to the castle within 1400, else the enemy nearest to the hero within 400, else its post 400 from the castle); **it takes the first spell card of an offer before an attribute**; it never goes farther than 2150 from its post; below 30 % HP it keeps 350 from every enemy; it stands still for a step to aim a line spell that is ready (a line flies where the hero walks); it sidesteps a charge that winds up within 700 and dashes when it can;
+  - autopilot (`sim/bot.ts`): it defends the castle (the enemy nearest to the castle within 1400, else the enemy nearest to the hero within 400, else its post 400 from the castle); **it takes the first spell card of an offer before an attribute**; it never goes farther than 2150 from its post; below 30 % HP it keeps 350 from every enemy; it sidesteps a charge that winds up within 700 and dashes when it can;
   - enemy numbers: damage multipliers Shieldbearer 0.5, Scout 0.3, Musketeer 0.32, Chaplain 0.65, Lancer 0.5, Captain 0.75 (of the map's damage); charge multiplier 1.5 (plan: 2); `scaling.yaml` enemy HP 0.35 (was 0.3) and speed 1.32 (was 1.22);
   - rules: castle 14000 HP (was 12000) with 1 % regeneration a minute (was 2); `xpFirst` 10 and `xpStep` 8 (was 7 and 4.5); packs 6–10, 8–11, 8–12 × 2, 10–14 × 2, 9–13 × 2 and 11–15 × 3; `hunterShare` as in the plan;
   - new heroes' spells against the first numbers of task 5: Wisp Ward 93 damage, Wailing Wave 933 / 4660, Mist Surge ticks × 0.6, Rocket Fan and Beam Swarm × 0.48, Cleaver Toss and Rot Field × 0.41, Riptide and Drowned Lake × 0.6, Crushing Wave level 1 400 (map 500);

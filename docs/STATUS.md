@@ -39,21 +39,13 @@ section Petr's batch 2. `npm run check` passes on every commit of the branch.
     run to the emptiest side (every enemy within 1000, weight 1/d^2) and sideways towards the castle, dash out of a
     crowd of 4 within 220; melee heroes (Stonehorn, Redcleaver) never back off and take half (`damageTaken` 0.5);
     Serpent Shaman shoots (`attack: { kind: ranged, range: 1200 }` in heroes.yaml, data-build override);
-  - balance knob `power` per hero (heroes.yaml, multiplies the base attack and spell power; no hero uses it yet).
-  - Digest now `b4e96637`.
+  - balance knob `power` per hero (heroes.yaml, multiplies the base attack and spell power);
+  - task 7, balance: line spells and cones aim themselves at the thickest crowd (Petr), Falling Stars is an area at the
+    crowd, Rocket Fan a self-aimed cone, per-hero `power`; autopilot with no gear, seeds 1-20: 2-4 wins of 20 for
+    every hero (23 of 160); table in DECISIONS;
+  - Digest now `fa569e92`.
 - **Open, in this order:**
-  1. task 7, balance toward about 10 % wins per hero (`--gear none`, seeds 1-20, world 1 normal) with the kiting
-     autopilot. Table with the kiting bot and no power (k0): Stonehorn 0, Nightglaive 0, Sparkshot 1, Mistwarden 1,
-     Tidecaller 1, Redcleaver 9, Gravecaller 20, Serpent Shaman 20 of 20. The ranged heroes die in 0-2 min at level
-     3-8: with no gear they barely hurt phase 1 enemies (Tidecaller, seed 1: 14 kills in 18 s), kiting alone cannot
-     save them. Petr: "maybe the damage or the type of the heroes' spells must change". Plan: first per-hero `power`
-     (strong ones down, weak ones up), then targeted spell changes where the halved AoE leaves a hero with no way to
-     clear a phase 1 pack (level 1 damage, radius or targets in `design/abilities.yaml`, json by the data-build rule,
-     skill `data-change`). Runs in parallel: the scratchpad helpers of the old session are gone; run
-     `npx tsx tools/sim-run/run.ts --hero <id> --seeds 1-20 --gear none --quiet` for 4 heroes at once (4 cores).
-     Each balance commit: `npm run sim:digest` into `client/determinism/digest.test.ts`; record the before/after
-     tables in DECISIONS (section Petr's batch 2).
-  2. e2e `webgl2-fallback`, `npm run shots` for the new bosses (`?debug=1&world=2&phase=6`) and casters
+  1. e2e `webgl2-fallback`, `npm run shots` for the new bosses (`?debug=1&world=2&phase=6`) and casters
      (`?debug=1&phase=3`), docs (STATUS: what Petr checks, with links), the PR #43 description (base is now `main`;
      its balance table has Sparkshot "0 -> 1", it was before 8, after 1; add tasks 2, 5b, 6, the kiting bot, the
      ranged shaman, the island-gap fix) and subscribe to its activity (PR #42 is merged, nobody else watches #43).

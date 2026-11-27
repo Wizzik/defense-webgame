@@ -152,15 +152,11 @@ describe("autopilot", () => {
     expect(move(run)).toMatchObject({ moveX: 1 });
   });
 
-  it("the bot stands still to aim a line spell that is ready", () => {
+  it("the bot walks on when a line spell is ready: the line aims itself (Petr, batch 2)", () => {
     const lineHero = gameData().heroes.find((h) => gameData().abilities.find((a) => a.id === h.signatureAbilities[0])!.kind === "line")!;
     const run = postRun(lineHero.id);
-    // a threat to walk to, inside the length of the line
     put(run, 0, run.hero.x + 700, run.hero.y);
     run.abilities[0].cooldown = 0;
-    expect(move(run)).toMatchObject({ moveX: 0, moveY: 0 });
-    // while the spell cools down the bot walks
-    run.abilities[0].cooldown = 30;
     expect(move(run)).toMatchObject({ moveX: 1, moveY: 0 });
   });
 

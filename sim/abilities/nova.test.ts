@@ -49,9 +49,11 @@ describe("nova", () => {
     expect(run.events.a[casts[0]]).toBe(3);
   });
 
-  it("slows for slowSeconds", () => {
+  it("falling stars (an area since batch 2) slow for slowSeconds", () => {
     const data = quietData();
-    const p = novaParams(data, "falling-stars");
+    const ab = data.abilities.find((a) => a.id === "falling-stars");
+    if (!ab || ab.kind !== "area") throw new Error("test setup");
+    const p = ab.params;
     p.radius = p.radius.map(() => 400); // room for the enemy to walk while slowed
     const run = abilityRun("nightglaive", { 0: 1 }, data);
     const e = addEnemy(run, 0, 350);

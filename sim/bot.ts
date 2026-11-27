@@ -429,14 +429,6 @@ export function botInput(run: Run, out: TickInput): TickInput {
       }
     }
   }
-  if (near >= 0) {
-    // A line spell flies where the hero walks, or at the nearest enemy when it stands: stand still to aim it.
-    for (let s = 0; s < run.abilities.length; s++) {
-      const slot = run.abilities[s];
-      if (slot.level < 1 || slot.cooldown > 1 || slot.active || slot.def.kind !== "line") continue;
-      if (nearDist <= slot.def.params.length[slot.level - 1]) return out;
-    }
-  }
   if (routed) {
     out.moveX = axis(dx);
     out.moveY = axis(dy);
