@@ -5,7 +5,7 @@ Decisions that still apply. Check here before you change a rule. Newest first in
 ## Petr's solo playtest batch (2026-11-26; Petr's wishes, the numbers are Claude's unless Petr is named)
 
 Petr could not win alone: enemies from the far side walked to the castle while he fought on the other. Spec of the
-random items that come next: `docs/superpowers/specs/2026-11-26-random-items-design.md` (waits for Petr).
+random items that come next: `docs/superpowers/specs/2026-11-26-random-items-design.md` (approved 2026-11-27).
 
 - **Defence circle** (Petr: 1000). `rules.enemies.heroDefendRange` 1000: while the target hero stands within it of
   the castle, every enemy goes for him (`sim/enemy-ai.ts`); beyond it the siegers turn to the castle again. The

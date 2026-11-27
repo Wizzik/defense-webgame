@@ -7,7 +7,7 @@ Updated 2026-11-26 (Petr's solo playtest batch, first work in Claude Code). Read
 1. **Solo playtest batch** (this branch, below): defence circle, level scaling, ranged reach, Redcleaver, ultimates,
    wards, 10 spell levels, tooltip, dash charges, blink (F), weather fixed to the map. Waits for Petr's playtest.
 2. **Random items** like Diablo 2 / Project Diablo 2 with game-icons.net pictures: the spec
-   `docs/superpowers/specs/2026-11-26-random-items-design.md` waits for Petr's answers (its section 9).
+   `docs/superpowers/specs/2026-11-26-random-items-design.md`, approved by Petr on 2026-11-27 (answers in its section 9); next: the plan and the build.
 3. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
 
 ## Solo playtest batch (branch `claude/gifted-gauss-k6wag4`, 2026-11-26)

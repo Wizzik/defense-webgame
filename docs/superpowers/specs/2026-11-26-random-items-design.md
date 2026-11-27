@@ -4,7 +4,7 @@ Petr (2026-11-26): instead of more hand-made items, a random generator like Diab
 of items is unlimited; the rarity gives the number of bonuses; items for casters (INT), tanks (STR) and assassins (AGI);
 better pictures from free icons (game-icons.net, CC BY 3.0, chosen by Petr).
 
-Status: **proposal, waits for Petr's yes** on the questions in section 9.
+Status: **approved by Petr (2026-11-27)** with the answers in section 9.
 
 ## 1. What stays
 
@@ -47,7 +47,8 @@ An item is no longer an index into `data.items` but a small record:
 Every affix has role tags; the base's flavour and the hero both weigh the draw:
 
 - **STR (tank):** str, hp, armor, regen, lifesteal, damage taken -x % (new), thorns (new: x % of melee damage back).
-- **AGI (assassin):** agi, attack speed, damage, move speed, crit chance and crit damage (new), dodge (new).
+- **AGI (assassin):** agi, attack speed, damage, move speed, crit chance and crit damage (new), dodge (new),
+  lifesteal and spell lifesteal (Petr 2026-11-27: an assassin sustains by both).
 - **INT (caster):** int, spell power, cooldown speed (new), ultimate cooldown (new), area size +x % (new),
   spell lifesteal (new).
 - **Any:** magnet, gold find, magic find.
@@ -98,10 +99,10 @@ its own point price added to the budget table.
 5. Icons: manifest, fetch, build, licences.
 6. Balance: `sim:chests` and `sim:run --gear` with random loadouts.
 
-## 9. Questions for Petr
+## 9. Petr's answers (2026-11-27)
 
-1. Keep the 70 items as rarer named items (recommended), or drop them?
-2. What happens to items the player does not want: salvage into gold for the next run, into "shards" to reroll one
-   affix of another item (PD2's crafting), or only delete?
-3. Smart loot share 60 % for the hero's attribute: fine, or should drops be fully random?
-4. Collection limit 200 items: fine?
+1. The 70 current items stay as rarer **named items**.
+2. Unwanted items are **salvaged for gold** (gold for the next run's chests).
+3. **Smart loot 60 %** of the affixes from the hero's primary attribute's pool.
+4. The collection holds at most **200** items.
+5. AGI affixes may also roll **lifesteal and spell lifesteal** (section 3).
