@@ -28,13 +28,14 @@ export const CHASE_DISTANCE = 400;
 export const LEASH_DISTANCE = 2150;
 /**
  * A ranged hero kites like a player (Petr, batch 2): it keeps the nearest enemy at least KITE_KEEP_SHARE of its attack
- * range away (at most KITE_KEEP_MAX), walking away from the weight of every enemy within KITE_REACH beyond that and a
+ * range away (at most KITE_KEEP_MAX), walking away from the weight of every enemy within KITE_REACH and a
  * little sideways (KITE_SIDE, the side towards the castle), so it circles instead of backing into a corner. With
  * KITE_CROWD enemies within KITE_CROWD_RADIUS it dashes out. Below LOW_HP it keeps LOW_HP_DISTANCE more.
  */
 const KITE_KEEP_SHARE = 0.6;
 const KITE_KEEP_MAX = 450;
-const KITE_REACH = 200;
+/** Every enemy within this distance pushes the kite, by 1 / distance squared: the hero runs to the emptiest side. */
+const KITE_REACH = 1000;
 const KITE_SIDE = 0.6;
 const KITE_CROWD = 4;
 const KITE_CROWD_RADIUS = 220;
@@ -447,13 +448,13 @@ export function botInput(run: Run, out: TickInput): TickInput {
 }
 
 /**
- * The kite of a ranged hero: away from the weight of the enemies within `keep` + KITE_REACH (nearer weighs more), plus a
+ * The kite of a ranged hero: away from the weight of the enemies within KITE_REACH (1 / distance squared), plus a
  * sideways part towards the castle; near the edge of the defence circle the outward part goes. `ox`, `oy` is the
  * hero's offset from the castle, `outside` its length, `edge` the circle the bot keeps inside. Does not allocate.
  */
 function kite(run: Run, out: TickInput, keep: number, ox: number, oy: number, outside: number, edge: number): void {
   const { hero, enemies } = run;
-  const reach = keep + KITE_REACH;
+  const reach = KITE_REACH;
   let px = 0;
   let py = 0;
   let crowd = 0;
@@ -466,7 +467,7 @@ function kite(run: Run, out: TickInput, keep: number, ox: number, oy: number, ou
     const d = Math.sqrt(sq);
     if (d < KITE_CROWD_RADIUS) crowd++;
     if (d < 1e-6) continue;
-    const w = (reach - d) / (reach * d);
+    const w = 1 / (sq * d);
     px += ex * w;
     py += ey * w;
   }
