@@ -961,13 +961,18 @@ test("orbs lie on the map; a berserk orb shows in the HUD; a heart heals the hur
   // let the hunters hurt the hero, then step away from them and drop a heart
   const full = await page.evaluate(() => window.__game!.heroHp);
   await page.evaluate(() => window.__game!.debug!.spawnEach());
-  for (let i = 0; i < 300; i++) {
-    const { hp, screen } = await page.evaluate(() => ({ hp: window.__game!.heroHp, screen: window.__game!.screen }));
-    if (screen === "levelUp" || screen === "chest") await pickCard(page);
-    else if (hp < full - 120) break;
-    await page.waitForTimeout(100);
+  // the hero steps away in the same frame its hp drops (a weak hero with no gear dies fast on a slow renderer)
+  for (let i = 0; i < 30; i++) {
+    const hurt = await page.waitForFunction((limit) => {
+      const g = window.__game!;
+      if (g.screen === "levelUp" || g.screen === "chest") return "card";
+      if (g.heroHp >= limit) return false;
+      g.debug!.teleport(2600, 2200);
+      return "hurt";
+    }, full - 120, { polling: "raf", timeout: 30_000 }).then((h) => h.jsonValue());
+    if (hurt === "hurt") break;
+    await pickCard(page);
   }
-  await page.evaluate(() => window.__game!.debug!.teleport(2600, 2200));
   await page.waitForTimeout(300);
   const before = await page.evaluate(() => window.__game!.heroHp);
   expect(before).toBeLessThan(full - 60);
