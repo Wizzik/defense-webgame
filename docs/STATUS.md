@@ -14,8 +14,12 @@ Updated 2026-11-27 (random items, stages 1-4 and the damage meter; Petr's batch 
    about 10 % autopilot wins with no gear). After stage 3 of random items, before its stage 4.
 4. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
 5. **English only for now** (Petr, 2026-11-27): new texts need no Czech (DECISIONS, English only).
-6. **Random items stage 4 and the damage meter** (branch `claude/random-items-client`, done, below). Next: random
-   items stage 5 (balance with rolled gear presets), then stage 6 (icons).
+6. **Random items stage 4 and the damage meter** (PR #45, merged 2026-11-27, below).
+7. **Petr's batch 3** (2026-11-27, after the 3-player playtest), NEXT: plan
+   `docs/superpowers/plans/2026-11-27-petr-batch-3.md`: co-op restart when everyone is down, no white hit flash,
+   weaker co-op scaling per player, spell levels 6 (ultimates 3, passives 5) with STR / AGI / INT cards after,
+   about level 60-70 at the end of a run. Straight to `main` (Petr). Then random items stage 5 (balance), stage 6
+   (icons).
 
 ## Random items stage 4 (client) and the damage meter (branch `claude/random-items-client`, DONE, 2026-11-27)
 
