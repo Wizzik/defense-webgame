@@ -178,8 +178,8 @@ function bakeClips(
 }
 
 /**
- * Shader position for the crowd. `anim` = (clip startFrame, clip frames, start time s, last hit
- * time s); the frame is `floor((time - start) * fps)` looped over the clip. The texel follows
+ * Shader position for the crowd. `anim` = (clip startFrame, clip frames, start time s, unused
+ * 0); the frame is `floor((time - start) * fps)` looped over the clip. The texel follows
  * `vatTexel` with the `vertexIndex` builtin. The instance matrix is applied here: positionNode
  * runs after three.js has applied it to the geometry position, so it has to apply the matrix to
  * the baked position itself; normals keep the default pose and get the instance rotation from

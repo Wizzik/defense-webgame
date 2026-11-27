@@ -1,4 +1,4 @@
-import { attribute, float, max, mix, step, texture, uniform, uv, vec3, vertexColor } from "three/tsl";
+import { attribute, max, mix, texture, uniform, uv, vec3, vertexColor } from "three/tsl";
 import {
   DynamicDrawUsage,
   Group,
@@ -21,16 +21,12 @@ export const IDLE_CLIP = "Idle";
 
 /** Rate the VAT is baked at; the game bakes and plays at this rate. */
 export const VAT_FPS = 30;
-/** Seconds after a hit during which an enemy flashes white. */
-const FLASH_SECONDS = 0.12;
 /** How far the model's own colours are pulled toward the type colour. */
 const BODY_TINT = 0.45;
 /** Share of the type colour that the model also emits, so the type reads in the dark arena. */
 const GLOW = 0.12;
 /** A lusted enemy (bloodlust) glows in this red the whole time the effect runs. */
 const LUST_GLOW = vec3(0.55, 0.06, 0.04);
-/** Marks "never hit" in `anim.w`, far enough in the past for the flash window. */
-const NEVER = -1000;
 
 function requireClip(vat: BakedVat, name: string): VatClip {
   const clip = vat.clips[name];
@@ -105,10 +101,8 @@ export class EnemyCrowd implements RunView {
     const base = vat.map ? texture(vat.map, uv()).rgb : vertexColor();
     material.colorNode = base.mul(mix(vec3(1, 1, 1), tint.div(peak), BODY_TINT));
     material.positionNode = vatPositionNode(vat, animNode, this.time, VAT_FPS);
-    // glow in the type colour (red while lusted), white for a moment after a hit
-    const sinceHit = this.time.sub(animNode.w);
-    const glow = mix(tint.mul(GLOW), LUST_GLOW, attribute("lust", "float"));
-    material.emissiveNode = mix(glow, vec3(1, 1, 1), float(1).sub(step(FLASH_SECONDS, sinceHit)));
+    // glow in the type colour (red while lusted); no flash on a hit (Petr, 2026-11-27)
+    material.emissiveNode = mix(tint.mul(GLOW), LUST_GLOW, attribute("lust", "float"));
 
     const mesh = new InstancedMesh(geometry, material, capacity);
     mesh.instanceMatrix.setUsage(DynamicDrawUsage);
@@ -182,7 +176,7 @@ export class EnemyCrowd implements RunView {
       anim[a] = clip.startFrame;
       anim[a + 1] = clip.frames;
       anim[a + 2] = start;
-      anim[a + 3] = enemies.lastHitTick[slot] < 0 ? NEVER : enemies.lastHitTick[slot] * seconds;
+      anim[a + 3] = 0;
       lust[n] = enemies.bloodlustTicks[slot] > 0 ? 1 : 0;
     }
     for (let type = 0; type < types.length; type++) {
