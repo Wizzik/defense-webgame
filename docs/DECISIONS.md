@@ -2,6 +2,106 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Balance target (Petr, 2026-11-27)
+
+- The autopilot without gear (`npm run sim:run -- --hero all --seeds 1-20 --gear none`, world 1 normal from
+  phase 1) wins about 10 % of the runs, for every hero (1-4 of 20 per hero). Every balance change keeps to it;
+  the plan of the changes that get there: `docs/superpowers/plans/2026-11-27-petr-batch-2.md`.
+
+## Random items, stage 3: meta and saves (2026-11-27; the plan's tasks 11-15, the details are Claude's)
+
+- **Item records** (`meta/item-record.ts`): one record per item of the collection, `uid` + rarity + permanent level,
+  and either `named` (a catalogue id) or a rolled item stored by value (`base`, rows `[stat, value at level 1,
+  tier]`, `effect`, two-word `name`), so a later change of the affix numbers never changes an owned item. A named
+  item is owned once and gains levels; every rolled item is its own record and keeps the level it dropped with.
+- **Save version 2** (`meta/save.ts`): `items: ItemRecord[]`, `nextUid`, loadouts by uid. Version 1 (item id to
+  level, loadouts by id) migrates on read: every item becomes a named record in key order, the dolls keep what they
+  wore. The reader keeps at most 2 x `rules.loot.collectionLimit` (200) records; salvaging a full collection is
+  stage 4. A rolled record whose base, rarity or rows the game does not know is left out and counted in `dropped`;
+  an unknown effect or name is dropped and the item kept. Import takes version 1 or 2 and refuses a file with no
+  item this game knows.
+- **Boss drops** (`meta/drop.ts`): the rarity is drawn as before (table + magic find); with the rarity's
+  `namedShare` the drop is a named item (new, or one more level of an owned one), else (and when every named item of
+  that rarity is at the top) a random item for a random slot, rolled for the local hero's primary attribute with the
+  boss's item power (`bossPower`: order, world, difficulty) at `levelAtPower` of that power. A boss therefore never
+  drops nothing any more. Common and rare drops are always random (named share 0). Same seed, order, course and
+  collection give the same drop.
+- **Loadouts** (`meta/equip.ts`, `sim/gear.ts`): `toLoadout` gives rolled entries (`item: rolled-<base>`, `rolled`);
+  `loadGear` wears them at their record's level; `rolledFits` refuses one in a slot of another type.
+- **Client:** the gear screen lists the named items as before, then the rolled records of the filter (highest
+  rarity first, then in the order they came); a click equips by uid. The count reads "records of 200". The end
+  screen and the news line read a rolled drop as new. `window.__game.collection` stays named id to level
+  (`namedLevels`); `collectionSize` counts every record.
+- **Determinism:** unchanged (`36fd80a2`); the matrix wears named loadouts only.
+
+## Random items, stage 2: sim (2026-11-27; the plan's tasks 6-10, the numbers and details are Claude's)
+
+- **New stats** (STAT_IDS, `GearBonus`, `HeroStats`; prices in `design/affixes.yaml`): crit chance and crit damage
+  (a crit multiplies one basic attack and its extra blows by 1 + `rules.loot.critDamage` 0.5 + gear crit damage),
+  dodge (an enemy's hit, not a cloud, a storm or fire; event `HeroDodge`), damage taken (a share off
+  `heroDamageScale`, so the hazards that divide by it stay exact shares of max hp), thorns (a share of the damage
+  a melee hit dealt, paid back by `applyThorns` right after `updateEnemies` as damage of source 2: no lifesteal, no
+  knockback; the enemy is never killed inside its own update), cooldown speed (joins the INT and passive cooldown
+  sum), ultimate cooldown (only the ultimate, on top) and area size (radius of nova, area, ticking area with its
+  bursts, and on-cast spells). Caps of the gear sum: crit chance 60 %, dodge 40 %, damage taken 50 %
+  (`rules.loot.caps`). Crit and dodge draw from the run's generator only for a hero who has them.
+- **Rolled items in the run:** `GearState.item` is ROLLED_ITEM (-2) for a rolled item, whose base, rarity, effect,
+  rare name and up to five rows (implicit + four affixes) sit in fixed typed arrays; `recomputeGear` sums the rows
+  like named stats, at the same item levels. The state hash mixes the rolled fields (named slots hash as before).
+- **Chests:** a card draws its rarity as before, then a free slot (no longer only slots with a named item of that
+  rarity), then a named item with `namedShare` (when one of that rarity fits), else a random item rolled for the
+  hero's primary attribute with the chest's item power (`chestPower`: phase, world, difficulty). A rolled card is New
+  or Choice, never Level (no two rolled items are the same). Common and rare cards are always rolled now, since
+  their named share is 0.
+- **Mythic rolls** draw one of `rules.loot.mythicEffects`; it works like the named item's effect (one per kind,
+  the later slot counts).
+- **Determinism:** the matrix gets `loot-t3` (gravecaller, world 3 insane from phase 11: 20 chests, T3 rows);
+  `w4-blizzard` moved to seed 16 (with seed 15 the tidecaller fell before the blizzard ended). Digest `ff675613` ->
+  `36fd80a2`.
+- **UI until stage 4:** a rolled item is shown as an `Item` with its own name (`client/ui/rolled-item.ts`): the
+  two-word name, or prefix + base + suffix; tooltips, chest cards, the compare and the gear panel read it like a
+  named item. The labels of the new stats exist in EN and CS.
+
+## Random items, stage 1: data (2026-11-27; Petr approved the spec, the numbers and the words are Claude's)
+
+Spec `docs/superpowers/specs/2026-11-26-random-items-design.md` (Petr's answers in section 9), plan
+`docs/superpowers/plans/2026-11-27-random-items.md`, tasks 1-5. The sim does not read the new data yet (stage 2).
+
+- **Files:** `design/item-bases.yaml` (46 bases), `design/affixes.yaml` (22 affixes, one per stat),
+  `design/item-names.yaml` (rare names), `rules.loot` in `design/rules.yaml`. data-build copies the three lists into
+  `data/generated/loot.json` (`GameData.loot`: `bases`, `affixes`, `names`); no map record behind them, so the cloud
+  writes the file with `mapLoot` of `tools/data-build/build.ts`, the same code `data:build` runs.
+- **Bases:** every slot type has a heavy (str), a light (agi) and a cloth (int) base; neck, ring, trinket and main hand
+  also a neutral one (`any`). The implicit row is worth 2 points (`rules.loot.implicitPoints`) and uses only stats the
+  sim reads today.
+- **Tiers split the budget, they never add points** (spec 4: "the rows of an item share its budget"): affix row i gets
+  (budget - 2) x weight_i / sum of the weights x a roll in [0.92, 1.08]. Weights T1-T4 1 / 1.35 / 1.7 / 2 (T4 = 2 x
+  T1), minPower 0 / 3 / 6 / 9. So every roll is within 8 % of the rarity budget (the test checks every tier combination
+  and both ends of every roll), a strong source gives a lopsided item (one big row of the stat you want), and an item
+  grows stronger only by its level. Deviation from the plan: the tier weights and minPower are one table in
+  `rules.loot.tiers`, not per stat; an affix only caps its tier (`maxTier`: lifesteal, move speed, dodge and damage
+  taken stop at T3). A one-row (common) item's tier changes nothing.
+- **Prices of the new stats** (1 point at item level 1, in `affixes.yaml`, `unit`): crit chance 1 % (a crit deals
+  +50 % at first), crit damage 5 %, dodge 0.5 %, damage taken 0.5 % less, thorns 5 % of a melee hit, cooldown speed
+  0.5 %, ultimate cooldown 1 %, area size 0.5 %. Stage 2 may retune them with the sim. The old stats keep the prices
+  of the `design/items.yaml` header (the test compares them).
+- **Roles:** str pool str, hp, armor, regen, damage taken, thorns, lifesteal; agi pool agi, attack speed, damage, move
+  speed, crit chance, crit damage, dodge, lifesteal; int pool int, spell power, cooldown speed, ultimate cooldown,
+  area size, lifesteal; any: magnet, gold find, magic find. Every role pool alone fills a mythic (4 affixes).
+- **Item power:** boss drops 2 / 4 / 6 / 8 by order, chests 1 + 0.3 x phase, + 0.5 per world above 1, + 1 Insane,
+  + 2 Hell. World 1 Normal: the first boss only T1, the final boss up to T3, chests up to T3 (phase 20: 7); T4 needs
+  power 9 (e.g. the final boss of world 3 or Insane); world 5 Hell's final boss is 12. A dropped item's level:
+  power 0 / 3 / 6 / 9 / 12 for level 1-5 (`levelAtPower`).
+- **Other numbers:** smart share 0.6, collection 200, named share epic 10 %, legendary 25 %, mythic 40 % (Petr),
+  salvage gold 10 / 25 / 50 / 90 / 150 by rarity (chest base price 100).
+- **Mythic effects:** the six existing kinds with fixed numbers between the named legendary and mythic items
+  (`rules.loot.mythicEffects`); new role effects later.
+- **Czech names:** a base carries the gender of its noun, `m`, `f`, `n` or `p`: a fourth form for plural nouns (boty,
+  rukavice, nárameníky), one plural form for inanimate masculine and feminine nouns. Every prefix and first word of a
+  rare name has the four forms; the test checks hard adjectives (-ý, -á, -é, -é) and soft ones (-í in all). The base's
+  CS name starts with a capital and is lowercased behind a prefix: "Mocná železná přilba medvěda". "Ghost" was a map
+  unit name (the clean-room test caught it): the rare name word is "Pale" / "Bledý".
+
 ## Petr's solo playtest batch (2026-11-26; Petr's wishes, the numbers are Claude's unless Petr is named)
 
 Petr could not win alone: enemies from the far side walked to the castle while he fought on the other. Spec of the

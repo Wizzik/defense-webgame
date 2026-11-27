@@ -8,6 +8,8 @@
 #   1 point = 0.5 attribute = 0.5 % damage, attack speed or spell power = 12 hp = 0.25 armor = 0.1 regen
 #   = 1 % move speed or gold = 10 magnet = 2 % magic find = 0.25 % lifesteal (tuned in docs/DECISIONS.md, sections Gear,
 #   drops and chests and Sustain). Lifesteal replaced one row of the same points on ten items (spec 2026-11-19 sustain).
+#   The stats random items brought (crit chance and damage, dodge, damage taken, thorns, cooldown speed, ultimate
+#   cooldown, area size) are priced in design/affixes.yaml (`unit`); a named item may use them at those prices.
 # source: optional, the map's item category that inspired the item (traceability only, never written to data/generated).
 # Names are our own; nothing is copied from the map.
 

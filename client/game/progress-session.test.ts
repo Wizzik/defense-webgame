@@ -90,11 +90,11 @@ describe("the progress key in IndexedDB", () => {
   it("does not overwrite the gear", async () => {
     const factory = fakeIndexedDb();
     const gear = (await indexedDbBackend(factory))!;
-    await gear.write({ ...emptySave(), items: { "tin-ring": 2 } });
+    await gear.write({ ...emptySave(), items: [{ uid: 1, rarity: "common" as const, level: 2, named: "tin-ring" }], nextUid: 2 });
     const progress = (await indexedDbBackend<ProgressData>(factory, "progress"))!;
     expect(await progress.read()).toBeNull();
     await progress.write({ version: 1, best: { "1-normal": win } });
-    expect(await gear.read()).toEqual({ ...emptySave(), items: { "tin-ring": 2 } });
+    expect(await gear.read()).toEqual({ ...emptySave(), items: [{ uid: 1, rarity: "common" as const, level: 2, named: "tin-ring" }], nextUid: 2 });
     expect(await progress.read()).toEqual({ version: 1, best: { "1-normal": win } });
   });
 });

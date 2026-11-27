@@ -20,6 +20,7 @@ import { CORPSE_CAPACITY, CorpseRing } from "./corpses";
 import { EnemyStore } from "./enemies";
 import { updateClouds } from "./enemy-cloud";
 import { EventKind, EventLog } from "./events";
+import { applyThorns, ThornsStore } from "./thorns";
 import { updateGearEffects } from "./gear-effects";
 import { emptyGearBonus, type GearState, loadGear, type LoadoutEntry, recomputeGear } from "./gear";
 import { refreshHeroStats } from "./level-up";
@@ -107,6 +108,8 @@ export class Run {
   readonly castle: CastleState;
   readonly enemies: EnemyStore;
   readonly grid: SpatialHash;
+  /** Thorns damage the enemies owe from melee hits on heroes, paid after updateEnemies (sim/thorns.ts). */
+  readonly thorns: ThornsStore;
   readonly crystals = new CrystalStore(CRYSTAL_CAPACITY);
   /** Gold coins on the ground. */
   readonly coins = new CrystalStore(COIN_CAPACITY);
@@ -207,6 +210,7 @@ export class Run {
     this.rng = new Rng(options.seed);
     this.enemies = new EnemyStore(rules.enemies.maxAlive);
     this.grid = new SpatialHash(128, rules.enemies.maxAlive);
+    this.thorns = new ThornsStore(rules.enemies.maxAlive);
     this.enemyBehavior = Uint8Array.from(data.enemies, (e) => BEHAVIOR_IDS.indexOf(e.behavior));
     this.enemyHunter = Uint8Array.from(data.enemies, (e) => (e.hunter ? 1 : 0));
     this.raiseTypes = Int32Array.from(data.enemies, (e, i) =>
@@ -322,6 +326,7 @@ export class Run {
    *   updateTimeline(this);       // phase 2b-3 (elite rushes and bosses by time)
    *   spawnEnemies(this);         // Task 4
    *   updateEnemies(this);        // Task 4
+   *   applyThorns(this);          // random items: thorns of gear hit back the melee enemies that hit a hero
    *   updateClouds(this);         // enemy factions: poison clouds hurt the hero (once per player)
    *   healEnemies(this);          // phase 2b-1 (reads the grid built by updateEnemies)
    *   updateHeroCombat(this);     // Task 5
@@ -400,6 +405,7 @@ export class Run {
     updateTimeline(this);
     spawnEnemies(this);
     updateEnemies(this);
+    applyThorns(this);
     for (let p = 0; p < count; p++) {
       this.current = p;
       updateClouds(this);
@@ -486,6 +492,7 @@ function createPlayer(data: GameData, options: PlayerOptions, p: number): Player
   const stats: HeroStats = {
     maxHp: 0, regenPerSecond: 0, armor: 0, attackIntervalSeconds: 0, damageMin: 0, damageMax: 0,
     spellPower: 0, cooldownScale: 0, moveSpeed: 0, collision: 0,
+    critChance: 0, critDamage: 0, dodge: 0, damageTakenScale: 1, thorns: 0, ultimateScale: 1, areaScale: 1,
   };
   const start = rules.arena.heroStart;
   // player 0 on the start, then east, west, further east: 0, +1, -1, +2 spacings

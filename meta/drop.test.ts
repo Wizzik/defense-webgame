@@ -1,25 +1,32 @@
 import { describe, expect, it } from "vitest";
-import type { GameData } from "../data/schema";
+import type { GameData, Rarity } from "../data/schema";
 import { gameData } from "../sim/testing/game-data";
-import { applyDrop, rollDrop } from "./drop";
+import { applyDrop, type Drop, rollDrop } from "./drop";
+import { namedRecord } from "./item-record";
 import { emptySave, type SaveData } from "./save";
 
 const data: GameData = gameData();
 const MAX = data.rules.gear.maxPermanentLevel;
 
-function owning(filter: (rarity: string) => boolean, level = 1): SaveData {
+function owning(filter: (rarity: Rarity) => boolean, level = 1): SaveData {
   const save = emptySave();
-  for (const item of data.items) if (filter(item.rarity)) save.items[item.id] = level;
+  for (const item of data.items) {
+    if (!filter(item.rarity)) continue;
+    save.items.push(namedRecord(data, save.nextUid, item.id, level)!);
+    save.nextUid++;
+  }
   return save;
 }
+
+const rarityOf = (drop: Drop): Rarity | null => (drop.kind === "none" ? null : drop.item.rarity);
 
 describe("boss drops", () => {
   /** Share of drops of `rarities` over seeds 1..n with an empty collection and the given magic find. */
   const shareOf = (boss: string, rarities: string[], magicFind: number, n = 2000) => {
     let hits = 0;
     for (let seed = 1; seed <= n; seed++) {
-      const drop = rollDrop(data, emptySave(), boss, seed, 0, magicFind);
-      if (drop.kind !== "none" && rarities.includes(drop.item.rarity)) hits++;
+      const rarity = rarityOf(rollDrop(data, emptySave(), boss, seed, 0, magicFind));
+      if (rarity && rarities.includes(rarity)) hits++;
     }
     return hits / n;
   };
@@ -45,45 +52,84 @@ describe("boss drops", () => {
     }
   });
 
-  it("an empty collection always gets a new item of a rarity of the boss's table", () => {
+  it("common and rare drops are always rolled items (their named share is 0)", () => {
     for (let seed = 1; seed <= 200; seed++) {
       const drop = rollDrop(data, emptySave(), "iron-marshal", seed, 0);
-      expect(drop.kind).toBe("new");
-      if (drop.kind !== "new") continue;
-      expect(drop.level).toBe(1);
+      expect(drop.kind).toBe("rolled");
+      if (drop.kind !== "rolled") continue;
       expect(["common", "rare"]).toContain(drop.item.rarity);
+      expect(drop.record.base).toBeDefined();
+      expect(drop.record.named).toBeUndefined();
+      expect(drop.record.rarity).toBe(drop.item.rarity);
     }
   });
 
-  it("with every item of the drawn rarity owned, one under the top level gains a level", () => {
-    const save = owning((rarity) => rarity === "common" || rarity === "rare", 2);
-    for (let seed = 1; seed <= 50; seed++) {
-      const drop = rollDrop(data, save, "iron-marshal", seed, 0);
-      expect(drop.kind).toBe("level");
-      if (drop.kind === "level") expect(drop.level).toBe(3);
+  it("a drop is a named item about as often as the rarity's named share", () => {
+    const counts: Record<string, { named: number; all: number }> = {};
+    for (let seed = 1; seed <= 4000; seed++) {
+      const drop = rollDrop(data, emptySave(), "dread-regent", seed, 3);
+      if (drop.kind === "none") throw new Error("expected a drop");
+      const row = (counts[drop.item.rarity] ??= { named: 0, all: 0 });
+      row.all++;
+      if (drop.kind === "new") row.named++;
+    }
+    for (const rarity of ["epic", "legendary"] as const) {
+      const share = counts[rarity]!.named / counts[rarity]!.all;
+      expect(share).toBeGreaterThan(data.rules.loot.namedShare[rarity] - 0.05);
+      expect(share).toBeLessThan(data.rules.loot.namedShare[rarity] + 0.05);
     }
   });
 
-  it("with the drawn rarity all at the top level, another rarity of the boss is tried", () => {
-    const save = owning((rarity) => rarity === "common", MAX);
-    for (let seed = 1; seed <= 50; seed++) {
-      const drop = rollDrop(data, save, "iron-marshal", seed, 0);
-      expect(drop.kind).toBe("new");
-      if (drop.kind === "new") expect(drop.item.rarity).toBe("rare");
+  it("a named drop of an owned item below the top level raises its level", () => {
+    const save = owning((rarity) => rarity !== "common" && rarity !== "rare", 2);
+    let levels = 0;
+    for (let seed = 1; seed <= 400; seed++) {
+      const drop = rollDrop(data, save, "dread-regent", seed, 3);
+      expect(drop.kind).not.toBe("new");
+      if (drop.kind !== "level") continue;
+      levels++;
+      expect(drop.level).toBe(3);
+      expect(save.items.some((record) => record.uid === drop.uid && record.named === drop.item.id)).toBe(true);
     }
-    const rares = owning((rarity) => rarity === "rare", MAX);
-    for (let seed = 1; seed <= 50; seed++) {
-      const drop = rollDrop(data, rares, "iron-marshal", seed, 0);
-      expect(drop.kind).toBe("new");
-      if (drop.kind === "new") expect(drop.item.rarity).toBe("common");
-    }
+    expect(levels).toBeGreaterThan(0);
   });
 
-  it("a collection with everything at the top level gets nothing", () => {
+  it("with every named item of the rarity at the top level, the drop is a rolled item", () => {
     const save = owning(() => true, MAX);
-    for (const boss of ["iron-marshal", "pale-abbot", "gunmaster", "dread-regent"]) {
-      expect(rollDrop(data, save, boss, 1, 0)).toEqual({ kind: "none" });
+    for (let seed = 1; seed <= 200; seed++) {
+      expect(rollDrop(data, save, "dread-regent", seed, 3).kind).toBe("rolled");
     }
+  });
+
+  it("the rolled level follows the boss's item power: order, world and difficulty", () => {
+    const levelOf = (order: number, world: number, difficulty: "normal" | "insane" | "hell") => {
+      const drop = rollDrop(data, emptySave(), "iron-marshal", 9, order, 0, { world, difficulty, primary: "str" });
+      if (drop.kind !== "rolled") throw new Error("expected a rolled drop");
+      expect(drop.record.level).toBe(drop.level);
+      return drop.level;
+    };
+    expect(levelOf(0, 1, "normal")).toBe(1); // power 2
+    expect(levelOf(1, 1, "normal")).toBe(2); // power 4
+    expect(levelOf(3, 1, "normal")).toBe(3); // power 8
+    expect(levelOf(3, 5, "hell")).toBe(5); // power 8 + 2 + 2
+  });
+
+  it("smart loot leans the rolled bases to the hero's primary attribute", () => {
+    const flavourShare = (primary: "str" | "int") => {
+      let hits = 0;
+      let all = 0;
+      for (let seed = 1; seed <= 600; seed++) {
+        const drop = rollDrop(data, emptySave(), "iron-marshal", seed, 0, 0, { primary });
+        if (drop.kind !== "rolled") continue;
+        const base = data.loot.bases.find((candidate) => candidate.id === drop.record.base)!;
+        all++;
+        if (base.flavour === primary) hits++;
+      }
+      return hits / all;
+    };
+    // any base of the slot type would match about one time in three
+    expect(flavourShare("str")).toBeGreaterThan(0.55);
+    expect(flavourShare("int")).toBeGreaterThan(0.55);
   });
 
   it("an enemy without a drop table drops nothing", () => {
@@ -91,37 +137,45 @@ describe("boss drops", () => {
     expect(rollDrop(data, emptySave(), "nobody", 1, 0)).toEqual({ kind: "none" });
   });
 
-  it("the same seed and order give the same drop; another order may give another", () => {
-    const ids = new Set<string>();
+  it("the same seed, order and course give the same drop; another order may give another", () => {
+    const names = new Set<string>();
     for (let order = 0; order < 8; order++) {
-      const a = rollDrop(data, emptySave(), "pale-abbot", 77, order);
-      const b = rollDrop(data, emptySave(), "pale-abbot", 77, order);
+      const a = rollDrop(data, emptySave(), "pale-abbot", 77, order, 0, { world: 2, difficulty: "insane", primary: "agi" });
+      const b = rollDrop(data, emptySave(), "pale-abbot", 77, order, 0, { world: 2, difficulty: "insane", primary: "agi" });
       expect(a).toEqual(b);
-      if (a.kind !== "none") ids.add(a.item.id);
+      if (a.kind !== "none") names.add(a.item.name.en);
     }
-    expect(ids.size).toBeGreaterThan(1);
+    expect(names.size).toBeGreaterThan(1);
   });
 
   it("the final boss drops a mythic item about one time in ten", () => {
     let mythic = 0;
     for (let seed = 1; seed <= 2000; seed++) {
-      const drop = rollDrop(data, emptySave(), "dread-regent", seed, 3);
-      if (drop.kind !== "none" && drop.item.rarity === "mythic") mythic++;
+      if (rarityOf(rollDrop(data, emptySave(), "dread-regent", seed, 3)) === "mythic") mythic++;
     }
     expect(mythic / 2000).toBeGreaterThan(0.07);
     expect(mythic / 2000).toBeLessThan(0.13);
   });
 
-  it("applyDrop adds a new item at level 1 or raises the level, and leaves its input alone", () => {
+  it("applyDrop adds a new record with the save's next uid or raises a level, and leaves its input alone", () => {
     const save = emptySave();
     const first = rollDrop(data, save, "iron-marshal", 5, 0);
-    if (first.kind === "none") throw new Error("expected a drop");
+    if (first.kind !== "rolled") throw new Error("expected a rolled drop");
     const after = applyDrop(save, first);
-    expect(save.items).toEqual({});
-    expect(after.items).toEqual({ [first.item.id]: 1 });
-    const raised = applyDrop(after, { kind: "level", item: first.item, level: 2 });
-    expect(raised.items[first.item.id]).toBe(2);
-    expect(after.items[first.item.id]).toBe(1);
-    expect(applyDrop(after, { kind: "none" })).toEqual(after);
+    expect(save.items).toEqual([]);
+    expect(save.nextUid).toBe(1);
+    expect(after.items).toEqual([{ ...first.record, uid: 1 }]);
+    expect(after.nextUid).toBe(2);
+
+    const again = applyDrop(after, { ...first, record: { ...first.record, uid: 1 } });
+    expect(again.items.map((record) => record.uid)).toEqual([1, 2]);
+
+    const item = data.items[0]!;
+    const named = applyDrop(again, { kind: "new", item, level: 1, record: namedRecord(data, 99, item.id, 1)! });
+    expect(named.items[2]).toEqual({ uid: 3, rarity: item.rarity, level: 1, named: item.id });
+    const raised = applyDrop(named, { kind: "level", item, level: 2, uid: 3 });
+    expect(raised.items[2]!.level).toBe(2);
+    expect(named.items[2]!.level).toBe(1);
+    expect(applyDrop(raised, { kind: "none" })).toEqual(raised);
   });
 });

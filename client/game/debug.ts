@@ -4,12 +4,14 @@ import { groundSpeedScale,
   type ChestOffer, chestPrice, debugDropHeart, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, debugSpawnOrb,
   debugWear, killEnemy, learnAbility, OrbKind, debugHazard, hazardPending,
   type Run,
-  SLOT_IDS, type SlotId, TICKS_PER_SECOND,
+  EMPTY_ITEM, ROLLED_ITEM, SLOT_IDS, type SlotId, TICKS_PER_SECOND,
 } from "../../sim";
 import { latestBoss, runPhase } from "./boss";
 import type { Backend, GpuInfo } from "../render/gpu";
 import type { PlayerSnapshot } from "./net-snapshot";
 import type { NetStats } from "../net/coop-net";
+import { cardItem } from "../ui/rolled-item";
+import { namedLevels } from "../../meta";
 
 const CHEST_ACTIONS = ["new", "choice", "level"] as const;
 /** Orb kinds by OrbKind value. */
@@ -68,15 +70,21 @@ export interface GameSnapshot {
   chests: { x: number; y: number }[];
   chestsOpened: number;
   /** The cards of the open chest (slot id, item id, its rarity, what the pick does); null outside the "chest" screen. */
-  chestCards: { slot: SlotId; item: string; rarity: Rarity; action: "new" | "choice" | "level" }[] | null;
+  /** `item` of a rolled (random) card is "rolled-<base id>"; `rolled` tells it apart; `name` in both languages. */
+  chestCards: {
+    slot: SlotId; item: string; rarity: Rarity; action: "new" | "choice" | "level"; rolled: boolean; name: { en: string; cs: string };
+  }[] | null;
   /** Index of the chest card whose compare panel is open, or null. */
   chestCompare: number | null;
   /** The settings panel is open. */
   settingsOpen: boolean;
   /** The 16 gear slots in the order of `SLOT_IDS`: item id and levels, or null for an empty slot. */
-  gear: ({ item: string; base: number; temp: number } | null)[];
-  /** The player's collection: item id to its permanent level. */
+  /** `item` of a rolled item is "rolled-<base id>" and `rolled` is true. */
+  gear: ({ item: string; base: number; temp: number; rolled: boolean } | null)[];
+  /** The named items of the collection: item id to its permanent level. */
   collection: Record<string, number>;
+  /** Records in the collection: named and rolled items. */
+  collectionSize: number;
   /** Whether the gear is stored in this browser (false with ?debug=1 and without storage). */
   gearSaved: boolean;
   /** The living orbs on the map, in simulation coordinates. */
@@ -161,7 +169,7 @@ export function publishSnapshot(backend: Backend, gpu: GpuInfo): GameSnapshot {
     projectiles: 0, packArrows: 0, charging: 0, phase: 1, boss: null, slams: 0,
     render: { enemyMeshes: 0, heroModels: 0, shadows: false, slamRings: 0, hazardRings: 0, particles: 0, pools: 0 },
     local: 0, players: [], net: null,
-    gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, settingsOpen: false, gear: [], collection: {}, gearSaved: false,
+    gold: 0, chestPrice: 0, chests: [], chestsOpened: 0, chestCards: null, chestCompare: null, settingsOpen: false, gear: [], collection: {}, collectionSize: 0, gearSaved: false,
     orbs: [], hearts: 0, buffs: { boots: 0, berserk: 0, heal: 0 }, lifesteal: 0,
     faction: "human", slowed: 0, rooted: 0, world: 1, difficulty: "normal", unlocked: [], progressSaved: false,
     obstacles: 0, hazard: { kind: "storm", pending: 0, waves: 0, weather: 0, warning: 0, ground: 1, chilled: false, pools: 0 },
@@ -185,11 +193,13 @@ export function addDebugHooks(
     // depend on a frame having passed (a slow software renderer), so these two publish at once
     grantItem(id: string, level: number): void {
       gear.grant(id, level);
-      snapshot.collection = gear.save.items;
+      snapshot.collection = namedLevels(gear.save);
+      snapshot.collectionSize = gear.save.items.length;
     },
     clearGear(): void {
       gear.clear();
-      snapshot.collection = gear.save.items;
+      snapshot.collection = namedLevels(gear.save);
+      snapshot.collectionSize = gear.save.items.length;
     },
     grantGold(amount: number): void {
       const run = getRun();
@@ -363,23 +373,25 @@ export function updateSnapshot(snapshot: GameSnapshot, run: Run | null, menuOpen
     // rebuilt only when the offer changes, not every frame
     shownOffer = offer;
     snapshot.chestCards = offer
-      ? offer.cards.map((card) => ({
-        slot: SLOT_IDS[card.slot]!,
-        item: run.data.items[card.item]!.id,
-        rarity: run.data.items[card.item]!.rarity,
-        action: CHEST_ACTIONS[card.action]!,
-      }))
+      ? offer.cards.map((card) => {
+        const item = cardItem(run.data, card);
+        return {
+          slot: SLOT_IDS[card.slot]!, item: item.id, rarity: item.rarity, action: CHEST_ACTIONS[card.action]!,
+          rolled: card.rolled != null, name: item.name,
+        };
+      })
       : null;
   }
   snapshot.gear.length = gear.item.length;
   for (let slot = 0; slot < gear.item.length; slot++) {
     const index = gear.item[slot]!;
-    if (index < 0) {
+    if (index === EMPTY_ITEM) {
       snapshot.gear[slot] = null;
       continue;
     }
-    const entry = snapshot.gear[slot] ?? (snapshot.gear[slot] = { item: "", base: 0, temp: 0 });
-    entry.item = run.data.items[index]!.id;
+    const entry = snapshot.gear[slot] ?? (snapshot.gear[slot] = { item: "", base: 0, temp: 0, rolled: false });
+    entry.rolled = index === ROLLED_ITEM;
+    entry.item = entry.rolled ? `rolled-${run.data.loot.bases[gear.rolledBase[slot]!]!.id}` : run.data.items[index]!.id;
     entry.base = gear.base[slot]!;
     entry.temp = gear.temp[slot]!;
   }

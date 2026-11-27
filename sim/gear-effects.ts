@@ -3,6 +3,7 @@ import { damageEnemy } from "./combat";
 import { TICKS_PER_SECOND } from "./constants";
 import { applySlow } from "./enemies";
 import { EventKind } from "./events";
+import { ROLLED_ITEM } from "./gear";
 import type { Run } from "./run";
 
 /** Enemies a chain may reach in one cast (the schema caps `jumps` at 8). */
@@ -66,7 +67,10 @@ export function loadEffects(run: Run): void {
   fx.goldHeal = 0;
   for (let slot = 0; slot < gear.item.length; slot++) {
     const index = gear.item[slot]!;
-    const effect = index < 0 ? undefined : data.items[index]!.effect;
+    // a rolled mythic carries one of rules.loot.mythicEffects (random items)
+    const effect = index >= 0 ? data.items[index]!.effect
+      : gear.rolledEffect[slot]! >= 0 && gear.item[slot] === ROLLED_ITEM ? data.rules.loot.mythicEffects[gear.rolledEffect[slot]!]
+      : undefined;
     if (!effect) continue;
     switch (effect.kind) {
       case "chain_on_attack":

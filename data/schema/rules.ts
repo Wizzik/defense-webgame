@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { LocalizedText, Slug } from "./common";
 import { FactionId } from "./enemy";
-import { RaritySchema } from "./item";
+import { EffectSchema, RaritySchema } from "./item";
 
 export const PointSchema = z.object({ x: z.number(), y: z.number() }).strict();
 export type Point = z.infer<typeof PointSchema>;
@@ -223,6 +223,59 @@ export const RulesSchema = z.object({
   magicFind: z.object({
     limit: positive,
     rarityFactor: z.object({ rare: nonNegative, epic: nonNegative, legendary: nonNegative, mythic: nonNegative }).strict(),
+  }).strict(),
+  /**
+   * Random items (spec 2026-11-26 random items, docs/DECISIONS.md section Random items). A rolled item has the
+   * base's implicit row (`implicitPoints`) and `affixCount` affix rows that share the rest of the rarity's budget:
+   * row i gets (budget - implicitPoints) x weight_i / sum of weights x a roll in [1 - rowRoll, 1 + rowRoll], where
+   * weight_i is the weight of the row's tier. A tier rolls only when the item power reaches its `minPower`.
+   * Item power = power.boss[boss order] or chestBase + chestPerPhase x phase, + perWorld x (world - 1) +
+   * difficulty; a dropped item's level is the highest whose `levelAtPower` the power reaches.
+   */
+  loot: z.object({
+    /** Share of the affixes drawn from the hero's primary attribute's pool (the rest from all). */
+    smartShare: z.number().min(0).max(1),
+    /** Items the collection holds at most. */
+    collectionLimit: z.number().int().positive(),
+    /** Point budget of an item at level 1 (the design/items.yaml header); named items are held to it by the tests. */
+    budget: z.object({ common: positive, rare: positive, epic: positive, legendary: positive, mythic: positive }).strict(),
+    implicitPoints: positive,
+    rowRoll: z.number().min(0).max(0.5),
+    affixCount: z.object({
+      common: z.number().int().min(1), rare: z.number().int().min(1), epic: z.number().int().min(1),
+      legendary: z.number().int().min(1), mythic: z.number().int().min(1),
+    }).strict(),
+    /** Share of a drop or chest card of the rarity that is a named item instead of a rolled one. */
+    namedShare: z.object({
+      common: z.number().min(0).max(1), rare: z.number().min(0).max(1), epic: z.number().min(0).max(1),
+      legendary: z.number().min(0).max(1), mythic: z.number().min(0).max(1),
+    }).strict(),
+    /** Gold a salvaged item of the rarity gives for the next run's chests. */
+    salvageGold: z.object({
+      common: nonNegative, rare: nonNegative, epic: nonNegative, legendary: nonNegative, mythic: nonNegative,
+    }).strict(),
+    /** T1-T4 from the lowest; a higher tier is a bigger share of the budget. */
+    tiers: z.array(z.object({ weight: positive, minPower: nonNegative }).strict()).length(4)
+      .refine((t) => t.every((tier, i) => i === 0 || (tier.weight > t[i - 1]!.weight && tier.minPower > t[i - 1]!.minPower)), {
+        message: "tier weights and minPower must rise",
+      }),
+    power: z.object({
+      /** By the boss's order in the run (rules.drops). */
+      boss: z.array(nonNegative).min(1),
+      chestBase: nonNegative,
+      chestPerPhase: nonNegative,
+      perWorld: nonNegative,
+      difficulty: z.object({ normal: nonNegative, insane: nonNegative, hell: nonNegative }).strict(),
+    }).strict(),
+    /** The least item power of item levels 1, 2, ... (one value per level up to gear.maxPermanentLevel). */
+    levelAtPower: z.array(nonNegative).min(1)
+      .refine((l) => l[0] === 0 && l.every((v, i) => i === 0 || v > l[i - 1]!), { message: "must start at 0 and rise" }),
+    /** Extra damage of a critical basic attack before gear adds crit damage (0.5: a crit deals 150 %). */
+    critDamage: positive,
+    /** The most the summed gear gives of these shares (sim/hero.ts heroStats). */
+    caps: z.object({ critChance: z.number().gt(0).max(1), dodge: z.number().gt(0).max(1), damageTaken: z.number().gt(0).max(1) }).strict(),
+    /** The effect a mythic roll draws one of (sim/gear-effects.ts), with its fixed numbers. */
+    mythicEffects: z.array(EffectSchema).min(1),
   }).strict(),
   /** What a boss drops: the rarity is drawn by these weights. */
   drops: z.array(z.object({

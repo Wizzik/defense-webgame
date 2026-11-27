@@ -21,6 +21,16 @@ The rules above (AGENTS.md) are shared with every AI tool and win over this sect
 - Then change `design/*.yaml` **and** the matching rows of `data/generated/*.json` together, by the same rule `tools/data-build` applies (scaling, `levelGrowthExponent`, rounding), with a small script in the scratchpad rather than by eye. Mention it in the commit, so Petr can rerun `data:build` locally and confirm the files do not change.
 - Skill `data-change` has the steps.
 
+## Long sessions: hand off to a fresh one (Petr, 2026-11-27)
+- When the context of a session grows too large, do not wait to be asked: start a new session yourself and hand the
+  work over, with everything it needs prepared.
+- Before the handoff: push every change (a branch of its own if it does not pass `npm run check` yet, and say so in
+  the commit), and write the state into `docs/STATUS.md`: what is done, what is half done (files, failing tests),
+  what comes next.
+- The new session (`create_session` on this repository and that branch) gets a prompt that names the plan and its
+  stage, the branch, the files to read first, the open steps in order, and the PR to update. Tell Petr in Czech
+  that the work moved and where.
+
 ## Project skills (`.claude/skills/`)
 - `finish-task`: checks, docs, commit, push, draft PR.
 - `data-change`: change game data (yaml + generated json) safely.

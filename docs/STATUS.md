@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-26 (Petr's solo playtest batch, first work in Claude Code). Read this first when you resume work.
+Updated 2026-11-27 (random items, stages 1-3: data, sim, meta and saves). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -8,7 +8,70 @@ Updated 2026-11-26 (Petr's solo playtest batch, first work in Claude Code). Read
    wards, 10 spell levels, tooltip, dash charges, blink (F), weather fixed to the map. Waits for Petr's playtest.
 2. **Random items** like Diablo 2 / Project Diablo 2 with game-icons.net pictures: the spec
    `docs/superpowers/specs/2026-11-26-random-items-design.md`, approved by Petr on 2026-11-27 (answers in its section 9); plan `docs/superpowers/plans/2026-11-27-random-items.md` (6 stages), to build in fresh sessions.
-3. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
+3. **Petr's batch 2** (2026-11-27): plan `docs/superpowers/plans/2026-11-27-petr-batch-2.md` (AoE -50 %, a quarter
+   of the enemies casters, Serpent Totem 100 damage + 25 % a level, F teleports to the mouse, bosses x3 hp x2
+   damage with their own names and looks per world, chest cards for worn slots only as upgrades, balance target
+   about 10 % autopilot wins with no gear). After stage 3 of random items, before its stage 4.
+4. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
+
+## Random items, stage 3: meta and saves (merged into `claude/random-items-data`, PR #42, 2026-11-27)
+
+Plan `docs/superpowers/plans/2026-11-27-random-items.md`, tasks 11-15; rulings in `docs/DECISIONS.md`, section
+Random items, stage 3. Started in the session of PR #42, finished in a fresh one.
+
+- **Done:** item records (`meta/item-record.ts`), save version 2 with the migration of version 1 (`meta/save.ts`),
+  equip by uid and rolled loadouts (`meta/equip.ts`, `sim/gear.ts`), boss drops that roll random items for the run's
+  world, difficulty and the hero's primary attribute (`meta/drop.ts`, `client/main.ts` `hud.dropFor`), the gear
+  screen with rolled records (`client/ui/collection-grid.ts`, `gear-screen.ts`), import of version 1 and 2, the
+  snapshot field `collectionSize`.
+- **Tests:** `meta/drop.test.ts`, `meta/item-record.test.ts` new or rewritten, the client tests on save version 2;
+  e2e: a boss drop lands as a random item, a version 2 file brings a random item that the gear screen lists and the
+  run wears. Checks: `npm run check` (1389 tests), build, e2e `webgl2-fallback` (51) pass. Digest unchanged.
+- **What Petr checks** (after the merge, https://wizzik.github.io/defense-webgame/):
+  - **an old save keeps its items**: open the game without `debug` in the browser where you already have items
+    (https://wizzik.github.io/defense-webgame/?lang=cs), menu Výbava: the old items are there at their levels and the
+    dolls still wear them; the count now reads "Sbírka: N z 200";
+  - **boss drops are random items**: play a run without debug (bosses come at 5, 10, 15 min), or quickly
+    https://wizzik.github.io/defense-webgame/?debug=1&phase=6&lang=cs and in the console `__game.debug.killBoss()`:
+    the news line "Kořist: ... (nový)" names a random item; `__game.collectionSize` is 1;
+  - **they can be worn into a run**: without debug (debug keeps nothing between pages), after a run with a boss
+    drop open Výbava: the random items stand after the named ones, a hover shows rows, a click puts it on, the next
+    run wears it (C opens the gear panel);
+  - later worlds and Hell give higher levels: `?debug=1&phase=16&world=5&difficulty=hell&lang=cs`, kill the boss.
+- **Next:** Petr's batch 2 (`docs/superpowers/plans/2026-11-27-petr-batch-2.md`), then random items stage 4.
+
+## Random items, stages 1-2: data and sim (branch `claude/random-items-data`, PR #42, 2026-11-27)
+
+Plan `docs/superpowers/plans/2026-11-27-random-items.md`; rulings and numbers in `docs/DECISIONS.md`, sections
+Random items, stage 1 and stage 2.
+
+- **Stage 1 (data, tasks 1-5):** `design/item-bases.yaml` (46 bases), `design/affixes.yaml` (22 affixes),
+  `design/item-names.yaml` (rare names), `rules.loot`; copied into `data/generated/loot.json` (`GameData.loot`).
+- **Stage 2 (sim, tasks 6-10):**
+  - new gear stats: crit chance and damage, dodge, damage taken, thorns, cooldown speed, ultimate cooldown, area size
+    (each with a test, `sim/gear-stats.test.ts`);
+  - `sim/item-roll.ts` rolls items (smart loot, tiers by item power, rows sharing the budget);
+  - **chests now offer random items**: named items only with the rarity's named share (epic 10 %, legendary 25 %,
+    mythic 40 %; common and rare cards are always random); a rolled mythic carries an effect;
+  - the hash covers the rolled rows; matrix case `loot-t3`; digest `ff675613` -> `36fd80a2`.
+  - Until stage 4 the client shows a rolled item through `client/ui/rolled-item.ts` (name, rows, effect) in the
+    chest cards, the compare and the gear panel.
+- `loot.json` and `rules.json` were written in the cloud by the data-build rule (`mapLoot`, a copy of
+  `design/rules.yaml`); Petr reruns `npm run data:build` locally once, the files must not change.
+- Checks: `npm run check` (1369 tests), build, e2e `webgl2-fallback` and `sim-chromium` (52) pass.
+- Autopilot, world 1 normal, mid gear, seeds 1-8 (wins of 8, castle of won runs), stage 1 -> stage 2: Stonehorn 8
+  (99 %) -> 8 (63 %); Nightglaive 8 (87 %) -> 8 (75 %); Gravecaller 8 (100 %) -> 8 (100 %); Serpent Shaman 7 (98 %)
+  -> 6 (92 %, both losses in the first 75 s, before any chest); Mistwarden 7 (97 %) -> 7 (99 %); Sparkshot 8 (96 %)
+  -> 8 (95 %); Redcleaver 8 (99 %) -> 8 (87 %); Tidecaller 8 (92 %) -> 8 (86 %). In sum 62 -> 61 of 64; the
+  strength heroes' castles fare worse (their rolled items lean to hp and armor). Balance is stage 5.
+- **What Petr checks** (after the merge, https://wizzik.github.io/defense-webgame/):
+  - open chests (`?debug=1&lang=cs`, in the console `__game.debug.grantGold(5000)`, walk onto a chest): most cards
+    are random items with their own names ("Mocná železná přilba medvěda", "Ponuré drápy"), rows and, on a mythic, an
+    effect line; do the Czech names sound right;
+  - a strength hero (Stonehorn) gets mostly heavy bases and str / hp / armor rows, a caster (Gravecaller) cloth and
+    int / spell rows;
+  - later phases give bigger rows: `?debug=1&phase=15&world=3&difficulty=insane&lang=cs`;
+  - the gear panel (C) shows the rolled items; the new stats (crit, dodge, thorns, cooldowns, spell area) read well.
 
 ## Solo playtest batch (branch `claude/gifted-gauss-k6wag4`, 2026-11-26)
 

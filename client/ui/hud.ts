@@ -16,6 +16,7 @@ import { BuffBar, type HazardCells } from "./buff-bar";
 import { el, formatTime, setText } from "./dom";
 import type { Drop } from "../../meta";
 import { chestLootLine, dropLine } from "./drop-lines";
+import { wornItem } from "./rolled-item";
 import { type Lang, type MessageKey, t } from "./i18n";
 
 /** How long the news of a boss or of an enrage stays (a rush stays for its warning time). */
@@ -231,7 +232,9 @@ export class Hud {
         this.announcer.push(line.text, ANNOUNCE_TICKS, line.tone);
         this.loot(line.tone);
       } else if (kind === EventKind.ChestPick) {
-        const line = chestLootLine(lang, run.data, events.u[i]!, events.v[i]!);
+        // the picker's slot holds the item now (a rolled one has no index in data.items)
+        const picker = run.players[events.player[i]!] ?? run.players[0]!;
+        const line = chestLootLine(lang, wornItem(run.data, picker.gear, events.a[i]!), events.v[i]!);
         if (line) {
           this.announcer.push(line.text, ANNOUNCE_TICKS, line.tone);
           this.loot(line.tone);

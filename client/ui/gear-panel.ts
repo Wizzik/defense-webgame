@@ -5,15 +5,16 @@ import { Doll, type DollSlotView } from "./doll";
 import { el, setText } from "./dom";
 import { type Lang, t } from "./i18n";
 import { ItemTooltip } from "./item-tooltip";
+import { wornItem } from "./rolled-item";
 
 /** The doll slots of a run: what the hero wears now, with the levels chests added. */
 export function runSlots(run: Run): DollSlotView[] {
   const { gear, data } = run;
   const slots: DollSlotView[] = [];
   for (let i = 0; i < SLOT_IDS.length; i++) {
-    const index = gear.item[i]!;
-    if (index < 0) continue;
-    slots.push({ slot: SLOT_IDS[i]!, item: data.items[index]!, level: gear.base[i]!, temp: gear.temp[i]! });
+    const item = wornItem(data, gear, i);
+    if (!item) continue;
+    slots.push({ slot: SLOT_IDS[i]!, item, level: gear.base[i]!, temp: gear.temp[i]! });
   }
   return slots;
 }

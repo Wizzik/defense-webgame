@@ -127,10 +127,12 @@ export function learnAbility(run: Run, index: number, abilityIndex: number): voi
   refreshHeroStats(run);
 }
 
-/** Cooldown in ticks: round(cooldown[level] * cooldownScale * 30). */
+/** Cooldown in ticks: round(cooldown[level] * cooldownScale * 30), x ultimateScale for the ultimate. */
 export function abilityCooldownTicks(run: Run, slot: AbilitySlot): number {
   const base = slot.def.cooldown[slot.level - 1];
-  return Math.round(base * run.hero.stats.cooldownScale * TICKS_PER_SECOND);
+  const stats = run.hero.stats;
+  const scale = slot === run.abilities[ULTIMATE_SLOT] ? stats.cooldownScale * stats.ultimateScale : stats.cooldownScale;
+  return Math.round(base * scale * TICKS_PER_SECOND);
 }
 
 /**

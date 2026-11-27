@@ -1,0 +1,72 @@
+# Item bases of random items (spec 2026-11-26 random items, section 2; docs/DECISIONS.md, section Random items).
+# A rolled item = base + rarity + affix rows (design/affixes.yaml, rules.loot in design/rules.yaml).
+# slotType: one of the 14 types. flavour: heavy str, light agi, cloth int, or neutral any; smart loot prefers the
+#   base of the hero's primary attribute (rules.loot.smartShare). Every slot type has a str, an agi and an int base.
+# implicit: the base's own row, worth rules.loot.implicitPoints (2) points at item level 1, priced by the affix units:
+#   1 attribute, 24 hp, 0.5 armor, 0.2 regen, 1 % damage, attack speed or spell power, 2 % move speed or gold,
+#   20 magnet, 4 % magic find. Only stats the sim reads today.
+# gender: of the Czech noun, for the prefix adjective in front of it: m, f, n, or p for a plural noun (boty).
+#   The CS name starts with a capital; behind a prefix it is lowercased ("Mocná železná přilba medvěda").
+# icon: the game-icons.net icon (stage 6 of the plan), missing until then.
+# Names are our own; nothing is copied from the map.
+
+# Head
+- { id: iron-helm, name: { en: "Iron Helm", cs: "Železná přilba" }, gender: f, slotType: head, flavour: str, implicit: { stat: armor, value: 0.5 } }
+- { id: leather-cap, name: { en: "Leather Cap", cs: "Kožená čapka" }, gender: f, slotType: head, flavour: agi, implicit: { stat: attackSpeed, value: 0.01 } }
+- { id: silk-hood, name: { en: "Silk Hood", cs: "Hedvábná kápě" }, gender: f, slotType: head, flavour: int, implicit: { stat: spellPower, value: 0.01 } }
+# Neck
+- { id: iron-torc, name: { en: "Iron Torc", cs: "Železný nákrčník" }, gender: m, slotType: neck, flavour: str, implicit: { stat: hp, value: 24 } }
+- { id: fang-necklace, name: { en: "Fang Necklace", cs: "Tesákový náhrdelník" }, gender: m, slotType: neck, flavour: agi, implicit: { stat: damage, value: 0.01 } }
+- { id: crystal-pendant, name: { en: "Crystal Pendant", cs: "Křišťálový přívěsek" }, gender: m, slotType: neck, flavour: int, implicit: { stat: int, value: 1 } }
+- { id: silver-chain, name: { en: "Silver Chain", cs: "Stříbrný řetízek" }, gender: m, slotType: neck, flavour: any, implicit: { stat: magicFind, value: 0.04 } }
+# Shoulders
+- { id: plate-pauldrons, name: { en: "Plate Pauldrons", cs: "Plátové nárameníky" }, gender: p, slotType: shoulders, flavour: str, implicit: { stat: armor, value: 0.5 } }
+- { id: leather-spaulders, name: { en: "Leather Spaulders", cs: "Kožené nárameníky" }, gender: p, slotType: shoulders, flavour: agi, implicit: { stat: agi, value: 1 } }
+- { id: silk-mantle, name: { en: "Silk Mantle", cs: "Hedvábný přehoz" }, gender: m, slotType: shoulders, flavour: int, implicit: { stat: int, value: 1 } }
+# Back
+- { id: war-cape, name: { en: "War Cape", cs: "Válečná pláštěnka" }, gender: f, slotType: back, flavour: str, implicit: { stat: hp, value: 24 } }
+- { id: hunters-cloak, name: { en: "Hunter's Cloak", cs: "Lovecký plášť" }, gender: m, slotType: back, flavour: agi, implicit: { stat: moveSpeed, value: 0.02 } }
+- { id: woven-shawl, name: { en: "Woven Shawl", cs: "Tkaný šál" }, gender: m, slotType: back, flavour: int, implicit: { stat: spellPower, value: 0.01 } }
+# Chest
+- { id: chainmail, name: { en: "Chainmail", cs: "Kroužková zbroj" }, gender: f, slotType: chest, flavour: str, implicit: { stat: armor, value: 0.5 } }
+- { id: leather-jerkin, name: { en: "Leather Jerkin", cs: "Kožená kazajka" }, gender: f, slotType: chest, flavour: agi, implicit: { stat: agi, value: 1 } }
+- { id: silk-robe, name: { en: "Silk Robe", cs: "Hedvábné roucho" }, gender: n, slotType: chest, flavour: int, implicit: { stat: int, value: 1 } }
+# Wrist
+- { id: iron-vambraces, name: { en: "Iron Vambraces", cs: "Železné nátepníky" }, gender: p, slotType: wrist, flavour: str, implicit: { stat: str, value: 1 } }
+- { id: leather-wraps, name: { en: "Leather Wraps", cs: "Kožené ovinky" }, gender: p, slotType: wrist, flavour: agi, implicit: { stat: attackSpeed, value: 0.01 } }
+- { id: silver-bangle, name: { en: "Silver Bangle", cs: "Stříbrný náramek" }, gender: m, slotType: wrist, flavour: int, implicit: { stat: spellPower, value: 0.01 } }
+# Hands
+- { id: iron-gauntlets, name: { en: "Iron Gauntlets", cs: "Železné rukavice" }, gender: p, slotType: hands, flavour: str, implicit: { stat: str, value: 1 } }
+- { id: leather-gloves, name: { en: "Leather Gloves", cs: "Kožené rukavice" }, gender: p, slotType: hands, flavour: agi, implicit: { stat: damage, value: 0.01 } }
+- { id: silk-gloves, name: { en: "Silk Gloves", cs: "Hedvábné rukavice" }, gender: p, slotType: hands, flavour: int, implicit: { stat: int, value: 1 } }
+# Waist
+- { id: plated-belt, name: { en: "Plated Belt", cs: "Plátovaný opasek" }, gender: m, slotType: waist, flavour: str, implicit: { stat: hp, value: 24 } }
+- { id: leather-belt, name: { en: "Leather Belt", cs: "Kožený opasek" }, gender: m, slotType: waist, flavour: agi, implicit: { stat: agi, value: 1 } }
+- { id: silk-sash, name: { en: "Silk Sash", cs: "Hedvábná šerpa" }, gender: f, slotType: waist, flavour: int, implicit: { stat: regen, value: 0.2 } }
+# Legs
+- { id: plate-greaves, name: { en: "Plate Greaves", cs: "Plátové holenice" }, gender: p, slotType: legs, flavour: str, implicit: { stat: armor, value: 0.5 } }
+- { id: leather-leggings, name: { en: "Leather Leggings", cs: "Kožené nohavice" }, gender: p, slotType: legs, flavour: agi, implicit: { stat: moveSpeed, value: 0.02 } }
+- { id: silk-trousers, name: { en: "Silk Trousers", cs: "Hedvábné kalhoty" }, gender: p, slotType: legs, flavour: int, implicit: { stat: int, value: 1 } }
+# Feet
+- { id: iron-sabatons, name: { en: "Iron Sabatons", cs: "Železné škorně" }, gender: p, slotType: feet, flavour: str, implicit: { stat: hp, value: 24 } }
+- { id: soft-boots, name: { en: "Soft Boots", cs: "Měkké boty" }, gender: p, slotType: feet, flavour: agi, implicit: { stat: moveSpeed, value: 0.02 } }
+- { id: cloth-slippers, name: { en: "Cloth Slippers", cs: "Plátěné střevíce" }, gender: p, slotType: feet, flavour: int, implicit: { stat: spellPower, value: 0.01 } }
+# Ring
+- { id: iron-ring, name: { en: "Iron Ring", cs: "Železný prsten" }, gender: m, slotType: ring, flavour: str, implicit: { stat: str, value: 1 } }
+- { id: jade-ring, name: { en: "Jade Ring", cs: "Nefritový prsten" }, gender: m, slotType: ring, flavour: agi, implicit: { stat: agi, value: 1 } }
+- { id: moonstone-ring, name: { en: "Moonstone Ring", cs: "Prsten z měsíčního kamene" }, gender: m, slotType: ring, flavour: int, implicit: { stat: int, value: 1 } }
+- { id: gold-ring, name: { en: "Gold Ring", cs: "Zlatý prsten" }, gender: m, slotType: ring, flavour: any, implicit: { stat: goldFind, value: 0.02 } }
+# Trinket
+- { id: war-horn, name: { en: "War Horn", cs: "Válečný roh" }, gender: m, slotType: trinket, flavour: str, implicit: { stat: regen, value: 0.2 } }
+- { id: bone-dice, name: { en: "Bone Dice", cs: "Kostěné kostky" }, gender: p, slotType: trinket, flavour: agi, implicit: { stat: damage, value: 0.01 } }
+- { id: rune-stone, name: { en: "Rune Stone", cs: "Runový kámen" }, gender: m, slotType: trinket, flavour: int, implicit: { stat: spellPower, value: 0.01 } }
+- { id: old-coin, name: { en: "Old Coin", cs: "Stará mince" }, gender: f, slotType: trinket, flavour: any, implicit: { stat: magicFind, value: 0.04 } }
+# Main hand
+- { id: broadsword, name: { en: "Broadsword", cs: "Široký meč" }, gender: m, slotType: mainHand, flavour: str, implicit: { stat: damage, value: 0.01 } }
+- { id: curved-dagger, name: { en: "Curved Dagger", cs: "Zahnutá dýka" }, gender: f, slotType: mainHand, flavour: agi, implicit: { stat: attackSpeed, value: 0.01 } }
+- { id: oak-staff, name: { en: "Oak Staff", cs: "Dubová hůl" }, gender: f, slotType: mainHand, flavour: int, implicit: { stat: spellPower, value: 0.01 } }
+- { id: iron-mace, name: { en: "Iron Mace", cs: "Železný palcát" }, gender: m, slotType: mainHand, flavour: any, implicit: { stat: damage, value: 0.01 } }
+# Off hand
+- { id: tower-shield, name: { en: "Tower Shield", cs: "Věžový štít" }, gender: m, slotType: offHand, flavour: str, implicit: { stat: armor, value: 0.5 } }
+- { id: parrying-knife, name: { en: "Parrying Knife", cs: "Krycí nůž" }, gender: m, slotType: offHand, flavour: agi, implicit: { stat: agi, value: 1 } }
+- { id: spell-tome, name: { en: "Spell Tome", cs: "Kniha kouzel" }, gender: f, slotType: offHand, flavour: int, implicit: { stat: int, value: 1 } }

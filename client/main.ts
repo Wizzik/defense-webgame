@@ -17,7 +17,7 @@ import { GearSession } from "./game/gear-session";
 import { indexedDbBackend, memoryBackend } from "./game/save-store";
 import { ProgressSession } from "./game/progress-session";
 import { WorldScreen } from "./ui/world-screen";
-import { firstUnlocked, type ProgressData } from "../meta";
+import { firstUnlocked, namedLevels, type ProgressData } from "../meta";
 import { Keyboard } from "./game/keyboard";
 import { readGameParams } from "./game/params";
 import { Session } from "./game/session";
@@ -283,7 +283,8 @@ async function start(): Promise<void> {
     }, (index, keep) => session.setCard(index, keep));
   }
   const publishGear = (): void => {
-    snapshot.collection = gear.save.items;
+    snapshot.collection = namedLevels(gear.save);
+    snapshot.collectionSize = gear.save.items.length;
     snapshot.gearSaved = gear.persistent;
     snapshot.unlocked = progress.unlocked();
     snapshot.progressSaved = progress.persistent;
@@ -580,7 +581,12 @@ function createUi(
   });
   const hud = new Hud(root);
   hud.onLoot = (tone) => sound.engine.play(sound.data.sounds[tone === "rarity-mythic" ? "drop.mythic" : "drop.legendary"]);
-  hud.dropFor = (bossId, order, magicFind) => gear.onBossDeath(bossId, session.seed, order, magicFind);
+  // the drop rolls for the run's course and the local hero's primary attribute (smart loot)
+  hud.dropFor = (bossId, order, magicFind) => {
+    const run = session.run;
+    const course = run ? { world: run.world, difficulty: run.difficulty, primary: run.hero.def.primary } : {};
+    return gear.onBossDeath(bossId, session.seed, order, magicFind, course);
+  };
   // the HUD reads the events of every step for its news line
   session.views.push({ update: () => {}, onEvents: (run) => hud.onEvents(run, lang), dispose: () => {} });
   const pointer = new CastlePointer(root);

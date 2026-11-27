@@ -39,9 +39,17 @@ export function heroStats(data: GameData, hero: HeroState, out: HeroStats): Hero
   out.damageMin = (def.baseAttack.damageMin + bonus) * damage;
   out.damageMax = (def.baseAttack.damageMax + bonus) * damage;
   out.spellPower = (1 + int * rules.hero.spellPowerPerInt) * (1 + gear.spellPower + passive.spellPower);
-  out.cooldownScale = 1 / (1 + int * rules.hero.cooldownSpeedPerInt + passive.cooldown);
+  out.cooldownScale = 1 / (1 + int * rules.hero.cooldownSpeedPerInt + passive.cooldown + gear.cooldownSpeed);
   out.moveSpeed = def.moveSpeed * (1 + hero.bonus.moveSpeed + gear.moveSpeed + passive.moveSpeed) * hero.speedScale;
   out.collision = rules.hero.collision;
+  const { caps } = rules.loot;
+  out.critChance = Math.min(gear.critChance, caps.critChance);
+  out.critDamage = rules.loot.critDamage + gear.critDamage;
+  out.dodge = Math.min(gear.dodge, caps.dodge);
+  out.damageTakenScale = 1 - Math.min(gear.damageTaken, caps.damageTaken);
+  out.thorns = gear.thorns;
+  out.ultimateScale = 1 / (1 + gear.ultimateCooldown);
+  out.areaScale = 1 + gear.areaSize;
   return out;
 }
 
@@ -207,7 +215,9 @@ export function updateHeroCombat(run: Run): void {
   const empower = consumeEmpower(run, e.x[best], e.y[best]);
   const bonus = onHitBonus(run, e.x[best], e.y[best]);
   const stun = onHitStunTicks;
-  const raw = rollDamage(run.rng, stats.damageMin, stats.damageMax) * empower + bonus;
+  // a crit (gear) draws from the run's generator only for a hero who has crit chance
+  const crit = stats.critChance > 0 && run.rng.next() < stats.critChance ? 1 + stats.critDamage : 1;
+  const raw = (rollDamage(run.rng, stats.damageMin, stats.damageMax) * empower + bonus) * crit;
   const amount = raw * (1 - reduction);
   if (!hero.moving && bestSq > 0) {
     const len = Math.sqrt(bestSq);
@@ -223,7 +233,7 @@ export function updateHeroCombat(run: Run): void {
   // more blows (two axes): each rolls its own damage on the same target, or on its splash ground once it fell
   const strikes = hero.def.baseAttack.strikes ?? 1;
   for (let s = 1; s < strikes; s++) {
-    const blow = rollDamage(run.rng, stats.damageMin, stats.damageMax) + bonus;
+    const blow = (rollDamage(run.rng, stats.damageMin, stats.damageMax) + bonus) * crit;
     if (e.alive[best] === 1) damageEnemy(run, best, blow * (1 - reduction), 0);
     splashBlow(run, best, targetX, targetY, blow);
   }

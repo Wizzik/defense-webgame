@@ -1,7 +1,10 @@
-export { applyDrop, rollDrop } from "./drop";
-export type { Drop } from "./drop";
-export { equip, toLoadout, unequip } from "./equip";
-export { emptySave, parseSave } from "./save";
+export { applyDrop, dropRank, rollDrop } from "./drop";
+export type { Drop, DropCourse } from "./drop";
+export { equip, grantNamed, loadoutEntry, toLoadout, unequip } from "./equip";
+export { namedRecord, parseRecord, recordItem, recordSlotType, rolledOf, rolledRecord } from "./item-record";
+export type { ItemRecord } from "./item-record";
+export { rolledAsItem, rolledName } from "./item-view";
+export { emptySave, namedLevels, namedRecordOf, parseSave, recordByUid } from "./save";
 export type { SaveData } from "./save";
 export { courseKey, emptyProgress, firstUnlocked, isUnlocked, parseProgress, recordResult } from "./progress";
 export type { CourseResult, ProgressData } from "./progress";

@@ -364,6 +364,13 @@ describe("data-build", () => {
     for (const item of data.items) expect(Object.keys(item)).toEqual(["id", "name", "slotType", "rarity", "stats"]);
   });
 
+  it("copies bases, affixes and rare names of random items as the design files give them", () => {
+    const d = design();
+    const data = buildGameData(mapExport(), d, "test");
+    expect(data.loot).toStrictEqual({ bases: d.itemBases, affixes: d.affixes, names: d.itemNames });
+    expect(data.loot.bases.length).toBeGreaterThan(0);
+  });
+
   it("copies enemy gold and defaults it to 0", () => {
     const data = buildGameData(mapExport(), design(), "test");
     expect(data.enemies.map((e) => e.gold)).toEqual([2, 0]);

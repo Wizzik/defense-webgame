@@ -16,7 +16,9 @@ describe("chest power", () => {
     expect(a).toEqual(chestPower(gameData(), "stonehorn", 3, { chests: 15, level: 25 }));
     expect(a.hp).toBeGreaterThan(1);
     expect(a.attack).toBeGreaterThan(1);
-    expect(a.spells).toBeGreaterThan(1);
+    // smart loot rolls a strength hero's items for strength, so his spells may stay; a caster's grow
+    expect(a.spells).toBeGreaterThanOrEqual(1);
+    expect(chestPower(gameData(), "gravecaller", 3, { chests: 15, level: 25 }).spells).toBeGreaterThan(1);
     expect(a.picks.new + a.picks.replace + a.picks.level).toBe(15);
     expect(Object.values(a.rarities).reduce((sum, n) => sum + n, 0)).toBe(15);
   });

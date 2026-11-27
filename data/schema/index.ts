@@ -3,7 +3,8 @@ import { AbilitySchema } from "./ability";
 import { ConstantsSchema } from "./constants";
 import { EnemySchema } from "./enemy";
 import { HeroSchema } from "./hero";
-import { ItemSchema, SLOT_TYPES } from "./item";
+import { ItemSchema, RARITIES, SLOT_TYPES } from "./item";
+import { LootSchema } from "./loot";
 import { RulesSchema } from "./rules";
 import { WorldSchema } from "./world";
 
@@ -22,6 +23,10 @@ export { stormOf, WorldSchema } from "./world";
 export type { World, WorldMap, Hazard, Storm, Weather, Thicket, Meteors } from "./world";
 export { HeroSchema } from "./hero";
 export type { Hero } from "./hero";
+export {
+  AFFIX_STAT_IDS, AffixSchema, GENDERS, GenderedText, ItemBaseSchema, ItemNamesSchema, LootSchema, NEW_STAT_IDS, ROLE_TAGS,
+} from "./loot";
+export type { Affix, AffixStat, Gender, ItemBase, ItemNames, Loot, RoleTag } from "./loot";
 export { ItemSchema, RARITIES, RARITY_ROWS, SLOT_TYPES, STAT_IDS } from "./item";
 export type { Effect, EffectKind, Item, Rarity, SlotType, StatId } from "./item";
 
@@ -31,6 +36,7 @@ export const GameDataSchema = z.object({
   enemies: z.array(EnemySchema),
   rules: RulesSchema,
   items: z.array(ItemSchema),
+  loot: LootSchema,
   constants: ConstantsSchema,
   worlds: z.array(WorldSchema).min(1),
 }).strict();
@@ -64,7 +70,7 @@ export function validateGameData(data: unknown): GameData {
       parsed.error.issues.map((i) => `${describePath(data, i.path)}: ${i.message}`),
     );
   }
-  const { heroes, abilities, enemies, rules, items, worlds } = parsed.data;
+  const { heroes, abilities, enemies, rules, items, loot, worlds } = parsed.data;
   const errors: string[] = [];
 
   const worldIds = new Set<string>();
@@ -156,6 +162,8 @@ export function validateGameData(data: unknown): GameData {
     if (count !== 1) errors.push(`items: ${count} common items of type ${type}, expected 1`);
   }
 
+  checkLoot(loot, rules, errors);
+
   if (rules.debug.phaseXp.length !== rules.phases.length) {
     errors.push(`rules.debug.phaseXp: ${rules.debug.phaseXp.length} values for ${rules.phases.length} phases`);
   }
@@ -194,4 +202,36 @@ export function validateGameData(data: unknown): GameData {
 
   if (errors.length > 0) throw new GameDataError(errors);
   return parsed.data;
+}
+
+/** Random items: unique ids and stats, every slot type with a base of each primary flavour, enough affixes. */
+function checkLoot(loot: GameData["loot"], rules: GameData["rules"], errors: string[]): void {
+  const baseIds = new Set<string>();
+  loot.bases.forEach((b, i) => {
+    if (baseIds.has(b.id)) errors.push(`loot.bases.${i}.id: duplicate base id "${b.id}"`);
+    baseIds.add(b.id);
+  });
+  for (const type of SLOT_TYPES) {
+    for (const flavour of ["str", "agi", "int"] as const) {
+      if (!loot.bases.some((b) => b.slotType === type && b.flavour === flavour)) {
+        errors.push(`loot.bases: no ${flavour} base of type ${type}`);
+      }
+    }
+  }
+  const stats = new Set<string>();
+  loot.affixes.forEach((a, i) => {
+    if (stats.has(a.stat)) errors.push(`loot.affixes.${i}.stat: duplicate affix "${a.stat}"`);
+    stats.add(a.stat);
+  });
+  loot.bases.forEach((b, i) => {
+    if (!stats.has(b.implicit.stat)) errors.push(`loot.bases.${i} (${b.id}).implicit.stat: no affix prices "${b.implicit.stat}"`);
+  });
+  const most = Math.max(...RARITIES.map((r) => rules.loot.affixCount[r]));
+  if (loot.affixes.length < most) errors.push(`loot.affixes: ${loot.affixes.length} affixes, an item rolls up to ${most}`);
+  if (rules.loot.levelAtPower.length !== rules.gear.maxPermanentLevel) {
+    errors.push(`rules.loot.levelAtPower: ${rules.loot.levelAtPower.length} values for ${rules.gear.maxPermanentLevel} item levels`);
+  }
+  if (rules.loot.power.boss.length !== rules.drops.length) {
+    errors.push(`rules.loot.power.boss: ${rules.loot.power.boss.length} values for ${rules.drops.length} boss drops`);
+  }
 }

@@ -120,6 +120,64 @@ drops:
   - { boss: pale-abbot, weights: { rare: 60, epic: 40 } }
   - { boss: gunmaster, weights: { epic: 75, legendary: 25 } }
   - { boss: dread-regent, weights: { epic: 50, legendary: 40, mythic: 10 } }
+# loot: random items (spec 2026-11-26 random items, docs/DECISIONS.md section Random items; bases in
+#   design/item-bases.yaml, affixes in design/affixes.yaml). A rolled item has its base's implicit row
+#   (implicitPoints) and affixCount affix rows; the affix rows share the rest of the rarity's budget (design/items.yaml
+#   header): row i = (budget - implicitPoints) x weight_i / (sum of the weights) x a roll in [1 - rowRoll, 1 + rowRoll]
+#   points, weight_i the weight of its tier (T1-T4 in `tiers`); a tier rolls only when the item power reaches its
+#   minPower, so a strong source gives fewer and bigger rows, never more points. smartShare of the affixes (and the
+#   base's flavour) come from the hero's primary attribute's pool. A card or drop of a rarity is a named item
+#   (design/items.yaml) with namedShare, else a rolled one; a mythic roll draws one of mythicEffects.
+#   Item power: power.boss[boss order] for a drop, chestBase + chestPerPhase x phase for a chest, + perWorld x
+#   (world - 1) + power.difficulty; a dropped item has the highest level whose levelAtPower the power reaches.
+#   salvageGold: gold a salvaged item gives the next run's chests; the collection holds collectionLimit items.
+#   critDamage: the extra damage of a critical basic attack before gear; caps: the most gear gives of crit chance,
+#   dodge and damage taken (sim/hero.ts).
+loot:
+  smartShare: 0.6
+  collectionLimit: 200
+  budget: { common: 6, rare: 12, epic: 20, legendary: 30, mythic: 42 }
+  implicitPoints: 2
+  rowRoll: 0.08
+  affixCount: { common: 1, rare: 2, epic: 3, legendary: 4, mythic: 4 }
+  namedShare: { common: 0, rare: 0, epic: 0.1, legendary: 0.25, mythic: 0.4 }
+  salvageGold: { common: 10, rare: 25, epic: 50, legendary: 90, mythic: 150 }
+  tiers: [{ weight: 1, minPower: 0 }, { weight: 1.35, minPower: 3 }, { weight: 1.7, minPower: 6 }, { weight: 2, minPower: 9 }]
+  power: { boss: [2, 4, 6, 8], chestBase: 1, chestPerPhase: 0.3, perWorld: 0.5, difficulty: { normal: 0, insane: 1, hell: 2 } }
+  levelAtPower: [0, 3, 6, 9, 12]
+  critDamage: 0.5
+  caps: { critChance: 0.6, dodge: 0.4, damageTaken: 0.5 }
+  mythicEffects:
+    - kind: chain_on_attack
+      params: { every: 4, damage: 120, jumps: 4, range: 380 }
+      text:
+        en: "Every 4th attack throws lightning that jumps on to 4 enemies."
+        cs: "Každý 4. útok vyšle blesk, který přeskočí na 4 nepřátele."
+    - kind: splash_on_attack
+      params: { chance: 0.3, radius: 220, fraction: 0.6 }
+      text:
+        en: "Attacks have a 30 % chance to hit everyone around the target for 60 % of the damage."
+        cs: "Útok má 30% šanci zasáhnout všechny kolem cíle za 60 % poškození."
+    - kind: low_hp_shield
+      params: { threshold: 0.3, seconds: 3, cooldown: 40 }
+      text:
+        en: "Under 30 % HP you and the castle take no damage for 3 s. Works once in 43 s."
+        cs: "Pod 30 % HP nedostáváš ty ani hrad 3 s žádné poškození. Funguje jednou za 43 s."
+    - kind: haste_on_elite_kill
+      params: { cooldownSpeed: 1.5, seconds: 8 }
+      text:
+        en: "When an elite or a boss falls, your spells recharge 50 % faster for 8 s."
+        cs: "Když padne elita nebo boss, kouzla se ti 8 s dobíjejí o 50 % rychleji."
+    - kind: slow_aura
+      params: { radius: 350, slow: 0.25 }
+      text:
+        en: "Enemies near you walk 25 % slower."
+        cs: "Nepřátelé poblíž tebe chodí o 25 % pomaleji."
+    - kind: gold_heals_castle
+      params: { perGold: 1.5 }
+      text:
+        en: "Every gold you collect heals the castle by 1.5 HP."
+        cs: "Každý sebraný zlaťák vyléčí hrad o 1,5 HP."
 progression: { xpFirst: 10, xpStep: 9, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3,
   ultimateFromLevel: 6, ultimateLevelStep: 6,   # map: ultimates need hero level 10
   # Shared spells and passives (docs/DECISIONS.md, section Shared spells and passives): the pools, the

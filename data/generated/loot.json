@@ -1,0 +1,1508 @@
+{
+  "bases": [
+    {
+      "id": "iron-helm",
+      "name": {
+        "en": "Iron Helm",
+        "cs": "Železná přilba"
+      },
+      "gender": "f",
+      "slotType": "head",
+      "flavour": "str",
+      "implicit": {
+        "stat": "armor",
+        "value": 0.5
+      }
+    },
+    {
+      "id": "leather-cap",
+      "name": {
+        "en": "Leather Cap",
+        "cs": "Kožená čapka"
+      },
+      "gender": "f",
+      "slotType": "head",
+      "flavour": "agi",
+      "implicit": {
+        "stat": "attackSpeed",
+        "value": 0.01
+      }
+    },
+    {
+      "id": "silk-hood",
+      "name": {
+        "en": "Silk Hood",
+        "cs": "Hedvábná kápě"
+      },
+      "gender": "f",
+      "slotType": "head",
+      "flavour": "int",
+      "implicit": {
+        "stat": "spellPower",
+        "value": 0.01
+      }
+    },
+    {
+      "id": "iron-torc",
+      "name": {
+        "en": "Iron Torc",
+        "cs": "Železný nákrčník"
+      },
+      "gender": "m",
+      "slotType": "neck",
+      "flavour": "str",
+      "implicit": {
+        "stat": "hp",
+        "value": 24
+      }
+    },
+    {
+      "id": "fang-necklace",
+      "name": {
+        "en": "Fang Necklace",
+        "cs": "Tesákový náhrdelník"
+      },
+      "gender": "m",
+      "slotType": "neck",
+      "flavour": "agi",
+      "implicit": {
+        "stat": "damage",
+        "value": 0.01
+      }
+    },
+    {
+      "id": "crystal-pendant",
+      "name": {
+        "en": "Crystal Pendant",
+        "cs": "Křišťálový přívěsek"
+      },
+      "gender": "m",
+      "slotType": "neck",
+      "flavour": "int",
+      "implicit": {
+        "stat": "int",
+        "value": 1
+      }
+    },
+    {
+      "id": "silver-chain",
+      "name": {
+        "en": "Silver Chain",
+        "cs": "Stříbrný řetízek"
+      },
+      "gender": "m",
+      "slotType": "neck",
+      "flavour": "any",
+      "implicit": {
+        "stat": "magicFind",
+        "value": 0.04
+      }
+    },
+    {
+      "id": "plate-pauldrons",
+      "name": {
+        "en": "Plate Pauldrons",
+        "cs": "Plátové nárameníky"
+      },
+      "gender": "p",
+      "slotType": "shoulders",
+      "flavour": "str",
+      "implicit": {
+        "stat": "armor",
+        "value": 0.5
+      }
+    },
+    {
+      "id": "leather-spaulders",
+      "name": {
+        "en": "Leather Spaulders",
+        "cs": "Kožené nárameníky"
+      },
+      "gender": "p",
+      "slotType": "shoulders",
+      "flavour": "agi",
+      "implicit": {
+        "stat": "agi",
+        "value": 1
+      }
+    },
+    {
+      "id": "silk-mantle",
+      "name": {
+        "en": "Silk Mantle",
+        "cs": "Hedvábný přehoz"
+      },
+      "gender": "m",
+      "slotType": "shoulders",
+      "flavour": "int",
+      "implicit": {
+        "stat": "int",
+        "value": 1
+      }
+    },
+    {
+      "id": "war-cape",
+      "name": {
+        "en": "War Cape",
+        "cs": "Válečná pláštěnka"
+      },
+      "gender": "f",
+      "slotType": "back",
+      "flavour": "str",
+      "implicit": {
+        "stat": "hp",
+        "value": 24
+      }
+    },
+    {
+      "id": "hunters-cloak",
+      "name": {
+        "en": "Hunter's Cloak",
+        "cs": "Lovecký plášť"
+      },
+      "gender": "m",
+      "slotType": "back",
+      "flavour": "agi",
+      "implicit": {
+        "stat": "moveSpeed",
+        "value": 0.02
+      }
+    },
+    {
+      "id": "woven-shawl",
+      "name": {
+        "en": "Woven Shawl",
+        "cs": "Tkaný šál"
+      },
+      "gender": "m",
+      "slotType": "back",
+      "flavour": "int",
+      "implicit": {
+        "stat": "spellPower",
+        "value": 0.01
+      }
+    },
+    {
+      "id": "chainmail",
+      "name": {
+        "en": "Chainmail",
+        "cs": "Kroužková zbroj"
+      },
+      "gender": "f",
+      "slotType": "chest",
+      "flavour": "str",
+      "implicit": {
+        "stat": "armor",
+        "value": 0.5
+      }
+    },
+    {
+      "id": "leather-jerkin",
+      "name": {
+        "en": "Leather Jerkin",
+        "cs": "Kožená kazajka"
+      },
+      "gender": "f",
+      "slotType": "chest",
+      "flavour": "agi",
+      "implicit": {
+        "stat": "agi",
+        "value": 1
+      }
+    },
+    {
+      "id": "silk-robe",
+      "name": {
+        "en": "Silk Robe",
+        "cs": "Hedvábné roucho"
+      },
+      "gender": "n",
+      "slotType": "chest",
+      "flavour": "int",
+      "implicit": {
+        "stat": "int",
+        "value": 1
+      }
+    },
+    {
+      "id": "iron-vambraces",
+      "name": {
+        "en": "Iron Vambraces",
+        "cs": "Železné nátepníky"
+      },
+      "gender": "p",
+      "slotType": "wrist",
+      "flavour": "str",
+      "implicit": {
+        "stat": "str",
+        "value": 1
+      }
+    },
+    {
+      "id": "leather-wraps",
+      "name": {
+        "en": "Leather Wraps",
+        "cs": "Kožené ovinky"
+      },
+      "gender": "p",
+      "slotType": "wrist",
+      "flavour": "agi",
+      "implicit": {
+        "stat": "attackSpeed",
+        "value": 0.01
+      }
+    },
+    {
+      "id": "silver-bangle",
+      "name": {
+        "en": "Silver Bangle",
+        "cs": "Stříbrný náramek"
+      },
+      "gender": "m",
+      "slotType": "wrist",
+      "flavour": "int",
+      "implicit": {
+        "stat": "spellPower",
+        "value": 0.01
+      }
+    },
+    {
+      "id": "iron-gauntlets",
+      "name": {
+        "en": "Iron Gauntlets",
+        "cs": "Železné rukavice"
+      },
+      "gender": "p",
+      "slotType": "hands",
+      "flavour": "str",
+      "implicit": {
+        "stat": "str",
+        "value": 1
+      }
+    },
+    {
+      "id": "leather-gloves",
+      "name": {
+        "en": "Leather Gloves",
+        "cs": "Kožené rukavice"
+      },
+      "gender": "p",
+      "slotType": "hands",
+      "flavour": "agi",
+      "implicit": {
+        "stat": "damage",
+        "value": 0.01
+      }
+    },
+    {
+      "id": "silk-gloves",
+      "name": {
+        "en": "Silk Gloves",
+        "cs": "Hedvábné rukavice"
+      },
+      "gender": "p",
+      "slotType": "hands",
+      "flavour": "int",
+      "implicit": {
+        "stat": "int",
+        "value": 1
+      }
+    },
+    {
+      "id": "plated-belt",
+      "name": {
+        "en": "Plated Belt",
+        "cs": "Plátovaný opasek"
+      },
+      "gender": "m",
+      "slotType": "waist",
+      "flavour": "str",
+      "implicit": {
+        "stat": "hp",
+        "value": 24
+      }
+    },
+    {
+      "id": "leather-belt",
+      "name": {
+        "en": "Leather Belt",
+        "cs": "Kožený opasek"
+      },
+      "gender": "m",
+      "slotType": "waist",
+      "flavour": "agi",
+      "implicit": {
+        "stat": "agi",
+        "value": 1
+      }
+    },
+    {
+      "id": "silk-sash",
+      "name": {
+        "en": "Silk Sash",
+        "cs": "Hedvábná šerpa"
+      },
+      "gender": "f",
+      "slotType": "waist",
+      "flavour": "int",
+      "implicit": {
+        "stat": "regen",
+        "value": 0.2
+      }
+    },
+    {
+      "id": "plate-greaves",
+      "name": {
+        "en": "Plate Greaves",
+        "cs": "Plátové holenice"
+      },
+      "gender": "p",
+      "slotType": "legs",
+      "flavour": "str",
+      "implicit": {
+        "stat": "armor",
+        "value": 0.5
+      }
+    },
+    {
+      "id": "leather-leggings",
+      "name": {
+        "en": "Leather Leggings",
+        "cs": "Kožené nohavice"
+      },
+      "gender": "p",
+      "slotType": "legs",
+      "flavour": "agi",
+      "implicit": {
+        "stat": "moveSpeed",
+        "value": 0.02
+      }
+    },
+    {
+      "id": "silk-trousers",
+      "name": {
+        "en": "Silk Trousers",
+        "cs": "Hedvábné kalhoty"
+      },
+      "gender": "p",
+      "slotType": "legs",
+      "flavour": "int",
+      "implicit": {
+        "stat": "int",
+        "value": 1
+      }
+    },
+    {
+      "id": "iron-sabatons",
+      "name": {
+        "en": "Iron Sabatons",
+        "cs": "Železné škorně"
+      },
+      "gender": "p",
+      "slotType": "feet",
+      "flavour": "str",
+      "implicit": {
+        "stat": "hp",
+        "value": 24
+      }
+    },
+    {
+      "id": "soft-boots",
+      "name": {
+        "en": "Soft Boots",
+        "cs": "Měkké boty"
+      },
+      "gender": "p",
+      "slotType": "feet",
+      "flavour": "agi",
+      "implicit": {
+        "stat": "moveSpeed",
+        "value": 0.02
+      }
+    },
+    {
+      "id": "cloth-slippers",
+      "name": {
+        "en": "Cloth Slippers",
+        "cs": "Plátěné střevíce"
+      },
+      "gender": "p",
+      "slotType": "feet",
+      "flavour": "int",
+      "implicit": {
+        "stat": "spellPower",
+        "value": 0.01
+      }
+    },
+    {
+      "id": "iron-ring",
+      "name": {
+        "en": "Iron Ring",
+        "cs": "Železný prsten"
+      },
+      "gender": "m",
+      "slotType": "ring",
+      "flavour": "str",
+      "implicit": {
+        "stat": "str",
+        "value": 1
+      }
+    },
+    {
+      "id": "jade-ring",
+      "name": {
+        "en": "Jade Ring",
+        "cs": "Nefritový prsten"
+      },
+      "gender": "m",
+      "slotType": "ring",
+      "flavour": "agi",
+      "implicit": {
+        "stat": "agi",
+        "value": 1
+      }
+    },
+    {
+      "id": "moonstone-ring",
+      "name": {
+        "en": "Moonstone Ring",
+        "cs": "Prsten z měsíčního kamene"
+      },
+      "gender": "m",
+      "slotType": "ring",
+      "flavour": "int",
+      "implicit": {
+        "stat": "int",
+        "value": 1
+      }
+    },
+    {
+      "id": "gold-ring",
+      "name": {
+        "en": "Gold Ring",
+        "cs": "Zlatý prsten"
+      },
+      "gender": "m",
+      "slotType": "ring",
+      "flavour": "any",
+      "implicit": {
+        "stat": "goldFind",
+        "value": 0.02
+      }
+    },
+    {
+      "id": "war-horn",
+      "name": {
+        "en": "War Horn",
+        "cs": "Válečný roh"
+      },
+      "gender": "m",
+      "slotType": "trinket",
+      "flavour": "str",
+      "implicit": {
+        "stat": "regen",
+        "value": 0.2
+      }
+    },
+    {
+      "id": "bone-dice",
+      "name": {
+        "en": "Bone Dice",
+        "cs": "Kostěné kostky"
+      },
+      "gender": "p",
+      "slotType": "trinket",
+      "flavour": "agi",
+      "implicit": {
+        "stat": "damage",
+        "value": 0.01
+      }
+    },
+    {
+      "id": "rune-stone",
+      "name": {
+        "en": "Rune Stone",
+        "cs": "Runový kámen"
+      },
+      "gender": "m",
+      "slotType": "trinket",
+      "flavour": "int",
+      "implicit": {
+        "stat": "spellPower",
+        "value": 0.01
+      }
+    },
+    {
+      "id": "old-coin",
+      "name": {
+        "en": "Old Coin",
+        "cs": "Stará mince"
+      },
+      "gender": "f",
+      "slotType": "trinket",
+      "flavour": "any",
+      "implicit": {
+        "stat": "magicFind",
+        "value": 0.04
+      }
+    },
+    {
+      "id": "broadsword",
+      "name": {
+        "en": "Broadsword",
+        "cs": "Široký meč"
+      },
+      "gender": "m",
+      "slotType": "mainHand",
+      "flavour": "str",
+      "implicit": {
+        "stat": "damage",
+        "value": 0.01
+      }
+    },
+    {
+      "id": "curved-dagger",
+      "name": {
+        "en": "Curved Dagger",
+        "cs": "Zahnutá dýka"
+      },
+      "gender": "f",
+      "slotType": "mainHand",
+      "flavour": "agi",
+      "implicit": {
+        "stat": "attackSpeed",
+        "value": 0.01
+      }
+    },
+    {
+      "id": "oak-staff",
+      "name": {
+        "en": "Oak Staff",
+        "cs": "Dubová hůl"
+      },
+      "gender": "f",
+      "slotType": "mainHand",
+      "flavour": "int",
+      "implicit": {
+        "stat": "spellPower",
+        "value": 0.01
+      }
+    },
+    {
+      "id": "iron-mace",
+      "name": {
+        "en": "Iron Mace",
+        "cs": "Železný palcát"
+      },
+      "gender": "m",
+      "slotType": "mainHand",
+      "flavour": "any",
+      "implicit": {
+        "stat": "damage",
+        "value": 0.01
+      }
+    },
+    {
+      "id": "tower-shield",
+      "name": {
+        "en": "Tower Shield",
+        "cs": "Věžový štít"
+      },
+      "gender": "m",
+      "slotType": "offHand",
+      "flavour": "str",
+      "implicit": {
+        "stat": "armor",
+        "value": 0.5
+      }
+    },
+    {
+      "id": "parrying-knife",
+      "name": {
+        "en": "Parrying Knife",
+        "cs": "Krycí nůž"
+      },
+      "gender": "m",
+      "slotType": "offHand",
+      "flavour": "agi",
+      "implicit": {
+        "stat": "agi",
+        "value": 1
+      }
+    },
+    {
+      "id": "spell-tome",
+      "name": {
+        "en": "Spell Tome",
+        "cs": "Kniha kouzel"
+      },
+      "gender": "f",
+      "slotType": "offHand",
+      "flavour": "int",
+      "implicit": {
+        "stat": "int",
+        "value": 1
+      }
+    }
+  ],
+  "affixes": [
+    {
+      "stat": "str",
+      "tags": [
+        "str"
+      ],
+      "unit": 0.5,
+      "prefix": {
+        "en": "Mighty",
+        "cs": {
+          "m": "Mocný",
+          "f": "Mocná",
+          "n": "Mocné",
+          "p": "Mocné"
+        }
+      },
+      "suffix": {
+        "en": "of the Bear",
+        "cs": "medvěda"
+      }
+    },
+    {
+      "stat": "hp",
+      "tags": [
+        "str"
+      ],
+      "unit": 12,
+      "prefix": {
+        "en": "Sturdy",
+        "cs": {
+          "m": "Odolný",
+          "f": "Odolná",
+          "n": "Odolné",
+          "p": "Odolné"
+        }
+      },
+      "suffix": {
+        "en": "of the Oak",
+        "cs": "dubu"
+      }
+    },
+    {
+      "stat": "armor",
+      "tags": [
+        "str"
+      ],
+      "unit": 0.25,
+      "prefix": {
+        "en": "Plated",
+        "cs": {
+          "m": "Kovaný",
+          "f": "Kovaná",
+          "n": "Kované",
+          "p": "Kované"
+        }
+      },
+      "suffix": {
+        "en": "of the Wall",
+        "cs": "hradeb"
+      }
+    },
+    {
+      "stat": "regen",
+      "tags": [
+        "str"
+      ],
+      "unit": 0.1,
+      "prefix": {
+        "en": "Mending",
+        "cs": {
+          "m": "Hojivý",
+          "f": "Hojivá",
+          "n": "Hojivé",
+          "p": "Hojivé"
+        }
+      },
+      "suffix": {
+        "en": "of the Spring",
+        "cs": "pramene"
+      }
+    },
+    {
+      "stat": "damageTaken",
+      "tags": [
+        "str"
+      ],
+      "unit": 0.005,
+      "maxTier": 3,
+      "prefix": {
+        "en": "Stalwart",
+        "cs": {
+          "m": "Neochvějný",
+          "f": "Neochvějná",
+          "n": "Neochvějné",
+          "p": "Neochvějné"
+        }
+      },
+      "suffix": {
+        "en": "of the Tortoise",
+        "cs": "želvy"
+      }
+    },
+    {
+      "stat": "thorns",
+      "tags": [
+        "str"
+      ],
+      "unit": 0.05,
+      "prefix": {
+        "en": "Barbed",
+        "cs": {
+          "m": "Ostnatý",
+          "f": "Ostnatá",
+          "n": "Ostnaté",
+          "p": "Ostnaté"
+        }
+      },
+      "suffix": {
+        "en": "of Thorns",
+        "cs": "trní"
+      }
+    },
+    {
+      "stat": "agi",
+      "tags": [
+        "agi"
+      ],
+      "unit": 0.5,
+      "prefix": {
+        "en": "Nimble",
+        "cs": {
+          "m": "Hbitý",
+          "f": "Hbitá",
+          "n": "Hbité",
+          "p": "Hbité"
+        }
+      },
+      "suffix": {
+        "en": "of the Lynx",
+        "cs": "rysa"
+      }
+    },
+    {
+      "stat": "attackSpeed",
+      "tags": [
+        "agi"
+      ],
+      "unit": 0.005,
+      "prefix": {
+        "en": "Swift",
+        "cs": {
+          "m": "Rychlý",
+          "f": "Rychlá",
+          "n": "Rychlé",
+          "p": "Rychlé"
+        }
+      },
+      "suffix": {
+        "en": "of the Hornet",
+        "cs": "sršně"
+      }
+    },
+    {
+      "stat": "damage",
+      "tags": [
+        "agi"
+      ],
+      "unit": 0.005,
+      "prefix": {
+        "en": "Cruel",
+        "cs": {
+          "m": "Krutý",
+          "f": "Krutá",
+          "n": "Kruté",
+          "p": "Kruté"
+        }
+      },
+      "suffix": {
+        "en": "of the Wolf",
+        "cs": "vlka"
+      }
+    },
+    {
+      "stat": "moveSpeed",
+      "tags": [
+        "agi"
+      ],
+      "unit": 0.01,
+      "maxTier": 3,
+      "prefix": {
+        "en": "Fleet",
+        "cs": {
+          "m": "Svižný",
+          "f": "Svižná",
+          "n": "Svižné",
+          "p": "Svižné"
+        }
+      },
+      "suffix": {
+        "en": "of the Hare",
+        "cs": "zajíce"
+      }
+    },
+    {
+      "stat": "critChance",
+      "tags": [
+        "agi"
+      ],
+      "unit": 0.01,
+      "prefix": {
+        "en": "Keen",
+        "cs": {
+          "m": "Ostrý",
+          "f": "Ostrá",
+          "n": "Ostré",
+          "p": "Ostré"
+        }
+      },
+      "suffix": {
+        "en": "of the Hawk",
+        "cs": "jestřába"
+      }
+    },
+    {
+      "stat": "critDamage",
+      "tags": [
+        "agi"
+      ],
+      "unit": 0.05,
+      "prefix": {
+        "en": "Brutal",
+        "cs": {
+          "m": "Drtivý",
+          "f": "Drtivá",
+          "n": "Drtivé",
+          "p": "Drtivé"
+        }
+      },
+      "suffix": {
+        "en": "of Ruin",
+        "cs": "zkázy"
+      }
+    },
+    {
+      "stat": "dodge",
+      "tags": [
+        "agi"
+      ],
+      "unit": 0.005,
+      "maxTier": 3,
+      "prefix": {
+        "en": "Elusive",
+        "cs": {
+          "m": "Prchavý",
+          "f": "Prchavá",
+          "n": "Prchavé",
+          "p": "Prchavé"
+        }
+      },
+      "suffix": {
+        "en": "of the Shadow",
+        "cs": "stínu"
+      }
+    },
+    {
+      "stat": "int",
+      "tags": [
+        "int"
+      ],
+      "unit": 0.5,
+      "prefix": {
+        "en": "Wise",
+        "cs": {
+          "m": "Moudrý",
+          "f": "Moudrá",
+          "n": "Moudré",
+          "p": "Moudré"
+        }
+      },
+      "suffix": {
+        "en": "of the Owl",
+        "cs": "sovy"
+      }
+    },
+    {
+      "stat": "spellPower",
+      "tags": [
+        "int"
+      ],
+      "unit": 0.005,
+      "prefix": {
+        "en": "Arcane",
+        "cs": {
+          "m": "Tajemný",
+          "f": "Tajemná",
+          "n": "Tajemné",
+          "p": "Tajemné"
+        }
+      },
+      "suffix": {
+        "en": "of the Magus",
+        "cs": "mága"
+      }
+    },
+    {
+      "stat": "cooldownSpeed",
+      "tags": [
+        "int"
+      ],
+      "unit": 0.005,
+      "prefix": {
+        "en": "Hasty",
+        "cs": {
+          "m": "Spěšný",
+          "f": "Spěšná",
+          "n": "Spěšné",
+          "p": "Spěšné"
+        }
+      },
+      "suffix": {
+        "en": "of the Comet",
+        "cs": "komety"
+      }
+    },
+    {
+      "stat": "ultimateCooldown",
+      "tags": [
+        "int"
+      ],
+      "unit": 0.01,
+      "prefix": {
+        "en": "Ascendant",
+        "cs": {
+          "m": "Vzestupný",
+          "f": "Vzestupná",
+          "n": "Vzestupné",
+          "p": "Vzestupné"
+        }
+      },
+      "suffix": {
+        "en": "of the Storm",
+        "cs": "bouře"
+      }
+    },
+    {
+      "stat": "areaSize",
+      "tags": [
+        "int"
+      ],
+      "unit": 0.005,
+      "prefix": {
+        "en": "Vast",
+        "cs": {
+          "m": "Rozlehlý",
+          "f": "Rozlehlá",
+          "n": "Rozlehlé",
+          "p": "Rozlehlé"
+        }
+      },
+      "suffix": {
+        "en": "of the Tide",
+        "cs": "přílivu"
+      }
+    },
+    {
+      "stat": "lifesteal",
+      "tags": [
+        "str",
+        "agi",
+        "int"
+      ],
+      "unit": 0.0025,
+      "maxTier": 3,
+      "prefix": {
+        "en": "Thirsting",
+        "cs": {
+          "m": "Žíznivý",
+          "f": "Žíznivá",
+          "n": "Žíznivé",
+          "p": "Žíznivé"
+        }
+      },
+      "suffix": {
+        "en": "of the Leech",
+        "cs": "pijavice"
+      }
+    },
+    {
+      "stat": "magnet",
+      "tags": [
+        "any"
+      ],
+      "unit": 10,
+      "prefix": {
+        "en": "Drawing",
+        "cs": {
+          "m": "Přitažlivý",
+          "f": "Přitažlivá",
+          "n": "Přitažlivé",
+          "p": "Přitažlivé"
+        }
+      },
+      "suffix": {
+        "en": "of the Magpie",
+        "cs": "straky"
+      }
+    },
+    {
+      "stat": "goldFind",
+      "tags": [
+        "any"
+      ],
+      "unit": 0.01,
+      "prefix": {
+        "en": "Gilded",
+        "cs": {
+          "m": "Zlacený",
+          "f": "Zlacená",
+          "n": "Zlacené",
+          "p": "Zlacené"
+        }
+      },
+      "suffix": {
+        "en": "of Greed",
+        "cs": "chamtivosti"
+      }
+    },
+    {
+      "stat": "magicFind",
+      "tags": [
+        "any"
+      ],
+      "unit": 0.02,
+      "prefix": {
+        "en": "Lucky",
+        "cs": {
+          "m": "Šťastný",
+          "f": "Šťastná",
+          "n": "Šťastné",
+          "p": "Šťastné"
+        }
+      },
+      "suffix": {
+        "en": "of Fortune",
+        "cs": "štěstěny"
+      }
+    }
+  ],
+  "names": {
+    "first": [
+      {
+        "en": "Grim",
+        "cs": {
+          "m": "Ponurý",
+          "f": "Ponurá",
+          "n": "Ponuré",
+          "p": "Ponuré"
+        }
+      },
+      {
+        "en": "Dread",
+        "cs": {
+          "m": "Hrozivý",
+          "f": "Hrozivá",
+          "n": "Hrozivé",
+          "p": "Hrozivé"
+        }
+      },
+      {
+        "en": "Bone",
+        "cs": {
+          "m": "Kostěný",
+          "f": "Kostěná",
+          "n": "Kostěné",
+          "p": "Kostěné"
+        }
+      },
+      {
+        "en": "Blood",
+        "cs": {
+          "m": "Krvavý",
+          "f": "Krvavá",
+          "n": "Krvavé",
+          "p": "Krvavé"
+        }
+      },
+      {
+        "en": "Ash",
+        "cs": {
+          "m": "Popelavý",
+          "f": "Popelavá",
+          "n": "Popelavé",
+          "p": "Popelavé"
+        }
+      },
+      {
+        "en": "Pale",
+        "cs": {
+          "m": "Bledý",
+          "f": "Bledá",
+          "n": "Bledé",
+          "p": "Bledé"
+        }
+      },
+      {
+        "en": "Ember",
+        "cs": {
+          "m": "Žhavý",
+          "f": "Žhavá",
+          "n": "Žhavé",
+          "p": "Žhavé"
+        }
+      },
+      {
+        "en": "Storm",
+        "cs": {
+          "m": "Bouřlivý",
+          "f": "Bouřlivá",
+          "n": "Bouřlivé",
+          "p": "Bouřlivé"
+        }
+      },
+      {
+        "en": "Night",
+        "cs": {
+          "m": "Noční",
+          "f": "Noční",
+          "n": "Noční",
+          "p": "Noční"
+        }
+      },
+      {
+        "en": "Raven",
+        "cs": {
+          "m": "Havraní",
+          "f": "Havraní",
+          "n": "Havraní",
+          "p": "Havraní"
+        }
+      },
+      {
+        "en": "Wolf",
+        "cs": {
+          "m": "Vlčí",
+          "f": "Vlčí",
+          "n": "Vlčí",
+          "p": "Vlčí"
+        }
+      },
+      {
+        "en": "Dragon",
+        "cs": {
+          "m": "Dračí",
+          "f": "Dračí",
+          "n": "Dračí",
+          "p": "Dračí"
+        }
+      },
+      {
+        "en": "Winter",
+        "cs": {
+          "m": "Zimní",
+          "f": "Zimní",
+          "n": "Zimní",
+          "p": "Zimní"
+        }
+      },
+      {
+        "en": "Gloom",
+        "cs": {
+          "m": "Šerý",
+          "f": "Šerá",
+          "n": "Šeré",
+          "p": "Šeré"
+        }
+      }
+    ],
+    "nouns": {
+      "head": [
+        {
+          "name": {
+            "en": "Crown",
+            "cs": "koruna"
+          },
+          "gender": "f"
+        },
+        {
+          "name": {
+            "en": "Cowl",
+            "cs": "kukla"
+          },
+          "gender": "f"
+        },
+        {
+          "name": {
+            "en": "Visor",
+            "cs": "hledí"
+          },
+          "gender": "n"
+        }
+      ],
+      "neck": [
+        {
+          "name": {
+            "en": "Collar",
+            "cs": "obojek"
+          },
+          "gender": "m"
+        },
+        {
+          "name": {
+            "en": "Talisman",
+            "cs": "talisman"
+          },
+          "gender": "m"
+        },
+        {
+          "name": {
+            "en": "Locket",
+            "cs": "medailon"
+          },
+          "gender": "m"
+        }
+      ],
+      "shoulders": [
+        {
+          "name": {
+            "en": "Mantle",
+            "cs": "přehoz"
+          },
+          "gender": "m"
+        },
+        {
+          "name": {
+            "en": "Spaulders",
+            "cs": "nárameníky"
+          },
+          "gender": "p"
+        }
+      ],
+      "back": [
+        {
+          "name": {
+            "en": "Shroud",
+            "cs": "rubáš"
+          },
+          "gender": "m"
+        },
+        {
+          "name": {
+            "en": "Cape",
+            "cs": "pláštěnka"
+          },
+          "gender": "f"
+        }
+      ],
+      "chest": [
+        {
+          "name": {
+            "en": "Carapace",
+            "cs": "krunýř"
+          },
+          "gender": "m"
+        },
+        {
+          "name": {
+            "en": "Vestment",
+            "cs": "roucho"
+          },
+          "gender": "n"
+        },
+        {
+          "name": {
+            "en": "Hauberk",
+            "cs": "drátěnice"
+          },
+          "gender": "f"
+        }
+      ],
+      "wrist": [
+        {
+          "name": {
+            "en": "Bracer",
+            "cs": "náramek"
+          },
+          "gender": "m"
+        },
+        {
+          "name": {
+            "en": "Clasp",
+            "cs": "spona"
+          },
+          "gender": "f"
+        }
+      ],
+      "hands": [
+        {
+          "name": {
+            "en": "Grip",
+            "cs": "stisk"
+          },
+          "gender": "m"
+        },
+        {
+          "name": {
+            "en": "Fist",
+            "cs": "pěst"
+          },
+          "gender": "f"
+        },
+        {
+          "name": {
+            "en": "Claws",
+            "cs": "drápy"
+          },
+          "gender": "p"
+        }
+      ],
+      "waist": [
+        {
+          "name": {
+            "en": "Cord",
+            "cs": "šňůra"
+          },
+          "gender": "f"
+        },
+        {
+          "name": {
+            "en": "Girdle",
+            "cs": "pás"
+          },
+          "gender": "m"
+        }
+      ],
+      "legs": [
+        {
+          "name": {
+            "en": "Greaves",
+            "cs": "holenice"
+          },
+          "gender": "p"
+        },
+        {
+          "name": {
+            "en": "Legguards",
+            "cs": "chrániče"
+          },
+          "gender": "p"
+        }
+      ],
+      "feet": [
+        {
+          "name": {
+            "en": "Stride",
+            "cs": "krok"
+          },
+          "gender": "m"
+        },
+        {
+          "name": {
+            "en": "Path",
+            "cs": "stezka"
+          },
+          "gender": "f"
+        }
+      ],
+      "ring": [
+        {
+          "name": {
+            "en": "Band",
+            "cs": "obroučka"
+          },
+          "gender": "f"
+        },
+        {
+          "name": {
+            "en": "Seal",
+            "cs": "pečeť"
+          },
+          "gender": "f"
+        },
+        {
+          "name": {
+            "en": "Loop",
+            "cs": "smyčka"
+          },
+          "gender": "f"
+        }
+      ],
+      "trinket": [
+        {
+          "name": {
+            "en": "Token",
+            "cs": "žeton"
+          },
+          "gender": "m"
+        },
+        {
+          "name": {
+            "en": "Idol",
+            "cs": "modla"
+          },
+          "gender": "f"
+        },
+        {
+          "name": {
+            "en": "Relic",
+            "cs": "relikvie"
+          },
+          "gender": "f"
+        }
+      ],
+      "mainHand": [
+        {
+          "name": {
+            "en": "Fang",
+            "cs": "tesák"
+          },
+          "gender": "m"
+        },
+        {
+          "name": {
+            "en": "Bane",
+            "cs": "zhouba"
+          },
+          "gender": "f"
+        },
+        {
+          "name": {
+            "en": "Song",
+            "cs": "píseň"
+          },
+          "gender": "f"
+        }
+      ],
+      "offHand": [
+        {
+          "name": {
+            "en": "Ward",
+            "cs": "záštita"
+          },
+          "gender": "f"
+        },
+        {
+          "name": {
+            "en": "Aegis",
+            "cs": "štít"
+          },
+          "gender": "m"
+        },
+        {
+          "name": {
+            "en": "Tome",
+            "cs": "foliant"
+          },
+          "gender": "m"
+        }
+      ]
+    }
+  }
+}

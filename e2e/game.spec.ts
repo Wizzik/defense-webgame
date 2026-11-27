@@ -631,8 +631,9 @@ test("a chest takes gold and offers three rolled items; the pick lands in the ge
   const cards = await page.evaluate(() => window.__game!.chestCards);
   expect(cards).toHaveLength(3);
   expect(cards!.every((card) => card.action === "new")).toBe(true);
-  const first = ITEMS.find((item) => item.id === cards![0]!.item)!;
-  expect(first.rarity).toBe(cards![0]!.rarity);
+  // a card offers a named item (its name in the catalogue) or a rolled one (a name of its own)
+  const first = cards![0]!;
+  if (!first.rolled) expect(ITEMS.find((item) => item.id === first.item)!.rarity).toBe(first.rarity);
   await expect(page.locator("button.card").first().locator(".card-name")).toHaveText(first.name.cs);
   await expect(page.locator("button.card").first()).toHaveClass(new RegExp(`rarity-${first.rarity}`));
   await expect(page.locator("#hud-gold")).toContainText("900");
@@ -678,7 +679,7 @@ test("a chest card for a worn slot opens the compare; Esc goes back, 1 keeps, th
   await expect(page.locator("#chest-compare")).toBeVisible();
   await expect(page.locator("#chest-compare .compare-col")).toHaveCount(2);
   await expect(page.locator(".compare-keep .card-name")).toHaveText(ITEMS.find((i) => i.id === worn.item)!.name.cs);
-  await expect(page.locator(".compare-take .card-name")).toHaveText(ITEMS.find((i) => i.id === cards[index]!.item)!.name.cs);
+  await expect(page.locator(".compare-take .card-name")).toHaveText(cards[index]!.name.cs);
   await expect(page.locator("button.card").first()).toBeHidden();
   expect(await page.evaluate(() => window.__game!.chestCompare)).toBe(index);
   const tick = await page.evaluate(() => window.__game!.tick);
@@ -771,16 +772,16 @@ test("a boss that falls drops an item into the collection and the end screen lis
   await startRun(page);
   await waitForScreen(page, "playing");
   await expect(page.locator("#save-warning")).toBeHidden();
-  expect(await page.evaluate(() => ({ collection: window.__game!.collection, saved: window.__game!.gearSaved })))
-    .toEqual({ collection: {}, saved: false });
+  expect(await page.evaluate(() => ({
+    collection: window.__game!.collection, size: window.__game!.collectionSize, saved: window.__game!.gearSaved,
+  }))).toEqual({ collection: {}, size: 0, saved: false });
   await page.waitForFunction(() => window.__game!.boss !== null);
   await page.evaluate(() => window.__game!.debug!.killBoss());
   await expect(page.locator("#announce")).toContainText("Kořist:");
   await expect(page.locator("#announce")).toHaveClass(/loot rarity-(common|rare)/);
-  // the snapshot follows the collection once a frame
-  await page.waitForFunction(() => Object.keys(window.__game!.collection).length === 1);
-  const collection = await page.evaluate(() => window.__game!.collection);
-  expect(Object.values(collection)).toEqual([1]);
+  // the snapshot follows the collection once a frame; a common or rare drop is a random item, not a named one
+  await page.waitForFunction(() => window.__game!.collectionSize === 1);
+  expect(await page.evaluate(() => window.__game!.collection)).toEqual({});
 
   // the item is kept when the run is lost, and the end screen names it
   await page.evaluate(() => window.__game!.debug!.grantItem("oaken-shield", 9));
@@ -831,7 +832,7 @@ test("the gear screen equips an item for one hero; the run starts with it", asyn
   await expect(page.locator("#gear-screen .gear-title")).toHaveText("Výbava");
   await expect(page.locator("#gear-screen .gear-grid .doll-slot")).toHaveCount(70);
   await expect(page.locator("#gear-screen .gear-grid .doll-slot:not(.missing)")).toHaveCount(3);
-  await expect(page.locator("#gear-screen .gear-count")).toHaveText("Sbírka: 3 z 70");
+  await expect(page.locator("#gear-screen .gear-count")).toHaveText("Sbírka: 3 z 200");
   const hp = Number(await page.locator("#gear-screen .doll-total-value").nth(3).textContent());
 
   await page.locator('#gear-screen .gear-filter[data-filter="ring"]').click();
@@ -867,9 +868,38 @@ test("the gear screen equips an item for one hero; the run starts with it", asyn
   await waitForScreen(page, "playing");
   const worn = await page.evaluate(() => window.__game!.gear.filter((slot) => slot !== null));
   expect(worn).toEqual([
-    { item: "band-of-resolve", base: 1, temp: 0 },
-    { item: "oaken-shield", base: 3, temp: 0 },
+    { item: "band-of-resolve", base: 1, temp: 0, rolled: false },
+    { item: "oaken-shield", base: 3, temp: 0, rolled: false },
   ]);
+});
+
+test("a save file of version 2 brings a random item; the gear screen lists it and the run wears it", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&lang=cs&hero=stonehorn");
+  await page.waitForFunction(() => window.__game?.screen === "menu");
+  const save = {
+    version: 2, nextUid: 2, loadouts: {},
+    items: [{
+      uid: 1, rarity: "epic", level: 3, base: "iron-helm", name: [2, 1],
+      rows: [["armor", 0.5, -1], ["cooldownSpeed", 0.034, 1], ["regen", 0.56, 0], ["thorns", 0.27, 0]],
+    }],
+  };
+  await page.locator("#gear").click();
+  await page.locator("#gear-import-file").setInputFiles({
+    name: "gear.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(save)),
+  });
+  await expect(page.locator("#gear-screen .gear-count")).toHaveText("Sbírka: 1 z 200");
+  const cell = page.locator('#gear-screen .gear-grid [data-uid="1"]');
+  await expect(cell).toHaveClass(/rarity-epic/);
+  await expect(cell.locator(".slot-level")).toHaveText("3");
+  await cell.hover();
+  await expect(page.locator("#gear-screen .item-tooltip")).toContainText("Kostěná kukla");
+  await cell.click();
+  await expect(page.locator('#gear-screen .gear-left .doll-slot[data-slot="head"]')).not.toHaveClass(/empty/);
+  await page.locator("#gear-back").click();
+  await startRun(page);
+  await waitForScreen(page, "playing");
+  expect(await page.evaluate(() => window.__game!.gear.filter((slot) => slot !== null)))
+    .toEqual([{ item: "rolled-iron-helm", base: 3, temp: 0, rolled: true }]);
 });
 
 test("every hero has its own doll", async ({ page }) => {

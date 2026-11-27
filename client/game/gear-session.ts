@@ -1,5 +1,7 @@
 import type { GameData } from "../../data/schema";
-import { applyDrop, type Drop, emptySave, equip, parseSave, rollDrop, type SaveData, toLoadout, unequip } from "../../meta";
+import {
+  applyDrop, type Drop, type DropCourse, emptySave, equip, grantNamed, parseSave, rollDrop, type SaveData, toLoadout, unequip,
+} from "../../meta";
 import type { LoadoutEntry, SlotId } from "../../sim";
 import type { SaveBackend } from "./save-store";
 
@@ -61,8 +63,8 @@ export class GearSession {
   }
 
   /** A boss fell: its drop goes into the collection at once, so it is kept even when the run is lost. */
-  onBossDeath(bossId: string, seed: number, order: number, magicFind: number): Drop {
-    const drop = rollDrop(this.data, this.save, bossId, seed, order, magicFind);
+  onBossDeath(bossId: string, seed: number, order: number, magicFind: number, course: DropCourse = {}): Drop {
+    const drop = rollDrop(this.data, this.save, bossId, seed, order, magicFind, course);
     this.drops.push(drop);
     this.commit(applyDrop(this.save, drop));
     return drop;
@@ -72,19 +74,18 @@ export class GearSession {
     return toLoadout(this.save, this.data, heroId);
   }
 
-  equip(heroId: string, itemId: string): void {
-    this.commit(equip(this.save, this.data, heroId, itemId));
+  /** Puts the collection's record `uid` on a hero's doll. */
+  equip(heroId: string, uid: number): void {
+    this.commit(equip(this.save, this.data, heroId, uid));
   }
 
   unequip(heroId: string, slot: SlotId): void {
     this.commit(unequip(this.save, heroId, slot));
   }
 
-  /** For debugging: puts an item into the collection at a level (clamped to the top level). Unknown items are ignored. */
+  /** For debugging: puts a named item into the collection at a level (clamped to the top level). Unknown items are ignored. */
   grant(itemId: string, level: number): void {
-    if (!this.data.items.some((item) => item.id === itemId)) return;
-    const clamped = Math.max(1, Math.min(this.data.rules.gear.maxPermanentLevel, Math.round(level)));
-    this.commit({ ...this.save, items: { ...this.save.items, [itemId]: clamped } });
+    this.commit(grantNamed(this.save, this.data, itemId, level));
   }
 
   /** For debugging: an empty collection and empty dolls. */
@@ -98,7 +99,7 @@ export class GearSession {
   }
 
   /**
-   * Replaces the gear by an exported file's text. Text that is not a save of version 1, or a save without a
+   * Replaces the gear by an exported file's text. Text that is not a save of version 1 or 2, or a save without a
    * single item this game knows, is refused and nothing changes; entries of a save that do not fit the game data are left out and counted in `dropped`.
    */
   importText(text: string): { ok: true; dropped: number } | { ok: false; reason: "invalid" } {
@@ -108,12 +109,12 @@ export class GearSession {
     } catch {
       return { ok: false, reason: "invalid" };
     }
-    if (typeof raw !== "object" || raw === null || (raw as { version?: unknown }).version !== 1) {
+    if (typeof raw !== "object" || raw === null || ![1, 2].includes((raw as { version?: unknown }).version as number)) {
       return { ok: false, reason: "invalid" };
     }
     const { save, dropped } = parseSave(raw, this.data);
     // a file with no item this game knows is someone else's file: it must not replace the collection
-    if (Object.keys(save.items).length === 0) return { ok: false, reason: "invalid" };
+    if (save.items.length === 0) return { ok: false, reason: "invalid" };
     this.commit(save);
     return { ok: true, dropped };
   }

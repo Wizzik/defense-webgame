@@ -1,6 +1,7 @@
 import type { GameData, SlotType } from "../../data/schema";
 import { SLOT_TYPES } from "../../data/schema";
-import { createRun } from "../../sim";
+import { recordByUid, recordItem } from "../../meta";
+import { createRun, SLOT_IDS } from "../../sim";
 import type { GearSession } from "../game/gear-session";
 import { compareTarget, gridEntries } from "./collection-grid";
 import { Doll, type DollSlotView, type DollTotals } from "./doll";
@@ -152,9 +153,14 @@ export class GearScreen {
     setText(this.importButton, t(lang, "gear.import"));
     setText(this.back, t(lang, "gear.back"));
     this.doll.setHeroName(hero ? hero.name[lang] : heroId);
-    const slots: DollSlotView[] = gear.loadout(heroId).map((entry) => ({
-      slot: entry.slot, item: data.items.find((item) => item.id === entry.item)!, level: entry.level, temp: 0,
-    }));
+    const slots: DollSlotView[] = [];
+    const loadout = save.loadouts[heroId] ?? {};
+    for (const slot of SLOT_IDS) {
+      const uid = loadout[slot];
+      const record = uid === undefined ? undefined : recordByUid(save, uid);
+      const item = record ? recordItem(data, record) : null;
+      if (record && item) slots.push({ slot, item, level: record.level, temp: 0 });
+    }
     this.doll.render(slots, this.totals());
 
     this.filters.replaceChildren();
@@ -180,13 +186,14 @@ export class GearScreen {
       const cell = el("button", entry.owned ? `doll-slot rarity-${item.rarity}` : "doll-slot empty missing", this.grid);
       cell.type = "button";
       cell.dataset.item = item.id;
+      if (entry.uid > 0) cell.dataset.uid = String(entry.uid);
       cell.setAttribute("aria-label", item.name[lang]);
       cell.innerHTML = iconSvg(item.slotType);
       if (entry.equipped) cell.classList.add("equipped");
       if (entry.owned && entry.level > 1) el("span", "slot-level", cell, String(entry.level));
       if (entry.owned) {
         cell.addEventListener("click", () => {
-          this.gear.equip(heroId, item.id);
+          this.gear.equip(heroId, entry.uid);
           this.onEquip();
           this.changed = true;
           this.render();
@@ -195,7 +202,7 @@ export class GearScreen {
         cell.setAttribute("aria-disabled", "true");
       }
       const show = (): void => {
-        const info = tooltipLines(lang, data, item, Math.max(1, entry.level), 0, entry.owned ? compareTarget(data, save, heroId, item) : undefined);
+        const info = tooltipLines(lang, data, item, Math.max(1, entry.level), 0, entry.owned ? compareTarget(data, save, heroId, item, entry.uid) : undefined);
         if (!entry.owned) info.sub = info.sub.replace(/[^·]+$/, ` ${t(lang, "gear.notOwned")}`);
         this.tooltip.show(cell, info);
       };
@@ -204,6 +211,6 @@ export class GearScreen {
       cell.addEventListener("mouseleave", () => this.tooltip.hide());
       cell.addEventListener("blur", () => this.tooltip.hide());
     }
-    setText(this.count, t(lang, "gear.count", { owned: Object.keys(save.items).length, all: data.items.length }));
+    setText(this.count, t(lang, "gear.count", { owned: save.items.length, all: data.rules.loot.collectionLimit }));
   }
 }

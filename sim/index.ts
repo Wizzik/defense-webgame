@@ -26,8 +26,12 @@ export { EventKind, EventLog } from "./events";
 export { PROJECTILE_CAPACITY, ProjectileStore, RETARGET_RANGE, updateProjectiles } from "./projectiles";
 export { stateHash } from "./hash";
 export { GearFx } from "./gear-effects";
-export { basicItemIndex, debugWear, GearState, itemStatAt, recomputeGear, SLOT_COUNT, SLOT_IDS, slotTypeOf } from "./gear";
-export type { GearBonus, LoadoutEntry, SlotId } from "./gear";
+export {
+  basicItemIndex, debugWear, EMPTY_ITEM, GearState, itemStatAt, MAX_ROWS, recomputeGear, ROLLED_ITEM, rolledAt, SLOT_COUNT,
+  SLOT_IDS, slotTypeOf, wearNamed, wearRolled, wornRarity,
+} from "./gear";
+export type { GearBonus, LoadoutEntry, RolledItem, SlotId } from "./gear";
+export { bossPower, chestPower, levelAtPower, rollItem, rowPoints } from "./item-roll";
 export { debugGrantXp, gainXp, xpToNext } from "./level-up";
 export { drawRarity, effectiveMagicFind, magicFindWeights } from "./magic-find";
 export { heroStats, maxDashCharges, moveHero } from "./hero";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EventKind, HeroHitSource, WeatherPhase } from "../../sim";
+import { EventKind, HeroHitSource, MAX_ROWS, ROLLED_ITEM, type Run, SLOT_COUNT, WeatherPhase } from "../../sim";
 import { gameData } from "../../sim/testing/game-data";
 import { firstDifference, matrixCases, matrixDigest, runCase, type CaseResult, type MatrixCase } from "./matrix";
 
@@ -7,13 +7,13 @@ describe("matrixCases", () => {
   it("lists the eight heroes, four start phases, two harder courses and the natural events with unique ids", () => {
     const data = gameData();
     const cases = matrixCases(data);
-    expect(cases).toHaveLength(19);
+    expect(cases).toHaveLength(20);
     expect(cases.find((c) => c.id === "w1-storm")).toMatchObject({ hero: "sparkshot", seed: 9, startPhase: 3, maxTicks: 4500 });
     expect(cases.slice(0, 8).map((c) => c.id)).toEqual(data.heroes.map((h) => `h-${h.id}`));
-    expect(cases.slice(8).map((c) => c.id)).toEqual(["p6", "p11", "p16", "p21", "w3-insane", "w5-hell", "w1-storm", "w2-sand", "w3-thicket", "w4-blizzard", "w5-meteors"]);
+    expect(cases.slice(8).map((c) => c.id)).toEqual(["p6", "p11", "p16", "p21", "w3-insane", "w5-hell", "w1-storm", "w2-sand", "w3-thicket", "w4-blizzard", "w5-meteors", "loot-t3"]);
     expect(cases.find((c) => c.id === "w3-insane")).toMatchObject({ hero: "stonehorn", seed: 6, world: 3, difficulty: "insane" });
     expect(cases.find((c) => c.id === "w5-hell")).toMatchObject({ hero: "redcleaver", seed: 7, world: 5, difficulty: "hell", startPhase: 6 });
-    expect(new Set(cases.map((c) => c.id)).size).toBe(19);
+    expect(new Set(cases.map((c) => c.id)).size).toBe(20);
   });
 
   it("the sandstorm case runs a whole storm", () => {
@@ -34,6 +34,27 @@ describe("matrixCases", () => {
       for (let i = 0; i < run.events.count; i++) if (run.events.kind[i] === EventKind.HazardWave) seen.add(run.events.u[i]!);
     });
     expect(seen.has(WeatherPhase.Start) && seen.has(WeatherPhase.End)).toBe(true);
+  });
+
+  it("the loot case wears random items from chests with T3 rows", () => {
+    const data = gameData();
+    const c = matrixCases(data).find((m) => m.id === "loot-t3")!;
+    let last: Run | null = null;
+    runCase(data, c, undefined, (run) => {
+      last = run;
+    });
+    const run = last! as Run;
+    expect(run.chestsOpened).toBeGreaterThan(5);
+    const gear = run.gear;
+    let rolled = 0;
+    let t3 = 0;
+    for (let slot = 0; slot < SLOT_COUNT; slot++) {
+      if (gear.item[slot] !== ROLLED_ITEM) continue;
+      rolled++;
+      for (let r = 0; r < gear.rowCount[slot]!; r++) if (gear.rowTier[slot * MAX_ROWS + r] === 2) t3++;
+    }
+    expect(rolled).toBeGreaterThan(3);
+    expect(t3).toBeGreaterThan(0);
   });
 
   it("the meteors case sees two waves and a pool that burns", () => {
