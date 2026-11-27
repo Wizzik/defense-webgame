@@ -30,9 +30,13 @@ export function rollDamage(rng: Rng, min: number, max: number): number {
   return lo + Math.floor(rng.next() * (hi - lo + 1));
 }
 
-/** Multiplier on every enemy hit on the hero: rules.threat.heroDamageTaken x the hero's damageTaken (default 1). */
+/**
+ * Multiplier on every enemy hit on the hero: rules.threat.heroDamageTaken x the hero's damageTaken (default 1) x the
+ * damage-taken scale of his gear.
+ */
 export function heroDamageScale(run: Run): number {
-  return run.data.rules.threat.heroDamageTaken * (run.hero.def.damageTaken ?? 1);
+  const hero = run.hero;
+  return run.data.rules.threat.heroDamageTaken * (hero.def.damageTaken ?? 1) * hero.stats.damageTakenScale;
 }
 
 /**
@@ -47,8 +51,17 @@ export function damageHero(run: Run, amount: number, attacker: number, source: n
   if (hero.hp <= 0 && run.players.length > 1) return 0;
   // nor does a co-op hero in his choice time (sim/coop-choice.ts)
   if (isChoosing(run)) return 0;
+  const hit = source === HeroHitSource.Hit && attacker >= 0;
+  // dodge (gear) draws from the run's generator only for a hero who has it; clouds, storms and fire are not dodged
+  if (hit && hero.stats.dodge > 0 && run.rng.next() < hero.stats.dodge) {
+    run.events.push(EventKind.HeroDodge, attacker, 0, hero.x, hero.y, 0, run.current);
+    return 0;
+  }
   const dealt = amount * heroDamageScale(run);
   hero.hp -= dealt;
+  if (hit && hero.stats.thorns > 0 && run.data.enemies[run.enemies.type[attacker]!]!.attack.kind === "melee") {
+    run.thorns.add(attacker, dealt * hero.stats.thorns);
+  }
   run.events.push(EventKind.HeroHit, attacker, dealt, hero.x, hero.y, source, run.current);
   return dealt;
 }

@@ -378,6 +378,9 @@ describe("random items", () => {
   const rules = (JSON.parse(read("rules.json")) as { loot: LootRules }).loot;
   const SLOTS = ["head", "neck", "shoulders", "back", "chest", "wrist", "hands", "waist", "legs", "feet", "ring", "trinket", "mainHand", "offHand"];
   const BUDGET: Record<string, number> = { common: 6, rare: 12, epic: 20, legendary: 30, mythic: 42 };
+  it("rules.loot.budget is the budget of the items header", () => {
+    expect((JSON.parse(read("rules.json")) as { loot: { budget: unknown } }).loot.budget).toEqual(BUDGET);
+  });
   const unitOf = (stat: string) => loot.affixes.find((a) => a.stat === stat)!.unit;
   const designFile = (file: string) => parse(readFileSync(join(import.meta.dirname, "..", "design", file), "utf8"));
 

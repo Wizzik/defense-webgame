@@ -14,7 +14,7 @@ export function updateNova(run: Run, slot: AbilitySlot, index: number): void {
   const L = slot.level - 1;
   const p = def.params;
   const hero = run.hero;
-  const radius = p.radius[L];
+  const radius = p.radius[L] * hero.stats.areaScale;
   if (mode === CastMode.Auto
     && countEnemiesWithin(run, hero.x, hero.y, radius) < run.data.rules.autocast.novaMinEnemies) return;
   startCast(run, index, radius, hero.x, hero.y, 0, 0);

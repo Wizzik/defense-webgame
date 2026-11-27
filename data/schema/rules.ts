@@ -237,6 +237,8 @@ export const RulesSchema = z.object({
     smartShare: z.number().min(0).max(1),
     /** Items the collection holds at most. */
     collectionLimit: z.number().int().positive(),
+    /** Point budget of an item at level 1 (the design/items.yaml header); named items are held to it by the tests. */
+    budget: z.object({ common: positive, rare: positive, epic: positive, legendary: positive, mythic: positive }).strict(),
     implicitPoints: positive,
     rowRoll: z.number().min(0).max(0.5),
     affixCount: z.object({
@@ -268,6 +270,10 @@ export const RulesSchema = z.object({
     /** The least item power of item levels 1, 2, ... (one value per level up to gear.maxPermanentLevel). */
     levelAtPower: z.array(nonNegative).min(1)
       .refine((l) => l[0] === 0 && l.every((v, i) => i === 0 || v > l[i - 1]!), { message: "must start at 0 and rise" }),
+    /** Extra damage of a critical basic attack before gear adds crit damage (0.5: a crit deals 150 %). */
+    critDamage: positive,
+    /** The most the summed gear gives of these shares (sim/hero.ts heroStats). */
+    caps: z.object({ critChance: z.number().gt(0).max(1), dodge: z.number().gt(0).max(1), damageTaken: z.number().gt(0).max(1) }).strict(),
     /** The effect a mythic roll draws one of (sim/gear-effects.ts), with its fixed numbers. */
     mythicEffects: z.array(EffectSchema).min(1),
   }).strict(),

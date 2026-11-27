@@ -627,6 +627,13 @@
   "loot": {
     "smartShare": 0.6,
     "collectionLimit": 200,
+    "budget": {
+      "common": 6,
+      "rare": 12,
+      "epic": 20,
+      "legendary": 30,
+      "mythic": 42
+    },
     "implicitPoints": 2,
     "rowRoll": 0.08,
     "affixCount": {
@@ -691,6 +698,12 @@
       9,
       12
     ],
+    "critDamage": 0.5,
+    "caps": {
+      "critChance": 0.6,
+      "dodge": 0.4,
+      "damageTaken": 0.5
+    },
     "mythicEffects": [
       {
         "kind": "chain_on_attack",

@@ -12,6 +12,17 @@ export interface HeroStats {
   cooldownScale: number;
   moveSpeed: number;
   collision: number;
+  /** From gear (random items): chance and extra damage of a critical basic attack, chance to dodge an enemy's hit. */
+  critChance: number;
+  critDamage: number;
+  dodge: number;
+  /** Multiplier on enemy damage to the hero (1 - damage taken from gear). */
+  damageTakenScale: number;
+  /** Share of a melee hit dealt back to the attacker. */
+  thorns: number;
+  /** Multiplier on the ultimate's cooldown, and on the radius of area spells. */
+  ultimateScale: number;
+  areaScale: number;
 }
 
 /** Sum of the learned passives at their levels (fractions, except regen in hp/s and magnet in world units). */

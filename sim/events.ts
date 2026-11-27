@@ -68,6 +68,8 @@ export const EventKind = {
   /** A hero blinked (key F, sim/hero-blink.ts): x/y = where he left, u/v = where he landed, value = the burst's radius,
    *  a = enemies hit. */
   Blink: 33,
+  /** A hero dodged an enemy's hit (gear, random items): a = the enemy slot, x/y = the hero, v = the player. */
+  HeroDodge: 34,
 } as const;
 
 /** Fixed-capacity event buffer, cleared every step. Events that do not fit only bump `dropped`. */

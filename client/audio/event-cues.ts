@@ -51,6 +51,8 @@ export const HANDLED_EVENTS: Record<keyof typeof EventKind, "sound" | "skip"> = 
   Hazard: "sound",
   Revive: "skip", // co-op only; the client of step 7 gives it a sound
   Blink: "sound",
+  // a dodge has no sound yet (random items, stage 4 may give it one)
+  HeroDodge: "skip",
   HazardWave: "sound", // only the chill of a hero; the storm's first bolt is heard in the same step, a weather has no sound of its own
 };
 

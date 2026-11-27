@@ -16,7 +16,7 @@ export function updateTickingArea(run: Run, slot: AbilitySlot, index: number): v
   const L = slot.level - 1;
   const p = def.params;
   const hero = run.hero;
-  const radius = p.radius[L];
+  const radius = p.radius[L] * hero.stats.areaScale;
   const total = Math.round(p.duration[L] * TICKS_PER_SECOND);
 
   if (!slot.active) {
@@ -33,7 +33,7 @@ export function updateTickingArea(run: Run, slot: AbilitySlot, index: number): v
   const k = total - slot.ticksLeft + 1;
   const bursts = Math.floor((k * tps) / TICKS_PER_SECOND + 1e-9)
     - Math.floor(((k - 1) * tps) / TICKS_PER_SECOND + 1e-9);
-  const hitRadius = p.hitRadius?.[L] ?? DEFAULT_HIT_RADIUS;
+  const hitRadius = (p.hitRadius?.[L] ?? DEFAULT_HIT_RADIUS) * hero.stats.areaScale;
   const damage = p.tickDamage[L] * hero.stats.spellPower;
   const arenaX = run.data.rules.arena.width / 2;
   const arenaY = run.data.rules.arena.height / 2;

@@ -46,6 +46,7 @@ drops:
 loot:
   smartShare: 0.6
   collectionLimit: 200
+  budget: { common: 6, rare: 12, epic: 20, legendary: 30, mythic: 42 }
   implicitPoints: 2
   rowRoll: 0.08
   affixCount: { common: 1, rare: 2, epic: 3, legendary: 4, mythic: 4 }
@@ -54,6 +55,8 @@ loot:
   tiers: [{ weight: 1, minPower: 0 }, { weight: 1.35, minPower: 3 }, { weight: 1.7, minPower: 6 }, { weight: 2, minPower: 9 }]
   power: { boss: [2], chestBase: 1, chestPerPhase: 0.3, perWorld: 0.5, difficulty: { normal: 0, insane: 1, hell: 2 } }
   levelAtPower: [0, 3, 6, 9, 12]
+  critDamage: 0.5
+  caps: { critChance: 0.6, dodge: 0.4, damageTaken: 0.5 }
   mythicEffects:
     - { kind: slow_aura, params: { radius: 350, slow: 0.25 }, text: { en: "Slow aura.", cs: "Zpomalující aura." } }
 progression: { xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3, ultimateFromLevel: 6, ultimateLevelStep: 6, sharedSpells: [zap], passives: [boon], sharedSpellSlots: 2, passiveSlots: 4, cardWeights: { signature: 4, sharedUpgrade: 3, newSpell: 2, newPassive: 2 } }

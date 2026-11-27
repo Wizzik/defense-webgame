@@ -16,7 +16,7 @@ export function onHeroCast(run: Run, index: number): void {
     if (def.kind !== "on_cast") continue;
     const L = slot.level - 1;
     const p = def.params;
-    const radius = p.radius[L];
+    const radius = p.radius[L] * hero.stats.areaScale;
     run.events.push(EventKind.Cast, j, radius, hero.x, hero.y, 0, 0);
     hitEnemiesAround(run, j, hero.x, hero.y, radius, p.damage[L] * hero.stats.spellPower,
       Math.round(p.stunSeconds[L] * TICKS_PER_SECOND), 0, 0);

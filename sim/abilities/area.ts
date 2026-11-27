@@ -15,7 +15,7 @@ export function updateArea(run: Run, slot: AbilitySlot, index: number): void {
   const p = def.params;
   const hero = run.hero;
   const e = run.enemies;
-  const radius = p.radius[L];
+  const radius = p.radius[L] * hero.stats.areaScale;
   const target = densestCluster(run, hero.x, hero.y, p.range[L], radius);
   if (target < 0 && mode === CastMode.Auto) return;
   const x = target >= 0 ? e.x[target] : hero.x;

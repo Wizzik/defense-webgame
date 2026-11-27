@@ -7,16 +7,11 @@ import { SlotTypeSchema, StatIdSchema, STAT_IDS } from "./item";
  * bases, the affix pools and the parts of the rare names; the numbers of a roll live in `rules.loot`.
  */
 
-/**
- * Stats only random items roll. The sim reads them from stage 2 of the plan on
- * (docs/superpowers/plans/2026-11-27-random-items.md); until then the roller skips them.
- * critChance and critDamage, dodge, damageTaken (a share off), thorns (a share of melee damage back),
- * cooldownSpeed, ultimateCooldown and areaSize are shares: 0.05 is 5 %.
- */
+/** The stats the random items added (STAT_IDS holds them too); the sim reads them since stage 2 of the plan. */
 export const NEW_STAT_IDS = [
   "critChance", "critDamage", "dodge", "damageTaken", "thorns", "cooldownSpeed", "ultimateCooldown", "areaSize",
-] as const;
-export const AFFIX_STAT_IDS = [...STAT_IDS, ...NEW_STAT_IDS] as const;
+] as const satisfies readonly (typeof STAT_IDS)[number][];
+export const AFFIX_STAT_IDS = STAT_IDS;
 export const AffixStatSchema = z.enum(AFFIX_STAT_IDS);
 export type AffixStat = z.infer<typeof AffixStatSchema>;
 

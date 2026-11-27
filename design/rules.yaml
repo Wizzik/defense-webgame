@@ -131,9 +131,12 @@ drops:
 #   Item power: power.boss[boss order] for a drop, chestBase + chestPerPhase x phase for a chest, + perWorld x
 #   (world - 1) + power.difficulty; a dropped item has the highest level whose levelAtPower the power reaches.
 #   salvageGold: gold a salvaged item gives the next run's chests; the collection holds collectionLimit items.
+#   critDamage: the extra damage of a critical basic attack before gear; caps: the most gear gives of crit chance,
+#   dodge and damage taken (sim/hero.ts).
 loot:
   smartShare: 0.6
   collectionLimit: 200
+  budget: { common: 6, rare: 12, epic: 20, legendary: 30, mythic: 42 }
   implicitPoints: 2
   rowRoll: 0.08
   affixCount: { common: 1, rare: 2, epic: 3, legendary: 4, mythic: 4 }
@@ -142,6 +145,8 @@ loot:
   tiers: [{ weight: 1, minPower: 0 }, { weight: 1.35, minPower: 3 }, { weight: 1.7, minPower: 6 }, { weight: 2, minPower: 9 }]
   power: { boss: [2, 4, 6, 8], chestBase: 1, chestPerPhase: 0.3, perWorld: 0.5, difficulty: { normal: 0, insane: 1, hell: 2 } }
   levelAtPower: [0, 3, 6, 9, 12]
+  critDamage: 0.5
+  caps: { critChance: 0.6, dodge: 0.4, damageTaken: 0.5 }
   mythicEffects:
     - kind: chain_on_attack
       params: { every: 4, damage: 120, jumps: 4, range: 380 }
