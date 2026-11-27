@@ -1093,9 +1093,11 @@ test("world 1 has its wall and islands; the storm's bolt warns with a circle", a
   await waitForScreen(page, "playing");
   expect(await page.evaluate(() => window.__game!.obstacles)).toBeGreaterThanOrEqual(35);
   await page.evaluate(() => window.__game!.debug!.hazard());
+  // 10 s: the first warning ring compiles its shader, which can block a software WebGPU page for over a second;
+  // the game does not advance while the page is blocked, so the 1.2 s warning is still pending afterwards
   await page.waitForFunction(
     () => window.__game!.render.hazardRings > 0 && window.__game!.hazard.pending > 0,
-    undefined, { timeout: 1_000, polling: 50 },
+    undefined, { timeout: 10_000, polling: 50 },
   );
   await expect(page.locator(".buff-cell.storm")).toBeVisible();
 });
