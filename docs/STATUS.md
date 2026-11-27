@@ -8,7 +8,11 @@ Updated 2026-11-27 (random items, stages 1-2: data and sim). Read this first whe
    wards, 10 spell levels, tooltip, dash charges, blink (F), weather fixed to the map. Waits for Petr's playtest.
 2. **Random items** like Diablo 2 / Project Diablo 2 with game-icons.net pictures: the spec
    `docs/superpowers/specs/2026-11-26-random-items-design.md`, approved by Petr on 2026-11-27 (answers in its section 9); plan `docs/superpowers/plans/2026-11-27-random-items.md` (6 stages), to build in fresh sessions.
-3. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
+3. **Petr's batch 2** (2026-11-27): plan `docs/superpowers/plans/2026-11-27-petr-batch-2.md` (AoE -50 %, a quarter
+   of the enemies casters, Serpent Totem 100 damage + 25 % a level, F teleports to the mouse, bosses x3 hp x2
+   damage with their own names and looks per world, chest cards for worn slots only as upgrades, balance target
+   about 10 % autopilot wins with no gear). After stage 3 of random items, before its stage 4.
+4. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
 
 ## Random items, stages 1-2: data and sim (branch `claude/random-items-data`, PR #42, 2026-11-27)
 

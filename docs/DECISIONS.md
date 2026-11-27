@@ -2,6 +2,12 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Balance target (Petr, 2026-11-27)
+
+- The autopilot without gear (`npm run sim:run -- --hero all --seeds 1-20 --gear none`, world 1 normal from
+  phase 1) wins about 10 % of the runs, for every hero (1-4 of 20 per hero). Every balance change keeps to it;
+  the plan of the changes that get there: `docs/superpowers/plans/2026-11-27-petr-batch-2.md`.
+
 ## Random items, stage 2: sim (2026-11-27; the plan's tasks 6-10, the numbers and details are Claude's)
 
 - **New stats** (STAT_IDS, `GearBonus`, `HeroStats`; prices in `design/affixes.yaml`): crit chance and crit damage
