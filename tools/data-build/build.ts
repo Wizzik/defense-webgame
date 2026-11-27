@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import { type Constants, type GameData, type Item, validateGameData } from "../../data/schema";
+import { type Constants, type GameData, type Item, type Loot, validateGameData } from "../../data/schema";
 import { ABILITIES_YAML, type Design, ENEMIES_YAML, HEROES_YAML, type ItemEntry, loadDesign, loadMapExport, type MapExport } from "./load";
 import { mapAbility, mapDesignAbility } from "./map-abilities";
 import { mapEnemy } from "./map-enemies";
@@ -36,6 +36,7 @@ export function buildGameData(src: MapExport, design: Design, mapVersion: string
     enemies,
     rules: design.rules,
     items: design.items.map(mapItem),
+    loot: mapLoot(design),
     constants: mapConstants(src.mapInfo.misc_constants, mapVersion),
     worlds: design.worlds.map(({ id, name, blurb, color, ready, strength, map, hazard }) => ({
       id, name, blurb, color, ready, ...(strength === undefined ? {} : { strength }), map, hazard,
@@ -58,7 +59,12 @@ function mapItem(entry: ItemEntry): Item {
   };
 }
 
-/** Writes heroes, abilities, enemies, rules, items, constants and worlds as JSON: indent 2, keys in mapping order. */
+/** Copies bases, affixes and rare-name parts as the design files give them (no map record behind them). */
+export function mapLoot(design: Pick<Design, "itemBases" | "affixes" | "itemNames">): Loot {
+  return { bases: design.itemBases, affixes: design.affixes, names: design.itemNames };
+}
+
+/** Writes heroes, abilities, enemies, rules, items, loot, constants and worlds as JSON: indent 2, keys in mapping order. */
 export function writeGameData(data: GameData, outDir: string): void {
   mkdirSync(outDir, { recursive: true });
   const files: [string, unknown][] = [
@@ -67,6 +73,7 @@ export function writeGameData(data: GameData, outDir: string): void {
     ["enemies.json", data.enemies],
     ["rules.json", data.rules],
     ["items.json", data.items],
+    ["loot.json", data.loot],
     ["constants.json", data.constants],
     ["worlds.json", data.worlds],
   ];

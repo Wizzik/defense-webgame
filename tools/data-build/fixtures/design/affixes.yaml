@@ -1,0 +1,41 @@
+# Affixes of random items (spec 2026-11-26 random items, sections 2-5; docs/DECISIONS.md, section Random items).
+# One affix per stat; an item names a stat at most once. The numbers of a roll live in rules.loot (design/rules.yaml).
+# tags: the role pools that hold the affix. Smart loot draws rules.loot.smartShare of an item's affixes from the
+#   pool of the hero's primary attribute, the rest from all affixes. Lifesteal is in every role's pool (Petr
+#   2026-11-27: one lifesteal for attacks and spells).
+# unit: the value of one budget point at item level 1. The stats of named items keep the prices of the
+#   design/items.yaml header; the new stats (stage 2 of the plan teaches the sim to read them) are priced here:
+#   1 point = 1 % crit chance (a crit deals +50 % at first, so 1 % = 0.5 % damage), 5 % crit damage, 0.5 % dodge,
+#   0.5 % less damage taken, 5 % of a melee hit back as thorns, 0.5 % faster cooldowns, 1 % faster ultimate
+#   cooldown, 0.5 % larger spell radius.
+# maxTier: the highest tier the affix rolls (missing: 4); defensive shares and lifesteal stop at 3.
+# prefix: given by the item's first affix, in front of the base; CS in the four forms of the base's gender
+#   (m, f, n, p for a plural noun). suffix: given by the second affix, behind the base ("of the Bear", "medvěda").
+# Names are our own; nothing is copied from the map.
+
+# STR (tank)
+- { stat: str, tags: [str], unit: 0.5, prefix: { en: "Mighty", cs: { m: "Mocný", f: "Mocná", n: "Mocné", p: "Mocné" } }, suffix: { en: "of the Bear", cs: "medvěda" } }
+- { stat: hp, tags: [str], unit: 12, prefix: { en: "Sturdy", cs: { m: "Odolný", f: "Odolná", n: "Odolné", p: "Odolné" } }, suffix: { en: "of the Oak", cs: "dubu" } }
+- { stat: armor, tags: [str], unit: 0.25, prefix: { en: "Plated", cs: { m: "Kovaný", f: "Kovaná", n: "Kované", p: "Kované" } }, suffix: { en: "of the Wall", cs: "hradeb" } }
+- { stat: regen, tags: [str], unit: 0.1, prefix: { en: "Mending", cs: { m: "Hojivý", f: "Hojivá", n: "Hojivé", p: "Hojivé" } }, suffix: { en: "of the Spring", cs: "pramene" } }
+- { stat: damageTaken, tags: [str], unit: 0.005, maxTier: 3, prefix: { en: "Stalwart", cs: { m: "Neochvějný", f: "Neochvějná", n: "Neochvějné", p: "Neochvějné" } }, suffix: { en: "of the Tortoise", cs: "želvy" } }
+- { stat: thorns, tags: [str], unit: 0.05, prefix: { en: "Barbed", cs: { m: "Ostnatý", f: "Ostnatá", n: "Ostnaté", p: "Ostnaté" } }, suffix: { en: "of Thorns", cs: "trní" } }
+# AGI (assassin)
+- { stat: agi, tags: [agi], unit: 0.5, prefix: { en: "Nimble", cs: { m: "Hbitý", f: "Hbitá", n: "Hbité", p: "Hbité" } }, suffix: { en: "of the Lynx", cs: "rysa" } }
+- { stat: attackSpeed, tags: [agi], unit: 0.005, prefix: { en: "Swift", cs: { m: "Rychlý", f: "Rychlá", n: "Rychlé", p: "Rychlé" } }, suffix: { en: "of the Hornet", cs: "sršně" } }
+- { stat: damage, tags: [agi], unit: 0.005, prefix: { en: "Cruel", cs: { m: "Krutý", f: "Krutá", n: "Kruté", p: "Kruté" } }, suffix: { en: "of the Wolf", cs: "vlka" } }
+- { stat: moveSpeed, tags: [agi], unit: 0.01, maxTier: 3, prefix: { en: "Fleet", cs: { m: "Svižný", f: "Svižná", n: "Svižné", p: "Svižné" } }, suffix: { en: "of the Hare", cs: "zajíce" } }
+- { stat: critChance, tags: [agi], unit: 0.01, prefix: { en: "Keen", cs: { m: "Ostrý", f: "Ostrá", n: "Ostré", p: "Ostré" } }, suffix: { en: "of the Hawk", cs: "jestřába" } }
+- { stat: critDamage, tags: [agi], unit: 0.05, prefix: { en: "Brutal", cs: { m: "Drtivý", f: "Drtivá", n: "Drtivé", p: "Drtivé" } }, suffix: { en: "of Ruin", cs: "zkázy" } }
+- { stat: dodge, tags: [agi], unit: 0.005, maxTier: 3, prefix: { en: "Elusive", cs: { m: "Prchavý", f: "Prchavá", n: "Prchavé", p: "Prchavé" } }, suffix: { en: "of the Shadow", cs: "stínu" } }
+# INT (caster)
+- { stat: int, tags: [int], unit: 0.5, prefix: { en: "Wise", cs: { m: "Moudrý", f: "Moudrá", n: "Moudré", p: "Moudré" } }, suffix: { en: "of the Owl", cs: "sovy" } }
+- { stat: spellPower, tags: [int], unit: 0.005, prefix: { en: "Arcane", cs: { m: "Tajemný", f: "Tajemná", n: "Tajemné", p: "Tajemné" } }, suffix: { en: "of the Magus", cs: "mága" } }
+- { stat: cooldownSpeed, tags: [int], unit: 0.005, prefix: { en: "Hasty", cs: { m: "Spěšný", f: "Spěšná", n: "Spěšné", p: "Spěšné" } }, suffix: { en: "of the Comet", cs: "komety" } }
+- { stat: ultimateCooldown, tags: [int], unit: 0.01, prefix: { en: "Ascendant", cs: { m: "Vzestupný", f: "Vzestupná", n: "Vzestupné", p: "Vzestupné" } }, suffix: { en: "of the Storm", cs: "bouře" } }
+- { stat: areaSize, tags: [int], unit: 0.005, prefix: { en: "Vast", cs: { m: "Rozlehlý", f: "Rozlehlá", n: "Rozlehlé", p: "Rozlehlé" } }, suffix: { en: "of the Tide", cs: "přílivu" } }
+# Every role
+- { stat: lifesteal, tags: [str, agi, int], unit: 0.0025, maxTier: 3, prefix: { en: "Thirsting", cs: { m: "Žíznivý", f: "Žíznivá", n: "Žíznivé", p: "Žíznivé" } }, suffix: { en: "of the Leech", cs: "pijavice" } }
+- { stat: magnet, tags: [any], unit: 10, prefix: { en: "Drawing", cs: { m: "Přitažlivý", f: "Přitažlivá", n: "Přitažlivé", p: "Přitažlivé" } }, suffix: { en: "of the Magpie", cs: "straky" } }
+- { stat: goldFind, tags: [any], unit: 0.01, prefix: { en: "Gilded", cs: { m: "Zlacený", f: "Zlacená", n: "Zlacené", p: "Zlacené" } }, suffix: { en: "of Greed", cs: "chamtivosti" } }
+- { stat: magicFind, tags: [any], unit: 0.02, prefix: { en: "Lucky", cs: { m: "Šťastný", f: "Šťastná", n: "Šťastné", p: "Šťastné" } }, suffix: { en: "of Fortune", cs: "štěstěny" } }

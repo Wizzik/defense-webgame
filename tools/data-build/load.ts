@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
-import type { Ability, Enemy, Hero, Item, Rules, World } from "../../data/schema";
+import type { Ability, Affix, Enemy, Hero, Item, ItemBase, ItemNames, Rules, World } from "../../data/schema";
 import { parseScaling, SCALING_YAML, type Scaling } from "./scaling";
 
 /** Design files as they are named in error messages. */
@@ -11,6 +11,9 @@ export const ENEMIES_YAML = "design/enemies.yaml";
 export const RULES_YAML = "design/rules.yaml";
 export const ITEMS_YAML = "design/items.yaml";
 export const WORLDS_YAML = "design/worlds.yaml";
+export const ITEM_BASES_YAML = "design/item-bases.yaml";
+export const AFFIXES_YAML = "design/affixes.yaml";
+export const ITEM_NAMES_YAML = "design/item-names.yaml";
 
 /** Object data fields of one export ability level. */
 export const DATA_FIELDS = [
@@ -167,6 +170,10 @@ export interface Design {
   rules: Rules;
   abilities: AbilityEntry[];
   items: ItemEntry[];
+  /** Random items: bases, affixes and rare-name parts; no map record, validated and copied. */
+  itemBases: ItemBase[];
+  affixes: Affix[];
+  itemNames: ItemNames;
   worlds: World[];
   scaling: Scaling;
 }
@@ -182,7 +189,10 @@ export function loadMapExport(dir: string): MapExport {
   };
 }
 
-/** Reads heroes.yaml, abilities.yaml, enemies.yaml, items.yaml, worlds.yaml and rules.yaml from a design folder. */
+/**
+ * Reads heroes.yaml, abilities.yaml, enemies.yaml, items.yaml, item-bases.yaml, affixes.yaml, item-names.yaml,
+ * worlds.yaml and rules.yaml from a design folder.
+ */
 export function loadDesign(dir: string): Design {
   return {
     heroes: list(readYaml(join(dir, "heroes.yaml")), HEROES_YAML) as HeroEntry[],
@@ -190,6 +200,9 @@ export function loadDesign(dir: string): Design {
     enemies: list(readYaml(join(dir, "enemies.yaml")), ENEMIES_YAML) as EnemyEntry[],
     rules: readYaml(join(dir, "rules.yaml")) as Rules,
     items: list(readYaml(join(dir, "items.yaml")), ITEMS_YAML) as ItemEntry[],
+    itemBases: list(readYaml(join(dir, "item-bases.yaml")), ITEM_BASES_YAML) as ItemBase[],
+    affixes: list(readYaml(join(dir, "affixes.yaml")), AFFIXES_YAML) as Affix[],
+    itemNames: readYaml(join(dir, "item-names.yaml")) as ItemNames,
     worlds: list(readYaml(join(dir, "worlds.yaml")), WORLDS_YAML) as World[],
     scaling: loadScaling(dir),
   };

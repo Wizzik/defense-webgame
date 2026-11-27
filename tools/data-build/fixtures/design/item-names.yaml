@@ -1,0 +1,72 @@
+# Two-word names of random items with three or more affixes (spec 2026-11-26 random items, section 5):
+# a first word and a noun of the item's slot type ("Grim Crown", "Ponurá koruna"). Items with one or two affixes are
+# named by their prefix and suffix instead (design/affixes.yaml).
+# first: EN, and CS in the four forms of the noun's gender (m, f, n, p for a plural noun).
+# nouns: per slot type; gender of the CS word.
+# Names are our own; nothing is copied from the map.
+first:
+  - { en: "Grim", cs: { m: "Ponurý", f: "Ponurá", n: "Ponuré", p: "Ponuré" } }
+  - { en: "Dread", cs: { m: "Hrozivý", f: "Hrozivá", n: "Hrozivé", p: "Hrozivé" } }
+  - { en: "Bone", cs: { m: "Kostěný", f: "Kostěná", n: "Kostěné", p: "Kostěné" } }
+  - { en: "Blood", cs: { m: "Krvavý", f: "Krvavá", n: "Krvavé", p: "Krvavé" } }
+  - { en: "Ash", cs: { m: "Popelavý", f: "Popelavá", n: "Popelavé", p: "Popelavé" } }
+  - { en: "Pale", cs: { m: "Bledý", f: "Bledá", n: "Bledé", p: "Bledé" } }
+  - { en: "Ember", cs: { m: "Žhavý", f: "Žhavá", n: "Žhavé", p: "Žhavé" } }
+  - { en: "Storm", cs: { m: "Bouřlivý", f: "Bouřlivá", n: "Bouřlivé", p: "Bouřlivé" } }
+  - { en: "Night", cs: { m: "Noční", f: "Noční", n: "Noční", p: "Noční" } }
+  - { en: "Raven", cs: { m: "Havraní", f: "Havraní", n: "Havraní", p: "Havraní" } }
+  - { en: "Wolf", cs: { m: "Vlčí", f: "Vlčí", n: "Vlčí", p: "Vlčí" } }
+  - { en: "Dragon", cs: { m: "Dračí", f: "Dračí", n: "Dračí", p: "Dračí" } }
+  - { en: "Winter", cs: { m: "Zimní", f: "Zimní", n: "Zimní", p: "Zimní" } }
+  - { en: "Gloom", cs: { m: "Šerý", f: "Šerá", n: "Šeré", p: "Šeré" } }
+nouns:
+  head:
+    - { name: { en: "Crown", cs: "koruna" }, gender: f }
+    - { name: { en: "Cowl", cs: "kukla" }, gender: f }
+    - { name: { en: "Visor", cs: "hledí" }, gender: n }
+  neck:
+    - { name: { en: "Collar", cs: "obojek" }, gender: m }
+    - { name: { en: "Talisman", cs: "talisman" }, gender: m }
+    - { name: { en: "Locket", cs: "medailon" }, gender: m }
+  shoulders:
+    - { name: { en: "Mantle", cs: "přehoz" }, gender: m }
+    - { name: { en: "Spaulders", cs: "nárameníky" }, gender: p }
+  back:
+    - { name: { en: "Shroud", cs: "rubáš" }, gender: m }
+    - { name: { en: "Cape", cs: "pláštěnka" }, gender: f }
+  chest:
+    - { name: { en: "Carapace", cs: "krunýř" }, gender: m }
+    - { name: { en: "Vestment", cs: "roucho" }, gender: n }
+    - { name: { en: "Hauberk", cs: "drátěnice" }, gender: f }
+  wrist:
+    - { name: { en: "Bracer", cs: "náramek" }, gender: m }
+    - { name: { en: "Clasp", cs: "spona" }, gender: f }
+  hands:
+    - { name: { en: "Grip", cs: "stisk" }, gender: m }
+    - { name: { en: "Fist", cs: "pěst" }, gender: f }
+    - { name: { en: "Claws", cs: "drápy" }, gender: p }
+  waist:
+    - { name: { en: "Cord", cs: "šňůra" }, gender: f }
+    - { name: { en: "Girdle", cs: "pás" }, gender: m }
+  legs:
+    - { name: { en: "Greaves", cs: "holenice" }, gender: p }
+    - { name: { en: "Legguards", cs: "chrániče" }, gender: p }
+  feet:
+    - { name: { en: "Stride", cs: "krok" }, gender: m }
+    - { name: { en: "Path", cs: "stezka" }, gender: f }
+  ring:
+    - { name: { en: "Band", cs: "obroučka" }, gender: f }
+    - { name: { en: "Seal", cs: "pečeť" }, gender: f }
+    - { name: { en: "Loop", cs: "smyčka" }, gender: f }
+  trinket:
+    - { name: { en: "Token", cs: "žeton" }, gender: m }
+    - { name: { en: "Idol", cs: "modla" }, gender: f }
+    - { name: { en: "Relic", cs: "relikvie" }, gender: f }
+  mainHand:
+    - { name: { en: "Fang", cs: "tesák" }, gender: m }
+    - { name: { en: "Bane", cs: "zhouba" }, gender: f }
+    - { name: { en: "Song", cs: "píseň" }, gender: f }
+  offHand:
+    - { name: { en: "Ward", cs: "záštita" }, gender: f }
+    - { name: { en: "Aegis", cs: "štít" }, gender: m }
+    - { name: { en: "Tome", cs: "foliant" }, gender: m }

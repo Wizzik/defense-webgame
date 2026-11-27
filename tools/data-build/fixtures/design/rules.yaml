@@ -43,6 +43,19 @@ gear: { levelStep: 0.15, chestLevelStep: 0.3, maxPermanentLevel: 5 }
 chests: { count: 3, basePrice: 40, priceGrowth: 1.18, minCastleDistance: 700, maxCastleDistance: 2000, minSpacing: 600, pickupRadius: 80, slotsPerOffer: 3, rarityWeights: { common: 55, rare: 30, epic: 12 } }
 drops:
   - { boss: warlord, weights: { common: 60, rare: 40 } }
+loot:
+  smartShare: 0.6
+  collectionLimit: 200
+  implicitPoints: 2
+  rowRoll: 0.08
+  affixCount: { common: 1, rare: 2, epic: 3, legendary: 4, mythic: 4 }
+  namedShare: { common: 0, rare: 0, epic: 0.1, legendary: 0.25, mythic: 0.4 }
+  salvageGold: { common: 10, rare: 25, epic: 50, legendary: 90, mythic: 150 }
+  tiers: [{ weight: 1, minPower: 0 }, { weight: 1.35, minPower: 3 }, { weight: 1.7, minPower: 6 }, { weight: 2, minPower: 9 }]
+  power: { boss: [2], chestBase: 1, chestPerPhase: 0.3, perWorld: 0.5, difficulty: { normal: 0, insane: 1, hell: 2 } }
+  levelAtPower: [0, 3, 6, 9, 12]
+  mythicEffects:
+    - { kind: slow_aura, params: { radius: 350, slow: 0.25 }, text: { en: "Slow aura.", cs: "Zpomalující aura." } }
 progression: { xpFirst: 4, xpStep: 2, magnetRadius: 300, crystalSpeed: 900, pickupRadius: 56, attributeCardAmount: 10, cardsPerOffer: 3, ultimateFromLevel: 6, ultimateLevelStep: 6, sharedSpells: [zap], passives: [boon], sharedSpellSlots: 2, passiveSlots: 4, cardWeights: { signature: 4, sharedUpgrade: 3, newSpell: 2, newPassive: 2 } }
 difficulty:
   worldStep: { hp: 0.25, damage: 0.25 }

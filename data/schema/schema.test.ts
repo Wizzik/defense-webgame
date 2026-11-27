@@ -117,6 +117,30 @@ function fixture(): any {
         perPlayer: { hp: 0.6, damage: 0.15, packSize: 0.5, eliteHp: 0.4, castleHp: 0, chests: 1 },
         revive: { seconds: 5, radius: 120, hpShare: 0.5 },
       },
+      loot: {
+        smartShare: 0.6, collectionLimit: 200, implicitPoints: 2, rowRoll: 0.08,
+        affixCount: { common: 1, rare: 2, epic: 3, legendary: 4, mythic: 4 },
+        namedShare: { common: 0, rare: 0, epic: 0.1, legendary: 0.25, mythic: 0.4 },
+        salvageGold: { common: 10, rare: 25, epic: 50, legendary: 90, mythic: 150 },
+        tiers: [{ weight: 1, minPower: 0 }, { weight: 1.35, minPower: 3 }, { weight: 1.7, minPower: 6 }, { weight: 2, minPower: 9 }],
+        power: { boss: [2], chestBase: 1, chestPerPhase: 0.3, perWorld: 0.5, difficulty: { normal: 0, insane: 1, hell: 2 } },
+        levelAtPower: [0, 3, 6, 9, 12],
+        mythicEffects: [{ kind: "slow_aura", params: { radius: 350, slow: 0.25 }, text: names("Slow") }],
+      },
+    },
+    loot: {
+      bases: SLOT_TYPES.flatMap((slotType) => (["str", "agi", "int"] as const).map((flavour) => ({
+        id: `${flavour}-${slotType.toLowerCase()}`, name: names(slotType), gender: "f", slotType, flavour,
+        implicit: { stat: "hp", value: 24 },
+      }))),
+      affixes: ["str", "agi", "int", "hp"].map((stat) => ({
+        stat, tags: [stat === "hp" ? "str" : stat], unit: stat === "hp" ? 12 : 0.5,
+        prefix: { en: "Big", cs: { m: "Velký", f: "Velká", n: "Velké", p: "Velké" } }, suffix: names("of it"),
+      })),
+      names: {
+        first: [{ en: "Grim", cs: { m: "Ponurý", f: "Ponurá", n: "Ponuré", p: "Ponuré" } }],
+        nouns: Object.fromEntries(SLOT_TYPES.map((t) => [t, [{ name: names(t), gender: "m" }]])),
+      },
     },
     worlds: [
       { id: "first-world", name: names("First"), blurb: names("A plain."), color: "#1f3a44", ready: true,
@@ -844,3 +868,55 @@ function meteors() {
 function thicket(zones: number[][]) {
   return { kind: "thicket" as const, slow: 0.35, zones, name: { en: "Thornbrake", cs: "Trnité houští" } };
 }
+
+describe("random item data", () => {
+  it("accepts the fixture's bases, affixes and names", () => {
+    const data = validateGameData(fixture());
+    expect(data.loot.bases).toHaveLength(42);
+    expect(data.rules.loot.smartShare).toBe(0.6);
+  });
+
+  it("rejects a duplicate base, a slot type without an int base and an unpriced implicit", () => {
+    const d = fixture();
+    d.loot.bases[1].id = d.loot.bases[0].id;
+    d.loot.bases = d.loot.bases.filter((b: { id: string }) => b.id !== "int-head");
+    d.loot.bases[3].implicit = { stat: "armor", value: 0.5 };
+    const message = errorMessage(d);
+    expect(message).toContain('duplicate base id "str-head"');
+    expect(message).toContain("no int base of type head");
+    expect(message).toContain('no affix prices "armor"');
+  });
+
+  it("rejects a duplicate affix, too few affixes for a mythic and an unknown stat or gender", () => {
+    const d = fixture();
+    d.loot.affixes[1].stat = "str";
+    d.loot.affixes.pop();
+    expect(errorMessage(d)).toContain('duplicate affix "str"');
+    expect(errorMessage(d)).toContain("3 affixes, an item rolls up to 4");
+    const e = fixture();
+    e.loot.affixes[0].stat = "luck";
+    e.loot.bases[0].gender = "x";
+    expect(errorMessage(e)).toContain("loot.affixes.0.stat");
+    expect(errorMessage(e)).toContain("loot.bases.0.gender");
+  });
+
+  it("rejects a Czech adjective without a form, and a slot type without rare nouns", () => {
+    const d = fixture();
+    delete d.loot.affixes[0].prefix.cs.p;
+    delete d.loot.names.nouns.offHand;
+    const message = errorMessage(d);
+    expect(message).toContain("loot.affixes.0.prefix.cs.p");
+    expect(message).toContain("loot.names.nouns.offHand");
+  });
+
+  it("rejects falling tiers, levelAtPower of the wrong length and power.boss not matching the drops", () => {
+    const d = fixture();
+    d.rules.loot.tiers[2].weight = 1;
+    expect(errorMessage(d)).toContain("tier weights and minPower must rise");
+    const e = fixture();
+    e.rules.loot.levelAtPower = [0, 3, 6];
+    e.rules.loot.power.boss = [1, 2];
+    expect(errorMessage(e)).toContain("rules.loot.levelAtPower: 3 values for 5 item levels");
+    expect(errorMessage(e)).toContain("rules.loot.power.boss: 2 values for 1 boss drops");
+  });
+});

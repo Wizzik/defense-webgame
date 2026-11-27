@@ -4,7 +4,7 @@ import { parse } from "yaml";
 import { describe, expect, it } from "vitest";
 import { validateGameData } from "./schema";
 
-const FILES = ["heroes.json", "abilities.json", "enemies.json", "rules.json", "items.json", "constants.json", "worlds.json"] as const;
+const FILES = ["heroes.json", "abilities.json", "enemies.json", "rules.json", "items.json", "loot.json", "constants.json", "worlds.json"] as const;
 /** Keys that carry map texts (tooltips) or design-only lookups (mapName). */
 const FORBIDDEN_KEYS = new Set(["tooltip", "ubertip", "tip", "mapName", "source", "review", "jassFunctions"]);
 
@@ -52,6 +52,7 @@ describe("generated game data", () => {
         enemies: JSON.parse(read("enemies.json")),
         rules: JSON.parse(read("rules.json")),
         items: JSON.parse(read("items.json")),
+        loot: JSON.parse(read("loot.json")),
         constants: JSON.parse(read("constants.json")),
         worlds: JSON.parse(read("worlds.json")),
       }),
@@ -358,6 +359,126 @@ describe("generated game data", () => {
         for (const rarity of Object.keys(drop.weights)) expect(of(rarity).length, `${drop.boss}: ${rarity}`).toBeGreaterThan(0);
       }
     });
+  });
+});
+
+describe("random items", () => {
+  type Gendered = { en: string; cs: { m: string; f: string; n: string; p: string } };
+  type Base = { id: string; name: { en: string; cs: string }; gender: string; slotType: string; flavour: string; implicit: { stat: string; value: number } };
+  type Affix = { stat: string; tags: string[]; unit: number; maxTier?: number; prefix: Gendered; suffix: { en: string; cs: string } };
+  type Loot = { bases: Base[]; affixes: Affix[]; names: { first: Gendered[]; nouns: Record<string, { name: { en: string; cs: string }; gender: string }[]> } };
+  type Tier = { weight: number; minPower: number };
+  type LootRules = {
+    implicitPoints: number; rowRoll: number; smartShare: number; collectionLimit: number;
+    affixCount: Record<string, number>; namedShare: Record<string, number>; tiers: Tier[];
+    power: { boss: number[]; chestBase: number; chestPerPhase: number; perWorld: number; difficulty: Record<string, number> };
+    levelAtPower: number[]; mythicEffects: { kind: string }[];
+  };
+  const loot = JSON.parse(read("loot.json")) as Loot;
+  const rules = (JSON.parse(read("rules.json")) as { loot: LootRules }).loot;
+  const SLOTS = ["head", "neck", "shoulders", "back", "chest", "wrist", "hands", "waist", "legs", "feet", "ring", "trinket", "mainHand", "offHand"];
+  const BUDGET: Record<string, number> = { common: 6, rare: 12, epic: 20, legendary: 30, mythic: 42 };
+  const unitOf = (stat: string) => loot.affixes.find((a) => a.stat === stat)!.unit;
+  const designFile = (file: string) => parse(readFileSync(join(import.meta.dirname, "..", "design", file), "utf8"));
+
+  it("loot.json is the copy of the three design files", () => {
+    expect(loot, "loot.json differs from design: run npm run data:build").toEqual({
+      bases: designFile("item-bases.yaml"), affixes: designFile("affixes.yaml"), names: designFile("item-names.yaml"),
+    });
+  });
+
+  it("has 46 bases, 3-4 per slot type, each type with a str, an agi and an int base", () => {
+    expect(loot.bases).toHaveLength(46);
+    for (const slot of SLOTS) {
+      const of = loot.bases.filter((b) => b.slotType === slot);
+      expect(of.length, slot).toBeGreaterThanOrEqual(3);
+      expect(of.length, slot).toBeLessThanOrEqual(4);
+      expect(new Set(of.map((b) => b.flavour)), slot).toEqual(new Set([...["str", "agi", "int"], ...(of.length === 4 ? ["any"] : [])]));
+    }
+    expect(new Set(loot.bases.map((b) => b.name.en)).size).toBe(loot.bases.length);
+  });
+
+  it("an implicit row is worth implicitPoints", () => {
+    for (const b of loot.bases) expect(b.implicit.value / unitOf(b.implicit.stat), b.id).toBeCloseTo(rules.implicitPoints, 9);
+  });
+
+  it("affixes price the stats of named items as the items header does", () => {
+    const UNIT: Record<string, number> = {
+      str: 0.5, agi: 0.5, int: 0.5, hp: 12, armor: 0.25, regen: 0.1, damage: 0.005, attackSpeed: 0.005, spellPower: 0.005,
+      moveSpeed: 0.01, goldFind: 0.01, magnet: 10, magicFind: 0.02, lifesteal: 0.0025,
+    };
+    for (const [stat, unit] of Object.entries(UNIT)) expect(unitOf(stat), stat).toBe(unit);
+    expect(loot.affixes).toHaveLength(22);
+  });
+
+  it("every role pool can fill a mythic on its own, and lifesteal is in all three", () => {
+    for (const role of ["str", "agi", "int"]) {
+      const pool = loot.affixes.filter((a) => a.tags.includes(role));
+      expect(pool.length, role).toBeGreaterThanOrEqual(rules.affixCount.mythic!);
+      expect(pool.map((a) => a.stat), role).toContain("lifesteal");
+    }
+  });
+
+  it("every possible roll stays within 10 % of its rarity budget", () => {
+    const q = rules.rowRoll;
+    for (const [rarity, budget] of Object.entries(BUDGET)) {
+      const n = rules.affixCount[rarity]!;
+      const share = budget - rules.implicitPoints;
+      // Every tier of every row, and every row at the low or the high end of its roll.
+      for (let combo = 0; combo < 4 ** n; combo++) {
+        const weights = Array.from({ length: n }, (_, i) => rules.tiers[Math.floor(combo / 4 ** i) % 4]!.weight);
+        const sum = weights.reduce((a, b) => a + b, 0);
+        for (let ends = 0; ends < 2 ** n; ends++) {
+          const rows = weights.map((w, i) => (share * w / sum) * ((ends >> i) & 1 ? 1 + q : 1 - q));
+          const total = rules.implicitPoints + rows.reduce((a, b) => a + b, 0);
+          expect(total, `${rarity} ${combo} ${ends}`).toBeGreaterThanOrEqual(budget * 0.9 - 1e-9);
+          expect(total, `${rarity} ${combo} ${ends}`).toBeLessThanOrEqual(budget * 1.1 + 1e-9);
+          if (rarity === "mythic") expect(Math.min(...rows), "a mythic has no tiny rows").toBeGreaterThanOrEqual(5);
+        }
+      }
+    }
+  });
+
+  it("T4 is about twice T1; the top source reaches T4 and level 5, world 1 normal's first boss stays below T2", () => {
+    const t = rules.tiers;
+    expect(t[3]!.weight / t[0]!.weight).toBeGreaterThanOrEqual(1.8);
+    expect(t[3]!.weight / t[0]!.weight).toBeLessThanOrEqual(2.2);
+    expect(t[0]!.minPower).toBe(0);
+    const top = Math.max(...rules.power.boss) + 4 * rules.power.perWorld + rules.power.difficulty.hell!;
+    expect(top).toBeGreaterThanOrEqual(t[3]!.minPower);
+    expect(top).toBeGreaterThanOrEqual(rules.levelAtPower[rules.levelAtPower.length - 1]!);
+    expect(rules.power.boss[0]!).toBeLessThan(t[1]!.minPower);
+    expect(rules.power.chestBase + 20 * rules.power.chestPerPhase).toBeLessThan(t[3]!.minPower);
+  });
+
+  it("Petr's answers: smart loot 60 %, 200 items, named shares 10 / 25 / 40 %", () => {
+    expect(rules.smartShare).toBe(0.6);
+    expect(rules.collectionLimit).toBe(200);
+    expect(rules.namedShare).toEqual({ common: 0, rare: 0, epic: 0.1, legendary: 0.25, mythic: 0.4 });
+    expect(rules.affixCount).toEqual({ common: 1, rare: 2, epic: 3, legendary: 4, mythic: 4 });
+    expect(rules.mythicEffects.map((e) => e.kind).sort()).toEqual([
+      "chain_on_attack", "gold_heals_castle", "haste_on_elite_kill", "low_hp_shield", "slow_aura", "splash_on_attack",
+    ]);
+  });
+
+  it("Czech adjectives have the forms of all genders (hard -ý/-á/-é/-é, soft -í in all)", () => {
+    const words = [...loot.affixes.map((a) => a.prefix), ...loot.names.first];
+    for (const { en, cs } of words) {
+      if (cs.m.endsWith("í")) {
+        expect([cs.f, cs.n, cs.p], en).toEqual([cs.m, cs.m, cs.m]);
+      } else {
+        const stem = cs.m.slice(0, -1);
+        expect(cs.m.endsWith("ý"), en).toBe(true);
+        expect([cs.f, cs.n, cs.p], en).toEqual([`${stem}á`, `${stem}é`, `${stem}é`]);
+      }
+    }
+    for (const b of loot.bases) expect(["m", "f", "n", "p"], b.id).toContain(b.gender);
+    expect(new Set(loot.affixes.map((a) => a.prefix.en)).size).toBe(loot.affixes.length);
+    expect(new Set(loot.affixes.map((a) => a.suffix.en)).size).toBe(loot.affixes.length);
+  });
+
+  it("every slot type has at least two nouns for rare names", () => {
+    for (const slot of SLOTS) expect(loot.names.nouns[slot]!.length, slot).toBeGreaterThanOrEqual(2);
   });
 });
 
