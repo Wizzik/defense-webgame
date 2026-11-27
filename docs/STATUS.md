@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-27 (random items, stages 1-3: data, sim, meta and saves). Read this first when you resume work.
+Updated 2026-11-27 (random items, stages 1-3; Petr's batch 2 in progress). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -13,6 +13,35 @@ Updated 2026-11-27 (random items, stages 1-3: data, sim, meta and saves). Read t
    damage with their own names and looks per world, chest cards for worn slots only as upgrades, balance target
    about 10 % autopilot wins with no gear). After stage 3 of random items, before its stage 4.
 4. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
+
+## Petr's batch 2 (branch `claude/petr-batch-2`, on top of PR #42, IN PROGRESS, 2026-11-27)
+
+Plan `docs/superpowers/plans/2026-11-27-petr-batch-2.md`; rulings and the autopilot tables in `docs/DECISIONS.md`,
+section Petr's batch 2. `npm run check` passes on every commit of the branch.
+
+- **Done:**
+  - task 1, AoE -50 %: `design/scaling.yaml` `abilities.areaScale: 0.5` (radius, hitRadius, width, endWidth of every
+    ability);
+  - task 3, Serpent Totem: 100, 125 ... 325 over the ten levels;
+  - task 4, blink: F teleports to the mouse at any distance (`rules.hero.blink.aheadDistance` without a mouse
+    point), a flash at both ends, no streak; e2e "F teleports the hero ...";
+  - task 5, first half: bosses x3 hp, x2 damage (`enemies.bossHp`, `bossDamage` in scaling.yaml).
+  - Digest now `1000e1ab`.
+- **Open, in this order:**
+  1. task 6, chests: cards for worn slots only as upgrades (Level of the worn item with `rules.loot.upgradeShare`
+     0.5, or a higher rarity in another slot; a mythic slot only Level cards); `sim/chests.ts`.
+  2. task 5, second half: each world its own four bosses (names EN/CS, look: model or tint, size, aura colour), same
+     mechanics per boss slot; world 1 keeps today's; `rules.drops` per boss slot, not per boss id
+     (`meta/drop.ts` reads `rules.drops` by boss id today).
+  3. task 2, casters: one caster type per faction (a spell bolt with its own look and sound, `skirmish`), at least
+     25 % of the phase mix from phase 3; a test of the share per phase.
+  4. task 7, balance toward about 10 % wins per hero (`--gear none`, seeds 1-20): today, seeds 1-10, Gravecaller 10,
+     Serpent Shaman 10, Redcleaver 7, Mistwarden 1, Sparkshot 1, Stonehorn 0, Nightglaive 0, Tidecaller 0 of 10.
+  5. e2e `webgl2-fallback`, `npm run shots` for the new bosses and casters, docs, PR.
+- **What Petr can check already** (after the merge; until then the branch has no page of its own):
+  spell circles half as big (`?debug=1&phase=10&lang=cs`), the shaman's totem tooltip shows 100 at level 1,
+  F teleports to the mouse from level 40 (`?debug=1&phase=20&lang=cs`, aim the mouse far and press F), the first
+  boss takes much longer (`?debug=1&phase=6&lang=cs`).
 
 ## Random items, stage 3: meta and saves (merged into `claude/random-items-data`, PR #42, 2026-11-27)
 
