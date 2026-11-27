@@ -927,7 +927,9 @@ test("every hero has its own doll", async ({ page }) => {
 });
 
 test("orbs lie on the map; a berserk orb shows in the HUD; a heart heals the hurt hero", async ({ page }) => {
-  await page.goto("/?seed=1&lang=en&debug=1&speed=4&hero=stonehorn");
+  // speed 1: a slow renderer runs at most 0.25 s of the game per frame, so the weak hero of the batch 2 balance
+  // cannot die among the hunters between two frames before it steps away
+  await page.goto("/?seed=1&lang=en&debug=1&speed=1&hero=stonehorn");
   await startRun(page);
   await waitForScreen(page, "playing");
   // an idle hero outside the castle's defence circle (rules.enemies.heroDefendRange): the packs go for the castle
