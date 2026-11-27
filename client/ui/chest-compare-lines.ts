@@ -12,6 +12,8 @@ export interface CompareSide {
   rarity: Rarity;
   rarityName: string;
   slotType: SlotType;
+  /** Id of the item (`rolled-<base id>` for a random one), for its icon. */
+  itemId: string;
   /** "level 3 → 4" for the kept item, "level 4 for this run" for the new one. */
   level: string;
   /** The special effect of a legendary or mythic item, or null. */
@@ -58,6 +60,7 @@ function side(lang: Lang, item: Item, level: string): CompareSide {
     rarity: item.rarity,
     rarityName: item.id.startsWith("rolled-") ? t(lang, "tooltip.random", { rarity }) : rarity,
     slotType: item.slotType,
+    itemId: item.id,
     level,
     effect: item.effect ? item.effect.text[lang] : null,
   };

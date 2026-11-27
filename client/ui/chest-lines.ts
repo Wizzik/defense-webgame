@@ -13,6 +13,8 @@ export interface ChestLines {
   /** Name of the slot's type. */
   slot: string;
   slotType: SlotType;
+  /** Id of the shown item (`rolled-<base id>` for a random one), for its icon. */
+  itemId: string;
   rarity: Rarity;
   rarityName: string;
   /** What the pick does: "new for this run", "compare with X", "level 3 → 4". */
@@ -55,6 +57,7 @@ export function chestLines(lang: Lang, data: GameData, gear: GearState, card: Ch
     title: item.name[lang],
     slot: t(lang, `slot.${type}` as MessageKey),
     slotType: type,
+    itemId: item.id,
     rarity: item.rarity,
     rarityName: item.id.startsWith("rolled-")
       ? t(lang, "tooltip.random", { rarity: t(lang, `rarity.${item.rarity}` as MessageKey) })

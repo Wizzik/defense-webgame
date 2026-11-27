@@ -34,10 +34,10 @@ describe("chest compare lines", () => {
     const { data, gear, helm, crown } = setup();
     const info = compareLines("en", data, gear, { slot: 0, item: crown, action: ChestAction.Choice });
     expect(info.keep).toEqual({
-      title: "Test Helm", rarity: "rare", rarityName: "Rare", slotType: "head", level: "level 3 → 4", effect: null,
+      title: "Test Helm", rarity: "rare", rarityName: "Rare", slotType: "head", itemId: "test-helm", level: "level 3 → 4", effect: null,
     });
     expect(info.take).toEqual({
-      title: "Test Crown", rarity: "epic", rarityName: "Epic", slotType: "head", level: "level 4 for this run", effect: null,
+      title: "Test Crown", rarity: "epic", rarityName: "Epic", slotType: "head", itemId: "test-crown", level: "level 4 for this run", effect: null,
     });
     const cs = compareLines("cs", data, gear, { slot: 0, item: crown, action: ChestAction.Choice });
     expect(cs.keep.level).toBe("úroveň 3 → 4");

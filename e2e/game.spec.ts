@@ -641,6 +641,11 @@ test("a chest takes gold and offers three rolled items; the pick lands in the ge
   if (!first.rolled) expect(ITEMS.find((item) => item.id === first.item)!.rarity).toBe(first.rarity);
   await expect(page.locator("button.card").first().locator(".card-name")).toHaveText(first.name.cs);
   await expect(page.locator("button.card").first()).toHaveClass(new RegExp(`rarity-${first.rarity}`));
+  // every card shows its item's picture (its base's for a rolled item), and the picture loads
+  await expect(page.locator("button.card .chest-glyph .item-icon")).toHaveCount(3);
+  const iconUrl = await page.locator("button.card .chest-glyph .item-icon").first().evaluate((node) =>
+    new URL(/url\(['"]?([^'")]+)['"]?\)/.exec(getComputedStyle(node).getPropertyValue("--icon"))![1]!, location.href).href);
+  expect((await page.request.get(iconUrl)).headers()["content-type"]).toContain("svg");
   await expect(page.locator("#hud-gold")).toContainText("900");
   await testInfo.attach(`chest-${testInfo.project.name}`, {
     body: await page.screenshot({ type: "png" }),
@@ -896,10 +901,13 @@ test("a save file of version 2 brings a random item; the gear screen lists it an
   const cell = page.locator('#gear-screen .gear-grid [data-uid="1"]');
   await expect(cell).toHaveClass(/rarity-epic/);
   await expect(cell.locator(".slot-level")).toHaveText("3");
+  await expect(cell.locator(".item-icon")).toHaveAttribute("style", /icons\/lorc-visored-helm\.svg/);
   await cell.hover();
   await expect(page.locator("#gear-screen .item-tooltip")).toContainText("Kostěná kukla");
   await cell.click();
   await expect(page.locator('#gear-screen .gear-left .doll-slot[data-slot="head"]')).not.toHaveClass(/empty/);
+  await expect(page.locator('#gear-screen .gear-left .doll-slot[data-slot="head"] .item-icon')).toHaveCount(1);
+  await expect(page.locator('#gear-screen .gear-left .doll-slot[data-slot="chest"] .item-icon')).toHaveCount(0);
   await page.locator("#gear-back").click();
   await startRun(page);
   await waitForScreen(page, "playing");

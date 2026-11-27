@@ -245,6 +245,7 @@ export const messagesEn = {
   "gear.importedPartly": "The gear was imported; {n} entries did not fit this version of the game and were left out.",
   "gear.importFailed": "This file is not a gear export. Nothing was changed.",
   "menu.gear": "Gear",
+  "menu.credits": "Credits: item icons by {authors} (game-icons.net, CC BY 3.0). Models by Kay Lousberg (KayKit, CC0).",
   "end.won": "You held the castle!",
   "end.lostCastle": "The castle has fallen.",
   "end.lostHero": "Your hero has fallen.",

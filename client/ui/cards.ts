@@ -5,7 +5,7 @@ import { ChestCompare } from "./chest-compare";
 import { chestLines } from "./chest-lines";
 import { el } from "./dom";
 import { abilityIconSvg } from "./ability-icons";
-import { iconSvg } from "./item-icons";
+import { itemIconHtml } from "./item-icons";
 import { tierMark } from "./item-tooltip";
 import { type Lang, type MessageKey, t } from "./i18n";
 
@@ -128,7 +128,7 @@ export class Cards {
     el("span", "card-badge", button, info.slot);
     const head = el("span", "chest-head", button);
     const glyph = el("span", "chest-glyph", head);
-    glyph.innerHTML = iconSvg(info.slotType);
+    glyph.innerHTML = itemIconHtml(info.itemId, info.slotType);
     el("span", "card-name", head, info.title);
     el("span", "chest-rarity", button, info.rarityName);
     el("span", "card-desc", button, info.action);

@@ -23,7 +23,7 @@ describe("chest lines", () => {
     const boots = data.items.findIndex((i) => i.slotType === "feet" && i.rarity === "common");
     const card = { slot: feet, item: boots, action: ChestAction.New };
     expect(chestLines("en", data, gear, card)).toEqual({
-      title: data.items[boots]!.name.en, slot: "Feet", slotType: "feet", rarity: "common", rarityName: "Common",
+      title: data.items[boots]!.name.en, slot: "Feet", slotType: "feet", itemId: data.items[boots]!.id, rarity: "common", rarityName: "Common",
       action: "new for this run",
       lines: itemLines("en", data.items[boots]!, 0, 1, data.rules.gear).map((text) => ({ text, tone: "plain" })),
     });

@@ -6,6 +6,7 @@ import { MODELS } from "../tools/assets-build/manifest";
 import { readGlbInfo } from "../tools/assets-build/glb-info";
 import { parse } from "yaml";
 import { COMMON_ENV, lookOf, worldModelIds } from "../client/render/world-look";
+import { ITEM_ICONS, iconFile } from "../client/ui/item-icon-names";
 
 const ASSETS = "assets";
 const ids = (file: string): string[] =>
@@ -165,5 +166,28 @@ describe("audio", () => {
     const used = new Set([...audio.cues.flatMap((c) => c.files), ...audio.tracks.map((t) => t.file)]);
     const present = [...files("sfx"), ...files("music")].map((f) => relative(ASSETS, f));
     expect(sorted(present)).toEqual(sorted([...used]));
+  });
+});
+
+describe("item icons", () => {
+  const icons = readdirSync(`${ASSETS}/icons`);
+  const bases = (JSON.parse(readFileSync("data/generated/loot.json", "utf8")) as { bases: { id: string }[] }).bases;
+
+  it("every base and named item has an icon, and every icon file is used", () => {
+    for (const id of [...ids("items"), ...bases.map((b) => b.id)]) expect(ITEM_ICONS[id], id).toBeDefined();
+    const used = new Set(Object.values(ITEM_ICONS).map((ref) => `${iconFile(ref)}.svg`));
+    expect(sorted(icons)).toEqual(sorted([...used]));
+  });
+
+  it("are optimized single-path svgs filled with currentColor, under 600 kB in all", () => {
+    let bytes = 0;
+    for (const file of icons) {
+      const text = readFileSync(`${ASSETS}/icons/${file}`, "utf8");
+      expect(text, file).toMatch(
+        /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" viewBox="0 0 512 512" fill="currentColor"><path d="[MmLlHhVvCcSsQqTtAaZz0-9.,\s-]+"\/><\/svg>\n$/,
+      );
+      bytes += statSync(`${ASSETS}/icons/${file}`).size;
+    }
+    expect(bytes).toBeLessThan(600_000);
   });
 });

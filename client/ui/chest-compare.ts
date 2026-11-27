@@ -1,7 +1,7 @@
 import type { ChestCard, Run } from "../../sim";
 import { type CompareSide, compareLines } from "./chest-compare-lines";
 import { el } from "./dom";
-import { iconSvg } from "./item-icons";
+import { itemIconHtml } from "./item-icons";
 import { type LineTone, tierMark } from "./item-tooltip";
 import { type Lang, t } from "./i18n";
 
@@ -83,7 +83,7 @@ export class ChestCompare {
     el("span", "compare-label", col, label);
     const head = el("span", "chest-head", col);
     const glyph = el("span", "chest-glyph", head);
-    glyph.innerHTML = iconSvg(side.slotType);
+    glyph.innerHTML = itemIconHtml(side.itemId, side.slotType);
     el("span", "card-name", head, side.title);
     el("span", "chest-rarity", col, side.rarityName);
     el("span", "card-desc", col, side.level);

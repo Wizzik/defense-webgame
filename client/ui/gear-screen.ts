@@ -7,7 +7,7 @@ import { compareTarget, gridList } from "./collection-grid";
 import { Doll, type DollSlotView, type DollTotals } from "./doll";
 import { el, setText } from "./dom";
 import { type Lang, type MessageKey, t } from "./i18n";
-import { iconSvg } from "./item-icons";
+import { iconSvg, itemIconHtml } from "./item-icons";
 import { ItemTooltip, tooltipLines } from "./item-tooltip";
 
 /**
@@ -215,7 +215,7 @@ export class GearScreen {
       cell.dataset.role = entry.role;
       if (entry.salvageable) cell.dataset.salvage = "1";
       cell.setAttribute("aria-label", item.name[lang]);
-      cell.innerHTML = iconSvg(item.slotType);
+      cell.innerHTML = itemIconHtml(item.id, item.slotType);
       if (entry.equipped) cell.classList.add("equipped");
       if (entry.owned && entry.level > 1) el("span", "slot-level", cell, String(entry.level));
       if (entry.owned) {

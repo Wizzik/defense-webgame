@@ -21,6 +21,7 @@
     "e2e": "playwright test",
     "assets:fetch": "tsx tools/assets-build/fetch.ts",
     "assets:build": "tsx tools/assets-build/build.ts",
+    "assets:icons": "tsx tools/assets-build/icons.ts",
     "shots": "SHOTS=1 playwright test e2e/shots.spec.ts --project=webgl2-fallback",
     "audio:build": "tsx tools/audio-build/build.ts",
     "audio:encode": "tsx tools/audio-build/encode.ts"

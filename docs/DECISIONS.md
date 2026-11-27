@@ -15,6 +15,19 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   `client/ui/messages-cs.ts` falls back to English, and a Czech browser no longer picks Czech by itself (`pickLang`).
   Where a data schema still requires `cs` (`{ en, cs }`, the gendered rare names), new rows repeat the English text.
 
+## Random items, stage 6: icons (2026-11-27; the picks are Claude's)
+
+- Pictures from game-icons.net (CC BY 3.0) at the pinned commit `82d9488` of `game-icons/icons`: one per base and
+  named item, chosen by Claude (`client/ui/item-icon-names.ts`); several items may share one. Files are named
+  `<author>-<icon>.svg` (two authors have a `trousers`). Built by `npm run assets:icons` (`tools/assets-build/icons.ts`):
+  only `<path>` elements with plain path data are accepted, the black background square is dropped and all paths
+  become one, filled with `currentColor`. Budget: all icons under 600 kB (`tests/assets.test.ts`), now 180 kB.
+- Drawn as a CSS mask (`--icon: url(...)`, `background-color: currentColor`), so the text colour (the rarity's)
+  fills it and the files load on demand (not bundled into the script). A random item shows its base's picture; an
+  item without one, empty slots and the slot filters show our slot glyph.
+- Attribution: a row per file in `assets/LICENSES.md` (author, CC BY 3.0, link to the icon's page) and a Credits
+  line in the menu naming the authors.
+
 ## Random items, stage 5: balance (2026-11-27)
 
 - `sim:run --gear rolled-mid` (a rare rolled at power 2, level 1, in every slot) and `rolled-full` (a mythic rolled

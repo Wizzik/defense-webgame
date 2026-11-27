@@ -1,4 +1,5 @@
 import type { SlotType } from "../../data/schema";
+import { ITEM_ICONS, iconFile } from "./item-icon-names";
 
 /** Our own glyphs, one per slot type (24 x 24, drawn with the text colour). The frame of a slot carries the rarity. */
 const GLYPHS: Record<SlotType, string> = {
@@ -24,4 +25,18 @@ export function iconSvg(type: SlotType): string {
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" ' +
     `stroke-linecap="round" aria-hidden="true">${GLYPHS[type]}</svg>`
   );
+}
+
+/** The id of a base or named item: a random item's id is "rolled-<base id>". */
+const iconKey = (itemId: string): string => (itemId.startsWith("rolled-") ? itemId.slice("rolled-".length) : itemId);
+
+/**
+ * The picture of an item (its base's for a random item), drawn in the text colour (the rarity's) as a CSS mask of
+ * its game-icons.net SVG; an item without a picture shows the glyph of its slot type.
+ */
+export function itemIconHtml(itemId: string, type: SlotType): string {
+  const ref = ITEM_ICONS[iconKey(itemId)];
+  if (!ref) return iconSvg(type);
+  const url = `${import.meta.env.BASE_URL}icons/${iconFile(ref)}.svg`;
+  return `<span class="item-icon" style="--icon: url('${url}')" aria-hidden="true"></span>`;
 }

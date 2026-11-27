@@ -19,7 +19,26 @@ Updated 2026-11-27 (random items, stages 1-4 and the damage meter; Petr's batch 
    co-op restart, no white hit flash, weaker co-op scaling, spell levels 6 (ultimates 3, passives 5) with STR / AGI /
    INT cards after, level 60-70 at the end of a run, wards x5. Then Sentry Ward = Serpent Totem (10 s / 15 s),
    dash 3 charges from level 10, blink from 20, and random items stage 5 (balance), DONE on `main`.
-   NEXT: random items stage 6 (icons, plan `docs/superpowers/plans/2026-11-27-random-items.md`, tasks 19-20).
+   Random items stage 6 (icons) DONE on `main` (below): the random items plan is complete.
+
+## Random items stage 6: item icons (straight to `main`, DONE, 2026-11-27)
+
+- Every item base (46) and named item (70) has a picture from game-icons.net (CC BY 3.0), 104 files, 180 kB in all
+  (`assets/icons/<author>-<icon>.svg`, test budget 600 kB). The mapping is `client/ui/item-icon-names.ts`;
+  `npm run assets:icons` fetches the files at the pinned commit into `assets-source/icons/` (untrusted, read as text
+  only), keeps only plain `<path>` data (a strict check, the black background square dropped), writes one path filled
+  with `currentColor` and rewrites the icon rows of `assets/LICENSES.md` with the authors.
+- The icon is a CSS mask filled with the rarity colour (the frame colour stays); a random item shows its base's
+  icon; empty slots and the slot filters keep our glyphs. Shown in the gear screen's collection and doll, the in-run
+  gear panel (C), the chest cards and the keep / take compare. Credits line in the menu (icon authors, KayKit).
+- **What Petr checks:**
+  - the gear screen with a few items: https://wizzik.github.io/defense-webgame/?debug=1 then in the console
+    `__game.debug.grantItem("skysplitter", 3); __game.debug.grantRolled("head", "mythic", 12)` and open Gear: each
+    picture readable at that size, in its rarity colour;
+  - chest cards and the compare: https://wizzik.github.io/defense-webgame/?debug=1&phase=5 then
+    `__game.debug.grantGold(2000)` and walk to a chest;
+  - any icon that fits badly: say the item and I swap the picture (one line in `client/ui/item-icon-names.ts`).
+  - the Credits line at the bottom of the menu.
 
 ## Sentry Ward, dash, blink and random items stage 5 (straight to `main`, DONE, 2026-11-27)
 

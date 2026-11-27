@@ -1,3 +1,4 @@
+import { usedIconAuthors } from "./item-icon-names";
 import type { Hero } from "../../data/schema";
 import { el } from "./dom";
 import { type Lang, type MessageKey, t } from "./i18n";
@@ -21,6 +22,7 @@ export class Menu {
   private readonly gear: HTMLButtonElement;
   private readonly settings: HTMLButtonElement;
   private readonly controls: HTMLElement;
+  private readonly credits: HTMLElement;
   private readonly languageLabel: HTMLElement;
   private readonly sound: HTMLButtonElement;
   private readonly gpuWarning: HTMLElement;
@@ -82,6 +84,7 @@ export class Menu {
       button.addEventListener("click", () => handlers.onLang(lang));
       this.langButtons.set(lang, button);
     }
+    this.credits = el("p", "menu-credits", panel);
   }
 
   setLang(lang: Lang): void {
@@ -94,6 +97,7 @@ export class Menu {
     this.coop.textContent = t(lang, "menu.coop");
     this.settings.textContent = t(lang, "menu.settings");
     this.controls.textContent = t(lang, "menu.controls");
+    this.credits.textContent = t(lang, "menu.credits", { authors: usedIconAuthors().join(", ") });
     this.languageLabel.textContent = t(lang, "menu.language");
     this.gpuWarning.textContent = t(lang, "menu.gpuWarning");
     this.saveWarning.textContent = t(lang, "menu.noSave");

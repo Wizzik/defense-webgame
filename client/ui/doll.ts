@@ -2,7 +2,7 @@ import type { GameData, Item } from "../../data/schema";
 import { type HeroStats, SLOT_IDS, type SlotId, slotTypeOf } from "../../sim";
 import { el, setText } from "./dom";
 import { type Lang, type MessageKey, t } from "./i18n";
-import { iconSvg } from "./item-icons";
+import { iconSvg, itemIconHtml } from "./item-icons";
 import { type ItemTooltip, tooltipLines } from "./item-tooltip";
 
 /** What one slot of the doll shows. `level` is the permanent level (0 for an item a chest gave), `temp` the levels from chests. */
@@ -51,6 +51,10 @@ export function slotName(lang: Lang, slot: SlotId): string {
 
 interface SlotNode {
   button: HTMLButtonElement;
+  /** Holds the slot's glyph or the worn item's icon. */
+  icon: HTMLElement;
+  /** Id of the item whose icon is shown, "" for the glyph. */
+  iconOf: string;
   temp: HTMLElement;
   level: HTMLElement;
   view: DollSlotView;
@@ -109,9 +113,12 @@ export class Doll {
     const button = el("button", "doll-slot empty", parent);
     button.type = "button";
     button.dataset.slot = slot;
-    button.innerHTML = iconSvg(slotTypeOf(SLOT_IDS.indexOf(slot)));
+    const icon = el("span", "slot-icon", button);
+    icon.innerHTML = iconSvg(slotTypeOf(SLOT_IDS.indexOf(slot)));
     const node: SlotNode = {
       button,
+      icon,
+      iconOf: "",
       temp: el("span", "slot-temp", button),
       level: el("span", "slot-level", button),
       view: { slot, item: null, level: 0, temp: 0 },
@@ -148,6 +155,12 @@ export class Doll {
     for (const node of this.nodes.values()) {
       const { item, level, temp } = node.view;
       node.button.className = item ? `doll-slot rarity-${item.rarity}` : "doll-slot empty";
+      const iconOf = item ? item.id : "";
+      if (iconOf !== node.iconOf) {
+        node.iconOf = iconOf;
+        const type = slotTypeOf(SLOT_IDS.indexOf(node.view.slot));
+        node.icon.innerHTML = item ? itemIconHtml(item.id, type) : iconSvg(type);
+      }
       setText(node.temp, temp > 0 ? `+${temp}` : "");
       setText(node.level, item && level > 1 ? String(level) : "");
     }
