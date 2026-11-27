@@ -132,6 +132,18 @@ const ENEMIES: EnemyRow[] = [
   { id: "stone-warden", src: "adv", body: "Knight", keep: ["1H_Sword", "Rectangle_Shield", "Knight_Helmet"], walking: "Walking_B", punch: "1H_Melee_Attack_Stab" },
   { id: "grove-druid", src: "adv", body: "Mage", keep: ["2H_Staff", "Mage_Hat"], walking: "Walking_A", punch: "Spellcasting" },
   { id: "grove-warden", src: "adv", body: "Knight", keep: ["1H_Sword", "Spike_Shield", "Knight_Cape"], walking: "Walking_A", punch: "1H_Melee_Attack_Slice_Diagonal" },
+  // casters of the four factions (Petr's batch 2): a mage, a barbarian with a staff, a skeleton rogue with a staff,
+  // a caped rogue with a staff
+  { id: "battle-mage", src: "adv", body: "Mage", keep: ["1H_Wand", "Mage_Hat", "Mage_Cape"], walking: "Walking_A", punch: "Spellcast_Shoot" },
+  {
+    id: "fire-caller", src: "adv", body: "Barbarian", keep: ["Barbarian_Hat"],
+    attach: [{ file: "adv:Assets/gltf/staff.gltf", slot: "handslot.r" }], walking: "Walking_A", punch: "Spellcast_Shoot",
+  },
+  { id: "bone-acolyte", src: "skel", body: "Skeleton_Rogue", attach: [skel("Skeleton_Staff", "handslot.r")], walking: "Walking_A", punch: "Spellcast_Shoot" },
+  {
+    id: "moon-priestess", src: "adv", body: "Rogue", keep: ["Rogue_Cape"],
+    attach: [{ file: "adv:Assets/gltf/staff.gltf", slot: "handslot.r" }], walking: "Walking_A", punch: "Spellcasting",
+  },
 ];
 
 /** `[out name, path under hex root without extension]` */

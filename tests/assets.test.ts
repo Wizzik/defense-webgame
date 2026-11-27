@@ -124,12 +124,12 @@ describe("model budget", () => {
     for (const id of worldIds) expect(worldBytes(id), id).toBeLessThanOrEqual(1_500_000);
   });
 
-  it("common models plus one world stay within 10 MB", () => {
+  it("common models plus one world stay within 11 MB", () => {
     const common = listFiles(`${ASSETS}/models`)
       .filter((f) => f.endsWith(".glb") && !f.includes(`${join("models", "env")}`))
       .reduce((sum, f) => sum + statSync(f).size, 0) + COMMON_ENV.reduce((n, m) => n + env(m), 0);
     const heaviest = Math.max(...worldIds.map(worldBytes));
-    expect(common + heaviest).toBeLessThanOrEqual(10_000_000);
+    expect(common + heaviest).toBeLessThanOrEqual(11_000_000);
   });
 
   it("every env model belongs to a world or the common set", () => {

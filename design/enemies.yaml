@@ -346,3 +346,50 @@
   gold: 10
   charge: { minRange: 300, maxRange: 700, windupSeconds: 0.5, speedMultiplier: 2.5, damageMultiplier: 1.5, distance: 900, cooldownSeconds: 6 }
   strike: { minRange: 300, maxRange: 900, radius: 160, effect: root, rootSeconds: 1.2, windupSeconds: 1, cooldownSeconds: 6, leap: false }
+
+# Casters (Petr's batch 2, 2026-11-27): one per faction, at least a quarter of the phase mix from phase 3. A caster is
+# a skirmisher whose ranged hit is a spell bolt in its faction's colour and sound (client/render/enemy-fx.ts,
+# design/audio.yaml `attack`). Each reuses the source and multipliers of its faction's support caster (Priest,
+# Shaman, Necromancer; the elf one the Priest), so its numbers are that caster's without the support spell.
+- id: battle-mage
+  faction: human
+  source: hmpr
+  mapName: Priest
+  name: { en: Battle Mage, cs: Bitevní mág }
+  multipliers: { damage: 0.65 }
+  behavior: skirmish
+  caster: true
+  xp: 2
+  gold: 2
+
+- id: fire-caller
+  faction: orc
+  source: oshm
+  name: { en: Fire Caller, cs: Vyvolavač ohně }
+  multipliers: { damage: 0.6 }
+  behavior: skirmish
+  caster: true
+  xp: 2
+  gold: 2
+
+- id: bone-acolyte
+  faction: undead
+  source: unec
+  mapName: Necromancer
+  name: { en: Bone Acolyte, cs: Kostěný akolyta }
+  multipliers: { damage: 0.65 }
+  behavior: skirmish
+  caster: true
+  xp: 2
+  gold: 2
+
+- id: moon-priestess
+  faction: elf
+  source: hmpr
+  mapName: Priest
+  name: { en: Moon Priestess, cs: Měsíční kněžka }
+  multipliers: { damage: 0.65 }
+  behavior: skirmish
+  caster: true
+  xp: 2
+  gold: 2

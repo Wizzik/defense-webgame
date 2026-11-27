@@ -155,6 +155,7 @@ export interface EnemyEntry {
   web?: NonNullable<Enemy["web"]>;
   cloud?: NonNullable<Enemy["cloud"]>;
   raise?: NonNullable<Enemy["raise"]>;
+  caster?: true;
 }
 
 /** One entry of design/items.yaml. Items have no record in the export: they are validated and copied. */

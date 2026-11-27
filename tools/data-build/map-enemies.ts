@@ -98,5 +98,6 @@ export function mapEnemy(exp: ExportUnit, entry: EnemyEntry): Enemy {
     };
   }
   if (entry.knockbackScale !== undefined) enemy.knockbackScale = entry.knockbackScale;
+  if (entry.caster) enemy.caster = true;
   return enemy;
 }

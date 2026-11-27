@@ -40,27 +40,29 @@ enemies: { maxAlive: 600, siegerAggroRange: 250, leashRange: 900, heroDefendRang
 # (the elite of the phase's faction) that come with the first pack of the phase.
 # Phases 6-20 (enemy factions, 2026-11-20): each faction's foot, shooter, heavy and caster keep the weights of the
 # human roles in the same phase (foot = shieldbearer + scout), so only the types change, not the pressure by role.
+# Casters (Petr's batch 2, 2026-11-27): from phase 3 each faction's caster (battle-mage, fire-caller, bone-acolyte,
+# moon-priestess) is at least a quarter of the mix weight; its weight came mostly out of the foot types.
 phases:
   - { mix: { shieldbearer: 8, scout: 3 }, pack: { min: 6, max: 10, everySeconds: 6 }, packs: 2, hunterShare: 0.25, elites: 0 }   # 1
   - { mix: { shieldbearer: 6, scout: 3, musketeer: 2 }, pack: { min: 8, max: 11, everySeconds: 6 }, packs: 2, hunterShare: 0.3, elites: 0 }   # 2
-  - { mix: { shieldbearer: 5, scout: 3, musketeer: 2, chaplain: 1, lancer: 1 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 2, hunterShare: 0.3, elites: 1 }   # 3
-  - { mix: { shieldbearer: 4, scout: 3, musketeer: 3, chaplain: 2, lancer: 2 }, pack: { min: 9, max: 13, everySeconds: 6 }, packs: 2, hunterShare: 0.3, elites: 1 }   # 4
-  - { mix: { shieldbearer: 4, scout: 2, musketeer: 3, chaplain: 2, lancer: 3 }, pack: { min: 7, max: 10, everySeconds: 6 }, packs: 4, hunterShare: 0.35, elites: 1 }   # 5
-  - { mix: { brute: 7, spearthrower: 3, hornback: 3, bloodcaller: 2 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 4, hunterShare: 0.35, elites: 1 }   # 6
-  - { mix: { brute: 7, spearthrower: 3, hornback: 3, bloodcaller: 2 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 4, hunterShare: 0.35, elites: 1 }   # 7
-  - { mix: { brute: 7, spearthrower: 3, hornback: 3, bloodcaller: 2 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 4, hunterShare: 0.35, elites: 1 }   # 8
-  - { mix: { brute: 6, spearthrower: 3, hornback: 3, bloodcaller: 2 }, pack: { min: 9, max: 13, everySeconds: 5 }, packs: 4, hunterShare: 0.35, elites: 2 }   # 9
-  - { mix: { brute: 6, spearthrower: 3, hornback: 3, bloodcaller: 2 }, pack: { min: 9, max: 13, everySeconds: 5 }, packs: 4, hunterShare: 0.35, elites: 2 }   # 10
-  - { mix: { ghoul: 6, webcrawler: 3, rotgut: 3, gravebinder: 2 }, pack: { min: 11, max: 15, everySeconds: 5 }, packs: 4, hunterShare: 0.4, elites: 2 }   # 11
-  - { mix: { ghoul: 6, webcrawler: 3, rotgut: 3, gravebinder: 2 }, pack: { min: 11, max: 15, everySeconds: 5 }, packs: 4, hunterShare: 0.4, elites: 2 }   # 12
-  - { mix: { ghoul: 6, webcrawler: 3, rotgut: 3, gravebinder: 2 }, pack: { min: 11, max: 15, everySeconds: 5 }, packs: 4, hunterShare: 0.4, elites: 2 }   # 13
-  - { mix: { ghoul: 6, webcrawler: 4, rotgut: 3, gravebinder: 2 }, pack: { min: 10, max: 14, everySeconds: 5 }, packs: 6, hunterShare: 0.4, elites: 2 }   # 14
-  - { mix: { ghoul: 6, webcrawler: 4, rotgut: 3, gravebinder: 2 }, pack: { min: 10, max: 14, everySeconds: 5 }, packs: 6, hunterShare: 0.4, elites: 2 }   # 15
-  - { mix: { huntress: 6, moon-archer: 4, stone-warden: 4, grove-druid: 2 }, pack: { min: 11, max: 15, everySeconds: 5 }, packs: 6, hunterShare: 0.4, elites: 2 }   # 16
-  - { mix: { huntress: 6, moon-archer: 4, stone-warden: 4, grove-druid: 2 }, pack: { min: 11, max: 15, everySeconds: 5 }, packs: 6, hunterShare: 0.4, elites: 2 }   # 17
-  - { mix: { huntress: 6, moon-archer: 4, stone-warden: 4, grove-druid: 2 }, pack: { min: 11, max: 15, everySeconds: 5 }, packs: 6, hunterShare: 0.4, elites: 2 }   # 18
-  - { mix: { huntress: 5, moon-archer: 4, stone-warden: 4, grove-druid: 2 }, pack: { min: 12, max: 16, everySeconds: 5 }, packs: 6, hunterShare: 0.4, elites: 3 }   # 19
-  - { mix: { huntress: 5, moon-archer: 4, stone-warden: 4, grove-druid: 2 }, pack: { min: 12, max: 16, everySeconds: 5 }, packs: 6, hunterShare: 0.4, elites: 3 }   # 20
+  - { mix: { shieldbearer: 3, scout: 2, musketeer: 2, chaplain: 1, lancer: 1, battle-mage: 3 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 2, hunterShare: 0.3, elites: 1 }   # 3
+  - { mix: { shieldbearer: 2, scout: 2, musketeer: 3, chaplain: 2, lancer: 2, battle-mage: 4 }, pack: { min: 9, max: 13, everySeconds: 6 }, packs: 2, hunterShare: 0.3, elites: 1 }   # 4
+  - { mix: { shieldbearer: 2, scout: 1, musketeer: 3, chaplain: 2, lancer: 3, battle-mage: 4 }, pack: { min: 7, max: 10, everySeconds: 6 }, packs: 4, hunterShare: 0.35, elites: 1 }   # 5
+  - { mix: { brute: 4, spearthrower: 3, hornback: 3, bloodcaller: 2, fire-caller: 4 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 4, hunterShare: 0.35, elites: 1 }   # 6
+  - { mix: { brute: 4, spearthrower: 3, hornback: 3, bloodcaller: 2, fire-caller: 4 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 4, hunterShare: 0.35, elites: 1 }   # 7
+  - { mix: { brute: 4, spearthrower: 3, hornback: 3, bloodcaller: 2, fire-caller: 4 }, pack: { min: 8, max: 12, everySeconds: 6 }, packs: 4, hunterShare: 0.35, elites: 1 }   # 8
+  - { mix: { brute: 3, spearthrower: 3, hornback: 3, bloodcaller: 2, fire-caller: 4 }, pack: { min: 9, max: 13, everySeconds: 5 }, packs: 4, hunterShare: 0.35, elites: 2 }   # 9
+  - { mix: { brute: 3, spearthrower: 3, hornback: 3, bloodcaller: 2, fire-caller: 4 }, pack: { min: 9, max: 13, everySeconds: 5 }, packs: 4, hunterShare: 0.35, elites: 2 }   # 10
+  - { mix: { ghoul: 3, webcrawler: 3, rotgut: 3, gravebinder: 2, bone-acolyte: 4 }, pack: { min: 11, max: 15, everySeconds: 5 }, packs: 4, hunterShare: 0.4, elites: 2 }   # 11
+  - { mix: { ghoul: 3, webcrawler: 3, rotgut: 3, gravebinder: 2, bone-acolyte: 4 }, pack: { min: 11, max: 15, everySeconds: 5 }, packs: 4, hunterShare: 0.4, elites: 2 }   # 12
+  - { mix: { ghoul: 3, webcrawler: 3, rotgut: 3, gravebinder: 2, bone-acolyte: 4 }, pack: { min: 11, max: 15, everySeconds: 5 }, packs: 4, hunterShare: 0.4, elites: 2 }   # 13
+  - { mix: { ghoul: 3, webcrawler: 4, rotgut: 3, gravebinder: 2, bone-acolyte: 4 }, pack: { min: 10, max: 14, everySeconds: 5 }, packs: 6, hunterShare: 0.4, elites: 2 }   # 14
+  - { mix: { ghoul: 3, webcrawler: 4, rotgut: 3, gravebinder: 2, bone-acolyte: 4 }, pack: { min: 10, max: 14, everySeconds: 5 }, packs: 6, hunterShare: 0.4, elites: 2 }   # 15
+  - { mix: { huntress: 4, moon-archer: 4, stone-warden: 4, grove-druid: 2, moon-priestess: 5 }, pack: { min: 11, max: 15, everySeconds: 5 }, packs: 6, hunterShare: 0.4, elites: 2 }   # 16
+  - { mix: { huntress: 4, moon-archer: 4, stone-warden: 4, grove-druid: 2, moon-priestess: 5 }, pack: { min: 11, max: 15, everySeconds: 5 }, packs: 6, hunterShare: 0.4, elites: 2 }   # 17
+  - { mix: { huntress: 4, moon-archer: 4, stone-warden: 4, grove-druid: 2, moon-priestess: 5 }, pack: { min: 11, max: 15, everySeconds: 5 }, packs: 6, hunterShare: 0.4, elites: 2 }   # 18
+  - { mix: { huntress: 3, moon-archer: 4, stone-warden: 4, grove-druid: 2, moon-priestess: 5 }, pack: { min: 12, max: 16, everySeconds: 5 }, packs: 6, hunterShare: 0.4, elites: 3 }   # 19
+  - { mix: { huntress: 3, moon-archer: 4, stone-warden: 4, grove-druid: 2, moon-priestess: 5 }, pack: { min: 12, max: 16, everySeconds: 5 }, packs: 6, hunterShare: 0.4, elites: 3 }   # 20
 # Enemy factions by phase (spec 2026-11-20): `elite` comes as the elite of their phases and leads their rushes,
 # `heavy` follows it in a rush.
 factions:

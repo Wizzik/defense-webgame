@@ -118,6 +118,8 @@ export const EnemySchema = z.object({
   }).strict().optional(),
   /** Multiplies the knockback of hits on the type: 0 = it does not move (default 1). */
   knockbackScale: z.number().min(0).optional(),
+  /** A caster: its ranged hit is a spell bolt (drawn and heard per faction); at least a quarter of a phase's mix from phase 3. */
+  caster: z.literal(true).optional(),
 }).strict();
 
 export type Enemy = z.infer<typeof EnemySchema>;

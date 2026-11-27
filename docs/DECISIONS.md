@@ -53,6 +53,25 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   radius of `PASS_MARGIN` (36), but an enemy was pushed out of the islands with its whole collision, so the final boss
   (96) stuck in a gap for good (Gravecaller, seed 2: no end of the run). The push-out radius is now at most
   `PASS_MARGIN`; a big enemy overlaps an island a little where it squeezes through. Charges and leaps as before.
+- **Casters** (task 2, Petr: "at least 25 % casters"): each faction gets a new caster type at the end of
+  `design/enemies.yaml` (the type index order stays): Battle Mage / Bitevní mág (human), Fire Caller / Vyvolavač ohně
+  (orc), Bone Acolyte / Kostěný akolyta (undead), Moon Priestess / Měsíční kněžka (elf). `behavior: skirmish` and the
+  new flag `caster: true` (schema, data-build). Numbers: the source and multipliers of the faction's support caster
+  (Priest x0.65, Shaman x0.6, Necromancer x0.65; the elf one the Priest), so each hits like the chaplain, bloodcaller
+  or gravebinder (13-14 every 1.5-2.1 s from 600) without the support spell; the json rows were written in the cloud
+  by that rule (no map export there): `data:build` must give the same files. From phase 3 the caster is at least a
+  quarter of `rules.phases[].mix` (25-28 %), its weight mostly taken from the foot types (shieldbearer, scout, brute,
+  ghoul, huntress), the other roles keep theirs; phases 1-2 have none (`data/generated.test.ts`). The look: a
+  thicker beam (0.14) that lives 0.22 s in the faction's colour (arcane blue, fire orange, grave green, moon violet)
+  and a flash where it lands (`client/render/enemy-fx.ts`); the sound: the enemy's `attack` cue in
+  `design/audio.yaml` (`enemy-bolt-arcane`, `-fire`, `-bone`, `-moon` on files already encoded, -16 dB, two voices,
+  priority 0) when the bolt hits the hero or the castle. The hit stays instant like every enemy shot.
+- **Caster models and the model budget:** each caster has its own KayKit model (`tools/assets-build/manifest.ts`: a
+  mage with a wand, a barbarian with a staff, a skeleton rogue with a staff, a caped rogue with a staff), about
+  250-300 kB each. The common models plus the heaviest world grew to 10.9 MB, so the budget went 10 -> 11 MB
+  (`tests/assets.test.ts`, AGENTS.md). Quantizing the meshes (gltf-transform `quantize`) was measured first: it
+  saves only about 20 % and dropped the skin, so it was not taken; borrowing a model would break the rule that every
+  common type has its own. Digest `4316afa9` -> `2b384fc3`.
 - Autopilot, gear none, seeds 1-10, after tasks 1, 3, 4 and boss strength: Stonehorn 0, Nightglaive 0, Gravecaller
   10, Serpent Shaman 10, Mistwarden 1, Sparkshot 1, Redcleaver 7, Tidecaller 0 (29 of 80). Far from 10 % each:
   the summoners (Gravecaller, Serpent Shaman) and Redcleaver are too strong, the rest die early (Stonehorn and

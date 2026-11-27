@@ -120,13 +120,14 @@ describe("generated game data", () => {
       "brute", "spearthrower", "hornback", "bloodcaller", "warlord",
       "ghoul", "webcrawler", "rotgut", "gravebinder", "risen", "bone-tyrant",
       "huntress", "moon-archer", "stone-warden", "grove-druid", "grove-warden",
+      "battle-mage", "fire-caller", "bone-acolyte", "moon-priestess",
     ]);
     expect(enemies.filter((e) => e.faction === undefined).map((e) => e.id)).toEqual(enemies.filter((e) => e.boss).map((e) => e.id));
     expect(enemies.filter((e) => e.boss).map((e) => e.id)).toEqual(["iron-marshal", "pale-abbot", "gunmaster", "dread-regent"]);
     const ranged = enemies.filter((e) => e.attack.kind === "ranged").map((e) => e.id);
     expect(ranged).toEqual([
       "musketeer", "chaplain", "pale-abbot", "gunmaster", "spearthrower", "bloodcaller", "webcrawler", "gravebinder",
-      "huntress", "moon-archer",
+      "huntress", "moon-archer", "battle-mage", "fire-caller", "bone-acolyte", "moon-priestess",
     ]);
     expect(enemies.filter((e) => e.attack.kind !== "ranged").every((e) => e.attack.kind === "melee")).toBe(true);
     expect(enemies.filter((e) => e.heal !== undefined).map((e) => e.id)).toEqual(["chaplain", "pale-abbot", "grove-druid"]);
@@ -223,6 +224,25 @@ describe("generated game data", () => {
       brute: "siege", spearthrower: "skirmish", hornback: "charge", bloodcaller: "support", warlord: "charge",
       ghoul: "flank", webcrawler: "skirmish", rotgut: "siege", gravebinder: "support", risen: "siege", "bone-tyrant": "siege",
       huntress: "flank", "moon-archer": "skirmish", "stone-warden": "siege", "grove-druid": "support", "grove-warden": "charge",
+      "battle-mage": "skirmish", "fire-caller": "skirmish", "bone-acolyte": "skirmish", "moon-priestess": "skirmish",
+    });
+  });
+
+  it("one caster per faction, at least a quarter of every phase mix from phase 3 (Petr's batch 2)", () => {
+    const enemies = JSON.parse(read("enemies.json")) as { id: string; caster?: true; faction?: string; attack: { kind: string } }[];
+    const casters = enemies.filter((e) => e.caster);
+    expect(casters.map((e) => [e.id, e.faction, e.attack.kind])).toEqual([
+      ["battle-mage", "human", "ranged"], ["fire-caller", "orc", "ranged"],
+      ["bone-acolyte", "undead", "ranged"], ["moon-priestess", "elf", "ranged"],
+    ]);
+    const ids = new Set(casters.map((e) => e.id));
+    const phases = (JSON.parse(read("rules.json")) as { phases: { mix: Record<string, number> }[] }).phases;
+    phases.forEach((phase, i) => {
+      const weights = Object.entries(phase.mix);
+      const total = weights.reduce((sum, [, w]) => sum + w, 0);
+      const cast = weights.reduce((sum, [id, w]) => sum + (ids.has(id) ? w : 0), 0);
+      if (i >= 2) expect(cast / total, `phase ${i + 1}`).toBeGreaterThanOrEqual(0.25);
+      else expect(cast, `phase ${i + 1}`).toBe(0);
     });
   });
 

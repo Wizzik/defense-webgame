@@ -81,6 +81,21 @@ describe("resolveEventCues", () => {
     expect(resolve().map((r) => r.cue)).toEqual([data.sounds.heroHit]);
   });
 
+  it("a caster's spell bolt is heard where it hits the hero or the castle, other shots only as the hit", () => {
+    const { run, resolve } = setup();
+    const casters = ["battle-mage", "fire-caller", "bone-acolyte", "moon-priestess"];
+    const cues = casters.map((id) => data.enemies[id]!.attack);
+    expect(cues).toEqual(["enemy-bolt-arcane", "enemy-bolt-fire", "enemy-bolt-bone", "enemy-bolt-moon"]);
+    const mage = run.enemies.spawn(run.data.enemies.findIndex((e) => e.id === "battle-mage"), 0, 5, 5, 10, 1, 0);
+    run.events.push(EventKind.HeroHit, mage, 5, 0, 0, HeroHitSource.Hit, 0);
+    run.events.push(EventKind.CastleHit, mage, 5, 0, 0, 0, 0);
+    expect(resolve().map((r) => r.cue)).toEqual([data.sounds.heroHit, "enemy-bolt-arcane", data.sounds.castleHit, "enemy-bolt-arcane"]);
+    run.events.clear();
+    const musketeer = run.enemies.spawn(run.data.enemies.findIndex((e) => e.id === "musketeer"), 0, 5, 5, 10, 1, 0);
+    run.events.push(EventKind.HeroHit, musketeer, 5, 0, 0, HeroHitSource.Hit, 0);
+    expect(resolve().map((r) => r.cue)).toEqual([data.sounds.heroHit]);
+  });
+
   it("every faction type dies with its faction's sound", () => {
     const deaths = (ids: string[]) => new Set(ids.map((id) => data.enemies[id]!.death));
     expect(deaths(["brute", "spearthrower", "hornback", "bloodcaller"]).size).toBe(1);

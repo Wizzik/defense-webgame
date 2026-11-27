@@ -35,6 +35,11 @@ export const ENEMY_TINTS: Readonly<Record<string, number>> = {
   "stone-warden": 0x5e5f9a,
   "grove-druid": 0x3fa7a0,
   "grove-warden": 0x6a4fb8,
+  // casters (Petr's batch 2), each in its faction's palette
+  "battle-mage": 0x4a6fd8,
+  "fire-caller": 0x8a7a2a,
+  "bone-acolyte": 0xc8e0b0,
+  "moon-priestess": 0x9a8ae8,
 };
 
 /** Colour of an enemy type; an unknown type is red. */
