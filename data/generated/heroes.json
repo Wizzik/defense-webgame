@@ -85,7 +85,7 @@
     ],
     "ultimate": "shadow-sisters",
     "damageTaken": 0.5,
-    "power": 1.7
+    "power": 1.6
   },
   {
     "id": "gravecaller",
@@ -128,7 +128,7 @@
       "soul-bolt"
     ],
     "ultimate": "bone-stampede",
-    "power": 0.45
+    "power": 0.4
   },
   {
     "id": "serpent-shaman",
@@ -172,7 +172,7 @@
     ],
     "ultimate": "spirit-ward",
     "damageTaken": 0.75,
-    "power": 0.5
+    "power": 0.55
   },
   {
     "id": "mistwarden",
@@ -215,8 +215,8 @@
       "mist-surge"
     ],
     "ultimate": "wailing-wave",
-    "damageTaken": 0.6,
-    "power": 1.2
+    "damageTaken": 0.7,
+    "power": 1.0
   },
   {
     "id": "sparkshot",
