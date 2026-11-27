@@ -1130,10 +1130,15 @@ test("world 1 has its wall and islands; the storm's bolt warns with a circle", a
   await startRun(page);
   await waitForScreen(page, "playing");
   expect(await page.evaluate(() => window.__game!.obstacles)).toBeGreaterThanOrEqual(35);
-  await page.evaluate(() => window.__game!.debug!.hazard());
+  // the warning lasts 1.2 s of the game, less than one slow frame of a software renderer can step: the wave and the
+  // pause (O opens the settings) come in one evaluate, so no step runs between them and the circle stays
+  await page.evaluate(() => {
+    window.__game!.debug!.hazard();
+    dispatchEvent(new KeyboardEvent("keydown", { code: "KeyO" }));
+  });
   await page.waitForFunction(
-    () => window.__game!.render.hazardRings > 0 && window.__game!.hazard.pending > 0,
-    undefined, { timeout: 1_000, polling: 50 },
+    () => window.__game!.settingsOpen && window.__game!.render.hazardRings > 0 && window.__game!.hazard.pending > 0,
+    undefined, { timeout: 10_000, polling: 50 },
   );
   await expect(page.locator(".buff-cell.storm")).toBeVisible();
 });
