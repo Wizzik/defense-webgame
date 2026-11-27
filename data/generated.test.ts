@@ -248,6 +248,8 @@ describe("generated game data", () => {
     expect(ability("seismic-echo").kind).toBe("on_cast");
     expect(heroes.find((h) => h.id === "nightglaive")!.signatureAbilities[0]).toBe("falling-stars");
     expect(ability("serpent-totem").params.maxAlive).toBeDefined();
+    // Petr 2026-11-27: a totem bites for 100 at level 1 and 25 % of that more every level
+    expect(ability("serpent-totem").params.damage).toEqual([100, 125, 150, 175, 200, 225, 250, 275, 300, 325]);
   });
 
   it("carries no map texts", () => {

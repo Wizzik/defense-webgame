@@ -226,9 +226,11 @@
     # which is multiplied by heroes.attackCooldown 0.5. The cap on living totems is our own.
     # The map's ward attacks for 101; Petr halved it on 2026-11-11 (the Serpent Shaman won every run).
     # 60 since 2026-11-12: with the cap of 2-6 totems and the slow cast, 50 won 1 of 5 test seeds and 75 won 15 of 15.
-    # Petr 2026-11-26: the wards were weak late; every level x1.5 (20, 30, 45, 68, 101 in the game, times spell
-    # power): these design values give that row after abilities.damage and levelGrowthExponent.
-    damage: { design: [67, 150, 337, 770, 1700] }
+    # Petr 2026-11-26: the wards were weak late; every level x1.5 (20, 30, 45, 68, 101 in the game).
+    # Petr 2026-11-27 (batch 2): "100 dmg + 25 % každý level": 100, 125, 150 ... 325 over the 10 levels in the game
+    # (linear, +25 % of level 1 a level; times spell power). These design values give that row after
+    # abilities.damage (x0.3), levelGrowthExponent (0.5) and the spread to 10 levels.
+    damage: { design: [333, 810, 1510, 2410, 3520] }
     attackRange: { design: [600, 600, 600, 600, 600] }
     attackInterval: { design: [0.5, 0.5, 0.5, 0.5, 0.5] }
     # Petr's values of 2026-11-12 (was 3, 6, 9, 12, 15), shared with Wisp Ward.

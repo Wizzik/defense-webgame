@@ -23,6 +23,10 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   Nightglaive 8 -> 1, Gravecaller 10 -> 10, Serpent Shaman 2 -> 2, Mistwarden 3 -> 1, Sparkshot 8 -> 0, Redcleaver
   10 -> 9, Tidecaller 10 -> 0; in sum 61 -> 23 of 80. Gravecaller (summons) and Redcleaver (melee) barely feel it;
   the tuning toward 10 % each comes after the bosses and casters (task 7 of the plan).
+- **Serpent Totem** (task 3, Petr): a bite of 100 at level 1 and +25 % of that a level, linear: 100, 125 ... 325 at
+  level 10 (times spell power). Written as design values (333, 810, 1510, 2410, 3520) that give this row after
+  `abilities.damage`, `levelGrowthExponent` and the spread to 10 levels; `data/generated.test.ts` pins the row.
+  Serpent Shaman, gear none, seeds 1-10: 2 -> 10 wins. Digest `22ae189d` -> `e81a39b0`.
 
 ## Random items, stage 3: meta and saves (2026-11-27; the plan's tasks 11-15, the details are Claude's)
 
