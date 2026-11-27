@@ -103,12 +103,10 @@ describe("generated game data", () => {
     expect(rows(JSON.parse(read("items.json")))).toEqual(rows(designEntries("items.yaml") as unknown as Row[]));
   });
 
-  it("melee heroes take a quarter less and enemies hit the hero twice as hard", () => {
-    const heroes = JSON.parse(read("heroes.json")) as { id: string; damageTaken?: number }[];
-    for (const hero of heroes) {
-      if (hero.id === "stonehorn" || hero.id === "redcleaver" || hero.id === "serpent-shaman") expect(hero.damageTaken, hero.id).toBe(0.75);
-      else expect(hero, hero.id).not.toHaveProperty("damageTaken");
-    }
+  it("heroes carry the damageTaken and power of design/heroes.yaml, and enemies hit the hero twice as hard", () => {
+    type Knobs = { id: string; damageTaken?: number; power?: number };
+    const knobs = (list: Knobs[]) => list.map(({ id, damageTaken, power }) => ({ id, damageTaken, power }));
+    expect(knobs(JSON.parse(read("heroes.json")) as Knobs[])).toEqual(knobs(designEntries("heroes.yaml") as unknown as Knobs[]));
     expect(JSON.parse(read("rules.json")).threat).toEqual({ heroDamageTaken: 2 });
   });
 
