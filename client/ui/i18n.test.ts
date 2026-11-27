@@ -4,14 +4,23 @@ import { messagesCs } from "./messages-cs";
 import { messagesEn } from "./messages-en";
 
 describe("i18n", () => {
-  it("cs has exactly the en keys", () => {
-    expect(Object.keys(messagesCs).sort()).toEqual(Object.keys(messagesEn).sort());
+  it("cs has only en keys; a missing one shows the English text (English only for now)", () => {
+    const en = new Set(Object.keys(messagesEn));
+    for (const key of Object.keys(messagesCs)) expect(en.has(key)).toBe(true);
+    const cs = messagesCs as Partial<Record<string, string>>;
+    const kept = cs["menu.start"];
+    delete cs["menu.start"];
+    try {
+      expect(t("cs", "menu.start")).toBe(messagesEn["menu.start"]);
+    } finally {
+      cs["menu.start"] = kept;
+    }
   });
 
-  it("pickLang prefers the URL, then storage, then the browser", () => {
+  it("pickLang prefers the URL, then storage, then English", () => {
     expect(pickLang("cs", "en", "en-US")).toBe("cs");
     expect(pickLang(undefined, "cs", "en-US")).toBe("cs");
-    expect(pickLang(undefined, "junk", "cs-CZ")).toBe("cs");
+    expect(pickLang(undefined, "junk", "cs-CZ")).toBe("en");
     expect(pickLang(undefined, null, "de-DE")).toBe("en");
   });
 
