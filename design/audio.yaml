@@ -469,6 +469,23 @@ abilities:
   stunning-tide: { cast: tide-splash }
   riptide: { cast: tide-rip }
   drowned-lake: { cast: tide-lake }
+  # new heroes, batch 1 (2026-11-28): existing cues until the spell graphics and sounds task
+  blade-frenzy: { cast: none }
+  sweeping-blades: { cast: none }
+  keen-edge: { cast: stone-tap }
+  crossing-strike: { cast: stone-quake }
+  holy-burst: { cast: mist-burst }
+  judgement: { cast: storm-bolt }
+  fan-of-light: { cast: bone-ring }
+  dominion: { cast: moon-starfall }
+  frost-slice: { cast: tide-crush }
+  frost-slap: { cast: tide-rip }
+  chill-field: { cast: none }
+  ice-fall: { cast: mist-surge }
+  hot-blood: { cast: none }
+  blasting-powder: { cast: spark-sear }
+  fan-fire: { cast: none }
+  doubles: { cast: moon-whisper }
   arc-lightning: { cast: shared-arc }
   smite: { cast: shared-smite }
   fire-bolt: { cast: shared-firebolt }
@@ -496,6 +513,10 @@ heroes:
   sparkshot: { attack: spark-shot }
   redcleaver: { attack: cleaver-chop }
   tidecaller: { attack: tide-bolt }
+  razorwind: { attack: cleaver-chop }
+  dawnhammer: { attack: stone-strike }
+  frostweaver: { attack: mist-chill }
+  deadeye: { attack: spark-shot }
 
 enemies:
   shieldbearer: { death: human-fall }

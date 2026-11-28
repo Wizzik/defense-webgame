@@ -170,11 +170,12 @@ describe("generated game data", () => {
     expect(enemies.filter((e) => e.boss).map((e) => e.collision)).toEqual([80, 80, 80, 96]);
   });
 
-  it("there are eight heroes, each with three signature abilities and an ultimate that exist", () => {
+  it("there are twelve heroes, each with three signature abilities and an ultimate that exist", () => {
     const heroes = JSON.parse(read("heroes.json")) as { id: string; signatureAbilities: string[]; ultimate: string }[];
     const abilities = new Set((JSON.parse(read("abilities.json")) as { id: string }[]).map((a) => a.id));
     expect(heroes.map((h) => h.id)).toEqual([
       "stonehorn", "nightglaive", "gravecaller", "serpent-shaman", "mistwarden", "sparkshot", "redcleaver", "tidecaller",
+      "razorwind", "dawnhammer", "frostweaver", "deadeye",
     ]);
     for (const hero of heroes) {
       expect(hero.signatureAbilities, hero.id).toHaveLength(3);

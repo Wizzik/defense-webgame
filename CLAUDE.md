@@ -6,6 +6,7 @@ The rules above (AGENTS.md) are shared with every AI tool and win over this sect
 
 ## Working with Petr
 - Talk to Petr in Czech; code, identifiers, comments, commits and docs stay in English (AGENTS.md).
+- Game texts are English only: never write new Czech in the game or its data; a required `cs` repeats `en` (Petr, 2026-11-28).
 - Petr plays and tests the game himself: after each block of work, list in `docs/STATUS.md` exactly what he should check in the browser, with ready links (`https://wizzik.github.io/defense-webgame/?debug=1&...`).
 - Give a recommendation, not a menu. Ask only when the answer changes what gets built (a number, a rule, a trade-off he must own).
 

@@ -1446,6 +1446,54 @@
     "drowned-lake": {
       "cast": "tide-lake"
     },
+    "blade-frenzy": {
+      "cast": "none"
+    },
+    "sweeping-blades": {
+      "cast": "none"
+    },
+    "keen-edge": {
+      "cast": "stone-tap"
+    },
+    "crossing-strike": {
+      "cast": "stone-quake"
+    },
+    "holy-burst": {
+      "cast": "mist-burst"
+    },
+    "judgement": {
+      "cast": "storm-bolt"
+    },
+    "fan-of-light": {
+      "cast": "bone-ring"
+    },
+    "dominion": {
+      "cast": "moon-starfall"
+    },
+    "frost-slice": {
+      "cast": "tide-crush"
+    },
+    "frost-slap": {
+      "cast": "tide-rip"
+    },
+    "chill-field": {
+      "cast": "none"
+    },
+    "ice-fall": {
+      "cast": "mist-surge"
+    },
+    "hot-blood": {
+      "cast": "none"
+    },
+    "blasting-powder": {
+      "cast": "spark-sear"
+    },
+    "fan-fire": {
+      "cast": "none"
+    },
+    "doubles": {
+      "cast": "moon-whisper"
+    },
     "arc-lightning": {
       "cast": "shared-arc"
     },
@@ -1519,6 +1567,18 @@
     },
     "tidecaller": {
       "attack": "tide-bolt"
+    },
+    "razorwind": {
+      "attack": "cleaver-chop"
+    },
+    "dawnhammer": {
+      "attack": "stone-strike"
+    },
+    "frostweaver": {
+      "attack": "mist-chill"
+    },
+    "deadeye": {
+      "attack": "spark-shot"
     }
   },
   "enemies": {

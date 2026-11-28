@@ -91,3 +91,49 @@
   ultimate: drowned-lake
   attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
   power: 0.51   # batch 3 balance pass (after Sentry Ward = Serpent Totem, dash 10, blink 20): about 10 % autopilot wins with no gear
+
+# New heroes, batch 1 (2026-11-28, docs/superpowers/plans/2026-11-28-new-heroes.md). power: the balance pass of batch 1.
+
+- id: razorwind
+  source: O00M
+  mapName: Tojara
+  name: { en: Razorwind, cs: Razorwind }
+  role: { en: "Melee duelist. Frenzied blades, cleaves and crits.", cs: "Melee duelist. Frenzied blades, cleaves and crits." }
+  signatureAbilities: [sweeping-blades, keen-edge, blade-frenzy]   # the cleave first: the only spell that deals damage early
+  ultimate: crossing-strike
+  attack: { cooldownScale: 0.5, strikes: 2 }   # a duelist: two quick blades (all of his kit but the ultimate rides on the attack)
+  damageTaken: 0.5   # melee: stands in the crowd
+  power: 0.36   # new heroes batch 1 balance pass: about 10 % autopilot wins with no gear
+
+
+- id: dawnhammer
+  source: O00Z
+  mapName: Marn Thunderhorn
+  name: { en: Dawnhammer, cs: Dawnhammer }
+  role: { en: "Holy knight. Bursts of light around him.", cs: "Holy knight. Bursts of light around him." }
+  signatureAbilities: [holy-burst, judgement, fan-of-light]
+  ultimate: dominion
+  damageTaken: 0.5   # melee: stands in the crowd
+  power: 0.35   # new heroes batch 1 balance pass: about 10 % autopilot wins with no gear
+
+
+- id: frostweaver
+  source: O00T
+  mapName: Foster
+  name: { en: Frostweaver, cs: Frostweaver }
+  role: { en: "Frost mage. Freezes, slows and buries packs in ice.", cs: "Frost mage. Freezes, slows and buries packs in ice." }
+  signatureAbilities: [frost-slice, frost-slap, chill-field]
+  ultimate: ice-fall
+  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
+  power: 0.44   # new heroes batch 1 balance pass: about 10 % autopilot wins with no gear
+
+
+- id: deadeye
+  source: O00J
+  mapName: Cowboy
+  name: { en: Deadeye, cs: Deadeye }
+  role: { en: "Gunslinger. Fast shots that spread and blast.", cs: "Gunslinger. Fast shots that spread and blast." }
+  signatureAbilities: [fan-fire, blasting-powder, hot-blood]   # the spread shots first: the only spell that deals damage early
+  ultimate: doubles
+  attack: { rangeScale: 2, cooldownScale: 0.5 }   # Petr: ranged heroes reach twice as far; a gunslinger shoots fast (his kit rides on the attack)
+  power: 1.25   # new heroes batch 1 balance pass: about 10 % autopilot wins with no gear

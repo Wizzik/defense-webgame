@@ -348,5 +348,180 @@
     ],
     "ultimate": "drowned-lake",
     "power": 0.51
+  },
+  {
+    "id": "razorwind",
+    "name": {
+      "en": "Razorwind",
+      "cs": "Razorwind"
+    },
+    "role": {
+      "en": "Melee duelist. Frenzied blades, cleaves and crits.",
+      "cs": "Melee duelist. Frenzied blades, cleaves and crits."
+    },
+    "primary": "agi",
+    "hp": 900,
+    "armor": 5,
+    "moveSpeed": 448,
+    "attributes": {
+      "str": {
+        "base": 38,
+        "perLevel": 2.2
+      },
+      "agi": {
+        "base": 33,
+        "perLevel": 3
+      },
+      "int": {
+        "base": 26,
+        "perLevel": 2.25
+      }
+    },
+    "baseAttack": {
+      "kind": "melee",
+      "range": 100,
+      "cooldown": 0.38,
+      "damageMin": 2,
+      "damageMax": 24,
+      "strikes": 2
+    },
+    "signatureAbilities": [
+      "sweeping-blades",
+      "keen-edge",
+      "blade-frenzy"
+    ],
+    "ultimate": "crossing-strike",
+    "damageTaken": 0.5,
+    "power": 0.36
+  },
+  {
+    "id": "dawnhammer",
+    "name": {
+      "en": "Dawnhammer",
+      "cs": "Dawnhammer"
+    },
+    "role": {
+      "en": "Holy knight. Bursts of light around him.",
+      "cs": "Holy knight. Bursts of light around him."
+    },
+    "primary": "str",
+    "hp": 1000,
+    "armor": 5,
+    "moveSpeed": 448,
+    "attributes": {
+      "str": {
+        "base": 35,
+        "perLevel": 3.5
+      },
+      "agi": {
+        "base": 25,
+        "perLevel": 2.5
+      },
+      "int": {
+        "base": 31,
+        "perLevel": 3.3
+      }
+    },
+    "baseAttack": {
+      "kind": "melee",
+      "range": 150,
+      "cooldown": 0.75,
+      "damageMin": 2,
+      "damageMax": 12
+    },
+    "signatureAbilities": [
+      "holy-burst",
+      "judgement",
+      "fan-of-light"
+    ],
+    "ultimate": "dominion",
+    "damageTaken": 0.5,
+    "power": 0.35
+  },
+  {
+    "id": "frostweaver",
+    "name": {
+      "en": "Frostweaver",
+      "cs": "Frostweaver"
+    },
+    "role": {
+      "en": "Frost mage. Freezes, slows and buries packs in ice.",
+      "cs": "Frost mage. Freezes, slows and buries packs in ice."
+    },
+    "primary": "int",
+    "hp": 900,
+    "armor": 5,
+    "moveSpeed": 490,
+    "attributes": {
+      "str": {
+        "base": 25,
+        "perLevel": 2.8
+      },
+      "agi": {
+        "base": 31,
+        "perLevel": 2.5
+      },
+      "int": {
+        "base": 49,
+        "perLevel": 4
+      }
+    },
+    "baseAttack": {
+      "kind": "bounce",
+      "range": 1400,
+      "cooldown": 0.75,
+      "damageMin": 2,
+      "damageMax": 8
+    },
+    "signatureAbilities": [
+      "frost-slice",
+      "frost-slap",
+      "chill-field"
+    ],
+    "ultimate": "ice-fall",
+    "power": 0.44
+  },
+  {
+    "id": "deadeye",
+    "name": {
+      "en": "Deadeye",
+      "cs": "Deadeye"
+    },
+    "role": {
+      "en": "Gunslinger. Fast shots that spread and blast.",
+      "cs": "Gunslinger. Fast shots that spread and blast."
+    },
+    "primary": "agi",
+    "hp": 900,
+    "armor": 5,
+    "moveSpeed": 448,
+    "attributes": {
+      "str": {
+        "base": 30,
+        "perLevel": 2.5
+      },
+      "agi": {
+        "base": 36,
+        "perLevel": 2.75
+      },
+      "int": {
+        "base": 25,
+        "perLevel": 2.25
+      }
+    },
+    "baseAttack": {
+      "kind": "ranged",
+      "range": 1600,
+      "cooldown": 0.38,
+      "damageMin": 2,
+      "damageMax": 24
+    },
+    "signatureAbilities": [
+      "fan-fire",
+      "blasting-powder",
+      "hot-blood"
+    ],
+    "ultimate": "doubles",
+    "power": 1.25
   }
 ]

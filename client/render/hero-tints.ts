@@ -7,6 +7,10 @@ const TINTS: Readonly<Record<string, number>> = {
   sparkshot: 0x4d4410,
   redcleaver: 0x551a1a,
   tidecaller: 0x10305a,
+  razorwind: 0x4d1030,
+  dawnhammer: 0x5a4a10,
+  frostweaver: 0x104a5a,
+  deadeye: 0x3d2a14,
 };
 
 /** Emissive tint of the hero's model; an unknown hero gets the first hero's tint. */
@@ -30,6 +34,10 @@ const BODY_COLORS: Readonly<Record<string, number>> = {
   sparkshot: 0xe0d24a,
   redcleaver: 0xd94a4a,
   tidecaller: 0x3b8fe0,
+  razorwind: 0xe05a9a,
+  dawnhammer: 0xfff0b0,
+  frostweaver: 0xa8ecff,
+  deadeye: 0xc08a50,
 };
 
 /** Bright body colour of the hero's model, one per hero; unknown heroes get the first. */

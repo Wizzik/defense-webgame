@@ -89,6 +89,26 @@ const ICONS: Record<string, Icon> = {
   },
   riptide: { color: WATER, glyph: '<path d="M14 12a2 2 0 1 0-2 2 4 4 0 1 0 4-4 6 6 0 1 0-6 6"/><path d="M2 21l4-2"/>' },
   "drowned-lake": { color: WATER, glyph: '<ellipse cx="12" cy="17" rx="9" ry="3.5"/><ellipse cx="12" cy="17" rx="4" ry="1.5"/><path d="M12 2s-3 4-3 6a3 3 0 0 0 6 0c0-2-3-6-3-6z"/>' },
+  // Razorwind
+  "blade-frenzy": { color: BLOOD, glyph: '<path d="M4 20L16 8M8 20L20 8"/><path d="M14 4l6 0 0 6M3 12l3-3"/>' },
+  "sweeping-blades": { color: STEEL, glyph: '<path d="M4 16a10 10 0 0 1 16 0"/><path d="M12 20L12 9"/><path d="M5 12l-2 1M19 12l2 1"/>' },
+  "keen-edge": { color: STEEL, glyph: '<path d="M5 19L17 7l2-4-4 2L3 17z"/><path d="M14 14l4 4M17 13l1 4 3 1"/>' },
+  "crossing-strike": { color: BLOOD, glyph: '<path d="M4 4l16 16M20 4L4 20"/><circle cx="12" cy="12" r="9"/>' },
+  // Dawnhammer
+  "holy-burst": { color: HOLY, glyph: '<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/>' },
+  judgement: { color: HOLY, glyph: '<path d="M10 2h4v14h-4z"/><path d="M4 20h16"/><path d="M7 17l-2 3M17 17l2 3"/>' },
+  "fan-of-light": { color: HOLY, glyph: '<path d="M12 12l-8-4M12 12l-8 4M12 12l8-4M12 12l8 4M12 12V3M12 12v9"/><circle cx="12" cy="12" r="1.5"/>' },
+  dominion: { color: HOLY, glyph: '<path d="M4 14l2-8 6 4 6-4 2 8z"/><path d="M4 18h16"/><path d="M8 21l1-2M12 21v-2M16 21l-1-2"/>' },
+  // Frostweaver
+  "frost-slice": { color: FROST, glyph: '<path d="M3 18L19 6"/><path d="M7 15l-1-4M11 12l-1-4M15 9l-1-4"/><path d="M19 6l2-1-1 2"/>' },
+  "frost-slap": { color: FROST, glyph: '<path d="M7 13V7a2 2 0 0 1 4 0v4M11 9a2 2 0 0 1 4 0v4a6 6 0 0 1-6 6H8l-3-4 2-2z"/><path d="M17 4l3 3M20 4l-3 3"/>' },
+  "chill-field": { color: FROST, glyph: '<circle cx="12" cy="12" r="9"/><path d="M12 6v12M6.8 9l10.4 6M6.8 15l10.4-6"/>' },
+  "ice-fall": { color: FROST, glyph: '<path d="M6 3l2 6M12 2l1 7M18 3l-2 6"/><path d="M3 21l4-6 4 3 3-5 4 4 3-1"/>' },
+  // Deadeye
+  "hot-blood": { color: FIRE, glyph: '<path d="M12 3s-5 6-5 10a5 5 0 0 0 10 0c0-4-5-10-5-10z"/><path d="M3 9h3M2 13h3M19 9h3"/>' },
+  "blasting-powder": { color: SPARK, glyph: '<circle cx="10" cy="14" r="6"/><path d="M14 10l3-3"/><path d="M18 3v3M21 6h-3M19.5 4.5l-1.5 1.5"/>' },
+  "fan-fire": { color: SPARK, glyph: '<path d="M3 12h6"/><path d="M9 12l11-7M9 12h12M9 12l11 7"/><circle cx="4" cy="12" r="1"/>' },
+  doubles: { color: SHADOW, glyph: '<circle cx="8" cy="7" r="3"/><path d="M3 20c0-4 2-7 5-7s5 3 5 7"/><circle cx="16" cy="7" r="3" stroke-dasharray="2 2"/><path d="M13 13c1-.5 2-.5 3 0 3 0 5 3 5 7" stroke-dasharray="2 2"/>' },
   // shared spells
   "arc-lightning": { color: STORM, glyph: '<path d="M13 2L6 13h5l-2 9 8-12h-5z"/>' },
   smite: { color: HOLY, glyph: '<path d="M12 2v13"/><path d="M8 11l4 4 4-4"/><path d="M5 20h14"/><path d="M8 17l-2 3M16 17l2 3"/>' },

@@ -68,6 +68,11 @@ const HEROES: HeroRow[] = [
     punch: "Spellcast_Shoot",
     attach: [{ file: "adv:Assets/gltf/staff.gltf", slot: "handslot.r" }],
   },
+  // new heroes, batch 1 (2026-11-28)
+  { id: "razorwind", body: "Knight", keep: ["1H_Sword", "1H_Sword_Offhand", "Knight_Helmet"], punch: "Dualwield_Melee_Attack_Slice" },
+  { id: "dawnhammer", body: "Knight", keep: ["1H_Sword", "Rectangle_Shield", "Knight_Cape"], punch: "1H_Melee_Attack_Chop" },
+  { id: "frostweaver", body: "Mage", keep: ["1H_Wand", "Spellbook", "Mage_Cape"], punch: "Spellcast_Shoot" },
+  { id: "deadeye", body: "Rogue_Hooded", keep: ["1H_Crossbow", "Rogue_Cape"], punch: "1H_Ranged_Shoot" },
 ];
 
 /** Body part nodes of a character; the hooded rogue shares the rogue's parts except the head. */
