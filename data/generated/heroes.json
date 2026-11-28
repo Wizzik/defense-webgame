@@ -76,7 +76,12 @@
       "range": 700,
       "cooldown": 0.75,
       "damageMin": 2,
-      "damageMax": 24
+      "damageMax": 24,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
     },
     "signatureAbilities": [
       "falling-stars",
@@ -84,7 +89,7 @@
       "swift-pace"
     ],
     "ultimate": "shadow-sisters",
-    "power": 0.62
+    "power": 0.48
   },
   {
     "id": "gravecaller",
@@ -119,7 +124,12 @@
       "range": 1200,
       "cooldown": 0.75,
       "damageMin": 2,
-      "damageMax": 8
+      "damageMax": 8,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
     },
     "signatureAbilities": [
       "grave-grasp",
@@ -127,7 +137,7 @@
       "soul-bolt"
     ],
     "ultimate": "bone-stampede",
-    "power": 0.29
+    "power": 0.26
   },
   {
     "id": "serpent-shaman",
@@ -247,7 +257,12 @@
       "range": 1400,
       "cooldown": 0.75,
       "damageMin": 2,
-      "damageMax": 24
+      "damageMax": 24,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
     },
     "signatureAbilities": [
       "rocket-fan",
@@ -255,7 +270,7 @@
       "quickstep"
     ],
     "ultimate": "beam-swarm",
-    "power": 0.74
+    "power": 0.4
   },
   {
     "id": "redcleaver",
@@ -339,7 +354,12 @@
       "range": 1300,
       "cooldown": 0.75,
       "damageMin": 2,
-      "damageMax": 8
+      "damageMax": 8,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
     },
     "signatureAbilities": [
       "crushing-wave",
@@ -347,7 +367,7 @@
       "riptide"
     ],
     "ultimate": "drowned-lake",
-    "power": 0.51
+    "power": 0.46
   },
   {
     "id": "razorwind",
@@ -392,7 +412,7 @@
     ],
     "ultimate": "crossing-strike",
     "damageTaken": 0.5,
-    "power": 0.36
+    "power": 0.45
   },
   {
     "id": "dawnhammer",
@@ -425,9 +445,10 @@
     "baseAttack": {
       "kind": "melee",
       "range": 150,
-      "cooldown": 0.75,
+      "cooldown": 0.3,
       "damageMin": 2,
-      "damageMax": 12
+      "damageMax": 12,
+      "strikes": 2
     },
     "signatureAbilities": [
       "holy-burst",
@@ -436,7 +457,7 @@
     ],
     "ultimate": "dominion",
     "damageTaken": 0.5,
-    "power": 0.35
+    "power": 0.3
   },
   {
     "id": "frostweaver",
@@ -469,9 +490,14 @@
     "baseAttack": {
       "kind": "bounce",
       "range": 1400,
-      "cooldown": 0.75,
+      "cooldown": 0.38,
       "damageMin": 2,
-      "damageMax": 8
+      "damageMax": 8,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
     },
     "signatureAbilities": [
       "frost-slice",
@@ -479,7 +505,7 @@
       "chill-field"
     ],
     "ultimate": "ice-fall",
-    "power": 0.44
+    "power": 0.32
   },
   {
     "id": "deadeye",

@@ -39,9 +39,12 @@ Updated 2026-11-28 (new heroes, batch 2). Read this first when you resume work.
   1-4 wins of 20 with no gear; table in `docs/DECISIONS.md`, section New heroes, batch 2. New mechanics: a
   bouncing base attack (`attack.bounce`, opt-in) and a stun on `nova`. Old heroes unchanged (the 24 older matrix cases
   are identical); digest `fa5a1ee3` -> `b04f8455`. `data/generated/` built by `npm run data:build` from v20.83.
-- **Open for Petr:** the older ranged heroes with the `bounce` kind (Nightglaive, Gravecaller, Sparkshot, Tidecaller,
-  Frostweaver) still do not bounce; turning it on changes their balance (a pass per hero). Batch 1 was balanced by
-  wins only; the meter rule would retune it too. Say whether to do both.
+- Then (Petr: yes to both): Nightglaive, Gravecaller, Sparkshot, Tidecaller and Frostweaver shoot bouncing shots, and
+  batch 1 is retuned by the meter rule (Crossing Strike 31 %, Dawnhammer's faster attack, a stronger Ice Fall and
+  Judgement); new powers in `docs/DECISIONS.md`, section Bouncing shots for the older ranged heroes. Digest ->
+  `41172dce`. This PR now carries batch 1's final numbers: merge #49 (it holds #48's commits) or #48 first.
+  - check the bounce: https://wizzik.github.io/defense-webgame/?debug=1&hero=sparkshot&phase=8 and
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=nightglaive&phase=8 (each shot leaps to 4 more enemies).
 - **What Petr checks** (after the merge of #48 and this PR):
   - the menu shows 16 heroes: https://wizzik.github.io/defense-webgame/
   - Ashsinger (shots leap between enemies, a fire ring around her, a slow wide comet):

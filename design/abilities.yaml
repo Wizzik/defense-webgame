@@ -804,7 +804,7 @@
   kind: area
   targeting: densest_cluster
   params:
-    damage: { design: [5000, 10000] }
+    damage: { design: [1250, 2500] }   # the map's 5000 / 10000 x 0.25: the meter pass of 2026-11-28 (was 45 %)
     radius: { design: [1000, 1500] }
     range: range
   review:
@@ -828,7 +828,7 @@
   targeting: densest_cluster
   params:
     # Frost Nova: DataA 250-4000 area damage, area 300-400, a slow of 5 s (duration); the slow share is a design value.
-    damage: DataA
+    damage: { design: [175, 350, 700, 1400, 2800] }   # DataA 250-4000 x 0.7: the meter pass of 2026-11-28
     radius: area
     range: range
     slow: { design: [0.3, 0.3, 0.3, 0.3, 0.3] }
@@ -842,8 +842,9 @@
   targeting: densest_cluster
   params:
     # Spirit Wolf base: one light unit for 3-7 s (duration); its hits are not in the export, so the damage, rate and
-    # radius are design values (the bursts of a ticking area, like Mist Surge).
-    tickDamage: { design: [150, 300, 450, 600, 800] }
+    # radius are design values (the bursts of a ticking area, like Mist Surge; the damage x 3.75 by the meter pass of
+    # 2026-11-28).
+    tickDamage: { design: [560, 1125, 1690, 2250, 3000] }
     ticksPerSecond: { design: [4, 4, 4, 4, 4] }
     radius: { design: [400, 400, 450, 450, 500] }
     duration: duration
@@ -867,8 +868,9 @@
   targeting: around_self
   params:
     # Starfall: DataA 1000 / 2500 every 1.5 s (DataB) within area 1000 / 1500 for 20 s. The game rains bursts in
-    # that radius like Bone Stampede (rate and burst radius design values); a burst deals the map's tick x 0.15.
-    tickDamage: { design: [150, 375] }
+    # that radius like Bone Stampede (rate and burst radius design values); a burst deals the map's tick x 0.3 (x 0.15
+    # before the meter pass of 2026-11-28).
+    tickDamage: { design: [300, 750] }
     ticksPerSecond: { design: [8, 10] }
     radius: area
     hitRadius: { design: [275, 350] }
@@ -887,7 +889,7 @@
   kind: line
   targeting: move_direction
   params:
-    damage: { design: [250, 500, 1000, 2000, 5000] }
+    damage: { design: [160, 325, 650, 1300, 3250] }   # the script's 250-5000 x 0.65: the meter pass of 2026-11-28
     length: { design: [780, 780, 780, 780, 780] }
     width: { design: [300, 400, 500, 600, 600] }
     stunSeconds: { design: [0.5, 0.5, 0.5, 0.5, 0.5] }
@@ -910,7 +912,7 @@
   kind: chain
   targeting: nearest
   params:
-    damage: { design: [500, 1000, 2000, 3000, 5000] }
+    damage: { design: [800, 1600, 3200, 4800, 8000] }   # the script's 500-5000 x 1.6: the meter pass of 2026-11-28
     range: range
     bounces: { design: [4, 5, 6, 7, 8] }
     bounceRange: { design: [600, 600, 600, 600, 600] }
@@ -944,8 +946,8 @@
   targeting: densest_cluster
   params:
     # A05D Starfall at the point: DataA 1000 / 3000 every 1.5 s within area 600 / 800 for 15 s. The game rains
-    # bursts like Drowned Lake; a burst deals the map's tick x 0.15.
-    tickDamage: { design: [150, 450] }
+    # bursts like Drowned Lake; a burst deals the map's tick x 0.7 (x 0.15 before the meter pass of 2026-11-28).
+    tickDamage: { design: [700, 2100] }
     ticksPerSecond: { design: [10, 11] }
     radius: { design: [600, 800] }
     hitRadius: { design: [275, 350] }

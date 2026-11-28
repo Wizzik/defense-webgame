@@ -28,8 +28,8 @@
   role: { en: "Ranged hunter. Swift strikes and falling stars.", cs: "Lovkyně na dálku. Rychlé útoky a padající hvězdy." }
   signatureAbilities: [falling-stars, hunters-focus, swift-pace]
   ultimate: shadow-sisters
-  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 0.62   # batch 3 balance pass (after Sentry Ward = Serpent Totem, dash 10, blink 20): about 10 % autopilot wins with no gear
+  attack: { rangeScale: 2, bounce: { count: 4, range: 400, falloff: 0.25 } }   # Petr: ranged heroes reach twice as far; the map's mbounce weapon leaps (Petr 2026-11-28, Ashsinger's numbers)
+  power: 0.48   # the bounce pass (Petr 2026-11-28: bouncing shots as in the map): about 10 % autopilot wins with no gear
 
 - id: gravecaller
   source: O00F
@@ -38,8 +38,8 @@
   role: { en: "Spellcaster. Drains souls and hurls skulls.", cs: "Kouzelník. Vysává duše a metá lebky." }
   signatureAbilities: [grave-grasp, skull-ring, soul-bolt]
   ultimate: bone-stampede
-  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 0.29   # batch 3 balance pass (after Sentry Ward = Serpent Totem, dash 10, blink 20): about 10 % autopilot wins with no gear
+  attack: { rangeScale: 2, bounce: { count: 4, range: 400, falloff: 0.25 } }   # Petr: ranged heroes reach twice as far; the map's mbounce weapon leaps (Petr 2026-11-28, Ashsinger's numbers)
+  power: 0.26   # the bounce pass (Petr 2026-11-28: bouncing shots as in the map): about 10 % autopilot wins with no gear
 
 - id: serpent-shaman
   source: O00X
@@ -69,8 +69,8 @@
   role: { en: "Gunner. Fast shots and rocket bursts.", cs: "Střelec. Rychlé výstřely a raketové salvy." }
   signatureAbilities: [rocket-fan, searing-rounds, quickstep]
   ultimate: beam-swarm
-  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 0.74   # batch 3 balance pass (after Sentry Ward = Serpent Totem, dash 10, blink 20): about 10 % autopilot wins with no gear
+  attack: { rangeScale: 2, bounce: { count: 4, range: 400, falloff: 0.25 } }   # Petr: ranged heroes reach twice as far; the map's mbounce weapon leaps (Petr 2026-11-28, Ashsinger's numbers)
+  power: 0.4   # the bounce pass (Petr 2026-11-28: bouncing shots as in the map): about 10 % autopilot wins with no gear
 
 - id: redcleaver
   source: O00U
@@ -90,8 +90,8 @@
   role: { en: "Tide mage. Waves that stun and push through.", cs: "Mág přílivu. Vlny, které omračují a prorážejí." }
   signatureAbilities: [crushing-wave, stunning-tide, riptide]
   ultimate: drowned-lake
-  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 0.51   # batch 3 balance pass (after Sentry Ward = Serpent Totem, dash 10, blink 20): about 10 % autopilot wins with no gear
+  attack: { rangeScale: 2, bounce: { count: 4, range: 400, falloff: 0.25 } }   # Petr: ranged heroes reach twice as far; the map's mbounce weapon leaps (Petr 2026-11-28, Ashsinger's numbers)
+  power: 0.46   # the bounce pass (Petr 2026-11-28: bouncing shots as in the map): about 10 % autopilot wins with no gear
 
 # New heroes, batch 1 (2026-11-28, docs/superpowers/plans/2026-11-28-new-heroes.md). power: the balance pass of batch 1.
 
@@ -104,7 +104,7 @@
   ultimate: crossing-strike
   attack: { cooldownScale: 0.5, strikes: 2 }   # a duelist: two quick blades (all of his kit but the ultimate rides on the attack)
   damageTaken: 0.5   # melee: stands in the crowd
-  power: 0.36   # new heroes batch 1 balance pass: about 10 % autopilot wins with no gear
+  power: 0.45   # the meter pass of batch 1 (Petr 2026-11-28): about 10 % autopilot wins with no gear
 
 
 - id: dawnhammer
@@ -114,8 +114,9 @@
   role: { en: "Holy knight. Bursts of light around him.", cs: "Holy knight. Bursts of light around him." }
   signatureAbilities: [holy-burst, judgement, fan-of-light]
   ultimate: dominion
+  attack: { cooldownScale: 0.4, strikes: 2 }   # Petr 2026-11-28: the base attack a little more than a spell (the map has no cleave for him)
   damageTaken: 0.5   # melee: stands in the crowd
-  power: 0.35   # new heroes batch 1 balance pass: about 10 % autopilot wins with no gear
+  power: 0.3   # the meter pass of batch 1 (Petr 2026-11-28): about 10 % autopilot wins with no gear
 
 
 - id: frostweaver
@@ -125,8 +126,8 @@
   role: { en: "Frost mage. Freezes, slows and buries packs in ice.", cs: "Frost mage. Freezes, slows and buries packs in ice." }
   signatureAbilities: [frost-slice, frost-slap, chill-field]
   ultimate: ice-fall
-  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 0.44   # new heroes batch 1 balance pass: about 10 % autopilot wins with no gear
+  attack: { rangeScale: 2, cooldownScale: 0.5, bounce: { count: 4, range: 400, falloff: 0.25 } }   # Petr: ranged heroes reach twice as far; the map's mbounce weapon leaps (Petr 2026-11-28, Ashsinger's numbers)
+  power: 0.32   # the meter pass of batch 1 (Petr 2026-11-28): about 10 % autopilot wins with no gear
 
 
 - id: deadeye

@@ -8,6 +8,35 @@ drops and chests, elite and boss threat, phase 2b-3, visual pass A) are in `docs
 They **still apply** unless a section here overrides them. A section that code or yaml names and that is not in this
 file is there; search it (`grep -n`) before you change a rule of those areas, do not read it whole.
 
+## Bouncing shots for the older ranged heroes and batch 1 by the damage meter (Petr, 2026-11-28: "1. Ano. 2. Ano")
+
+- **Bounce on:** the older heroes whose map weapon is `mbounce` (Nightglaive, Gravecaller, Sparkshot, Tidecaller) and
+  Frostweaver get `attack.bounce` with Ashsinger's numbers (4 leaps within 400, -25 % a leap). Their spells stay;
+  only `power` moves to keep 1-4 wins of 20. Their meter is not retuned (Petr asked for the bounce, not a new kit):
+  Gravecaller's Grave Grasp stays at about 46 %, Tidecaller's Crushing Wave 49 %, Nightglaive's Falling Stars
+  41-45 %, Sparkshot's attack 70-78 % (his kit rides on it).
+- **Batch 1 by the meter rule** (New heroes, batch 2): Crossing Strike x0.25 of the map (45 % -> 31 %), Holy Burst x0.7
+  (DataA as design rows), Judgement x3.75, Dominion x2, Dawnhammer's attack x0.4 interval with two blows (2 % -> 6-7 %;
+  the map has no cleave for him), Frost Slice x0.65, Frost Slap x1.6, Ice Fall x4.7 (8 % -> 14-23 %), Frostweaver's
+  attack x0.5 interval with the bounce. Deadeye already fitted (ultimate 26 %, a kit that rides on the attack, 2 of
+  20) and stays.
+- **Balance** (`sim:run --seeds 1-20 --gear none`, world 1 normal), wins of 20:
+
+  | hero | power before | wins after the bounce at that power | kept power | wins |
+  |---|---|---|---|---|
+  | Nightglaive | 0.62 | 11 | **0.48** | 1 (0.49: 5, 0.47: 1) |
+  | Gravecaller | 0.29 | 6 | **0.26** | 2 |
+  | Sparkshot | 0.74 | 12 | **0.4** | 2 (0.5: 8) |
+  | Tidecaller | 0.51 | 6 | **0.46** | 4 |
+  | Frostweaver | 0.44 | 3 (7 with the faster attack) | **0.32** | 1 (0.38: 9) |
+  | Razorwind | 0.36 | 4 | **0.45** | 4 (Crossing Strike 31 %, attack 20 %) |
+  | Dawnhammer | 0.35 | 4 | **0.3** | 3 (Dominion 17 %, Holy Burst 17 %, Judgement 9 %, Fan of Light 8 %, attack 6 %) |
+
+  The autopilot's wins swing by 4-8 of 20 between close powers (Frostweaver won 9 at 0.38 and 7 at 0.44), so each
+  kept power was measured once at 20 seeds.
+- **Digest** `b04f8455` -> `41172dce`: the cases of the seven heroes and the cases that play them change (p6-p21,
+  w1-storm, w2-sand, w4-blizzard, w5-meteors, loot-t3); the other heroes' cases stay identical.
+
 ## New heroes, batch 2 (2026-11-28; Petr: "the remaining heroes of the map", the picks and numbers are Claude's)
 
 - Batch 2 of the plan `docs/superpowers/plans/2026-11-28-new-heroes.md` (section Batch 2): **Ashsinger** (O004, INT
