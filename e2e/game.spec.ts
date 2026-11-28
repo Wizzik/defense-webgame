@@ -66,7 +66,8 @@ async function pickCard(page: Page): Promise<void> {
 }
 
 /** Wears the first common item of each type in all 16 gear slots of the run (chest items at level 1). */
-async function wearCommons(page: Page, rarity = "common"): Promise<void> {
+/** Wears the first named item of `rarity` in every slot (named items are legendary or mythic since 2026-11-28). */
+async function wearNamed(page: Page, rarity = "legendary"): Promise<void> {
   const pairs = SLOTS.map(([slot, type]) => [slot, ITEMS.find((item) => item.slotType === type && item.rarity === rarity)!.id]);
   await page.evaluate((list) => {
     for (const [slot, item] of list) window.__game!.debug!.wear(slot!, item!);
@@ -580,9 +581,9 @@ test("a slam shows a ring and hides it after the hit", async ({ page }, testInfo
   await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
   await page.waitForFunction(() => window.__game?.phase === 6, undefined, { timeout: 30_000 });
   expect(await page.evaluate(() => window.__game!.render.slamRings)).toBe(0);
-  // epic gear in every slot: the Blood Clan's lusted warlord and the doubled packs kill a lightly geared Mistwarden
-  // before the ring of the first slam is gone
-  await wearCommons(page, "epic");
+  // legendary gear in every slot: the Blood Clan's lusted warlord and the doubled packs kill a lightly geared
+  // Mistwarden before the ring of the first slam is gone
+  await wearNamed(page);
   await startRun(page);
   await page.waitForFunction(() => window.__game?.boss?.id === "iron-marshal", undefined, { timeout: 30_000, polling: 50 });
   // stay next to the boss until its slam is ready (7 s after it came) and it winds up
@@ -670,7 +671,10 @@ test("a chest card for a worn slot opens the compare; Esc goes back, 1 keeps, th
   await page.goto("/?seed=1&debug=1&lang=cs");
   await startRun(page);
   await waitForScreen(page, "playing");
-  await wearCommons(page);
+  // random common items everywhere (no named item is common since 2026-11-28): most chest cards are a Choice
+  await page.evaluate((slots) => {
+    for (const [slot] of slots) window.__game!.debug!.wearRolled(slot!, "common");
+  }, SLOTS);
   await page.evaluate(() => {
     const g = window.__game!;
     g.debug!.grantGold(1000);
@@ -688,7 +692,9 @@ test("a chest card for a worn slot opens the compare; Esc goes back, 1 keeps, th
   await page.locator("button.card").nth(index).click();
   await expect(page.locator("#chest-compare")).toBeVisible();
   await expect(page.locator("#chest-compare .compare-col")).toHaveCount(2);
-  await expect(page.locator(".compare-keep .card-name")).toHaveText(ITEMS.find((i) => i.id === worn.item)!.name.cs);
+  // the worn item is a random one: its two-word name is its own
+  expect(worn.rolled).toBe(true);
+  await expect(page.locator(".compare-keep .card-name")).not.toHaveText("");
   await expect(page.locator(".compare-take .card-name")).toHaveText(cards[index]!.name.cs);
   await expect(page.locator("button.card").first()).toBeHidden();
   expect(await page.evaluate(() => window.__game!.chestCompare)).toBe(index);
@@ -791,7 +797,7 @@ test("a boss that falls drops an item into the collection and the end screen lis
   await expect(page.locator("#announce")).toHaveClass(/loot rarity-(common|rare)/);
   // the snapshot follows the collection once a frame; a common or rare drop is a random item, not a named one
   await page.waitForFunction(() => window.__game!.collectionSize === 1);
-  expect(await page.evaluate(() => window.__game!.collection)).toEqual({});
+  await expect.poll(() => page.evaluate(() => window.__game!.collection)).toEqual({});
 
   // the item is kept when the run is lost, and the end screen names it
   await page.evaluate(() => window.__game!.debug!.grantItem("oaken-shield", 9));
@@ -965,7 +971,7 @@ test("a named item nobody wears salvages for its rarity's gold x its level and c
   await expect(page.locator("#gear-message")).toHaveText("Salvaged for 180 gold.");
   await expect(page.locator("#gear-bank")).toContainText("Bank: 180 gold");
   await expect(page.locator('#gear-screen .gear-grid [data-item="skysplitter"]')).toHaveClass(/missing/);
-  expect(await page.evaluate(() => window.__game!.collection)).toEqual({});
+  await expect.poll(() => page.evaluate(() => window.__game!.collection)).toEqual({});
 });
 
 test("every hero has its own doll", async ({ page }) => {
