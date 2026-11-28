@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { killEnemy } from "./combat";
+import { damageCastle, damageEnemy, damageHero, killEnemy } from "./combat";
 import { Role } from "./enemies";
 import { EventKind } from "./events";
 import { stateHash } from "./hash";
@@ -179,6 +179,83 @@ describe("gear effects", () => {
     run.coins.drop(run.hero.x + 10, run.hero.y, 100);
     run.step(NO_INPUT);
     expect(run.castle.hp).toBe(run.castle.maxHp);
+  });
+
+  it("heal_on_kill: every n-th kill heals the hero, never above his maximum", () => {
+    const run = runWith({ kind: "heal_on_kill", params: { kills: 3, hp: 50 } });
+    const max = run.hero.stats.maxHp;
+    run.hero.hp = max - 200;
+    killEnemy(run, dummy(run, 2000));
+    killEnemy(run, dummy(run, 2000));
+    expect(run.hero.hp).toBe(max - 200);
+    killEnemy(run, dummy(run, 2000));
+    expect(run.hero.hp).toBe(max - 150);
+    run.hero.hp = max - 10;
+    for (let i = 0; i < 3; i++) killEnemy(run, dummy(run, 2000));
+    expect(run.hero.hp).toBe(max);
+  });
+
+  it("nova_when_hit: a hit sets off one nova around the hero, then it waits out its cooldown", () => {
+    const run = runWith({ kind: "nova_when_hit", params: { cooldown: 2, damage: 100, radius: 250 } });
+    const near = dummy(run, 200, 0);
+    const far = dummy(run, 700, 0);
+    run.hero.hp = run.hero.stats.maxHp;
+    damageHero(run, 10, -1);
+    run.step(NO_INPUT);
+    const nova = 100 * run.hero.stats.spellPower;
+    expect(run.enemies.hp[near]).toBeCloseTo(1e7 - nova, 6);
+    expect(run.enemies.hp[far]).toBe(1e7);
+    damageHero(run, 10, -1);
+    run.step(NO_INPUT);
+    expect(run.enemies.hp[near]).toBeCloseTo(1e7 - nova, 6);
+    for (let i = 0; i < 60; i++) run.step(NO_INPUT);
+    damageHero(run, 10, -1);
+    run.step(NO_INPUT);
+    expect(run.enemies.hp[near]).toBeCloseTo(1e7 - 2 * nova, 6);
+  });
+
+  it("elite_slayer: the hero's hits on elites and bosses deal the share more, on common enemies not", () => {
+    const run = runWith({ kind: "elite_slayer", params: { share: 0.25 } });
+    const common = dummy(run, 2000, 0, 0);
+    const elite = dummy(run, 2000, 300, run.eliteTypes[0]!);
+    const boss = dummy(run, 2000, 600, run.finalBossType);
+    for (const slot of [common, elite, boss]) damageEnemy(run, slot, 100, 1);
+    expect(run.enemies.hp[common]).toBeCloseTo(1e7 - 100, 6);
+    expect(run.enemies.hp[elite]).toBeCloseTo(1e7 - 125, 6);
+    expect(run.enemies.hp[boss]).toBeCloseTo(1e7 - 125, 6);
+    // the world's hazards (no meter source) do not count
+    damageEnemy(run, elite, 100, 2, -1, -1);
+    expect(run.enemies.hp[elite]).toBeCloseTo(1e7 - 225, 6);
+  });
+
+  it("death_burst: a kill that procs hurts the enemies around it in the next step, its kills burst no further", () => {
+    const run = runWith({ kind: "death_burst", params: { chance: 1, damage: 80, radius: 200 } });
+    const victim = dummy(run, 2000);
+    const near = dummy(run, 2150);
+    const weak = dummy(run, 1850);
+    const beyond = dummy(run, 1850 - 150);
+    run.enemies.hp[weak] = 1;
+    const far = dummy(run, 2800);
+    killEnemy(run, victim);
+    run.step(NO_INPUT);
+    const burst = 80 * run.hero.stats.spellPower;
+    expect(run.enemies.hp[near]).toBeCloseTo(1e7 - burst, 6);
+    expect(run.enemies.alive[weak]).toBe(0);
+    expect(run.enemies.hp[far]).toBe(1e7);
+    run.step(NO_INPUT);
+    expect(run.enemies.hp[beyond]).toBe(1e7);
+    expect(run.gear.fx.burstCount).toBe(0);
+  });
+
+  it("castle_ward: the castle takes the share less damage", () => {
+    const run = runWith({ kind: "castle_ward", params: { share: 0.3 } });
+    const before = run.castle.hp;
+    damageCastle(run, 100, -1);
+    expect(run.castle.hp).toBeCloseTo(before - 70, 6);
+    const bare = runWith({ kind: "castle_ward", params: { share: 0.3 } }, false);
+    const start = bare.castle.hp;
+    damageCastle(bare, 100, -1);
+    expect(bare.castle.hp).toBeCloseTo(start - 100, 6);
   });
 
   it("an effect of an item that is not worn does nothing", () => {

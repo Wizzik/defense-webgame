@@ -289,31 +289,60 @@ describe("generated game data", () => {
       str: 0.5, agi: 0.5, int: 0.5, hp: 12, armor: 0.25, regen: 0.1,
       damage: 0.005, attackSpeed: 0.005, spellPower: 0.005, moveSpeed: 0.01, goldFind: 0.01, magnet: 10, magicFind: 0.02,
       lifesteal: 0.0025,
+      // the stats of random items, at the units of design/affixes.yaml
+      critChance: 0.01, critDamage: 0.05, dodge: 0.005, damageTaken: 0.005, thorns: 0.05, cooldownSpeed: 0.005,
+      ultimateCooldown: 0.01, areaSize: 0.005,
     };
     const BUDGET: Record<string, number> = { common: 6, rare: 12, epic: 20, legendary: 30, mythic: 42 };
     const of = (rarity: string) => items.filter((item) => item.rarity === rarity);
 
-    it("has 14 common, 24 rare, 24 epic, 5 legendary and 3 mythic items", () => {
-      expect(["common", "rare", "epic", "legendary", "mythic"].map((r) => of(r).length)).toEqual([14, 24, 24, 5, 3]);
+    const KINDS = [
+      "castle_ward", "chain_on_attack", "death_burst", "elite_slayer", "gold_heals_castle", "haste_on_elite_kill",
+      "heal_on_kill", "low_hp_shield", "nova_when_hit", "slow_aura", "splash_on_attack",
+    ];
+
+    it("has only legendary (48) and mythic (22) items (Petr, 2026-11-28)", () => {
+      expect(["common", "rare", "epic", "legendary", "mythic"].map((r) => of(r).length)).toEqual([0, 0, 0, 48, 22]);
     });
 
-    it("every slot type has a rare and an epic item", () => {
-      for (const rarity of ["rare", "epic"]) {
+    it("every slot type has a legendary and a mythic item", () => {
+      for (const rarity of ["legendary", "mythic"]) {
         expect(new Set(of(rarity).map((item) => item.slotType)).size, rarity).toBe(14);
       }
     });
 
-    it("legendary and mythic items carry an effect, the lower rarities none", () => {
-      for (const item of items) {
-        const special = item.rarity === "legendary" || item.rarity === "mythic";
-        expect(item.effect !== undefined, item.id).toBe(special);
+    it("every item carries an effect; each rarity has every kind, and the items of one slot type differ in kind", () => {
+      for (const item of items) expect(item.effect, item.id).toBeDefined();
+      for (const rarity of ["legendary", "mythic"]) {
+        expect([...new Set(of(rarity).map((item) => item.effect!.kind))].sort(), rarity).toEqual(KINDS);
       }
-      expect(of("legendary").map((item) => item.effect!.kind).sort()).toEqual(
-        ["chain_on_attack", "haste_on_elite_kill", "low_hp_shield", "slow_aura", "splash_on_attack"],
-      );
-      expect(of("mythic").map((item) => item.effect!.kind).sort()).toEqual(["chain_on_attack", "gold_heals_castle", "low_hp_shield"]);
-      for (const item of [...of("legendary"), ...of("mythic")]) {
-        expect(["mainHand", "offHand", "trinket"], item.id).toContain(item.slotType);
+      // (the slot types of one kind differ, so one doll holds many kinds; only the legendary and mythic pairs older than
+      // 2026-11-28 share a kind in one slot type: Skysplitter and the Glaive of the Last Storm, Last Rampart and
+      // Oathkeeper's Wall)
+      const OLD_PAIRS: Record<string, number> = { mainHand: 1, offHand: 1 };
+      for (const type of new Set(items.map((item) => item.slotType))) {
+        const kinds = items.filter((item) => item.slotType === type).map((item) => item.effect!.kind);
+        expect(new Set(kinds).size, type).toBe(kinds.length - (OLD_PAIRS[type] ?? 0));
+      }
+    });
+
+    it("a kind's mythic version is the same everywhere and stronger than its legendary one", () => {
+      type Fx = { kind: string; params: Record<string, number> };
+      const version = (rarity: string, kind: string) => {
+        const all = of(rarity).map((item) => item.effect as Fx).filter((e) => e.kind === kind).map((e) => JSON.stringify(e.params));
+        expect(new Set(all).size, `${rarity} ${kind}`).toBe(1);
+        return JSON.parse(all[0]!) as Record<string, number>;
+      };
+      for (const kind of KINDS) {
+        const legendary = version("legendary", kind);
+        const mythic = version("mythic", kind);
+        expect(mythic, kind).not.toEqual(legendary);
+        for (const key of Object.keys(legendary)) {
+          // a cooldown, a kill count or an attack count is shorter or the same, everything else larger or the same
+          const lower = key === "cooldown" || key === "every" || key === "kills";
+          if (lower) expect(mythic[key], `${kind}.${key}`).toBeLessThanOrEqual(legendary[key]!);
+          else expect(mythic[key], `${kind}.${key}`).toBeGreaterThanOrEqual(legendary[key]!);
+        }
       }
     });
 
@@ -326,58 +355,53 @@ describe("generated game data", () => {
       }
     });
 
-    it("ten items carry magic find", () => {
-      const mf = items.filter((item) => item.stats.some((row) => row.stat === "magicFind")).map((item) => item.id).sort();
-      expect(mf).toEqual([
-        "band-of-resolve", "belt-of-many-knives", "compass-of-the-lost-scout", "falcon-charm", "hourglass-of-the-hunt",
-        "hunters-whistle", "pendant-of-the-deep-well", "ring-of-the-keen-eye", "seal-of-the-archivist", "tin-ring",
-      ]);
+    it("thirteen items carry magic find, on jewels, trinkets and one belt", () => {
+      const mf = items.filter((item) => item.stats.some((row) => row.stat === "magicFind"));
+      expect(mf.length).toBe(13);
+      for (const item of mf) expect(["neck", "ring", "trinket", "waist"], item.id).toContain(item.slotType);
     });
 
-    it("ten items carry lifesteal, each between 1 and 3 %", () => {
+    it("seventeen items carry lifesteal, each between 1 and 3 %", () => {
       const ls = items.filter((item) => item.stats.some((row) => row.stat === "lifesteal"));
-      expect(ls.length).toBe(10);
+      expect(ls.length).toBe(17);
       for (const item of ls) {
         const value = item.stats.find((row) => row.stat === "lifesteal")!.value;
         expect(value, item.id).toBeGreaterThanOrEqual(0.01);
         expect(value, item.id).toBeLessThanOrEqual(0.03);
-        expect(item.rarity, item.id).not.toBe("common");
       }
       const types = ls.map((item) => item.slotType);
       for (const [type, min] of [["mainHand", 2], ["hands", 2], ["offHand", 1], ["ring", 2], ["trinket", 2]] as const) {
         expect(types.filter((t) => t === type).length, type).toBeGreaterThanOrEqual(min);
       }
-      expect(ls.filter((item) => item.rarity === "rare").length).toBeGreaterThanOrEqual(3);
     });
 
-    it("the best epic-or-better magic find build gives about 100 % at level 5", () => {
-      const build = [
-        "pendant-of-the-deep-well", "ring-of-the-keen-eye", "seal-of-the-archivist", "belt-of-many-knives",
-        "compass-of-the-lost-scout", "hourglass-of-the-hunt",
-      ];
-      const sum = build.reduce((total, id) => {
-        const row = items.find((item) => item.id === id)!.stats.find((r) => r.stat === "magicFind")!;
-        return total + row.value;
-      }, 0);
+    it("the best magic find build of named items reaches about the cap (1.5) at level 5", () => {
+      // one item per slot: neck, two rings, waist and two trinkets, the highest magic find each
+      const best = (type: string, n: number) => items.filter((item) => item.slotType === type)
+        .map((item) => item.stats.find((r) => r.stat === "magicFind")?.value ?? 0).sort((a, b) => b - a).slice(0, n);
+      const sum = [...best("neck", 1), ...best("ring", 2), ...best("waist", 1), ...best("trinket", 2)].reduce((a, b) => a + b, 0);
       const atFive = sum * (1 + 0.15 * 4);
-      expect(atFive).toBeGreaterThan(0.95);
-      expect(atFive).toBeLessThan(1.15);
+      expect(atFive).toBeGreaterThan(1.3);
+      expect(atFive).toBeLessThan(1.6);
     });
 
     it("an item names a stat once", () => {
       for (const item of items) expect(new Set(item.stats.map((row) => row.stat)).size, item.id).toBe(item.stats.length);
     });
 
-    it("the main attributes are spread evenly over the rare and the epic items", () => {
-      for (const rarity of ["rare", "epic"]) {
+    it("the main attributes are spread about evenly over the legendary and the mythic items", () => {
+      for (const [rarity, counts] of [["legendary", [17, 16, 15]], ["mythic", [9, 7, 7]]] as const) {
         const lean = (attr: string) => of(rarity).filter((item) => item.stats.some((row) => row.stat === attr)).length;
-        expect([lean("str"), lean("agi"), lean("int")], rarity).toEqual([8, 8, 8]);
+        expect([lean("str"), lean("agi"), lean("int")], rarity).toEqual(counts);
       }
     });
 
-    it("every rarity a boss drops has an item", () => {
+    it("a boss's legendary and mythic drops can be named, its lower rarities are random items only", () => {
       for (const drop of rules.drops) {
-        for (const rarity of Object.keys(drop.weights)) expect(of(rarity).length, `${drop.boss}: ${rarity}`).toBeGreaterThan(0);
+        for (const rarity of Object.keys(drop.weights)) {
+          const named = rarity === "legendary" || rarity === "mythic";
+          expect(of(rarity).length > 0, `${drop.boss}: ${rarity}`).toBe(named);
+        }
       }
     });
   });
@@ -481,7 +505,8 @@ describe("random items", () => {
     expect(rules.namedShare).toEqual({ common: 0, rare: 0, epic: 0.1, legendary: 0.25, mythic: 0.4 });
     expect(rules.affixCount).toEqual({ common: 1, rare: 2, epic: 3, legendary: 4, mythic: 4 });
     expect(rules.mythicEffects.map((e) => e.kind).sort()).toEqual([
-      "chain_on_attack", "gold_heals_castle", "haste_on_elite_kill", "low_hp_shield", "slow_aura", "splash_on_attack",
+      "castle_ward", "chain_on_attack", "death_burst", "elite_slayer", "gold_heals_castle", "haste_on_elite_kill",
+      "heal_on_kill", "low_hp_shield", "nova_when_hit", "slow_aura", "splash_on_attack",
     ]);
   });
 

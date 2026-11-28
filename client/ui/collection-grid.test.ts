@@ -20,8 +20,8 @@ describe("collection grid", () => {
     const rank = ["mythic", "legendary", "epic", "rare", "common"];
     const ranks = entries.map((entry) => rank.indexOf(entry.item.rarity));
     expect(ranks).toEqual([...ranks].sort((a, b) => a - b));
-    const epics = entries.filter((entry) => entry.item.rarity === "epic").map((entry) => entry.item.id);
-    expect(epics).toEqual(data.items.filter((i) => i.rarity === "epic").map((i) => i.id));
+    const mythics = entries.filter((entry) => entry.item.rarity === "mythic").map((entry) => entry.item.id);
+    expect(mythics).toEqual(data.items.filter((i) => i.rarity === "mythic").map((i) => i.id));
   });
 
   it("a filter keeps one slot type", () => {

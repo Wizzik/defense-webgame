@@ -157,13 +157,6 @@ export function wornRarity(data: GameData, gear: GearState, slot: number): numbe
   return RARITIES.indexOf(data.items[index]!.rarity);
 }
 
-/** Index in `data.items` of the common item of a slot type (the one a chest puts into an empty slot). */
-export function basicItemIndex(data: GameData, type: SlotType): number {
-  const index = data.items.findIndex((item) => item.rarity === "common" && item.slotType === type);
-  if (index < 0) throw new Error(`gear: no common item of type ${type}`);
-  return index;
-}
-
 /** Puts the valid entries of a loadout (named or rolled) into the gear slots. An entry that does not fit is skipped. */
 export function loadGear(run: Run, loadout: readonly LoadoutEntry[]): void {
   const { data, gear } = run;

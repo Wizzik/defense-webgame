@@ -304,6 +304,14 @@ function mixPlayer(p: PlayerState): void {
   mixInt(fx.shieldWait);
   mixInt(fx.hasteLeft);
   mixFloat(fx.hasteCarry);
+  mixInt(fx.healCount);
+  mixInt(fx.novaWait);
+  mixInt(fx.novaPending);
+  mixInt(fx.burstCount);
+  for (let b = 0; b < fx.burstCount; b++) {
+    mixFloat(fx.burstX[b]!);
+    mixFloat(fx.burstY[b]!);
+  }
   mixInt(p.shieldTicks);
   mixFloat(hero.speedScale);
   const buffs = p.buffs;

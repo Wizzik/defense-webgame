@@ -2,7 +2,7 @@
 // must match in Node and in every browser engine. Pure: no DOM and no timers, so Node and the page share it.
 import type { DifficultyId, GameData } from "../../data/schema";
 import { botInput, createRun, idleCard, stateHash, type Run, type RunState, type TickInput } from "../../sim";
-import { gearPreset } from "../../tools/sim-run/gear-presets";
+import { gearPreset, type GearPresetName } from "../../tools/sim-run/gear-presets";
 
 export interface MatrixCase {
   id: string;
@@ -10,7 +10,7 @@ export interface MatrixCase {
   seed: number;
   startPhase?: number;
   durationSeconds?: number;
-  gear: "none" | "mid" | "full";
+  gear: GearPresetName;
   maxTicks: number;
   /** No movement and the idle card pick instead of the autopilot (tests only). */
   idle?: boolean;
@@ -60,8 +60,10 @@ export function matrixCases(data: GameData): MatrixCase[] {
     { id: "w5-meteors", hero: "gravecaller", seed: 17, startPhase: 1, gear: "mid", maxTicks: 3600, world: 5 },
     // random items from chests with item power for T3 rows (world 3 insane from phase 11, random items plan stage 2);
     // full gear since the kiting autopilot (batch 2): with mid gear it falls before it opens a chest
-    // (since the salvage bank of stage 4 it starts with 300 gold: its first chests come at once)
-    { id: "loot-t3", hero: "gravecaller", seed: 27, startPhase: 11, gear: "full", maxTicks: 4500, world: 3, difficulty: "insane", gold: 300 },
+    // (since the salvage bank of stage 4 it starts with 300 gold: its first chests come at once); rolled-mid
+    // since 2026-11-28: full is mythic everywhere, where a chest offers only Level cards, and on mid (legendary
+    // named items now) the autopilot keeps its named items
+    { id: "loot-t3", hero: "gravecaller", seed: 27, startPhase: 11, gear: "rolled-mid", maxTicks: 4500, world: 3, difficulty: "insane", gold: 300 },
   );
   return cases;
 }

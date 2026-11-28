@@ -42,9 +42,10 @@ describe("item records", () => {
   });
 
   it("a named record takes its rarity from the catalogue", () => {
-    const item = data.items.find((candidate) => candidate.rarity === "epic")!;
+    // a save of before 2026-11-28 stored "common" for what is now a legendary item
+    const item = data.items.find((candidate) => candidate.rarity === "mythic")!;
     expect(parseRecord({ uid: 4, level: 2, named: item.id, rarity: "common" }, data))
-      .toEqual({ uid: 4, rarity: "epic", level: 2, named: item.id });
+      .toEqual({ uid: 4, rarity: "mythic", level: 2, named: item.id });
   });
 
   it("parseRecord refuses what does not fit the game data", () => {

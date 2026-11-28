@@ -4,7 +4,7 @@ import { canSalvage, salvage, salvageValue, takeBank } from "./salvage";
 import { emptySave, type SaveData } from "./save";
 
 const data = gameData();
-const helm = data.items.find((i) => i.slotType === "head" && i.rarity === "rare")!.id;
+const helm = data.items.find((i) => i.slotType === "head" && i.rarity === "legendary")!.id;
 const rolled = (uid: number, rarity: "common" | "epic" | "mythic") => ({
   uid, rarity, level: 1, base: data.loot.bases.find((b) => b.slotType === "head")!.id, rows: [["armor", 2, -1]] as [
     "armor", number, number][],
@@ -13,7 +13,7 @@ const rolled = (uid: number, rarity: "common" | "epic" | "mythic") => ({
 function save(): SaveData {
   return {
     ...emptySave(), nextUid: 5,
-    items: [{ uid: 1, rarity: "rare", level: 2, named: helm }, rolled(2, "epic"), rolled(3, "mythic"), rolled(4, "common")],
+    items: [{ uid: 1, rarity: "legendary", level: 2, named: helm }, rolled(2, "epic"), rolled(3, "mythic"), rolled(4, "common")],
     loadouts: { stonehorn: { head: 3 } },
   };
 }

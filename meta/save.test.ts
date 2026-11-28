@@ -3,9 +3,9 @@ import { gameData } from "../sim/testing/game-data";
 import { emptySave, namedLevels, parseSave } from "./save";
 
 const data = gameData();
-const helm = data.items.find((i) => i.slotType === "head" && i.rarity === "rare")!.id;
-const boots = data.items.find((i) => i.slotType === "feet" && i.rarity === "rare")!.id;
-const ring = data.items.find((i) => i.slotType === "ring" && i.rarity === "rare")!.id;
+const helm = data.items.filter((i) => i.slotType === "head" && i.rarity === "legendary")[1]!.id;
+const boots = data.items.filter((i) => i.slotType === "feet" && i.rarity === "legendary")[1]!.id;
+const ring = data.items.filter((i) => i.slotType === "ring" && i.rarity === "legendary")[1]!.id;
 const named = (uid: number, id: string, level: number) =>
   ({ uid, rarity: data.items.find((i) => i.id === id)!.rarity, level, named: id });
 /** A stored rolled head item. */
