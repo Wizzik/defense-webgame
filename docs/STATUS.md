@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-28 (new heroes, batch 1). Read this first when you resume work.
+Updated 2026-11-28 (new heroes, batch 2). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -27,6 +27,30 @@ Updated 2026-11-28 (new heroes, batch 1). Read this first when you resume work.
 9. **Named items only legendary / mythic, salvage for named items** (Petr, 2026-11-28): plan
    `docs/superpowers/plans/2026-11-28-named-items-legendary.md`, branch `claude/named-items-legendary` (from
    `claude/peaceful-galileo-qtu26s`), DONE (below), waits for Petr's playtest.
+
+## New heroes, batch 2 (branch `claude/new-heroes-2`, on top of batch 1 / PR #48, DONE, waits for Petr's playtest, 2026-11-28)
+
+- Four more heroes of the map with our names: **Ashsinger** (INT ranged: Cinder Wave, Pyre Mantle, Ember Comet;
+  ultimate Phoenix Wrath), **Thunderhoof** (STR melee: Ground Surge, Hoofstomp stun, Long March; ultimate Aftershock,
+  a stunning ring after every spell), **Stormseer** (INT ranged: Spirit Pack wolves, Squall, Dread Call stun;
+  ultimate Last Rites), **Mirrorblade** (AGI melee: Twin Shades and Mirror Dance copies, Flash Cut crits, sweeping
+  blades; ultimate Steel Cyclone). KayKit models of their own, our icons.
+- New spell mechanic: a stun on `nova`. Old heroes unchanged (the 24 older matrix cases are identical); digest
+  `fa5a1ee3` -> `51871bd1`. Numbers and the balance table: `docs/DECISIONS.md`, section New heroes, batch 2 (2-4
+  autopilot wins of 20 with no gear each). `data/generated/` built by `npm run data:build` from the v20.83 export.
+- **What Petr checks** (after the merge of #48 and this PR):
+  - the menu shows 16 heroes: https://wizzik.github.io/defense-webgame/
+  - Ashsinger (fire waves, a slow wide comet, a burning ring around her):
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=ashsinger&phase=8
+  - Thunderhoof (stomps stun, every spell sends a shock ring once the ultimate is learned):
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=thunderhoof&phase=8
+  - Stormseer (wolves by the crowd, lightning around him, Last Rites clears a wide circle):
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=stormseer&phase=8
+  - Mirrorblade (two quick sweeping blades, copies at his side, the cyclone):
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=mirrorblade&phase=8 and from the start
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=mirrorblade
+  - known weak spots: Stormseer's Last Rites deals about 70 % of his damage (Squall and Dread Call about 1 %);
+    Mirrorblade's Steel Cyclone is small. Say whether to strengthen the small spells or keep the map's numbers.
 
 ## New heroes, batch 1 (branch `claude/new-heroes-1`, DONE, waits for Petr's playtest, 2026-11-28)
 
@@ -261,34 +285,9 @@ section Petr's batch 2. `npm run check` passes on every commit of the branch.
   - casters from phase 3 (https://wizzik.github.io/defense-webgame/?debug=1&phase=3&lang=cs, blue bolts with a
     flash; `__game.debug.spawnEach()` shows all seven human types).
 
-## Solo playtest batch (branch `claude/gifted-gauss-k6wag4`, 2026-11-26)
-
-- Done in one Claude Code session; rulings and numbers: `docs/DECISIONS.md`, section Petr's solo playtest batch.
-- The Claude Code setup came first: `CLAUDE.md` (imports AGENTS.md, adds the workflow and the data rule for cloud
-  sessions), `.claude/settings.json` (allowed commands, a clean-room hook), skills `finish-task`, `data-change`,
-  `balance-check`.
-- Generated JSON was edited by the data-build rules in the container (no map there): Petr reruns `npm run data:build`
-  locally once; the files must not change.
-- Autopilot, world 1 normal, mid gear, seeds 1-8 (wins of 8, castle hp of won runs): before -> after
-  - Stonehorn 3 (55 %) -> 8 (99 %); Nightglaive 2 (37 %) -> 8 (87 %); Gravecaller 8 (90 %) -> 8 (100 %);
-    Serpent Shaman 3 (51 %) -> 7 (98 %); Mistwarden 3 (17 %) -> 7 (97 %); Sparkshot 1 (28 %) -> 8 (96 %);
-    Redcleaver 0 -> 8 (99 %); Tidecaller 0 -> 8 (92 %). In sum 20 -> 62 of 64; the castle stopped losing runs.
-  - **Open for Petr:** world 1 normal may now be too easy; if so, raise `rules.enemies.levelScaling` (0.009) or the
-    world steps. Worlds 2-5 and Insane / Hell were not measured again.
-- **What Petr checks** (https://wizzik.github.io/defense-webgame/ after the merge):
-  - a solo run on world 1: do enemies from the far side now come to you while you stay near the castle (1000), and
-    turn to the castle when you walk farther; can you win now;
-  - ranged heroes (Sparkshot, Tidecaller): do they shoot at enemies off the screen (reach 1300-1400);
-  - Redcleaver: fast double chops with splash; ultimates of Sparkshot, Redcleaver and Tidecaller: bursts as dense as
-    the Gravecaller's;
-  - hover the spells in the bottom bar: level, text, values now and next;
-  - level 20: dash shows "3 / 3", three dashes in a row; level 40: F jumps to the mouse (`?debug=1&phase=10` and
-    `__game.debug.grantXp(50000)` get there fast);
-  - worlds 4 and 5: snow and embers stay on the ground when you walk (`?debug=1&world=4`).
-
 ## Older entries
 
-Finished work before 2026-11-26 (and the random items stages 1-3): `docs/archive/status-2026-11-04-to-27.md`.
+Finished work before 2026-11-26 (and the random items stages 1-3, the solo playtest batch): `docs/archive/status-2026-11-04-to-27.md`.
 Read it only when a task needs the history of a feature; `docs/DECISIONS.md` holds the rules that still apply.
 
 ## Open questions for Petr

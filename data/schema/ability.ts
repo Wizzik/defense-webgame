@@ -87,7 +87,7 @@ export const AbilitySchema = z
     })),
     variant("area", params(["damage", "radius", "range"], ["healPerHit", "slow", "slowSeconds"])),
     variant("line", params(["damage", "length", "width"], ["stunSeconds", "waveSpeed"])),
-    variant("nova", params(["damage", "radius"], ["slow", "slowSeconds"])),
+    variant("nova", params(["damage", "radius"], ["slow", "slowSeconds", "stunSeconds"])),
     variant("cone", params(["damage", "length", "endWidth", "maxTargets"])),
     variant("ticking_area", params(["tickDamage", "ticksPerSecond", "radius", "duration"], ["hitRadius"])),
     variant("aura", paramsAnyOf(["damageBonus", "moveSpeedBonus", "attackSpeedBonus", "slow"], ["radius"]).superRefine((p, ctx) => {

@@ -109,6 +109,26 @@ const ICONS: Record<string, Icon> = {
   "blasting-powder": { color: SPARK, glyph: '<circle cx="10" cy="14" r="6"/><path d="M14 10l3-3"/><path d="M18 3v3M21 6h-3M19.5 4.5l-1.5 1.5"/>' },
   "fan-fire": { color: SPARK, glyph: '<path d="M3 12h6"/><path d="M9 12l11-7M9 12h12M9 12l11 7"/><circle cx="4" cy="12" r="1"/>' },
   doubles: { color: SHADOW, glyph: '<circle cx="8" cy="7" r="3"/><path d="M3 20c0-4 2-7 5-7s5 3 5 7"/><circle cx="16" cy="7" r="3" stroke-dasharray="2 2"/><path d="M13 13c1-.5 2-.5 3 0 3 0 5 3 5 7" stroke-dasharray="2 2"/>' },
+  // Ashsinger
+  "cinder-wave": { color: FIRE, glyph: '<path d="M3 17c3-4 6 0 9-4s6 0 9-4"/><path d="M6 12c1-2 0-3 1-5M12 9c1-2 0-3 1-5"/>' },
+  "pyre-mantle": { color: FIRE, glyph: '<circle cx="12" cy="13" r="3"/><path d="M12 3c-4 4-7 7-7 11a7 7 0 0 0 14 0c0-4-3-7-7-11z"/>' },
+  "ember-comet": { color: FIRE, glyph: '<circle cx="16" cy="8" r="4"/><path d="M13 11L3 21M11 9L4 16M15 13l-6 7"/>' },
+  "phoenix-wrath": { color: FIRE, glyph: '<path d="M12 6c-2 0-3 2-3 4l-6-3 3 7 6 4 6-4 3-7-6 3c0-2-1-4-3-4z"/><path d="M12 18v3"/>' },
+  // Thunderhoof
+  "ground-surge": { color: EARTH, glyph: '<path d="M3 20l4-6 3 3 4-7 3 4 4-8"/><path d="M3 20h18"/>' },
+  hoofstomp: { color: EARTH, glyph: '<path d="M8 4h8l1 8H7z"/><path d="M12 4v8"/><path d="M3 18c3-2 15-2 18 0M5 21c2-1 12-1 14 0"/>' },
+  "long-march": { color: EARTH, glyph: '<path d="M5 20l3-8 4 2 3-8"/><path d="M15 6l3-2M15 6l1 3"/><path d="M3 14h3M2 17h3"/>' },
+  aftershock: { color: EARTH, glyph: '<circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="6" stroke-dasharray="3 2"/><circle cx="12" cy="12" r="10" stroke-dasharray="3 3"/>' },
+  // Stormseer
+  squall: { color: STORM, glyph: '<path d="M5 9a4 4 0 0 1 7-3 4 4 0 0 1 7 3H5z"/><path d="M9 12l-2 4h3l-2 5M15 12l-2 4h3l-2 5"/>' },
+  "spirit-pack": { color: SPIRIT, glyph: '<path d="M4 18l2-8 3 2 3-6 3 6 3-2 2 8z"/><circle cx="10" cy="14" r=".8"/><circle cx="14" cy="14" r=".8"/>' },
+  "dread-call": { color: SPIRIT, glyph: '<path d="M4 9v6h3l5 4V5L7 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>' },
+  "last-rites": { color: SHADOW, glyph: '<path d="M7 20V9a5 5 0 0 1 10 0v11"/><path d="M12 9v6M9.5 11.5h5"/><path d="M4 20h16"/>' },
+  // Mirrorblade
+  "flash-cut": { color: STEEL, glyph: '<path d="M4 20L20 4"/><path d="M14 4h6v6"/><path d="M5 9l3 1M9 5l1 3M15 15l3 1M19 19l-1-3"/>' },
+  "twin-shades": { color: SHADOW, glyph: '<path d="M6 21v-5l3-3V8a2 2 0 0 1 4 0v5"/><path d="M13 21v-5l3-3V8a2 2 0 0 1 4 0" stroke-dasharray="2 2"/>' },
+  "mirror-dance": { color: ARCANE, glyph: '<path d="M12 3v18" stroke-dasharray="2 2"/><path d="M9 6L4 12l5 6M15 6l5 6-5 6"/>' },
+  "steel-cyclone": { color: STEEL, glyph: '<path d="M12 12m-2 0a2 2 0 1 0 4 0a4 4 0 1 0-8 0a6 6 0 1 0 12 0a8 8 0 1 0-16 0"/><path d="M20 12l2-2"/>' },
   // shared spells
   "arc-lightning": { color: STORM, glyph: '<path d="M13 2L6 13h5l-2 9 8-12h-5z"/>' },
   smite: { color: HOLY, glyph: '<path d="M12 2v13"/><path d="M8 11l4 4 4-4"/><path d="M5 20h14"/><path d="M8 17l-2 3M16 17l2 3"/>' },

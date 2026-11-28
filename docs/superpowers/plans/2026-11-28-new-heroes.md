@@ -68,10 +68,10 @@ Timed self buffs of the map (Berserk 12 s every 30 s, Bloodlust 60 s) become per
 | 1 | O00Z (Marn Thunderhorn) | dawnhammer | STR | melee | Holy Nova `area` slow, Holy Judgement `ticking_area`, Fan of Light `nova` | Holy Domination `ticking_area` around self | - |
 | 1 | O00T (Foster) | frostweaver | INT | ranged | Frost Slice `line` stun, Frost Slap `chain`, Frost Effect `aura` slow | Ice Fall `ticking_area` | aura slow |
 | 1 | O00J (Cowboy) | deadeye | AGI | ranged | Bloodlust `aura`, Gunpowder `on_hit` bash, Multishot `on_hit` extraTargets | Mirror Image `summon` images | - |
-| 2 | O004 (Kame) | | INT | ranged | Shock Fire `line`, Immolation Fire `ticking_area`, Kamezoko `line` | Phoenix Angry `nova` | - |
-| 2 | O003 (Buller) | | STR | melee | Shock Tauren `line`, War Stomp `nova`, Endurance `aura` | EarthWave `on_cast` | - |
-| 2 | O01A (Kazragore) | | INT | ranged | Monsoon `ticking_area`, Feral Spirit `summon`, All Stop `nova` | Life's Ended `nova` | - |
-| 2 | O001 (Imager) | | AGI | melee | Double Illusion `aura`, Critical Strike `on_hit`, Mirror Image `summon` | Bladestorm `ticking_area` | - |
+| 2 | O004 (Kame) | ashsinger | INT | ranged | Shock Fire `line`, Immolation Fire `ticking_area`, Kamezoko `line` | Phoenix Angry `nova` | - |
+| 2 | O003 (Buller) | thunderhoof | STR | melee | Shock Tauren `line`, War Stomp `nova` stun, Endurance `aura` | EarthWave `on_cast` | nova stun |
+| 2 | O01A (Kazragore) | stormseer | INT | ranged | Monsoon `ticking_area`, Feral Spirit `summon`, All Stop `nova` | Life's Ended `nova` | - |
+| 2 | O001 (Imager) | mirrorblade | AGI | melee | Critical Strike `on_hit`, Double Illusion `summon`, Mirror Image `summon` | Bladestorm `ticking_area` | - |
 | 3 | O007 (Healer) | | INT | ranged | Healing Wave `heal`, Fider Light `nova`, Inner Fire `aura` | Holy Fall `ticking_area` | - |
 | 3 | O00O (Magicer) | | INT | ranged | Storm Blast `instant`, Regen Aura `heal`, Phoenix `ticking_area` | Angel Cry `ticking_area` | - |
 | 3 | O00D (Nikoro) | | STR | melee | Thunder Impale `line`, War Stomp `nova`, Devotion Aura `aura` | Battle Roar Axe `cone` | armor aura |
@@ -142,3 +142,36 @@ Steps (one commit each, `npm run check` before each):
 3. client: icons, tints, models (manifest, fetch, build, licenses), lists and docs.
 4. balance: `power` per new hero, `sim:run` table in DECISIONS.
 5. docs (STATUS, DECISIONS), e2e `webgl2-fallback`, shots of the new heroes, draft PR.
+
+## Batch 2 (branch `claude/new-heroes-2`, stands on batch 1)
+
+| id | name | model (KayKit adventurers) | attack clip |
+|---|---|---|---|
+| ashsinger | Ashsinger | Mage, `2H_Staff`, `Mage_Cape` | `Spellcast_Raise` |
+| thunderhoof | Thunderhoof | Barbarian, `2H_Axe`, `Barbarian_Cape` | `2H_Melee_Attack_Chop` |
+| stormseer | Stormseer | Mage, `Spellbook_open`, `Mage_Cape` | `Spellcasting` |
+| mirrorblade | Mirrorblade | Rogue, `Knife` + `Knife_Offhand`, `Rogue_Cape` | `Dualwield_Melee_Attack_Slice` |
+
+Spells (map numbers and script lines in each block's review notes):
+
+- **Ashsinger** (O004): Cinder Wave (A00G Shock Wave: 200-2500 in a line 800-1000 long, 300 wide -> `line`), Pyre
+  Mantle (A00H Immolation: 50-500 a second within 350, a toggle -> `ticking_area` around the hero, 6 s every 6 s),
+  Ember Comet (A04R, script `Trig_KameMove_Actions`: a comet moves 600 a second for 3 s and burns 0.8-4.0 x Int
+  every 0.01 s within 300-500 -> a slow wide `line` of design damage), ultimate Phoenix Wrath (A00J, script: 2000 /
+  5000 within 600 / 800 and a 5 s slow -> `nova` with slow).
+- **Thunderhoof** (O003): Ground Surge (A00K Shock Wave: 200-3200, 350-550 wide -> `line`), Hoofstomp (A04T War
+  Stomp: 150-2000 within 250-550, stun 3-5 s -> `nova` with a shorter design stun), Long March (A007 Endurance on
+  the hero: +10-30 % move, +10-50 % attack speed -> `aura`), ultimate Aftershock (A00L, scripts `EarthWave` and
+  `Dupe_Shock`: more shock waves after War Stomp and Shock Tauren, 1000 / 2500 -> `on_cast`).
+- **Stormseer** (O01A): Squall (A07I Monsoon: 100-1800 every 1.5 s within 600 for 12 s -> `ticking_area` around the
+  hero), Spirit Pack (A083 Feral Spirit: 2-3 wolves of 100-500 for 60 s -> `summon` wards), Dread Call (A088, script
+  `Trig_Death_Prevent_Actions`: no enemy attacks for 5-25 s -> `nova` with a short stun), ultimate Last Rites (A08D:
+  2000 / 4000 within 1500 / 2500; the script's execute below that hp is left out -> `nova`).
+- **Mirrorblade** (O001): Flash Cut (A006 Critical Strike: 20 / 25 %, x1.75 / x2.25 -> `on_hit` crit), Twin Shades
+  (A04D, script `Trig_Double_Ilusion_Actions`: 1-5 copies, 25 % damage, normal damage taken, 30 s -> `summon`
+  images), Mirror Dance (A1C3 Mirror Image: 1-6 images, 20 %, x3 taken, 15 s -> `summon` images), ultimate Steel
+  Cyclone (A003 Bladestorm, 5 map levels, so design rows of its levels 1, 3, 5 without `source` -> `ticking_area`
+  around the hero).
+- The plan's "Double Illusion `aura`" was wrong: the export shows a script summon of copies, so it is a `summon`.
+- New mechanic: `nova.stunSeconds` (optional; War Stomp, All Stop). No older ability uses it, so the older matrix
+  cases stay.

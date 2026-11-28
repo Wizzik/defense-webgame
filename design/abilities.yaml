@@ -1013,3 +1013,287 @@
     damageDealt: { design: [0.3, 0.3, 0.3] }
     damageTaken: { design: [3, 3, 3] }
     duration: { design: [15, 15, 15] }
+
+# Ashsinger (new heroes, batch 2)
+
+- id: cinder-wave
+  source: A00G
+  name: { en: Cinder Wave, cs: Cinder Wave }
+  description: { en: "A wave of fire rolls ahead and burns everything in its way.", cs: "A wave of fire rolls ahead and burns everything in its way." }
+  kind: line
+  targeting: move_direction
+  params:
+    # Shock Wave: DataA 200-2500 damage, DataC distance 800-1000, area 300 the width; the map's wave speed is engine
+    # default, so the speed is a design value.
+    damage: DataA
+    length: DataC
+    width: area
+    waveSpeed: { design: [1600, 1600, 1600, 1600, 1600] }
+
+- id: pyre-mantle
+  source: A00H
+  name: { en: Pyre Mantle, cs: Pyre Mantle }
+  description: { en: "Flames wreathe you and burn the enemies next to you.", cs: "Flames wreathe you and burn the enemies next to you." }
+  kind: ticking_area
+  targeting: around_self
+  # The map's Immolation is a toggle (no cooldown, mana every second); the game burns 6 s every 6 s (18 x 0.33).
+  cooldown: { design: [18, 18, 18, 18, 18] }
+  params:
+    # Immolation: DataA 50-500 damage every second within area 350. Two bursts a second close around the hero
+    # (radius 100), each half of the map's second.
+    tickDamage: { design: [25, 50, 100, 150, 250] }
+    ticksPerSecond: { design: [2, 2, 2, 2, 2] }
+    radius: { design: [100, 100, 100, 100, 100] }
+    hitRadius: area
+    duration: { design: [6, 6, 6, 6, 6] }
+
+- id: ember-comet
+  source: A04R
+  name: { en: Ember Comet, cs: Ember Comet }
+  description: { en: "A slow comet of fire crosses the field and scorches a wide path.", cs: "A slow comet of fire crosses the field and scorches a wide path." }
+  kind: line
+  targeting: move_direction
+  params:
+    damage: { design: [600, 1200, 1800, 2400, 3000] }
+    length: { design: [1800, 1800, 1800, 1800, 1800] }
+    width: { design: [600, 700, 800, 900, 1000] }
+    waveSpeed: { design: [600, 600, 600, 600, 600] }
+  review:
+    jassFunctions:
+      - Trig_KameMove_Func001C
+      - Trig_KameMove_Func001Func001C
+    notes: >-
+      Trig_Kame_Actions (war3map.j v20.83, lines 21199-21231) waits 1.5 s, then creates the comet unit h015 and lets
+      Trig_KameMove_Actions (21588, every 0.01 s) run for 3 s: the comet moves 6 a step (600 a second, so about 1800
+      long) and hurts the enemies within 300, 350, 400, 450, 500 by level (width = twice that) for 0.8, 1.6, 2.4,
+      3.2, 4.0 x the hero's Intelligence every 0.01 s (Trig_KameMove_Func001Func002002, 21545; ...Func003002, 21453),
+      pulling them along. The game hits each enemy once; the damage is a design value of about three Cinder Waves
+      (our spell power grows with Intelligence already).
+
+- id: phoenix-wrath
+  source: A00J
+  name: { en: Phoenix Wrath, cs: Phoenix Wrath }
+  description: { en: "A burst of phoenix fire around you burns and slows every enemy.", cs: "A burst of phoenix fire around you burns and slows every enemy." }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: { design: [2000, 5000] }
+    radius: area
+    slow: { design: [0.5, 0.5] }
+    slowSeconds: duration
+  review:
+    jassFunctions:
+      - Trig_Phoneix_Angry_Func002Func001C
+      - Trig_Phoneix_Angry_Func002Func001Func001C
+    notes: >-
+      Trig_Phoneix_Angry_Actions (war3map.j v20.83, lines 16660-16664) picks the enemies within 800 of the hero and
+      Trig_Phoneix_Angry_Func002A (16640-16658) deals 2000 (level 1) or 5000 (level 2) to each. The Thunder Clap base
+      slows them for 5 s (duration; DataC / DataD reduce move and attack speed); the slow share is a design value.
+      The radius is the object data area 600 / 800.
+
+# Thunderhoof (new heroes, batch 2)
+
+- id: ground-surge
+  source: A00K
+  name: { en: Ground Surge, cs: Ground Surge }
+  description: { en: "A shock wave tears through the ground ahead of you.", cs: "A shock wave tears through the ground ahead of you." }
+  kind: line
+  targeting: move_direction
+  params:
+    # Shock Wave: DataA 200-3200 damage, DataC distance 800, area 350-550 the width.
+    damage: DataA
+    length: DataC
+    width: area
+    waveSpeed: { design: [1600, 1600, 1600, 1600, 1600] }
+
+- id: hoofstomp
+  source: A04T
+  name: { en: Hoofstomp, cs: Hoofstomp }
+  description: { en: "You stomp the ground, hurting and stunning the enemies around you.", cs: "You stomp the ground, hurting and stunning the enemies around you." }
+  kind: nova
+  targeting: around_self
+  params:
+    # War Stomp: DataA 150-2000 within area 250-550; the map stuns 3-5 s (2-4 s on heroes) every 6.5 s, which would
+    # hold the crowd for good at our cooldowns, so the stun is a design value.
+    damage: DataA
+    radius: area
+    stunSeconds: { design: [1, 1.25, 1.5, 1.75, 2] }
+
+- id: long-march
+  source: A007
+  name: { en: Long March, cs: Long March }
+  description: { en: "You move and attack faster.", cs: "You move and attack faster." }
+  kind: aura
+  targeting: self
+  params:
+    # Endurance Aura on the hero only: DataA 10-30 % move speed, DataB 10-50 % attack speed (the same map ability as
+    # Swift Pace, an id of its own for this hero).
+    moveSpeedBonus: DataA
+    attackSpeedBonus: DataB
+
+- id: aftershock
+  source: A00L
+  name: { en: Aftershock, cs: Aftershock }
+  description: { en: "Each of your spells sends a stunning shock wave around you.", cs: "Each of your spells sends a stunning shock wave around you." }
+  kind: on_cast
+  targeting: on_cast
+  params:
+    damage: { design: [1000, 2500] }
+    radius: { design: [700, 700] }
+    stunSeconds: { design: [0.5, 1] }
+  review:
+    jassFunctions:
+      - Trig_EarthWave_Func002C
+      - Trig_EarthWave_Func002Func001C
+      - Trig_Dupe_Shock_Func004C
+      - Trig_Dupe_Shock_Func004Func001C
+    notes: >-
+      A00L is a passive with no numbers of its own (Devotion Aura base, all 0). Trig_EarthWave_Actions (war3map.j
+      v20.83, lines 21702-21715) answers every War Stomp (A04T) by sending a shock wave from the hero to each enemy
+      within 350, and Trig_Dupe_Shock_Actions (16703-16734) answers every Shock Tauren (A00K) with one more wave
+      (two at level 2) at random enemies within 500 of the target point; the extra damage is 1000 / 2500 by level.
+      The game sends one stunning ring after each of the hero's spells (the on_cast kind of Seismic Echo): damage
+      1000 / 2500, radius 700 (350 after the AoE scale) and the stun are design values.
+
+# Stormseer (new heroes, batch 2)
+
+- id: squall
+  source: A07I
+  name: { en: Squall, cs: Squall }
+  description: { en: "Lightning keeps striking the enemies around you.", cs: "Lightning keeps striking the enemies around you." }
+  kind: ticking_area
+  targeting: around_self
+  params:
+    # Monsoon: DataA 100-1800 every 1.5 s (DataB) within area 600 for 12 s (duration). The game rains bursts in that
+    # radius like Ice Fall; a burst deals the map's strike x 0.15 (rate and burst radius design values).
+    tickDamage: { design: [15, 45, 105, 180, 270] }
+    ticksPerSecond: { design: [10, 10, 10, 10, 10] }
+    radius: area
+    hitRadius: { design: [275, 275, 275, 275, 275] }
+    duration: duration
+
+- id: spirit-pack
+  source: A083
+  name: { en: Spirit Pack, cs: Spirit Pack }
+  description: { en: "Spirit wolves appear by the crowd and bite the enemies near them.", cs: "Spirit wolves appear by the crowd and bite the enemies near them." }
+  kind: summon
+  targeting: densest_cluster
+  params:
+    # Feral Spirit: DataB 3, 2, 3, 2, 3 wolves of 100, 300, 300, 500, 500 damage for 60 s (cooldown 30). The game
+    # raises wards (the wolves hold their spot): count, a 20 s life (like Serpent Totem's 15) and the cap are design
+    # values; the bite is the map's 100 rising to 500 more evenly, in the totem's units (Serpent Totem writes 333 for
+    # the map's 101: x 3.3, then x 0.3 in data-build); range is the object data range (800).
+    count: { design: [2, 2, 3, 3, 3] }
+    duration: { design: [20, 20, 20, 20, 20] }
+    range: range
+    damage: { design: [330, 660, 990, 1320, 1650] }
+    attackRange: { design: [300, 300, 300, 300, 300] }
+    attackInterval: { design: [0.5, 0.5, 0.5, 0.5, 0.5] }
+    maxAlive: { design: [4, 4, 6, 6, 6] }
+  review:
+    jassFunctions:
+      - Trig_Level_Ability_Actions
+    notes: >-
+      Engine Spirit Wolf (AOsf). The export ties Trig_Level_Ability_Actions to A083: it only sets the level of the
+      wolves' own abilities, so every number is object data or a design value.
+
+- id: dread-call
+  source: A088
+  name: { en: Dread Call, cs: Dread Call }
+  description: { en: "Your call stuns every enemy around you.", cs: "Your call stuns every enemy around you." }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: { design: [100, 150, 200, 250, 300] }
+    radius: { design: [700, 700, 700, 700, 700] }
+    stunSeconds: { design: [1.5, 2, 2.5, 3, 3.5] }
+  review:
+    jassFunctions:
+      - Trig_Death_Prevent_Func002C
+      - Trig_Death_Prevent_Func002Func001C
+    notes: >-
+      Trig_Death_Prevent_Actions (war3map.j v20.83, lines 27187-27220) stops every enemy on the map from attacking for
+      5, 10, 15, 20, 25 s by level (udg_real17), with no damage. The game stuns the enemies within 700 (350 after the
+      AoE scale) for a shorter time and adds a small hit; every number is a design value.
+
+- id: last-rites
+  source: A08D
+  name: { en: Last Rites, cs: Last Rites }
+  description: { en: "Death sweeps a wide circle around you.", cs: "Death sweeps a wide circle around you." }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: DataA
+    radius: area
+  review:
+    jassFunctions:
+      - Trig_Finish_Func004C
+    notes: >-
+      War Stomp base: DataA 2000 / 4000 within area 1500 / 2500. Trig_Finish_Actions (war3map.j v20.83, lines
+      27344-27355) also kills, 1 s later, every enemy on the map with less hp than that; the game leaves the
+      execute out and keeps the wide circle.
+
+# Mirrorblade (new heroes, batch 2)
+
+- id: flash-cut
+  source: A006
+  name: { en: Flash Cut, cs: Flash Cut }
+  description: { en: "Your blades sometimes strike critically.", cs: "Your blades sometimes strike critically." }
+  kind: on_hit
+  targeting: on_attack
+  params:
+    # Critical Strike: DataA is the chance in percent (20, 25); DataB the multiplier (1.75, 2.25). The evasion
+    # (DataD) and the bonus damage (DataC) are left out.
+    chance: { design: [0.2, 0.25] }
+    multiplier: DataB
+
+- id: twin-shades
+  source: A04D
+  name: { en: Twin Shades, cs: Twin Shades }
+  description: { en: "Lasting copies of you fight at your side.", cs: "Lasting copies of you fight at your side." }
+  kind: summon
+  targeting: self
+  params:
+    count: { design: [1, 2, 3, 4, 5] }
+    damageDealt: { design: [0.25, 0.25, 0.25, 0.25, 0.25] }
+    damageTaken: { design: [1, 1, 1, 1, 1] }
+    duration: { design: [30, 30, 30, 30, 30] }
+  review:
+    jassFunctions:
+      - Trig_Double_Ilusion_Func002C
+      - Trig_Double_Ilusion_Func002Func001C
+    notes: >-
+      A04D is a Berserk with every field 0; Trig_Double_Ilusion_Actions (war3map.j v20.83, lines 20131-20198)
+      creates 1, 2, 3, 4, 5 copies by level with the illusion item I1C0 (the tooltip: 25 % damage, normal damage
+      taken, 30 s; cooldown 45). Every row is a design value from those numbers.
+
+- id: mirror-dance
+  source: A1C3
+  name: { en: Mirror Dance, cs: Mirror Dance }
+  description: { en: "Fragile copies of you join the fight for a moment.", cs: "Fragile copies of you join the fight for a moment." }
+  kind: summon
+  targeting: self
+  params:
+    # Mirror Image: DataA 1, 2, 3, 4, 6 images, DataB 20 % damage dealt, DataC x3 damage taken, 15 s.
+    count: DataA
+    damageDealt: DataB
+    damageTaken: DataC
+    duration: duration
+
+# Steel Cyclone is the map's A003 (Bladestorm: DataA 100, 300, 500, 700, 1400 damage per second within area 400 for
+# 3 s, cooldown 15 / 25; script Trig_Blade_Storm_Actions, war3map.j v20.83, lines 20233-20268, ends it with a slam
+# within 600). A003 has 5 levels in the map and an ultimate has 3 in the game, so it has no source: the rows are its
+# levels 1, 3 and 5, four bursts a second close around the hero, each the map's damage of one second (in place of
+# the slam, which is left out).
+- id: steel-cyclone
+  name: { en: Steel Cyclone, cs: Steel Cyclone }
+  description: { en: "You spin into a storm of blades that cuts everything around you.", cs: "You spin into a storm of blades that cuts everything around you." }
+  kind: ticking_area
+  targeting: around_self
+  cooldown: { design: [15, 25, 25] }
+  params:
+    tickDamage: { design: [100, 500, 1400] }
+    ticksPerSecond: { design: [4, 4, 4] }
+    radius: { design: [100, 100, 100] }
+    hitRadius: { design: [400, 400, 400] }
+    duration: { design: [3, 3, 3] }

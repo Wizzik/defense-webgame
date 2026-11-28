@@ -137,3 +137,49 @@
   ultimate: doubles
   attack: { rangeScale: 2, cooldownScale: 0.5 }   # Petr: ranged heroes reach twice as far; a gunslinger shoots fast (his kit rides on the attack)
   power: 1.25   # new heroes batch 1 balance pass: about 10 % autopilot wins with no gear
+
+# New heroes, batch 2 (2026-11-28, docs/superpowers/plans/2026-11-28-new-heroes.md). power: the balance pass of batch 2.
+
+- id: ashsinger
+  source: O004
+  mapName: Kame
+  name: { en: Ashsinger, cs: Ashsinger }
+  role: { en: "Fire sorceress. Waves of flame, a burning mantle and a comet.", cs: "Fire sorceress. Waves of flame, a burning mantle and a comet." }
+  signatureAbilities: [cinder-wave, pyre-mantle, ember-comet]
+  ultimate: phoenix-wrath
+  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
+  power: 0.65   # new heroes batch 2 balance pass: about 10 % autopilot wins with no gear
+
+
+- id: thunderhoof
+  source: O003
+  mapName: Buller
+  name: { en: Thunderhoof, cs: Thunderhoof }
+  role: { en: "Earth-shaking brawler. Shock waves, stomps and aftershocks.", cs: "Earth-shaking brawler. Shock waves, stomps and aftershocks." }
+  signatureAbilities: [ground-surge, hoofstomp, long-march]
+  ultimate: aftershock
+  damageTaken: 0.5   # melee: stands in the crowd
+  power: 0.4   # new heroes batch 2 balance pass: about 10 % autopilot wins with no gear
+
+
+- id: stormseer
+  source: O01A
+  mapName: Kazragore
+  name: { en: Stormseer, cs: Stormseer }
+  role: { en: "Storm shaman. Squalls, spirit wolves and a call that freezes the crowd.", cs: "Storm shaman. Squalls, spirit wolves and a call that freezes the crowd." }
+  signatureAbilities: [spirit-pack, squall, dread-call]   # the wolves first: the squall alone could not hold the first waves
+  ultimate: last-rites
+  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
+  power: 0.7   # new heroes batch 2 balance pass: about 10 % autopilot wins with no gear
+
+
+- id: mirrorblade
+  source: O001
+  mapName: Imager
+  name: { en: Mirrorblade, cs: Mirrorblade }
+  role: { en: "Blade dancer. Crits, illusions and a steel cyclone.", cs: "Blade dancer. Crits, illusions and a steel cyclone." }
+  signatureAbilities: [twin-shades, flash-cut, mirror-dance]   # a lasting copy first: the crits alone could not hold the first waves
+  ultimate: steel-cyclone
+  attack: { cooldownScale: 0.5, strikes: 2, splash: { radius: 160, share: 0.5 } }   # a blade dancer: two quick sweeping blades (without the sweep he fell in the first 2 minutes at any power)
+  damageTaken: 0.5   # melee: stands in the crowd
+  power: 1   # new heroes batch 2 balance pass: about 10 % autopilot wins with no gear
