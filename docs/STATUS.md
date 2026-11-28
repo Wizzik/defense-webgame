@@ -263,10 +263,11 @@ section Petr's batch 2. `npm run check` passes on every commit of the branch.
 ## CI in parallel jobs (branch `claude/ci-parallel`, 2026-11-28)
 
 - Petr: "can the CI checks be faster?". One serial job took 32 min (e2e 28.5). Now `unit` (typecheck, vitest,
-  python) and seven e2e jobs run side by side: webgl2-fallback and webgpu-swiftshader in two shards each,
+  python) and seven e2e jobs run side by side: webgl2-fallback and webgpu-swiftshader in three shards each,
   sim-chromium, sim-firefox, sim-webkit; each installs only its browser. `playwright.config.ts` `fullyParallel: true`
   so a shard splits by test (workers stay 1, tests still run one at a time). Local `npm run e2e` is unchanged.
-- **What Petr checks:** the PR's checks list eight jobs and the run takes about 8-10 min instead of 32.
+- First run with two shards: 12 min (the first shards 11-12 min, the second 5-7); three shards aim at about 8.
+- **What Petr checks:** the PR's checks list ten jobs and the run takes about 8-9 min instead of 32.
 
 ## Older entries
 
