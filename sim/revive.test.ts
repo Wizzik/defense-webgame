@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { chestPrice } from "./chests";
 import { TICKS_PER_SECOND } from "./constants";
-import { difficultyMods } from "./difficulty";
+import { difficultyMods, extraPlayers } from "./difficulty";
 import { EventKind } from "./events";
 import { NO_INPUT, type TickInput } from "./input";
 import { reviveShare } from "./revive";
@@ -114,13 +114,14 @@ describe("co-op difficulty and chests per player", () => {
     const per = rules.coop.perPlayer;
     const one = difficultyMods(rules, 3, "insane", 1);
     const three = difficultyMods(rules, 3, "insane", 3);
-    expect(three.hp).toBeCloseTo(one.hp * (1 + 2 * per.hp));
-    expect(three.damage).toBeCloseTo(one.damage * (1 + 2 * per.damage));
-    expect(three.packSize).toBeCloseTo(one.packSize * (1 + 2 * per.packSize));
-    expect(three.eliteHp).toBeCloseTo(one.eliteHp * (1 + 2 * per.eliteHp));
+    const more = extraPlayers(rules, 3);
+    expect(three.hp).toBeCloseTo(one.hp * (1 + more * per.hp));
+    expect(three.damage).toBeCloseTo(one.damage * (1 + more * per.damage));
+    expect(three.packSize).toBeCloseTo(one.packSize * (1 + more * per.packSize));
+    expect(three.eliteHp).toBeCloseTo(one.eliteHp * (1 + more * per.eliteHp));
     expect(three.gold).toBe(one.gold);
     expect(three.magicFind).toBe(one.magicFind);
-    expect(players(2).mods.hp).toBeCloseTo(1 + per.hp);
+    expect(players(2).mods.hp).toBeCloseTo(1 + extraPlayers(rules, 2) * per.hp);
   });
 
   it("lays more chests for more players", () => {

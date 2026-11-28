@@ -926,6 +926,11 @@
     }
   },
   "coop": {
+    "extraPlayers": [
+      1,
+      1.7,
+      2.4
+    ],
     "perPlayer": {
       "hp": 0.5,
       "damage": 0.22,

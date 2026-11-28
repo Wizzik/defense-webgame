@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-27 (random items, stages 1-4 and the damage meter; Petr's batch 2 merged in PR #43; English only for now). Read this first when you resume work.
+Updated 2026-11-28 (co-op gear between runs and group strength by size). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -20,6 +20,26 @@ Updated 2026-11-27 (random items, stages 1-4 and the damage meter; Petr's batch 
    INT cards after, level 60-70 at the end of a run, wards x5. Then Sentry Ward = Serpent Totem (10 s / 15 s),
    dash 3 charges from level 10, blink from 20, and random items stage 5 (balance), DONE on `main`.
    Random items stage 6 (icons) DONE on `main` (below): the random items plan is complete.
+8. **Co-op gear between runs and group strength by size** (Petr, 2026-11-28; branch `claude/peaceful-galileo-qtu26s`,
+   below). Then the remaining heroes of the map and better spell graphics (point 4).
+9. **Named items only legendary / mythic, salvage for named items** (Petr, 2026-11-28): plan
+   `docs/superpowers/plans/2026-11-28-named-items-legendary.md` (rulings and steps), handed to a fresh session on
+   branch `claude/named-items-legendary` (from `claude/peaceful-galileo-qtu26s`). Not started.
+
+## Co-op gear between runs and group strength by size (branch `claude/peaceful-galileo-qtu26s`, DONE, 2026-11-28)
+
+- The end screen of a co-op run has **Gear for the next run** (host and guests): wear what the run dropped, Back
+  returns to the end screen; the host's Again starts the next run with everyone's new gear (protocol version 6).
+- `rules.coop.extraPlayers` [1, 1.7, 2.4]: 3 and 4 players count as 1.7 and 2.4 extra players (was 2 and 3).
+  Autopilot wins without gear: 2 players 20 %, 3 players 9 % -> 25 %, 4 players 1 % -> 16-25 %, solo 25 %.
+  Numbers: `docs/DECISIONS.md`, section Co-op gear between runs and group strength by size.
+- `data/generated/rules.json` edited in the cloud (one new row, `coop.extraPlayers`): **run `npm run data:build`
+  locally and check that nothing changes.**
+- **What Petr checks** (after the merge, https://wizzik.github.io/defense-webgame/):
+  - co-op with a friend (both pages need the new version, protocol 6): play until the run ends; both end screens show
+    **Gear for the next run**; the guest wears another item, goes Back, the host presses **Again (same group)**: the
+    guest's new run wears the new item (C in the run shows it);
+  - 3 and 4 players without gear on normal feel about as hard as 2 players, not much harder.
 
 ## Random items stage 6: item icons (straight to `main`, DONE, 2026-11-27)
 

@@ -4,7 +4,7 @@
 import { stateHash, TICK_SECONDS, type Run, type TickInput } from "../../sim";
 import { HASH_EVERY, Lockstep } from "./lockstep";
 import type { PeerLink } from "./peer-link";
-import { inputMessage, type NetMessage, toInput } from "./protocol";
+import { inputMessage, type NetGear, type NetMessage, toInput } from "./protocol";
 import { everyoneReady, inboundPlayer, relayTargets } from "./relay";
 import { startTicker, type Ticker } from "./ticker";
 import { WallClock } from "./wall-clock";
@@ -49,6 +49,8 @@ export interface CoopNetDeps {
   onDesync(step: number): void;
   /** A guest: the host started the next run of the group over the same link (after a run ended). */
   onRestart?(m: StartMessage): void;
+  /** The host: guest `player` changed his gear after the run ended; it counts for the group's next run. */
+  onGear?(player: number, gear: NetGear[]): void;
 }
 
 export type StartMessage = Extract<NetMessage, { t: "start" }>;
@@ -167,6 +169,7 @@ export class CoopNet {
     } else if (m.t === "left" && deps.local !== 0 && from === 0) this.leave(m.p, "left");
     else if (m.t === "bye") this.linkClosed(from, "the other player left");
     else if (m.t === "start" && deps.local !== 0 && from === 0) deps.onRestart?.(m);
+    else if (m.t === "gear" && deps.local === 0 && from !== 0 && !this.isGone(from)) deps.onGear?.(from, m.g);
   }
 
   /** A link closed: on the host one guest left; on a guest the host left, and with him every other player. */

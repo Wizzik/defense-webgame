@@ -4,9 +4,9 @@ import { InputAction, type TickInput } from "../../sim";
 
 /**
  * 2: the game's co-op lobby (`join` and `start`, multiplayer migration step 7); 3: up to 4 players (`room`, `left`,
- * `p`); 5: a worn random item travels with its rows (NetRolled).
+ * `p`); 5: a worn random item travels with its rows (NetRolled); 6: a guest sends new gear after a run ended (`gear`).
  */
-export const PROTOCOL_VERSION = 5;
+export const PROTOCOL_VERSION = 6;
 /** The longest blink aim an input may carry (world units from the hero). */
 const MAX_AIM = 4000;
 
@@ -32,6 +32,8 @@ export type NetMessage =
   | { t: "start"; v: number; seed: number; world: number; d: NetDifficulty; you: number; heroes: string[]; g: NetGear[][] }
   /** Host to every guest when the lobby changes: the heroes in player order and the receiver's number (-1: the room is full). */
   | { t: "room"; v: number; you: number; heroes: string[] }
+  /** Guest to host after a run ended: the permanent gear he wears in the group's next run (Again). */
+  | { t: "gear"; g: NetGear[] }
   /** Host to the other guests: guest `p` left the run. */
   | { t: "left"; p: number }
   /** An input or a hash of player `p` for step `k` (the host sets `p` from the link a guest sent it on). */
@@ -131,6 +133,10 @@ export function decodeMessage(raw: unknown): NetMessage | null {
       if (!intIn(m.v, 0, UINT32_MAX) || !Array.isArray(m.heroes) || m.heroes.length < 1 || m.heroes.length > MAX_PLAYERS) return null;
       if (!m.heroes.every((h) => id(h, MAX_HERO_ID)) || !intIn(m.you, -1, m.heroes.length - 1)) return null;
       return { t: "room", v: m.v, you: m.you, heroes: m.heroes as string[] };
+    case "gear": {
+      const g = gearList(m.g);
+      return g ? { t: "gear", g } : null;
+    }
     case "left":
       return intIn(m.p, 1, MAX_PLAYERS - 1) ? { t: "left", p: m.p } : null;
     case "in":

@@ -257,6 +257,7 @@ export const messagesEn = {
   "end.again": "Play again",
   "end.againGroup": "Again (same group)",
   "end.waitHost": "Waiting for the host to start again...",
+  "end.gear": "Gear for the next run",
   "end.leave": "Leave",
   "error.noGpu": "Your browser supports neither WebGPU nor WebGL2.",
   "error.generic": "Something went wrong: {message}",

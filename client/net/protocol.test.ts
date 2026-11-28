@@ -18,10 +18,12 @@ describe("decodeMessage", () => {
     { t: "room", v: PROTOCOL_VERSION, you: 2, heroes: ["stonehorn", "sparkshot", "tidecaller"] },
     { t: "room", v: PROTOCOL_VERSION, you: -1, heroes: ["stonehorn", "a", "b", "c"] },
     { t: "left", p: 3 },
+    { t: "gear", g: [["head", "travelers-hood", 2]] },
+    { t: "gear", g: [] },
   ];
 
-  it("is version 5 (random items travel with their roll)", () => {
-    expect(PROTOCOL_VERSION).toBe(5);
+  it("is version 6 (a guest sends new gear after a run ended)", () => {
+    expect(PROTOCOL_VERSION).toBe(6);
   });
 
   it.each(valid.map((m) => [m.t, m] as const))("round-trips %s", (_t, m) => {
@@ -63,6 +65,8 @@ describe("decodeMessage", () => {
     ["a start beyond its heroes", { t: "start", v: 3, seed: 1, world: 1, d: "hell", you: 2, heroes: ["a", "b"], g: [[], []] }],
     ["a room of five", { t: "room", v: 3, you: 1, heroes: ["a", "b", "c", "d", "e"] }],
     ["a left host", { t: "left", p: 0 }],
+    ["gear without a list", { t: "gear" }],
+    ["gear of a bad entry", { t: "gear", g: [["head", "hood", 0]] }],
     ["an array", [1, 2]],
   ])("rejects %s", (_name, raw) => {
     expect(roundTrip(raw)).toBeNull();

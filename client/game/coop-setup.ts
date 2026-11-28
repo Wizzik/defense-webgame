@@ -49,7 +49,8 @@ export function joinCodeOf(search: string): string | null {
 interface LastRun {
   links: ReadonlyMap<number, PeerLink>;
   heroes: readonly string[];
-  gear: readonly NetGear[][];
+  /** Player p's gear; the host replaces a guest's row when he sends new gear after the run ended. */
+  gear: NetGear[][];
   world: number;
   difficulty: DifficultyId;
   local: number;
@@ -292,6 +293,25 @@ export class CoopSetup {
     return gone.includes(0) ? null : "guest";
   }
 
+  /** The hero this window plays in the co-op run on screen, or null outside co-op. */
+  localHero(): string | null {
+    const last = this.last;
+    return last && this.deps.session.coop ? last.heroes[last.local] ?? null : null;
+  }
+
+  /**
+   * Guest, after his gear changed on the end screen: tells the host, who uses it for the group's next run (Petr,
+   * 2026-11-28: wear what the last run dropped). The host reads his own gear again when he starts.
+   */
+  gearChanged(): void {
+    const last = this.last;
+    if (!last || last.local === 0 || !this.deps.session.coop) return;
+    const hero = last.heroes[last.local];
+    const host = last.links.get(0);
+    if (hero === undefined || !host) return;
+    host.send({ t: "gear", g: toNet(this.deps.loadout(hero)) });
+  }
+
   /** Host, after a run ended: the same group (without the guests who left) plays the same course again. */
   async restart(): Promise<boolean> {
     const { deps } = this;
@@ -364,8 +384,12 @@ export class CoopSetup {
       },
       onDesync: (step) => this.deps.onNote(t(this.deps.lang(), "coop.desync", { n: step })),
       onRestart: (m) => void this.guestRestart(m),
+      onGear: (p, g) => {
+        if (this.last === last && p > 0 && p < last.gear.length) last.gear[p] = g;
+      },
     });
-    this.last = { links, heroes, gear, world, difficulty, local, onStop };
+    const last: LastRun = { links, heroes, gear: heroes.map((_, p) => gear[p] ?? []), world, difficulty, local, onStop };
+    this.last = last;
     this.room = null;
     this.roster = new Roster();
     this.peer = null;

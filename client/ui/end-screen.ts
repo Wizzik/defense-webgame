@@ -17,8 +17,10 @@ export class EndScreen {
   private readonly title: HTMLElement;
   private readonly stats: HTMLElement;
   private readonly again: HTMLButtonElement;
+  private readonly gear: HTMLButtonElement;
 
-  constructor(parent: HTMLElement, onAgain: () => void) {
+  /** `onGear`: co-op only, the gear screen before the group's next run (the end screen comes back with `reveal`). */
+  constructor(parent: HTMLElement, onAgain: () => void, onGear: () => void = () => {}) {
     this.root = el("div", "screen end", parent);
     this.root.id = "end";
     this.root.hidden = true;
@@ -28,6 +30,10 @@ export class EndScreen {
     this.again = el("button", "button primary", panel);
     this.again.id = "again";
     this.again.addEventListener("click", onAgain);
+    this.gear = el("button", "button", panel);
+    this.gear.id = "end-gear";
+    this.gear.hidden = true;
+    this.gear.addEventListener("click", onGear);
   }
 
   /**
@@ -66,8 +72,16 @@ export class EndScreen {
     if (coop === "guest") el("p", "end-line end-wait", this.stats, t(lang, "end.waitHost"));
     this.root.dataset.coop = coop ?? "";
     this.again.textContent = t(lang, coop === "guest" ? "end.leave" : coop === "host" ? "end.againGroup" : "end.again");
+    // co-op: change the gear (wear what the run dropped) before the host starts the group's next run
+    this.gear.hidden = coop === null;
+    this.gear.textContent = t(lang, "end.gear");
     this.root.hidden = false;
     this.again.focus();
+  }
+
+  /** Shows the end screen again as it was (back from the gear screen). */
+  reveal(): void {
+    this.root.hidden = false;
   }
 
   hide(): void {
