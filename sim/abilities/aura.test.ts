@@ -45,7 +45,7 @@ describe("aura", () => {
     expect(run.hero.bonus.damage).toBeGreaterThan(0);
     expect(run.hero.bonus.moveSpeed).toBeGreaterThan(0);
     const none = abilityRun("nightglaive", {});
-    expect(none.hero.bonus).toEqual({ damage: 0, moveSpeed: 0, attackSpeed: 0 });
+    expect(none.hero.bonus).toEqual({ damage: 0, moveSpeed: 0, attackSpeed: 0, armor: 0, hp: 0 });
   });
 
   it("an aura card refreshes the stats", () => {

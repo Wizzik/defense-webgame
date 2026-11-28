@@ -738,5 +738,198 @@
     "ultimate": "steel-cyclone",
     "damageTaken": 0.5,
     "power": 0.8
+  },
+  {
+    "id": "lightbinder",
+    "name": {
+      "en": "Lightbinder",
+      "cs": "Lightbinder"
+    },
+    "role": {
+      "en": "Healer of light. Pulses that burn foes and mend friends.",
+      "cs": "Healer of light. Pulses that burn foes and mend friends."
+    },
+    "primary": "int",
+    "hp": 800,
+    "armor": 5,
+    "moveSpeed": 448,
+    "attributes": {
+      "str": {
+        "base": 27,
+        "perLevel": 2.3
+      },
+      "agi": {
+        "base": 25,
+        "perLevel": 2.2
+      },
+      "int": {
+        "base": 37,
+        "perLevel": 3.5
+      }
+    },
+    "baseAttack": {
+      "kind": "ranged",
+      "range": 1200,
+      "cooldown": 0.26,
+      "damageMin": 2,
+      "damageMax": 8,
+      "splash": {
+        "radius": 150,
+        "share": 0.5
+      }
+    },
+    "signatureAbilities": [
+      "radiant-pulse",
+      "mending-wave",
+      "inner-flame"
+    ],
+    "ultimate": "heavens-rain",
+    "power": 0.3
+  },
+  {
+    "id": "skyweaver",
+    "name": {
+      "en": "Skyweaver",
+      "cs": "Skyweaver"
+    },
+    "role": {
+      "en": "Storm mage. Bolts, a hymn of light and a flock of phoenixes.",
+      "cs": "Storm mage. Bolts, a hymn of light and a flock of phoenixes."
+    },
+    "primary": "int",
+    "hp": 900,
+    "armor": 5,
+    "moveSpeed": 560,
+    "attributes": {
+      "str": {
+        "base": 35,
+        "perLevel": 2
+      },
+      "agi": {
+        "base": 38,
+        "perLevel": 2.5
+      },
+      "int": {
+        "base": 39,
+        "perLevel": 3
+      }
+    },
+    "baseAttack": {
+      "kind": "bounce",
+      "range": 1300,
+      "cooldown": 0.3,
+      "damageMin": 2,
+      "damageMax": 8,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
+    },
+    "signatureAbilities": [
+      "tempest-bolt",
+      "seraph-hymn",
+      "soothing-aura"
+    ],
+    "ultimate": "phoenix-flock",
+    "power": 0.3
+  },
+  {
+    "id": "ironroar",
+    "name": {
+      "en": "Ironroar",
+      "cs": "Ironroar"
+    },
+    "role": {
+      "en": "Beast warrior. Spikes, a hurling stomp and an iron ward.",
+      "cs": "Beast warrior. Spikes, a hurling stomp and an iron ward."
+    },
+    "primary": "str",
+    "hp": 900,
+    "armor": 0,
+    "moveSpeed": 448,
+    "attributes": {
+      "str": {
+        "base": 39,
+        "perLevel": 2
+      },
+      "agi": {
+        "base": 35,
+        "perLevel": 3.75
+      },
+      "int": {
+        "base": 26,
+        "perLevel": 2.25
+      }
+    },
+    "baseAttack": {
+      "kind": "melee",
+      "range": 128,
+      "cooldown": 0.26,
+      "damageMin": 2,
+      "damageMax": 24,
+      "strikes": 2,
+      "splash": {
+        "radius": 225,
+        "share": 0.4
+      }
+    },
+    "signatureAbilities": [
+      "thunder-spikes",
+      "earthhurl",
+      "iron-ward"
+    ],
+    "ultimate": "roaring-axe",
+    "damageTaken": 0.5,
+    "power": 0.15
+  },
+  {
+    "id": "stonebeard",
+    "name": {
+      "en": "Stonebeard",
+      "cs": "Stonebeard"
+    },
+    "role": {
+      "en": "Mountain fighter. Hammer waves, thunder and a titan form.",
+      "cs": "Mountain fighter. Hammer waves, thunder and a titan form."
+    },
+    "primary": "str",
+    "hp": 800,
+    "armor": 5,
+    "moveSpeed": 420,
+    "attributes": {
+      "str": {
+        "base": 35,
+        "perLevel": 3.2
+      },
+      "agi": {
+        "base": 20,
+        "perLevel": 2.3
+      },
+      "int": {
+        "base": 15,
+        "perLevel": 2.2
+      }
+    },
+    "baseAttack": {
+      "kind": "melee",
+      "range": 128,
+      "cooldown": 0.38,
+      "damageMin": 2,
+      "damageMax": 12,
+      "strikes": 2,
+      "splash": {
+        "radius": 225,
+        "share": 0.4
+      }
+    },
+    "signatureAbilities": [
+      "hammer-wave",
+      "rolling-thunder",
+      "skull-crack"
+    ],
+    "ultimate": "titan-form",
+    "damageTaken": 0.5,
+    "power": 0.3
   }
 ]

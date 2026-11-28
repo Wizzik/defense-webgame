@@ -31,9 +31,9 @@ export function heroStats(data: GameData, hero: HeroState, out: HeroStats): Hero
   const bonus = primary * c.primaryAttackBonus;
   const power = def.power ?? 1;
   const damage = (1 + hero.bonus.damage + gear.damage + passive.attack) * power;
-  out.maxHp = (def.hp + str * c.strHitPointBonus + gear.hp) * (1 + passive.hp);
+  out.maxHp = (def.hp + str * c.strHitPointBonus + gear.hp) * (1 + passive.hp + hero.bonus.hp);
   out.regenPerSecond = rules.hero.baseRegen + str * rules.hero.regenPerStr + gear.regen + passive.regen;
-  out.armor = def.armor + agi * c.agiDefenseBonus + gear.armor;
+  out.armor = def.armor + agi * c.agiDefenseBonus + gear.armor + hero.bonus.armor;
   out.attackIntervalSeconds =
     def.baseAttack.cooldown
     / Math.min(1 + agi * c.agiAttackSpeedBonus + hero.bonus.attackSpeed + gear.attackSpeed + passive.attackSpeed,

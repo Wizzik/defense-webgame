@@ -12,6 +12,7 @@ import { updateNova } from "./nova";
 import { updateProjectile } from "./projectile";
 import { updateSummon } from "./summon";
 import { updateTickingArea } from "./ticking-area";
+import { updateTransform } from "./transform";
 import { CastMode, castMode } from "./slots";
 import type { AbilitySlot } from "./slots";
 
@@ -42,4 +43,5 @@ export const UPDATERS: Partial<Record<Ability["kind"], AbilityUpdate>> = {
   passive: () => {},
   chain: updateChain,
   instant: updateInstant,
+  transform: updateTransform,
 };

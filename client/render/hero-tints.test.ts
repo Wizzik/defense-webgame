@@ -16,7 +16,7 @@ describe("hero tints", () => {
       bodies.add(heroBodyColor(hero.id));
       tints.add(heroTint(hero.id));
     }
-    expect(heroes.length).toBe(16);
+    expect(heroes.length).toBe(20);
     expect(bodies.size).toBe(heroes.length);
     expect(tints.size).toBe(heroes.length);
   });

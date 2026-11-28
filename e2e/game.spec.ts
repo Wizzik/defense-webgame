@@ -233,7 +233,7 @@ test("run ends with the end screen", async ({ page }, testInfo) => {
 test("menu lets you pick a hero", async ({ page }, testInfo) => {
   await page.goto("/?seed=1&lang=en");
   await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
-  await expect(page.locator("button.hero-button")).toHaveCount(16);
+  await expect(page.locator("button.hero-button")).toHaveCount(20);
   await page.locator("button.hero-button", { hasText: "Nightglaive" }).click();
   await testInfo.attach(`menu-hero-${testInfo.project.name}`, {
     body: await page.screenshot({ type: "png" }),
@@ -279,12 +279,12 @@ test.describe("a missing hero model", () => {
   });
 });
 
-test("the menu lists sixteen heroes and starts each of the new ones", async ({ page }) => {
+test("the menu lists twenty heroes and starts each of the new ones", async ({ page }) => {
   test.setTimeout(5 * 60_000);
-  for (const hero of ["ashsinger", "thunderhoof", "stormseer", "mirrorblade"]) {
+  for (const hero of ["lightbinder", "skyweaver", "ironroar", "stonebeard"]) {
     await page.goto(`/?hero=${hero}&seed=1&speed=4&duration=20&debug=1&lang=en`);
     await expect(page.locator("#start")).toHaveText("Start", { timeout: 90_000 });
-    await expect(page.locator("button.hero-button")).toHaveCount(16);
+    await expect(page.locator("button.hero-button")).toHaveCount(20);
     await expect(page.locator(`button.hero-button[data-hero="${hero}"]`)).toHaveAttribute("aria-pressed", "true");
     await startRun(page);
     await waitForScreen(page, "playing");
