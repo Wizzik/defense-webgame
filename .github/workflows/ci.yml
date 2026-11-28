@@ -12,10 +12,12 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# The jobs run side by side (Petr 2026-11-28: CI took 32 min, 28 of them e2e in one serial job). Each e2e job runs one
+# Playwright project, the two long game projects in three shards each (two left the first shard at 12 min); every job builds the game itself (webServer).
 jobs:
-  check:
+  unit:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,15 +28,40 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run test:py
+
+  e2e:
+    name: e2e ${{ matrix.project }}${{ matrix.shard && format(' {0}', matrix.shard) || '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { project: webgl2-fallback, shard: 1/3, browsers: chromium }
+          - { project: webgl2-fallback, shard: 2/3, browsers: chromium }
+          - { project: webgl2-fallback, shard: 3/3, browsers: chromium }
+          - { project: webgpu-swiftshader, shard: 1/3, browsers: chromium }
+          - { project: webgpu-swiftshader, shard: 2/3, browsers: chromium }
+          - { project: webgpu-swiftshader, shard: 3/3, browsers: chromium }
+          - { project: sim-chromium, browsers: chromium }
+          - { project: sim-firefox, browsers: firefox }
+          - { project: sim-webkit, browsers: webkit }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
       - uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-ffwk
-      - run: npx playwright install --with-deps chromium firefox webkit
-      - run: npm run e2e
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ matrix.browsers }}
+      - run: npx playwright install --with-deps ${{ matrix.browsers }}
+      - run: npx playwright test --project=${{ matrix.project }} ${{ matrix.shard && format('--shard={0}', matrix.shard) || '' }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.project }}${{ matrix.shard && format('-{0}', strategy.job-index) || '' }}
           path: playwright-report/
           if-no-files-found: ignore

@@ -19,7 +19,8 @@ export default defineConfig({
   testDir: "e2e",
   timeout: 180_000,
   workers: 1,
-  fullyParallel: false,
+  // tests stay one at a time (workers 1: software rendering takes every core); fullyParallel lets CI shard by test
+  fullyParallel: true,
   reporter: process.env.CI ? [["line"], ["html", { open: "never" }]] : [["line"]],
   webServer: {
     command: "npm run build && npx vite preview --port 4173 --strictPort",
