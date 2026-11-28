@@ -27,8 +27,9 @@ each ability's `review` notes like the existing heroes.
    attack clip), `npm run assets:fetch`, `npm run assets:build`, the license row.
 7. Lists: `data/generated.test.ts` (hero ids), `client/render/hero-tints.test.ts` (count), the `hero` parameter in
    `AGENTS.md` and `README.md`, the e2e loop of heroes that play a run (`e2e/game.spec.ts`).
-8. Balance: `power` per hero until the autopilot with no gear wins 1-4 of 20 (skill `balance-check`, DECISIONS:
-   Balance target); the old heroes must not move (the digest changes only if a sim rule changes).
+8. Balance: first the damage meter of `sim:run` (each spell about 10-20 %, the ultimate about 25 %, the base attack a
+   little more; Petr 2026-11-28), then `power` per hero until the autopilot with no gear wins 1-4 of 20 (skill
+   `balance-check`, DECISIONS: Balance target); the old heroes must not move.
 
 ## Mapping of the map's spell classes to our kinds
 
@@ -173,5 +174,7 @@ Spells (map numbers and script lines in each block's review notes):
   Cyclone (A003 Bladestorm, 5 map levels, so design rows of its levels 1, 3, 5 without `source` -> `ticking_area`
   around the hero).
 - The plan's "Double Illusion `aura`" was wrong: the export shows a script summon of copies, so it is a `summon`.
-- New mechanic: `nova.stunSeconds` (optional; War Stomp, All Stop). No older ability uses it, so the older matrix
-  cases stay.
+- New mechanics: `nova.stunSeconds` (optional; War Stomp, All Stop) and `baseAttack.bounce` (opt-in; the map's
+  `mbounce` weapon). No older hero or ability uses them, so the older matrix cases stay.
+- Balance by the damage meter (Petr, 2026-11-28, for this and every later batch): spells about 10-20 %, the ultimate
+  about 25 %, the base attack a little more (ranged bounce, melee cleave as in the map), then power to 1-4 wins of 20.

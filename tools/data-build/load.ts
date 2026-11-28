@@ -126,6 +126,7 @@ export interface HeroEntry {
     cooldownScale?: number;
     strikes?: number;
     splash?: { radius: number; share: number };
+    bounce?: { count: number; range: number; falloff: number };
   };
 }
 

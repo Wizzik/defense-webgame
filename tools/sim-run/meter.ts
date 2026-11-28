@@ -17,7 +17,7 @@ export function meterOf(player: PlayerState): Record<string, number> {
  * `  meter rock-rupture 62 % | attack 20 % | ...`: each source's share of all the damage of the runs, the biggest
  * first, at most `top` of them.
  */
-export function meterLine(meters: readonly Record<string, number>[], top = 8): string {
+export function meterLine(meters: readonly Record<string, number>[], top = 12): string {
   const sum = new Map<string, number>();
   for (const meter of meters) for (const [name, damage] of Object.entries(meter)) sum.set(name, (sum.get(name) ?? 0) + damage);
   let total = 0;

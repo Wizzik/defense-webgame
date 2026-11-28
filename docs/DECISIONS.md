@@ -15,34 +15,45 @@ file is there; search it (`grep -n`) before you change a rule of those areas, do
   Surge, Hoofstomp, Long March; ultimate Aftershock), **Stormseer** (O01A, INT ranged: Spirit Pack, Squall, Dread
   Call; ultimate Last Rites), **Mirrorblade** (O001, AGI melee: Twin Shades, Flash Cut, Mirror Dance; ultimate Steel
   Cyclone). Names and texts are ours; the map's numbers and script lines are in the review notes.
-- **New spell mechanic:** `nova.stunSeconds` (optional): the nova stuns what it hits (Hoofstomp, Dread Call). The
-  map's stuns (War Stomp 3-5 s every 6.5 s, All Stop 5-25 s on the whole map) would hold the crowd for good at our
-  cooldowns, so both stuns are design values (1-2 s, 1.5-3.5 s within 350).
-- **Left out of the map's scripts:** the execute of Life's Ended (every enemy on the map under 2000 / 4000 hp dies),
-  the final slam of Bladestorm (Steel Cyclone's bursts deal the map's damage of a second each instead), the pull of
-  Kamezoko (Ember Comet hits each enemy once), the evasion and bonus damage of Imager's Critical Strike.
-- **Imager's map ultimate is Critical Strike** (A006, level 10); the game makes Bladestorm (A003) the ultimate, as the
-  plan said, and Critical Strike a spell (Flash Cut). Bladestorm has 5 map levels, so Steel Cyclone has no `source`.
-- **Mirrorblade's blades sweep** (`attack.splash` 160 / 0.5, like Redcleaver's axes): with a single-target kit he fell
-  in the first 2 minutes at any power (0 of 20 at power 1, 1.8 and 2.6). Stormseer opens with Spirit Pack and
-  Mirrorblade with Twin Shades (slot 0 must deal damage early).
-- **Spirit Pack's wolves** are wards in Serpent Totem's units (map 100 -> 330 before the x0.3 of data-build), 2-3 at a
-  time for 20 s.
+- **Balance by the damage meter (Petr, 2026-11-28):** "spells must be balanced by how they come out": each normal
+  spell about **10-20 %** of the hero's damage, the **ultimate about 25 %**, the **base attack a little more**, and the
+  **wins** stay the target (1-4 of 20). The ranged attack **bounces as in the map** (the map's `mbounce` weapon), the
+  melee attack **splashes as in the map** (the map's Cleave A1C0: 40 % within 450). The damage rows of the batch are
+  design values from that pass (the map's numbers in the comments); auras and the crit have no row of their own.
+  This holds for every later batch.
+- **New mechanics:** `baseAttack.bounce` (`{ count, range, falloff }`, opt-in in `heroes.yaml`: the shot leaps to the
+  nearest unstruck enemy within `range`, each leap losing `falloff`; a base attack hit on the meter). The `bounce`
+  kind of the older heroes still does not leap (their behaviour stays; Petr decides whether they get it). And
+  `nova.stunSeconds` (optional): Hoofstomp, Dread Call; the map's stuns (War Stomp 3-5 s every 6.5 s, All Stop 5-25 s
+  on the whole map) would hold the crowd for good, so the stuns are 1-2 s and 1.5-3.5 s.
+- **Attacks:** Ashsinger bounces 4 times within 400, -25 % a leap (count, range and falloff are design values: the
+  export has no bounce fields), attack interval x0.35; Thunderhoof and Mirrorblade cleave 40 % within 225 (the map's
+  450 x the AoE scale), two blows at x0.3 / x0.35 of the map's interval; Stormseer (a plain `missile` in the map)
+  shoots at x0.28. Without the faster attack it stayed at 3-9 % of the damage.
+- **Ranged heroes' spells around themselves reach past 450** (the autopilot keeps the nearest enemy that far): Pyre
+  Mantle 600, Squall 700, Dread Call 700, Phoenix Wrath 800 (the script's radius) after the AoE scale. At the map's
+  175-300 they dealt 1-3 %.
+- **Left out of the map's scripts:** the execute of Life's Ended, the final slam of Bladestorm, the pull of Kamezoko,
+  the evasion and bonus damage of Imager's Critical Strike. Imager's map ultimate is Critical Strike (A006); the game
+  makes Bladestorm (A003, 5 map levels, so no `source`) the ultimate and Critical Strike a spell.
+- **Slot 0:** Stormseer opens with Spirit Pack and Mirrorblade with Twin Shades (the first spell must deal damage).
 - **Ability order and digest:** the blocks come last in `design/abilities.yaml`; the 24 older matrix cases are
-  identical, the matrix gains four `h-<id>` cases. Digest `fa5a1ee3` -> `51871bd1`.
-- **Balance** (`sim:run --seeds 1-20 --gear none`, world 1 normal), wins of 20 by `power`:
+  identical, the matrix gains four `h-<id>` cases. Digest `fa5a1ee3` -> `b04f8455`.
+- **Balance** (`sim:run --seeds 1-20 --gear none`, world 1 normal), wins of 20 and the meter of the kept numbers
+  (the hero's own sources; the shared spells and items take the rest):
 
-  | hero | power 1 | tries | kept |
-  |---|---|---|---|
-  | Ashsinger | 13 | 0.5: 1, 0.7: 7, 0.6: 1 | **0.65: 4** |
-  | Thunderhoof | 20 | | **0.4: 4** |
-  | Stormseer | 11 (Squall first) | Spirit Pack first: 0.6: 1, 0.8: 6 | **0.7: 4** |
-  | Mirrorblade | 0 | no sweep: 1.8: 2, 2.6: 0; sweep: 0.6: 0, 1.2: 1 | **1.0: 2** |
+  | hero | power | wins | ultimate | spells | attack |
+  |---|---|---|---|---|---|
+  | Ashsinger | **0.26** | 3 | Phoenix Wrath 25 % | Cinder Wave 13 %, Pyre Mantle 12 %, Ember Comet 10 % | 11 % |
+  | Thunderhoof | **0.18** | 1 (0.19: 5) | Aftershock 20 % | Ground Surge 14 %, Hoofstomp 10 % | 15 % |
+  | Stormseer | **0.3** | 4 | Last Rites 17 % | Squall 17 %, Dread Call 10 %, Spirit Pack 10 % | 7 % |
+  | Mirrorblade | **0.8** | 4 | Steel Cyclone 15 % | Twin Shades 8 %, Mirror Dance 8 % (Flash Cut is in the attack) | 13 % |
 
-  The damage meter of the kept numbers: Ashsinger Ember Comet 29 %, Cinder Wave 24 %, Phoenix Wrath 11 %; Thunderhoof
-  Aftershock 39 %, Ground Surge 25 %; Stormseer Last Rites 69 %, Spirit Pack 13 % (Squall and Dread Call about 1 %);
-  Mirrorblade attack 28-30 %, the copies 10 %, Steel Cyclone 2-4 % (the shared spells carry the rest). Most losses come
-  in the first 4 minutes, as with the older heroes.
+  The first pass (map numbers, power only) gave Stormseer's Last Rites 69 %, Ashsinger's Ember Comet and Cinder Wave
+  together 53 %, Thunderhoof's Aftershock 39 %, and 1-4 % to the base attacks and the spells around a ranged hero.
+  The base attack stays at 7-15 %, a little under Petr's wish: a survivors crowd gives the spells' areas dozens of
+  targets; more attack would need still faster attacks or weaker spells and a higher power (which also lifts the
+  shared spells). The autopilot wins swing by 4-6 of 20 between close powers, so each kept power was measured once.
 
 ## New heroes, batch 1 (2026-11-28; Petr: "the remaining heroes of the map", the picks and numbers are Claude's)
 

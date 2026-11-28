@@ -555,9 +555,14 @@
     "baseAttack": {
       "kind": "bounce",
       "range": 1200,
-      "cooldown": 0.75,
+      "cooldown": 0.26,
       "damageMin": 2,
-      "damageMax": 8
+      "damageMax": 8,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
     },
     "signatureAbilities": [
       "cinder-wave",
@@ -565,7 +570,7 @@
       "ember-comet"
     ],
     "ultimate": "phoenix-wrath",
-    "power": 0.65
+    "power": 0.26
   },
   {
     "id": "thunderhoof",
@@ -598,9 +603,14 @@
     "baseAttack": {
       "kind": "melee",
       "range": 128,
-      "cooldown": 0.75,
+      "cooldown": 0.22,
       "damageMin": 2,
-      "damageMax": 12
+      "damageMax": 12,
+      "strikes": 2,
+      "splash": {
+        "radius": 225,
+        "share": 0.4
+      }
     },
     "signatureAbilities": [
       "ground-surge",
@@ -609,7 +619,7 @@
     ],
     "ultimate": "aftershock",
     "damageTaken": 0.5,
-    "power": 0.4
+    "power": 0.18
   },
   {
     "id": "stormseer",
@@ -642,7 +652,7 @@
     "baseAttack": {
       "kind": "ranged",
       "range": 1200,
-      "cooldown": 0.75,
+      "cooldown": 0.21,
       "damageMin": 2,
       "damageMax": 8
     },
@@ -652,7 +662,7 @@
       "dread-call"
     ],
     "ultimate": "last-rites",
-    "power": 0.7
+    "power": 0.3
   },
   {
     "id": "mirrorblade",
@@ -685,13 +695,13 @@
     "baseAttack": {
       "kind": "melee",
       "range": 100,
-      "cooldown": 0.38,
+      "cooldown": 0.26,
       "damageMin": 2,
       "damageMax": 24,
       "strikes": 2,
       "splash": {
-        "radius": 160,
-        "share": 0.5
+        "radius": 225,
+        "share": 0.4
       }
     },
     "signatureAbilities": [
@@ -701,6 +711,6 @@
     ],
     "ultimate": "steel-cyclone",
     "damageTaken": 0.5,
-    "power": 1
+    "power": 0.8
   }
 ]

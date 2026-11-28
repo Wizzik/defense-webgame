@@ -42,6 +42,7 @@ export function mapHero(exp: ExportHero, entry: HeroEntry): Hero {
       damageMax: exp.damage_max,
       ...(attack.strikes === undefined ? {} : { strikes: attack.strikes }),
       ...(attack.splash === undefined ? {} : { splash: attack.splash }),
+      ...(attack.bounce === undefined ? {} : { bounce: attack.bounce }),
     },
     signatureAbilities: entry.signatureAbilities,
     ultimate: entry.ultimate,

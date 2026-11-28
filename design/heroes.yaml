@@ -8,7 +8,8 @@
 #   Petr's batch 2, task 7: about 10 % autopilot wins with no gear for every hero).
 # attack: optional design changes of the base attack (2026-11-26, Petr): kind and range replace the map's (batch 2),
 #   rangeScale and cooldownScale multiply the
-#   map's range and cooldown (before design/scaling.yaml), strikes = blows per attack, splash = { radius, share }.
+#   map's range and cooldown (before design/scaling.yaml), strikes = blows per attack, splash = { radius, share },
+#   bounce = { count, range, falloff }: the shot leaps to the nearest unstruck enemy, each leap losing falloff.
 
 - id: stonehorn
   source: O00C
@@ -147,8 +148,8 @@
   role: { en: "Fire sorceress. Waves of flame, a burning mantle and a comet.", cs: "Fire sorceress. Waves of flame, a burning mantle and a comet." }
   signatureAbilities: [cinder-wave, pyre-mantle, ember-comet]
   ultimate: phoenix-wrath
-  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 0.65   # new heroes batch 2 balance pass: about 10 % autopilot wins with no gear
+  attack: { rangeScale: 2, cooldownScale: 0.35, bounce: { count: 4, range: 400, falloff: 0.25 } }   # Petr: ranged heroes reach twice as far; the map's mbounce weapon: the shot leaps (Petr 2026-11-28: bounce as in the map; count, range and falloff are design values)
+  power: 0.26   # new heroes batch 2 balance pass: about 10 % autopilot wins with no gear
 
 
 - id: thunderhoof
@@ -158,8 +159,9 @@
   role: { en: "Earth-shaking brawler. Shock waves, stomps and aftershocks.", cs: "Earth-shaking brawler. Shock waves, stomps and aftershocks." }
   signatureAbilities: [ground-surge, hoofstomp, long-march]
   ultimate: aftershock
+  attack: { cooldownScale: 0.3, strikes: 2, splash: { radius: 225, share: 0.4 } }   # the map's Cleave 40% (A1C0) within 450, x0.5 like every area (Petr 2026-11-28: melee splash as in the map)
   damageTaken: 0.5   # melee: stands in the crowd
-  power: 0.4   # new heroes batch 2 balance pass: about 10 % autopilot wins with no gear
+  power: 0.18   # new heroes batch 2 balance pass: about 10 % autopilot wins with no gear
 
 
 - id: stormseer
@@ -169,8 +171,8 @@
   role: { en: "Storm shaman. Squalls, spirit wolves and a call that freezes the crowd.", cs: "Storm shaman. Squalls, spirit wolves and a call that freezes the crowd." }
   signatureAbilities: [spirit-pack, squall, dread-call]   # the wolves first: the squall alone could not hold the first waves
   ultimate: last-rites
-  attack: { rangeScale: 2 }   # Petr: ranged heroes reach twice as far
-  power: 0.7   # new heroes batch 2 balance pass: about 10 % autopilot wins with no gear
+  attack: { rangeScale: 2, cooldownScale: 0.28 }   # Petr: ranged heroes reach twice as far
+  power: 0.3   # new heroes batch 2 balance pass: about 10 % autopilot wins with no gear
 
 
 - id: mirrorblade
@@ -180,6 +182,6 @@
   role: { en: "Blade dancer. Crits, illusions and a steel cyclone.", cs: "Blade dancer. Crits, illusions and a steel cyclone." }
   signatureAbilities: [twin-shades, flash-cut, mirror-dance]   # a lasting copy first: the crits alone could not hold the first waves
   ultimate: steel-cyclone
-  attack: { cooldownScale: 0.5, strikes: 2, splash: { radius: 160, share: 0.5 } }   # a blade dancer: two quick sweeping blades (without the sweep he fell in the first 2 minutes at any power)
+  attack: { cooldownScale: 0.35, strikes: 2, splash: { radius: 225, share: 0.4 } }   # a blade dancer: two quick blades; the map's Cleave 40% (A1C0) within 450, x0.5 like every area (without it he fell in the first 2 minutes at any power)
   damageTaken: 0.5   # melee: stands in the crowd
-  power: 1   # new heroes batch 2 balance pass: about 10 % autopilot wins with no gear
+  power: 0.8   # new heroes batch 2 balance pass: about 10 % autopilot wins with no gear

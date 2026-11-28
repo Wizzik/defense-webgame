@@ -28,29 +28,32 @@ Updated 2026-11-28 (new heroes, batch 2). Read this first when you resume work.
    `docs/superpowers/plans/2026-11-28-named-items-legendary.md`, branch `claude/named-items-legendary` (from
    `claude/peaceful-galileo-qtu26s`), DONE (below), waits for Petr's playtest.
 
-## New heroes, batch 2 (branch `claude/new-heroes-2`, on top of batch 1 / PR #48, DONE, waits for Petr's playtest, 2026-11-28)
+## New heroes, batch 2 (branch `claude/new-heroes-2`, PR #49 on top of batch 1 / PR #48, DONE, waits for Petr's playtest, 2026-11-28)
 
-- Four more heroes of the map with our names: **Ashsinger** (INT ranged: Cinder Wave, Pyre Mantle, Ember Comet;
-  ultimate Phoenix Wrath), **Thunderhoof** (STR melee: Ground Surge, Hoofstomp stun, Long March; ultimate Aftershock,
-  a stunning ring after every spell), **Stormseer** (INT ranged: Spirit Pack wolves, Squall, Dread Call stun;
-  ultimate Last Rites), **Mirrorblade** (AGI melee: Twin Shades and Mirror Dance copies, Flash Cut crits, sweeping
-  blades; ultimate Steel Cyclone). KayKit models of their own, our icons.
-- New spell mechanic: a stun on `nova`. Old heroes unchanged (the 24 older matrix cases are identical); digest
-  `fa5a1ee3` -> `51871bd1`. Numbers and the balance table: `docs/DECISIONS.md`, section New heroes, batch 2 (2-4
-  autopilot wins of 20 with no gear each). `data/generated/` built by `npm run data:build` from the v20.83 export.
+- Four more heroes of the map with our names: **Ashsinger** (INT ranged, bouncing shots: Cinder Wave, a ring of fire,
+  Ember Comet; ultimate Phoenix Wrath), **Thunderhoof** (STR melee, cleaving axe: Ground Surge, Hoofstomp stun, Long
+  March; ultimate Aftershock, a stunning ring after every spell), **Stormseer** (INT ranged: Spirit Pack wolves,
+  Squall, Dread Call stun; ultimate Last Rites), **Mirrorblade** (AGI melee, two cleaving blades: Twin Shades and
+  Mirror Dance copies, Flash Cut crits; ultimate Steel Cyclone). KayKit models of their own, our icons.
+- Balanced by the damage meter as Petr asked (2026-11-28): spells 8-17 %, ultimates 15-25 %, the base attack 7-15 %,
+  1-4 wins of 20 with no gear; table in `docs/DECISIONS.md`, section New heroes, batch 2. New mechanics: a
+  bouncing base attack (`attack.bounce`, opt-in) and a stun on `nova`. Old heroes unchanged (the 24 older matrix cases
+  are identical); digest `fa5a1ee3` -> `b04f8455`. `data/generated/` built by `npm run data:build` from v20.83.
+- **Open for Petr:** the older ranged heroes with the `bounce` kind (Nightglaive, Gravecaller, Sparkshot, Tidecaller,
+  Frostweaver) still do not bounce; turning it on changes their balance (a pass per hero). Batch 1 was balanced by
+  wins only; the meter rule would retune it too. Say whether to do both.
 - **What Petr checks** (after the merge of #48 and this PR):
   - the menu shows 16 heroes: https://wizzik.github.io/defense-webgame/
-  - Ashsinger (fire waves, a slow wide comet, a burning ring around her):
+  - Ashsinger (shots leap between enemies, a fire ring around her, a slow wide comet):
     https://wizzik.github.io/defense-webgame/?debug=1&hero=ashsinger&phase=8
-  - Thunderhoof (stomps stun, every spell sends a shock ring once the ultimate is learned):
+  - Thunderhoof (fast cleaving chops, stomps stun, every spell sends a shock ring once the ultimate is learned):
     https://wizzik.github.io/defense-webgame/?debug=1&hero=thunderhoof&phase=8
-  - Stormseer (wolves by the crowd, lightning around him, Last Rites clears a wide circle):
+  - Stormseer (wolves by the crowd, lightning around him, the call stuns the crowd, Last Rites):
     https://wizzik.github.io/defense-webgame/?debug=1&hero=stormseer&phase=8
-  - Mirrorblade (two quick sweeping blades, copies at his side, the cyclone):
+  - Mirrorblade (two quick cleaving blades, copies at his side, the cyclone):
     https://wizzik.github.io/defense-webgame/?debug=1&hero=mirrorblade&phase=8 and from the start
     https://wizzik.github.io/defense-webgame/?debug=1&hero=mirrorblade
-  - known weak spots: Stormseer's Last Rites deals about 70 % of his damage (Squall and Dread Call about 1 %);
-    Mirrorblade's Steel Cyclone is small. Say whether to strengthen the small spells or keep the map's numbers.
+  - the damage meter in the run shows the shares above; say which spell feels too weak or strong.
 
 ## New heroes, batch 1 (branch `claude/new-heroes-1`, DONE, waits for Petr's playtest, 2026-11-28)
 
