@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-28 (new heroes, batch 1). Read this first when you resume work.
+Updated 2026-11-28 (new heroes, batch 2). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -27,6 +27,36 @@ Updated 2026-11-28 (new heroes, batch 1). Read this first when you resume work.
 9. **Named items only legendary / mythic, salvage for named items** (Petr, 2026-11-28): plan
    `docs/superpowers/plans/2026-11-28-named-items-legendary.md`, branch `claude/named-items-legendary` (from
    `claude/peaceful-galileo-qtu26s`), DONE (below), waits for Petr's playtest.
+
+## New heroes, batch 2 (branch `claude/new-heroes-2`, PR #49 on top of batch 1 / PR #48, DONE, waits for Petr's playtest, 2026-11-28)
+
+- Four more heroes of the map with our names: **Ashsinger** (INT ranged, bouncing shots: Cinder Wave, a ring of fire,
+  Ember Comet; ultimate Phoenix Wrath), **Thunderhoof** (STR melee, cleaving axe: Ground Surge, Hoofstomp stun, Long
+  March; ultimate Aftershock, a stunning ring after every spell), **Stormseer** (INT ranged: Spirit Pack wolves,
+  Squall, Dread Call stun; ultimate Last Rites), **Mirrorblade** (AGI melee, two cleaving blades: Twin Shades and
+  Mirror Dance copies, Flash Cut crits; ultimate Steel Cyclone). KayKit models of their own, our icons.
+- Balanced by the damage meter as Petr asked (2026-11-28): spells 8-17 %, ultimates 15-25 %, the base attack 7-15 %,
+  1-4 wins of 20 with no gear; table in `docs/DECISIONS.md`, section New heroes, batch 2. New mechanics: a
+  bouncing base attack (`attack.bounce`, opt-in) and a stun on `nova`. Old heroes unchanged (the 24 older matrix cases
+  are identical); digest `fa5a1ee3` -> `b04f8455`. `data/generated/` built by `npm run data:build` from v20.83.
+- Then (Petr: yes to both): Nightglaive, Gravecaller, Sparkshot, Tidecaller and Frostweaver shoot bouncing shots, and
+  batch 1 is retuned by the meter rule (Crossing Strike 31 %, Dawnhammer's faster attack, a stronger Ice Fall and
+  Judgement); new powers in `docs/DECISIONS.md`, section Bouncing shots for the older ranged heroes. Digest ->
+  `41172dce`. This PR now carries batch 1's final numbers: merge #49 (it holds #48's commits) or #48 first.
+  - check the bounce: https://wizzik.github.io/defense-webgame/?debug=1&hero=sparkshot&phase=8 and
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=nightglaive&phase=8 (each shot leaps to 4 more enemies).
+- **What Petr checks** (after the merge of #48 and this PR):
+  - the menu shows 16 heroes: https://wizzik.github.io/defense-webgame/
+  - Ashsinger (shots leap between enemies, a fire ring around her, a slow wide comet):
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=ashsinger&phase=8
+  - Thunderhoof (fast cleaving chops, stomps stun, every spell sends a shock ring once the ultimate is learned):
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=thunderhoof&phase=8
+  - Stormseer (wolves by the crowd, lightning around him, the call stuns the crowd, Last Rites):
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=stormseer&phase=8
+  - Mirrorblade (two quick cleaving blades, copies at his side, the cyclone):
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=mirrorblade&phase=8 and from the start
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=mirrorblade
+  - the damage meter in the run shows the shares above; say which spell feels too weak or strong.
 
 ## New heroes, batch 1 (branch `claude/new-heroes-1`, DONE, waits for Petr's playtest, 2026-11-28)
 
@@ -261,43 +291,17 @@ section Petr's batch 2. `npm run check` passes on every commit of the branch.
   - casters from phase 3 (https://wizzik.github.io/defense-webgame/?debug=1&phase=3&lang=cs, blue bolts with a
     flash; `__game.debug.spawnEach()` shows all seven human types).
 
-## Solo playtest batch (branch `claude/gifted-gauss-k6wag4`, 2026-11-26)
-
-- Done in one Claude Code session; rulings and numbers: `docs/DECISIONS.md`, section Petr's solo playtest batch.
-- The Claude Code setup came first: `CLAUDE.md` (imports AGENTS.md, adds the workflow and the data rule for cloud
-  sessions), `.claude/settings.json` (allowed commands, a clean-room hook), skills `finish-task`, `data-change`,
-  `balance-check`.
-- Generated JSON was edited by the data-build rules in the container (no map there): Petr reruns `npm run data:build`
-  locally once; the files must not change.
-- Autopilot, world 1 normal, mid gear, seeds 1-8 (wins of 8, castle hp of won runs): before -> after
-  - Stonehorn 3 (55 %) -> 8 (99 %); Nightglaive 2 (37 %) -> 8 (87 %); Gravecaller 8 (90 %) -> 8 (100 %);
-    Serpent Shaman 3 (51 %) -> 7 (98 %); Mistwarden 3 (17 %) -> 7 (97 %); Sparkshot 1 (28 %) -> 8 (96 %);
-    Redcleaver 0 -> 8 (99 %); Tidecaller 0 -> 8 (92 %). In sum 20 -> 62 of 64; the castle stopped losing runs.
-  - **Open for Petr:** world 1 normal may now be too easy; if so, raise `rules.enemies.levelScaling` (0.009) or the
-    world steps. Worlds 2-5 and Insane / Hell were not measured again.
-- **What Petr checks** (https://wizzik.github.io/defense-webgame/ after the merge):
-  - a solo run on world 1: do enemies from the far side now come to you while you stay near the castle (1000), and
-    turn to the castle when you walk farther; can you win now;
-  - ranged heroes (Sparkshot, Tidecaller): do they shoot at enemies off the screen (reach 1300-1400);
-  - Redcleaver: fast double chops with splash; ultimates of Sparkshot, Redcleaver and Tidecaller: bursts as dense as
-    the Gravecaller's;
-  - hover the spells in the bottom bar: level, text, values now and next;
-  - level 20: dash shows "3 / 3", three dashes in a row; level 40: F jumps to the mouse (`?debug=1&phase=10` and
-    `__game.debug.grantXp(50000)` get there fast);
-  - worlds 4 and 5: snow and embers stay on the ground when you walk (`?debug=1&world=4`).
-
 ## CI in parallel jobs (branch `claude/ci-parallel`, 2026-11-28)
 
 - Petr: "can the CI checks be faster?". One serial job took 32 min (e2e 28.5). Now `unit` (typecheck, vitest,
   python) and seven e2e jobs run side by side: webgl2-fallback and webgpu-swiftshader in three shards each,
   sim-chromium, sim-firefox, sim-webkit; each installs only its browser. `playwright.config.ts` `fullyParallel: true`
   so a shard splits by test (workers stay 1, tests still run one at a time). Local `npm run e2e` is unchanged.
-- First run with two shards: 12 min (the first shards 11-12 min, the second 5-7); three shards aim at about 8.
-- **What Petr checks:** the PR's checks list ten jobs and the run takes about 8-9 min instead of 32.
+- Two shards: 12 min; three shards: 11.3 min (the first webgl2 third holds the heaviest tests). Merged as PR #50.
 
 ## Older entries
 
-Finished work before 2026-11-26 (and the random items stages 1-3): `docs/archive/status-2026-11-04-to-27.md`.
+Finished work before 2026-11-26 (and the random items stages 1-3, the solo playtest batch): `docs/archive/status-2026-11-04-to-27.md`.
 Read it only when a task needs the history of a feature; `docs/DECISIONS.md` holds the rules that still apply.
 
 ## Open questions for Petr

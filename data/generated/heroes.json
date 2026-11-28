@@ -76,7 +76,12 @@
       "range": 700,
       "cooldown": 0.75,
       "damageMin": 2,
-      "damageMax": 24
+      "damageMax": 24,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
     },
     "signatureAbilities": [
       "falling-stars",
@@ -84,7 +89,7 @@
       "swift-pace"
     ],
     "ultimate": "shadow-sisters",
-    "power": 0.62
+    "power": 0.48
   },
   {
     "id": "gravecaller",
@@ -119,7 +124,12 @@
       "range": 1200,
       "cooldown": 0.75,
       "damageMin": 2,
-      "damageMax": 8
+      "damageMax": 8,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
     },
     "signatureAbilities": [
       "grave-grasp",
@@ -127,7 +137,7 @@
       "soul-bolt"
     ],
     "ultimate": "bone-stampede",
-    "power": 0.29
+    "power": 0.26
   },
   {
     "id": "serpent-shaman",
@@ -247,7 +257,12 @@
       "range": 1400,
       "cooldown": 0.75,
       "damageMin": 2,
-      "damageMax": 24
+      "damageMax": 24,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
     },
     "signatureAbilities": [
       "rocket-fan",
@@ -255,7 +270,7 @@
       "quickstep"
     ],
     "ultimate": "beam-swarm",
-    "power": 0.74
+    "power": 0.4
   },
   {
     "id": "redcleaver",
@@ -339,7 +354,12 @@
       "range": 1300,
       "cooldown": 0.75,
       "damageMin": 2,
-      "damageMax": 8
+      "damageMax": 8,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
     },
     "signatureAbilities": [
       "crushing-wave",
@@ -347,7 +367,7 @@
       "riptide"
     ],
     "ultimate": "drowned-lake",
-    "power": 0.51
+    "power": 0.46
   },
   {
     "id": "razorwind",
@@ -392,7 +412,7 @@
     ],
     "ultimate": "crossing-strike",
     "damageTaken": 0.5,
-    "power": 0.36
+    "power": 0.45
   },
   {
     "id": "dawnhammer",
@@ -425,9 +445,10 @@
     "baseAttack": {
       "kind": "melee",
       "range": 150,
-      "cooldown": 0.75,
+      "cooldown": 0.3,
       "damageMin": 2,
-      "damageMax": 12
+      "damageMax": 12,
+      "strikes": 2
     },
     "signatureAbilities": [
       "holy-burst",
@@ -436,7 +457,7 @@
     ],
     "ultimate": "dominion",
     "damageTaken": 0.5,
-    "power": 0.35
+    "power": 0.3
   },
   {
     "id": "frostweaver",
@@ -469,9 +490,14 @@
     "baseAttack": {
       "kind": "bounce",
       "range": 1400,
-      "cooldown": 0.75,
+      "cooldown": 0.38,
       "damageMin": 2,
-      "damageMax": 8
+      "damageMax": 8,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
     },
     "signatureAbilities": [
       "frost-slice",
@@ -479,7 +505,7 @@
       "chill-field"
     ],
     "ultimate": "ice-fall",
-    "power": 0.44
+    "power": 0.32
   },
   {
     "id": "deadeye",
@@ -523,5 +549,194 @@
     ],
     "ultimate": "doubles",
     "power": 1.25
+  },
+  {
+    "id": "ashsinger",
+    "name": {
+      "en": "Ashsinger",
+      "cs": "Ashsinger"
+    },
+    "role": {
+      "en": "Fire sorceress. Waves of flame, a burning mantle and a comet.",
+      "cs": "Fire sorceress. Waves of flame, a burning mantle and a comet."
+    },
+    "primary": "int",
+    "hp": 600,
+    "armor": 5,
+    "moveSpeed": 448,
+    "attributes": {
+      "str": {
+        "base": 26,
+        "perLevel": 2
+      },
+      "agi": {
+        "base": 24,
+        "perLevel": 2.8
+      },
+      "int": {
+        "base": 37,
+        "perLevel": 3.2
+      }
+    },
+    "baseAttack": {
+      "kind": "bounce",
+      "range": 1200,
+      "cooldown": 0.26,
+      "damageMin": 2,
+      "damageMax": 8,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
+    },
+    "signatureAbilities": [
+      "cinder-wave",
+      "pyre-mantle",
+      "ember-comet"
+    ],
+    "ultimate": "phoenix-wrath",
+    "power": 0.26
+  },
+  {
+    "id": "thunderhoof",
+    "name": {
+      "en": "Thunderhoof",
+      "cs": "Thunderhoof"
+    },
+    "role": {
+      "en": "Earth-shaking brawler. Shock waves, stomps and aftershocks.",
+      "cs": "Earth-shaking brawler. Shock waves, stomps and aftershocks."
+    },
+    "primary": "str",
+    "hp": 800,
+    "armor": 5,
+    "moveSpeed": 434,
+    "attributes": {
+      "str": {
+        "base": 35,
+        "perLevel": 4.2
+      },
+      "agi": {
+        "base": 23,
+        "perLevel": 2.5
+      },
+      "int": {
+        "base": 24,
+        "perLevel": 2.8
+      }
+    },
+    "baseAttack": {
+      "kind": "melee",
+      "range": 128,
+      "cooldown": 0.22,
+      "damageMin": 2,
+      "damageMax": 12,
+      "strikes": 2,
+      "splash": {
+        "radius": 225,
+        "share": 0.4
+      }
+    },
+    "signatureAbilities": [
+      "ground-surge",
+      "hoofstomp",
+      "long-march"
+    ],
+    "ultimate": "aftershock",
+    "damageTaken": 0.5,
+    "power": 0.18
+  },
+  {
+    "id": "stormseer",
+    "name": {
+      "en": "Stormseer",
+      "cs": "Stormseer"
+    },
+    "role": {
+      "en": "Storm shaman. Squalls, spirit wolves and a call that freezes the crowd.",
+      "cs": "Storm shaman. Squalls, spirit wolves and a call that freezes the crowd."
+    },
+    "primary": "int",
+    "hp": 1000,
+    "armor": 0,
+    "moveSpeed": 448,
+    "attributes": {
+      "str": {
+        "base": 31,
+        "perLevel": 2.8
+      },
+      "agi": {
+        "base": 28,
+        "perLevel": 2.5
+      },
+      "int": {
+        "base": 39,
+        "perLevel": 4
+      }
+    },
+    "baseAttack": {
+      "kind": "ranged",
+      "range": 1200,
+      "cooldown": 0.21,
+      "damageMin": 2,
+      "damageMax": 8
+    },
+    "signatureAbilities": [
+      "spirit-pack",
+      "squall",
+      "dread-call"
+    ],
+    "ultimate": "last-rites",
+    "power": 0.3
+  },
+  {
+    "id": "mirrorblade",
+    "name": {
+      "en": "Mirrorblade",
+      "cs": "Mirrorblade"
+    },
+    "role": {
+      "en": "Blade dancer. Crits, illusions and a steel cyclone.",
+      "cs": "Blade dancer. Crits, illusions and a steel cyclone."
+    },
+    "primary": "agi",
+    "hp": 800,
+    "armor": 5,
+    "moveSpeed": 448,
+    "attributes": {
+      "str": {
+        "base": 28,
+        "perLevel": 2
+      },
+      "agi": {
+        "base": 33,
+        "perLevel": 3
+      },
+      "int": {
+        "base": 26,
+        "perLevel": 2
+      }
+    },
+    "baseAttack": {
+      "kind": "melee",
+      "range": 100,
+      "cooldown": 0.26,
+      "damageMin": 2,
+      "damageMax": 24,
+      "strikes": 2,
+      "splash": {
+        "radius": 225,
+        "share": 0.4
+      }
+    },
+    "signatureAbilities": [
+      "twin-shades",
+      "flash-cut",
+      "mirror-dance"
+    ],
+    "ultimate": "steel-cyclone",
+    "damageTaken": 0.5,
+    "power": 0.8
   }
 ]

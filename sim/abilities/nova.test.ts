@@ -26,6 +26,31 @@ describe("nova", () => {
     expect(run.events.a[hits[0]]).toBe(e);
   });
 
+  it("stuns the enemies it hits for stunSeconds (new heroes, batch 2)", () => {
+    const data = quietData();
+    const p = novaParams(data, "skull-ring");
+    p.stunSeconds = p.damage.map(() => 2);
+    p.damage = p.damage.map(() => 1);
+    const run = abilityRun("gravecaller", { 1: 1 }, data);
+    const e = addEnemy(run, 150, 0);
+    run.enemies.stunTicks[e] = 0; // addEnemy holds the enemy in place with a long stun
+    run.step(NO_INPUT);
+    expect(eventsOf(run, EventKind.Cast).length).toBe(1);
+    expect(run.enemies.stunTicks[e]).toBeGreaterThanOrEqual(59);
+    expect(run.enemies.stunTicks[e]).toBeLessThanOrEqual(60);
+  });
+
+  it("does not stun without stunSeconds", () => {
+    const data = quietData();
+    const p = novaParams(data, "skull-ring");
+    p.damage = p.damage.map(() => 1);
+    const run = abilityRun("gravecaller", { 1: 1 }, data);
+    const e = addEnemy(run, 150, 0);
+    run.enemies.stunTicks[e] = 0; // addEnemy holds the enemy in place with a long stun
+    run.step(NO_INPUT);
+    expect(run.enemies.stunTicks[e]).toBe(0);
+  });
+
   it("waits for novaMinEnemies", () => {
     const data = quietData();
     data.rules.autocast.novaMinEnemies = 3;

@@ -22,6 +22,12 @@ export const HeroSchema = z.object({
     strikes: z.number().int().min(2).max(4).optional(),
     /** Every blow also hits the other enemies within `radius` of its target for `share` of its damage. */
     splash: z.object({ radius: z.number().positive(), share: z.number().positive().max(1) }).strict().optional(),
+    /** The shot leaps `count` times to the nearest enemy within `range` it has not struck, each leap losing `falloff`. */
+    bounce: z.object({
+      count: z.number().int().min(1).max(8),
+      range: z.number().positive(),
+      falloff: z.number().min(0).max(0.95),
+    }).strict().optional(),
   }).strict(),
   signatureAbilities: z.tuple([Slug, Slug, Slug]),
   ultimate: Slug,

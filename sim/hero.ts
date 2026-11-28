@@ -9,6 +9,7 @@ import { EventKind } from "./events";
 import { onGearAttack } from "./gear-effects";
 import { hitExtraTargets } from "./hero-multishot";
 import { blink } from "./hero-blink";
+import { bounceShot } from "./hero-bounce";
 import { splashBlow } from "./hero-splash";
 import { InputAction } from "./input";
 import type { TickInput } from "./input";
@@ -233,6 +234,7 @@ export function updateHeroCombat(run: Run): void {
   const extra = extraTargets(run);
   damageEnemy(run, best, amount, 0);
   splashBlow(run, best, targetX, targetY, raw);
+  bounceShot(run, best, targetX, targetY, raw);
   // more blows (two axes): each rolls its own damage on the same target, or on its splash ground once it fell
   const strikes = hero.def.baseAttack.strikes ?? 1;
   for (let s = 1; s < strikes; s++) {

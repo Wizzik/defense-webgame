@@ -5,7 +5,7 @@ import { CastMode, castMode, startCast } from "./slots";
 import type { AbilitySlot } from "./slots";
 import { countEnemiesWithin } from "./targeting";
 
-/** Strikes everything around the hero; auto-casts once enough enemies are inside the radius. */
+/** Strikes everything around the hero (with an optional slow and stun); auto-casts once enough enemies are inside the radius. */
 export function updateNova(run: Run, slot: AbilitySlot, index: number): void {
   const def = slot.def;
   if (def.kind !== "nova") return;
@@ -19,6 +19,7 @@ export function updateNova(run: Run, slot: AbilitySlot, index: number): void {
     && countEnemiesWithin(run, hero.x, hero.y, radius) < run.data.rules.autocast.novaMinEnemies) return;
   startCast(run, index, radius, hero.x, hero.y, 0, 0);
   const slowTicks = Math.round((p.slowSeconds?.[L] ?? 0) * TICKS_PER_SECOND);
+  const stunTicks = Math.round((p.stunSeconds?.[L] ?? 0) * TICKS_PER_SECOND);
   hitEnemiesAround(run, index, hero.x, hero.y, radius, p.damage[L] * hero.stats.spellPower,
-    0, p.slow?.[L] ?? 0, slowTicks);
+    stunTicks, p.slow?.[L] ?? 0, slowTicks);
 }

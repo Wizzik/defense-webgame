@@ -8,6 +8,82 @@ drops and chests, elite and boss threat, phase 2b-3, visual pass A) are in `docs
 They **still apply** unless a section here overrides them. A section that code or yaml names and that is not in this
 file is there; search it (`grep -n`) before you change a rule of those areas, do not read it whole.
 
+## Bouncing shots for the older ranged heroes and batch 1 by the damage meter (Petr, 2026-11-28: "1. Ano. 2. Ano")
+
+- **Bounce on:** the older heroes whose map weapon is `mbounce` (Nightglaive, Gravecaller, Sparkshot, Tidecaller) and
+  Frostweaver get `attack.bounce` with Ashsinger's numbers (4 leaps within 400, -25 % a leap). Their spells stay;
+  only `power` moves to keep 1-4 wins of 20. Their meter is not retuned (Petr asked for the bounce, not a new kit):
+  Gravecaller's Grave Grasp stays at about 46 %, Tidecaller's Crushing Wave 49 %, Nightglaive's Falling Stars
+  41-45 %, Sparkshot's attack 70-78 % (his kit rides on it).
+- **Batch 1 by the meter rule** (New heroes, batch 2): Crossing Strike x0.25 of the map (45 % -> 31 %), Holy Burst x0.7
+  (DataA as design rows), Judgement x3.75, Dominion x2, Dawnhammer's attack x0.4 interval with two blows (2 % -> 6-7 %;
+  the map has no cleave for him), Frost Slice x0.65, Frost Slap x1.6, Ice Fall x4.7 (8 % -> 14-23 %), Frostweaver's
+  attack x0.5 interval with the bounce. Deadeye already fitted (ultimate 26 %, a kit that rides on the attack, 2 of
+  20) and stays.
+- **Balance** (`sim:run --seeds 1-20 --gear none`, world 1 normal), wins of 20:
+
+  | hero | power before | wins after the bounce at that power | kept power | wins |
+  |---|---|---|---|---|
+  | Nightglaive | 0.62 | 11 | **0.48** | 1 (0.49: 5, 0.47: 1) |
+  | Gravecaller | 0.29 | 6 | **0.26** | 2 |
+  | Sparkshot | 0.74 | 12 | **0.4** | 2 (0.5: 8) |
+  | Tidecaller | 0.51 | 6 | **0.46** | 4 |
+  | Frostweaver | 0.44 | 3 (7 with the faster attack) | **0.32** | 1 (0.38: 9) |
+  | Razorwind | 0.36 | 4 | **0.45** | 4 (Crossing Strike 31 %, attack 20 %) |
+  | Dawnhammer | 0.35 | 4 | **0.3** | 3 (Dominion 17 %, Holy Burst 17 %, Judgement 9 %, Fan of Light 8 %, attack 6 %) |
+
+  The autopilot's wins swing by 4-8 of 20 between close powers (Frostweaver won 9 at 0.38 and 7 at 0.44), so each
+  kept power was measured once at 20 seeds.
+- **Digest** `b04f8455` -> `41172dce`: the cases of the seven heroes and the cases that play them change (p6-p21,
+  w1-storm, w2-sand, w4-blizzard, w5-meteors, loot-t3); the other heroes' cases stay identical.
+
+## New heroes, batch 2 (2026-11-28; Petr: "the remaining heroes of the map", the picks and numbers are Claude's)
+
+- Batch 2 of the plan `docs/superpowers/plans/2026-11-28-new-heroes.md` (section Batch 2): **Ashsinger** (O004, INT
+  ranged: Cinder Wave, Pyre Mantle, Ember Comet; ultimate Phoenix Wrath), **Thunderhoof** (O003, STR melee: Ground
+  Surge, Hoofstomp, Long March; ultimate Aftershock), **Stormseer** (O01A, INT ranged: Spirit Pack, Squall, Dread
+  Call; ultimate Last Rites), **Mirrorblade** (O001, AGI melee: Twin Shades, Flash Cut, Mirror Dance; ultimate Steel
+  Cyclone). Names and texts are ours; the map's numbers and script lines are in the review notes.
+- **Balance by the damage meter (Petr, 2026-11-28):** "spells must be balanced by how they come out": each normal
+  spell about **10-20 %** of the hero's damage, the **ultimate about 25 %**, the **base attack a little more**, and the
+  **wins** stay the target (1-4 of 20). The ranged attack **bounces as in the map** (the map's `mbounce` weapon), the
+  melee attack **splashes as in the map** (the map's Cleave A1C0: 40 % within 450). The damage rows of the batch are
+  design values from that pass (the map's numbers in the comments); auras and the crit have no row of their own.
+  This holds for every later batch.
+- **New mechanics:** `baseAttack.bounce` (`{ count, range, falloff }`, opt-in in `heroes.yaml`: the shot leaps to the
+  nearest unstruck enemy within `range`, each leap losing `falloff`; a base attack hit on the meter). The `bounce`
+  kind of the older heroes still does not leap (their behaviour stays; Petr decides whether they get it). And
+  `nova.stunSeconds` (optional): Hoofstomp, Dread Call; the map's stuns (War Stomp 3-5 s every 6.5 s, All Stop 5-25 s
+  on the whole map) would hold the crowd for good, so the stuns are 1-2 s and 1.5-3.5 s.
+- **Attacks:** Ashsinger bounces 4 times within 400, -25 % a leap (count, range and falloff are design values: the
+  export has no bounce fields), attack interval x0.35; Thunderhoof and Mirrorblade cleave 40 % within 225 (the map's
+  450 x the AoE scale), two blows at x0.3 / x0.35 of the map's interval; Stormseer (a plain `missile` in the map)
+  shoots at x0.28. Without the faster attack it stayed at 3-9 % of the damage.
+- **Ranged heroes' spells around themselves reach past 450** (the autopilot keeps the nearest enemy that far): Pyre
+  Mantle 600, Squall 700, Dread Call 700, Phoenix Wrath 800 (the script's radius) after the AoE scale. At the map's
+  175-300 they dealt 1-3 %.
+- **Left out of the map's scripts:** the execute of Life's Ended, the final slam of Bladestorm, the pull of Kamezoko,
+  the evasion and bonus damage of Imager's Critical Strike. Imager's map ultimate is Critical Strike (A006); the game
+  makes Bladestorm (A003, 5 map levels, so no `source`) the ultimate and Critical Strike a spell.
+- **Slot 0:** Stormseer opens with Spirit Pack and Mirrorblade with Twin Shades (the first spell must deal damage).
+- **Ability order and digest:** the blocks come last in `design/abilities.yaml`; the 24 older matrix cases are
+  identical, the matrix gains four `h-<id>` cases. Digest `fa5a1ee3` -> `b04f8455`.
+- **Balance** (`sim:run --seeds 1-20 --gear none`, world 1 normal), wins of 20 and the meter of the kept numbers
+  (the hero's own sources; the shared spells and items take the rest):
+
+  | hero | power | wins | ultimate | spells | attack |
+  |---|---|---|---|---|---|
+  | Ashsinger | **0.26** | 3 | Phoenix Wrath 25 % | Cinder Wave 13 %, Pyre Mantle 12 %, Ember Comet 10 % | 11 % |
+  | Thunderhoof | **0.18** | 1 (0.19: 5) | Aftershock 20 % | Ground Surge 14 %, Hoofstomp 10 % | 15 % |
+  | Stormseer | **0.3** | 4 | Last Rites 17 % | Squall 17 %, Dread Call 10 %, Spirit Pack 10 % | 7 % |
+  | Mirrorblade | **0.8** | 4 | Steel Cyclone 15 % | Twin Shades 8 %, Mirror Dance 8 % (Flash Cut is in the attack) | 13 % |
+
+  The first pass (map numbers, power only) gave Stormseer's Last Rites 69 %, Ashsinger's Ember Comet and Cinder Wave
+  together 53 %, Thunderhoof's Aftershock 39 %, and 1-4 % to the base attacks and the spells around a ranged hero.
+  The base attack stays at 7-15 %, a little under Petr's wish: a survivors crowd gives the spells' areas dozens of
+  targets; more attack would need still faster attacks or weaker spells and a higher power (which also lifts the
+  shared spells). The autopilot wins swing by 4-6 of 20 between close powers, so each kept power was measured once.
+
 ## New heroes, batch 1 (2026-11-28; Petr: "the remaining heroes of the map", the picks and numbers are Claude's)
 
 - Plan: `docs/superpowers/plans/2026-11-28-new-heroes.md` (all 36 remaining map heroes in 9 batches of 4, first the

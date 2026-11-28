@@ -73,6 +73,11 @@ const HEROES: HeroRow[] = [
   { id: "dawnhammer", body: "Knight", keep: ["1H_Sword", "Rectangle_Shield", "Knight_Cape"], punch: "1H_Melee_Attack_Chop" },
   { id: "frostweaver", body: "Mage", keep: ["1H_Wand", "Spellbook", "Mage_Cape"], punch: "Spellcast_Shoot" },
   { id: "deadeye", body: "Rogue_Hooded", keep: ["1H_Crossbow", "Rogue_Cape"], punch: "1H_Ranged_Shoot" },
+  // new heroes, batch 2 (2026-11-28)
+  { id: "ashsinger", body: "Mage", keep: ["2H_Staff", "Mage_Cape"], punch: "Spellcast_Raise" },
+  { id: "thunderhoof", body: "Barbarian", keep: ["2H_Axe", "Barbarian_Cape"], punch: "2H_Melee_Attack_Chop" },
+  { id: "stormseer", body: "Mage", keep: ["Spellbook_open", "Mage_Cape"], punch: "Spellcasting" },
+  { id: "mirrorblade", body: "Rogue", keep: ["Knife", "Knife_Offhand", "Rogue_Cape"], punch: "Dualwield_Melee_Attack_Slice" },
 ];
 
 /** Body part nodes of a character; the hooded rogue shares the rogue's parts except the head. */

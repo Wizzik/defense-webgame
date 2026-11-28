@@ -486,6 +486,23 @@ abilities:
   blasting-powder: { cast: spark-sear }
   fan-fire: { cast: none }
   doubles: { cast: moon-whisper }
+  # new heroes, batch 2 (2026-11-28): existing cues until the spell graphics and sounds task
+  cinder-wave: { cast: shared-firebolt }
+  pyre-mantle: { cast: none }
+  ember-comet: { cast: shared-meteor }
+  phoenix-wrath: { cast: blood-fan }
+  ground-surge: { cast: shared-shock }
+  hoofstomp: { cast: stone-quake }
+  long-march: { cast: none }
+  aftershock: { cast: stone-tap }
+  squall: { cast: storm-bolt }
+  spirit-pack: { cast: shared-sentry }
+  dread-call: { cast: mist-burst }
+  last-rites: { cast: bone-ring }
+  flash-cut: { cast: stone-tap }
+  twin-shades: { cast: moon-whisper }
+  mirror-dance: { cast: moon-whisper }
+  steel-cyclone: { cast: shared-blades }
   arc-lightning: { cast: shared-arc }
   smite: { cast: shared-smite }
   fire-bolt: { cast: shared-firebolt }
@@ -517,6 +534,10 @@ heroes:
   dawnhammer: { attack: stone-strike }
   frostweaver: { attack: mist-chill }
   deadeye: { attack: spark-shot }
+  ashsinger: { attack: grave-bolt }
+  thunderhoof: { attack: stone-strike }
+  stormseer: { attack: shaman-bolt }
+  mirrorblade: { attack: cleaver-chop }
 
 enemies:
   shieldbearer: { death: human-fall }
