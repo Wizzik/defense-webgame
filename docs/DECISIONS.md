@@ -8,6 +8,23 @@ drops and chests, elite and boss threat, phase 2b-3, visual pass A) are in `docs
 They **still apply** unless a section here overrides them. A section that code or yaml names and that is not in this
 file is there; search it (`grep -n`) before you change a rule of those areas, do not read it whole.
 
+## Item pictures: own colour, rarity on the frame, the slot always readable (2026-11-28; Petr: "only the frame by rarity, the rest of the icon specific to the item; waist must be a waist, boots boots, ring a ring; trinket anything, neck anything that hangs on something"; the picks and colours are Claude's)
+
+- An item's picture is filled with the item's own colour (`client/ui/item-tints.ts`: by material, iron and plate
+  steel-grey, leather brown, silk lilac, silver, gold, jade, moonstone, oak, sea, storm, night ...; a random item
+  takes its base's), lit from the top left; the rarity is only the frame: the doll and collection slot border, and a
+  new rarity frame around the picture on chest cards and in the compare. An item not owned yet in the collection
+  stays a grey silhouette.
+- Every picture shows its slot: 19 named items changed pictures that did not (a falling star, mountains, daggers,
+  brass knuckles, a crystal eye, a raven ...) for a picture of that slot from game-icons.net (same pinned commit):
+  cloak-of-falling-stars vampire-cape, banner-cloak-of-the-keep cape-armor, weavers-gloves winter-gloves,
+  hood-of-the-night-watch warlock-hood, staff-of-the-low-tide winged-scepter, falcon-charm feather-necklace, jade-ring
+  globe-ring, band-of-resolve skull-ring, moonlit-signet frozen-ring, ring-of-the-keen-eye big-diamond-ring,
+  seal-of-the-archivist diamond-ring, starwoven-mantle shoulder-scales, raven-feather-spaulders shoulder-armor,
+  girdle-of-the-mountain black-belt, belt-of-many-knives belt-armor, silver-bangle and siegebreaker-vambraces bracer,
+  bindings-of-the-high-tide bracers, swiftstep-boots fur-boot. Items of one slot may share a picture; their colours
+  tell them apart. Trinkets keep any picture.
+
 ## Stat icons and tier squares (2026-11-28; Petr: "why are the T1 to T4 tags so big? a small square next to the description is enough ... it would need icons for the different stats"; the glyphs and colours are Claude's)
 
 - A rolled affix row's tier is a small square (8 px) in the tier colour after the row text (T1 grey, T2 green, T3

@@ -1,5 +1,6 @@
 import type { SlotType } from "../../data/schema";
 import { ITEM_ICONS, iconFile } from "./item-icon-names";
+import { itemTint } from "./item-tints";
 
 /** Our own glyphs, one per slot type (24 x 24, drawn with the text colour). The frame of a slot carries the rarity. */
 const GLYPHS: Record<SlotType, string> = {
@@ -31,12 +32,15 @@ export function iconSvg(type: SlotType): string {
 const iconKey = (itemId: string): string => (itemId.startsWith("rolled-") ? itemId.slice("rolled-".length) : itemId);
 
 /**
- * The picture of an item (its base's for a random item), drawn in the text colour (the rarity's) as a CSS mask of
- * its game-icons.net SVG; an item without a picture shows the glyph of its slot type.
+ * The picture of an item (its base's for a random item) as a CSS mask of its game-icons.net SVG, filled with the
+ * item's own colour (item-tints.ts; Petr, 2026-11-28: only the frame carries the rarity); an item without a picture
+ * shows the glyph of its slot type.
  */
 export function itemIconHtml(itemId: string, type: SlotType): string {
   const ref = ITEM_ICONS[iconKey(itemId)];
   if (!ref) return iconSvg(type);
   const url = `${import.meta.env.BASE_URL}icons/${iconFile(ref)}.svg`;
-  return `<span class="item-icon" style="--icon: url('${url}')" aria-hidden="true"></span>`;
+  const tint = itemTint(itemId);
+  const style = tint ? `--icon: url('${url}'); --tint: ${tint}` : `--icon: url('${url}')`;
+  return `<span class="item-icon" style="${style}" aria-hidden="true"></span>`;
 }
