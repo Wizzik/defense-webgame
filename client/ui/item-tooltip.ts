@@ -4,16 +4,27 @@ import { itemStatAt } from "../../sim";
 import { el } from "./dom";
 import { type Lang, type MessageKey, t } from "./i18n";
 import { statLabel, statValue } from "./item-lines";
+import { statIconSvg } from "./stat-icons";
 
 export type LineTone = "plain" | "better" | "worse" | "effect" | "temp";
+
+/**
+ * One row of an item's text. `stat`: the row's stat, drawn as its icon at the start (stat-icons.ts); none for an
+ * effect or a chest-level line. `tier`: 1-4 for a rolled affix row (a small square in the tier colour), else none.
+ */
+export interface ItemLine {
+  text: string;
+  tone: LineTone;
+  stat?: StatId;
+  tier?: number;
+}
 
 export interface TooltipInfo {
   name: string;
   rarity: Rarity;
   /** "Rare · Head · level 2". */
   sub: string;
-  /** `tier`: 1-4 for a rolled affix row (T1-T4, drawn as a coloured mark), 0 for any other row. */
-  lines: { text: string; tone: LineTone; tier?: number }[];
+  lines: ItemLine[];
   /** "Drops from: …"; empty when no boss drops the rarity. */
   source: string;
 }
@@ -50,7 +61,7 @@ export function tooltipLines(
     const value = itemStatAt(row.value, level, temp, gear);
     const base = `${statValue(row.stat, value)} ${statLabel(lang, row.stat)}`;
     const tier = rowTier(item, r);
-    const mark = tier > 0 ? { tier } : {};
+    const mark = tier > 0 ? { stat: row.stat, tier } : { stat: row.stat };
     if (!compare) {
       lines.push({ text: base, tone: "plain", ...mark });
       return;
@@ -61,7 +72,7 @@ export function tooltipLines(
     else lines.push({ text: `${base} ${delta(row.stat, diff)}`, tone: diff > 0 ? "better" : "worse", ...mark });
   });
   for (const [stat, value] of other) {
-    lines.push({ text: `${statValue(stat, 0)} ${statLabel(lang, stat)} ${delta(stat, -value)}`, tone: "worse" });
+    lines.push({ text: `${statValue(stat, 0)} ${statLabel(lang, stat)} ${delta(stat, -value)}`, tone: "worse", stat });
   }
   if (item.effect) lines.push({ text: item.effect.text[lang], tone: "effect" });
   if (temp > 0) lines.push({ text: tempLine(lang, temp), tone: "temp" });
@@ -85,10 +96,19 @@ export function tooltipLines(
   };
 }
 
-/** The "T3" mark after a rolled affix row, coloured by its tier (style.css `.tier-mark.tier-N`). */
-export function tierMark(parent: HTMLElement, tier: number): void {
-  const mark = el("span", `tier-mark tier-${tier}`, parent, `T${tier}`);
-  mark.title = `Tier ${tier} of 4`;
+/**
+ * Dresses a row of item text: the stat's icon before the text and, for a rolled affix row, a small square in the
+ * tier colour after it (style.css `.stat-row`, `.tier-mark.tier-N`; Petr, 2026-11-28: a small square, not a "T3" tag).
+ */
+export function decorateRow(row: HTMLElement, stat: StatId | undefined, tier: number | undefined): void {
+  if (stat === undefined && !tier) return;
+  row.classList.add("stat-row");
+  if (stat !== undefined) row.insertAdjacentHTML("afterbegin", statIconSvg(stat));
+  if (tier) {
+    const mark = el("span", `tier-mark tier-${tier}`, row);
+    mark.title = `Tier ${tier} of 4`;
+    mark.setAttribute("aria-label", `Tier ${tier} of 4`);
+  }
 }
 
 /** One floating tooltip box, shared by the slots of a doll or of the collection. */
@@ -108,7 +128,7 @@ export class ItemTooltip {
     el("div", "tooltip-sub", root, info.sub);
     for (const line of info.lines) {
       const row = el("div", `tooltip-line ${line.tone}`, root, line.text);
-      if (line.tier) tierMark(row, line.tier);
+      decorateRow(row, line.stat, line.tier);
     }
     if (info.source !== "") el("div", "tooltip-source", root, info.source);
     root.hidden = false;

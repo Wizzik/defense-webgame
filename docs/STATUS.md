@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-28 (new heroes, batch 2). Read this first when you resume work.
+Updated 2026-11-28 (stat icons and tier squares). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -27,6 +27,19 @@ Updated 2026-11-28 (new heroes, batch 2). Read this first when you resume work.
 9. **Named items only legendary / mythic, salvage for named items** (Petr, 2026-11-28): plan
    `docs/superpowers/plans/2026-11-28-named-items-legendary.md`, branch `claude/named-items-legendary` (from
    `claude/peaceful-galileo-qtu26s`), DONE (below), waits for Petr's playtest.
+
+## Stat icons and tier squares (branch `claude/admiring-davinci-enqxge`, DONE, waits for Petr's check, 2026-11-28)
+
+- The "T1"-"T4" tags are now small squares in the tier colour after the row (hover one: "Tier 3 of 4"); on the chest
+  cards they took a whole row each before. Every stat row starts with an icon of its own (22 stats, our glyphs and
+  colours; list in `docs/DECISIONS.md`, section Stat icons and tier squares). No game rule changed, digest the same.
+- **What Petr checks** (after the merge):
+  - the gear screen: https://wizzik.github.io/defense-webgame/?debug=1 , in the console
+    `window.__game.debug.grantRolled("mainHand", "mythic", 12)`, open Gear and hover the new weapon: one line per stat,
+    an icon in front, a small coloured square behind each affix.
+  - chest cards and the compare: https://wizzik.github.io/defense-webgame/?debug=1&phase=8 , in the console
+    `window.__game.debug.grantGold(5000)` and walk to a chest (the pointer shows it); a card of a worn slot opens the
+    keep / take compare.
 
 ## New heroes, batch 3 (branch `claude/new-heroes-3`, DONE, waits for Petr's playtest, 2026-11-28)
 
@@ -153,7 +166,7 @@ Updated 2026-11-28 (new heroes, batch 2). Read this first when you resume work.
     `__game.debug.learn(4, "sentry-ward")`;
   - 3 dash charges from level 10, F from level 20: https://wizzik.github.io/defense-webgame/?debug=1&phase=6
   - a mythic random item feels like a named one, crits not absurd:
-    https://wizzik.github.io/defense-webgame/?debug=1 then `__game.debug.grantRolled("weapon", "mythic", 12)` and wear it
+    https://wizzik.github.io/defense-webgame/?debug=1 then `__game.debug.grantRolled("mainHand", "mythic", 12)` and wear it
     in the gear screen.
 - Generated json edited in the cloud again (`abilities.json`, `heroes.json`, `rules.json`): **run
   `npm run data:build` locally and check that nothing changes.**
