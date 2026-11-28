@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { extraPlayers } from "./difficulty";
 import { stateHash } from "./hash";
 import { NO_INPUT, type TickInput } from "./input";
 import { gainXp } from "./level-up";
@@ -112,7 +113,7 @@ describe("a run with several players", () => {
     const per = data.rules.coop.perPlayer.castleHp;
     expect(createRun(data, { seed: 1 }).castle.maxHp).toBe(base);
     const three = createRun(data, { seed: 1, players: [{ hero: "stonehorn" }, { hero: "sparkshot" }, { hero: "tidecaller" }] });
-    expect(three.castle.maxHp).toBeCloseTo(base * (1 + 2 * per));
+    expect(three.castle.maxHp).toBeCloseTo(base * (1 + extraPlayers(data.rules, 3) * per));
     expect(three.castle.hp).toBe(three.castle.maxHp);
   });
 });

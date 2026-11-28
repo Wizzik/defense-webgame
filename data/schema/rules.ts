@@ -327,10 +327,13 @@ export const RulesSchema = z.object({
    * Co-op (multiplayer migration step 6, sim/difficulty.ts, sim/revive.ts): with n players enemy hp, damage, pack
    * sizes, elite hp and the castle's hp (`castleHp`, step 8) are each x (1 + perPlayer.x x (n - 1)) on top of the
    * difficulty; `chests` more chests lie on
-   * the map per extra player. A fallen hero is revived by a living teammate within `revive.radius` for
+   * the map per extra player. `extraPlayers` (2026-11-28) is the count of extra players (n - 1 before) that the
+   * multipliers and the XP share use for 2, 3 and 4 players, so a bigger group need not grow harder in a straight
+   * line; the chests stay (n - 1). A fallen hero is revived by a living teammate within `revive.radius` for
    * `revive.seconds`, back at `revive.hpShare` of his max hp. One player: all of it is x 1.
    */
   coop: z.object({
+    extraPlayers: z.array(nonNegative).length(3),
     perPlayer: z.object({
       hp: nonNegative, damage: nonNegative, packSize: nonNegative, eliteHp: nonNegative, castleHp: nonNegative,
       chests: z.number().int().min(0).max(4),

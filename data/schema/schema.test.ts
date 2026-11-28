@@ -114,6 +114,7 @@ function fixture(): any {
         },
       },
       coop: {
+        extraPlayers: [1, 2, 3],
         perPlayer: { hp: 0.6, damage: 0.15, packSize: 0.5, eliteHp: 0.4, castleHp: 0, chests: 1 },
         revive: { seconds: 5, radius: 120, hpShare: 0.5 },
       },

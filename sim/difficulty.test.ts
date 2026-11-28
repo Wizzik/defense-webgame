@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { DifficultyId } from "../data/schema";
 import { TICKS_PER_SECOND } from "./constants";
 import { gainGold } from "./crystals";
-import { difficultyMods } from "./difficulty";
+import { difficultyMods, extraPlayers } from "./difficulty";
 import { Role } from "./enemies";
 import { EventKind } from "./events";
 import { stateHash } from "./hash";
@@ -68,8 +68,20 @@ describe("difficultyMods", () => {
   it("a co-op group gains a kill's XP over its bigger packs (Petr's batch 3)", () => {
     const r = rules();
     r.coop.perPlayer.packSize = 0.3;
+    r.coop.extraPlayers = [1, 2, 3];
     expect(difficultyMods(r, 1, "normal", 1).xp).toBe(1);
     expect(difficultyMods(r, 1, "normal", 3).xp).toBeCloseTo(1 / 1.6, 12);
+  });
+
+  it("counts the extra players of a group by rules.coop.extraPlayers (2026-11-28)", () => {
+    const r = rules();
+    r.coop.extraPlayers = [1, 1.5, 1.8];
+    r.coop.perPlayer.hp = 0.5;
+    r.coop.perPlayer.packSize = 0.3;
+    expect(extraPlayers(r, 1)).toBe(0);
+    expect(extraPlayers(r, 3)).toBe(1.5);
+    expect(difficultyMods(r, 1, "normal", 4).hp).toBeCloseTo(1.9, 12);
+    expect(difficultyMods(r, 1, "normal", 3).xp).toBeCloseTo(1 / 1.45, 12);
   });
 
   it("world 3 insane and world 5 hell", () => {

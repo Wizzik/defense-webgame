@@ -3,7 +3,7 @@ import { createRun } from "../../sim";
 import { gameData } from "../../sim/testing/game-data";
 import { CoopNet } from "./coop-net";
 import type { PeerLink } from "./peer-link";
-import type { NetMessage } from "./protocol";
+import type { NetGear, NetMessage } from "./protocol";
 
 /** A link whose sent messages are recorded and whose callbacks a test fires. */
 class FakeLink implements PeerLink {
@@ -32,13 +32,16 @@ class FakeLink implements PeerLink {
   }
 }
 
-function net(local: number, links: Map<number, FakeLink>, left: number[] = []): CoopNet {
+function net(
+  local: number, links: Map<number, FakeLink>, left: number[] = [], gear: [number, NetGear[]][] = [],
+): CoopNet {
   const heroes = ["stonehorn", "sparkshot", "tidecaller"];
   const run = createRun(gameData(), { seed: 1, players: heroes.map((hero) => ({ hero })) });
   return new CoopNet({
     links, local, players: 3, run,
     readInput: () => {}, afterStep: () => {},
     onLeft: (p) => left.push(p), onDesync: () => {},
+    onGear: (p, g) => gear.push([p, g]),
   });
 }
 
@@ -83,6 +86,21 @@ describe("CoopNet with three players", () => {
     host.fire({ t: "left", p: 2 });
     expect(coop.stats.gone).toEqual([2]);
     expect(left).toEqual([2]);
+  });
+
+  it("host takes a guest's new gear for the next run; a guest ignores gear", () => {
+    const a = new FakeLink();
+    const b = new FakeLink();
+    const gear: [number, NetGear[]][] = [];
+    net(0, new Map([[1, a], [2, b]]), [], gear);
+    b.fire({ t: "gear", g: [["head", "travelers-hood", 2]] });
+    expect(gear).toEqual([[2, [["head", "travelers-hood", 2]]]]);
+    expect(a.sent.some((m) => m.t === "gear")).toBe(false);
+    const host = new FakeLink();
+    const seen: [number, NetGear[]][] = [];
+    net(1, new Map([[0, host]]), [], seen);
+    host.fire({ t: "gear", g: [] });
+    expect(seen).toEqual([]);
   });
 
   it("stop closes every link", () => {

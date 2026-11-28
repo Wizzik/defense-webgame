@@ -34,7 +34,7 @@ import { FlowField } from "./world-map/flow";
 import { spawnEnemies } from "./spawner";
 import { applyStartPhase } from "./start-phase";
 import { updateRevive } from "./revive";
-import { checkCourse, type DifficultyMods, difficultyMods } from "./difficulty";
+import { checkCourse, type DifficultyMods, difficultyMods, extraPlayers } from "./difficulty";
 import { buildTimeline, type TimedEvent, updateTimeline } from "./timeline";
 import { buildPhaseTables, enemyType, type PhaseTable } from "./spawn-tables";
 import { SpatialHash } from "./spatial-grid";
@@ -251,8 +251,8 @@ export class Run {
     }
     this.current = 0;
 
-    // co-op (multiplayer migration step 8): every player after the first adds rules.coop.perPlayer.castleHp
-    const castleHp = rules.castle.hp * (1 + rules.coop.perPlayer.castleHp * (players.length - 1));
+    // co-op (multiplayer migration step 8): every extra player (rules.coop.extraPlayers) adds perPlayer.castleHp
+    const castleHp = rules.castle.hp * (1 + rules.coop.perPlayer.castleHp * extraPlayers(rules, players.length));
     this.castle = {
       x: rules.arena.castle.x, y: rules.arena.castle.y, radius: rules.castle.radius,
       hp: castleHp, maxHp: castleHp, lastHitTick: -1,

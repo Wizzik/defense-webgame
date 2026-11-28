@@ -12,10 +12,19 @@ export interface DifficultyMods {
   /** Added to the hero's magic find from gear. */
   magicFind: number;
   /**
-   * Share of a kill's XP each hero gains: 1 alone, 1 / (1 + perPlayer.packSize x (n - 1)) in co-op, so the bigger
+   * Share of a kill's XP each hero gains: 1 alone, 1 / (1 + perPlayer.packSize x extra players) in co-op, so the bigger
    * packs of a group do not level it faster than one hero (Petr's batch 3: one XP curve, level 60-70 at the end).
    */
   xp: number;
+}
+
+/**
+ * The extra players a group of `players` counts as for the co-op multipliers and the XP share:
+ * `rules.coop.extraPlayers` for 2-4 players (2026-11-28), 0 alone.
+ */
+export function extraPlayers(rules: Rules, players: number): number {
+  if (players <= 1) return 0;
+  return rules.coop.extraPlayers[Math.min(players, 4) - 2]!;
 }
 
 /** `strength` is the world's own multiplier on enemy hp and damage (`World.strength`, default 1). */
@@ -23,8 +32,9 @@ export function difficultyMods(rules: Rules, world: number, difficulty: Difficul
   const { worldStep, reward, levels } = rules.difficulty;
   const level = levels[difficulty];
   const above = world - 1;
-  // co-op (multiplayer migration step 6): every player after the first adds rules.coop.perPlayer; one player x 1
-  const more = players - 1;
+  // co-op (multiplayer migration step 6): every extra player adds rules.coop.perPlayer, counted by
+  // rules.coop.extraPlayers (2026-11-28); one player x 1
+  const more = extraPlayers(rules, players);
   const per = rules.coop.perPlayer;
   return {
     hp: level.hp * (1 + worldStep.hp * above) * strength * (1 + per.hp * more),

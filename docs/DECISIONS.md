@@ -57,6 +57,34 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   jump by 3-6 for a power step of 0.02-0.04 (a cliff), so read them as +-2.
 - Digest `4d1136d4` -> `4a120fc3` (wards) -> `4facf838` (dash, power, crit cap).
 
+## Co-op gear between runs and group strength by size (2026-11-28; Petr's words, Claude's numbers)
+
+- **Gear before Again** (Petr: "we must be able to wear the gear we looted"): the end screen of a co-op run has a
+  **Gear for the next run** button (`#end-gear`) for the host and the guests. It opens the gear screen of the hero
+  this window plays; Back returns to the end screen. A guest whose gear changed sends `{ t: "gear", g }` to the host
+  (protocol version **6**), who keeps it as that guest's row for the group's next `start`; the host reads his own
+  gear again when he presses Again. A start that comes while the screen is open closes it and the run comes up (a
+  change made then counts for the run after). The hero stays the same (to change it, leave and join a new room).
+  Tested by hand: two windows over a local PeerServer, lost -> guest wears an item -> Again -> the guest's new run
+  wears it, hashes matched, no desync.
+- **Group strength** (Petr: "3 and 4 players need easier enemies, the sequence of the numbers is wrong"): hp, damage
+  and pack size are each x (1 + perPlayer x (n - 1)) and they multiply, so the threat grew faster than the group.
+  New `rules.coop.extraPlayers` = **[1, 1.7, 2.4]**: the count of extra players that the enemy multipliers, the
+  castle hp and the XP share use for 2, 3 and 4 players (was 1, 2, 3); `perPlayer` and the chests (n - 1) stay.
+  Autopilot, gear none, world 1 normal, 80 runs per cell (8 groups x 10 seeds); solo 25 % (seeds 1-10):
+
+  | extraPlayers for 3 / 4 | 3 players | 4 players |
+  |---|---|---|
+  | 2 / 3 (before) | 9 % | 1 % |
+  | 1.3 / 1.5 | 68 % | 90 % |
+  | 1.5 / 1.8 | 48 % | 76 % |
+  | 1.8 / 2.5 | 8 % | 14 % |
+  | 1.7 / 2.3 | 24 % | 29 % |
+  | **1.7 / 2.4** | 25 % (seeds 11-20) | 16 % (1-10), 25 % (11-20) |
+
+  2 players (unchanged, 1): 20 % (seeds 1-10), 21 % (11-20). Every group size now wins about as often as one hero.
+  The digest does not change (the matrix has no co-op case).
+
 ## Petr's batch 3 (2026-11-27; plan `docs/superpowers/plans/2026-11-27-petr-batch-3.md`, Petr's words, Claude's numbers)
 
 - **No white hit flash** (task 2): enemies no longer flash white after a hit; the type-colour glow and the red of
@@ -66,8 +94,8 @@ Decisions that still apply. Check here before you change a rule. Newest first in
   numbered again (`client/game/coop-restart.ts`). A guest's end screen says "Waiting for the host to start again..."
   and its button is **Leave** (back to the menu, which closes his link). The old net loop is detached (links stay
   open), the guest detaches his at once when the new `start` comes, so nothing of the old run is in flight. Only an
-  ended run can restart. Guests keep the gear of the last start (the host's is read again); a guest who wants other
-  gear leaves and joins a new room. Protocol version stays 5 (`start` may now come again). Tested: unit test of the
+  ended run can restart. Guests keep the gear of the last start (the host's is read again); since 2026-11-28 they can
+  change it on the end screen (section Co-op gear between runs). Protocol version stays 5 (`start` may now come again). Tested: unit test of the
   new group, e2e local co-op (`?debug=1&mate=`), and by hand two windows over a local PeerServer (lost -> Again ->
   a new run, hashes matched, no desync).
 - **Spell levels** (task 4, Petr confirmed: "the same strength, fewer steps"): signature and shared spells 6 levels

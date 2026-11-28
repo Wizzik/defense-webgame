@@ -448,8 +448,10 @@ function createUi(
   });
   // co-op: the lobby; the host's course comes from the world screen (`coopCourse` routes its Start and Back)
   let coopCourse = false;
-  // the gear screen opened from the lobby goes back there (and a guest tells the host his new gear)
-  let gearFromLobby = false;
+  // where the gear screen goes back to: the menu, the co-op lobby (a guest tells the host his new gear), or the end
+  // screen of a co-op run (a guest tells the host his gear for the group's next run); "closing": a co-op run started
+  // while it was open, so it goes nowhere
+  let gearFrom: "menu" | "lobby" | "end" | "closing" = "menu";
   const lobby = new CoopLobby(root, data.heroes, {
     onHero: (id) => {
       heroId = id;
@@ -463,7 +465,7 @@ function createUi(
     onJoin: (code) => void coop.join(code),
     onStart: () => coop.chooseCourse(),
     onGear: () => {
-      gearFromLobby = true;
+      gearFrom = "lobby";
       lobby.close();
       gearScreen.open(heroId, lang);
     },
@@ -499,8 +501,9 @@ function createUi(
       end.hide();
       ended = false;
       // the host started while this player looked at his gear: the screen closes, the run comes up
-      gearFromLobby = false;
+      if (gearFrom !== "menu") gearFrom = "closing";
       gearScreen.close();
+      gearFrom = "menu";
       lobby.close();
       lobby.set({ kind: "idle" });
       worldScreen.close();
@@ -576,9 +579,16 @@ function createUi(
     data, gear,
     onEquip: () => sound.engine.play(sound.data.sounds["gear.equip"]),
     onClose: (changed) => {
+      const from = gearFrom;
+      gearFrom = "menu";
+      // after a co-op run the session holds the ended co-op run: no new run behind the menu
+      if (from === "end" || from === "closing") {
+        if (changed) coop.gearChanged();
+        if (from === "end") end.reveal();
+        return;
+      }
       if (changed) void useHero(heroId);
-      if (gearFromLobby) {
-        gearFromLobby = false;
+      if (from === "lobby") {
         lobby.open(lang, heroId);
         if (changed) coop.heroChanged();
       } else menu.setVisible(true);
@@ -633,6 +643,13 @@ function createUi(
     }
     void useHero(heroId, nextSeed());
     showMenu();
+  }, () => {
+    // co-op: wear what the run dropped before the group's next run (Petr, 2026-11-28)
+    const hero = coop.localHero();
+    if (hero === null) return;
+    gearFrom = "end";
+    end.hide();
+    gearScreen.open(hero, lang);
   });
   menu.setLang(lang);
   let ended = false;
