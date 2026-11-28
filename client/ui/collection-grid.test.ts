@@ -20,8 +20,8 @@ describe("collection grid", () => {
     const rank = ["mythic", "legendary", "epic", "rare", "common"];
     const ranks = entries.map((entry) => rank.indexOf(entry.item.rarity));
     expect(ranks).toEqual([...ranks].sort((a, b) => a - b));
-    const epics = entries.filter((entry) => entry.item.rarity === "epic").map((entry) => entry.item.id);
-    expect(epics).toEqual(data.items.filter((i) => i.rarity === "epic").map((i) => i.id));
+    const mythics = entries.filter((entry) => entry.item.rarity === "mythic").map((entry) => entry.item.id);
+    expect(mythics).toEqual(data.items.filter((i) => i.rarity === "mythic").map((i) => i.id));
   });
 
   it("a filter keeps one slot type", () => {
@@ -118,14 +118,16 @@ describe("collection grid", () => {
       expect(list.total).toBe(tight.items.length + 10);
     });
 
-    it("a random item nobody wears is salvageable, a worn or named one is not", () => {
+    it("an owned item nobody wears is salvageable, named too (2026-11-28); a worn or unowned one is not", () => {
       let save = rolledSave(3);
       save = equip(save, data, "sparkshot", 2);
+      save = grantNamed(save, data, "skysplitter", 2);
       const entries = gridEntries(data, save, "stonehorn", "all");
       const of = (uid: number) => entries.find((entry) => entry.uid === uid)!;
       expect(of(1).salvageable).toBe(true);
       expect(of(2).salvageable).toBe(false);
-      expect(entries.filter((entry) => !entry.rolled).every((entry) => !entry.salvageable)).toBe(true);
+      expect(entries.find((entry) => entry.item.id === "skysplitter")!.salvageable).toBe(true);
+      expect(entries.filter((entry) => !entry.owned).every((entry) => !entry.salvageable)).toBe(true);
     });
   });
 });

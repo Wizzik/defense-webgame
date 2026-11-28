@@ -632,13 +632,10 @@ describe("item and gear schemas", () => {
     expect(errorMessage(other)).toContain('"grunt" is not a boss');
   });
 
-  it("needs exactly one common item for every slot type", () => {
-    const missing = fixture();
-    missing.items.pop();
-    expect(errorMessage(missing)).toContain("items: 0 common items of type offHand, expected 1");
-    const twice = fixture();
-    twice.items.push({ ...twice.items[0], id: "second-head" });
-    expect(errorMessage(twice)).toContain("items: 2 common items of type head, expected 1");
+  it("needs no common item of a slot type (named items are legendary and mythic since 2026-11-28)", () => {
+    const data = fixture();
+    data.items = data.items.filter((item: { slotType: string }) => item.slotType !== "offHand");
+    expect(() => validateGameData(data)).not.toThrow();
   });
 
   it("enemy gold defaults to 0 and must not be negative", () => {

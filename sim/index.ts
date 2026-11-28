@@ -27,7 +27,7 @@ export { PROJECTILE_CAPACITY, ProjectileStore, RETARGET_RANGE, updateProjectiles
 export { stateHash } from "./hash";
 export { GearFx } from "./gear-effects";
 export {
-  basicItemIndex, debugWear, EMPTY_ITEM, GearState, itemStatAt, MAX_ROWS, recomputeGear, ROLLED_ITEM, rolledAt, SLOT_COUNT,
+  debugWear, EMPTY_ITEM, GearState, itemStatAt, MAX_ROWS, recomputeGear, ROLLED_ITEM, rolledAt, SLOT_COUNT,
   SLOT_IDS, slotTypeOf, wearNamed, wearRolled, wornRarity,
 } from "./gear";
 export type { GearBonus, LoadoutEntry, RolledItem, SlotId } from "./gear";

@@ -86,7 +86,12 @@ describe("chest compare lines", () => {
 
   it("a legendary or mythic effect goes under its own column", () => {
     const { data, gear } = setup();
-    gear.item[14] = data.items.findIndex((i) => i.slotType === "mainHand" && i.rarity === "common");
+    // named items have an effect each since 2026-11-28: a plain blade for the side without one
+    data.items.push({
+      id: "test-blade", name: { en: "Test Blade", cs: "Zkušební čepel" }, slotType: "mainHand", rarity: "common",
+      stats: [{ stat: "damage", value: 0.03 }],
+    });
+    gear.item[14] = data.items.length - 1;
     gear.temp[14] = 1;
     const sword = data.items.findIndex((i) => i.id === "skysplitter");
     const info = compareLines("cs", data, gear, { slot: 14, item: sword, action: ChestAction.Choice });
@@ -102,7 +107,7 @@ describe("chest compare lines", () => {
 
   it("a rolled item's affix rows carry their tier, its base row none, and its rarity says random", () => {
     const { data, gear } = setup();
-    gear.item[0] = data.items.findIndex((i) => i.slotType === "head" && i.rarity === "common");
+    gear.item[0] = data.items.findIndex((i) => i.id === "test-hood");
     const rolled = rollItem(data, new Rng(5), "head", "epic", 9, "str");
     const info = compareLines("en", data, gear, { slot: 0, item: -1, action: ChestAction.Choice, rolled });
     expect(info.take.rarityName).toBe("Epic random item");

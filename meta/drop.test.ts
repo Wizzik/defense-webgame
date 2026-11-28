@@ -73,7 +73,9 @@ describe("boss drops", () => {
       row.all++;
       if (drop.kind === "new") row.named++;
     }
-    for (const rarity of ["epic", "legendary"] as const) {
+    // no named item is epic any more (2026-11-28): every epic drop is a random item
+    expect(counts.epic!.named).toBe(0);
+    for (const rarity of ["legendary", "mythic"] as const) {
       const share = counts[rarity]!.named / counts[rarity]!.all;
       expect(share).toBeGreaterThan(data.rules.loot.namedShare[rarity] - 0.05);
       expect(share).toBeLessThan(data.rules.loot.namedShare[rarity] + 0.05);

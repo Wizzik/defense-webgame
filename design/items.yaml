@@ -1,7 +1,10 @@
 # Items (gear). The order is the item index in the game: add new items at the end of their rarity block only
 # before a release that may drop saved loadouts by index; saved data uses ids, so the order is free otherwise.
 # slotType: one of the 14 types (a ring fits ring1 and ring2, a trinket trinket1 and trinket2).
-# rarity: common (1 stat row), rare (2), epic (3), legendary (4), mythic (5).
+# rarity: legendary (4 stat rows) or mythic (5). Named items have no lower rarity (Petr, 2026-11-28: the former common
+#   and rare items are legendary, the epics mythic but in trinket, mainHand and offHand, which became legendary);
+#   common to epic drops and chest cards are random items (design/item-bases.yaml). The rows below the item budgets
+#   for common to epic still price random items (budget below).
 # stats: values at item level 1. damage, attackSpeed, moveSpeed, spellPower, goldFind, magicFind and lifesteal are shares
 #   (0.05 = 5 %).
 #   Budget per item at level 1, summed over the rows: common 6, rare 12, epic 20, legendary 30, mythic 42 points;
@@ -10,79 +13,488 @@
 #   drops and chests and Sustain). Lifesteal replaced one row of the same points on ten items (spec 2026-11-19 sustain).
 #   The stats random items brought (crit chance and damage, dodge, damage taken, thorns, cooldown speed, ultimate
 #   cooldown, area size) are priced in design/affixes.yaml (`unit`); a named item may use them at those prices.
+# effect: every named item has one (sim/gear-effects.ts, 11 kinds; one kind does not stack, the later slot counts).
+#   A mythic has the stronger version of its kind (about 1.5 x the legendary's, or a shorter cooldown). effect.params
+#   are fixed: an effect does not grow with the item level. effect.text is the tooltip line and must say the same numbers.
+#   New items of 2026-11-28 keep their old rows first, every row the same share of the budget (whole points), and add
+#   rows of their theme (scratchpad script of that day; docs/DECISIONS.md, Named items only legendary / mythic).
 # source: optional, the map's item category that inspired the item (traceability only, never written to data/generated).
 # Names are our own; nothing is copied from the map.
 
-# Common: one per slot type, so a chest card of any slot can fall to common.
-- { id: travelers-hood, name: { en: "Traveler's Hood", cs: "Poutníkova kápě" }, slotType: head, rarity: common, stats: [{ stat: int, value: 3 }] }
-- { id: copper-pendant, name: { en: "Copper Pendant", cs: "Měděný přívěsek" }, slotType: neck, rarity: common, stats: [{ stat: magnet, value: 60 }] }
-- { id: padded-mantle, name: { en: "Padded Mantle", cs: "Vycpané nárameníky" }, slotType: shoulders, rarity: common, stats: [{ stat: str, value: 3 }] }
-- { id: road-cloak, name: { en: "Road Cloak", cs: "Cestovní plášť" }, slotType: back, rarity: common, stats: [{ stat: agi, value: 3 }] }
-- { id: quilted-vest, name: { en: "Quilted Vest", cs: "Prošívaná vesta" }, slotType: chest, rarity: common, stats: [{ stat: hp, value: 72 }] }
-- { id: leather-bracers, name: { en: "Leather Bracers", cs: "Kožené nátepníky" }, slotType: wrist, rarity: common, stats: [{ stat: agi, value: 3 }] }
-- { id: work-gloves, name: { en: "Work Gloves", cs: "Pracovní rukavice" }, slotType: hands, rarity: common, stats: [{ stat: str, value: 3 }] }
-- { id: rope-belt, name: { en: "Rope Belt", cs: "Provazový opasek" }, slotType: waist, rarity: common, stats: [{ stat: int, value: 3 }] }
-- { id: patched-trousers, name: { en: "Patched Trousers", cs: "Záplatované kalhoty" }, slotType: legs, rarity: common, stats: [{ stat: hp, value: 72 }] }
-- { id: walking-boots, name: { en: "Walking Boots", cs: "Pochodové boty" }, slotType: feet, rarity: common, stats: [{ stat: moveSpeed, value: 0.06 }] }
-- { id: tin-ring, name: { en: "Tin Ring", cs: "Cínový prsten" }, slotType: ring, rarity: common, stats: [{ stat: magicFind, value: 0.12 }] }
-- { id: lucky-pebble, name: { en: "Lucky Pebble", cs: "Oblázek pro štěstí" }, slotType: trinket, rarity: common, stats: [{ stat: int, value: 3 }] }
-- { id: militia-blade, name: { en: "Militia Blade", cs: "Domobranecká čepel" }, slotType: mainHand, rarity: common, stats: [{ stat: damage, value: 0.03 }] }
-- { id: plank-buckler, name: { en: "Plank Buckler", cs: "Prkenný štítek" }, slotType: offHand, rarity: common, stats: [{ stat: str, value: 3 }] }
-
-# Rare: two stat rows, 12 points.
-- { id: wardens-helm, name: { en: "Warden's Helm", cs: "Strážcova přilba" }, slotType: head, rarity: rare, stats: [{ stat: str, value: 3.5 }, { stat: hp, value: 60 }] }
-- { id: scholars-circlet, name: { en: "Scholar's Circlet", cs: "Učencova čelenka" }, slotType: head, rarity: rare, stats: [{ stat: int, value: 3.5 }, { stat: spellPower, value: 0.025 }] }
-- { id: falcon-charm, name: { en: "Falcon Charm", cs: "Sokolí amulet" }, slotType: neck, rarity: rare, stats: [{ stat: agi, value: 3.5 }, { stat: magicFind, value: 0.10 }] }
-- { id: bastion-pauldrons, name: { en: "Bastion Pauldrons", cs: "Baštové nárameníky" }, slotType: shoulders, rarity: rare, stats: [{ stat: str, value: 3 }, { stat: armor, value: 1.5 }] }
-- { id: starwoven-mantle, name: { en: "Starwoven Mantle", cs: "Hvězdný přehoz" }, slotType: shoulders, rarity: rare, stats: [{ stat: int, value: 4 }, { stat: regen, value: 0.4 }] }
-- { id: windrunner-cloak, name: { en: "Cloak of the Tailwind", cs: "Plášť příznivého větru" }, slotType: back, rarity: rare, stats: [{ stat: agi, value: 3.5 }, { stat: moveSpeed, value: 0.05 }] }
-- { id: guardsmans-cuirass, name: { en: "Guardsman's Cuirass", cs: "Kyrys gardisty" }, slotType: chest, rarity: rare, stats: [{ stat: hp, value: 84 }, { stat: str, value: 2.5 }] }
-- { id: robe-of-quiet-waters, name: { en: "Robe of Quiet Waters", cs: "Roucho tichých vod" }, slotType: chest, rarity: rare, stats: [{ stat: hp, value: 72 }, { stat: int, value: 3 }] }
-- { id: archers-bracers, name: { en: "Archer's Bracers", cs: "Lučištníkovy nátepníky" }, slotType: wrist, rarity: rare, stats: [{ stat: agi, value: 3.5 }, { stat: attackSpeed, value: 0.025 }] }
-- { id: masons-grip, name: { en: "Mason's Grip", cs: "Zedníkův stisk" }, slotType: hands, rarity: rare, stats: [{ stat: str, value: 3.5 }, { stat: lifesteal, value: 0.0125 }] }
-- { id: quickfinger-gloves, name: { en: "Quickfinger Gloves", cs: "Rukavice hbitých prstů" }, slotType: hands, rarity: rare, stats: [{ stat: attackSpeed, value: 0.03 }, { stat: agi, value: 3 }] }
-- { id: runed-sash, name: { en: "Runed Sash", cs: "Runová šerpa" }, slotType: waist, rarity: rare, stats: [{ stat: int, value: 4 }, { stat: hp, value: 48 }] }
-- { id: marching-greaves, name: { en: "Marching Greaves", cs: "Pochodové holenice" }, slotType: legs, rarity: rare, stats: [{ stat: hp, value: 84 }, { stat: str, value: 2.5 }] }
-- { id: trackers-leggings, name: { en: "Tracker's Leggings", cs: "Stopařovy nohavice" }, slotType: legs, rarity: rare, stats: [{ stat: agi, value: 3.5 }, { stat: hp, value: 60 }] }
-- { id: swiftstep-boots, name: { en: "Boots of the Quick Mile", cs: "Boty rychlé míle" }, slotType: feet, rarity: rare, stats: [{ stat: moveSpeed, value: 0.07 }, { stat: agi, value: 2.5 }] }
-- { id: pilgrims-sandals, name: { en: "Pilgrim's Sandals", cs: "Poutnické sandály" }, slotType: feet, rarity: rare, stats: [{ stat: moveSpeed, value: 0.06 }, { stat: int, value: 3 }] }
-- { id: band-of-resolve, name: { en: "Band of Resolve", cs: "Prsten odhodlání" }, slotType: ring, rarity: rare, stats: [{ stat: str, value: 3.5 }, { stat: magicFind, value: 0.10 }] }
-- { id: moonlit-signet, name: { en: "Moonlit Signet", cs: "Pečeť měsíčního svitu" }, slotType: ring, rarity: rare, stats: [{ stat: int, value: 3.5 }, { stat: lifesteal, value: 0.0125 }] }
-- { id: hunters-whistle, name: { en: "Hunter's Whistle", cs: "Lovecká píšťalka" }, slotType: trinket, rarity: rare, stats: [{ stat: agi, value: 3 }, { stat: magicFind, value: 0.12 }] }
-- { id: vial-of-clear-thought, name: { en: "Vial of Clear Thought", cs: "Lahvička jasné mysli" }, slotType: trinket, rarity: rare, stats: [{ stat: int, value: 3.5 }, { stat: lifesteal, value: 0.0125 }] }
-- { id: soldiers-longsword, name: { en: "Soldier's Longsword", cs: "Vojákův dlouhý meč" }, slotType: mainHand, rarity: rare, stats: [{ stat: damage, value: 0.035 }, { stat: str, value: 2.5 }] }
-- { id: twin-edged-glaive, name: { en: "Twin-edged Glaive", cs: "Dvoubřitá glévie" }, slotType: mainHand, rarity: rare, stats: [{ stat: damage, value: 0.03 }, { stat: agi, value: 3 }] }
-- { id: apprentices-staff, name: { en: "Apprentice's Staff", cs: "Učednická hůl" }, slotType: mainHand, rarity: rare, stats: [{ stat: spellPower, value: 0.035 }, { stat: int, value: 2.5 }] }
-- { id: oaken-shield, name: { en: "Oaken Shield", cs: "Dubový štít" }, slotType: offHand, rarity: rare, stats: [{ stat: lifesteal, value: 0.0175 }, { stat: str, value: 2.5 }] }
-
-# Epic: three stat rows, 20 points.
-- { id: helm-of-the-unbroken-line, name: { en: "Helm of the Unbroken Line", cs: "Přilba neprolomené linie" }, slotType: head, rarity: epic, stats: [{ stat: str, value: 4.5 }, { stat: hp, value: 72 }, { stat: armor, value: 1.25 }] }
-- { id: hood-of-the-night-watch, name: { en: "Hood of the Night Watch", cs: "Kápě noční hlídky" }, slotType: head, rarity: epic, stats: [{ stat: agi, value: 4.5 }, { stat: attackSpeed, value: 0.03 }, { stat: hp, value: 60 }] }
-- { id: pendant-of-the-deep-well, name: { en: "Pendant of the Deep Well", cs: "Přívěsek hluboké studny" }, slotType: neck, rarity: epic, stats: [{ stat: int, value: 4.5 }, { stat: spellPower, value: 0.03 }, { stat: magicFind, value: 0.10 }] }
-- { id: torc-of-the-old-guard, name: { en: "Torc of the Old Guard", cs: "Nákrčník staré gardy" }, slotType: neck, rarity: epic, stats: [{ stat: str, value: 4.5 }, { stat: regen, value: 0.6 }, { stat: hp, value: 60 }] }
-- { id: raven-feather-spaulders, name: { en: "Raven-feather Spaulders", cs: "Nárameníky z havraního peří" }, slotType: shoulders, rarity: epic, stats: [{ stat: agi, value: 4.5 }, { stat: damage, value: 0.03 }, { stat: moveSpeed, value: 0.05 }] }
-- { id: cloak-of-falling-stars, name: { en: "Cloak of Falling Stars", cs: "Plášť padajících hvězd" }, slotType: back, rarity: epic, stats: [{ stat: int, value: 4.5 }, { stat: spellPower, value: 0.03 }, { stat: hp, value: 60 }] }
-- { id: banner-cloak-of-the-keep, name: { en: "Banner-cloak of the Keep", cs: "Praporový plášť tvrze" }, slotType: back, rarity: epic, stats: [{ stat: str, value: 4 }, { stat: hp, value: 84 }, { stat: regen, value: 0.5 }] }
-- { id: night-trackers-jerkin, name: { en: "Night Tracker's Jerkin", cs: "Kazajka nočního stopaře" }, slotType: chest, rarity: epic, stats: [{ stat: agi, value: 4.5 }, { stat: hp, value: 72 }, { stat: attackSpeed, value: 0.025 }] }
-- { id: bulwark-plate, name: { en: "Bulwark Plate", cs: "Plát opory" }, slotType: chest, rarity: epic, stats: [{ stat: hp, value: 108 }, { stat: str, value: 3 }, { stat: armor, value: 1.25 }] }
-- { id: bindings-of-the-high-tide, name: { en: "Bindings of the High Tide", cs: "Pouta přílivu" }, slotType: wrist, rarity: epic, stats: [{ stat: int, value: 4.5 }, { stat: spellPower, value: 0.03 }, { stat: regen, value: 0.5 }] }
-- { id: siegebreaker-vambraces, name: { en: "Siegebreaker Vambraces", cs: "Nátepníky lamače obležení" }, slotType: wrist, rarity: epic, stats: [{ stat: str, value: 4.5 }, { stat: damage, value: 0.03 }, { stat: lifesteal, value: 0.0125 }] }
-- { id: weavers-gloves, name: { en: "Weaver's Gloves", cs: "Tkalcovy rukavice" }, slotType: hands, rarity: epic, stats: [{ stat: int, value: 4.5 }, { stat: spellPower, value: 0.035 }, { stat: lifesteal, value: 0.01 }] }
-- { id: girdle-of-the-mountain, name: { en: "Girdle of the Mountain", cs: "Horský pás" }, slotType: waist, rarity: epic, stats: [{ stat: str, value: 4.5 }, { stat: hp, value: 84 }, { stat: armor, value: 1 }] }
-- { id: belt-of-many-knives, name: { en: "Belt of Many Knives", cs: "Opasek mnoha nožů" }, slotType: waist, rarity: epic, stats: [{ stat: agi, value: 4.5 }, { stat: damage, value: 0.03 }, { stat: magicFind, value: 0.10 }] }
-- { id: leggings-of-the-moon-court, name: { en: "Leggings of the Moon Court", cs: "Nohavice měsíčního dvora" }, slotType: legs, rarity: epic, stats: [{ stat: int, value: 4.5 }, { stat: hp, value: 72 }, { stat: spellPower, value: 0.025 }] }
-- { id: treads-of-the-vanguard, name: { en: "Treads of the Vanguard", cs: "Boty předvoje" }, slotType: feet, rarity: epic, stats: [{ stat: moveSpeed, value: 0.07 }, { stat: str, value: 4 }, { stat: hp, value: 60 }] }
-- { id: boots-of-the-silent-road, name: { en: "Boots of the Silent Road", cs: "Boty tiché cesty" }, slotType: feet, rarity: epic, stats: [{ stat: moveSpeed, value: 0.08 }, { stat: agi, value: 4 }, { stat: attackSpeed, value: 0.02 }] }
-- { id: ring-of-the-keen-eye, name: { en: "Ring of the Keen Eye", cs: "Prsten bystrého oka" }, slotType: ring, rarity: epic, stats: [{ stat: agi, value: 4 }, { stat: lifesteal, value: 0.015 }, { stat: magicFind, value: 0.12 }] }
-- { id: seal-of-the-archivist, name: { en: "Seal of the Archivist", cs: "Pečeť archiváře" }, slotType: ring, rarity: epic, stats: [{ stat: int, value: 4 }, { stat: spellPower, value: 0.03 }, { stat: magicFind, value: 0.12 }] }
-- { id: astrolabe-shard, name: { en: "Astrolabe Shard", cs: "Úlomek astrolábu" }, slotType: trinket, rarity: epic, stats: [{ stat: int, value: 4 }, { stat: spellPower, value: 0.035 }, { stat: lifesteal, value: 0.0125 }] }
-- { id: compass-of-the-lost-scout, name: { en: "Compass of the Lost Scout", cs: "Kompas ztraceného zvěda" }, slotType: trinket, rarity: epic, stats: [{ stat: agi, value: 4 }, { stat: moveSpeed, value: 0.06 }, { stat: magicFind, value: 0.12 }] }
-- { id: greatblade-of-the-keep, name: { en: "Greatblade of the Keep", cs: "Velký meč tvrze" }, slotType: mainHand, rarity: epic, stats: [{ stat: damage, value: 0.045 }, { stat: str, value: 3.5 }, { stat: lifesteal, value: 0.01 }] }
-- { id: staff-of-the-low-tide, name: { en: "Staff of the Low Tide", cs: "Hůl odlivu" }, slotType: mainHand, rarity: epic, stats: [{ stat: spellPower, value: 0.045 }, { stat: int, value: 3.5 }, { stat: lifesteal, value: 0.01 }] }
-- { id: parrying-dagger, name: { en: "Parrying Dagger", cs: "Krycí dýka" }, slotType: offHand, rarity: epic, stats: [{ stat: agi, value: 4 }, { stat: attackSpeed, value: 0.035 }, { stat: armor, value: 1.25 }] }
-
-# Legendary: four stat rows, 30 points, and a special effect (sim/gear-effects.ts). Weapons, off-hands and trinkets only.
-# effect.params are fixed: an effect does not grow with the item level. effect.text is the tooltip line and must say the same numbers.
+# Legendary: four stat rows, 30 points, and a special effect (sim/gear-effects.ts).
+- id: travelers-hood
+  name: { en: "Traveler's Hood", cs: "Poutníkova kápě" }
+  slotType: head
+  rarity: legendary
+  stats: [{ stat: int, value: 4 }, { stat: spellPower, value: 0.04 }, { stat: hp, value: 84 }, { stat: cooldownSpeed, value: 0.035 }]
+  effect:
+    kind: haste_on_elite_kill
+    params: { cooldownSpeed: 1.5, seconds: 8 }
+    text:
+      en: "When an elite or a boss falls, your spells recharge 50 % faster for 8 s."
+      cs: "Když padne elita nebo boss, kouzla se ti 8 s dobíjejí o 50 % rychleji."
+- id: copper-pendant
+  name: { en: "Copper Pendant", cs: "Měděný přívěsek" }
+  slotType: neck
+  rarity: legendary
+  stats: [{ stat: magnet, value: 80 }, { stat: int, value: 4 }, { stat: spellPower, value: 0.035 }, { stat: magicFind, value: 0.14 }]
+  effect:
+    kind: gold_heals_castle
+    params: { perGold: 1.25 }
+    text:
+      en: "Every gold you collect heals the castle by 1.25 HP."
+      cs: "Každý sebraný zlaťák vyléčí hrad o 1,25 HP."
+- id: padded-mantle
+  name: { en: "Padded Mantle", cs: "Vycpané nárameníky" }
+  slotType: shoulders
+  rarity: legendary
+  stats: [{ stat: str, value: 4 }, { stat: armor, value: 2 }, { stat: hp, value: 84 }, { stat: regen, value: 0.7 }]
+  effect:
+    kind: low_hp_shield
+    params: { threshold: 0.3, seconds: 3, cooldown: 45 }
+    text:
+      en: "Under 30 % HP you and the castle take no damage for 3 s. Works once in 48 s."
+      cs: "Pod 30 % HP nedostáváš ty ani hrad 3 s žádné poškození. Funguje jednou za 48 s."
+- id: road-cloak
+  name: { en: "Road Cloak", cs: "Cestovní plášť" }
+  slotType: back
+  rarity: legendary
+  stats: [{ stat: agi, value: 4 }, { stat: moveSpeed, value: 0.08 }, { stat: dodge, value: 0.035 }, { stat: attackSpeed, value: 0.035 }]
+  effect:
+    kind: chain_on_attack
+    params: { every: 4, damage: 90, jumps: 3, range: 350 }
+    text:
+      en: "Every 4th attack throws lightning that jumps on to 3 enemies."
+      cs: "Každý 4. útok vyšle blesk, který přeskočí na 3 nepřátele."
+- id: quilted-vest
+  name: { en: "Quilted Vest", cs: "Prošívaná vesta" }
+  slotType: chest
+  rarity: legendary
+  stats: [{ stat: hp, value: 96 }, { stat: str, value: 4 }, { stat: armor, value: 1.75 }, { stat: damageTaken, value: 0.035 }]
+  effect:
+    kind: low_hp_shield
+    params: { threshold: 0.3, seconds: 3, cooldown: 45 }
+    text:
+      en: "Under 30 % HP you and the castle take no damage for 3 s. Works once in 48 s."
+      cs: "Pod 30 % HP nedostáváš ty ani hrad 3 s žádné poškození. Funguje jednou za 48 s."
+- id: leather-bracers
+  name: { en: "Leather Bracers", cs: "Kožené nátepníky" }
+  slotType: wrist
+  rarity: legendary
+  stats: [{ stat: agi, value: 4 }, { stat: attackSpeed, value: 0.04 }, { stat: critChance, value: 0.07 }, { stat: damage, value: 0.035 }]
+  effect:
+    kind: chain_on_attack
+    params: { every: 4, damage: 90, jumps: 3, range: 350 }
+    text:
+      en: "Every 4th attack throws lightning that jumps on to 3 enemies."
+      cs: "Každý 4. útok vyšle blesk, který přeskočí na 3 nepřátele."
+- id: work-gloves
+  name: { en: "Work Gloves", cs: "Pracovní rukavice" }
+  slotType: hands
+  rarity: legendary
+  stats: [{ stat: str, value: 4 }, { stat: hp, value: 96 }, { stat: armor, value: 1.75 }, { stat: damage, value: 0.035 }]
+  effect:
+    kind: low_hp_shield
+    params: { threshold: 0.3, seconds: 3, cooldown: 45 }
+    text:
+      en: "Under 30 % HP you and the castle take no damage for 3 s. Works once in 48 s."
+      cs: "Pod 30 % HP nedostáváš ty ani hrad 3 s žádné poškození. Funguje jednou za 48 s."
+- id: rope-belt
+  name: { en: "Rope Belt", cs: "Provazový opasek" }
+  slotType: waist
+  rarity: legendary
+  stats: [{ stat: int, value: 4 }, { stat: hp, value: 96 }, { stat: spellPower, value: 0.035 }, { stat: areaSize, value: 0.035 }]
+  effect:
+    kind: haste_on_elite_kill
+    params: { cooldownSpeed: 1.5, seconds: 8 }
+    text:
+      en: "When an elite or a boss falls, your spells recharge 50 % faster for 8 s."
+      cs: "Když padne elita nebo boss, kouzla se ti 8 s dobíjejí o 50 % rychleji."
+- id: patched-trousers
+  name: { en: "Patched Trousers", cs: "Záplatované kalhoty" }
+  slotType: legs
+  rarity: legendary
+  stats: [{ stat: hp, value: 96 }, { stat: str, value: 4 }, { stat: armor, value: 1.75 }, { stat: regen, value: 0.7 }]
+  effect:
+    kind: low_hp_shield
+    params: { threshold: 0.3, seconds: 3, cooldown: 45 }
+    text:
+      en: "Under 30 % HP you and the castle take no damage for 3 s. Works once in 48 s."
+      cs: "Pod 30 % HP nedostáváš ty ani hrad 3 s žádné poškození. Funguje jednou za 48 s."
+- id: walking-boots
+  name: { en: "Walking Boots", cs: "Pochodové boty" }
+  slotType: feet
+  rarity: legendary
+  stats: [{ stat: moveSpeed, value: 0.08 }, { stat: agi, value: 4 }, { stat: attackSpeed, value: 0.035 }, { stat: dodge, value: 0.035 }]
+  effect:
+    kind: chain_on_attack
+    params: { every: 4, damage: 90, jumps: 3, range: 350 }
+    text:
+      en: "Every 4th attack throws lightning that jumps on to 3 enemies."
+      cs: "Každý 4. útok vyšle blesk, který přeskočí na 3 nepřátele."
+- id: tin-ring
+  name: { en: "Tin Ring", cs: "Cínový prsten" }
+  slotType: ring
+  rarity: legendary
+  stats: [{ stat: magicFind, value: 0.16 }, { stat: agi, value: 4 }, { stat: lifesteal, value: 0.0175 }, { stat: critChance, value: 0.07 }]
+  effect:
+    kind: gold_heals_castle
+    params: { perGold: 1.25 }
+    text:
+      en: "Every gold you collect heals the castle by 1.25 HP."
+      cs: "Každý sebraný zlaťák vyléčí hrad o 1,25 HP."
+- id: lucky-pebble
+  name: { en: "Lucky Pebble", cs: "Oblázek pro štěstí" }
+  slotType: trinket
+  rarity: legendary
+  stats: [{ stat: int, value: 4 }, { stat: spellPower, value: 0.04 }, { stat: lifesteal, value: 0.0175 }, { stat: cooldownSpeed, value: 0.035 }]
+  effect:
+    kind: death_burst
+    params: { chance: 0.2, damage: 60, radius: 180 }
+    text:
+      en: "Enemies you kill have a 20 % chance to burst and hurt the enemies around them."
+      cs: "Nepřítel, kterého zabiješ, má 20% šanci vybuchnout a zranit nepřátele kolem sebe."
+- id: militia-blade
+  name: { en: "Militia Blade", cs: "Domobranecká čepel" }
+  slotType: mainHand
+  rarity: legendary
+  stats: [{ stat: damage, value: 0.04 }, { stat: str, value: 4 }, { stat: lifesteal, value: 0.0175 }, { stat: critDamage, value: 0.35 }]
+  effect:
+    kind: nova_when_hit
+    params: { cooldown: 4, damage: 150, radius: 250 }
+    text:
+      en: "When you are hit, a blast hurts every enemy around you. Works once in 4 s."
+      cs: "Když tě něco zasáhne, výbuch zraní všechny nepřátele kolem tebe. Funguje jednou za 4 s."
+- id: plank-buckler
+  name: { en: "Plank Buckler", cs: "Prkenný štítek" }
+  slotType: offHand
+  rarity: legendary
+  stats: [{ stat: str, value: 4 }, { stat: armor, value: 2 }, { stat: hp, value: 84 }, { stat: regen, value: 0.7 }]
+  effect:
+    kind: nova_when_hit
+    params: { cooldown: 4, damage: 150, radius: 250 }
+    text:
+      en: "When you are hit, a blast hurts every enemy around you. Works once in 4 s."
+      cs: "Když tě něco zasáhne, výbuch zraní všechny nepřátele kolem tebe. Funguje jednou za 4 s."
+- id: wardens-helm
+  name: { en: "Warden's Helm", cs: "Strážcova přilba" }
+  slotType: head
+  rarity: legendary
+  stats: [{ stat: str, value: 4 }, { stat: hp, value: 96 }, { stat: armor, value: 1.75 }, { stat: regen, value: 0.7 }]
+  effect:
+    kind: nova_when_hit
+    params: { cooldown: 4, damage: 150, radius: 250 }
+    text:
+      en: "When you are hit, a blast hurts every enemy around you. Works once in 4 s."
+      cs: "Když tě něco zasáhne, výbuch zraní všechny nepřátele kolem tebe. Funguje jednou za 4 s."
+- id: scholars-circlet
+  name: { en: "Scholar's Circlet", cs: "Učencova čelenka" }
+  slotType: head
+  rarity: legendary
+  stats: [{ stat: int, value: 4 }, { stat: spellPower, value: 0.04 }, { stat: hp, value: 84 }, { stat: cooldownSpeed, value: 0.035 }]
+  effect:
+    kind: death_burst
+    params: { chance: 0.2, damage: 60, radius: 180 }
+    text:
+      en: "Enemies you kill have a 20 % chance to burst and hurt the enemies around them."
+      cs: "Nepřítel, kterého zabiješ, má 20% šanci vybuchnout a zranit nepřátele kolem sebe."
+- id: falcon-charm
+  name: { en: "Falcon Charm", cs: "Sokolí amulet" }
+  slotType: neck
+  rarity: legendary
+  stats: [{ stat: agi, value: 4 }, { stat: magicFind, value: 0.16 }, { stat: critChance, value: 0.07 }, { stat: magnet, value: 70 }]
+  effect:
+    kind: chain_on_attack
+    params: { every: 4, damage: 90, jumps: 3, range: 350 }
+    text:
+      en: "Every 4th attack throws lightning that jumps on to 3 enemies."
+      cs: "Každý 4. útok vyšle blesk, který přeskočí na 3 nepřátele."
+- id: bastion-pauldrons
+  name: { en: "Bastion Pauldrons", cs: "Baštové nárameníky" }
+  slotType: shoulders
+  rarity: legendary
+  stats: [{ stat: str, value: 4 }, { stat: armor, value: 2 }, { stat: hp, value: 84 }, { stat: regen, value: 0.7 }]
+  effect:
+    kind: nova_when_hit
+    params: { cooldown: 4, damage: 150, radius: 250 }
+    text:
+      en: "When you are hit, a blast hurts every enemy around you. Works once in 4 s."
+      cs: "Když tě něco zasáhne, výbuch zraní všechny nepřátele kolem tebe. Funguje jednou za 4 s."
+- id: starwoven-mantle
+  name: { en: "Starwoven Mantle", cs: "Hvězdný přehoz" }
+  slotType: shoulders
+  rarity: legendary
+  stats: [{ stat: int, value: 4 }, { stat: regen, value: 0.8 }, { stat: spellPower, value: 0.035 }, { stat: areaSize, value: 0.035 }]
+  effect:
+    kind: haste_on_elite_kill
+    params: { cooldownSpeed: 1.5, seconds: 8 }
+    text:
+      en: "When an elite or a boss falls, your spells recharge 50 % faster for 8 s."
+      cs: "Když padne elita nebo boss, kouzla se ti 8 s dobíjejí o 50 % rychleji."
+- id: windrunner-cloak
+  name: { en: "Cloak of the Tailwind", cs: "Plášť příznivého větru" }
+  slotType: back
+  rarity: legendary
+  stats: [{ stat: agi, value: 4 }, { stat: moveSpeed, value: 0.08 }, { stat: dodge, value: 0.035 }, { stat: attackSpeed, value: 0.035 }]
+  effect:
+    kind: elite_slayer
+    params: { share: 0.2 }
+    text:
+      en: "You deal 20 % more damage to elites and bosses."
+      cs: "Elitám a bossům dáváš o 20 % větší poškození."
+- id: guardsmans-cuirass
+  name: { en: "Guardsman's Cuirass", cs: "Kyrys gardisty" }
+  slotType: chest
+  rarity: legendary
+  stats: [{ stat: hp, value: 96 }, { stat: str, value: 4 }, { stat: armor, value: 1.75 }, { stat: damageTaken, value: 0.035 }]
+  effect:
+    kind: nova_when_hit
+    params: { cooldown: 4, damage: 150, radius: 250 }
+    text:
+      en: "When you are hit, a blast hurts every enemy around you. Works once in 4 s."
+      cs: "Když tě něco zasáhne, výbuch zraní všechny nepřátele kolem tebe. Funguje jednou za 4 s."
+- id: robe-of-quiet-waters
+  name: { en: "Robe of Quiet Waters", cs: "Roucho tichých vod" }
+  slotType: chest
+  rarity: legendary
+  stats: [{ stat: hp, value: 96 }, { stat: int, value: 4 }, { stat: spellPower, value: 0.035 }, { stat: regen, value: 0.7 }]
+  effect:
+    kind: haste_on_elite_kill
+    params: { cooldownSpeed: 1.5, seconds: 8 }
+    text:
+      en: "When an elite or a boss falls, your spells recharge 50 % faster for 8 s."
+      cs: "Když padne elita nebo boss, kouzla se ti 8 s dobíjejí o 50 % rychleji."
+- id: archers-bracers
+  name: { en: "Archer's Bracers", cs: "Lučištníkovy nátepníky" }
+  slotType: wrist
+  rarity: legendary
+  stats: [{ stat: agi, value: 4 }, { stat: attackSpeed, value: 0.04 }, { stat: critChance, value: 0.07 }, { stat: damage, value: 0.035 }]
+  effect:
+    kind: elite_slayer
+    params: { share: 0.2 }
+    text:
+      en: "You deal 20 % more damage to elites and bosses."
+      cs: "Elitám a bossům dáváš o 20 % větší poškození."
+- id: masons-grip
+  name: { en: "Mason's Grip", cs: "Zedníkův stisk" }
+  slotType: hands
+  rarity: legendary
+  stats: [{ stat: str, value: 4 }, { stat: lifesteal, value: 0.02 }, { stat: damage, value: 0.035 }, { stat: thorns, value: 0.35 }]
+  effect:
+    kind: heal_on_kill
+    params: { kills: 10, hp: 40 }
+    text:
+      en: "Every 10th kill heals you by 40 HP."
+      cs: "Každé 10. zabití tě vyléčí o 40 HP."
+- id: quickfinger-gloves
+  name: { en: "Quickfinger Gloves", cs: "Rukavice hbitých prstů" }
+  slotType: hands
+  rarity: legendary
+  stats: [{ stat: attackSpeed, value: 0.04 }, { stat: agi, value: 4 }, { stat: critDamage, value: 0.35 }, { stat: critChance, value: 0.07 }]
+  effect:
+    kind: elite_slayer
+    params: { share: 0.2 }
+    text:
+      en: "You deal 20 % more damage to elites and bosses."
+      cs: "Elitám a bossům dáváš o 20 % větší poškození."
+- id: runed-sash
+  name: { en: "Runed Sash", cs: "Runová šerpa" }
+  slotType: waist
+  rarity: legendary
+  stats: [{ stat: int, value: 4 }, { stat: hp, value: 96 }, { stat: spellPower, value: 0.035 }, { stat: areaSize, value: 0.035 }]
+  effect:
+    kind: death_burst
+    params: { chance: 0.2, damage: 60, radius: 180 }
+    text:
+      en: "Enemies you kill have a 20 % chance to burst and hurt the enemies around them."
+      cs: "Nepřítel, kterého zabiješ, má 20% šanci vybuchnout a zranit nepřátele kolem sebe."
+- id: marching-greaves
+  name: { en: "Marching Greaves", cs: "Pochodové holenice" }
+  slotType: legs
+  rarity: legendary
+  stats: [{ stat: hp, value: 96 }, { stat: str, value: 4 }, { stat: armor, value: 1.75 }, { stat: regen, value: 0.7 }]
+  effect:
+    kind: castle_ward
+    params: { share: 0.2 }
+    text:
+      en: "The castle takes 20 % less damage."
+      cs: "Hrad dostává o 20 % menší poškození."
+- id: trackers-leggings
+  name: { en: "Tracker's Leggings", cs: "Stopařovy nohavice" }
+  slotType: legs
+  rarity: legendary
+  stats: [{ stat: agi, value: 4 }, { stat: hp, value: 96 }, { stat: moveSpeed, value: 0.07 }, { stat: dodge, value: 0.035 }]
+  effect:
+    kind: elite_slayer
+    params: { share: 0.2 }
+    text:
+      en: "You deal 20 % more damage to elites and bosses."
+      cs: "Elitám a bossům dáváš o 20 % větší poškození."
+- id: swiftstep-boots
+  name: { en: "Boots of the Quick Mile", cs: "Boty rychlé míle" }
+  slotType: feet
+  rarity: legendary
+  stats: [{ stat: moveSpeed, value: 0.08 }, { stat: agi, value: 4 }, { stat: attackSpeed, value: 0.035 }, { stat: dodge, value: 0.035 }]
+  effect:
+    kind: elite_slayer
+    params: { share: 0.2 }
+    text:
+      en: "You deal 20 % more damage to elites and bosses."
+      cs: "Elitám a bossům dáváš o 20 % větší poškození."
+- id: pilgrims-sandals
+  name: { en: "Pilgrim's Sandals", cs: "Poutnické sandály" }
+  slotType: feet
+  rarity: legendary
+  stats: [{ stat: moveSpeed, value: 0.08 }, { stat: int, value: 4 }, { stat: spellPower, value: 0.035 }, { stat: cooldownSpeed, value: 0.035 }]
+  effect:
+    kind: death_burst
+    params: { chance: 0.2, damage: 60, radius: 180 }
+    text:
+      en: "Enemies you kill have a 20 % chance to burst and hurt the enemies around them."
+      cs: "Nepřítel, kterého zabiješ, má 20% šanci vybuchnout a zranit nepřátele kolem sebe."
+- id: band-of-resolve
+  name: { en: "Band of Resolve", cs: "Prsten odhodlání" }
+  slotType: ring
+  rarity: legendary
+  stats: [{ stat: str, value: 4 }, { stat: magicFind, value: 0.16 }, { stat: hp, value: 84 }, { stat: lifesteal, value: 0.0175 }]
+  effect:
+    kind: castle_ward
+    params: { share: 0.2 }
+    text:
+      en: "The castle takes 20 % less damage."
+      cs: "Hrad dostává o 20 % menší poškození."
+- id: moonlit-signet
+  name: { en: "Moonlit Signet", cs: "Pečeť měsíčního svitu" }
+  slotType: ring
+  rarity: legendary
+  stats: [{ stat: int, value: 4 }, { stat: lifesteal, value: 0.02 }, { stat: spellPower, value: 0.035 }, { stat: magicFind, value: 0.14 }]
+  effect:
+    kind: death_burst
+    params: { chance: 0.2, damage: 60, radius: 180 }
+    text:
+      en: "Enemies you kill have a 20 % chance to burst and hurt the enemies around them."
+      cs: "Nepřítel, kterého zabiješ, má 20% šanci vybuchnout a zranit nepřátele kolem sebe."
+- id: hunters-whistle
+  name: { en: "Hunter's Whistle", cs: "Lovecká píšťalka" }
+  slotType: trinket
+  rarity: legendary
+  stats: [{ stat: agi, value: 4 }, { stat: magicFind, value: 0.16 }, { stat: moveSpeed, value: 0.07 }, { stat: critChance, value: 0.07 }]
+  effect:
+    kind: splash_on_attack
+    params: { chance: 0.3, radius: 220, fraction: 0.6 }
+    text:
+      en: "Attacks have a 30 % chance to hit everyone around the target for 60 % of the damage."
+      cs: "Útok má 30% šanci zasáhnout všechny kolem cíle za 60 % poškození."
+- id: vial-of-clear-thought
+  name: { en: "Vial of Clear Thought", cs: "Lahvička jasné mysli" }
+  slotType: trinket
+  rarity: legendary
+  stats: [{ stat: int, value: 4 }, { stat: lifesteal, value: 0.02 }, { stat: spellPower, value: 0.035 }, { stat: cooldownSpeed, value: 0.035 }]
+  effect:
+    kind: castle_ward
+    params: { share: 0.2 }
+    text:
+      en: "The castle takes 20 % less damage."
+      cs: "Hrad dostává o 20 % menší poškození."
+- id: soldiers-longsword
+  name: { en: "Soldier's Longsword", cs: "Vojákův dlouhý meč" }
+  slotType: mainHand
+  rarity: legendary
+  stats: [{ stat: damage, value: 0.04 }, { stat: str, value: 4 }, { stat: lifesteal, value: 0.0175 }, { stat: critDamage, value: 0.35 }]
+  effect:
+    kind: castle_ward
+    params: { share: 0.2 }
+    text:
+      en: "The castle takes 20 % less damage."
+      cs: "Hrad dostává o 20 % menší poškození."
+- id: twin-edged-glaive
+  name: { en: "Twin-edged Glaive", cs: "Dvoubřitá glévie" }
+  slotType: mainHand
+  rarity: legendary
+  stats: [{ stat: damage, value: 0.04 }, { stat: agi, value: 4 }, { stat: attackSpeed, value: 0.035 }, { stat: critChance, value: 0.07 }]
+  effect:
+    kind: slow_aura
+    params: { radius: 350, slow: 0.25 }
+    text:
+      en: "Enemies near you walk 25 % slower."
+      cs: "Nepřátelé poblíž tebe chodí o 25 % pomaleji."
+- id: apprentices-staff
+  name: { en: "Apprentice's Staff", cs: "Učednická hůl" }
+  slotType: mainHand
+  rarity: legendary
+  stats: [{ stat: spellPower, value: 0.04 }, { stat: int, value: 4 }, { stat: lifesteal, value: 0.0175 }, { stat: cooldownSpeed, value: 0.035 }]
+  effect:
+    kind: gold_heals_castle
+    params: { perGold: 1.25 }
+    text:
+      en: "Every gold you collect heals the castle by 1.25 HP."
+      cs: "Každý sebraný zlaťák vyléčí hrad o 1,25 HP."
+- id: oaken-shield
+  name: { en: "Oaken Shield", cs: "Dubový štít" }
+  slotType: offHand
+  rarity: legendary
+  stats: [{ stat: lifesteal, value: 0.02 }, { stat: str, value: 4 }, { stat: armor, value: 1.75 }, { stat: hp, value: 84 }]
+  effect:
+    kind: castle_ward
+    params: { share: 0.2 }
+    text:
+      en: "The castle takes 20 % less damage."
+      cs: "Hrad dostává o 20 % menší poškození."
+- id: astrolabe-shard
+  name: { en: "Astrolabe Shard", cs: "Úlomek astrolábu" }
+  slotType: trinket
+  rarity: legendary
+  stats: [{ stat: int, value: 4 }, { stat: spellPower, value: 0.04 }, { stat: lifesteal, value: 0.0175 }, { stat: cooldownSpeed, value: 0.035 }]
+  effect:
+    kind: heal_on_kill
+    params: { kills: 10, hp: 40 }
+    text:
+      en: "Every 10th kill heals you by 40 HP."
+      cs: "Každé 10. zabití tě vyléčí o 40 HP."
+- id: compass-of-the-lost-scout
+  name: { en: "Compass of the Lost Scout", cs: "Kompas ztraceného zvěda" }
+  slotType: trinket
+  rarity: legendary
+  stats: [{ stat: agi, value: 4 }, { stat: moveSpeed, value: 0.08 }, { stat: magicFind, value: 0.14 }, { stat: critChance, value: 0.07 }]
+  effect:
+    kind: chain_on_attack
+    params: { every: 4, damage: 90, jumps: 3, range: 350 }
+    text:
+      en: "Every 4th attack throws lightning that jumps on to 3 enemies."
+      cs: "Každý 4. útok vyšle blesk, který přeskočí na 3 nepřátele."
+- id: greatblade-of-the-keep
+  name: { en: "Greatblade of the Keep", cs: "Velký meč tvrze" }
+  slotType: mainHand
+  rarity: legendary
+  stats: [{ stat: damage, value: 0.04 }, { stat: str, value: 4 }, { stat: lifesteal, value: 0.0175 }, { stat: critDamage, value: 0.35 }]
+  effect:
+    kind: heal_on_kill
+    params: { kills: 10, hp: 40 }
+    text:
+      en: "Every 10th kill heals you by 40 HP."
+      cs: "Každé 10. zabití tě vyléčí o 40 HP."
+- id: staff-of-the-low-tide
+  name: { en: "Staff of the Low Tide", cs: "Hůl odlivu" }
+  slotType: mainHand
+  rarity: legendary
+  stats: [{ stat: spellPower, value: 0.04 }, { stat: int, value: 4 }, { stat: lifesteal, value: 0.0175 }, { stat: cooldownSpeed, value: 0.035 }]
+  effect:
+    kind: low_hp_shield
+    params: { threshold: 0.3, seconds: 3, cooldown: 45 }
+    text:
+      en: "Under 30 % HP you and the castle take no damage for 3 s. Works once in 48 s."
+      cs: "Pod 30 % HP nedostáváš ty ani hrad 3 s žádné poškození. Funguje jednou za 48 s."
+- id: parrying-dagger
+  name: { en: "Parrying Dagger", cs: "Krycí dýka" }
+  slotType: offHand
+  rarity: legendary
+  stats: [{ stat: agi, value: 4 }, { stat: attackSpeed, value: 0.04 }, { stat: armor, value: 1.75 }, { stat: dodge, value: 0.035 }]
+  effect:
+    kind: splash_on_attack
+    params: { chance: 0.3, radius: 220, fraction: 0.6 }
+    text:
+      en: "Attacks have a 30 % chance to hit everyone around the target for 60 % of the damage."
+      cs: "Útok má 30% šanci zasáhnout všechny kolem cíle za 60 % poškození."
 - id: skysplitter
   name: { en: "Skysplitter", cs: "Rozparovač nebes" }
   slotType: mainHand
@@ -120,7 +532,7 @@
   name: { en: "Hourglass of the Hunt", cs: "Přesýpací hodiny lovu" }
   slotType: trinket
   rarity: legendary
-  stats: [{ stat: int, value: 5 }, { stat: spellPower, value: 0.045 }, { stat: hp, value: 72 }, { stat: magicFind, value: 0.10 }]
+  stats: [{ stat: int, value: 5 }, { stat: spellPower, value: 0.045 }, { stat: hp, value: 72 }, { stat: magicFind, value: 0.1 }]
   effect:
     kind: haste_on_elite_kill
     params: { cooldownSpeed: 1.5, seconds: 8 }
@@ -139,7 +551,216 @@
       en: "Enemies near you walk 25 % slower."
       cs: "Nepřátelé poblíž tebe chodí o 25 % pomaleji."
 
-# Mythic: five stat rows, 42 points, and a stronger or unique effect.
+# Mythic: five stat rows, 42 points, and a stronger effect.
+- id: helm-of-the-unbroken-line
+  name: { en: "Helm of the Unbroken Line", cs: "Přilba neprolomené linie" }
+  slotType: head
+  rarity: mythic
+  stats: [{ stat: str, value: 4.5 }, { stat: hp, value: 108 }, { stat: armor, value: 2 }, { stat: regen, value: 0.8 }, { stat: damage, value: 0.04 }]
+  effect:
+    kind: low_hp_shield
+    params: { threshold: 0.4, seconds: 4, cooldown: 30 }
+    text:
+      en: "Under 40 % HP you and the castle take no damage for 4 s. Works once in 34 s."
+      cs: "Pod 40 % HP nedostáváš ty ani hrad 4 s žádné poškození. Funguje jednou za 34 s."
+- id: hood-of-the-night-watch
+  name: { en: "Hood of the Night Watch", cs: "Kápě noční hlídky" }
+  slotType: head
+  rarity: mythic
+  stats: [{ stat: agi, value: 4.5 }, { stat: attackSpeed, value: 0.045 }, { stat: hp, value: 96 }, { stat: critChance, value: 0.08 }, { stat: damage, value: 0.04 }]
+  effect:
+    kind: chain_on_attack
+    params: { every: 3, damage: 160, jumps: 5, range: 400 }
+    text:
+      en: "Every 3rd attack throws lightning that jumps on to 5 enemies."
+      cs: "Každý 3. útok vyšle blesk, který přeskočí na 5 nepřátel."
+- id: pendant-of-the-deep-well
+  name: { en: "Pendant of the Deep Well", cs: "Přívěsek hluboké studny" }
+  slotType: neck
+  rarity: mythic
+  stats: [{ stat: int, value: 4.5 }, { stat: spellPower, value: 0.045 }, { stat: magicFind, value: 0.16 }, { stat: magnet, value: 80 }, { stat: hp, value: 96 }]
+  effect:
+    kind: haste_on_elite_kill
+    params: { cooldownSpeed: 1.6, seconds: 10 }
+    text:
+      en: "When an elite or a boss falls, your spells recharge 60 % faster for 10 s."
+      cs: "Když padne elita nebo boss, kouzla se ti 10 s dobíjejí o 60 % rychleji."
+- id: torc-of-the-old-guard
+  name: { en: "Torc of the Old Guard", cs: "Nákrčník staré gardy" }
+  slotType: neck
+  rarity: mythic
+  stats: [{ stat: str, value: 4.5 }, { stat: regen, value: 0.9 }, { stat: hp, value: 96 }, { stat: magicFind, value: 0.16 }, { stat: armor, value: 2 }]
+  effect:
+    kind: nova_when_hit
+    params: { cooldown: 3, damage: 200, radius: 300 }
+    text:
+      en: "When you are hit, a blast hurts every enemy around you. Works once in 3 s."
+      cs: "Když tě něco zasáhne, výbuch zraní všechny nepřátele kolem tebe. Funguje jednou za 3 s."
+- id: raven-feather-spaulders
+  name: { en: "Raven-feather Spaulders", cs: "Nárameníky z havraního peří" }
+  slotType: shoulders
+  rarity: mythic
+  stats: [{ stat: agi, value: 4.5 }, { stat: damage, value: 0.045 }, { stat: moveSpeed, value: 0.08 }, { stat: dodge, value: 0.04 }, { stat: attackSpeed, value: 0.04 }]
+  effect:
+    kind: elite_slayer
+    params: { share: 0.3 }
+    text:
+      en: "You deal 30 % more damage to elites and bosses."
+      cs: "Elitám a bossům dáváš o 30 % větší poškození."
+- id: cloak-of-falling-stars
+  name: { en: "Cloak of Falling Stars", cs: "Plášť padajících hvězd" }
+  slotType: back
+  rarity: mythic
+  stats: [{ stat: int, value: 4.5 }, { stat: spellPower, value: 0.045 }, { stat: hp, value: 96 }, { stat: cooldownSpeed, value: 0.04 }, { stat: regen, value: 0.8 }]
+  effect:
+    kind: haste_on_elite_kill
+    params: { cooldownSpeed: 1.6, seconds: 10 }
+    text:
+      en: "When an elite or a boss falls, your spells recharge 60 % faster for 10 s."
+      cs: "Když padne elita nebo boss, kouzla se ti 10 s dobíjejí o 60 % rychleji."
+- id: banner-cloak-of-the-keep
+  name: { en: "Banner-cloak of the Keep", cs: "Praporový plášť tvrze" }
+  slotType: back
+  rarity: mythic
+  stats: [{ stat: str, value: 4.5 }, { stat: hp, value: 108 }, { stat: regen, value: 0.8 }, { stat: armor, value: 2 }, { stat: damage, value: 0.04 }]
+  effect:
+    kind: nova_when_hit
+    params: { cooldown: 3, damage: 200, radius: 300 }
+    text:
+      en: "When you are hit, a blast hurts every enemy around you. Works once in 3 s."
+      cs: "Když tě něco zasáhne, výbuch zraní všechny nepřátele kolem tebe. Funguje jednou za 3 s."
+- id: night-trackers-jerkin
+  name: { en: "Night Tracker's Jerkin", cs: "Kazajka nočního stopaře" }
+  slotType: chest
+  rarity: mythic
+  stats: [{ stat: agi, value: 4.5 }, { stat: hp, value: 108 }, { stat: attackSpeed, value: 0.04 }, { stat: dodge, value: 0.04 }, { stat: damage, value: 0.04 }]
+  effect:
+    kind: elite_slayer
+    params: { share: 0.3 }
+    text:
+      en: "You deal 30 % more damage to elites and bosses."
+      cs: "Elitám a bossům dáváš o 30 % větší poškození."
+- id: bulwark-plate
+  name: { en: "Bulwark Plate", cs: "Plát opory" }
+  slotType: chest
+  rarity: mythic
+  stats: [{ stat: hp, value: 108 }, { stat: str, value: 4.5 }, { stat: armor, value: 2 }, { stat: damageTaken, value: 0.04 }, { stat: regen, value: 0.8 }]
+  effect:
+    kind: castle_ward
+    params: { share: 0.3 }
+    text:
+      en: "The castle takes 30 % less damage."
+      cs: "Hrad dostává o 30 % menší poškození."
+- id: bindings-of-the-high-tide
+  name: { en: "Bindings of the High Tide", cs: "Pouta přílivu" }
+  slotType: wrist
+  rarity: mythic
+  stats: [{ stat: int, value: 4.5 }, { stat: spellPower, value: 0.045 }, { stat: regen, value: 0.8 }, { stat: cooldownSpeed, value: 0.04 }, { stat: hp, value: 96 }]
+  effect:
+    kind: death_burst
+    params: { chance: 0.25, damage: 70, radius: 200 }
+    text:
+      en: "Enemies you kill have a 25 % chance to burst and hurt the enemies around them."
+      cs: "Nepřítel, kterého zabiješ, má 25% šanci vybuchnout a zranit nepřátele kolem sebe."
+- id: siegebreaker-vambraces
+  name: { en: "Siegebreaker Vambraces", cs: "Nátepníky lamače obležení" }
+  slotType: wrist
+  rarity: mythic
+  stats: [{ stat: str, value: 4.5 }, { stat: damage, value: 0.045 }, { stat: lifesteal, value: 0.02 }, { stat: armor, value: 2 }, { stat: hp, value: 96 }]
+  effect:
+    kind: castle_ward
+    params: { share: 0.3 }
+    text:
+      en: "The castle takes 30 % less damage."
+      cs: "Hrad dostává o 30 % menší poškození."
+- id: weavers-gloves
+  name: { en: "Weaver's Gloves", cs: "Tkalcovy rukavice" }
+  slotType: hands
+  rarity: mythic
+  stats: [{ stat: int, value: 4.5 }, { stat: spellPower, value: 0.045 }, { stat: lifesteal, value: 0.02 }, { stat: cooldownSpeed, value: 0.04 }, { stat: hp, value: 96 }]
+  effect:
+    kind: death_burst
+    params: { chance: 0.25, damage: 70, radius: 200 }
+    text:
+      en: "Enemies you kill have a 25 % chance to burst and hurt the enemies around them."
+      cs: "Nepřítel, kterého zabiješ, má 25% šanci vybuchnout a zranit nepřátele kolem sebe."
+- id: girdle-of-the-mountain
+  name: { en: "Girdle of the Mountain", cs: "Horský pás" }
+  slotType: waist
+  rarity: mythic
+  stats: [{ stat: str, value: 4.5 }, { stat: hp, value: 108 }, { stat: armor, value: 2 }, { stat: regen, value: 0.8 }, { stat: damage, value: 0.04 }]
+  effect:
+    kind: heal_on_kill
+    params: { kills: 10, hp: 60 }
+    text:
+      en: "Every 10th kill heals you by 60 HP."
+      cs: "Každé 10. zabití tě vyléčí o 60 HP."
+- id: belt-of-many-knives
+  name: { en: "Belt of Many Knives", cs: "Opasek mnoha nožů" }
+  slotType: waist
+  rarity: mythic
+  stats: [{ stat: agi, value: 4.5 }, { stat: damage, value: 0.045 }, { stat: magicFind, value: 0.16 }, { stat: critChance, value: 0.08 }, { stat: attackSpeed, value: 0.04 }]
+  effect:
+    kind: splash_on_attack
+    params: { chance: 0.4, radius: 250, fraction: 0.8 }
+    text:
+      en: "Attacks have a 40 % chance to hit everyone around the target for 80 % of the damage."
+      cs: "Útok má 40% šanci zasáhnout všechny kolem cíle za 80 % poškození."
+- id: leggings-of-the-moon-court
+  name: { en: "Leggings of the Moon Court", cs: "Nohavice měsíčního dvora" }
+  slotType: legs
+  rarity: mythic
+  stats: [{ stat: int, value: 4.5 }, { stat: hp, value: 108 }, { stat: spellPower, value: 0.04 }, { stat: areaSize, value: 0.04 }, { stat: cooldownSpeed, value: 0.04 }]
+  effect:
+    kind: slow_aura
+    params: { radius: 400, slow: 0.35 }
+    text:
+      en: "Enemies near you walk 35 % slower."
+      cs: "Nepřátelé poblíž tebe chodí o 35 % pomaleji."
+- id: treads-of-the-vanguard
+  name: { en: "Treads of the Vanguard", cs: "Boty předvoje" }
+  slotType: feet
+  rarity: mythic
+  stats: [{ stat: moveSpeed, value: 0.09 }, { stat: str, value: 4.5 }, { stat: hp, value: 96 }, { stat: armor, value: 2 }, { stat: regen, value: 0.8 }]
+  effect:
+    kind: heal_on_kill
+    params: { kills: 10, hp: 60 }
+    text:
+      en: "Every 10th kill heals you by 60 HP."
+      cs: "Každé 10. zabití tě vyléčí o 60 HP."
+- id: boots-of-the-silent-road
+  name: { en: "Boots of the Silent Road", cs: "Boty tiché cesty" }
+  slotType: feet
+  rarity: mythic
+  stats: [{ stat: moveSpeed, value: 0.09 }, { stat: agi, value: 4.5 }, { stat: attackSpeed, value: 0.04 }, { stat: dodge, value: 0.04 }, { stat: damage, value: 0.04 }]
+  effect:
+    kind: splash_on_attack
+    params: { chance: 0.4, radius: 250, fraction: 0.8 }
+    text:
+      en: "Attacks have a 40 % chance to hit everyone around the target for 80 % of the damage."
+      cs: "Útok má 40% šanci zasáhnout všechny kolem cíle za 80 % poškození."
+- id: ring-of-the-keen-eye
+  name: { en: "Ring of the Keen Eye", cs: "Prsten bystrého oka" }
+  slotType: ring
+  rarity: mythic
+  stats: [{ stat: agi, value: 4.5 }, { stat: lifesteal, value: 0.0225 }, { stat: magicFind, value: 0.16 }, { stat: critChance, value: 0.08 }, { stat: attackSpeed, value: 0.04 }]
+  effect:
+    kind: slow_aura
+    params: { radius: 400, slow: 0.35 }
+    text:
+      en: "Enemies near you walk 35 % slower."
+      cs: "Nepřátelé poblíž tebe chodí o 35 % pomaleji."
+- id: seal-of-the-archivist
+  name: { en: "Seal of the Archivist", cs: "Pečeť archiváře" }
+  slotType: ring
+  rarity: mythic
+  stats: [{ stat: int, value: 4.5 }, { stat: spellPower, value: 0.045 }, { stat: magicFind, value: 0.16 }, { stat: lifesteal, value: 0.02 }, { stat: hp, value: 96 }]
+  effect:
+    kind: chain_on_attack
+    params: { every: 3, damage: 160, jumps: 5, range: 400 }
+    text:
+      en: "Every 3rd attack throws lightning that jumps on to 5 enemies."
+      cs: "Každý 3. útok vyšle blesk, který přeskočí na 5 nepřátel."
 - id: seal-of-the-royal-treasury
   name: { en: "Seal of the Royal Treasury", cs: "Pečeť královské pokladnice" }
   slotType: trinket

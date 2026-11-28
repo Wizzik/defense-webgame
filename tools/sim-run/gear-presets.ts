@@ -30,9 +30,10 @@ function rolledPreset(data: GameData, heroId: string, preset: "rolled-mid" | "ro
 export type GearPresetName = (typeof GEAR_PRESETS)[number];
 
 /**
- * A loadout for balance runs. `none`: nothing. `mid`: a rare item of level 1 in every slot, one that carries the
- * hero's main attribute where the slot has one. `full`: the highest rarity the slot's type has, at the top level,
- * again leaning to the main attribute. An item is worn once, so the second ring or trinket takes the next best.
+ * A loadout for balance runs. `none`: nothing. `mid`: a legendary named item of level 1 in every slot (named items
+ * are legendary or mythic since 2026-11-28; it was a rare one), one that carries the hero's main attribute where the
+ * slot has one. `full`: the highest rarity the slot's type has, at the top level, again leaning to the main attribute.
+ * An item is worn once, so the second ring or trinket takes the next best.
  */
 export function gearPreset(data: GameData, heroId: string, preset: GearPresetName, seed = 1): LoadoutEntry[] {
   if (preset === "none") return [];
@@ -47,7 +48,7 @@ export function gearPreset(data: GameData, heroId: string, preset: GearPresetNam
   for (let index = 0; index < SLOT_IDS.length; index++) {
     const type = slotTypeOf(index);
     const candidates = data.items
-      .filter((item) => item.slotType === type && !used.has(item.id) && (preset === "full" || item.rarity === "rare"))
+      .filter((item) => item.slotType === type && !used.has(item.id) && (preset === "full" || item.rarity === "legendary"))
       // the highest rarity first, then the leaning ones, then the order of the data (the sort is stable)
       .sort((a, b) => rank(b.rarity) - rank(a.rarity) || Number(leans(b)) - Number(leans(a)));
     const item = candidates[0];

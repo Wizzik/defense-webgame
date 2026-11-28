@@ -53,6 +53,16 @@ export const EffectSchema = z.discriminatedUnion("kind", [
   effect("slow_aura", { radius: positive, slow: share }),
   /** Collected gold heals the castle by `perGold` hp for every gold of the coin. */
   effect("gold_heals_castle", { perGold: positive }),
+  /** Every `kills`-th kill of the hero heals him `hp`. */
+  effect("heal_on_kill", { kills: z.number().int().min(1), hp: positive }),
+  /** When the hero takes damage, at most once per `cooldown` s: `damage` x spell power to every enemy within `radius`. */
+  effect("nova_when_hit", { cooldown: positive, damage: positive, radius: positive }),
+  /** The hero's hits deal `share` more damage to elites and bosses. */
+  effect("elite_slayer", { share: share }),
+  /** A kill of the hero bursts with `chance`: `damage` x spell power to the enemies within `radius` (a burst's kills do not burst). */
+  effect("death_burst", { chance: share, damage: positive, radius: positive }),
+  /** The castle takes `share` less damage (the strongest ward of all players counts). */
+  effect("castle_ward", { share: share }),
 ]);
 export type Effect = z.infer<typeof EffectSchema>;
 export type EffectKind = Effect["kind"];

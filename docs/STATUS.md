@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-28 (co-op gear between runs and group strength by size). Read this first when you resume work.
+Updated 2026-11-28 (named items only legendary / mythic, salvage for named items). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -23,8 +23,36 @@ Updated 2026-11-28 (co-op gear between runs and group strength by size). Read th
 8. **Co-op gear between runs and group strength by size** (Petr, 2026-11-28; branch `claude/peaceful-galileo-qtu26s`,
    below). Then the remaining heroes of the map and better spell graphics (point 4).
 9. **Named items only legendary / mythic, salvage for named items** (Petr, 2026-11-28): plan
-   `docs/superpowers/plans/2026-11-28-named-items-legendary.md` (rulings and steps), handed to a fresh session on
-   branch `claude/named-items-legendary` (from `claude/peaceful-galileo-qtu26s`). Not started.
+   `docs/superpowers/plans/2026-11-28-named-items-legendary.md`, branch `claude/named-items-legendary` (from
+   `claude/peaceful-galileo-qtu26s`), DONE (below), waits for Petr's playtest.
+
+## Named items only legendary / mythic, salvage for named items (branch `claude/named-items-legendary`, DONE, 2026-11-28)
+
+- The 70 named items are 48 legendary and 22 mythic (every slot type has both); new stats by the budget, an effect on
+  every item, five new effect kinds (heal on kill, nova when hit, elite slayer, death burst, castle ward); random
+  mythics roll them too. Old saves keep id and level, the item shows its new rarity and is stronger.
+- **Salvage** takes named items too (any item no hero wears): gold = rarity's salvage gold x level (legendary 90,
+  mythic 150 per level; the bank holds 500). A salvaged named item can drop again.
+- `sim:run --gear mid` = a legendary named item of level 1 per slot. Balance numbers: `docs/DECISIONS.md`, section
+  Named items only legendary / mythic. The named full set is stronger than a random mythic set (world 3 hell: 33 vs
+  23 autopilot wins of 80); Petr: the named items stay the top, the random mythic budget stays 34.
+- Digest `62622e34` -> `82150491`. `data/generated/items.json` and `rules.json` edited in the cloud by the data-build
+  rule: **run `npm run data:build` locally and check that nothing changes.**
+- **What Petr checks** (after the merge, https://wizzik.github.io/defense-webgame/):
+  - the gear screen: https://wizzik.github.io/defense-webgame/?debug=1 then in the console
+    `__game.debug.grantItem("travelers-hood", 1); __game.debug.grantItem("hood-of-the-night-watch", 3)` and open
+    Gear: the hood is Legendary, the night watch Mythic, the tooltip has 4 / 5 rows and an effect line;
+    the rarity filters L / M show all 70 items, C / R / E none of them;
+  - the new effects in a run: https://wizzik.github.io/defense-webgame/?debug=1&hero=redcleaver&phase=8 then
+    `__game.debug.wear("hands", "masons-grip")` (heal every 10th kill), `__game.debug.wear("back", "banner-cloak-of-the-keep")`
+    (mythic nova when hit), `__game.debug.wear("wrist", "bindings-of-the-high-tide")` (mythic death burst),
+    `__game.debug.wear("legs", "trackers-leggings")` (elite slayer), `__game.debug.wear("chest", "bulwark-plate")`
+    (mythic castle ward): the damage meter (N) shows the item row grow; C shows the effect lines;
+  - **salvage a named item**: https://wizzik.github.io/defense-webgame/?debug=1 then
+    `__game.debug.grantItem("skysplitter", 2)`, Gear, Salvage, hover Skysplitter ("Salvage: 180 gold"), click it:
+    "Bank: 180 gold", the item is no longer owned; without `debug=1` the bank goes into the next run;
+  - an old save: your own collection in the browser (without debug) shows the former common / rare / epic items as
+    legendary / mythic with the same levels.
 
 ## Co-op gear between runs and group strength by size (branch `claude/peaceful-galileo-qtu26s`, DONE, 2026-11-28)
 
@@ -207,65 +235,6 @@ section Petr's batch 2. `npm run check` passes on every commit of the branch.
   - casters from phase 3 (https://wizzik.github.io/defense-webgame/?debug=1&phase=3&lang=cs, blue bolts with a
     flash; `__game.debug.spawnEach()` shows all seven human types).
 
-## Random items, stage 3: meta and saves (merged into `claude/random-items-data`, PR #42, 2026-11-27)
-
-Plan `docs/superpowers/plans/2026-11-27-random-items.md`, tasks 11-15; rulings in `docs/DECISIONS.md`, section
-Random items, stage 3. Started in the session of PR #42, finished in a fresh one.
-
-- **Done:** item records (`meta/item-record.ts`), save version 2 with the migration of version 1 (`meta/save.ts`),
-  equip by uid and rolled loadouts (`meta/equip.ts`, `sim/gear.ts`), boss drops that roll random items for the run's
-  world, difficulty and the hero's primary attribute (`meta/drop.ts`, `client/main.ts` `hud.dropFor`), the gear
-  screen with rolled records (`client/ui/collection-grid.ts`, `gear-screen.ts`), import of version 1 and 2, the
-  snapshot field `collectionSize`.
-- **Tests:** `meta/drop.test.ts`, `meta/item-record.test.ts` new or rewritten, the client tests on save version 2;
-  e2e: a boss drop lands as a random item, a version 2 file brings a random item that the gear screen lists and the
-  run wears. Checks: `npm run check` (1389 tests), build, e2e `webgl2-fallback` (51) pass. Digest unchanged.
-- **What Petr checks** (after the merge, https://wizzik.github.io/defense-webgame/):
-  - **an old save keeps its items**: open the game without `debug` in the browser where you already have items
-    (https://wizzik.github.io/defense-webgame/?lang=cs), menu Výbava: the old items are there at their levels and the
-    dolls still wear them; the count now reads "Sbírka: N z 200";
-  - **boss drops are random items**: play a run without debug (bosses come at 5, 10, 15 min), or quickly
-    https://wizzik.github.io/defense-webgame/?debug=1&phase=6&lang=cs and in the console `__game.debug.killBoss()`:
-    the news line "Kořist: ... (nový)" names a random item; `__game.collectionSize` is 1;
-  - **they can be worn into a run**: without debug (debug keeps nothing between pages), after a run with a boss
-    drop open Výbava: the random items stand after the named ones, a hover shows rows, a click puts it on, the next
-    run wears it (C opens the gear panel);
-  - later worlds and Hell give higher levels: `?debug=1&phase=16&world=5&difficulty=hell&lang=cs`, kill the boss.
-- **Next:** Petr's batch 2 (`docs/superpowers/plans/2026-11-27-petr-batch-2.md`), then random items stage 4.
-
-## Random items, stages 1-2: data and sim (branch `claude/random-items-data`, PR #42, 2026-11-27)
-
-Plan `docs/superpowers/plans/2026-11-27-random-items.md`; rulings and numbers in `docs/DECISIONS.md`, sections
-Random items, stage 1 and stage 2.
-
-- **Stage 1 (data, tasks 1-5):** `design/item-bases.yaml` (46 bases), `design/affixes.yaml` (22 affixes),
-  `design/item-names.yaml` (rare names), `rules.loot`; copied into `data/generated/loot.json` (`GameData.loot`).
-- **Stage 2 (sim, tasks 6-10):**
-  - new gear stats: crit chance and damage, dodge, damage taken, thorns, cooldown speed, ultimate cooldown, area size
-    (each with a test, `sim/gear-stats.test.ts`);
-  - `sim/item-roll.ts` rolls items (smart loot, tiers by item power, rows sharing the budget);
-  - **chests now offer random items**: named items only with the rarity's named share (epic 10 %, legendary 25 %,
-    mythic 40 %; common and rare cards are always random); a rolled mythic carries an effect;
-  - the hash covers the rolled rows; matrix case `loot-t3`; digest `ff675613` -> `36fd80a2`.
-  - Until stage 4 the client shows a rolled item through `client/ui/rolled-item.ts` (name, rows, effect) in the
-    chest cards, the compare and the gear panel.
-- `loot.json` and `rules.json` were written in the cloud by the data-build rule (`mapLoot`, a copy of
-  `design/rules.yaml`); Petr reruns `npm run data:build` locally once, the files must not change.
-- Checks: `npm run check` (1369 tests), build, e2e `webgl2-fallback` and `sim-chromium` (52) pass.
-- Autopilot, world 1 normal, mid gear, seeds 1-8 (wins of 8, castle of won runs), stage 1 -> stage 2: Stonehorn 8
-  (99 %) -> 8 (63 %); Nightglaive 8 (87 %) -> 8 (75 %); Gravecaller 8 (100 %) -> 8 (100 %); Serpent Shaman 7 (98 %)
-  -> 6 (92 %, both losses in the first 75 s, before any chest); Mistwarden 7 (97 %) -> 7 (99 %); Sparkshot 8 (96 %)
-  -> 8 (95 %); Redcleaver 8 (99 %) -> 8 (87 %); Tidecaller 8 (92 %) -> 8 (86 %). In sum 62 -> 61 of 64; the
-  strength heroes' castles fare worse (their rolled items lean to hp and armor). Balance is stage 5.
-- **What Petr checks** (after the merge, https://wizzik.github.io/defense-webgame/):
-  - open chests (`?debug=1&lang=cs`, in the console `__game.debug.grantGold(5000)`, walk onto a chest): most cards
-    are random items with their own names ("Mocná železná přilba medvěda", "Ponuré drápy"), rows and, on a mythic, an
-    effect line; do the Czech names sound right;
-  - a strength hero (Stonehorn) gets mostly heavy bases and str / hp / armor rows, a caster (Gravecaller) cloth and
-    int / spell rows;
-  - later phases give bigger rows: `?debug=1&phase=15&world=3&difficulty=insane&lang=cs`;
-  - the gear panel (C) shows the rolled items; the new stats (crit, dodge, thorns, cooldowns, spell area) read well.
-
 ## Solo playtest batch (branch `claude/gifted-gauss-k6wag4`, 2026-11-26)
 
 - Done in one Claude Code session; rulings and numbers: `docs/DECISIONS.md`, section Petr's solo playtest batch.
@@ -291,457 +260,10 @@ Random items, stage 1 and stage 2.
     `__game.debug.grantXp(50000)` get there fast);
   - worlds 4 and 5: snow and embers stay on the ground when you walk (`?debug=1&world=4`).
 
-## Order (Petr, 2026-11-23 evening)
+## Older entries
 
-1. **Co-op for 3-4 players**: merged (PR #39, below); waits for Petr's test.
-2. **More worlds:** difficulties plan 3b: merged (PR #40, below); waits for Petr's playtest.
-3. Then the **remaining heroes** of the map and **better spell graphics** (effects of the spells), in a new chat.
-
-## Difficulties 3b: Frostreach and Blightscar (merged as PR #40 `956e551`, 2026-11-24)
-
-- Plan `docs/superpowers/plans/2026-11-24-difficulties-worlds-4-5.md`, done inline in one chat; Petr: "make it harder". A fresh review found one bug (a co-op hero chilled right after his choice time or a revive, roots counted as standing), fixed before the merge; merged at Petr's word after green CI. `npm run check` (1311 tests), the build, e2e `webgl2-fallback` and `sim-chromium` (51) pass. Numbers and rulings: `docs/DECISIONS.md`, section Difficulties and worlds, plan 3b.
-- What it brings:
-  - **world 4 Frostreach:** blue-grey snow, an ice ridge in a horseshoe over the north and east of the castle with one pass in the north-east; the **blizzard** from phase 2 every 80-100 s: announced 5 s ahead, 15 s of thick snow and fog, -25 % walking for everyone; a hero who **stands 3 s** in it is chilled (base attacks 20 % slower) until he walks;
-  - **world 5 Blightscar:** black earth, a violet sky, green embers, a broken octagonal wall with four breaches; **green meteors** from phase 1 every 18-24 s, 3-6 around every hero after a 1.5 s yellow-green circle (12 % of max hp), each leaving a **pool of green fire** for 6 s (4 % of max hp a second);
-  - all five worlds are `ready`; the effect bar shows the blizzard, chill, the meteor countdown and fire under the hero.
-- **Harder ladder:** worlds 4 and 5 have their own enemy strength (x1.03 and x1.10 on top of the world step; worlds 1-3 unchanged). Autopilot wins of 160 with mid gear: world 1 104, 2 88, 3 78, **4 61, 5 43**; world 5 Hell with full gear 12.
-- What Petr checks in the playtest:
-  - the look and readability of both worlds: is the snow too bright, are pale enemies readable on it; is Blightscar too purple or too dark; the ridge and its pass, the wall and its breaches;
-  - the blizzard: noticeable, does chill make him keep moving, is -25 % too much;
-  - the meteors: is the yellow-green circle readable and different from the roots, are they too often, are the pools too strong (they barely hurt enemies on purpose);
-  - is world 5 hard enough (or too hard) with his gear;
-  - fps with a full crowd: `?fps=1&debug=1&phase=16&world=5` against world 1.
-  - quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1&world=4 and `?debug=1&world=5`; in the console `__game.debug.hazard()` (a blizzard or a meteor wave at once), `__game.hazard` (kind, weather seconds, `chilled`, `pools`).
-
-## Co-op for 3-4 players (merged as PR #39 `8ca6505`, 2026-11-24)
-
-- Petr approved the short design (2026-11-24); plan `docs/superpowers/plans/2026-11-24-coop-four-players.md`, done inline in one chat. `npm run check`, the build and e2e `coop.spec.ts` pass. Details and rulings: `docs/DECISIONS.md`, section Co-op for 3-4 players.
-- What it brings:
-  - **one link for up to three friends:** the host sends the same link; the lobby lists who is in ("1. Stonehorn (host, you)"), each picks and may change his hero; the host starts once one guest is in; a 5th player sees "The room is full";
-  - a star through the host (guests link only to him; he relays inputs and hashes), protocol 3;
-  - a guest who leaves: the others play on, his hero stands still, the banner names him; the host who leaves: each guest plays on alone;
-  - `?debug=1&mate=gravecaller,tidecaller,stonehorn`: a local run of four heroes, the autopilot steering the other three.
-- Merged at Petr's word after green CI.
-- Net test here: 4 headless windows stayed in sync (no desync), a guest leaving and the host leaving behaved as above; only about 8 steps a second on this container's CPU, so the speed is for Petr's test.
-- **What Petr checks after the merge** (https://wizzik.github.io/defense-webgame/):
-  - Host a game, open the link in two or three other browsers or send it to friends; the lobby lists all; change a hero after joining;
-  - play 10 minutes in 3-4; is the game smooth (send `window.__net` from each console: tick, rttMedian, stallsPerMinute, lastMatchedHash, desyncAt);
-  - one guest closes his page: the others go on; the HUD shows three teammates;
-  - does it feel as hard as alone with 3-4 (`rules.coop`, step 8).
-
-## Multiplayer migration step 8: co-op balance (merged as PR #38 `303f3b5`, 2026-11-23)
-
-- Petr (2026-11-23): "go on with development". Done inline in one chat; `npm run check` passes; the single-player digest stays `4bc81413`. Table and rulings: `docs/DECISIONS.md`, section Multiplayer migration, step 8.
-- `npm run sim:run -- --players 1-4 --seeds 1-5 --quiet`: every group of n heroes on the autopilot, wins, castle losses, all-down losses, downs and revives.
-- `rules.coop.perPlayer`: enemy hp 0.75 -> 0.9, damage 0.3 -> 0.45, new `castleHp` 0.25. Autopilot (seeds 6-10): solo 55 %, 2 players 55 %, 3 players 48 %, 4 players 43 %; heroes now fall in co-op too (before, the castle decided almost every co-op run).
-- What Petr checks: a co-op run with a friend: is it as hard as alone or a bit harder, do heroes fall and need reviving, does the castle hold long enough with 2 players.
-- The migration table (`docs/multiplayer/single-hero-inventory.md`) is done. Next: see Order (Petr, 2026-11-23 evening) above.
-
-## After Petr's first co-op test: cards in the middle, 5 s choice, hero choice in the lobby, spell icons (merged as PR #37, 2026-11-23)
-
-- Petr: the cards must be in the middle as alone, the protection 5 s instead of 10, a guest who comes by the link must be able to change his hero, and every spell needs its own picture, bigger and better. Done; details in `docs/DECISIONS.md`, section After Petr's first co-op test.
-- What Petr checks: the cards and the 5 s; changing the hero in the lobby after joining (the host's lobby line names the new hero); the icons in the ability bar and on the cards: can he tell every spell apart, are they big and clear enough.
-
-## Multiplayer migration step 7: the co-op client (merged as PR #36 `dd6597b`, 2026-11-23)
-
-- Petr (2026-11-23): "step 7: the client, lobby, net loop and teammates' HUD". Done inline in one chat; `npm run check`, the build and e2e `webgl2-fallback` pass (new `e2e/coop.spec.ts`). Rulings and details: `docs/DECISIONS.md`, section Multiplayer migration, step 7.
-- **Single player unchanged:** the matrix digest stays `4bc81413`; events got a player column that is not hashed.
-- What it brings (two players):
-  - menu **Co-op** → lobby: *Host a game* gives a link to send (Copy), the link or the room code joins; each plays the hero chosen in the menu with his own gear; the host chooses the course in the world screen and starts;
-  - the real game plays co-op over WebRTC in lockstep (the spike's worker heartbeat), never pauses (C and O open over the fight);
-  - both heroes in their own models; a fallen hero lies down and stands up when revived; a teammate's spells are drawn and heard as his;
-  - cards in co-op: a compact column at the right edge with the choice time (protected, then "you fight again"), keys 1-3; a card is sent once per offer;
-  - teammate HUD: his name, hp and "down" with a revive bar or "choosing" under the own bars; a plate over his hero (hp, or a cross in a filling revive ring); a banner when you are down yourself, when the teammate left (his hero stands, the run goes on) or on a desync;
-  - `?debug=1&mate=<hero>`: a local co-op run with the autopilot as the second hero (no network), `__game.debug.down(p)`.
-- Net test here (two headless windows, local PeerServer): lobby to start, 33 s both walking, hashes matched, no desync; a card pick of the guest reached both; the host closed his page and the guest played on. RTT about 190 ms only because two software-rendering windows share this container.
-- **What Petr checks after the merge** (https://wizzik.github.io/defense-webgame/):
-  - Chrome + Firefox on one computer: menu Co-op → Host a game, open the link in the other browser (choose a different hero there in the menu first, then open the link again or type the code), host: Choose the course and start; play 10 minutes, one window minimized for a while;
-  - the cards column at the right: readable, does choosing during the fight work, are 10 s enough;
-  - the teammate HUD: name, hp, "down" and revive bar; the plate and ring over the fallen hero; the banner when you are down;
-  - fell on purpose and let the other revive you; close one window and see that the other plays on;
-  - then two computers in different networks; send `window.__net` (or the numbers: step, rttMedian, stallsPerMinute, lastMatchedHash, desyncAt) from the console.
-- **Open for Petr:** a guest's win counts for his own world ladder; teammates' sounds are as loud as his own; the copies of a hero (mirror images) show the local hero's model; the end screen of a lost co-op run says "your hero has fallen". 3-4 players need more links (later).
-- Next: step 8 (co-op balance, `sim:run --players`, Petr's playtests), in a new chat.
-
-## Multiplayer migration step 6: revive, chests and enemy strength per player (merged as PR #35 `21f17cc`, 2026-11-23)
-
-- Petr (2026-11-23): "go on with step 6". Done inline in one chat; `npm run check` (1214 tests) and the build pass. Rulings, numbers and the probe: `docs/DECISIONS.md`, section Multiplayer migration, step 6.
-- **Single player unchanged:** the matrix digest stays `4bc81413`.
-- **Co-op:** a fallen hero lies still; a teammate standing within 120 of him for 5 s revives him at 50 % hp (the progress resets when he walks away); the run is lost only when every hero is down or the castle falls. With n players enemies have hp x (1 + 0.75 (n - 1)), damage x (1 + 0.3 (n - 1)), packs x (1 + 0.3 (n - 1)), elites and bosses x (1 + 0.25 (n - 1)) more hp; one more chest per extra player; each player has his own chest price. New section `rules.coop` in `design/rules.yaml`. The autopilot walks to a fallen teammate and revives him.
-- Probe (world 1 Normal, no gear): stonehorn + sparkshot 6 of 8, nightglaive + tidecaller 1 of 8, three heroes 2 of 4, four heroes 0 of 4 (castle falls in the finale); solo stonehorn 6 of 6, sparkshot 1 of 6, nightglaive and tidecaller 3 of 8, mistwarden 0 of 8. Balance is step 8.
-- `/net-spike/` shows nothing new yet (no revive ring, no teammate hp): that is the client of step 7. On it Petr can see that a fallen hero (grey cross) stands up again when his teammate walks onto him for 5 s.
-- Next: step 7 (client: lobby, net loop, hero models, teammate HUD with a down marker and revive progress, the card panel), in a new chat.
-
-## Multiplayer migration step 5: co-op without a pause (merged as PR #34 `6962c81`, 2026-11-23)
-
-- Petr (2026-11-23): "go on". Done inline in the same chat as steps 3-4; `npm run check` (1205 tests) and the build pass. Rulings: `docs/DECISIONS.md`, section Multiplayer migration, step 5.
-- **Single player keeps the pause**; the matrix digest stays `4bc81413`.
-- **Co-op:** a level-up or a chest never pauses the run; each player picks with his own input. For 10 s the choosing hero is immune, does not attack or cast, and enemies ignore him; then the offer stays open and he fights again. He can walk while choosing. Level-ups in a row share one 10 s.
-- `/net-spike/`: the autopilot picks for the local player 2 s after an offer opens (no card panel until step 7); a choosing hero has a light-blue ring.
-- What Petr can check after the merge on `/net-spike/`: the game does not stop at a level-up, a ring shows around a hero for 2 s and enemies turn to the other hero meanwhile.
-- Next: step 6 (a fallen hero is revived by standing on him 5 s, the run ends when all are down, more chests and harder enemies per player), in a new chat.
-
-## Multiplayer migration steps 3-4: enemies pick a hero, shared XP, own gold (merged as PR #33 `612cf90`, 2026-11-23)
-
-- Petr (2026-11-23): "go on with steps 3 and 4". Done inline in one chat; `npm run check` (1197 tests) and the build pass. Rulings: `docs/DECISIONS.md`, section Multiplayer migration, steps 3-4.
-- **One player is unchanged:** the matrix digest stays `4bc81413`.
-- **Step 3:** each enemy goes for the nearest living hero and keeps him until another is 100 nearer (`sim/targets.ts`, `enemies.target`); it hits only him, keeps out of every hero; slams, boss strikes, roots, clouds and storm bolts hit every hero inside; a storm wave drops bolts around every living hero; the castle is safe while any player's shield runs.
-- **Step 4:** XP is shared (every hero levels together, each gets his own offer); coins go to the purse of the hero who collects them, hearts heal him, orbs buff him; pickups fly to the nearest hero.
-- Autopilot probe with two heroes (stonehorn + sparkshot, seeds 1-4): all won, both at level 48-49, gold apart, the enemies split about evenly between the heroes. Co-op is far too easy until step 6 (difficulty per player).
-- What Petr can check after the merge on https://wizzik.github.io/defense-webgame/net-spike/ (host + guest): enemies now go for the guest's hero too, both heroes level together, each hero's gold is his own. The single-player game should play exactly as before.
-- Next: step 5 (level-up without pause in co-op: 10 s choice, the hero immune and ignored while choosing; single player keeps the pause), then step 6 (down and revive, chests and difficulty per player).
-
-## Multiplayer migration steps 1-2 and the net loop (merged as PR #31 `b56a300`, 2026-11-22)
-
-- Petr (2026-11-22): "go on with development, mainly the multiplayer". Done inline in one chat; `npm run check` (1185 tests), the build, e2e `webgl2-fallback` and `sim-chromium` (46 of 46) pass. Rulings: `docs/DECISIONS.md`, section Multiplayer migration, steps 1-2.
-- **Step 1:** `run.players` (`sim/player.ts`) holds the player's part of a run; the matrix digest stays `4bc81413`, now pinned by `client/determinism/digest.test.ts` (`npm run sim:digest`).
-- **Step 2:** `RunOptions.players` (1-4 heroes), `run.step(inputs[])`, the hero systems run once per player with `run.current` set; allies and bolts have an `owner`. One player is unchanged (same digest). Not yet: enemies, pickups, orbs, snares and the hazard see only player 0 (steps 3-4); a level-up or chest of any player still pauses the run (step 5); no revive (step 6).
-- **Net loop fix** (Petr's test of 2026-11-21 crawled at ~2 steps a second in the guest window): `/net-spike/` now steps from a worker heartbeat up to wall-clock time (`client/net/ticker.ts`, `client/net/wall-clock.ts`) and draws on `requestAnimationFrame` only. Test here: host + a guest page whose `requestAnimationFrame` never fires, 30 s, local PeerServer: 931 / 932 steps (30 a second), last matched hash 929, 0 stalls, no desync. The page now plays **two heroes**: the host steers stonehorn, the guest sparkshot.
-- Merged at Petr's word after green CI (the first CI run timed out the enemy-row e2e wait of 3 s on the software renderer; now 15 s).
-- **Petr's net test (2026-11-23, one computer, Chrome host + second window):** host panel at step 13417 (about 7.5 minutes): RTT median 1.8 ms, p95 2.7 ms, 12 stalls (0.7 a minute), matched hash 13409, no desync, 0 rejected. The crawl is gone. He read the guest as disconnected after a hero died; the host's matched hash says it was still running: a fallen hero simply vanished from the map. Branch `net-spike-fallen`: a fallen hero stays as a grey cross, the page text names who steers what.
-- **What Petr checks after the merge:** https://wizzik.github.io/defense-webgame/net-spike/ in Chrome (Host) + Firefox (the link) on one computer, 10 minutes, each window walking its own hero, one of them minimized for a while; then (c) two computers in different networks. Send the panel values (step, RTT, stalls/min, matched hash, desync). Remember: enemies still chase only the host's hero (step 3).
-- Next: migration step 3 (enemy targeting per enemy) and step 4 (shared XP, own gold, pickups to the collector), then step 5 (level-up without pause in co-op, 10 s choice).
-
-## Difficulties 3a: Red Waste and Shadewood (merged as PR #30 `c3dcfdb`, 2026-11-22)
-
-- All 8 tasks of `docs/superpowers/plans/2026-11-22-difficulties-worlds-2-3.md` done inline in one chat, one final self-review. `npm run check` (1172 tests), the build, e2e `webgl2-fallback` (44) and `sim-chromium` pass. Numbers, rulings and the win table: `docs/DECISIONS.md`, section Difficulties and worlds, plan 3a.
-- What it brings:
-  - **world 2 Red Waste:** wine-red clay, a blue river across the arena with two stone bridges, mesas, stumps and clan tents; the **sandstorm** from phase 2: announced 5 s ahead, then 15 s of thick pink-grey fog, blown dust and -20 % walking speed for everyone, every 100-130 s;
-  - **world 3 Shadewood:** night in blues with fireflies, a ring of ancient trees around the castle with four diagonal passages, **thornbrake** zones (dark discs with bushes) where walking is 30 % slower (a path through them is not);
-  - each world's models load only before its first run (Start shows "Loading…"), the ground, forest and light change with the world; the effect bar shows the sandstorm's seconds and a thorn glyph while the hero stands in a thicket;
-  - worlds 2 and 3 are `ready` (no "coming soon"); worlds 4-5 still look like world 1 until plan 3b.
-- Balance (Normal, seeds 1-20, wins of 160; none / mid / full): world 1 74 / 104 / 137 (unchanged), world 2 64 / 88 / 125, world 3 53 / 78 / 121.
-- What Petr checks in the playtest:
-  - the look and readability of both worlds (no orange? is Red Waste too pink, is Shadewood too dark?), the river and its bridges, the tree ring as a border;
-  - does the thicket catch enemies (and the hero) in a fun way; is the sandstorm noticeable and not annoying (fog thickness, how often);
-  - fps with a full crowd in world 2 and 3: `?fps=1&debug=1&phase=16&world=2` and `&world=3` against world 1 (goal at most -10 %); the simulation step of world 3 is 1.3x world 1 (over the 1.2x goal, 0.077 ms);
-  - quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1&world=2 and `?debug=1&world=3`; in the console `__game.debug.hazard()` (a sandstorm at once in world 2), `__game.hazard` (kind, weather seconds, ground speed under the hero).
-- **Open for Petr:** the bridges and passages are 400 wide (the plan's 300 did not pass on the 100-unit grid); the thicket slow is 30 % (35 % put world 3 under its band).
-- Merged at Petr's word (2026-11-22) after green CI (CI runners were ~1.8x slower that day: the chest rarity test and a chest-card click got more time); his playtest stands.
-- Next: plan 3b (Frostreach and Blightscar, their natural events and looks, the ladder tuned for world 5), in a new chat after Petr plays 3a.
-
-## Difficulties 2: obstacles, paths, the wall of world 1, the summer storm (merged as PR #29 `316476d`, 2026-11-21)
-
-- All 7 tasks of `docs/superpowers/plans/2026-11-21-difficulties-obstacles.md` done inline in one chat, one final self-review. `npm run check` (1131 tests), the build, e2e `webgl2-fallback` and `sim-chromium` pass. Numbers, rulings and the win table: `docs/DECISIONS.md`, section Difficulties and worlds, plan 2.
-- What it brings:
-  - world 1 has the old wall in the north with two gates (x = -625 and 625), four paths of trodden earth (+15 % walking speed), 30-40 islands of rocks, trees and ruins placed from the run seed (every free place still reaches the castle);
-  - the hero and enemies collide with the wall and the islands (no dash through the wall), enemies walk around islands and through the gates (flow fields), a melee enemy cannot hit over the wall; the autopilot routes through the gates;
-  - the summer storm from phase 3: a wave every 55-70 s of 1-3 bolts near the hero, a blue-white circle 1.2 s ahead, then 8 % of the hero's hp, 20 % of an enemy's, 2 % of a boss's; a lightning glyph in the effect bar counts down, the news line announces the first wave, the world screen names the natural event;
-  - worlds 2-5 share world 1's map and storm until plan 3;
-  - `sim:run` prints a `world` line; the determinism digest is now `38f9402b` (new case `w1-storm`).
-- Balance (world 1 Normal, seeds 1-20, wins of 160): without gear 73 -> 74, mid 94 -> 104, full 127 -> 137. The storm made the autopilot win more (it dodges every bolt), so waves come every 55-70 s instead of 35-45.
-- What Petr checks in the playtest:
-  - the wall and its gates: readable, does it feel like a place; do enemies come through the gates sensibly, does anything get stuck (enemies, the hero, the autopilot);
-  - paths: visible (not orange), does the speed feel;
-  - the storm: is the circle readable and different from a boss slam, is 1.2 s fair, is 8 % right, is a wave every 55-70 s too rare or too often;
-  - islands: do trees or rocks hide enemies;
-  - **fps** with a full crowd on his machine: `?fps=1&debug=1&phase=16` against `main` (144 there; the goal is at most -10 %); the simulation step is ~1.5x `main` (0.076 ms).
-  - quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1&phase=3 then `__game.debug.hazard()` in the console; `?fps=1&debug=1&phase=16`; `__game.obstacles`, `__game.hazard`.
-- Merged at Petr's word (2026-11-21) after green CI; his playtest stands.
-- **Open for Petr:** with gear the autopilot now wins more than before (mid 104, full 137; world 5 Normal mid 76 instead of 67): the wall and its chokepoint help the defence. Plan 3 tunes worlds 2-5 and can steepen the ladder.
-
-## Difficulties 1: world ladder, Normal / Insane / Hell, world choice, unlocks (merged as PR #28 `35ed49d`, 2026-11-21)
-
-- All 7 tasks of `docs/superpowers/plans/2026-11-21-difficulties-ladder.md` done inline in one chat, one final self-review. `npm run check`, the build, e2e `webgl2-fallback` (40 of 40) and `sim-chromium` pass. Spec: `docs/superpowers/specs/2026-11-21-difficulties-worlds-design.md`. Numbers, the win table and rulings: `docs/DECISIONS.md`, section Difficulties and worlds, plan 1.
-- What it brings:
-  - after menu Start a world choice: Normal / Insane / Hell, five world cards in their colours (Silver March, Red Waste, Shadewood, Frostreach, Blightscar), under the chosen one its sentence, enemy strength (x1.14 for world 5 Normal) and the reward; locked ones are greyed with a lock; Back and Esc return to the menu;
-  - a win of world N opens world N + 1 on the same difficulty; world 5 Normal opens Insane, world 5 Insane opens Hell; the best result (win or phase) stands on each card, stored in the browser for all heroes;
-  - harder courses: enemy hp and damage x1.35 (Insane) and x1.75 (Hell, elites and bosses x1.2 more), bigger packs, five extra elite rushes; rewards: more gold per world, magic find +10 % per world and +25 / +50 % for Insane / Hell;
-  - worlds 2-5 still look like world 1 ("coming soon"): obstacles, paths and natural situations are plans 2 and 3;
-  - `sim:run --world 1-5|all --difficulty normal|insane|hell|all`; the determinism digest is now `22d17e18` (two new matrix cases).
-- World 1 Normal is exactly today's game (the `sim:run` output of seeds 1-20 did not change).
-- What Petr checks in the playtest:
-  - the world screen at his resolution: readability of the cards, the colours (no orange), the lock and "coming soon";
-  - unlocking: win world 1 Normal, then world 2 is open (without `debug`; a debug run stores nothing);
-  - the feel of Insane and Hell: Hell is very hard for the autopilot even with the best gear (19 of 160 wins in world 5); the worlds differ little in strength (x1.14 at world 5) because mid gear loses 41 % already in world 1. Tell me if the ladder should climb steeper;
-  - quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1&world=5&difficulty=hell (everything open, Start, then the world screen preselects world 5 Hell), `?debug=1&phase=16&difficulty=insane`; in the console `__game.world`, `__game.difficulty`, `__game.unlocked`.
-- **Open for Petr:** world 5 Normal with mid gear wins 67 of 160 (the plan wanted 70-90, the spec "about half"); Hell may need softening after he plays.
-- Merged at Petr's word (2026-11-21) after green CI; his playtest of the world screen and the unlocks still stands.
-
-## Order (Petr, 2026-11-21)
-
-- Difficulties (plan 1 done, plans 2 and 3 next), then progression between runs, credits and legal check, then the multiplayer migration. Design each with a player-count knob (`docs/multiplayer/single-hero-inventory.md`, chapter 5).
-
-## Multiplayer spike: merged (PR #27 as `c86fb8b`, 2026-11-21, Pages deployed); Petr's first net test done
-
-- All 7 tasks of `docs/superpowers/plans/2026-11-20-multiplayer-spike.md` done inline in one chat (Petr approved the spike), one final self-review. The game did not change (`git diff main -- sim`: only `sim/hash.ts` and its test). `npm run check` (1040 tests), the build, e2e `webgl2-fallback` (36 of 36) and `sim-chromium` pass; CI on the PR: 78 of 78; the CI job timeout went 25 -> 40 minutes (Firefox, WebKit and the `sim-*` projects made the job about 25 minutes). Merged at Petr's word.
-- **Report: `docs/multiplayer/spike-report.md`.** In short:
-  - determinism holds: the matrix of 12 autopilot runs gives digest `73372c52` in Node, Chromium, Firefox and WebKit (CI), the first 600 steps of a phase-16 run match step by step; no fix was needed;
-  - lockstep works: two Chromium tabs over WebRTC (local PeerServer; the container cannot reach the PeerJS cloud) 60 s, 0 stalls, 0 desyncs; in memory, reordered and delayed delivery stays in sync over 3000 steps and a changed `gold` is caught within 30 steps;
-  - several heroes: `docs/multiplayer/single-hero-inventory.md`, 38 `sim/` files read the one hero, an 8-step migration of 8-10 chats in which every step keeps the one-player game (the matrix digest is the regression test).
-- New: the hash also covers enemy `maxHp`, `damageScale`, `spawnTick`, last hit and attack ticks, facing, heart values, `ultimateRequested` and the offer shape (the spec's pre-scan was wrong: gold, chests, pickups, projectiles, allies and offers were already hashed). Pages `/determinism/` and `/net-spike/` (after the merge on Pages), Playwright projects `sim-chromium`, `sim-firefox`, `sim-webkit`, `client/net/` (protocol, lockstep, PeerJS 1.5.5 link, room codes).
-- **Petr's first net test (2026-11-21, Chrome host + Firefox guest, one computer):** connected, RTT 0.7-0.8 ms (p95 1.1), hashes matched up to step 89, no desync, 0 rejected, **but only about 105 steps in 5.2 minutes** (host 4375 stalls, guest 580). From the panel numbers the guest page ran its fixed step about 2 times a second and the host about 14 (30 expected): the spike page steps the sim from `requestAnimationFrame`, which browsers throttle in a background, minimized or covered window, and `FixedStepLoop` drops lost time instead of catching up, so lockstep crawls at the slowest window's pace. The headless two-tab test could not show it (headless Chromium does not throttle). Needed before co-op (migration step 7): step the sim on a timer that is not throttled (a Web Worker) and run as many steps as are ready up to the wall-clock target; drawing stays on `requestAnimationFrame`. The spike page is not fixed yet.
-- **Petr's co-op decisions (2026-11-21):** single player keeps the level-up pause; a co-op card choice lasts 10 s, then the autopilot does not pick, the offer stays open and the hero becomes vulnerable again (open: does he attack and cast again before he picks). Full rules: claude.ai project `claude/multiplayer-decisions.md`.
-- **Still for Petr (report chapter 5):** after the merge (a) `/determinism/` in Chrome and Firefox must show `73372c52`; (b) `/net-spike/` Chrome (Host) + Firefox (the link) on one computer 10 minutes; (c) two computers in different networks 10 minutes; send the panel values to the chat.
-- Quick links after the merge: https://wizzik.github.io/defense-webgame/determinism/, https://wizzik.github.io/defense-webgame/net-spike/.
-
-## Enemy factions: merged (PR #26 as `b67c076`, 2026-11-20, Pages deployed); Petr's playtest passed ("testy super")
-
-- All 8 tasks of `docs/superpowers/plans/2026-11-20-enemy-factions.md` are done inline in one chat with one final review. `npm run check`, the build and the e2e project `webgl2-fallback` pass. Numbers, rulings and the win table: `docs/DECISIONS.md`, section Enemy factions.
-- What it brings:
-  - four factions by five phases: Human Legion 1-5, Blood Clan 6-10, Restless Dead 11-15, Moon Grove 16-20; elites of a phase and rushes come from the faction of their phase; a horn and a news line announce a new faction (after the boss's news in the same step);
-  - 16 new enemy types (4 per new faction, an elite each, and the risen), every common type with its own KayKit model and a faction palette (no orange); humans are now knights, rogues and a priest (skeletons are the undead);
-  - mechanics: the bloodcaller's bloodlust (red glow), the webcrawler's web (slow), the rotgut's poison cloud (grey-green ring), the gravebinder raising the fallen (green flash, the risen give nothing), the grove druid's and grove warden's roots (green warning circle, 1.2 s without walking or dash); the web and the roots show in the effect bar with seconds;
-  - faction death sounds and mechanic sounds from files already encoded; the autopilot leaves roots, fights rotguts from the cloud's edge and hunts casters first.
-- What Petr checks in the playtest:
-  - does each faction look and sound different, can he tell the types apart (palettes, sizes) and the enemies from the heroes;
-  - the mechanics: is a lusted orc readable, is the cloud fair, are roots dodgeable (1 s warning), is raising annoying or fun;
-  - the news line at 4:10, 8:20 and 12:30-13:20 (boss first, then the faction);
-  - balance: the Blood Clan was the deadliest at first and was softened; Nightglaive with gear wins more now, Mistwarden with gear on some seeds less (table in DECISIONS);
-  - **fps**: `?fps=1&debug=1&phase=16` with a full elf crowd on his machine (22 enemy meshes now instead of 6); the model download grew 5.6 -> 9.8 MB.
-- CI on the PR first failed: with 22 enemy meshes software WebGPU drew every empty type mesh and the pack-arrow e2e ran out of time; empty type meshes are now hidden (faster than `main`), CI green, merged at Petr's word.
-- Quick links: https://wizzik.github.io/defense-webgame/?debug=1&phase=6 (Blood Clan with the first miniboss), `&phase=11` (Restless Dead), `&phase=16` (Moon Grove); in the console `__game.debug.spawnFaction("undead")` (or `orc`, `elf`, `human`), `__game.debug.spawnEach()` (the current faction); `__game.faction`, `__game.slowed`, `__game.rooted`.
-- Order after this (Petr, 2026-11-20): 4 difficulties with environments, 5 progression between runs, 6 credits and legal check, then multiplayer, which starts with several heroes in the simulation. No AI ally for the player; co-op notes in DECISIONS.
-
-## Spell sounds review: merged (PR #25 `3de6a45`, 2026-11-20)
-
-- Petr: Falling Stars sounds like wood; spells should sound like their names. 21 spell cues rebuilt as layered takes (list and why in `docs/DECISIONS.md`, Audio and music). The simulation did not change.
-- What Petr checks: the A/B page from the chat, then in the game `?debug=1&hero=nightglaive` (Falling Stars), `__game.debug.learn(4, "meteor")`, `__game.debug.learn(5, "smite")`. Any cue he dislikes is one `mix()` entry to change.
-
-Updated 2026-11-20 (audio merged as PR #23 `73948f0`, Pages deployed; waits for Petr's listen). Read this first when you resume work.
-
-
-## Audio and music: merged (PR #23 as `73948f0`, 2026-11-20, Pages deployed); quieter mix after Petr's first listen on branch `audio-quieter`
-
-- Petr's first listen (2026-11-20): the music is too loud, sword clanging too, far too many sounds; drop the gold and XP pickup sounds. Branch `audio-quieter`: those pickups are silent, default music 0.3, every sound at most once at a time, softer hero attacks and enemy deaths (numbers in `docs/DECISIONS.md`, Audio and music). A volume he already saved in Settings stays, so he may lower music there himself.
-
-- Petr (2026-11-19): the sounds were monotonous, "no feel, no soul"; fantasy style, every hero with its own theme; the game complete before multiplayer. Order he approved: 1 audio and music + settings, 2 several heroes in the simulation and an AI ally, 3 enemy factions by phase, 4 difficulties with environments, 5 progression between runs, 6 credits and legal check, then multiplayer. **Dropped:** the castle shop.
-- Spec `docs/superpowers/specs/2026-11-19-audio-design.md`, plan `docs/superpowers/plans/2026-11-19-audio.md`. Sources, levels and authors: `docs/DECISIONS.md`, section Audio and music.
-- Done inline without subagents; `npm run check` (889 tests), the build and e2e `webgl2-fallback` (35 of 35) pass. The simulation did not change (`git diff main -- sim` is empty).
-- What it brings:
-  - 161 recorded CC0 effects for all 75 cues (every ability, hero attack, enemy death and game sound), each hero with its own family; the synth tones stay as the fallback;
-  - six CC0 tracks: menu Fantasy Orchestral Theme, run Determined Pursuit, boss Boss Fight (Lisboa), final boss Epic Endgame, victory fanfare, defeat jingle; crossfades and ducking;
-  - the Settings panel (menu button, O in a run): master, music and effects volume, screen shake, damage numbers;
-  - `npm run audio:encode` from `tools/audio-build/manifest.ts` (sources from Petr's folder `Downloads\Zvuky`, unpacked into the untracked `audio-source/`).
-- **Open for Petr:** only one run track was downloaded, so the same 108 s loop repeats seamlessly the whole run; two more from the list (Battle Theme A or B, A Legend Will Rise, Laments of the War) would vary it. The finale track is the file "Heavy Concept A Bass Master.wav", taken as Epic Endgame Cinematic (cynicmusic); it loops every 40 s.
-- What Petr checks: can he tell a hero by its sound; does it still feel monotonous after 15 minutes; music against the fight (too loud or quiet: the Settings sliders); is the horn of a boss and a rush heard; the heartbeat under 25 % hp; the Settings panel on O. Quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1&phase=6 (miniboss and its music), `&phase=21` (finale), `?hero=sparkshot` etc.
-- Rulings of Tasks 1-8 (Petr may change any): the speed auras cast silently; a gear splash plays the hero's attack sound; the lifesteal heal sounds at most every 0.5 s, the orb heal not at all; audio starts at the first click or key; O closes the panel O opened, Esc always; a cue whose file failed is fetched again at the next Start.
-
-## Gravecaller nerf: smaller Bone Stampede, half the Grave Grasp heal, double ultimate cooldown: merged (PR #21 `9922896`, PR #22 `8cfdbd9`, 2026-11-19, Pages deployed); waits for Petr's playtest
-
-- Petr's wish: the Gravecaller is so strong because its ultimate reaches much wider than other heroes' ultimates; halve its heal too.
-- Then (Petr played it: still too strong, it ran nearly all the time) the Bone Stampede cooldown doubled: 19.8/13.2 -> 39.6/26.4 s (PR #22).
-- Bone Stampede radius 1000/1500 -> 700/900 with bursts 20/30 -> 10/11 a second (same hits per enemy inside, the spell deals about half to a third of before); Grave Grasp heal per hit halved (1.25-7.5). Numbers: `docs/DECISIONS.md`, section Gravecaller.
-- The autopilot still wins 20 of 20 (castle 80 -> 73 %): probes show its strength is the kit (three damage spells, two of them every 1.98 s), not the ultimate or the heal. Open for Petr after he plays.
-- What Petr checks: does the ultimate feel smaller (bones fall closer around the hero, fewer of them), is the Gravecaller still too easy; quick link https://wizzik.github.io/defense-webgame/?debug=1&hero=gravecaller, `__game.debug.setAbilityLevel(3, 2)` for the ultimate at its top level (R casts it).
-
-## Sustain: lifesteal, hearts and map orbs: merged (PR #19 as `e20da9a`, 2026-11-19); waits for Petr's playtest
-
-- All 7 tasks of `docs/superpowers/plans/2026-11-19-sustain.md` are done (inline in one chat, one final self-review against spec 4.1-4.7 and `AGENTS.md`: the chat starts no separate reviewer). `npm run check`, the build and the e2e project `webgl2-fallback` (33 of 33) pass. Spec: `docs/superpowers/specs/2026-11-19-sustain-design.md`. Numbers, the ten items and the win table: `docs/DECISIONS.md`, section Sustain.
-- Why: Petr played PR #18 ("it is really very hard", he died in the 3rd minute) and asked for sustain instead of turning the spell knobs back. The knobs (0.5 / 0.005) and the doubled enemy damage stay.
-- What it brings:
-  - **orbs on the map** (up to 3, the first at 8, 20 and 32 s, then 30-45 s after a pickup, each time at a random place 300-2000 from the castle): boots x2 move speed, berserk x1.5 damage (spells and summons too), renewal 100 % hp over 15 s; each lasts 15 s, the same orb again restarts it; the magnet does not pull orbs, walk within 70;
-  - **hearts:** elites and bosses always drop one, other enemies 4 %; the magnet pulls them; a heart heals 8 % of max hp;
-  - **lifesteal** on ten rare and epic items (one row each replaced, 1-1.75 % at level 1): heals that share of the damage of attacks and spells, at most 2 % of max hp a second;
-  - the HUD shows the running effects with seconds over the ability bar; heals rise as green numbers; lifesteal stands in tooltips, the chest compare and the totals under the doll; two new sounds;
-  - the autopilot walks to boots and berserk orbs within 900 and to a renewal orb within 1500 below 70 % hp; `sim:run` prints a `sustain` line.
-- Balance (autopilot wins of 320, seeds 1-20 and 21-40, `main` -> `sustain`): without gear 68 -> 138, mid gear 124 -> 172, full gear 254 -> 248; losses before 4:00 without gear 202 -> 40, so the losses moved to the finale (16-20 minutes).
-- What Petr checks in the playtest:
-  - can the first minutes be survived now, is the game still a challenge later;
-  - is an orb visible and worth the walk (they are drawn bigger than the spec said: about 2.8 x a crystal, with a ring on the floor), do berserk and boots feel strong, does renewal save a bad moment;
-  - hearts: are they noticeable, is 8 % right;
-  - lifesteal in the tooltips and under the doll; the effect bar over the ability bar at 1280x720;
-  - quick links after the merge: https://wizzik.github.io/defense-webgame/?debug=1, then in the console `__game.debug.spawnOrb("heal")` (or `"boots"`, `"berserk"`), `__game.debug.dropHeart()`, `__game.debug.wear("ring1", "moonlit-signet")` for lifesteal.
-- **Open for Petr:** full gear does not reach "almost all" (248 of 320, `main` 254); a higher lifesteal cap changed nothing, the full-gear losses are finale losses of Redcleaver, Tidecaller, Mistwarden and Sparkshot (their kits). Gravecaller still wins 20 of 20.
-- Merged at Petr's word after green CI, Pages deployed.
-- Next: Petr plays the live game.
-
-## Spell scaling, multishot on every arrow, chest compare: merged (PR #18 as `4b50a8c`, 2026-11-19); Petr played it and asked for sustain (above)
-
-- All 7 tasks of `docs/superpowers/plans/2026-11-19-spell-scaling-chest-compare.md` are done (inline in one chat, one final self-review). `npm run check`, the build and the e2e project `webgl2-fallback` pass. Spec: `docs/superpowers/specs/2026-11-19-spell-scaling-chest-compare-design.md`. Numbers, rulings and tables: `docs/DECISIONS.md`, section Spell scaling, multishot on every arrow, chest compare.
-- What it brings:
-  - spells grow from level 1 by the square root of their map curve (`design/scaling.yaml` `abilities.levelGrowthExponent: 0.5`): Forked Bolt 90 -> 367 instead of 1500, Mending Tide 150 -> 671 instead of 3000; level 1 is unchanged;
-  - Int gives half the spell power (`rules.hero.spellPowerPerInt` 0.01 -> 0.005);
-  - a cast at phase 20 without gear now hits for 900-2250 instead of 2000-14400: a Lancer survives one cast for four of the seven heroes that reach phase 20 (the Serpent Shaman: 7118 -> 1073; Nightglaive, Gravecaller and Sparkshot still one-shot it);
-  - every multishot arrow of Searing Rounds carries the burn (still 1, 1, 2, 2, 3 extra arrows);
-  - a chest card for a worn slot is now a choice: click it (or its key) and a panel shows the worn item (one level up) and the new one (at the slot's level + 1) side by side, stat rows lined up, better green with ▲, worse red with ▼; 1 keeps, 2 takes, Esc goes back to the three cards. A lower or equal rarity is offered too now;
-  - `sim:run` prints a `burst` line per hero (spell cast and base attack against Shieldbearer and Lancer hp at phases 5, 10, 15, 20).
-- **Open for Petr (the main decision):** tamed spells cost many autopilot wins: without gear 131 -> 68 of 320, mid gear 255 -> 124, full gear 320 -> 254 (Redcleaver 6 and 4 of 20 with the best gear). The deaths fall at 2-4 minutes under the doubled enemy damage, before spells grow, so no setting of the two knobs reaches 6-12 of 20 for most heroes. Choose: keep 0.5 / 0.005 (spells tamed, much harder game), go up to 0.7 / 0.01 (gear wins return: mid 117, full 157 of 160 on seeds 1-20, but a late cast kills 2-5 Lancers again), or keep the curves and soften the early threat. Sweep table in `docs/DECISIONS.md`.
-- **Open for Petr:** Gravecaller still wins 20 of 20 in every setting; Mistwarden, Redcleaver and Tidecaller win none without gear (their kits, out of scope); the base attack grows about x4.5 over a run (measured, not tuned); on-hit bonuses do not use spell power.
-- What Petr checks in the playtest:
-  - is the second half of a run a challenge now, is the Serpent Shaman no longer immortal, are the first minutes too hard;
-  - the Sparkshot: does every arrow burn, does it feel strong enough;
-  - the compare panel at 1280x720: readability, the lined-up rows, keys 1, 2 and Esc, the mouse;
-  - quick links: https://wizzik.github.io/defense-webgame/?debug=1 after the merge; in the console `__game.debug.grantGold(5000)`, then walk to a chest (a worn slot shows a Choice after the first few chests); `__game.debug.setAbilityLevel(0, 5)` for a signature spell at its top level; `__game.debug.wear("head", "travelers-hood")` to wear an item at once.
-- Merged at Petr's word after green CI, Pages deployed. Petr kept the knobs and asked for sustain instead (the Sustain section at the top).
-
-## Chest loot, Magic Find and enemy threat: merged (PR #15 as `dd88ff5`, 2026-11-18); waits for Petr's playtest
-
-- All 7 tasks of `docs/superpowers/plans/2026-11-18-chest-loot-threat.md` are done (executed inline in one chat, one final self-review: the chat could not start a separate reviewer). `npm run check` and the build pass; the e2e project `webgl2-fallback` passed 30 of 30 after Task 5 and 29 of 30 at the end ("pack arrows point at a new pack" ran out of its 5 s on this container's ~2.5 fps software rendering, the same timing on `main`; CI decides). Numbers, rulings and the win table: `docs/DECISIONS.md`, section Chest loot, Magic Find and enemy threat.
-- What it brings:
-  - enemies hit the hero twice as hard; Stonehorn and Redcleaver take a quarter less (x1.5); the castle as before;
-  - a chest offers 3 rolled items in all five rarities (glyph, name in the rarity colour, rarity, "new for this run" / "replaces X for this run" / "level 3 -> 4", stat rows compared with the worn item); a higher rarity replaces the worn item for the run, the permanent item comes back after the run;
-  - a new stat Magic Find on 10 items (rings, necks, trinkets, a belt): raises the odds of better rarities in chests and boss drops, with diminishing returns; shown in tooltips and in the totals under the doll (gear screen and panel C);
-  - a legendary or mythic from a chest is named on the news line in its colour;
-  - chests cost half (Petr, before the merge): 100, 112, 125, ...; without gear the autopilot wins 94 instead of 70 of 320 runs and opens almost twice as many chests;
-  - chest levels count 0.25 each (permanent levels 0.15), also the first level of an item a chest gave; `npm run sim:chests` measures chest power: 15 chests give a bare level-25 hero x1.46 (hp 1.44, attack 1.48, spells 1.45).
-- What Petr checks in the playtest:
-  - do chests feel worth the walk now, and do the cards and rarities read (colours, the replace line);
-  - does a mistake hurt now: running away should no longer be safe; is x2 too much early (the autopilot dies at 2-4 minutes, before the first miniboss);
-  - the news line for a legendary or mythic from a chest;
-  - Magic Find: is the stat clear in tooltips and under the doll.
-- Quick links (with `debug=1` the collection starts empty and nothing is stored): https://wizzik.github.io/defense-webgame/?debug=1 after the merge; in the console `__game.debug.grantGold(5000)`, then walk to a chest; `__game.chestCards` lists the offer; `__game.debug.grantItem("seal-of-the-archivist", 5)` for Magic Find.
-- **Open for Petr (wins without gear):** five heroes win 0 or 1 of 20 on both seed sets: Stonehorn, Nightglaive, Mistwarden, Sparkshot, Tidecaller (table in `docs/DECISIONS.md`). Not tuned here (spec 5.2); the shared-spells plan tunes kits to 6-12 of 20 against this state. Gravecaller still wins 20 of 20. With a rare item in every slot wins fell less (e.g. Nightglaive 18 -> 4, Sparkshot 10 -> 19); full gear wins everything.
-- **Open for Petr (rulings):** chest levels count also the first level of a chest item (the plan's formula would have needed a step of about 1.25); weights common 25, rare 30, epic 37, legendary 6, mythic 2. Both are his to change in `design/rules.yaml`.
-- Minor notes from the final review (not fixed): `basicItemIndex` is no longer used by the game; two cards of one offer can show the same ring or trinket; the debug snapshot caches `chestCards` per offer.
-- Merged at Petr's request after halving the chest price (2026-11-18 evening), CI green.
-- Next: Petr plays the live game.
-
-## Shared spells and passives: merged (PR #16 as `d66d9a0`, 2026-11-18); waits for Petr's playtest
-
-- All 9 tasks of `docs/superpowers/plans/2026-11-18-shared-spells-passives.md` are done (inline in one chat, one final self-review of the whole diff against spec 4.1-4.8 and `AGENTS.md`). `npm run check`, the build and the e2e project `webgl2-fallback` (31 of 31) pass. Approved and merged by Claude at Petr's word ("vše si schval, sluč a nasaď"). Numbers, sources from the map, rulings and the win table: `docs/DECISIONS.md`, section Shared spells and passives.
-- What it brings:
-  - 10 ability slots: the kit (0-3), two shared spells (4-5) and four passives (6-9); the new slots start empty and fill from level-up cards marked **New** (glyph, name, text, level 1 values);
-  - 10 shared spells any hero can learn: Arc Lightning (a chain that leaps 2-6 times), Smite (a strike from above on the strongest enemy, bosses and elites first), Fire Bolt, Frost Ring, Meteor, Holy Ground, Blade Fan, Shock Wave, Sentry Ward, Second Wind; all cast on their own;
-  - 6 passives with 5 levels: Might, Arcane Focus, Haste, Vigor, Fleet Foot, Fortune (attack, spell power, cooldowns, hp and regen, speed, gold and pickup range);
-  - cards come from four weighted groups (signature 4, shared upgrade 3, new spell 2, new passive 2); attribute cards only when nothing else can be learned or raised;
-  - the ability bar: signature spells, the two shared spells and the ultimate in one row, a small row of four passive glyphs under it; empty slots are dashed frames;
-  - the autopilot takes the ultimate, signature, new spell, shared upgrade, new passive, passive upgrade, attribute; `sim:run` prints what it took and when the whole kit was full (median phase 19-20 of 20).
-- Wins without gear, seeds 1-20 (`main` -> branch): Stonehorn 3 -> 6, Nightglaive 0 -> 4, Gravecaller 20, Serpent Shaman 9 -> 15, Mistwarden 0 -> 4, Sparkshot 1 -> 4, Redcleaver 8, Tidecaller 0 -> 3 (seeds 21-40 and 1-100 in DECISIONS). Mid gear: 258 -> 255 of 320; full gear wins all.
-- What Petr checks in the playtest:
-  - does the second half of a run feel full now: a real choice at every level-up, a build that differs between runs of one hero;
-  - the New cards and the passive row under the ability bar (readability at 1280x720, the glyphs);
-  - the effects: the Arc Lightning bolt along its leaps, the Smite flash from above;
-  - the strength of shared spells next to the signature ones (target: a shared spell at level 5 is about a signature spell at level 3-4) and of the passives;
-  - quick links: https://wizzik.github.io/defense-webgame/?debug=1 then in the console `__game.debug.learn(4, "arc-lightning")`, `__game.debug.learn(5, "smite")`, `__game.debug.learn(6, "might")` (passives into slots 6-9), `__game.debug.setAbilityLevel(4, 5)`; `__game.abilityIds` lists the slots.
-- **Open for Petr (balance band 6-12 of 20):** Serpent Shaman reads 15 and 16 on the two seed sets, but over 100 seeds it moves only 63 -> 69 % (it already won about 13 of 20 on `main`; 9 on seeds 1-20 was luck). Nightglaive, Mistwarden, Sparkshot and Tidecaller come closer but stay under 6 on at least one set: Nightglaive and Mistwarden die at 2-4 minutes under the doubled enemy damage, before shared spells matter; closing that needs their kits. Redcleaver stays in the band but loses over 100 seeds (45 -> 35 %). Gravecaller still wins everything. Tried and dropped: weaker Arcane Focus, shared spells +30 %, signature weight 6.
-- Minor notes from the final review (not fixed): the client keeps the chain's last bolt point per slot in a small growing array; `botCard` builds the slot range per card (only at offers); the spec's `move_direction` for Blade Fan and `around_self` for Sentry Ward were changed to what the updaters read (`nearest`, `densest_cluster`).
-- Merged by Claude after green CI (Petr's word: approve, merge and deploy), Pages deployed.
-- Next: Petr plays the live game (both PR #15 and PR #16).
-
-## Sparkshot multishot: merged (PR #14, 2026-11-18)
-
-- Petr's wish (2026-11-18): Searing Rounds shoots more enemies. Each base attack also hits 1, 1, 2, 2, 3 other enemies in reach (by the spell's level); the split shots deal the base attack without the burn. Rule and numbers: `docs/DECISIONS.md`, section Sparkshot multishot.
-- Autopilot wins of the Sparkshot: 0 -> 10 of 20 (seeds 21-40: 1 -> 13). The other heroes are unchanged.
-- What Petr checks in the playtest: does it feel like a multishot (the bolts), is the Sparkshot fun now, does it die too often (below 50 % hp in 19 of 20 autopilot runs).
-- Merged as `cd54f2e`, Pages deployed. The PR also fixed the e2e test of the gear panel: a level-up offer can open right after a chest pick (it failed once on software WebGPU in CI).
-
-## Gear, boss drops and chests: merged (PR #12 into `elite-boss-threat`, PR #13 into `main`, 2026-11-13); waits for Petr's playtest
-
-- All 11 tasks of `docs/superpowers/plans/2026-11-13-items-gear-chests.md` are done (executed inline in one chat with one final review). `npm run check`, the build and the e2e project `webgl2-fallback` pass. Spec: `docs/superpowers/specs/2026-11-13-items-gear-chests-design.md` (section 12: what the build made precise). Numbers and the table of wins: `docs/DECISIONS.md`, section Gear, drops and chests.
-- Merged at Petr's request (2026-11-13 evening). Lesson: a PR stacked on another PR's branch is merged into that branch, not into `main`, when the lower PR is merged first without deleting its branch; open PRs against `main`, one after another.
-- What it brings:
-  - gold coins from kills, gold and the next chest's price in the HUD;
-  - 3 chests on the map (a pointer at the screen edge shows the nearest one, bright when the gold is there): pay, pick 1 of 3 gear slots; an empty slot gets a common item for this run, a worn one a level for this run;
-  - C opens the gear panel in a run (the run pauses);
-  - every boss drops one item (the news line names it in its rarity colour, the end screen lists the loot); it is kept when the run is lost; a duplicate raises the item's level up to 5;
-  - the menu has the button Gear: the hero's doll with 16 slots, the collection of 70 items in five rarities with a filter, tooltips that compare with the worn item, export to a file and import;
-  - 5 legendary and 3 mythic items with a special effect (chain lightning, splash, a shield under low hp, faster cooldowns after an elite kill, a slowing aura, gold that heals the castle);
-  - the gear is stored in the browser (IndexedDB), never with `?debug=1`.
-- What Petr checks in the playtest:
-  - chests: is the price curve right (200, 224, 251, ...; about 12 to 16 chests in a won run), is a chest worth the walk, do the chest and its price read on the ground;
-  - **chests are weak on purpose for now:** 16 chests give a hero without gear about +10 % (the spec wanted +50 % at the end of a run); stronger chests made the run without gear easier at once. Stronger chests, or keep them and make gear the main source of power? (Answered 2026-11-18: stronger chests, see the chest-loot spec at the top.)
-  - the gear screen: readability, the icons (own simple glyphs), the doll (one blue-grey figure for every hero), the tooltip;
-  - the names of the 70 items (EN and CS) and the texts of the eight effects;
-  - how strong gear feels: a rare item in every slot already wins most autopilot runs; the best gear at level 5 is about 2x hp, attack and spells at hero level 25.
-- Quick links (with `debug=1` the collection starts empty and nothing is stored):
-  - https://wizzik.github.io/defense-webgame/?debug=1&phase=6 : first miniboss at once; kill it for a drop, or `window.__game.debug.killBoss()` in the console;
-  - console helpers: `__game.debug.grantGold(2000)`, `__game.debug.grantItem("skysplitter", 5)` (ids are in `design/items.yaml`), `__game.debug.clearGear()`.
-- **Open for Petr 1 (balance without gear):** with chests the autopilot wins about as before for six heroes; Nightglaive swings (2 and 9 of 20 on the two seed sets, 8 and 4 before) and the Tidecaller gains (7 and 5, before 2 and 3). Sparkshot still won none without gear (closed by the multishot, 2026-11-18).
-- **Open for Petr 2 (chest power):** answered by the chest-loot spec (2026-11-18).
-- Left from the final review as minor notes (not fixed): the drop rides on the event buffer (a full buffer of 1024 events would lose it); stored data of another version loads as empty and the first drop overwrites it; a write that fails later in a session turns saving off without a word; the export revokes its link right after the click; pack arrows hide while a chest slot is chosen; the gear screen builds a whole run for the totals on every click; a chest's fallback place skips the spacing check; a chest can put the same common ring into both ring slots.
-- Later, not in this plan: difficulties as a combination of another environment and a chosen difficulty (Petr, 2026-11-12); they are meant to take up the power of gear.
-
-## Elite and boss threat: merged (PR #11, 2026-11-13); waits for Petr's playtest
-
-- Why: Petr's playtest of 2b-3 (elites too weak, running away kills everything, bosses cannot reach or catch the hero). Spec: `docs/superpowers/specs/2026-11-12-elite-boss-threat-design.md`; numbers and the balance table: `docs/DECISIONS.md`, section Elite and boss threat.
-- What it brings: elites hunt the hero and charge; minibosses hunt the hero; every boss strikes from afar with a 1 s warning circle on the hero (three of them leap into it, the Gunmaster shoots). `npm run check`, the build and the e2e project `webgl2-fallback` pass.
-- What Petr checks in the playtest: is running away still safe; is 1 s enough to leave the circle; are the elites and the first boss (4:10) too hard now; do minibosses still die too fast (about 20 s for the autopilot, their hp did not change). Quick links: `?debug=1&phase=6` (first miniboss), `&phase=4` (elite rush after 30 s), `&phase=21` (finale).
-- Next: Petr plays.
-- Open: the Tidecaller fell from 14 to 2 autopilot wins of 20; Sparkshot still wins none.
-
-## Phase 2b-3 (full run with a boss): merged (PR #10, 2026-11-12)
-
-- All 8 tasks of `docs/superpowers/plans/2026-11-12-phase-2b3-full-run-boss.md` are done (executed inline in one chat with one final review). `npm run check`, the build and the e2e project `webgl2-fallback` pass.
-- What it brings: a run of 20 phases (16:40), five elite rushes announced 7 s ahead, three minibosses (Iron Marshal 4:10, Pale Abbot 8:20, Gunmaster 12:30) and the final boss Dread Regent at 16:40 with an enrage 200 s later; the run is won when the final boss falls. Bosses slam the ground after a red warning circle. The HUD shows the phase, news and the boss's hp bar. `?debug=1&phase=N` starts at a phase.
-- What Petr checks in the playtest (after the merge, on the live game):
-  - the length and the pace of the run, and whether the second half feels thin (after the kit is full the cards offer only attributes; meant to last until 2c);
-  - the slam circle: is it readable on the grass and on the dark earth by the castle, is 1 s enough to walk out;
-  - how hard the bosses are; the final boss has 257 000 hp (the spec's 60 000 fell in under 30 s);
-  - the news line and the boss bar under the clock (they share the place with "The castle is under attack!");
-  - quick links: https://wizzik.github.io/defense-webgame/?debug=1&phase=6 (first miniboss at once), `&phase=4` (elite rush after 30 s), `&phase=21` (finale).
-- **Open for Petr 1 (balance spread):** on 20 seeds the autopilot wins 10 (Stonehorn), 12 (Nightglaive), 7 (Mistwarden), but 17 (Serpent Shaman), 15 (Redcleaver), 14 (Tidecaller) and 0 (Sparkshot: its castle is almost gone when the finale starts). The run-wide numbers cannot close this spread; it needs kit work or a look at how the autopilot plays a ranged hero in the finale. Gravecaller still wins everything.
-- **Open for Petr 2 (XP curve):** the full kit comes in phases 7-9 (the spec wanted 12-14) and a won run ends at level 49-50 (wanted 35-45). A slower curve made the heroes die between 2:00 and 6:00; it needs the early phases retuned with it. Numbers: `docs/DECISIONS.md`, section Phase 2b-3.
-- Merged as `a684417`. The two open balance points stay open.
-
-## Ward rework: merged (PR #9, 2026-11-12)
-
-- Merged as `5207271`, Pages deployed.
-
-- Petr's decision after the first playtest of visual pass A: Serpent Totem and Wisp Ward both raise 1, 2, 2, 3, 3 wards a cast, at most 2, 4, 4, 6, 6 alive, and the totem casts every 4.95 s on every level. Details and numbers: `docs/DECISIONS.md` (Product, 2026-11-12).
-- Serpent Totem damage went 50 -> 60 to keep the Serpent Shaman in the balance bands (Claude's tuning; Petr may change it). The Serpent Shaman is no longer an open balance gap; the Gravecaller still is.
-- What Petr checks: both heroes on the live game. Do the wards follow the fight well enough, or should they move with the hero (that needs new simulation code)?
-
-## Visual pass A: merged (PR #8, 2026-11-12)
-
-- Plan: `docs/superpowers/plans/2026-11-11-visual-pass-a.md` (7 tasks, all done). PR #8 merged as `0a6de7e`; CI was green on both e2e projects, Pages deployed. Live at https://wizzik.github.io/defense-webgame/.
-- What it brings: KayKit CC0 models (8 heroes from 5 adventurer bodies, 6 skeleton enemy types with weapons, the castle with towers and flags, a forest around the spawn ring), procedural ground, dusk light and fog, a moon shadow map plus blob shadows, a build tool for assets. The simulation and the balance did not change (`git diff main -- sim design data` is empty). Decisions: `docs/DECISIONS.md`, section Visual pass A.
-- What Petr checks in the playtest:
-  - the look and the readability of the six enemy types; the strong type tint on enemies; the chaplain's small size;
-  - the grass colour and the dark earth around the castle;
-  - the mage hats hide gravecaller and mistwarden from above;
-  - orange details in the kit textures (not removable without new textures) and stonehorn's orange hero colour;
-  - the forest border outside the arena edge: that it hides the end of the world in every corner, and the size of the rocks;
-  - `?fps=1` on his machine: the shadow map has never run on real hardware (only on software rendering here). Compare the default with `?shadows=0`;
-  - the enemy cap of 3000 triangles and its fps cost with a full crowd.
-- From the five minor notes after 2b-1, "the Lancer and the Chaplain are both pale" is gone (they are textured models now); four remain.
-
-## Phase 2b-2 (ring arena, enemy AI, four heroes): merged (PR #7, 2026-11-11)
-
-- Live at https://wizzik.github.io/defense-webgame/ (CI and Pages green on `eb6e671`). 8 heroes, packs from every side, five enemy behaviours; the autopilot loses about half of its runs. No final whole-branch review ran before the merge.
-- **Open for Petr 1 (2026-11-12: the Serpent Shaman part is closed by the ward rework, the Gravecaller stays):** Gravecaller and Serpent Shaman still win 5 of 5 and are never in danger, also after Petr's cuts of 2026-11-11 evening (Serpent Totem damage halved, Grave Grasp heal -75 %). They need a redesign of their kits.
-- **Open for Petr 2 (closed by 2b-3):** balance is now measured on 20 seeds (`sim:run --seeds 1-20`), with seeds 21-40 as a check; CI guards only the shape of a run.
-- What Petr should check in the playtest: packs come from all sides and reach him and the castle, the types read apart, the first tries are often lost, and the menu shows 8 heroes.
-- Numbers: `docs/DECISIONS.md`. Plan: `docs/superpowers/plans/2026-11-11-phase-2b2-ring-ai-heroes.md`.
-
-## Now
-
-- **Phase 0 (foundation): done.** PR #1 was merged on 2026-11-04. On Petr's laptop the spike holds 60 fps on average with 150 and 600 enemies, with a 1% low of 57–59 fps on both WebGPU and WebGL2.
-- **Phase 1 (vertical slice): done, merged with PR #2.** The 3-minute run is playable at https://wizzik.github.io/defense-webgame/:
-  - Stonehorn moves with WASD, Rock Rupture casts itself, and siegers and hunters come from two gates;
-  - XP crystals drop, and each level-up offers three cards;
-  - the run ends in a win, or in a loss when the castle or the hero falls;
-  - the UI is in EN and CS;
-  - the simulation is deterministic and replayable;
-  - there are 176 unit tests and 12 e2e tests, and CI is green.
-- **Tempo and effects pass (2026-11-06, PR #3 tempo and PR #4 effects + sounds)** after Petr's first playtest:
-  - survivors pace through `design/scaling.yaml`: about 360 enemies a run, level about 11, Rock Rupture every 4 s;
-  - knockback, damage numbers, death pop, camera shake and synthesized sounds (M mutes).
-  - The pace is tuned in `design/scaling.yaml` (multipliers on map numbers) and `design/rules.yaml` (castle, spawns, XP). After a change run `npm run data:build` and `npm run sim:run -- --hero all --runs 5`.
-- **Phase 2a (heroes and abilities): merged** (PR #5 on 2026-11-10) and live: 4 heroes, 16 abilities in 12 kinds, hero choice in the menu, R (ultimate), T (auto switch), Space (dash), ability HUD, effects, wards and copies, learn and ultimate cards, `sim:run --hero`.
-
-## Next
-
-**2b-1 Swarms and enemy variety: merged (PR #6, 2026-11-11).** Packs, 6 enemy types, shooters and healers, a 5-minute run in 6 phases, the GPU name in the `?fps=1` overlay. Minor review notes are left for a later pass (the pale Lancer and Chaplain note was closed by Visual pass A): the chaplain heals every 31 steps, not 30; `Effects` keeps uploading behind the menu after a restart; the e2e test for a shooter that dies in the step it fired only proves that nothing crashes. Plan: `docs/superpowers/plans/2026-11-10-phase-2b1-swarms-and-enemies.md`.
-
-**Petr's playtest of 2a (2026-11-10), the reason for 2b-1 (done) and the visual passes:**
-- 20.5 fps: **resolved, not a game bug** (see below);
-- the graphics are "terrible" and he wants a big improvement, with Tripo or Blender if useful (his Blender MCP does not install; no Tripo or Blender connector exists in the claude.ai directory);
-- enemies come one by one, not in swarms, and there is only one enemy type: boring.
-
-**Fps investigation (2026-11-10 evening):**
-- Simulation cost is negligible: under 0.1 ms per step on average for all 4 heroes (about 20 enemies alive in the first 3 minutes).
-- Measured the live build in the Claude desktop app's built-in browser on Petr's desktop (Windows, Chromium 152, WebGPU, NVIDIA Blackwell / RTX 50, 144 Hz, dpr 1, 1129x1275): stonehorn holds **144 fps, 1% low 141** up to 70 s; JS in the rAF callback is under 1 ms per frame (p95 1.6 ms).
-- **Cause found and fixed:** Petr's Chrome 157 (Windows 10 22H2) had every GPU feature on "Software only". Enabling `chrome://flags` "Override software rendering list" gave **140 fps**, so Chrome's GPU blocklist was blocking his NVIDIA driver. Advised: update the NVIDIA driver, then set the flag back to Default and check chrome://gpu.
-- 2b-1 added the GPU name to the `?fps=1` overlay and a menu warning on software rendering.
-
-**Order after 2b-2 (approved by Petr 2026-11-10; 2b-2 was put in front on 2026-11-11):**
-1. **Visual pass A, no external tools**: merged, see the top of this file.
-2. **Visual pass B, own hero models** (needs Petr's computer): Tripo (text or image to 3D with auto-rig; check the licence of his plan before anything is committed, the repo is public) or Blender. Blender MCP install problem: Petr pastes the error into a chat on the computer with Blender. Constraints: hero <= 5000 triangles, enemy <= 3000 (see docs/DECISIONS.md), clips Idle, Running/Walking, Punch, Death, every asset in `assets/LICENSES.md`.
-3. Then the rest of 2b: 20 phases, elites and bosses are done (2b-3); factions and difficulties remain. Gold, chests, items and the collection (parts of 2c economy and 2e meta progression) are merged. Then the rest of 2c, 2d shared abilities, the rest of 2e.
-4. Propose the second skill (project development rules).
-
-**Fps test links for Petr** (play about 2 minutes, read the overlay: average and 1% low, and the backend it names):
-- https://wizzik.github.io/defense-webgame/?fps=1&hero=stonehorn
-- https://wizzik.github.io/defense-webgame/?fps=1&hero=serpent-shaman (totems)
-- https://wizzik.github.io/defense-webgame/?fps=1&hero=gravecaller (Bone Stampede from hero level 6)
-- the same with `&renderer=webgl2`
-
-## Working with tokens
-
-- One chat per plan or per phase: write the plan in one chat, execute it in the next. A new chat starts from this file.
-- Tell Petr when a chat has grown long (he asked for this on 2026-11-10): at the latest after a plan is written, after a phase is merged, or when the history holds a whole executed plan.
-- Subagent-driven execution costs the most (a fresh context per task and per review). For small plans (up to about 6 tasks) offer native execution with one final review.
+Finished work before 2026-11-26 (and the random items stages 1-3): `docs/archive/status-2026-11-04-to-27.md`.
+Read it only when a task needs the history of a feature; `docs/DECISIONS.md` holds the rules that still apply.
 
 ## Open questions for Petr
 

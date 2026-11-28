@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { GameData } from "../data/schema";
-import { basicItemIndex, itemStatAt, type LoadoutEntry, recomputeGear, SLOT_COUNT, SLOT_IDS, slotTypeOf } from "./gear";
+import { itemStatAt, type LoadoutEntry, recomputeGear, SLOT_COUNT, SLOT_IDS, slotTypeOf } from "./gear";
 import { stateHash } from "./hash";
 import { heroStats } from "./hero";
 import { NO_INPUT } from "./input";
@@ -8,11 +8,12 @@ import { createRun } from "./run";
 import { gameData } from "./testing/game-data";
 import { updatePickups } from "./crystals";
 
-/** Game data whose common item of `type` has the single stat row `stat: value`. */
+/** Game data whose first item of `type` has the single stat row `stat: value` and no effect. */
 function dataWith(type: string, stat: string, value: number): { data: GameData; id: string } {
   const data = gameData();
-  const item = data.items.find((i) => i.rarity === "common" && i.slotType === type)!;
+  const item = data.items.find((i) => i.slotType === type)!;
   item.stats = [{ stat: stat as never, value }];
+  delete item.effect;
   return { data, id: item.id };
 }
 
@@ -39,17 +40,12 @@ describe("gear", () => {
     data.rules.gear.chestLevelStep = 0.3;
     const run = createRun(data, { seed: 1, durationSeconds: 100000 });
     const feet = SLOT_IDS.indexOf("feet");
-    run.gear.item[feet] = basicItemIndex(data, "feet");
+    const index = data.items.findIndex((item) => item.id === "walking-boots");
+    run.gear.item[feet] = index;
     run.gear.temp[feet] = 2;
     recomputeGear(run);
-    const boots = data.items[basicItemIndex(data, "feet")]!;
+    const boots = data.items[index]!;
     expect(run.hero.gear.moveSpeed).toBeCloseTo(boots.stats[0]!.value * 1.6, 9);
-  });
-
-  it("finds the common item of a slot type", () => {
-    const data = gameData();
-    const index = basicItemIndex(data, "feet");
-    expect(data.items[index]).toMatchObject({ slotType: "feet", rarity: "common" });
   });
 
   it("a +10 str item of level 2 adds 11.5 str to the stats and the hero starts at full hp", () => {
@@ -146,7 +142,8 @@ describe("gear", () => {
     expect(items.filter((i) => i >= 0).length).toBe(1);
     expect(run.gear.item[SLOT_IDS.indexOf("ring1")]).toBe(data.items.findIndex((i) => i.id === ring));
     expect(run.gear.base[SLOT_IDS.indexOf("ring1")]).toBe(2);
-    expect(run.hero.gear.magicFind).toBeCloseTo(0.12 * 1.15, 9); // tin-ring carries magic find
+    const mf = data.items.find((i) => i.id === ring)!.stats.find((r) => r.stat === "magicFind")!.value;
+    expect(run.hero.gear.magicFind).toBeCloseTo(mf * 1.15, 9); // tin-ring carries magic find
   });
 
   it("the same seed and gear give the same hash, other gear another", () => {

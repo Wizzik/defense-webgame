@@ -25,13 +25,13 @@ describe("gear presets", () => {
     }
   });
 
-  it("mid is rare items that lean to the hero's main attribute where one exists", () => {
+  it("mid is legendary items that lean to the hero's main attribute where one exists", () => {
     for (const hero of data.heroes) {
       const items = gearPreset(data, hero.id, "mid").map((entry) => data.items.find((item) => item.id === entry.item)!);
-      expect(items.every((item) => item.rarity === "rare")).toBe(true);
+      expect(items.every((item) => item.rarity === "legendary")).toBe(true);
       for (const item of items) {
         const leaning = data.items.some((other) =>
-          other.rarity === "rare" && other.slotType === item.slotType && other.stats.some((row) => row.stat === hero.primary));
+          other.rarity === "legendary" && other.slotType === item.slotType && other.stats.some((row) => row.stat === hero.primary));
         // the second ring or trinket may have to take what is left
         if (leaning && item.slotType !== "ring" && item.slotType !== "trinket") {
           expect(item.stats.some((row) => row.stat === hero.primary), `${hero.id}: ${item.id}`).toBe(true);
@@ -40,13 +40,20 @@ describe("gear presets", () => {
     }
   });
 
-  it("full wears every mythic item and the highest rarity of every other slot", () => {
-    const ids = gearPreset(data, "sparkshot", "full").map((entry) => entry.item);
-    for (const item of data.items.filter((candidate) => candidate.rarity === "mythic")) expect(ids).toContain(item.id);
-    const rarities = ids.map((id) => data.items.find((item) => item.id === id)!.rarity);
-    expect(rarities.filter((rarity) => rarity === "mythic")).toHaveLength(3);
-    expect(rarities.filter((rarity) => rarity === "legendary")).toHaveLength(1);
-    expect(rarities.filter((rarity) => rarity === "epic")).toHaveLength(12);
+  it("full wears a mythic in every slot but the second trinket (one mythic trinket), leaning to the main attribute", () => {
+    for (const hero of data.heroes) {
+      const items = gearPreset(data, hero.id, "full").map((entry) => data.items.find((item) => item.id === entry.item)!);
+      const rarities = items.map((item) => item.rarity);
+      expect(rarities.filter((rarity) => rarity === "mythic"), hero.id).toHaveLength(15);
+      expect(items.filter((item) => item.rarity === "legendary").map((item) => item.slotType)).toEqual(["trinket"]);
+      for (const item of items) {
+        const leaning = data.items.some((other) =>
+          other.rarity === item.rarity && other.slotType === item.slotType && other.stats.some((row) => row.stat === hero.primary));
+        if (leaning && item.slotType !== "ring" && item.slotType !== "trinket") {
+          expect(item.stats.some((row) => row.stat === hero.primary), `${hero.id}: ${item.id}`).toBe(true);
+        }
+      }
+    }
   });
 
   it("sim:run takes --gear", () => {

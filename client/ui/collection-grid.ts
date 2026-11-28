@@ -14,7 +14,7 @@ export interface GridEntry {
   equipped: boolean;
   /** A random item (its record carries its rows). */
   rolled: boolean;
-  /** A random item no doll wears: the salvage button may take it. */
+  /** An owned item (named or random) no doll wears: the salvage button may take it. */
   salvageable: boolean;
   /** The role the item serves (rolledRole / namedRole). */
   role: RoleTag;
@@ -86,7 +86,8 @@ export function gridEntries(
       const level = record?.level ?? 0;
       entries.push({
         item, uid: record?.uid ?? 0, owned: record !== undefined, level,
-        equipped: record !== undefined && worn.has(record.uid), rolled: false, salvageable: false,
+        equipped: record !== undefined && worn.has(record.uid), rolled: false,
+        salvageable: record !== undefined && canSalvage(save, record.uid),
         role: itemRole(data, item), power: itemPower(data, item, level),
       });
     }

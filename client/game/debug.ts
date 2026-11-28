@@ -3,7 +3,7 @@ import type { DifficultyId, Rarity, SlotType, StatId } from "../../data/schema";
 import { RARITIES, SLOT_TYPES, STAT_IDS } from "../../data/schema";
 import { groundSpeedScale,
   type ChestOffer, chestPrice, debugDropHeart, debugGrantGold, debugGrantXp, debugSetAbilityLevel, debugSpawnEach, debugSpawnOrb,
-  debugWear, killEnemy, learnAbility, OrbKind, debugHazard, hazardPending,
+  debugWear, killEnemy, recomputeGear, Rng, rollItem, wearRolled, learnAbility, OrbKind, debugHazard, hazardPending,
   type Run,
   EMPTY_ITEM, itemStatAt, MAX_ROWS, ROLLED_ITEM, SLOT_IDS, type SlotId, slotTypeOf, TICKS_PER_SECOND,
 } from "../../sim";
@@ -161,6 +161,11 @@ export interface GameSnapshot {
     chooseChest(index: number, side: "keep" | "take"): void;
     /** Puts an item (by id) into a gear slot (by id) of the run as a chest item at level 1; throws on an unknown id. */
     wear(slotId: string, itemId: string): void;
+    /**
+     * Puts a random item of `rarity` (item power 0, the hero's attribute, a generator seeded by the slot) into a gear
+     * slot of the run as a chest item at level 1; throws on an unknown slot or rarity.
+     */
+    wearRolled(slotId: string, rarity: string): void;
     /** An orb of the type 150 ahead of the hero; throws on an unknown type. */
     spawnOrb(type: string): void;
     /** A heart 100 ahead of the hero. */
@@ -293,6 +298,18 @@ export function addDebugHooks(
       const item = run.data.items.findIndex((i) => i.id === itemId);
       if (item < 0) throw new Error(`debug.wear: unknown item "${itemId}"`);
       debugWear(run, slot, item);
+    },
+    wearRolled(slotId: string, rarity: string): void {
+      const run = getRun();
+      if (!run) return;
+      const slot = (SLOT_IDS as readonly string[]).indexOf(slotId);
+      if (slot < 0) throw new Error(`debug.wearRolled: unknown slot "${slotId}"`);
+      if (!(RARITIES as readonly string[]).includes(rarity)) throw new Error(`debug.wearRolled: unknown rarity "${rarity}"`);
+      const rolled = rollItem(run.data, new Rng(slot + 1), slotTypeOf(slot), rarity as Rarity, 0, run.hero.def.primary);
+      wearRolled(run.gear, slot, rolled);
+      run.gear.base[slot] = 0;
+      run.gear.temp[slot] = 1;
+      recomputeGear(run);
     },
     spawnOrb(type: string): void {
       const kind = (ORB_TYPES as readonly string[]).indexOf(type);

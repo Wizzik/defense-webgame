@@ -7,7 +7,7 @@ import { emptySave, namedLevels, type SaveData } from "./save";
 
 const data = gameData();
 const rings = data.items.filter((i) => i.slotType === "ring").map((i) => i.id);
-const helm = data.items.find((i) => i.slotType === "head" && i.rarity === "epic")!.id;
+const helm = data.items.find((i) => i.slotType === "head" && i.rarity === "mythic")!.id;
 const rolledHelm: ItemRecord = {
   uid: 50, rarity: "legendary", level: 3, base: "iron-helm",
   rows: [["armor", 0.5, -1], ["str", 4, 2], ["hp", 60, 0], ["dodge", 0.02, 1], ["thorns", 0.3, 0]], effect: 1,
@@ -40,7 +40,7 @@ describe("equip", () => {
   });
 
   it("an item of another type replaces what its slot holds; every hero has its own doll", () => {
-    const other = data.items.find((i) => i.slotType === "head" && i.rarity === "rare")!.id;
+    const other = data.items.find((i) => i.slotType === "head" && i.rarity === "legendary")!.id;
     let save = owning({ [helm]: 2, [other]: 1 });
     save = equip(save, data, "stonehorn", uidOf(save, helm));
     save = equip(save, data, "sparkshot", uidOf(save, helm));

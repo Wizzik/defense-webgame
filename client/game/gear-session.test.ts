@@ -5,8 +5,8 @@ import { GearSession } from "./gear-session";
 import { memoryBackend } from "./save-store";
 
 const data = gameData();
-const helm = data.items.find((i) => i.slotType === "head" && i.rarity === "rare")!.id;
-const helmRecord = (level: number, uid = 1) => ({ uid, rarity: "rare" as const, level, named: helm });
+const helm = data.items.find((i) => i.slotType === "head" && i.rarity === "legendary")!.id;
+const helmRecord = (level: number, uid = 1) => ({ uid, rarity: "legendary" as const, level, named: helm });
 
 describe("GearSession", () => {
   it("loads a save of version 1 as named records", async () => {

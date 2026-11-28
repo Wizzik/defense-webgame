@@ -5,7 +5,7 @@ import { Role } from "./enemies";
 import { Slam, SlamEvent, windupRadius } from "./enemy-slam";
 import { EventKind } from "./events";
 import { gainGold } from "./crystals";
-import { onGearEliteKill } from "./gear-effects";
+import { castleWardShare, gearDamageScale, onGearEliteKill, onGearHeroHit, onGearKill } from "./gear-effects";
 import { gainXp } from "./level-up";
 import type { Rng } from "./rng";
 import type { Run } from "./run";
@@ -60,6 +60,7 @@ export function damageHero(run: Run, amount: number, attacker: number, source: n
   }
   const dealt = amount * heroDamageScale(run);
   hero.hp -= dealt;
+  if (dealt > 0) onGearHeroHit(run);
   if (hit && hero.stats.thorns > 0 && run.data.enemies[run.enemies.type[attacker]!]!.attack.kind === "melee") {
     run.thorns.add(attacker, dealt * hero.stats.thorns);
   }
@@ -67,16 +68,20 @@ export function damageHero(run: Run, amount: number, attacker: number, source: n
   return dealt;
 }
 
-/** Subtracts `amount` from the castle (nothing while any player's shield runs) and records the hit tick. */
+/**
+ * Subtracts `amount` (less the strongest castle_ward of the players' gear) from the castle (nothing while any
+ * player's shield runs) and records the hit tick.
+ */
 export function damageCastle(run: Run, amount: number, attacker: number): void {
   for (let p = 0; p < run.players.length; p++) if (run.players[p]!.shieldTicks > 0) return;
   const castle = run.castle;
-  castle.hp -= amount;
+  const dealt = amount * (1 - castleWardShare(run));
+  castle.hp -= dealt;
   castle.lastHitTick = run.tick;
   const e = run.enemies;
   const ax = attacker >= 0 ? e.x[attacker] : castle.x;
   const ay = attacker >= 0 ? e.y[attacker] : castle.y;
-  run.events.push(EventKind.CastleHit, attacker, amount, ax, ay, 0, 0);
+  run.events.push(EventKind.CastleHit, attacker, dealt, ax, ay, 0, 0);
 }
 
 /**
@@ -92,7 +97,8 @@ export function damageEnemy(
 ): void {
   const e = run.enemies;
   if (e.alive[slot] === 0) return;
-  const amount = raw * berserkScale(run);
+  // elite_slayer (gear) counts for the hero's own hits, not for the world's hazards (meter -1)
+  const amount = raw * berserkScale(run) * (meter >= 0 ? gearDamageScale(run, e.type[slot]!) : 1);
   const before = e.hp[slot];
   e.hp[slot] = before - amount;
   e.lastHitTick[slot] = run.tick;
@@ -160,6 +166,7 @@ export function killEnemy(run: Run, slot: number): void {
     run.events.push(EventKind.Slam, slot, SlamEvent.Cancelled, e.slamX[slot], e.slamY[slot], windupRadius(run, slot), 0);
   }
   if (run.isBoss[e.type[slot]] === 1 || run.isElite[e.type[slot]] === 1) onGearEliteKill(run);
+  onGearKill(run, x, y);
   if (run.isBoss[e.type[slot]] === 1) {
     run.events.push(EventKind.BossDeath, e.type[slot], run.bossesKilled++, x, y, 0, 0);
     run.bossCount--;

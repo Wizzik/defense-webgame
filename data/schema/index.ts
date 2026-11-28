@@ -161,11 +161,6 @@ export function validateGameData(data: unknown): GameData {
     if (itemIds.has(item.id)) errors.push(`items.${i}.id: duplicate item id "${item.id}"`);
     itemIds.add(item.id);
   });
-  // A chest fills an empty slot with the common item of its type, so every type needs exactly one.
-  for (const type of SLOT_TYPES) {
-    const count = items.filter((item) => item.rarity === "common" && item.slotType === type).length;
-    if (count !== 1) errors.push(`items: ${count} common items of type ${type}, expected 1`);
-  }
 
   checkLoot(loot, rules, errors);
 

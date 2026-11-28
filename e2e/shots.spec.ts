@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Page } from "@playwright/test";
 import type { GameSnapshot } from "../client/game/debug";
-import { startRun as clickStart, test } from "./fixtures";
+import { startRun as clickStart, expect, test } from "./fixtures";
 
 declare global {
   interface Window {
@@ -229,16 +229,29 @@ test("shot: chest-compare", async ({ page }) => {
     ["hands", "hands"], ["waist", "waist"], ["legs", "legs"], ["feet", "feet"], ["ring1", "ring"], ["ring2", "ring"],
     ["trinket1", "trinket"], ["trinket2", "trinket"], ["mainHand", "mainHand"], ["offHand", "offHand"],
   ];
-  const pairs = slots.map(([slot, type]) => [slot, items.find((item) => item.slotType === type && item.rarity === "common")!.id]);
+  // named items are legendary or mythic since 2026-11-28: wear legendary ones, and open chests until one offers a
+  // Choice (a mythic card)
+  const pairs = slots.map(([slot, type]) => [slot, items.find((item) => item.slotType === type && item.rarity === "legendary")!.id]);
   await startRun(page, "seed=1&debug=1&lang=cs");
   await page.evaluate((list) => {
     const g = window.__game!;
     for (const [slot, item] of list) g.debug!.wear(slot!, item!);
-    g.debug!.grantGold(1000);
-    g.debug!.teleport(g.chests[0]!.x, g.chests[0]!.y);
   }, pairs);
-  await page.waitForFunction(() => window.__game?.screen === "chest", undefined, { timeout: 90_000, polling: 250 });
-  const index = await page.evaluate(() => window.__game!.chestCards!.findIndex((card) => card.action === "choice"));
+  let index = -1;
+  for (let attempt = 0; attempt < 12 && index < 0; attempt++) {
+    await page.evaluate(() => {
+      const g = window.__game!;
+      g.debug!.grantGold(5000);
+      g.debug!.teleport(g.chests[0]!.x, g.chests[0]!.y);
+    });
+    await page.waitForFunction(() => window.__game?.screen === "chest", undefined, { timeout: 90_000, polling: 250 });
+    index = await page.evaluate(() => window.__game!.chestCards!.findIndex((card) => card.action === "choice"));
+    if (index < 0) {
+      await page.evaluate(() => window.__game!.debug!.chooseChest(0, "keep"));
+      await page.waitForFunction(() => window.__game?.screen === "playing", undefined, { timeout: 30_000, polling: 100 });
+    }
+  }
+  expect(index).toBeGreaterThanOrEqual(0);
   await page.waitForTimeout(350);
   await page.locator("button.card").nth(Math.max(0, index)).click();
   await page.locator("#chest-compare").waitFor();

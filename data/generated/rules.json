@@ -794,6 +794,61 @@
           "en": "Every gold you collect heals the castle by 1.5 HP.",
           "cs": "Každý sebraný zlaťák vyléčí hrad o 1,5 HP."
         }
+      },
+      {
+        "kind": "heal_on_kill",
+        "params": {
+          "kills": 10,
+          "hp": 60
+        },
+        "text": {
+          "en": "Every 10th kill heals you by 60 HP.",
+          "cs": "Každé 10. zabití tě vyléčí o 60 HP."
+        }
+      },
+      {
+        "kind": "nova_when_hit",
+        "params": {
+          "cooldown": 3,
+          "damage": 200,
+          "radius": 300
+        },
+        "text": {
+          "en": "When you are hit, a blast hurts every enemy around you. Works once in 3 s.",
+          "cs": "Když tě něco zasáhne, výbuch zraní všechny nepřátele kolem tebe. Funguje jednou za 3 s."
+        }
+      },
+      {
+        "kind": "elite_slayer",
+        "params": {
+          "share": 0.3
+        },
+        "text": {
+          "en": "You deal 30 % more damage to elites and bosses.",
+          "cs": "Elitám a bossům dáváš o 30 % větší poškození."
+        }
+      },
+      {
+        "kind": "death_burst",
+        "params": {
+          "chance": 0.25,
+          "damage": 70,
+          "radius": 200
+        },
+        "text": {
+          "en": "Enemies you kill have a 25 % chance to burst and hurt the enemies around them.",
+          "cs": "Nepřítel, kterého zabiješ, má 25% šanci vybuchnout a zranit nepřátele kolem sebe."
+        }
+      },
+      {
+        "kind": "castle_ward",
+        "params": {
+          "share": 0.3
+        },
+        "text": {
+          "en": "The castle takes 30 % less damage.",
+          "cs": "Hrad dostává o 30 % menší poškození."
+        }
       }
     ]
   },

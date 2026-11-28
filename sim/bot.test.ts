@@ -14,6 +14,7 @@ import { Role } from "./enemies";
 import { createRun } from "./run";
 import { spawnBoss } from "./timeline";
 import type { Run } from "./run";
+import type { Rarity } from "../data/schema";
 import { gameData, openArena } from "./testing/game-data";
 
 // whole runs with up to rules.enemies.maxAlive (600) enemies take longer than the global 30 s
@@ -474,8 +475,14 @@ describe("balance", () => {
       }
     });
 
-    const idOf = (run: Run, slotType: string, rarity: string) =>
-      run.data.items.findIndex((item) => item.slotType === slotType && item.rarity === rarity);
+    /** A named item of the slot type and rarity; below legendary (no such named item since 2026-11-28) a test copy. */
+    const idOf = (run: Run, slotType: string, rarity: Rarity): number => {
+      const found = run.data.items.findIndex((item) => item.slotType === slotType && item.rarity === rarity);
+      if (found >= 0) return found;
+      const { effect: _, ...like } = run.data.items.find((item) => item.slotType === slotType)!;
+      run.data.items.push({ ...like, id: `test-${slotType}-${rarity}`, rarity });
+      return run.data.items.length - 1;
+    };
 
     it("takes the Choice of a higher rarity than the worn item with the highest rarity first", () => {
       const run = quiet();
