@@ -1,6 +1,6 @@
 import type { GameData, Rarity, RoleTag, SlotType } from "../../data/schema";
 import { RARITIES, ROLE_TAGS, SLOT_TYPES } from "../../data/schema";
-import { recordByUid, recordItem } from "../../meta";
+import { recordByUid, recordItem, salvageValue } from "../../meta";
 import { createRun, SLOT_IDS } from "../../sim";
 import type { GearSession } from "../game/gear-session";
 import { compareTarget, gridList } from "./collection-grid";
@@ -13,7 +13,7 @@ import { ItemTooltip, tooltipLines } from "./item-tooltip";
 /**
  * The gear screen of the menu: the chosen hero's doll on the left (a click on a slot takes the item off), the
  * collection on the right (a click on an owned item puts it on) with filters by slot, role and rarity, the sort by
- * power and the salvage mode (a click on a random item nobody wears turns it into bank gold), export and import of
+ * power and the salvage mode (a click on an item nobody wears turns it into bank gold), export and import of
  * the saved gear below.
  */
 export class GearScreen {
@@ -237,7 +237,7 @@ export class GearScreen {
         if (!entry.owned) info.sub = info.sub.replace(/[^·]+$/, ` ${t(lang, "gear.notOwned")}`);
         if (this.salvaging) {
           info.source = entry.salvageable
-            ? t(lang, "gear.salvageValue", { gold: data.rules.loot.salvageGold[item.rarity] })
+            ? t(lang, "gear.salvageValue", { gold: salvageValue(data, save, entry.uid) })
             : t(lang, "gear.salvageRefused");
         }
         this.tooltip.show(cell, info);
@@ -254,9 +254,10 @@ export class GearScreen {
     setText(this.bank, t(lang, "gear.bank", { gold: save.bankGold, max: data.rules.loot.bankLimit }));
   }
 
-  /** Salvage mode: the click on a random item nobody wears salvages it; anything else only says why not. */
+  /** Salvage mode: the click on an item nobody wears salvages it; anything else only says why not. */
   private salvageEntry(uid: number, salvageable: boolean): void {
     const record = recordByUid(this.gear.save, uid);
+    const gold = salvageable && record ? salvageValue(this.data, this.gear.save, uid) : 0;
     if (!salvageable || !record || !this.gear.salvage(uid)) {
       setText(this.message, t(this.lang, "gear.salvageRefused"));
       this.message.dataset.ok = "false";
@@ -264,7 +265,7 @@ export class GearScreen {
     }
     this.tooltip.hide();
     this.changed = true;
-    setText(this.message, t(this.lang, "gear.salvaged", { gold: this.data.rules.loot.salvageGold[record.rarity] }));
+    setText(this.message, t(this.lang, "gear.salvaged", { gold }));
     this.message.dataset.ok = "true";
     this.render();
   }

@@ -84,7 +84,7 @@ export class GearSession {
     this.commit(unequip(this.save, heroId, slot));
   }
 
-  /** Salvages the random item `uid` (meta/salvage.ts); returns whether it was salvaged. */
+  /** Salvages the item `uid`, named or random (meta/salvage.ts); returns whether it was salvaged. */
   salvage(uid: number): boolean {
     if (!canSalvage(this.save, uid)) return false;
     this.commit(salvage(this.data, this.save, uid));

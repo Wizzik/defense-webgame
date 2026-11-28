@@ -2,21 +2,24 @@ import type { GameData } from "../data/schema";
 import { recordByUid, type SaveData } from "./save";
 
 /**
- * Salvage (random items plan, task 16; Petr's answer 9.2): a random item nobody wears turns into gold for the next
- * run. The gold (`rules.loot.salvageGold` by rarity) goes into the save's bank, which holds at most
- * `rules.loot.bankLimit`; the next solo run starts with the whole bank and empties it (`takeBank`).
+ * Salvage (random items plan, task 16; Petr's answer 9.2; named items too since 2026-11-28): an item nobody wears
+ * turns into gold for the next run. The gold (`rules.loot.salvageGold` by rarity x the record's level) goes into the
+ * save's bank, which holds at most `rules.loot.bankLimit`; the next solo run starts with the whole bank and empties it
+ * (`takeBank`). A salvaged named item is no longer owned and may drop again (new, level 1).
  */
 
-/** Whether the record `uid` may be salvaged: a random item that no hero's doll wears. */
+/** Whether the record `uid` may be salvaged: an item (named or random) that no hero's doll wears. */
 export function canSalvage(save: SaveData, uid: number): boolean {
   const record = recordByUid(save, uid);
-  if (!record || record.named !== undefined) return false;
+  if (!record) return false;
   return !Object.values(save.loadouts).some((loadout) => Object.values(loadout).includes(uid));
 }
 
 /** The gold record `uid` gives when salvaged (before the bank's limit), 0 when it cannot be salvaged. */
 export function salvageValue(data: GameData, save: SaveData, uid: number): number {
-  return canSalvage(save, uid) ? data.rules.loot.salvageGold[recordByUid(save, uid)!.rarity] : 0;
+  if (!canSalvage(save, uid)) return 0;
+  const record = recordByUid(save, uid)!;
+  return data.rules.loot.salvageGold[record.rarity] * record.level;
 }
 
 /** The save without the record `uid` and with its gold in the bank (kept to the limit); the same save when it cannot. */

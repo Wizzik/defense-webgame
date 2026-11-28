@@ -941,7 +941,7 @@ test("the gear screen filters random items, sorts them by power and salvages the
   await page.locator('#gear-screen .gear-grid [data-uid="2"]').click();
   await page.locator("#gear-salvage").click();
   await page.locator('#gear-screen .gear-grid [data-uid="2"]').click();
-  await expect(page.locator("#gear-message")).toHaveText("Only random items that no hero wears can be salvaged.");
+  await expect(page.locator("#gear-message")).toHaveText("Only items that no hero wears can be salvaged.");
   await page.locator('#gear-screen .gear-grid [data-uid="3"]').click();
   await expect(page.locator("#gear-message")).toHaveText("Salvaged for 10 gold.");
   await expect(page.locator('#gear-screen .gear-grid [data-uid="3"]')).toHaveCount(0);
@@ -951,6 +951,21 @@ test("the gear screen filters random items, sorts them by power and salvages the
   await waitForScreen(page, "playing");
   expect(await page.evaluate(() => window.__game!.gold)).toBeGreaterThanOrEqual(10);
   expect(await page.evaluate(() => window.__game!.collectionSize)).toBe(2);
+});
+
+test("a named item nobody wears salvages for its rarity's gold x its level and can drop again", async ({ page }) => {
+  await page.goto("/?seed=1&debug=1&hero=stonehorn");
+  await page.waitForFunction(() => window.__game?.screen === "menu");
+  await page.evaluate(() => window.__game!.debug!.grantItem("skysplitter", 2));
+  await page.locator("#gear").click();
+  await page.locator("#gear-salvage").click();
+  await page.locator('#gear-screen .gear-grid [data-item="skysplitter"]').hover();
+  await expect(page.locator("#gear-screen .item-tooltip")).toContainText("Salvage: 180 gold");
+  await page.locator('#gear-screen .gear-grid [data-item="skysplitter"]').click();
+  await expect(page.locator("#gear-message")).toHaveText("Salvaged for 180 gold.");
+  await expect(page.locator("#gear-bank")).toContainText("Bank: 180 gold");
+  await expect(page.locator('#gear-screen .gear-grid [data-item="skysplitter"]')).toHaveClass(/missing/);
+  expect(await page.evaluate(() => window.__game!.collection)).toEqual({});
 });
 
 test("every hero has its own doll", async ({ page }) => {
