@@ -62,8 +62,8 @@ great icons should be legendary / mythic only"; "part legendary, part mythic"; "
   rarer per card now that their share is the same but the item stronger; the change is within the seeds' noise).
   `sim:chests -- --seeds 1-200` (level 25, 15 chests, no permanent gear): mean x1.25 -> x1.26. **The named full set
   is now clearly stronger than the random mythic set** (world 3 hell: 33 vs 23 wins of 80; it was about equal before
-  with the old epics): named mythics keep 42 points and an effect in every slot, a random mythic has 34. Expected;
-  Petr decides whether a random mythic's budget goes up or the named ones stay the top.
+  with the old epics): named mythics keep 42 points and an effect in every slot, a random mythic has 34. **Petr
+  (2026-11-28): the named items stay the top; the random mythic's budget stays 34.**
 - **sim:run presets:** `mid` is a legendary named item of level 1 per slot (was rare); `full` the best named item per
   slot at level 5 (mythic everywhere but the second trinket). The determinism matrix case `loot-t3` wears
   `rolled-mid` (under `full` a chest offers only Level cards).

@@ -8,7 +8,8 @@ Defense Webgame is a browser survivors-like game (TypeScript + Three.js + Vite),
 - `docs/DECISIONS.md`: decisions already made. Check it before you change a rule.
 - The spec and plans are long and in Czech: read only the section your task needs.
 - Do not read `data/generated/*.json` or map exports whole; query them (`node -e`, `python3 -I -c`).
-- Update `docs/STATUS.md` when a task or phase finishes.
+- Update `docs/STATUS.md` when a task or phase finishes. Keep it short (about 300 lines): when it grows past that, move
+  the oldest finished sections (merged and played by Petr) to `docs/archive/` and leave a pointer (Petr, 2026-11-28).
 
 ## Clean room
 The repository is public (decided 2026-11-04): never commit anything that must not be published.
