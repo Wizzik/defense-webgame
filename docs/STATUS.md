@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-28 (co-op gear between runs and group strength by size). Read this first when you resume work.
+Updated 2026-11-28 (named items only legendary / mythic, salvage for named items). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -23,8 +23,35 @@ Updated 2026-11-28 (co-op gear between runs and group strength by size). Read th
 8. **Co-op gear between runs and group strength by size** (Petr, 2026-11-28; branch `claude/peaceful-galileo-qtu26s`,
    below). Then the remaining heroes of the map and better spell graphics (point 4).
 9. **Named items only legendary / mythic, salvage for named items** (Petr, 2026-11-28): plan
-   `docs/superpowers/plans/2026-11-28-named-items-legendary.md` (rulings and steps), handed to a fresh session on
-   branch `claude/named-items-legendary` (from `claude/peaceful-galileo-qtu26s`). Not started.
+   `docs/superpowers/plans/2026-11-28-named-items-legendary.md`, branch `claude/named-items-legendary` (from
+   `claude/peaceful-galileo-qtu26s`), DONE (below), waits for Petr's playtest.
+
+## Named items only legendary / mythic, salvage for named items (branch `claude/named-items-legendary`, DONE, 2026-11-28)
+
+- The 70 named items are 48 legendary and 22 mythic (every slot type has both); new stats by the budget, an effect on
+  every item, five new effect kinds (heal on kill, nova when hit, elite slayer, death burst, castle ward); random
+  mythics roll them too. Old saves keep id and level, the item shows its new rarity and is stronger.
+- **Salvage** takes named items too (any item no hero wears): gold = rarity's salvage gold x level (legendary 90,
+  mythic 150 per level; the bank holds 500). A salvaged named item can drop again.
+- `sim:run --gear mid` = a legendary named item of level 1 per slot. Balance numbers: `docs/DECISIONS.md`, section
+  Named items only legendary / mythic.
+- Digest `62622e34` -> `82150491`. `data/generated/items.json` and `rules.json` edited in the cloud by the data-build
+  rule: **run `npm run data:build` locally and check that nothing changes.**
+- **What Petr checks** (after the merge, https://wizzik.github.io/defense-webgame/):
+  - the gear screen: https://wizzik.github.io/defense-webgame/?debug=1 then in the console
+    `__game.debug.grantItem("travelers-hood", 1); __game.debug.grantItem("hood-of-the-night-watch", 3)` and open
+    Gear: the hood is Legendary, the night watch Mythic, the tooltip has 4 / 5 rows and an effect line;
+    the rarity filters L / M show all 70 items, C / R / E none of them;
+  - the new effects in a run: https://wizzik.github.io/defense-webgame/?debug=1&hero=redcleaver&phase=8 then
+    `__game.debug.wear("hands", "masons-grip")` (heal every 10th kill), `__game.debug.wear("back", "banner-cloak-of-the-keep")`
+    (mythic nova when hit), `__game.debug.wear("wrist", "bindings-of-the-high-tide")` (mythic death burst),
+    `__game.debug.wear("legs", "trackers-leggings")` (elite slayer), `__game.debug.wear("chest", "bulwark-plate")`
+    (mythic castle ward): the damage meter (N) shows the item row grow; C shows the effect lines;
+  - **salvage a named item**: https://wizzik.github.io/defense-webgame/?debug=1 then
+    `__game.debug.grantItem("skysplitter", 2)`, Gear, Salvage, hover Skysplitter ("Salvage: 180 gold"), click it:
+    "Bank: 180 gold", the item is no longer owned; without `debug=1` the bank goes into the next run;
+  - an old save: your own collection in the browser (without debug) shows the former common / rare / epic items as
+    legendary / mythic with the same levels.
 
 ## Co-op gear between runs and group strength by size (branch `claude/peaceful-galileo-qtu26s`, DONE, 2026-11-28)
 

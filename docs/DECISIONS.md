@@ -2,6 +2,51 @@
 
 Decisions that still apply. Check here before you change a rule. Newest first in each section.
 
+## Named items only legendary / mythic, salvage for named items (2026-11-28; Petr's words, Claude's rulings and numbers)
+
+Plan `docs/superpowers/plans/2026-11-28-named-items-legendary.md`. Petr: "the 70 items with their own names and
+great icons should be legendary / mythic only"; "part legendary, part mythic"; "Salvage for every item".
+
+- **Rarities:** every common and rare named item is legendary; every epic is mythic, but the five epics of trinket,
+  mainHand and offHand (the slot types that had a mythic) are legendary. 48 legendary, 22 mythic; every slot type has
+  both. Ids, names and icons stay; owned items keep id and level and get stronger.
+- **Stats:** legendary 4 rows / 30 points, mythic 5 rows / 42 (the items.yaml budgets). The old rows stay first;
+  every row gets the same share in whole points (30 = 8+8+7+7, 42 = 9+9+8+8+8), rows of the item's theme are added
+  (its attribute, the slot's usual stats; a scratchpad script, not by eye). The old 5 legendaries and 3 mythics are
+  unchanged.
+- **Effects:** every named item has one; 11 kinds, the items of one slot type differ in kind (but the two old pairs
+  Skysplitter / Glaive of the Last Storm and Last Rampart / Oathkeeper's Wall). Effects of one kind still do not
+  stack. Legendary / mythic version of each kind (one version per rarity everywhere):
+
+  | kind | legendary | mythic |
+  |---|---|---|
+  | chain_on_attack | every 4th attack, 90 x SP, 3 jumps, 350 | every 3rd, 160, 5 jumps, 400 |
+  | splash_on_attack | 30 %, 220, 60 % | 40 %, 250, 80 % |
+  | low_hp_shield | under 30 %, 3 s, cooldown 45 s | under 40 %, 4 s, cooldown 30 s |
+  | haste_on_elite_kill | +50 % for 8 s | +60 % for 10 s |
+  | slow_aura | 25 % in 350 | 35 % in 400 |
+  | gold_heals_castle | 1.25 hp per gold | 2 hp per gold |
+  | heal_on_kill (new) | every 10th kill heals 40 hp | every 10th kill heals 60 hp |
+  | nova_when_hit (new) | 150 x SP in 250, once in 4 s | 200 x SP in 300, once in 3 s |
+  | elite_slayer (new) | +20 % damage to elites and bosses | +30 % |
+  | death_burst (new) | 20 % of kills burst, 60 x SP in 180 | 25 %, 70 x SP in 200 |
+  | castle_ward (new) | the castle takes 20 % less | 30 % less |
+
+  A nova fires in the step after the hit and a burst in the step after the kill (`updateGearEffects`), so no enemy
+  dies inside the enemies' own loop; at most 16 bursts wait at once, the kills of a burst do not burst. elite_slayer
+  counts for the hero's hits and his allies', not for the world's hazards; castle_ward: the strongest of all
+  players counts. Random mythics roll the mythic versions of the five new kinds too (`rules.loot.mythicEffects`,
+  11 entries).
+- **Saves:** a named record takes its rarity from the catalogue (already so since stage 3), so old saves and
+  imports show and price the new rarity.
+- **Salvage:** any record no doll wears, named ones too; gold `rules.loot.salvageGold[rarity] x level` (a random
+  item's record level the same way); the bank limit 500 stays. A salvaged named item can drop again (new, level 1).
+- **Drops and chests:** `namedShare` stays (legendary 0.25, mythic 0.4); common to epic cards and drops are always
+  random items.
+- **sim:run presets:** `mid` is a legendary named item of level 1 per slot (was rare); `full` the best named item per
+  slot at level 5 (mythic everywhere but the second trinket). The determinism matrix case `loot-t3` wears
+  `rolled-mid` (under `full` a chest offers only Level cards).
+
 ## Balance target (Petr, 2026-11-27)
 
 - The autopilot without gear (`npm run sim:run -- --hero all --seeds 1-20 --gear none`, world 1 normal from
