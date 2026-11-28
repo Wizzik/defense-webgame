@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-28 (stat icons and tier squares). Read this first when you resume work.
+Updated 2026-11-28 (item pictures). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -28,7 +28,19 @@ Updated 2026-11-28 (stat icons and tier squares). Read this first when you resum
    `docs/superpowers/plans/2026-11-28-named-items-legendary.md`, branch `claude/named-items-legendary` (from
    `claude/peaceful-galileo-qtu26s`), DONE (below), waits for Petr's playtest.
 
-## Stat icons and tier squares (branch `claude/admiring-davinci-enqxge`, DONE, waits for Petr's check, 2026-11-28)
+## Item pictures: own colour, rarity on the frame (branch `claude/admiring-davinci-enqxge`, DONE, waits for Petr's check, 2026-11-28)
+
+- Pictures are no longer filled with the rarity colour: each item has its own colour (by material), the rarity is
+  the frame (also a new frame around the picture on chest cards). 19 named items got a picture of their slot (a belt
+  for a belt, a ring for a ring, ...); list in `docs/DECISIONS.md`, section Item pictures.
+- **What Petr checks** (after the merge):
+  - https://wizzik.github.io/defense-webgame/?debug=1 , in the console
+    `["head","waist","wrist","ring","feet","neck"].forEach(s => window.__game.debug.grantRolled(s, "epic", 6))`, then
+    Gear: coloured pictures in rarity frames; unowned items stay grey.
+  - chest cards: https://wizzik.github.io/defense-webgame/?debug=1&phase=8 , `window.__game.debug.grantGold(5000)`
+    and walk to a chest.
+
+## Stat icons and tier squares (PR #52, merged 2026-11-28, waits for Petr's check)
 
 - The "T1"-"T4" tags are now small squares in the tier colour after the row (hover one: "Tier 3 of 4"); on the chest
   cards they took a whole row each before. Every stat row starts with an icon of its own (22 stats, our glyphs and
