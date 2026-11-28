@@ -1310,3 +1310,273 @@
     radius: { design: [100, 100, 100] }
     hitRadius: { design: [600, 600, 600] }
     duration: { design: [6, 6, 6] }
+
+# Lightbinder (new heroes, batch 3)
+
+- id: radiant-pulse
+  source: A06A
+  name: { en: Radiant Pulse, cs: Radiant Pulse }
+  description: { en: "A pulse of light burns every enemy around you.", cs: "A pulse of light burns every enemy around you." }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: { design: [500, 1000, 2000, 3000, 6000] }
+    radius: { design: [1400, 1400, 1400, 1400, 1400] }
+  review:
+    jassFunctions:
+      - Trig_Fander_Light_Func002C
+      - Trig_Fander_Light_Func002Func001C
+    notes: >-
+      Trig_Fander_Light_Actions (war3map.j v20.83, lines 16163-16191) hits every enemy on the map (range 1e9) for 500,
+      1000, 2000, 3000, 6000 by level (lines 16143, 16090, 16037, 15984, 15931) and heals the allies for 200-3000.
+      The game strikes the enemies within 1400 (700 after the AoE scale, past the 450 a ranged hero keeps); the heal
+      of allies is left out (Mending Wave heals).
+
+- id: mending-wave
+  source: A017
+  name: { en: Mending Wave, cs: Mending Wave }
+  description: { en: "A wave of healing restores you.", cs: "A wave of healing restores you." }
+  kind: heal
+  targeting: self
+  params:
+    # The map's Healing Wave heals 1 point per target (DataA, scripted); the amount is Second Wind's design row (the
+    # same map ability, an id of its own for this hero).
+    amount: { design: [600, 1000, 1500, 2200, 3000] }
+    maxTargets: { design: [1, 1, 1, 1, 1] }
+    range: range
+
+- id: inner-flame
+  source: A015
+  name: { en: Inner Flame, cs: Inner Flame }
+  description: { en: "Your attacks hit harder and your skin grows tougher.", cs: "Your attacks hit harder and your skin grows tougher." }
+  kind: aura
+  targeting: self
+  params:
+    # Inner Fire: DataA +10-50 % damage, DataB +10-80 armor for 60 s every 10 s, so always on: a permanent aura. The
+    # map's armor x 0.2 (the game's armor counts more against its smaller hits).
+    damageBonus: DataA
+    armorBonus: { design: [2, 4, 6, 8, 16] }
+
+- id: heavens-rain
+  source: A018
+  name: { en: Heaven's Rain, cs: Heaven's Rain }
+  description: { en: "Holy light rains around you for a long time.", cs: "Holy light rains around you for a long time." }
+  kind: ticking_area
+  targeting: around_self
+  params:
+    # Starfall: DataA 1000 / 2500 every 1.5 s (DataB) within area 1000 for 10 / 15 s. The game rains bursts in that
+    # radius like Dominion; a burst deals the map's tick x 0.3.
+    tickDamage: { design: [300, 750] }
+    ticksPerSecond: { design: [8, 10] }
+    radius: area
+    hitRadius: { design: [400, 400] }
+    duration: duration
+
+# Skyweaver (new heroes, batch 3)
+
+- id: tempest-bolt
+  source: A03U
+  name: { en: Tempest Bolt, cs: Tempest Bolt }
+  description: { en: "A bolt strikes the thickest crowd and bursts around it.", cs: "A bolt strikes the thickest crowd and bursts around it." }
+  kind: area
+  targeting: densest_cluster
+  params:
+    damage: { design: [400, 800, 1200, 1600, 3200] }
+    radius: { design: [1000, 1000, 1000, 1000, 1000] }
+    range: range
+  review:
+    jassFunctions:
+      - Trig_Stom_Blast_Func005Func001C
+      - Trig_Stom_Blast_Func005Func001Func001C
+    notes: >-
+      Trig_Stom_Blast_Actions (war3map.j v20.83, lines 18824-18832) waits 0.5 s after the storm bolt (DataA 200-1600)
+      and lets a dummy cast A03T at the caster's level on every enemy within 500 of the target: A03T DataA 400, 800,
+      1200, 1600, 3200. The game strikes the crowd once with A03T's damage within 1000 (500 after the AoE scale).
+      A03U is also a shared spell's map ability; this is an id of its own for the hero.
+
+- id: seraph-hymn
+  source: A03V
+  name: { en: Seraph Hymn, cs: Seraph Hymn }
+  description: { en: "Light keeps striking the enemies around you.", cs: "Light keeps striking the enemies around you." }
+  kind: ticking_area
+  targeting: around_self
+  cooldown: { design: [20, 20, 20, 20, 20] }
+  params:
+    tickDamage: { design: [400, 600, 1000, 1600, 2000] }
+    ticksPerSecond: { design: [5, 5, 5, 5, 10] }
+    radius: { design: [1200, 1200, 1200, 1200, 1200] }
+    hitRadius: { design: [200, 200, 200, 200, 200] }
+    duration: { design: [6, 6, 6, 6, 6] }
+  review:
+    jassFunctions:
+      - Trig_Angel_Cry_damage_Func001C
+      - Trig_Angel_Cry_damage_Func001Func001C
+    notes: >-
+      Trig_Angel_Cry_Actions (war3map.j v20.83, 18841-18846) turns on Trig_Angel_Cry_damage_Actions (18973-18995): it
+      hits 5 random enemies within 600 (10 at level 5) for 20, 30, 50, 80, 100 x the hero's level (18963-18863) as
+      long as the hymn lasts. The game rains 5 (10) bursts a second within 1200 (600 after the AoE scale) for 6 s
+      every 20 s; a burst deals the map's hit at hero level 20.
+
+- id: soothing-aura
+  source: A03W
+  name: { en: Soothing Aura, cs: Soothing Aura }
+  description: { en: "A gentle light keeps healing you.", cs: "A gentle light keeps healing you." }
+  kind: heal
+  targeting: self
+  cooldown: { design: [3, 3, 3, 3, 3] }
+  params:
+    amount: { design: [60, 120, 180, 240, 450] }
+    maxTargets: { design: [1, 1, 1, 1, 1] }
+    range: { design: [700, 700, 700, 700, 700] }
+  review:
+    jassFunctions:
+      - Trig_Regen_Aura_Func002C
+      - Trig_Regen_Aura_Func002Func001C
+    notes: >-
+      Trig_Regen_Aura_Actions (war3map.j v20.83, 19109-19138) heals every ally within 700 of the hero by 20, 40, 60,
+      80, 150 each time it runs. The game heals the hero every 3 s (about 1 s after the cooldown scale) by three
+      times that.
+
+- id: phoenix-flock
+  source: A03X
+  name: { en: Phoenix Flock, cs: Phoenix Flock }
+  description: { en: "Phoenixes circle you and dive at the enemies around you.", cs: "Phoenixes circle you and dive at the enemies around you." }
+  kind: ticking_area
+  targeting: around_self
+  params:
+    # Locust Swarm: DataA 20 / 30 phoenixes for 20 s (duration) within area 1000; their hits are unit data, not in
+    # the export, so the burst damage is a design value; a burst a phoenix a second.
+    tickDamage: { design: [200, 400] }
+    ticksPerSecond: { design: [20, 30] }
+    radius: area
+    hitRadius: { design: [200, 200] }
+    duration: duration
+
+# Ironroar (new heroes, batch 3)
+
+- id: thunder-spikes
+  source: A014
+  name: { en: Thunder Spikes, cs: Thunder Spikes }
+  description: { en: "Spikes burst from the ground in a line and stun.", cs: "Spikes burst from the ground in a line and stun." }
+  kind: line
+  targeting: move_direction
+  params:
+    # Impale: DataC 300-4800 damage, area 300 the width, range 700-800 the length; the map's stun (duration 2-4 s) is
+    # a design value here.
+    damage: DataC
+    length: range
+    width: area
+    stunSeconds: { design: [1, 1, 1.5, 1.5, 2] }
+    waveSpeed: { design: [2000, 2000, 2000, 2000, 2000] }
+
+- id: earthhurl
+  source: A013
+  name: { en: Earthhurl, cs: Earthhurl }
+  description: { en: "You hurl the ground around you, hurting and stunning the enemies there.", cs: "You hurl the ground around you, hurting and stunning the enemies there." }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: { design: [200, 400, 800, 1600, 3200] }
+    radius: { design: [800, 800, 800, 800, 800] }
+    stunSeconds: { design: [1, 1.25, 1.5, 1.75, 2] }
+  review:
+    jassFunctions:
+      - Trig_StormLand_Func027C
+      - Trig_StormLand_Func027Func001C
+    notes: >-
+      Trig_StormLand_Actions (war3map.j v20.83, 25724-25782) throws a random enemy within 300 of the hero and, where
+      it lands, deals 200, 400, 800, 1600, 3200 by level within 600 (25714-25590); War Stomp's own DataA (400-6500,
+      area 400, stun 3-5 s) comes on top. The game deals the script's damage within 800 (400 after the AoE scale)
+      around the hero; the throw is left out and the stun is a design value.
+
+- id: iron-ward
+  source: AHad
+  name: { en: Iron Ward, cs: Iron Ward }
+  description: { en: "Your armor grows tougher.", cs: "Your armor grows tougher." }
+  kind: aura
+  targeting: self
+  params:
+    # Devotion Aura: DataA +10, 20, 30, 40, 80 armor; the map's armor x 0.2 like Inner Flame.
+    armorBonus: { design: [2, 4, 6, 8, 16] }
+
+- id: roaring-axe
+  source: A04Q
+  name: { en: Roaring Axe, cs: Roaring Axe }
+  description: { en: "A thrown axe and a roar tear through the crowd ahead.", cs: "A thrown axe and a roar tear through the crowd ahead." }
+  kind: cone
+  targeting: densest_cluster
+  params:
+    damage: { design: [3000, 6000] }
+    length: range
+    endWidth: { design: [800, 800] }
+    maxTargets: { design: [30, 40] }
+  review:
+    jassFunctions:
+      - Trig_Axe_Func006C
+      - Trig_Move_down_Func004Func001001003002002002001
+    notes: >-
+      Trig_Axe_Actions (war3map.j v20.83, around 25839-25913) throws the hero along the line to the target (range 1500 /
+      2000) and Trig_Move_down_Actions (26042) hurts what it lands on for 2 / 3 x the hero's Strength; the roar
+      (Trig_Roar, 20666) deals 5000 around. The game sends one cone along that range; damage and width are design
+      values.
+
+# Stonebeard (new heroes, batch 3)
+
+- id: hammer-wave
+  source: A00O
+  name: { en: Hammer Wave, cs: Hammer Wave }
+  description: { en: "Your hammer sends a shock wave ahead.", cs: "Your hammer sends a shock wave ahead." }
+  kind: line
+  targeting: move_direction
+  params:
+    # Shock Wave: DataA 300-3000, DataC distance 800, area 300 the width.
+    damage: DataA
+    length: DataC
+    width: area
+    waveSpeed: { design: [1600, 1600, 1600, 1600, 1600] }
+
+- id: rolling-thunder
+  source: A00P
+  name: { en: Rolling Thunder, cs: Rolling Thunder }
+  description: { en: "You slam the ground; the enemies around you are hurt and slowed.", cs: "You slam the ground; the enemies around you are hurt and slowed." }
+  kind: nova
+  targeting: around_self
+  params:
+    # Thunder Clap: DataA 300-3500 within area 1000-3000 (the game 600-1000 before the AoE scale, a melee hero's
+    # reach), DataC 50-90 % slow for 2 s (duration). A00P is also a shared spell's map ability; an id of its own.
+    damage: DataA
+    radius: { design: [600, 700, 800, 900, 1000] }
+    slow: DataC
+    slowSeconds: duration
+
+- id: skull-crack
+  source: A00Q
+  name: { en: Skull Crack, cs: Skull Crack }
+  description: { en: "Your blows sometimes crack skulls: extra damage and a stun.", cs: "Your blows sometimes crack skulls: extra damage and a stun." }
+  kind: on_hit
+  targeting: on_attack
+  params:
+    # Bash: DataA 17.5 % chance, DataC +100-5000 damage, stun 2 s (duration; 1 s in the game).
+    chance: { design: [0.175, 0.175, 0.175, 0.175, 0.175] }
+    bonusDamage: DataC
+    stunSeconds: { design: [1, 1, 1, 1, 1] }
+
+- id: titan-form
+  source: A00R
+  name: { en: Titan Form, cs: Titan Form }
+  description: { en: "You grow into a titan for a while: more health, armor and damage.", cs: "You grow into a titan for a while: more health, armor and damage." }
+  kind: transform
+  targeting: self
+  params:
+    duration: { design: [30, 30] }
+    hpBonus: { design: [0.5, 1] }
+    armorBonus: { design: [10, 20] }
+    damageBonus: { design: [1, 2] }
+  review:
+    jassFunctions:
+      - Trig_Demon_Conditions
+    notes: >-
+      Avatar: DataA +100 / +400 armor, DataB +10000 / +20000 hp, DataC +3000 / +10000 damage for 60 s, cooldown 150 /
+      120. Trig_Demon_Actions (war3map.j v20.83, 16208-16216) also gives A04Y (Cleave 100 % within 200) for 60 s. The
+      game's transform keeps the map's share of the time (30 s, then the cooldown) and scales the bonuses to the
+      game's heroes: +50 / +100 % max hp, +10 / +20 armor, +100 / +200 % attack damage; the cleave is left out.

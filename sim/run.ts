@@ -508,7 +508,7 @@ function createPlayer(data: GameData, options: PlayerOptions, p: number): Player
     facingX: 0, facingY: 1, moving: false,
     level: 1, xp: 0,
     str: def.attributes.str.base, agi: def.attributes.agi.base, int: def.attributes.int.base,
-    hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0 }, gear: emptyGearBonus(), passive: emptyPassiveBonus(), attackCooldown: 0, pendingLevelUps: 0, speedScale: 1,
+    hp: 0, stats, bonus: { damage: 0, moveSpeed: 0, attackSpeed: 0, armor: 0, hp: 0 }, gear: emptyGearBonus(), passive: emptyPassiveBonus(), attackCooldown: 0, pendingLevelUps: 0, speedScale: 1,
     dashTicks: 0, dashCooldown: 0, dashCharges: 1, blinkCooldown: 0, dashDirX: 0, dashDirY: 0, slowTicks: 0, slowShare: 0, rootTicks: 0,
   };
   heroStats(data, hero, stats);

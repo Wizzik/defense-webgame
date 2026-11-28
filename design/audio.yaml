@@ -503,6 +503,23 @@ abilities:
   twin-shades: { cast: moon-whisper }
   mirror-dance: { cast: moon-whisper }
   steel-cyclone: { cast: shared-blades }
+  # new heroes, batch 3 (2026-11-28): existing cues until the spell graphics and sounds task
+  radiant-pulse: { cast: mist-burst }
+  mending-wave: { cast: shared-breath }
+  inner-flame: { cast: none }
+  heavens-rain: { cast: moon-starfall }
+  tempest-bolt: { cast: storm-bolt }
+  seraph-hymn: { cast: shared-holy }
+  soothing-aura: { cast: none }
+  phoenix-flock: { cast: shared-meteor }
+  thunder-spikes: { cast: shared-shock }
+  earthhurl: { cast: stone-quake }
+  iron-ward: { cast: none }
+  roaring-axe: { cast: blood-fan }
+  hammer-wave: { cast: shared-shock }
+  rolling-thunder: { cast: shared-frost }
+  skull-crack: { cast: stone-tap }
+  titan-form: { cast: stone-quake }
   arc-lightning: { cast: shared-arc }
   smite: { cast: shared-smite }
   fire-bolt: { cast: shared-firebolt }
@@ -538,6 +555,10 @@ heroes:
   thunderhoof: { attack: stone-strike }
   stormseer: { attack: shaman-bolt }
   mirrorblade: { attack: cleaver-chop }
+  lightbinder: { attack: mist-chill }
+  skyweaver: { attack: spark-shot }
+  ironroar: { attack: cleaver-chop }
+  stonebeard: { attack: stone-strike }
 
 enemies:
   shieldbearer: { death: human-fall }

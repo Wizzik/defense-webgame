@@ -111,6 +111,7 @@ export const messagesEn = {
   "stat.slow": "Slow",
   "stat.slowSeconds": "Slow (s)",
   "stat.damageBonus": "Attack damage",
+  "stat.armorBonus": "Armor",
   "stat.moveSpeedBonus": "Move speed",
   "stat.attackSpeedBonus": "Attack speed",
   "stat.count": "Count",

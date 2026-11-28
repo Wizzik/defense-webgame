@@ -3,7 +3,7 @@ import { LocalizedText, Slug } from "./common";
 
 export const AbilityKind = z.enum([
   "projectile", "instant", "chain", "area", "line", "nova", "cone",
-  "ticking_area", "aura", "summon", "on_hit", "heal", "shield", "on_cast", "passive",
+  "ticking_area", "aura", "summon", "on_hit", "heal", "shield", "on_cast", "passive", "transform",
 ]);
 
 export const Targeting = z.enum([
@@ -90,7 +90,7 @@ export const AbilitySchema = z
     variant("nova", params(["damage", "radius"], ["slow", "slowSeconds", "stunSeconds"])),
     variant("cone", params(["damage", "length", "endWidth", "maxTargets"])),
     variant("ticking_area", params(["tickDamage", "ticksPerSecond", "radius", "duration"], ["hitRadius"])),
-    variant("aura", paramsAnyOf(["damageBonus", "moveSpeedBonus", "attackSpeedBonus", "slow"], ["radius"]).superRefine((p, ctx) => {
+    variant("aura", paramsAnyOf(["damageBonus", "moveSpeedBonus", "attackSpeedBonus", "slow", "armorBonus"], ["radius"]).superRefine((p, ctx) => {
       if ((p.slow === undefined) !== (p.radius === undefined)) {
         ctx.addIssue({ code: "custom", message: "an aura with slow needs radius, and radius needs slow" });
       }
@@ -99,6 +99,8 @@ export const AbilitySchema = z
     variant("on_hit", paramsAnyOf(["chance", "splashRadius", "bonusDamage", "empower", "extraTargets"], ["splashPercent", "stunSeconds", "multiplier"])),
     variant("heal", params(["amount", "maxTargets", "range"])),
     variant("shield", params(["duration", "radius"])),
+    // a timed self buff (the map's Avatar): hpBonus and damageBonus are shares, armorBonus is flat armor
+    variant("transform", params(["duration"], ["hpBonus", "armorBonus", "damageBonus"])),
     variant("passive", paramsAnyOf(PASSIVE_KEYS)),
   ])
   .superRefine((a, ctx) => {

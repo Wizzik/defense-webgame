@@ -1542,6 +1542,54 @@
     "steel-cyclone": {
       "cast": "shared-blades"
     },
+    "radiant-pulse": {
+      "cast": "mist-burst"
+    },
+    "mending-wave": {
+      "cast": "shared-breath"
+    },
+    "inner-flame": {
+      "cast": "none"
+    },
+    "heavens-rain": {
+      "cast": "moon-starfall"
+    },
+    "tempest-bolt": {
+      "cast": "storm-bolt"
+    },
+    "seraph-hymn": {
+      "cast": "shared-holy"
+    },
+    "soothing-aura": {
+      "cast": "none"
+    },
+    "phoenix-flock": {
+      "cast": "shared-meteor"
+    },
+    "thunder-spikes": {
+      "cast": "shared-shock"
+    },
+    "earthhurl": {
+      "cast": "stone-quake"
+    },
+    "iron-ward": {
+      "cast": "none"
+    },
+    "roaring-axe": {
+      "cast": "blood-fan"
+    },
+    "hammer-wave": {
+      "cast": "shared-shock"
+    },
+    "rolling-thunder": {
+      "cast": "shared-frost"
+    },
+    "skull-crack": {
+      "cast": "stone-tap"
+    },
+    "titan-form": {
+      "cast": "stone-quake"
+    },
     "arc-lightning": {
       "cast": "shared-arc"
     },
@@ -1639,6 +1687,18 @@
     },
     "mirrorblade": {
       "attack": "cleaver-chop"
+    },
+    "lightbinder": {
+      "attack": "mist-chill"
+    },
+    "skyweaver": {
+      "attack": "spark-shot"
+    },
+    "ironroar": {
+      "attack": "cleaver-chop"
+    },
+    "stonebeard": {
+      "attack": "stone-strike"
     }
   },
   "enemies": {

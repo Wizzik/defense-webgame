@@ -129,6 +129,26 @@ const ICONS: Record<string, Icon> = {
   "twin-shades": { color: SHADOW, glyph: '<path d="M6 21v-5l3-3V8a2 2 0 0 1 4 0v5"/><path d="M13 21v-5l3-3V8a2 2 0 0 1 4 0" stroke-dasharray="2 2"/>' },
   "mirror-dance": { color: ARCANE, glyph: '<path d="M12 3v18" stroke-dasharray="2 2"/><path d="M9 6L4 12l5 6M15 6l5 6-5 6"/>' },
   "steel-cyclone": { color: STEEL, glyph: '<path d="M12 12m-2 0a2 2 0 1 0 4 0a4 4 0 1 0-8 0a6 6 0 1 0 12 0a8 8 0 1 0-16 0"/><path d="M20 12l2-2"/>' },
+  // Lightbinder
+  "radiant-pulse": { color: HOLY, glyph: '<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 2"/><circle cx="12" cy="12" r="10.5"/>' },
+  "mending-wave": { color: HEAL, glyph: '<path d="M3 15c3-3 6 3 9 0s6-3 9 0"/><path d="M12 4v7M8.5 7.5h7"/>' },
+  "inner-flame": { color: FIRE, glyph: '<path d="M12 21a6 6 0 0 0 6-6c0-4-6-11-6-11S6 11 6 15a6 6 0 0 0 6 6z"/><path d="M12 18a2 2 0 0 0 2-2c0-1.5-2-4-2-4s-2 2.5-2 4a2 2 0 0 0 2 2z"/>' },
+  "heavens-rain": { color: HOLY, glyph: '<path d="M4 6h16"/><path d="M7 9l-1 4M12 9v5M17 9l1 4M9 16l-1 4M15 16l1 4"/>' },
+  // Skyweaver
+  "tempest-bolt": { color: STORM, glyph: '<path d="M13 2L6 13h5l-2 9 8-12h-5z"/><circle cx="12" cy="12" r="10" stroke-dasharray="2 3"/>' },
+  "seraph-hymn": { color: HOLY, glyph: '<path d="M12 7c-3-4-8-2-9 2 3 0 6 1 9 4 3-3 6-4 9-4-1-4-6-6-9-2z"/><path d="M12 13v8M9 18h6"/>' },
+  "soothing-aura": { color: HEAL, glyph: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>' },
+  "phoenix-flock": { color: FIRE, glyph: '<path d="M3 10l4 2 2-4 2 4 4-6 1 6 5-2-4 7H7z"/><path d="M9 21l3-3 3 3"/>' },
+  // Ironroar
+  "thunder-spikes": { color: EARTH, glyph: '<path d="M3 20l3-8 2 8 3-11 3 11 2-8 3 8"/><path d="M2 20h20"/>' },
+  earthhurl: { color: EARTH, glyph: '<circle cx="12" cy="7" r="3"/><path d="M12 10v3"/><path d="M3 20c3-3 15-3 18 0M6 17l-2-2M18 17l2-2"/>' },
+  "iron-ward": { color: STEEL, glyph: '<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/><path d="M8 12h8M12 8v8"/>' },
+  "roaring-axe": { color: BLOOD, glyph: '<path d="M4 20L14 10"/><path d="M14 10c1-4 5-6 7-6-1 3 0 6-3 8z"/><path d="M3 9l3 1M4 5l3 3M8 3l1 3"/>' },
+  // Stonebeard
+  "hammer-wave": { color: STORM, glyph: '<path d="M4 8h8v4H4z"/><path d="M8 12v9"/><path d="M14 8c2 2 2 6 0 8M17 6c3 3 3 9 0 12"/>' },
+  "rolling-thunder": { color: STORM, glyph: '<path d="M7 4h10v5H7z"/><path d="M12 9v4"/><path d="M3 18c3-2 15-2 18 0M5 21c3-1 11-1 14 0"/><path d="M4 14l2 1M20 14l-2 1"/>' },
+  "skull-crack": { color: BONE, glyph: '<path d="M6 11a6 6 0 1 1 12 0v3l-2 1v3H8v-3l-2-1z"/><path d="M12 5l-1 4 2 2-1 3"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>' },
+  "titan-form": { color: EARTH, glyph: '<circle cx="12" cy="5" r="2.5"/><path d="M5 10l7-2 7 2-2 4h-3v7h-4v-7H7z"/><path d="M3 6l2 2M21 6l-2 2"/>' },
   // shared spells
   "arc-lightning": { color: STORM, glyph: '<path d="M13 2L6 13h5l-2 9 8-12h-5z"/>' },
   smite: { color: HOLY, glyph: '<path d="M12 2v13"/><path d="M8 11l4 4 4-4"/><path d="M5 20h14"/><path d="M8 17l-2 3M16 17l2 3"/>' },

@@ -3802,5 +3802,771 @@
         6
       ]
     }
+  },
+  {
+    "id": "radiant-pulse",
+    "name": {
+      "en": "Radiant Pulse",
+      "cs": "Radiant Pulse"
+    },
+    "description": {
+      "en": "A pulse of light burns every enemy around you.",
+      "cs": "A pulse of light burns every enemy around you."
+    },
+    "kind": "nova",
+    "targeting": "around_self",
+    "levels": 6,
+    "cooldown": [
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64
+    ],
+    "params": {
+      "damage": [
+        150,
+        200,
+        265,
+        327,
+        398,
+        520
+      ],
+      "radius": [
+        700,
+        700,
+        700,
+        700,
+        700,
+        700
+      ]
+    }
+  },
+  {
+    "id": "mending-wave",
+    "name": {
+      "en": "Mending Wave",
+      "cs": "Mending Wave"
+    },
+    "description": {
+      "en": "A wave of healing restores you.",
+      "cs": "A wave of healing restores you."
+    },
+    "kind": "heal",
+    "targeting": "self",
+    "levels": 6,
+    "cooldown": [
+      4.95,
+      4.95,
+      4.95,
+      4.95,
+      4.95,
+      4.95
+    ],
+    "params": {
+      "amount": [
+        180,
+        222,
+        264,
+        309,
+        356,
+        402
+      ],
+      "maxTargets": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "range": [
+        700,
+        700,
+        700,
+        700,
+        700,
+        700
+      ]
+    }
+  },
+  {
+    "id": "inner-flame",
+    "name": {
+      "en": "Inner Flame",
+      "cs": "Inner Flame"
+    },
+    "description": {
+      "en": "Your attacks hit harder and your skin grows tougher.",
+      "cs": "Your attacks hit harder and your skin grows tougher."
+    },
+    "kind": "aura",
+    "targeting": "self",
+    "levels": 6,
+    "cooldown": [
+      3.3,
+      3.3,
+      3.3,
+      3.3,
+      3.3,
+      3.3
+    ],
+    "params": {
+      "damageBonus": [
+        0.1,
+        0.18,
+        0.26,
+        0.34,
+        0.42,
+        0.5
+      ],
+      "armorBonus": [
+        2,
+        4,
+        5,
+        7,
+        10,
+        16
+      ]
+    }
+  },
+  {
+    "id": "heavens-rain",
+    "name": {
+      "en": "Heaven's Rain",
+      "cs": "Heaven's Rain"
+    },
+    "description": {
+      "en": "Holy light rains around you for a long time.",
+      "cs": "Holy light rains around you for a long time."
+    },
+    "kind": "ticking_area",
+    "targeting": "around_self",
+    "levels": 3,
+    "cooldown": [
+      19.8,
+      16.5,
+      13.2
+    ],
+    "params": {
+      "tickDamage": [
+        90,
+        116,
+        142
+      ],
+      "ticksPerSecond": [
+        8,
+        9,
+        10
+      ],
+      "radius": [
+        500,
+        500,
+        500
+      ],
+      "hitRadius": [
+        200,
+        200,
+        200
+      ],
+      "duration": [
+        10,
+        13,
+        15
+      ]
+    }
+  },
+  {
+    "id": "tempest-bolt",
+    "name": {
+      "en": "Tempest Bolt",
+      "cs": "Tempest Bolt"
+    },
+    "description": {
+      "en": "A bolt strikes the thickest crowd and bursts around it.",
+      "cs": "A bolt strikes the thickest crowd and bursts around it."
+    },
+    "kind": "area",
+    "targeting": "densest_cluster",
+    "levels": 6,
+    "cooldown": [
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64
+    ],
+    "params": {
+      "damage": [
+        120,
+        160,
+        193,
+        221,
+        260,
+        339
+      ],
+      "radius": [
+        500,
+        500,
+        500,
+        500,
+        500,
+        500
+      ],
+      "range": [
+        800,
+        800,
+        800,
+        800,
+        800,
+        800
+      ]
+    }
+  },
+  {
+    "id": "seraph-hymn",
+    "name": {
+      "en": "Seraph Hymn",
+      "cs": "Seraph Hymn"
+    },
+    "description": {
+      "en": "Light keeps striking the enemies around you.",
+      "cs": "Light keeps striking the enemies around you."
+    },
+    "kind": "ticking_area",
+    "targeting": "around_self",
+    "levels": 6,
+    "cooldown": [
+      6.6,
+      6.6,
+      6.6,
+      6.6,
+      6.6,
+      6.6
+    ],
+    "params": {
+      "tickDamage": [
+        120,
+        142,
+        173,
+        210,
+        246,
+        268
+      ],
+      "ticksPerSecond": [
+        5,
+        5,
+        5,
+        5,
+        6,
+        10
+      ],
+      "radius": [
+        600,
+        600,
+        600,
+        600,
+        600,
+        600
+      ],
+      "hitRadius": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "duration": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    }
+  },
+  {
+    "id": "soothing-aura",
+    "name": {
+      "en": "Soothing Aura",
+      "cs": "Soothing Aura"
+    },
+    "description": {
+      "en": "A gentle light keeps healing you.",
+      "cs": "A gentle light keeps healing you."
+    },
+    "kind": "heal",
+    "targeting": "self",
+    "levels": 6,
+    "cooldown": [
+      0.99,
+      0.99,
+      0.99,
+      0.99,
+      0.99,
+      0.99
+    ],
+    "params": {
+      "amount": [
+        18,
+        24,
+        29,
+        33,
+        39,
+        49
+      ],
+      "maxTargets": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "range": [
+        700,
+        700,
+        700,
+        700,
+        700,
+        700
+      ]
+    }
+  },
+  {
+    "id": "phoenix-flock",
+    "name": {
+      "en": "Phoenix Flock",
+      "cs": "Phoenix Flock"
+    },
+    "description": {
+      "en": "Phoenixes circle you and dive at the enemies around you.",
+      "cs": "Phoenixes circle you and dive at the enemies around you."
+    },
+    "kind": "ticking_area",
+    "targeting": "around_self",
+    "levels": 3,
+    "cooldown": [
+      13.2,
+      9.9,
+      6.6
+    ],
+    "params": {
+      "tickDamage": [
+        60,
+        73,
+        85
+      ],
+      "ticksPerSecond": [
+        20,
+        25,
+        30
+      ],
+      "radius": [
+        500,
+        500,
+        500
+      ],
+      "hitRadius": [
+        100,
+        100,
+        100
+      ],
+      "duration": [
+        20,
+        20,
+        20
+      ]
+    }
+  },
+  {
+    "id": "thunder-spikes",
+    "name": {
+      "en": "Thunder Spikes",
+      "cs": "Thunder Spikes"
+    },
+    "description": {
+      "en": "Spikes burst from the ground in a line and stun.",
+      "cs": "Spikes burst from the ground in a line and stun."
+    },
+    "kind": "line",
+    "targeting": "move_direction",
+    "levels": 6,
+    "cooldown": [
+      1.98,
+      1.98,
+      1.98,
+      1.98,
+      1.98,
+      1.98
+    ],
+    "params": {
+      "damage": [
+        90,
+        120,
+        159,
+        210,
+        276,
+        360
+      ],
+      "length": [
+        700,
+        700,
+        700,
+        740,
+        800,
+        800
+      ],
+      "width": [
+        150,
+        150,
+        150,
+        150,
+        150,
+        150
+      ],
+      "stunSeconds": [
+        1,
+        1,
+        1.3,
+        1.5,
+        1.6,
+        2
+      ],
+      "waveSpeed": [
+        2000,
+        2000,
+        2000,
+        2000,
+        2000,
+        2000
+      ]
+    }
+  },
+  {
+    "id": "earthhurl",
+    "name": {
+      "en": "Earthhurl",
+      "cs": "Earthhurl"
+    },
+    "description": {
+      "en": "You hurl the ground around you, hurting and stunning the enemies there.",
+      "cs": "You hurl the ground around you, hurting and stunning the enemies there."
+    },
+    "kind": "nova",
+    "targeting": "around_self",
+    "levels": 6,
+    "cooldown": [
+      2.31,
+      2.31,
+      2.31,
+      2.31,
+      2.31,
+      2.31
+    ],
+    "params": {
+      "damage": [
+        60,
+        80,
+        106,
+        140,
+        184,
+        240
+      ],
+      "radius": [
+        400,
+        400,
+        400,
+        400,
+        400,
+        400
+      ],
+      "stunSeconds": [
+        1,
+        1.2,
+        1.4,
+        1.6,
+        1.8,
+        2
+      ]
+    }
+  },
+  {
+    "id": "iron-ward",
+    "name": {
+      "en": "Iron Ward",
+      "cs": "Iron Ward"
+    },
+    "description": {
+      "en": "Your armor grows tougher.",
+      "cs": "Your armor grows tougher."
+    },
+    "kind": "aura",
+    "targeting": "self",
+    "levels": 6,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "armorBonus": [
+        2,
+        4,
+        5,
+        7,
+        10,
+        16
+      ]
+    }
+  },
+  {
+    "id": "roaring-axe",
+    "name": {
+      "en": "Roaring Axe",
+      "cs": "Roaring Axe"
+    },
+    "description": {
+      "en": "A thrown axe and a roar tear through the crowd ahead.",
+      "cs": "A thrown axe and a roar tear through the crowd ahead."
+    },
+    "kind": "cone",
+    "targeting": "densest_cluster",
+    "levels": 3,
+    "cooldown": [
+      3.96,
+      3.96,
+      3.96
+    ],
+    "params": {
+      "damage": [
+        900,
+        1087,
+        1273
+      ],
+      "length": [
+        1500,
+        1750,
+        2000
+      ],
+      "endWidth": [
+        400,
+        400,
+        400
+      ],
+      "maxTargets": [
+        30,
+        35,
+        40
+      ]
+    }
+  },
+  {
+    "id": "hammer-wave",
+    "name": {
+      "en": "Hammer Wave",
+      "cs": "Hammer Wave"
+    },
+    "description": {
+      "en": "Your hammer sends a shock wave ahead.",
+      "cs": "Your hammer sends a shock wave ahead."
+    },
+    "kind": "line",
+    "targeting": "move_direction",
+    "levels": 6,
+    "cooldown": [
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64
+    ],
+    "params": {
+      "damage": [
+        90,
+        120,
+        159,
+        201,
+        243,
+        285
+      ],
+      "length": [
+        800,
+        800,
+        800,
+        800,
+        800,
+        800
+      ],
+      "width": [
+        150,
+        150,
+        150,
+        150,
+        150,
+        150
+      ],
+      "waveSpeed": [
+        1600,
+        1600,
+        1600,
+        1600,
+        1600,
+        1600
+      ]
+    }
+  },
+  {
+    "id": "rolling-thunder",
+    "name": {
+      "en": "Rolling Thunder",
+      "cs": "Rolling Thunder"
+    },
+    "description": {
+      "en": "You slam the ground; the enemies around you are hurt and slowed.",
+      "cs": "You slam the ground; the enemies around you are hurt and slowed."
+    },
+    "kind": "nova",
+    "targeting": "around_self",
+    "levels": 6,
+    "cooldown": [
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64
+    ],
+    "params": {
+      "damage": [
+        90,
+        120,
+        159,
+        201,
+        247,
+        307
+      ],
+      "radius": [
+        300,
+        340,
+        380,
+        420,
+        460,
+        500
+      ],
+      "slow": [
+        0.5,
+        0.58,
+        0.672,
+        0.752,
+        0.82,
+        0.9
+      ],
+      "slowSeconds": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    }
+  },
+  {
+    "id": "skull-crack",
+    "name": {
+      "en": "Skull Crack",
+      "cs": "Skull Crack"
+    },
+    "description": {
+      "en": "Your blows sometimes crack skulls: extra damage and a stun.",
+      "cs": "Your blows sometimes crack skulls: extra damage and a stun."
+    },
+    "kind": "on_hit",
+    "targeting": "on_attack",
+    "levels": 6,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "chance": [
+        0.175,
+        0.175,
+        0.175,
+        0.175,
+        0.175,
+        0.175
+      ],
+      "bonusDamage": [
+        30,
+        48,
+        65,
+        82,
+        118,
+        212
+      ],
+      "stunSeconds": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  {
+    "id": "titan-form",
+    "name": {
+      "en": "Titan Form",
+      "cs": "Titan Form"
+    },
+    "description": {
+      "en": "You grow into a titan for a while: more health, armor and damage.",
+      "cs": "You grow into a titan for a while: more health, armor and damage."
+    },
+    "kind": "transform",
+    "targeting": "self",
+    "levels": 3,
+    "cooldown": [
+      49.5,
+      44.55,
+      39.6
+    ],
+    "params": {
+      "duration": [
+        30,
+        30,
+        30
+      ],
+      "hpBonus": [
+        0.5,
+        0.75,
+        1
+      ],
+      "armorBonus": [
+        10,
+        15,
+        20
+      ],
+      "damageBonus": [
+        1,
+        2,
+        2
+      ]
+    }
   }
 ]

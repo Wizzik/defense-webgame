@@ -186,3 +186,50 @@
   attack: { cooldownScale: 0.35, strikes: 2, splash: { radius: 225, share: 0.4 } }   # a blade dancer: two quick blades; the map's Cleave 40% (A1C0) within 450, x0.5 like every area (without it he fell in the first 2 minutes at any power)
   damageTaken: 0.5   # melee: stands in the crowd
   power: 0.8   # new heroes batch 2 balance pass: about 10 % autopilot wins with no gear
+
+# New heroes, batch 3 (2026-11-28, docs/superpowers/plans/2026-11-28-new-heroes.md). power: the balance pass of batch 3.
+
+- id: lightbinder
+  source: O007
+  mapName: Healer
+  name: { en: Lightbinder, cs: Lightbinder }
+  role: { en: "Healer of light. Pulses that burn foes and mend friends.", cs: "Healer of light. Pulses that burn foes and mend friends." }
+  signatureAbilities: [radiant-pulse, mending-wave, inner-flame]
+  ultimate: heavens-rain
+  attack: { rangeScale: 2, splash: { radius: 150, share: 0.5 } }   # Petr: ranged heroes reach twice as far; the map's msplash missile (radius and share design values)
+  power: 1   # new heroes batch 3 balance pass
+
+
+- id: skyweaver
+  source: O00O
+  mapName: Magicer
+  name: { en: Skyweaver, cs: Skyweaver }
+  role: { en: "Storm mage. Bolts, a hymn of light and a flock of phoenixes.", cs: "Storm mage. Bolts, a hymn of light and a flock of phoenixes." }
+  signatureAbilities: [tempest-bolt, seraph-hymn, soothing-aura]
+  ultimate: phoenix-flock
+  attack: { rangeScale: 2, bounce: { count: 4, range: 400, falloff: 0.25 } }   # Petr: ranged heroes reach twice as far; the map's mbounce weapon leaps
+  power: 1   # new heroes batch 3 balance pass
+
+
+- id: ironroar
+  source: O00D
+  mapName: Nikoro
+  name: { en: Ironroar, cs: Ironroar }
+  role: { en: "Beast warrior. Spikes, a hurling stomp and an iron ward.", cs: "Beast warrior. Spikes, a hurling stomp and an iron ward." }
+  signatureAbilities: [thunder-spikes, earthhurl, iron-ward]
+  ultimate: roaring-axe
+  attack: { splash: { radius: 225, share: 0.4 } }   # the map's Cleave 40% (A1C0) within 450, x0.5 like every area
+  damageTaken: 0.5   # melee: stands in the crowd
+  power: 1   # new heroes batch 3 balance pass
+
+
+- id: stonebeard
+  source: O00A
+  mapName: Shorter
+  name: { en: Stonebeard, cs: Stonebeard }
+  role: { en: "Mountain fighter. Hammer waves, thunder and a titan form.", cs: "Mountain fighter. Hammer waves, thunder and a titan form." }
+  signatureAbilities: [hammer-wave, rolling-thunder, skull-crack]
+  ultimate: titan-form
+  attack: { splash: { radius: 225, share: 0.4 } }   # the map's Cleave 40% (A1C0) within 450, x0.5 like every area
+  damageTaken: 0.5   # melee: stands in the crowd
+  power: 1   # new heroes batch 3 balance pass

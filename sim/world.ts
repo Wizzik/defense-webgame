@@ -60,8 +60,8 @@ export interface HeroState {
   int: number;
   hp: number;
   stats: HeroStats;
-  /** Sum of the learned auras (fractions, 0 = none); filled by auraBonuses before every stat recomputation. */
-  bonus: { damage: number; moveSpeed: number; attackSpeed: number };
+  /** Sum of the learned auras and running transforms (fractions but `armor`, 0 = none); filled by auraBonuses before every stat recomputation. */
+  bonus: { damage: number; moveSpeed: number; attackSpeed: number; armor: number; hp: number };
   /** Sum of the worn items' stats; filled by recomputeGear (sim/gear.ts). */
   gear: GearBonus;
   /** Sum of the learned passives; filled by passiveBonuses (sim/abilities/passive.ts) before every stat recomputation. */
