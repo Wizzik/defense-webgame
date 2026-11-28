@@ -22,6 +22,9 @@ Updated 2026-11-28 (co-op gear between runs and group strength by size). Read th
    Random items stage 6 (icons) DONE on `main` (below): the random items plan is complete.
 8. **Co-op gear between runs and group strength by size** (Petr, 2026-11-28; branch `claude/peaceful-galileo-qtu26s`,
    below). Then the remaining heroes of the map and better spell graphics (point 4).
+9. **Named items only legendary / mythic, salvage for named items** (Petr, 2026-11-28): plan
+   `docs/superpowers/plans/2026-11-28-named-items-legendary.md` (rulings and steps), handed to a fresh session on
+   branch `claude/named-items-legendary` (from `claude/peaceful-galileo-qtu26s`). Not started.
 
 ## Co-op gear between runs and group strength by size (branch `claude/peaceful-galileo-qtu26s`, DONE, 2026-11-28)
 
