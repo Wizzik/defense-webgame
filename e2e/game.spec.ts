@@ -938,6 +938,8 @@ test("the gear screen filters random items, sorts them by power and salvages the
   await page.locator('#gear-screen .gear-grid [data-uid="1"]').hover();
   await expect(page.locator("#gear-screen .item-tooltip")).toContainText("Mythic random item");
   await expect(page.locator("#gear-screen .item-tooltip .tier-mark").first()).toBeVisible();
+  await expect(page.locator("#gear-screen .item-tooltip .stat-row .stat-icon").first()).toBeVisible();
+  await expect(page.locator("#gear-screen .item-tooltip .tier-mark").first()).toHaveAttribute("title", /^Tier [1-4] of 4$/);
   await page.locator('#gear-screen .gear-filter[data-rarity="all"]').click();
   // the sort by power puts the mythic first
   await page.locator("#gear-sort").click();

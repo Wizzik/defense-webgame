@@ -26,8 +26,8 @@ describe("item tooltip", () => {
     expect(en.rarity).toBe("rare");
     expect(en.sub).toBe("Rare · Head · level 2");
     expect(en.lines).toEqual([
-      { text: "+16.1 Strength", tone: "plain" },
-      { text: "+138 HP", tone: "plain" },
+      { text: "+16.1 Strength", tone: "plain", stat: "str" },
+      { text: "+138 HP", tone: "plain", stat: "hp" },
     ]);
     expect(tooltipLines("cs", data, helm, 2, 0).sub).toBe("Vzácný · Hlava · úroveň 2");
   });
@@ -36,8 +36,8 @@ describe("item tooltip", () => {
     const tip = tooltipLines("en", data, helm, 1, 2);
     expect(tip.sub).toBe("Rare · Head · level 1");
     expect(tip.lines).toEqual([
-      { text: "+22.4 Strength", tone: "plain" },
-      { text: "+192 HP", tone: "plain" },
+      { text: "+22.4 Strength", tone: "plain", stat: "str" },
+      { text: "+192 HP", tone: "plain", stat: "hp" },
       { text: "+2 levels from chests in this run", tone: "temp" },
     ]);
     expect(tooltipLines("cs", data, helm, 1, 1).lines.at(-1)).toEqual({ text: "+1 úroveň z truhel v tomto běhu", tone: "temp" });
@@ -46,21 +46,21 @@ describe("item tooltip", () => {
   it("an item a chest gave has no permanent level", () => {
     const tip = tooltipLines("cs", data, helm, 0, 3);
     expect(tip.sub).toBe("Vzácný · Hlava · jen na tento běh");
-    expect(tip.lines[0]).toEqual({ text: "+26.6 síla", tone: "plain" });
+    expect(tip.lines[0]).toEqual({ text: "+26.6 síla", tone: "plain", stat: "str" });
     expect(tooltipLines("en", data, helm, 0, 1).sub).toBe("Rare · Head · this run only");
   });
 
   it("compares with the worn item: better, worse and lost rows", () => {
     const tip = tooltipLines("en", data, helm, 1, 0, { item: hood, level: 1 });
     expect(tip.lines).toEqual([
-      { text: "+14 Strength (+4)", tone: "better" },
-      { text: "+120 HP (+120)", tone: "better" },
-      { text: "+0 Intelligence (−8)", tone: "worse" },
+      { text: "+14 Strength (+4)", tone: "better", stat: "str" },
+      { text: "+120 HP (+120)", tone: "better", stat: "hp" },
+      { text: "+0 Intelligence (−8)", tone: "worse", stat: "int" },
     ]);
     const same = tooltipLines("en", data, helm, 1, 0, { item: helm, level: 1 });
     expect(same.lines.every((line) => line.tone === "plain")).toBe(true);
     const lower = tooltipLines("en", data, helm, 1, 0, { item: helm, level: 3 });
-    expect(lower.lines[0]).toEqual({ text: "+14 Strength (−4.2)", tone: "worse" });
+    expect(lower.lines[0]).toEqual({ text: "+14 Strength (−4.2)", tone: "worse", stat: "str" });
   });
 
   it("a special effect gets its own line after the stats", () => {

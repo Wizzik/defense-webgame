@@ -44,6 +44,19 @@ Updated 2026-11-28 (new heroes, batch 4). Read this first when you resume work.
   - https://wizzik.github.io/defense-webgame/?debug=1&hero=emberclaw&phase=8 (Molten Shell after level 10)
   - https://wizzik.github.io/defense-webgame/?debug=1&hero=galestrider&phase=8
 
+## Stat icons and tier squares (branch `claude/admiring-davinci-enqxge`, DONE, waits for Petr's check, 2026-11-28)
+
+- The "T1"-"T4" tags are now small squares in the tier colour after the row (hover one: "Tier 3 of 4"); on the chest
+  cards they took a whole row each before. Every stat row starts with an icon of its own (22 stats, our glyphs and
+  colours; list in `docs/DECISIONS.md`, section Stat icons and tier squares). No game rule changed, digest the same.
+- **What Petr checks** (after the merge):
+  - the gear screen: https://wizzik.github.io/defense-webgame/?debug=1 , in the console
+    `window.__game.debug.grantRolled("mainHand", "mythic", 12)`, open Gear and hover the new weapon: one line per stat,
+    an icon in front, a small coloured square behind each affix.
+  - chest cards and the compare: https://wizzik.github.io/defense-webgame/?debug=1&phase=8 , in the console
+    `window.__game.debug.grantGold(5000)` and walk to a chest (the pointer shows it); a card of a worn slot opens the
+    keep / take compare.
+
 ## New heroes, batch 3 (branch `claude/new-heroes-3`, DONE, waits for Petr's playtest, 2026-11-28)
 
 - **Lightbinder** (INT ranged healer: Radiant Pulse, Mending Wave, Inner Flame; ultimate Heaven's Rain),
