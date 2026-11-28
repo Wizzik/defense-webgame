@@ -21,15 +21,19 @@ The rules above (AGENTS.md) are shared with every AI tool and win over this sect
 - Then change `design/*.yaml` **and** the matching rows of `data/generated/*.json` together, by the same rule `tools/data-build` applies (scaling, `levelGrowthExponent`, rounding), with a small script in the scratchpad rather than by eye. Mention it in the commit, so Petr can rerun `data:build` locally and confirm the files do not change.
 - Skill `data-change` has the steps.
 
-## Long sessions: hand off to a fresh one (Petr, 2026-11-27)
-- When the context of a session grows too large, do not wait to be asked: start a new session yourself and hand the
-  work over, with everything it needs prepared.
+## Long sessions: when to hand off to a fresh one (Petr, 2026-11-27, revised 2026-11-28)
+- A fresh session is not free: its fixed start (instructions, tools, these files) plus reading the task's files
+  costs about 100k tokens before it works. A long one is not free either: every step reprocesses the whole context.
+- Stay in one session while the work stays on one topic, even when it is long. Do not hand off early or by a token
+  count; do not hand off in the middle of a half-done change.
+- Hand off at a natural boundary: a feature done and pushed, a PR merged, or the start of a large new topic (a new
+  plan). Also when the context has grown so long that earlier details are being lost.
 - Before the handoff: push every change (a branch of its own if it does not pass `npm run check` yet, and say so in
   the commit), and write the state into `docs/STATUS.md`: what is done, what is half done (files, failing tests),
   what comes next.
-- The new session (`create_session` on this repository and that branch) gets a prompt that names the plan and its
-  stage, the branch, the files to read first, the open steps in order, and the PR to update. Tell Petr in Czech
-  that the work moved and where.
+- The new session (`create_session` on this repository and that branch) gets a narrow prompt: the plan and its
+  stage, the branch, only the files the task needs (not all of STATUS.md and DECISIONS.md), the open steps in
+  order, and the PR to update. Tell Petr in Czech that the work moved and where.
 
 ## Project skills (`.claude/skills/`)
 - `finish-task`: checks, docs, commit, push, draft PR.
