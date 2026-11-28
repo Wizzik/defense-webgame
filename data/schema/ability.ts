@@ -90,9 +90,13 @@ export const AbilitySchema = z
     variant("nova", params(["damage", "radius"], ["slow", "slowSeconds"])),
     variant("cone", params(["damage", "length", "endWidth", "maxTargets"])),
     variant("ticking_area", params(["tickDamage", "ticksPerSecond", "radius", "duration"], ["hitRadius"])),
-    variant("aura", paramsAnyOf(["damageBonus", "moveSpeedBonus", "attackSpeedBonus"])),
+    variant("aura", paramsAnyOf(["damageBonus", "moveSpeedBonus", "attackSpeedBonus", "slow"], ["radius"]).superRefine((p, ctx) => {
+      if ((p.slow === undefined) !== (p.radius === undefined)) {
+        ctx.addIssue({ code: "custom", message: "an aura with slow needs radius, and radius needs slow" });
+      }
+    })),
     variant("summon", summonParams()),
-    variant("on_hit", paramsAnyOf(["chance", "splashRadius", "bonusDamage", "empower"], ["splashPercent", "stunSeconds", "extraTargets"])),
+    variant("on_hit", paramsAnyOf(["chance", "splashRadius", "bonusDamage", "empower", "extraTargets"], ["splashPercent", "stunSeconds", "multiplier"])),
     variant("heal", params(["amount", "maxTargets", "range"])),
     variant("shield", params(["duration", "radius"])),
     variant("passive", paramsAnyOf(PASSIVE_KEYS)),

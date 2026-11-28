@@ -1,6 +1,7 @@
 import type { Ability } from "../../data/schema";
 import type { Run } from "../run";
 import { updateArea } from "./area";
+import { updateAura } from "./aura-slow";
 import { updateChain } from "./chain";
 import { updateInstant } from "./instant";
 import { updateHeal } from "./heal";
@@ -26,8 +27,8 @@ export const UPDATERS: Partial<Record<Ability["kind"], AbilityUpdate>> = {
   ticking_area: updateTickingArea,
   projectile: updateProjectile,
   cone: updateCone,
-  // Bonuses come from auraBonuses (aura.ts) when the stats are recomputed; nothing to do per step.
-  aura: () => {},
+  // Bonuses come from auraBonuses (aura.ts) when the stats are recomputed; an aura with `slow` slows enemies here.
+  aura: (run, slot) => updateAura(run, slot),
   // An empowered strike charges up here; the charge is spent by consumeEmpower (on-hit.ts) on the hero's
   // attack. The other on_hit abilities are passive: onHitBonus (on-hit.ts) reads them on every attack.
   on_hit: (run, slot, index) => {

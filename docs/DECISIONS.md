@@ -8,6 +8,44 @@ drops and chests, elite and boss threat, phase 2b-3, visual pass A) are in `docs
 They **still apply** unless a section here overrides them. A section that code or yaml names and that is not in this
 file is there; search it (`grep -n`) before you change a rule of those areas, do not read it whole.
 
+## New heroes, batch 1 (2026-11-28; Petr: "the remaining heroes of the map", the picks and numbers are Claude's)
+
+- Plan: `docs/superpowers/plans/2026-11-28-new-heroes.md` (all 36 remaining map heroes in 9 batches of 4, first the
+  ones whose spells fit our kinds). Batch 1: **Razorwind** (O00M, AGI melee), **Dawnhammer** (O00Z, STR melee),
+  **Frostweaver** (O00T, INT ranged), **Deadeye** (O00J, AGI ranged). Names, roles and texts are ours; the map's
+  numbers and script lines are in the review notes of `design/abilities.yaml`.
+- **New spell mechanics:** `on_hit.multiplier` (with `chance`: a critical strike that multiplies the base attack;
+  the highest of the procs counts, on top of the gear's crit), `on_hit.splashRadius` / `splashPercent` now work (a
+  cleave around the target, added to a hero's own `baseAttack.splash`; the AoE scale halves `splashRadius` too),
+  `aura.slow` + `aura.radius` (every 10 steps the enemies within the radius walk `slow` slower, like the gear's slow
+  aura; the larger slow wins).
+- **Timed self buffs of the map become permanent auras with smaller numbers** (Berserk, Bloodlust: about 40 % of
+  the map's attack speed), as Swift Pace and Hunter's Focus before.
+- **Kits that ride on the base attack** (Razorwind, Deadeye: three passives and an ultimate) start with their damage
+  passive in slot 0 (the cleave, the spread shots), and their attack is faster: Razorwind `cooldownScale` 0.5 with 2
+  strikes, Deadeye `cooldownScale` 0.5 (reach x2 as every ranged hero). Without that they fell in 30 s at level 1.
+- **Ultimates and spells with more map levels than ours** (A004 Mirror Image 5 levels, A039 Multishot 10) have no
+  `source` and design rows (Doubles: the map's levels 1, 3, 5; Fan Fire: the first five), so an ultimate keeps 3
+  levels and a spell 6.
+- **Ability order:** the new heroes' abilities come after the shared spells and passives in `design/abilities.yaml`,
+  so the indices of the older ones stay (the state hash mixes them); the 20 older matrix cases are unchanged
+  checkpoint by checkpoint, the matrix gains the four `h-<id>` cases. Digest `82150491` -> `fa5a1ee3`.
+- **Model budget:** a run loads only its heroes, so the 11 MB budget counts the enemy models, the common env models,
+  the four heaviest hero models and the heaviest world (it counted every hero; 44 heroes at about 330 kB would not
+  fit).
+- **Balance** (`sim:run --seeds 1-20 --gear none`, world 1 normal), wins of 20 by `power`:
+
+  | hero | power 1 | tries | kept |
+  |---|---|---|---|
+  | Razorwind | 0 (12 with the faster attack) | 0.75: 11, 0.5: 5, 0.42: 5 | **0.36: 4** |
+  | Dawnhammer | 20 | | **0.35: 4** |
+  | Frostweaver | 19 | 0.55: 6, 0.48: 5, 0.42: 1 | **0.44: 2** |
+  | Deadeye | 0 (1 with the faster attack) | 1.4: 8, 1.3: 6, 1.2: 2 | **1.25: 2** |
+
+  The damage meter of the kept numbers: Razorwind Crossing Strike 45 %, attack 17 %; Dawnhammer Holy Burst 25 %,
+  Fan of Light 14 %, Dominion 12 %; Frostweaver Frost Slice 22 %, Frost Slap 9 %, Ice Fall 8 %; Deadeye attack 63 %,
+  Doubles 26 %. Most losses come in the first 4 minutes, as with the older heroes.
+
 ## Named items only legendary / mythic, salvage for named items (2026-11-28; Petr's words, Claude's rulings and numbers)
 
 Plan `docs/superpowers/plans/2026-11-28-named-items-legendary.md`. Petr: "the 70 items with their own names and
@@ -86,6 +124,9 @@ great icons should be legendary / mythic only"; "part legendary, part mythic"; "
   only. The existing Czech stays in the game: `?lang=cs` or a stored choice still shows it, a message key missing from
   `client/ui/messages-cs.ts` falls back to English, and a Czech browser no longer picks Czech by itself (`pickLang`).
   Where a data schema still requires `cs` (`{ en, cs }`, the gendered rare names), new rows repeat the English text.
+- Petr, 2026-11-28 (again): "Forget Czech. English is enough, write it down." **Never write new Czech** anywhere in
+  the game (messages, `design/*.yaml` rows, names of heroes, spells, items): `cs` repeats `en`. Talking to Petr in
+  chat stays Czech.
 
 ## Random items, stage 6: icons (2026-11-27; the picks are Claude's)
 

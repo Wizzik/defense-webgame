@@ -125,10 +125,15 @@ describe("model budget", () => {
     for (const id of worldIds) expect(worldBytes(id), id).toBeLessThanOrEqual(1_500_000);
   });
 
-  it("common models plus one world stay within 11 MB", () => {
-    const common = listFiles(`${ASSETS}/models`)
-      .filter((f) => f.endsWith(".glb") && !f.includes(`${join("models", "env")}`))
-      .reduce((sum, f) => sum + statSync(f).size, 0) + COMMON_ENV.reduce((n, m) => n + env(m), 0);
+  // A run loads only the heroes in it (at most four in co-op), so the budget counts the four heaviest hero models,
+  // every enemy model and the common env models (new heroes, 2026-11-28: the map's 44 heroes would not fit otherwise).
+  it("common models, the four heaviest heroes and one world stay within 11 MB", () => {
+    const glbs = listFiles(`${ASSETS}/models`).filter((f) => f.endsWith(".glb") && !f.includes(`${join("models", "env")}`));
+    const heroDir = join("models", "heroes");
+    const heroes = glbs.filter((f) => f.includes(heroDir)).map((f) => statSync(f).size).sort((a, b) => b - a);
+    const common = glbs.filter((f) => !f.includes(heroDir)).reduce((sum, f) => sum + statSync(f).size, 0)
+      + heroes.slice(0, 4).reduce((sum, n) => sum + n, 0)
+      + COMMON_ENV.reduce((n, m) => n + env(m), 0);
     const heaviest = Math.max(...worldIds.map(worldBytes));
     expect(common + heaviest).toBeLessThanOrEqual(11_000_000);
   });

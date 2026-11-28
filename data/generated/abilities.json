@@ -2255,5 +2255,734 @@
         200
       ]
     }
+  },
+  {
+    "id": "blade-frenzy",
+    "name": {
+      "en": "Blade Frenzy",
+      "cs": "Blade Frenzy"
+    },
+    "description": {
+      "en": "You attack much faster and move a little faster.",
+      "cs": "You attack much faster and move a little faster."
+    },
+    "kind": "aura",
+    "targeting": "self",
+    "levels": 6,
+    "cooldown": [
+      9.9,
+      9.9,
+      9.9,
+      9.9,
+      9.9,
+      9.9
+    ],
+    "params": {
+      "attackSpeedBonus": [
+        0.1,
+        0.18,
+        0.26,
+        0.34,
+        0.42,
+        0.5
+      ],
+      "moveSpeedBonus": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08
+      ]
+    }
+  },
+  {
+    "id": "sweeping-blades",
+    "name": {
+      "en": "Sweeping Blades",
+      "cs": "Sweeping Blades"
+    },
+    "description": {
+      "en": "Your attacks also cut the enemies around the target.",
+      "cs": "Your attacks also cut the enemies around the target."
+    },
+    "kind": "on_hit",
+    "targeting": "on_attack",
+    "levels": 6,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "splashRadius": [
+        225,
+        225,
+        225,
+        225,
+        225,
+        225
+      ],
+      "splashPercent": [
+        0.24,
+        0.272,
+        0.304,
+        0.336,
+        0.368,
+        0.4
+      ]
+    }
+  },
+  {
+    "id": "keen-edge",
+    "name": {
+      "en": "Keen Edge",
+      "cs": "Keen Edge"
+    },
+    "description": {
+      "en": "Your attacks sometimes strike critically.",
+      "cs": "Your attacks sometimes strike critically."
+    },
+    "kind": "on_hit",
+    "targeting": "on_attack",
+    "levels": 6,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "chance": [
+        0.1,
+        0.14,
+        0.18,
+        0.22,
+        0.27,
+        0.35
+      ],
+      "multiplier": [
+        1.25,
+        1.45,
+        1.65,
+        1.85,
+        2.05,
+        2.25
+      ]
+    }
+  },
+  {
+    "id": "crossing-strike",
+    "name": {
+      "en": "Crossing Strike",
+      "cs": "Crossing Strike"
+    },
+    "description": {
+      "en": "You leap into the thickest crowd and cut everything around.",
+      "cs": "You leap into the thickest crowd and cut everything around."
+    },
+    "kind": "area",
+    "targeting": "densest_cluster",
+    "levels": 3,
+    "cooldown": [
+      13.2,
+      9.9,
+      6.6
+    ],
+    "params": {
+      "damage": [
+        1500,
+        1811,
+        2121
+      ],
+      "radius": [
+        500,
+        625,
+        750
+      ],
+      "range": [
+        800,
+        800,
+        800
+      ]
+    }
+  },
+  {
+    "id": "holy-burst",
+    "name": {
+      "en": "Holy Burst",
+      "cs": "Holy Burst"
+    },
+    "description": {
+      "en": "Light bursts on the thickest crowd and slows it.",
+      "cs": "Light bursts on the thickest crowd and slows it."
+    },
+    "kind": "area",
+    "targeting": "densest_cluster",
+    "levels": 6,
+    "cooldown": [
+      3.63,
+      3.63,
+      3.63,
+      3.63,
+      3.63,
+      3.63
+    ],
+    "params": {
+      "damage": [
+        75,
+        100,
+        132,
+        175,
+        230,
+        300
+      ],
+      "radius": [
+        150,
+        190,
+        200,
+        200,
+        200,
+        200
+      ],
+      "range": [
+        800,
+        800,
+        800,
+        800,
+        800,
+        800
+      ],
+      "slow": [
+        0.3,
+        0.3,
+        0.3,
+        0.3,
+        0.3,
+        0.3
+      ],
+      "slowSeconds": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ]
+    }
+  },
+  {
+    "id": "judgement",
+    "name": {
+      "en": "Judgement",
+      "cs": "Judgement"
+    },
+    "description": {
+      "en": "A pillar of light keeps striking the thickest crowd.",
+      "cs": "A pillar of light keeps striking the thickest crowd."
+    },
+    "kind": "ticking_area",
+    "targeting": "densest_cluster",
+    "levels": 6,
+    "cooldown": [
+      13.2,
+      11.88,
+      10.56,
+      9.24,
+      7.92,
+      6.6
+    ],
+    "params": {
+      "tickDamage": [
+        45,
+        60,
+        72,
+        83,
+        93,
+        104
+      ],
+      "ticksPerSecond": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "radius": [
+        200,
+        200,
+        215,
+        225,
+        230,
+        250
+      ],
+      "duration": [
+        3,
+        4,
+        5,
+        5,
+        6,
+        7
+      ]
+    }
+  },
+  {
+    "id": "fan-of-light",
+    "name": {
+      "en": "Fan of Light",
+      "cs": "Fan of Light"
+    },
+    "description": {
+      "en": "Blades of light fly out and cut every enemy around you.",
+      "cs": "Blades of light fly out and cut every enemy around you."
+    },
+    "kind": "nova",
+    "targeting": "around_self",
+    "levels": 6,
+    "cooldown": [
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64,
+      2.64
+    ],
+    "params": {
+      "damage": [
+        150,
+        200,
+        241,
+        276,
+        325,
+        424
+      ],
+      "radius": [
+        175,
+        175,
+        190,
+        210,
+        235,
+        275
+      ]
+    }
+  },
+  {
+    "id": "dominion",
+    "name": {
+      "en": "Dominion",
+      "cs": "Dominion"
+    },
+    "description": {
+      "en": "Holy light rains around you for a long time.",
+      "cs": "Holy light rains around you for a long time."
+    },
+    "kind": "ticking_area",
+    "targeting": "around_self",
+    "levels": 3,
+    "cooldown": [
+      19.8,
+      16.5,
+      13.2
+    ],
+    "params": {
+      "tickDamage": [
+        45,
+        58,
+        71
+      ],
+      "ticksPerSecond": [
+        8,
+        9,
+        10
+      ],
+      "radius": [
+        500,
+        625,
+        750
+      ],
+      "hitRadius": [
+        138,
+        157,
+        175
+      ],
+      "duration": [
+        20,
+        20,
+        20
+      ]
+    }
+  },
+  {
+    "id": "frost-slice",
+    "name": {
+      "en": "Frost Slice",
+      "cs": "Frost Slice"
+    },
+    "description": {
+      "en": "A blade of frost runs ahead, freezes and wounds.",
+      "cs": "A blade of frost runs ahead, freezes and wounds."
+    },
+    "kind": "line",
+    "targeting": "move_direction",
+    "levels": 6,
+    "cooldown": [
+      3.3,
+      3.3,
+      3.3,
+      3.3,
+      3.3,
+      3.3
+    ],
+    "params": {
+      "damage": [
+        75,
+        100,
+        132,
+        175,
+        237,
+        335
+      ],
+      "length": [
+        780,
+        780,
+        780,
+        780,
+        780,
+        780
+      ],
+      "width": [
+        150,
+        190,
+        230,
+        270,
+        300,
+        300
+      ],
+      "stunSeconds": [
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "waveSpeed": [
+        1500,
+        1500,
+        1500,
+        1500,
+        1500,
+        1500
+      ]
+    }
+  },
+  {
+    "id": "frost-slap",
+    "name": {
+      "en": "Frost Slap",
+      "cs": "Frost Slap"
+    },
+    "description": {
+      "en": "An icy hand strikes and leaps from enemy to enemy.",
+      "cs": "An icy hand strikes and leaps from enemy to enemy."
+    },
+    "kind": "chain",
+    "targeting": "nearest",
+    "levels": 6,
+    "cooldown": [
+      9.9,
+      9.9,
+      9.9,
+      9.9,
+      9.9,
+      9.9
+    ],
+    "params": {
+      "damage": [
+        150,
+        200,
+        265,
+        327,
+        388,
+        474
+      ],
+      "range": [
+        550,
+        550,
+        550,
+        550,
+        550,
+        550
+      ],
+      "bounces": [
+        4,
+        5,
+        6,
+        6,
+        7,
+        8
+      ],
+      "bounceRange": [
+        600,
+        600,
+        600,
+        600,
+        600,
+        600
+      ]
+    }
+  },
+  {
+    "id": "chill-field",
+    "name": {
+      "en": "Chill Field",
+      "cs": "Chill Field"
+    },
+    "description": {
+      "en": "Enemies near you walk slower.",
+      "cs": "Enemies near you walk slower."
+    },
+    "kind": "aura",
+    "targeting": "self",
+    "levels": 6,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "slow": [
+        0.1,
+        0.18,
+        0.26,
+        0.34,
+        0.42,
+        0.5
+      ],
+      "radius": [
+        300,
+        300,
+        300,
+        300,
+        300,
+        300
+      ]
+    }
+  },
+  {
+    "id": "ice-fall",
+    "name": {
+      "en": "Ice Fall",
+      "cs": "Ice Fall"
+    },
+    "description": {
+      "en": "Ice keeps falling on the thickest crowd.",
+      "cs": "Ice keeps falling on the thickest crowd."
+    },
+    "kind": "ticking_area",
+    "targeting": "densest_cluster",
+    "levels": 3,
+    "cooldown": [
+      26.4,
+      23.1,
+      19.8
+    ],
+    "params": {
+      "tickDamage": [
+        45,
+        62,
+        78
+      ],
+      "ticksPerSecond": [
+        10,
+        11,
+        11
+      ],
+      "radius": [
+        300,
+        350,
+        400
+      ],
+      "hitRadius": [
+        138,
+        157,
+        175
+      ],
+      "duration": [
+        15,
+        15,
+        15
+      ]
+    }
+  },
+  {
+    "id": "hot-blood",
+    "name": {
+      "en": "Hot Blood",
+      "cs": "Hot Blood"
+    },
+    "description": {
+      "en": "You shoot much faster and move faster.",
+      "cs": "You shoot much faster and move faster."
+    },
+    "kind": "aura",
+    "targeting": "self",
+    "levels": 6,
+    "cooldown": [
+      3.3,
+      3.3,
+      3.3,
+      3.3,
+      3.3,
+      3.3
+    ],
+    "params": {
+      "attackSpeedBonus": [
+        0.1,
+        0.18,
+        0.26,
+        0.34,
+        0.44,
+        0.6
+      ],
+      "moveSpeedBonus": [
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+      ]
+    }
+  },
+  {
+    "id": "blasting-powder",
+    "name": {
+      "en": "Blasting Powder",
+      "cs": "Blasting Powder"
+    },
+    "description": {
+      "en": "Your shots sometimes blast harder and stun.",
+      "cs": "Your shots sometimes blast harder and stun."
+    },
+    "kind": "on_hit",
+    "targeting": "on_attack",
+    "levels": 6,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "chance": [
+        0.1,
+        0.14,
+        0.18,
+        0.22,
+        0.26,
+        0.3
+      ],
+      "bonusDamage": [
+        60,
+        80,
+        96,
+        110,
+        134,
+        190
+      ],
+      "stunSeconds": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    }
+  },
+  {
+    "id": "fan-fire",
+    "name": {
+      "en": "Fan Fire",
+      "cs": "Fan Fire"
+    },
+    "description": {
+      "en": "Each shot also hits more enemies near the target.",
+      "cs": "Each shot also hits more enemies near the target."
+    },
+    "kind": "on_hit",
+    "targeting": "on_attack",
+    "levels": 6,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "extraTargets": [
+        1,
+        2,
+        3,
+        3,
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "id": "doubles",
+    "name": {
+      "en": "Doubles",
+      "cs": "Doubles"
+    },
+    "description": {
+      "en": "Copies of you join the fight for a while.",
+      "cs": "Copies of you join the fight for a while."
+    },
+    "kind": "summon",
+    "targeting": "self",
+    "levels": 3,
+    "cooldown": [
+      4.95,
+      4.95,
+      4.95
+    ],
+    "params": {
+      "count": [
+        1,
+        3,
+        6
+      ],
+      "damageDealt": [
+        0.3,
+        0.3,
+        0.3
+      ],
+      "damageTaken": [
+        3,
+        3,
+        3
+      ],
+      "duration": [
+        15,
+        15,
+        15
+      ]
+    }
   }
 ]

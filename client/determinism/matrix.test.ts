@@ -4,16 +4,16 @@ import { gameData } from "../../sim/testing/game-data";
 import { firstDifference, matrixCases, matrixDigest, runCase, type CaseResult, type MatrixCase } from "./matrix";
 
 describe("matrixCases", () => {
-  it("lists the eight heroes, four start phases, two harder courses and the natural events with unique ids", () => {
+  it("lists every hero, four start phases, two harder courses and the natural events with unique ids", () => {
     const data = gameData();
     const cases = matrixCases(data);
-    expect(cases).toHaveLength(20);
+    expect(cases).toHaveLength(data.heroes.length + 12);
     expect(cases.find((c) => c.id === "w1-storm")).toMatchObject({ hero: "sparkshot", seed: 9, startPhase: 3, maxTicks: 4500 });
-    expect(cases.slice(0, 8).map((c) => c.id)).toEqual(data.heroes.map((h) => `h-${h.id}`));
-    expect(cases.slice(8).map((c) => c.id)).toEqual(["p6", "p11", "p16", "p21", "w3-insane", "w5-hell", "w1-storm", "w2-sand", "w3-thicket", "w4-blizzard", "w5-meteors", "loot-t3"]);
+    expect(cases.slice(0, data.heroes.length).map((c) => c.id)).toEqual(data.heroes.map((h) => `h-${h.id}`));
+    expect(cases.slice(data.heroes.length).map((c) => c.id)).toEqual(["p6", "p11", "p16", "p21", "w3-insane", "w5-hell", "w1-storm", "w2-sand", "w3-thicket", "w4-blizzard", "w5-meteors", "loot-t3"]);
     expect(cases.find((c) => c.id === "w3-insane")).toMatchObject({ hero: "stonehorn", seed: 6, world: 3, difficulty: "insane" });
     expect(cases.find((c) => c.id === "w5-hell")).toMatchObject({ hero: "redcleaver", seed: 7, world: 5, difficulty: "hell", startPhase: 6 });
-    expect(new Set(cases.map((c) => c.id)).size).toBe(20);
+    expect(new Set(cases.map((c) => c.id)).size).toBe(data.heroes.length + 12);
   });
 
   it("the sandstorm case runs a whole storm", () => {

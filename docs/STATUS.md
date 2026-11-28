@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-28 (named items only legendary / mythic, salvage for named items). Read this first when you resume work.
+Updated 2026-11-28 (new heroes, batch 1). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -12,7 +12,9 @@ Updated 2026-11-28 (named items only legendary / mythic, salvage for named items
    of the enemies casters, Serpent Totem 100 damage + 25 % a level, F teleports to the mouse, bosses x3 hp x2
    damage with their own names and looks per world, chest cards for worn slots only as upgrades, balance target
    about 10 % autopilot wins with no gear). After stage 3 of random items, before its stage 4.
-4. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23).
+4. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23). **Heroes: plan
+   `docs/superpowers/plans/2026-11-28-new-heroes.md` (36 heroes, 9 batches of 4); batch 1 DONE on branch
+   `claude/new-heroes-1` (below), batch 2 next after Petr's playtest.** Spell graphics: not started.
 5. **English only for now** (Petr, 2026-11-27): new texts need no Czech (DECISIONS, English only).
 6. **Random items stage 4 and the damage meter** (PR #45, merged 2026-11-27, below).
 7. **Petr's batch 3** (2026-11-27, after the 3-player playtest), DONE on `main` (below), waits for Petr's playtest:
@@ -25,6 +27,30 @@ Updated 2026-11-28 (named items only legendary / mythic, salvage for named items
 9. **Named items only legendary / mythic, salvage for named items** (Petr, 2026-11-28): plan
    `docs/superpowers/plans/2026-11-28-named-items-legendary.md`, branch `claude/named-items-legendary` (from
    `claude/peaceful-galileo-qtu26s`), DONE (below), waits for Petr's playtest.
+
+## New heroes, batch 1 (branch `claude/new-heroes-1`, DONE, waits for Petr's playtest, 2026-11-28)
+
+- Four heroes of the map with our names: **Razorwind** (AGI melee: cleave, crits, a frenzy aura; ultimate Crossing
+  Strike), **Dawnhammer** (STR melee: Holy Burst, Judgement, Fan of Light; ultimate Dominion), **Frostweaver** (INT
+  ranged: Frost Slice, Frost Slap chain, Chill Field slow aura; ultimate Ice Fall), **Deadeye** (AGI ranged: spread
+  shots, Blasting Powder stuns, Hot Blood; ultimate Doubles, up to 6 copies). KayKit models of their own, our icons.
+- New spell mechanics: critical strike and cleave on `on_hit`, a slowing `aura`. Old heroes unchanged (the 20 older
+  matrix cases are identical); digest `82150491` -> `fa5a1ee3` (four new cases). Numbers and the balance table:
+  `docs/DECISIONS.md`, section New heroes, batch 1 (2-4 autopilot wins of 20 with no gear each).
+- `data/generated/` was built by `npm run data:build` from the v20.83 export in the cloud (`constants.json`
+  `mapVersion` v20.75 -> v20.83, nothing else changed for the older data).
+- **What Petr checks** (after the merge):
+  - the menu shows 12 heroes: https://wizzik.github.io/defense-webgame/
+  - Razorwind: two quick blades, cleave around the target, crit numbers, the ultimate hits the crowd:
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=razorwind and later
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=razorwind&phase=8
+  - Dawnhammer: https://wizzik.github.io/defense-webgame/?debug=1&hero=dawnhammer&phase=8
+  - Frostweaver (enemies near you walk slower with Chill Field, the frost hand leaps):
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=frostweaver&phase=8
+  - Deadeye (each shot hits more enemies, copies at the ultimate):
+    https://wizzik.github.io/defense-webgame/?debug=1&hero=deadeye&phase=8
+  - each hero with no gear should be hard, like the older ones; say which kit feels dull or too strong. The spells
+    reuse the older effects and sounds until the spell graphics task.
 
 ## Named items only legendary / mythic, salvage for named items (branch `claude/named-items-legendary`, DONE, 2026-11-28)
 
@@ -286,7 +312,7 @@ Read it only when a task needs the history of a feature; `docs/DECISIONS.md` hol
 - Commits must use the identity `Claude <noreply@anthropic.com>` (set in the repo's git config), or GitHub shows them as Unverified. Add the session's co-author trailers.
 - Push access: `add_repo` with `access: push` is sometimes refused by the auto-mode classifier (it worked in the 2b-1 planning chat and was refused in both 2b-2 execution sessions). Without it nothing can be pushed; tell Petr.
 - The shell cannot reach github.io or Actions artifact storage. Check the live site with WebFetch, or measure it on Petr's computer through the desktop app's built-in browser (`javascript_exec` can read `window.__game` and time frames).
-- The map export is in `data-source/v20.75/out/` (untracked). If it is missing, run `npm run map:extract -- <map.w3x> v20.75`; the map is a file in the claude.ai project.
+- The map (v20.83) is in the private repository `Wizzik/wizziks-assets` (`maps/X_Hero_Siege_F-Day_v20.83_AI.w3x`): `add_repo` it (read), clone it to `/home/user/wizziks-assets`, run `npm run map:extract -- /home/user/wizziks-assets/maps/X_Hero_Siege_F-Day_v20.83_AI.w3x v20.83` (output `data-source/v20.83/out/`, untracked). Then **`npm run data:build -- --source data-source/v20.83/out --out data/generated` works in the cloud** (checked 2026-11-28: the same data as the repo but `constants.json` `mapVersion`). Never commit the map or the export. `.claude/settings.json` denies reading `data-source/` with the file tools; query it with `python3 -I -c` / `node -e` (AGENTS.md).
 - Playwright uses the pre-installed Chromium (`/opt/pw-browsers/chromium-1243`), so `@playwright/test` stays at 1.63.0.
 
 ## Resume after a break

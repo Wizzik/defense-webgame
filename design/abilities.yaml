@@ -752,3 +752,264 @@
   params:
     goldBonus: { design: [0.08, 0.16, 0.24, 0.32, 0.40] }
     magnetBonus: { design: [40, 80, 120, 160, 200] }
+
+# New heroes (2026-11-28, docs/superpowers/plans/2026-11-28-new-heroes.md). Their blocks come after the shared spells
+# and passives so the indices of the older abilities (the state hash mixes them) stay.
+
+# Razorwind (new heroes, batch 1)
+
+- id: blade-frenzy
+  source: A03I
+  name: { en: Blade Frenzy, cs: Blade Frenzy }
+  description: { en: "You attack much faster and move a little faster.", cs: "You attack much faster and move a little faster." }
+  kind: aura
+  targeting: self
+  params:
+    # The map's Berserk lasts 12 s every 30 s: +25 % to +125 % attack speed, +20 % move speed (DataB, DataA).
+    # As a permanent aura about 40 % of it, like Swift Pace.
+    attackSpeedBonus: { design: [0.1, 0.2, 0.3, 0.4, 0.5] }
+    moveSpeedBonus: { design: [0.08, 0.08, 0.08, 0.08, 0.08] }
+  review:
+    notes: >-
+      Engine Berserk (Absk) with object data DataA 0.2 move speed, DataB 0.25-1.25 attack speed, DataC 0.15 more
+      damage taken, 12 s, cooldown 30 s. The script functions listed for A03I in the export are AI_Setup and LB_Init
+      only (AI hints and the late-game bonus table); the game drops the damage taken and makes it permanent.
+
+- id: sweeping-blades
+  source: A01G
+  name: { en: Sweeping Blades, cs: Sweeping Blades }
+  description: { en: "Your attacks also cut the enemies around the target.", cs: "Your attacks also cut the enemies around the target." }
+  kind: on_hit
+  targeting: on_attack
+  params:
+    # Cleaving Attack: DataA 0.24-0.4 of the hit to enemies within 450 (area); the AoE scale halves the radius.
+    splashRadius: area
+    splashPercent: DataA
+
+- id: keen-edge
+  source: A03J
+  name: { en: Keen Edge, cs: Keen Edge }
+  description: { en: "Your attacks sometimes strike critically.", cs: "Your attacks sometimes strike critically." }
+  kind: on_hit
+  targeting: on_attack
+  params:
+    # Critical Strike: DataA is the chance in percent (10, 15, 20, 25, 35); the game reads a share of 1.
+    chance: { design: [0.1, 0.15, 0.2, 0.25, 0.35] }
+    multiplier: DataB
+
+- id: crossing-strike
+  source: A03L
+  name: { en: Crossing Strike, cs: Crossing Strike }
+  description: { en: "You leap into the thickest crowd and cut everything around.", cs: "You leap into the thickest crowd and cut everything around." }
+  kind: area
+  targeting: densest_cluster
+  params:
+    damage: { design: [5000, 10000] }
+    radius: { design: [1000, 1500] }
+    range: range
+  review:
+    jassFunctions:
+      - Trig_XTRIKE_Func028C
+      - Trig_XTRIKE_Func028Func001C
+    notes: >-
+      Trig_XTRIKE_Actions (war3map.j v20.83, lines 18662-18730) moves the hero to the target point, waits about
+      2.4 s and then deals 5000 (level 1, Trig_XTRIKE_Func028Func002002, 18651) or 10000 (level 2,
+      Trig_XTRIKE_Func028Func001Func002002, 18636) to the enemies within 1000 / 1500 of the hero
+      (Trig_XTRIKE_Func028C / Func001C tell the levels apart). The game strikes at the crowd at once, without the
+      leap; range is the object data range (800).
+
+# Dawnhammer (new heroes, batch 1)
+
+- id: holy-burst
+  source: A06C
+  name: { en: Holy Burst, cs: Holy Burst }
+  description: { en: "Light bursts on the thickest crowd and slows it.", cs: "Light bursts on the thickest crowd and slows it." }
+  kind: area
+  targeting: densest_cluster
+  params:
+    # Frost Nova: DataA 250-4000 area damage, area 300-400, a slow of 5 s (duration); the slow share is a design value.
+    damage: DataA
+    radius: area
+    range: range
+    slow: { design: [0.3, 0.3, 0.3, 0.3, 0.3] }
+    slowSeconds: duration
+
+- id: judgement
+  source: A06K
+  name: { en: Judgement, cs: Judgement }
+  description: { en: "A pillar of light keeps striking the thickest crowd.", cs: "A pillar of light keeps striking the thickest crowd." }
+  kind: ticking_area
+  targeting: densest_cluster
+  params:
+    # Spirit Wolf base: one light unit for 3-7 s (duration); its hits are not in the export, so the damage, rate and
+    # radius are design values (the bursts of a ticking area, like Mist Surge).
+    tickDamage: { design: [150, 300, 450, 600, 800] }
+    ticksPerSecond: { design: [4, 4, 4, 4, 4] }
+    radius: { design: [400, 400, 450, 450, 500] }
+    duration: duration
+
+- id: fan-of-light
+  source: A06J
+  name: { en: Fan of Light, cs: Fan of Light }
+  description: { en: "Blades of light fly out and cut every enemy around you.", cs: "Blades of light fly out and cut every enemy around you." }
+  kind: nova
+  targeting: around_self
+  params:
+    # Fan of Knives: DataA 500-4000 per target within area 350-550.
+    damage: DataA
+    radius: area
+
+- id: dominion
+  source: A06B
+  name: { en: Dominion, cs: Dominion }
+  description: { en: "Holy light rains around you for a long time.", cs: "Holy light rains around you for a long time." }
+  kind: ticking_area
+  targeting: around_self
+  params:
+    # Starfall: DataA 1000 / 2500 every 1.5 s (DataB) within area 1000 / 1500 for 20 s. The game rains bursts in
+    # that radius like Bone Stampede (rate and burst radius design values); a burst deals the map's tick x 0.15.
+    tickDamage: { design: [150, 375] }
+    ticksPerSecond: { design: [8, 10] }
+    radius: area
+    hitRadius: { design: [275, 350] }
+    duration: duration
+  review:
+    notes: >-
+      Engine Starfall; the export lists only AI_Setup and LB_Init for A06B (AI hints and the late-game bonus), so
+      every number is object data: DataA 1000 / 2500, DataB 1.5 s, area 1000 / 1500, duration 20.
+
+# Frostweaver (new heroes, batch 1)
+
+- id: frost-slice
+  source: A05A
+  name: { en: Frost Slice, cs: Frost Slice }
+  description: { en: "A blade of frost runs ahead, freezes and wounds.", cs: "A blade of frost runs ahead, freezes and wounds." }
+  kind: line
+  targeting: move_direction
+  params:
+    damage: { design: [250, 500, 1000, 2000, 5000] }
+    length: { design: [780, 780, 780, 780, 780] }
+    width: { design: [300, 400, 500, 600, 600] }
+    stunSeconds: { design: [0.5, 0.5, 0.5, 0.5, 0.5] }
+    waveSpeed: { design: [1500, 1500, 1500, 1500, 1500] }
+  review:
+    jassFunctions:
+      - Trig_Fost_Slice_Func010C
+      - Trig_Fost_Slice_Move_Func004C
+    notes: >-
+      Trig_Fost_Slice_Actions (war3map.j v20.83, lines 22099-22145) runs Trig_Fost_Slice_Move_Actions (22351) every
+      0.02 s for 0.5 s: the wave moves 30 a step (1500 a second, 25 steps, so about 780 long) and picks up the
+      enemies within 150, 200, 250, 300, 300 of it by level (width = twice that). They are paused 0.5 s (the stun)
+      and each gets a frost nova of A059 at the slice's level (Trig_Fost_Slice_Func010*Func002A): its DataB
+      250, 500, 1000, 2000, 5000 is the damage.
+
+- id: frost-slap
+  source: A05B
+  name: { en: Frost Slap, cs: Frost Slap }
+  description: { en: "An icy hand strikes and leaps from enemy to enemy.", cs: "An icy hand strikes and leaps from enemy to enemy." }
+  kind: chain
+  targeting: nearest
+  params:
+    damage: { design: [500, 1000, 2000, 3000, 5000] }
+    range: range
+    bounces: { design: [4, 5, 6, 7, 8] }
+    bounceRange: { design: [600, 600, 600, 600, 600] }
+  review:
+    jassFunctions:
+      - Trig_Fost_Slap_Func010C
+      - Trig_SlapDamage_Func007C
+    notes: >-
+      Trig_Fost_Slap_Actions (war3map.j v20.83, 22445-22500) sends an icy hand at the target that lives 5, 7, 9,
+      11, 13 s by level; Trig_SlapDamage_Actions (22720) deals 500, 1000, 2000, 3000, 5000 on each hit (with a
+      splash of 200-300) and sends the hand on to a random enemy within 600. The game makes it a chain: the
+      leaps grow with the level up to the cap of 8; bounceRange is the script's 600.
+
+- id: chill-field
+  source: A05E
+  name: { en: Chill Field, cs: Chill Field }
+  description: { en: "Enemies near you walk slower.", cs: "Enemies near you walk slower." }
+  kind: aura
+  targeting: self
+  params:
+    # Endurance base with negative values: enemies within area 300 lose 10-50 % move and attack speed (DataA).
+    # The game slows their walk; the radius is doubled so the AoE scale (x0.5) leaves the map's 300.
+    slow: { design: [0.1, 0.2, 0.3, 0.4, 0.5] }
+    radius: { design: [600, 600, 600, 600, 600] }
+
+- id: ice-fall
+  source: A05C
+  name: { en: Ice Fall, cs: Ice Fall }
+  description: { en: "Ice keeps falling on the thickest crowd.", cs: "Ice keeps falling on the thickest crowd." }
+  kind: ticking_area
+  targeting: densest_cluster
+  params:
+    # A05D Starfall at the point: DataA 1000 / 3000 every 1.5 s within area 600 / 800 for 15 s. The game rains
+    # bursts like Drowned Lake; a burst deals the map's tick x 0.15.
+    tickDamage: { design: [150, 450] }
+    ticksPerSecond: { design: [10, 11] }
+    radius: { design: [600, 800] }
+    hitRadius: { design: [275, 350] }
+    duration: { design: [15, 15] }
+  review:
+    jassFunctions:
+      - Trig_SnowFall_Func008C
+      - Trig_SnowFall_Func008Func001C
+    notes: >-
+      Trig_SnowFall_Actions (war3map.j v20.83, 22797-22840) waits 2 s, then puts a dummy at the target point that
+      lives 15 s and casts A05D (Starfall) at level 1 or 2: DataA 1000 / 3000 every 1.5 s within 600 / 800.
+
+# Deadeye (new heroes, batch 1)
+
+- id: hot-blood
+  source: A1E0
+  name: { en: Hot Blood, cs: Hot Blood }
+  description: { en: "You shoot much faster and move faster.", cs: "You shoot much faster and move faster." }
+  kind: aura
+  targeting: self
+  params:
+    # Bloodlust: +40 % to +250 % attack speed (DataA), +25 % move speed (DataB) for 60 s; as a permanent aura less.
+    attackSpeedBonus: { design: [0.1, 0.2, 0.3, 0.4, 0.6] }
+    moveSpeedBonus: { design: [0.1, 0.1, 0.1, 0.1, 0.1] }
+
+- id: blasting-powder
+  source: A038
+  name: { en: Blasting Powder, cs: Blasting Powder }
+  description: { en: "Your shots sometimes blast harder and stun.", cs: "Your shots sometimes blast harder and stun." }
+  kind: on_hit
+  targeting: on_attack
+  params:
+    # Bash: DataA is the chance in percent (10-30); DataC the bonus damage (200-2000); duration the stun (2 s).
+    chance: { design: [0.1, 0.15, 0.2, 0.25, 0.3] }
+    bonusDamage: DataC
+    stunSeconds: duration
+  review:
+    notes: >-
+      Engine Bash (AHbh) with object data DataA 10-30 %, DataC 200-2000, stun 2 s (1 s on heroes). The export ties
+      the function GPW_Actions to A038; it only adds an effect to the bash, so every number is object data.
+
+# Fan Fire is the map's A039 (Multishot, script Trig_Mutip_Shot_Actions, war3map.j v20.83, lines 18191-18260: 1, 2, 3,
+# 4, 5, 7, 9, 11, 15 ... extra shots by level). A039 has 10 levels in the map; the game keeps its first five as design
+# rows, so it has no source and no review.
+- id: fan-fire
+  name: { en: Fan Fire, cs: Fan Fire }
+  description: { en: "Each shot also hits more enemies near the target.", cs: "Each shot also hits more enemies near the target." }
+  kind: on_hit
+  targeting: on_attack
+  cooldown: { design: [0, 0, 0, 0, 0] }
+  params:
+    extraTargets: { design: [1, 2, 3, 4, 5] }
+
+# Doubles is the map's A004 (Mirror Image: DataA 1-6 images, DataB 30 % damage dealt, DataC 300 % damage taken, 15 s,
+# cooldown 15 s). A004 has 5 levels in the map and an ultimate has 3 in the game, so it has no source: the rows are
+# its levels 1, 3 and 5 (count 1, 3, 6).
+- id: doubles
+  name: { en: Doubles, cs: Doubles }
+  description: { en: "Copies of you join the fight for a while.", cs: "Copies of you join the fight for a while." }
+  kind: summon
+  targeting: self
+  cooldown: { design: [15, 15, 15] }
+  params:
+    count: { design: [1, 3, 6] }
+    damageDealt: { design: [0.3, 0.3, 0.3] }
+    damageTaken: { design: [3, 3, 3] }
+    duration: { design: [15, 15, 15] }
