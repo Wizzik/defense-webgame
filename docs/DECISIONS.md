@@ -8,6 +8,21 @@ drops and chests, elite and boss threat, phase 2b-3, visual pass A) are in `docs
 They **still apply** unless a section here overrides them. A section that code or yaml names and that is not in this
 file is there; search it (`grep -n`) before you change a rule of those areas, do not read it whole.
 
+## Stat icons and tier squares (2026-11-28; Petr: "why are the T1 to T4 tags so big? a small square next to the description is enough ... it would need icons for the different stats"; the glyphs and colours are Claude's)
+
+- A rolled affix row's tier is a small square (8 px) in the tier colour after the row text (T1 grey, T2 green, T3
+  blue, T4 gold), its title and aria-label "Tier N of 4"; no "T3" text. The old tag stretched to a full row on the
+  chest cards (`.card-line` is a flex column), so every affix took two rows.
+- Every stat row (tooltip, chest cards, keep / take compare, the gear doll's tooltip) starts with the stat's icon:
+  a 16 px dark tile with our own line glyph in the stat's colour (`client/ui/stat-icons.ts`, drawn by us like
+  `ability-icons.ts`, so no license row). Effect, temp-level and empty compare rows get none; an unknown stat a
+  diamond. `client/ui/stat-icons.test.ts` checks that every stat id has a glyph and a colour of its own.
+- The glyphs: str dumbbell, agi feather, int book, hp heart, armor shield, regen heart with plus, dodge figure with
+  motion lines, damageTaken arrow down onto ground, thorns bramble, lifesteal drop with fangs, damage sword,
+  attackSpeed two arrows, critChance crosshair, critDamage burst, spellPower flame, cooldownSpeed hourglass,
+  ultimateCooldown stopwatch, areaSize expanding corners, moveSpeed boot, magnet horseshoe magnet, goldFind coin
+  stack, magicFind gem.
+
 ## New heroes, batch 3 (2026-11-28; Petr: "pak pokračuj se zbylými hrdiny", the picks and numbers are Claude's)
 
 - Batch 3 of `docs/superpowers/plans/2026-11-28-new-heroes.md` (section Batch 3): **Lightbinder** (O007, INT ranged,

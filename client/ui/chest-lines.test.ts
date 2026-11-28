@@ -36,7 +36,7 @@ describe("chest lines", () => {
     expect(chestLines("en", data, gear, card)).toEqual({
       title: data.items[boots]!.name.en, slot: "Feet", slotType: "feet", itemId: data.items[boots]!.id, rarity: "common", rarityName: "Common",
       action: "new for this run",
-      lines: itemLines("en", data.items[boots]!, 0, 1, data.rules.gear).map((text) => ({ text, tone: "plain" })),
+      lines: itemLines("en", data.items[boots]!, 0, 1, data.rules.gear).map((text, r) => ({ text, tone: "plain", stat: data.items[boots]!.stats[r]!.stat })),
     });
     expect(chestLines("cs", data, gear, card).action).toBe("nové na tento běh");
   });
@@ -72,8 +72,8 @@ describe("chest lines", () => {
     expect(info.title).toBe("Zkušební přilba");
     expect(info.action).toBe("úroveň 3 → 4");
     expect(info.lines).toEqual([
-      { text: "+20.3 → +24.5 síla", tone: "better" },
-      { text: "+174 → +210 HP", tone: "better" },
+      { text: "+20.3 → +24.5 síla", tone: "better", stat: "str" },
+      { text: "+174 → +210 HP", tone: "better", stat: "hp" },
     ]);
   });
 

@@ -3,7 +3,7 @@ import { rowTier } from "../../meta";
 import { ChestAction, type ChestCard, type GearState, itemStatAt, slotTypeOf } from "../../sim";
 import { type Lang, type MessageKey, t } from "./i18n";
 import { itemLines, statLabel, statValue } from "./item-lines";
-import { type LineTone, tooltipLines } from "./item-tooltip";
+import { type ItemLine, tooltipLines } from "./item-tooltip";
 import { cardItem, wornItem } from "./rolled-item";
 
 /** What a chest card shows. */
@@ -20,10 +20,10 @@ export interface ChestLines {
   /** What the pick does: "new for this run", "compare with X", "level 3 → 4". */
   action: string;
   /** Stat rows: the item at level 1, the comparison with the worn item, or the worn item's "from → to". */
-  lines: { text: string; tone: LineTone; tier?: number }[];
+  lines: ItemLine[];
 }
 
-function withTier<T extends object>(line: T, tier: number): T & { tier?: number } {
+function withTier(line: ItemLine, tier: number): ItemLine {
   return tier > 0 ? { ...line, tier } : line;
 }
 
@@ -39,7 +39,7 @@ export function chestLines(lang: Lang, data: GameData, gear: GearState, card: Ch
   let lines: ChestLines["lines"];
   if (card.action === ChestAction.New) {
     action = t(lang, "chest.new");
-    lines = itemLines(lang, item, 0, 1, rules).map((text, r) => withTier({ text, tone: "plain" as LineTone }, rowTier(item, r)));
+    lines = itemLines(lang, item, 0, 1, rules).map((text, r) => withTier({ text, tone: "plain", stat: item.stats[r]!.stat }, rowTier(item, r)));
     if (item.effect) lines.push({ text: item.effect.text[lang], tone: "effect" });
   } else if (card.action === ChestAction.Choice) {
     const old = wornItem(data, gear, card.slot)!;
@@ -50,7 +50,8 @@ export function chestLines(lang: Lang, data: GameData, gear: GearState, card: Ch
     lines = item.stats.map((row, r) => withTier({
       text: `${statValue(row.stat, itemStatAt(row.value, base, temp, rules))} → ` +
         `${statValue(row.stat, itemStatAt(row.value, base, temp + 1, rules))} ${statLabel(lang, row.stat)}`,
-      tone: "better" as LineTone,
+      tone: "better",
+      stat: row.stat,
     }, rowTier(item, r)));
   }
   return {
