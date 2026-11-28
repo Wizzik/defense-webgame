@@ -233,3 +233,49 @@
   attack: { cooldownScale: 0.5, strikes: 2, splash: { radius: 225, share: 0.4 } }   # the map's Cleave 40% (A1C0) within 450, x0.5 like every area
   damageTaken: 0.5   # melee: stands in the crowd
   power: 0.3   # new heroes batch 3 balance pass (meter, then 1-4 autopilot wins of 20 with no gear)
+
+
+- id: rimebreaker
+  source: O00E
+  mapName: Icer
+  name: { en: Rimebreaker, cs: Rimebreaker }
+  role: { en: "Frost brawler. Ice waves, a freezing stomp and a colossus form.", cs: "Frost brawler. Ice waves, a freezing stomp and a colossus form." }
+  signatureAbilities: [rime-wave, frost-stomp, glacial-cleave]
+  ultimate: frost-colossus
+  attack: { cooldownScale: 0.5, strikes: 2 }   # no A1C0 in the map: his cleave is the spell Glacial Cleave
+  damageTaken: 0.5   # melee: stands in the crowd
+  power: 0.39   # new heroes batch 4 balance pass (meter, then 1-4 autopilot wins of 20 with no gear)
+
+
+- id: arcfang
+  source: O00Y
+  mapName: Moogul the Sly
+  name: { en: Arcfang, cs: Arcfang }
+  role: { en: "Sly storm mage. Forking arcs, a lightning canopy and a storm giant.", cs: "Sly storm mage. Forking arcs, a lightning canopy and a storm giant." }
+  signatureAbilities: [forking-arc, storm-canopy, jolt-strike]
+  ultimate: storm-giant
+  attack: { rangeScale: 2, cooldownScale: 0.4, bounce: { count: 4, range: 400, falloff: 0.25 } }   # Petr: ranged heroes reach twice as far; the map's mbounce weapon leaps
+  power: 0.25   # new heroes batch 4 balance pass (meter, then 1-4 autopilot wins of 20 with no gear)
+
+
+- id: emberclaw
+  source: O00W
+  mapName: Magma
+  name: { en: Emberclaw, cs: Emberclaw }
+  role: { en: "Molten hunter. A lava rush, a fiery breath and a burning shell.", cs: "Molten hunter. A lava rush, a fiery breath and a burning shell." }
+  signatureAbilities: [lava-rush, magma-breath, molten-growth]
+  ultimate: molten-shell
+  attack: { rangeScale: 2, cooldownScale: 0.6, bounce: { count: 4, range: 400, falloff: 0.25 } }   # Petr: ranged heroes reach twice as far; the map's mbounce weapon leaps
+  power: 0.16   # new heroes batch 4 balance pass (meter, then 1-4 autopilot wins of 20 with no gear)
+
+
+- id: galestrider
+  source: O00L
+  mapName: Walker
+  name: { en: Galestrider, cs: Galestrider }
+  role: { en: "Storm walker. Quaking steps, a haymaker and a rampage of twisters.", cs: "Storm walker. Quaking steps, a haymaker and a rampage of twisters." }
+  signatureAbilities: [haymaker, quake-steps, tireless-stride]
+  ultimate: twister-rampage
+  attack: { cooldownScale: 0.4, strikes: 2, splash: { radius: 225, share: 0.4 } }   # the map's Cleave 40% (A1C0) within 450, x0.5 like every area
+  damageTaken: 0.5   # melee: stands in the crowd
+  power: 0.22   # new heroes batch 4 balance pass (meter, then 1-4 autopilot wins of 20 with no gear)

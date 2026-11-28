@@ -19,6 +19,10 @@ const TINTS: Readonly<Record<string, number>> = {
   skyweaver: 0x302060,
   ironroar: 0x40281a,
   stonebeard: 0x3a3a40,
+  rimebreaker: 0x1e3a50,
+  arcfang: 0x2a2050,
+  emberclaw: 0x501a10,
+  galestrider: 0x2a4030,
 };
 
 /** Emissive tint of the hero's model; an unknown hero gets the first hero's tint. */
@@ -54,6 +58,10 @@ const BODY_COLORS: Readonly<Record<string, number>> = {
   skyweaver: 0x9a7aff,
   ironroar: 0xb06a3a,
   stonebeard: 0xb8c0cc,
+  rimebreaker: 0xa8e0ff,
+  arcfang: 0xb0a0ff,
+  emberclaw: 0xff8a40,
+  galestrider: 0x9ad8b0,
 };
 
 /** Bright body colour of the hero's model, one per hero; unknown heroes get the first. */

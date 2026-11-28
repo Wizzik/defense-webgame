@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-11-28 (stat icons and tier squares). Read this first when you resume work.
+Updated 2026-11-28 (new heroes, batch 4). Read this first when you resume work.
 
 ## Order (Petr, 2026-11-26)
 
@@ -14,7 +14,7 @@ Updated 2026-11-28 (stat icons and tier squares). Read this first when you resum
    about 10 % autopilot wins with no gear). After stage 3 of random items, before its stage 4.
 4. Then the remaining heroes of the map and better spell graphics (from the order of 2026-11-23). **Heroes: plan
    `docs/superpowers/plans/2026-11-28-new-heroes.md` (36 heroes, 9 batches of 4); batch 1 DONE on branch
-   `claude/new-heroes-1` (below), batch 2 next after Petr's playtest.** Spell graphics: not started.
+   `claude/new-heroes-1` (below), batches 2-4 DONE (PRs #49, #51 and batch 4's), batch 5 next after Petr's playtest.** Spell graphics: not started.
 5. **English only for now** (Petr, 2026-11-27): new texts need no Czech (DECISIONS, English only).
 6. **Random items stage 4 and the damage meter** (PR #45, merged 2026-11-27, below).
 7. **Petr's batch 3** (2026-11-27, after the 3-player playtest), DONE on `main` (below), waits for Petr's playtest:
@@ -27,6 +27,22 @@ Updated 2026-11-28 (stat icons and tier squares). Read this first when you resum
 9. **Named items only legendary / mythic, salvage for named items** (Petr, 2026-11-28): plan
    `docs/superpowers/plans/2026-11-28-named-items-legendary.md`, branch `claude/named-items-legendary` (from
    `claude/peaceful-galileo-qtu26s`), DONE (below), waits for Petr's playtest.
+
+## New heroes, batch 4 (branch `claude/new-heroes-4`, on top of batch 3 / PR #51, DONE, waits for Petr's playtest, 2026-11-28)
+
+- **Rimebreaker** (STR melee: Rime Wave, Frost Stomp stun, Glacial Cleave; ultimate Frost Colossus, a 30 s titan),
+  **Arcfang** (INT ranged, bouncing shots: Forking Arc, Storm Canopy, Jolt Strike; ultimate Storm Giant),
+  **Emberclaw** (AGI ranged, bouncing shots: Lava Rush, Magma Breath, Molten Growth speed aura; ultimate Molten Shell,
+  a burning ring), **Galestrider** (STR melee, cleave: Haymaker, Quake Steps, Tireless Stride; ultimate Twister
+  Rampage over the crowd).
+- No new mechanics. Balanced by the meter and to 3-4 wins of 20; table in `docs/DECISIONS.md`, section New heroes,
+  batch 4. Digest -> `114a42ed` (older cases identical).
+- **What Petr checks** (after the merge):
+  - the menu shows 24 heroes: https://wizzik.github.io/defense-webgame/
+  - https://wizzik.github.io/defense-webgame/?debug=1&hero=rimebreaker&phase=10 (Frost Colossus: the hp bar grows)
+  - https://wizzik.github.io/defense-webgame/?debug=1&hero=arcfang&phase=8
+  - https://wizzik.github.io/defense-webgame/?debug=1&hero=emberclaw&phase=8 (Molten Shell after level 10)
+  - https://wizzik.github.io/defense-webgame/?debug=1&hero=galestrider&phase=8
 
 ## Stat icons and tier squares (branch `claude/admiring-davinci-enqxge`, DONE, waits for Petr's check, 2026-11-28)
 
@@ -153,23 +169,6 @@ Updated 2026-11-28 (stat icons and tier squares). Read this first when you resum
     **Gear for the next run**; the guest wears another item, goes Back, the host presses **Again (same group)**: the
     guest's new run wears the new item (C in the run shows it);
   - 3 and 4 players without gear on normal feel about as hard as 2 players, not much harder.
-
-## Sentry Ward, dash, blink and random items stage 5 (straight to `main`, DONE, 2026-11-27)
-
-- Sentry Ward has Serpent Totem's numbers and lives 10 s, a serpent totem 15 s; dash 3 charges from level 10, blink
-  from level 20; hero power tuned again (2-5 autopilot wins of 20 each). Stage 5: `sim:run --gear rolled-mid |
-  rolled-full`, crit damage from gear capped at +150 %, a random mythic's budget 34. Numbers: `docs/DECISIONS.md`,
-  sections Random items, stage 5 and Sentry Ward, Serpent Totem, dash and blink.
-- **What Petr checks:**
-  - Sentry Ward (any hero, a shared spell) and Serpent Totem: many wards, short-lived (10 s and 15 s), similar damage:
-    https://wizzik.github.io/defense-webgame/?debug=1&hero=serpent-shaman&phase=8 and in the console
-    `__game.debug.learn(4, "sentry-ward")`;
-  - 3 dash charges from level 10, F from level 20: https://wizzik.github.io/defense-webgame/?debug=1&phase=6
-  - a mythic random item feels like a named one, crits not absurd:
-    https://wizzik.github.io/defense-webgame/?debug=1 then `__game.debug.grantRolled("mainHand", "mythic", 12)` and wear it
-    in the gear screen.
-- Generated json edited in the cloud again (`abilities.json`, `heroes.json`, `rules.json`): **run
-  `npm run data:build` locally and check that nothing changes.**
 
 ## Petr's batch 3 (straight to `main`, DONE, 2026-11-27)
 

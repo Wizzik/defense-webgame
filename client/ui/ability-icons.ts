@@ -149,6 +149,26 @@ const ICONS: Record<string, Icon> = {
   "rolling-thunder": { color: STORM, glyph: '<path d="M7 4h10v5H7z"/><path d="M12 9v4"/><path d="M3 18c3-2 15-2 18 0M5 21c3-1 11-1 14 0"/><path d="M4 14l2 1M20 14l-2 1"/>' },
   "skull-crack": { color: BONE, glyph: '<path d="M6 11a6 6 0 1 1 12 0v3l-2 1v3H8v-3l-2-1z"/><path d="M12 5l-1 4 2 2-1 3"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>' },
   "titan-form": { color: EARTH, glyph: '<circle cx="12" cy="5" r="2.5"/><path d="M5 10l7-2 7 2-2 4h-3v7h-4v-7H7z"/><path d="M3 6l2 2M21 6l-2 2"/>' },
+  // Rimebreaker
+  "rime-wave": { color: FROST, glyph: '<path d="M3 12h4M5 9l-2 3 2 3"/><path d="M10 6c3 3 3 9 0 12M14 4c4 4 4 12 0 16M18 7c2 3 2 7 0 10"/>' },
+  "frost-stomp": { color: FROST, glyph: '<path d="M9 3h6v8H9z"/><path d="M3 18c3-2 15-2 18 0"/><path d="M12 13v8M8 15l8 4M16 15l-8 4"/>' },
+  "glacial-cleave": { color: FROST, glyph: '<path d="M4 20L15 9"/><path d="M15 9c0-3 2-6 5-6 0 3-1 6-5 6z"/><path d="M6 8c2-3 5-4 8-4M18 16c-3 2-6 3-9 2"/>' },
+  "frost-colossus": { color: FROST, glyph: '<circle cx="12" cy="5" r="2.5"/><path d="M5 10l7-2 7 2-2 4h-3v7h-4v-7H7z"/><path d="M12 11v2M3 4l2 2M21 4l-2 2"/>' },
+  // Arcfang
+  "forking-arc": { color: STORM, glyph: '<path d="M4 12l5-2-2 5 6-3-1 4 8-6"/><path d="M14 6l3 2M15 18l3-2"/>' },
+  "storm-canopy": { color: STORM, glyph: '<path d="M5 9a7 5 0 0 1 14 0z"/><path d="M8 11l-2 4h3l-2 5M16 11l-2 4h3l-2 5"/>' },
+  "jolt-strike": { color: SPARK, glyph: '<circle cx="12" cy="12" r="8"/><path d="M13 5l-4 7h4l-2 7"/>' },
+  "storm-giant": { color: STORM, glyph: '<circle cx="12" cy="5" r="2.5"/><path d="M5 10l7-2 7 2-2 4h-3v7h-4v-7H7z"/><path d="M20 3l-2 3h2l-2 3"/>' },
+  // Emberclaw
+  "lava-rush": { color: FIRE, glyph: '<path d="M3 17h12"/><path d="M15 17c2-2 2-5 0-7 3 0 6 3 6 7z"/><path d="M5 13l2-3M9 13l2-4"/>' },
+  "magma-breath": { color: FIRE, glyph: '<path d="M4 12l16-7v14z"/><path d="M8 12c2-1 4 1 6 0s4 1 6 0"/>' },
+  "molten-growth": { color: FIRE, glyph: '<path d="M12 21a5 5 0 0 0 5-5c0-3-5-9-5-9s-5 6-5 9a5 5 0 0 0 5 5z"/><path d="M12 7V2M9 4l3-2 3 2"/>' },
+  "molten-shell": { color: FIRE, glyph: '<circle cx="12" cy="12" r="4"/><path d="M12 3c3 2 6 5 6 9M12 21c-3-2-6-5-6-9M3 12c2-3 5-6 9-6M21 12c-2 3-5 6-9 6"/>' },
+  // Galestrider
+  haymaker: { color: EARTH, glyph: '<path d="M8 14V8a2 2 0 0 1 4 0v4-6a2 2 0 0 1 4 0v8a6 6 0 0 1-6 6H9l-3-4z"/><path d="M3 6l3 2M3 11h3"/>' },
+  "quake-steps": { color: EARTH, glyph: '<path d="M7 4c2 0 3 2 3 4s-1 4-3 4-2-2-2-4 0-4 2-4zM15 10c2 0 3 2 3 4s-1 4-3 4-2-2-2-4 0-4 2-4z"/><path d="M3 21h18"/>' },
+  "tireless-stride": { color: NATURE, glyph: '<path d="M13 4a2 2 0 1 0 0 .1"/><path d="M8 21l3-6 3 2v4M11 15l1-6 4 3 3-1M12 9l-4 2-2 3"/>' },
+  "twister-rampage": { color: SPIRIT, glyph: '<path d="M4 4h16M6 8h12M8 12h8M10 16h5M11 20h3"/><path d="M17 4c-1 6-4 10-5 16"/>' },
   // shared spells
   "arc-lightning": { color: STORM, glyph: '<path d="M13 2L6 13h5l-2 9 8-12h-5z"/>' },
   smite: { color: HOLY, glyph: '<path d="M12 2v13"/><path d="M8 11l4 4 4-4"/><path d="M5 20h14"/><path d="M8 17l-2 3M16 17l2 3"/>' },

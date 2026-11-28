@@ -8,6 +8,37 @@ drops and chests, elite and boss threat, phase 2b-3, visual pass A) are in `docs
 They **still apply** unless a section here overrides them. A section that code or yaml names and that is not in this
 file is there; search it (`grep -n`) before you change a rule of those areas, do not read it whole.
 
+## New heroes, batch 4 (2026-11-28; Petr: "pak pokračuj se zbylými hrdiny", the picks and numbers are Claude's)
+
+- Batch 4 of `docs/superpowers/plans/2026-11-28-new-heroes.md` (section Batch 4): **Rimebreaker** (O00E, STR melee:
+  Rime Wave, Frost Stomp, Glacial Cleave; ultimate Frost Colossus), **Arcfang** (O00Y, INT ranged, bouncing shots:
+  Forking Arc, Storm Canopy, Jolt Strike; ultimate Storm Giant), **Emberclaw** (O00W, AGI ranged, bouncing shots: Lava
+  Rush, Magma Breath, Molten Growth; ultimate Molten Shell), **Galestrider** (O00L, STR melee, cleave: Haymaker, Quake
+  Steps, Tireless Stride; ultimate Twister Rampage). Names and texts are ours.
+- **No new mechanics:** the two Avatars are `transform` with Titan Form's numbers; the shared map abilities (A01G,
+  A069, A00Q, A00R, A0AD, A007) get ids of their own.
+- **Map ultimates kept:** Magma's ultimate is the map's 2-level Fire Shield (A0AE, Permanent Immolation -> Molten
+  Shell, a `ticking_area` around the hero 6 s every 6 s), not Grow Up as the plan's table had: Grow Up (A05Y, 5
+  levels, Endurance + Agility on learning) is a spell, a permanent aura of move and attack speed (the Agility and the
+  growth are left out). Walker's Tornado (A092 Stampede) is a `ticking_area` at the crowd (bursts for 10 s), not a
+  `line`; Lightning Rain (A067 -> A068 Monsoon) a `ticking_area` around the hero like Squall, not a `nova`.
+- **Left out of the scripts:** Ice Stomp's ice wall (Confine), Fire Slice's dash and fires, Knock Out's stun,
+  knock-back and splash, Foot Clap's walking through units, Breath of Fire's burn.
+- **Attacks:** Rimebreaker has no A1C0 in the map (his cleave is the spell Glacial Cleave, as Razorwind's), two blows
+  at x0.5; Galestrider cleaves (A1C0), two blows at x0.4; Arcfang bounces at x0.4, Emberclaw at x0.6.
+- **Digest** `7b1568d5` -> `114a42ed`: the 32 older cases are identical, four `h-<id>` cases added.
+- **Balance** (`sim:run --seeds 1-20 --gear none`, world 1 normal; meter first, then power):
+
+  | hero | power | wins | ultimate | spells | attack |
+  |---|---|---|---|---|---|
+  | Rimebreaker | **0.39** | 4 (0.45: 11, 0.35: 2) | Frost Colossus (in the attack) | Rime Wave 22 %, Frost Stomp 17 % | 26 % (with Glacial Cleave) |
+  | Arcfang | **0.25** | 4 | Storm Giant (in the attack) | Storm Canopy 23 %, Forking Arc 23 % | 27 % (with Jolt Strike) |
+  | Emberclaw | **0.16** | 3 (0.17: 5, 0.2: 9) | Molten Shell 31 % | Lava Rush 25 %, Magma Breath 17 % | 12 % |
+  | Galestrider | **0.22** | 3 (0.25: 9) | Twister Rampage 19 % | Quake Steps 22 %, Haymaker 7 % | 15 % |
+
+  At power 1 and the map's numbers they won 18-20 of 20; Frost Stomp, Magma Breath and Molten Shell dealt 3-4 %
+  (x2.4, x4, x4), Lava Rush x1.3, Forking Arc x2, Quake Steps x2.5, Twister Rampage x0.75, Rime Wave x0.6.
+
 ## Stat icons and tier squares (2026-11-28; Petr: "why are the T1 to T4 tags so big? a small square next to the description is enough ... it would need icons for the different stats"; the glyphs and colours are Claude's)
 
 - A rolled affix row's tier is a small square (8 px) in the tier colour after the row text (T1 grey, T2 green, T3

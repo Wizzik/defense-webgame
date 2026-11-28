@@ -931,5 +931,195 @@
     "ultimate": "titan-form",
     "damageTaken": 0.5,
     "power": 0.3
+  },
+  {
+    "id": "rimebreaker",
+    "name": {
+      "en": "Rimebreaker",
+      "cs": "Rimebreaker"
+    },
+    "role": {
+      "en": "Frost brawler. Ice waves, a freezing stomp and a colossus form.",
+      "cs": "Frost brawler. Ice waves, a freezing stomp and a colossus form."
+    },
+    "primary": "str",
+    "hp": 700,
+    "armor": 5,
+    "moveSpeed": 420,
+    "attributes": {
+      "str": {
+        "base": 38,
+        "perLevel": 3.2
+      },
+      "agi": {
+        "base": 30,
+        "perLevel": 2.5
+      },
+      "int": {
+        "base": 24,
+        "perLevel": 2.3
+      }
+    },
+    "baseAttack": {
+      "kind": "melee",
+      "range": 200,
+      "cooldown": 0.38,
+      "damageMin": 2,
+      "damageMax": 12,
+      "strikes": 2
+    },
+    "signatureAbilities": [
+      "rime-wave",
+      "frost-stomp",
+      "glacial-cleave"
+    ],
+    "ultimate": "frost-colossus",
+    "damageTaken": 0.5,
+    "power": 0.39
+  },
+  {
+    "id": "arcfang",
+    "name": {
+      "en": "Arcfang",
+      "cs": "Arcfang"
+    },
+    "role": {
+      "en": "Sly storm mage. Forking arcs, a lightning canopy and a storm giant.",
+      "cs": "Sly storm mage. Forking arcs, a lightning canopy and a storm giant."
+    },
+    "primary": "int",
+    "hp": 800,
+    "armor": 5,
+    "moveSpeed": 392,
+    "attributes": {
+      "str": {
+        "base": 28,
+        "perLevel": 2.5
+      },
+      "agi": {
+        "base": 27,
+        "perLevel": 2.1
+      },
+      "int": {
+        "base": 36,
+        "perLevel": 5
+      }
+    },
+    "baseAttack": {
+      "kind": "bounce",
+      "range": 1400,
+      "cooldown": 0.3,
+      "damageMin": 2,
+      "damageMax": 24,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
+    },
+    "signatureAbilities": [
+      "forking-arc",
+      "storm-canopy",
+      "jolt-strike"
+    ],
+    "ultimate": "storm-giant",
+    "power": 0.25
+  },
+  {
+    "id": "emberclaw",
+    "name": {
+      "en": "Emberclaw",
+      "cs": "Emberclaw"
+    },
+    "role": {
+      "en": "Molten hunter. A lava rush, a fiery breath and a burning shell.",
+      "cs": "Molten hunter. A lava rush, a fiery breath and a burning shell."
+    },
+    "primary": "agi",
+    "hp": 1000,
+    "armor": 5,
+    "moveSpeed": 448,
+    "attributes": {
+      "str": {
+        "base": 25,
+        "perLevel": 2
+      },
+      "agi": {
+        "base": 40,
+        "perLevel": 3.75
+      },
+      "int": {
+        "base": 31,
+        "perLevel": 2.75
+      }
+    },
+    "baseAttack": {
+      "kind": "bounce",
+      "range": 1200,
+      "cooldown": 0.45,
+      "damageMin": 3,
+      "damageMax": 18,
+      "bounce": {
+        "count": 4,
+        "range": 400,
+        "falloff": 0.25
+      }
+    },
+    "signatureAbilities": [
+      "lava-rush",
+      "magma-breath",
+      "molten-growth"
+    ],
+    "ultimate": "molten-shell",
+    "power": 0.16
+  },
+  {
+    "id": "galestrider",
+    "name": {
+      "en": "Galestrider",
+      "cs": "Galestrider"
+    },
+    "role": {
+      "en": "Storm walker. Quaking steps, a haymaker and a rampage of twisters.",
+      "cs": "Storm walker. Quaking steps, a haymaker and a rampage of twisters."
+    },
+    "primary": "str",
+    "hp": 1000,
+    "armor": 5,
+    "moveSpeed": 378,
+    "attributes": {
+      "str": {
+        "base": 35,
+        "perLevel": 4.1
+      },
+      "agi": {
+        "base": 28,
+        "perLevel": 3
+      },
+      "int": {
+        "base": 39,
+        "perLevel": 2.5
+      }
+    },
+    "baseAttack": {
+      "kind": "melee",
+      "range": 150,
+      "cooldown": 0.3,
+      "damageMin": 2,
+      "damageMax": 8,
+      "strikes": 2,
+      "splash": {
+        "radius": 225,
+        "share": 0.4
+      }
+    },
+    "signatureAbilities": [
+      "haymaker",
+      "quake-steps",
+      "tireless-stride"
+    ],
+    "ultimate": "twister-rampage",
+    "damageTaken": 0.5,
+    "power": 0.22
   }
 ]

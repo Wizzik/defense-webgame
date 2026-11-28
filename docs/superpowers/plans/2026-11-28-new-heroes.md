@@ -77,10 +77,10 @@ Timed self buffs of the map (Berserk 12 s every 30 s, Bloodlust 60 s) become per
 | 3 | O00O (Magicer) | skyweaver | INT | ranged | Storm Blast `instant`, Regen Aura `heal`, Phoenix `ticking_area` | Angel Cry `ticking_area` | - |
 | 3 | O00D (Nikoro) | ironroar | STR | melee | Thunder Impale `line`, War Stomp `nova`, Devotion Aura `aura` | Battle Roar Axe `cone` | armor aura |
 | 3 | O00A (Shorter) | stonebeard | STR | melee | Shock Hammer `line`, Thunder Clap `nova`, Bash `on_hit` | Avatar `transform` | transform |
-| 4 | O00E (Icer) | | STR | melee | Shock Wave `line`, Cleaving Attack `on_hit`, Ice Stomp `nova` | Avatar `transform` | - |
-| 4 | O00Y (Moogul the Sly) | | INT | ranged | Lightning Rain `nova`, Chain Lightning `chain`, Bash `on_hit` | Avatar `transform` | - |
-| 4 | O00W (Magma) | | AGI | ranged | Fire Slice `line`, Breath of Fire `cone`, Fire Shield `ticking_area` | Grow Up `transform` | - |
-| 4 | O00L (Walker) | | STR | melee | Foot Clap `nova`, Knock Out `instant`, Endurance `aura` | Tornado `line` | - |
+| 4 | O00E (Icer) | rimebreaker | STR | melee | Shock Wave `line`, Cleaving Attack `on_hit`, Ice Stomp `nova` | Avatar `transform` | - |
+| 4 | O00Y (Moogul the Sly) | arcfang | INT | ranged | Lightning Rain `nova`, Chain Lightning `chain`, Bash `on_hit` | Avatar `transform` | - |
+| 4 | O00W (Magma) | emberclaw | AGI | ranged | Fire Slice `line`, Breath of Fire `cone`, Fire Shield `ticking_area` | Grow Up `transform` | - |
+| 4 | O00L (Walker) | galestrider | STR | melee | Foot Clap `nova`, Knock Out `instant`, Endurance `aura` | Tornado `line` | - |
 | 5 | O00G (Kel Stonebull) | | STR | melee | Rock Down `area`, Carrion Swarm `cone`, Vampiric Fangs `aura` | Inferno `area` | lifesteal aura |
 | 5 | O00S (Gold Machine) | | STR | melee | Cloud Poison `ticking_area`, Bash Gold `on_hit`, Immolation `ticking_area` | Cleaving Attack `on_hit` | gold on hit |
 | 5 | O00V (DarkLord) | | STR | melee | Advanced `nova`, Dupe Wave `nova`, Endurance `aura` | Hawk `summon` | - |
@@ -200,3 +200,24 @@ Spells (map numbers and script lines in each block's review notes):
 - **Stonebeard** (O00A): Hammer Wave (A00O -> `line`), Rolling Thunder (A00P Thunder Clap -> `nova` slow), Skull Crack
   (A00Q Bash -> `on_hit`), ultimate Titan Form (A00R Avatar, script `Trig_Demon_Actions` -> `transform`).
 - New mechanics: `aura.armorBonus`, the kind `transform`. Numbers and balance: DECISIONS, New heroes, batch 3.
+
+## Batch 4 (branch `claude/new-heroes-4`, stands on batch 3)
+
+| id | name | model (KayKit adventurers) | attack clip |
+|---|---|---|---|
+| rimebreaker | Rimebreaker | Knight, `2H_Sword`, `Knight_Cape` | `2H_Melee_Attack_Slice` |
+| arcfang | Arcfang | Mage, `1H_Wand` + `Spellbook_open` | `Spellcast_Shoot` |
+| emberclaw | Emberclaw | Rogue_Hooded, `1H_Crossbow` | `1H_Ranged_Shoot` |
+| galestrider | Galestrider | Barbarian, `2H_Axe` | `2H_Melee_Attack_Slice` |
+
+- **Rimebreaker** (O00E): Rime Wave (A0BC Shock Wave -> `line`), Frost Stomp (A0BB War Stomp, script Confine ->
+  `nova` stun), Glacial Cleave (A01G -> `on_hit` splash), ultimate Frost Colossus (A00R Avatar -> `transform`).
+- **Arcfang** (O00Y): Forking Arc (A069 -> `chain`), Storm Canopy (A067 -> A068 Monsoon, script `Trig_Lightning_Rain`
+  -> `ticking_area` around the hero), Jolt Strike (A00Q Bash -> `on_hit`), ultimate Storm Giant (A00R -> `transform`).
+- **Emberclaw** (O00W): Lava Rush (A01S, script `Trig_FireSliceMove` -> `line`), Magma Breath (A0AD -> `cone`), Molten
+  Growth (A05Y Grow Up -> `aura`), ultimate Molten Shell (A0AE Permanent Immolation -> `ticking_area`): the map's
+  ultimate is Fire Shield (2 levels), so Grow Up is a spell, not the `transform` of the table.
+- **Galestrider** (O00L): Haymaker (A091 Storm Bolt, script `Trig_Knockout` -> `instant`), Quake Steps (A090, script
+  `Trig_FootClap` -> `ticking_area` around the hero), Tireless Stride (A007 -> `aura`), ultimate Twister Rampage (A092
+  Stampede -> `ticking_area` at the crowd).
+- No new mechanics. Numbers and balance: DECISIONS, New heroes, batch 4.

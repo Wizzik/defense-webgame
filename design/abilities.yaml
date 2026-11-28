@@ -1584,3 +1584,278 @@
       120. Trig_Demon_Actions (war3map.j v20.83, 16208-16216) also gives A04Y (Cleave 100 % within 200) for 60 s. The
       game's transform keeps the map's share of the time (30 s, then the cooldown) and scales the bonuses to the
       game's heroes: +50 / +100 % max hp, +10 / +20 armor, +100 / +200 % attack damage; the cleave is left out.
+
+# New heroes, batch 4: damage rows tuned to the damage meter like batches 2 and 3 (the map's numbers in each comment).
+
+# Rimebreaker (new heroes, batch 4)
+
+- id: rime-wave
+  source: A0BC
+  name: { en: Rime Wave, cs: Rime Wave }
+  description: { en: "A wave of frost ripples ahead of you.", cs: "A wave of frost ripples ahead of you." }
+  kind: line
+  targeting: move_direction
+  params:
+    # Shock Wave: DataA 500-6000 damage, DataC distance 800, area 350-550 the width.
+    damage: { design: [300, 600, 1200, 1800, 3600] }   # DataA x 0.6 (the meter pass)
+    length: DataC
+    width: area
+    waveSpeed: { design: [1600, 1600, 1600, 1600, 1600] }
+
+- id: frost-stomp
+  source: A0BB
+  name: { en: Frost Stomp, cs: Frost Stomp }
+  description: { en: "You stomp the ground, hurting and freezing the enemies around you.", cs: "You stomp the ground, hurting and freezing the enemies around you." }
+  kind: nova
+  targeting: around_self
+  params:
+    damage: { design: [480, 960, 1920, 2400, 4800] }   # DataA x 2.4 (the meter pass)
+    radius: { design: [800, 800, 800, 800, 800] }   # area 600; 800 (400 after the AoE scale) reaches the crowd around him
+    stunSeconds: { design: [1, 1, 1.25, 1.25, 1.5] }
+  review:
+    jassFunctions:
+      - Trig_Confine_Conditions
+    notes: >-
+      War Stomp: DataA 200-2000 within area 600, stun 2-4 s (duration; heroes 1-2 s). Trig_Confine_Actions (war3map.j
+      v20.83, 27631-27668) then raises an ice wall around the hero for 8 s that pulls the enemies near him in and lets
+      none pass. The game keeps the stomp; the wall is left out and the stun is a design value (as Hoofstomp).
+
+- id: glacial-cleave
+  source: A01G
+  name: { en: Glacial Cleave, cs: Glacial Cleave }
+  description: { en: "Your blows also cut the enemies around the target.", cs: "Your blows also cut the enemies around the target." }
+  kind: on_hit
+  targeting: on_attack
+  params:
+    # Cleaving Attack: DataA 0.24-0.4 of the hit to enemies within 450 (area); the AoE scale halves the radius. The same
+    # map ability as Sweeping Blades, an id of its own for this hero.
+    splashRadius: area
+    splashPercent: DataA
+
+- id: frost-colossus
+  source: A00R
+  name: { en: Frost Colossus, cs: Frost Colossus }
+  description: { en: "You grow into a colossus of ice for a while: more health, armor and damage.", cs: "You grow into a colossus of ice for a while: more health, armor and damage." }
+  kind: transform
+  targeting: self
+  params:
+    duration: { design: [30, 30] }
+    hpBonus: { design: [0.5, 1] }
+    armorBonus: { design: [10, 20] }
+    damageBonus: { design: [1, 2] }
+  review:
+    jassFunctions:
+      - Trig_Demon_Conditions
+    notes: >-
+      Avatar (the same map ability as Titan Form, an id of its own for this hero): DataA +100 / +400 armor, DataB +10000
+      / +20000 hp, DataC +3000 / +10000 damage for 60 s, cooldown 150 / 120. The game's transform as Titan Form: 30 s,
+      +50 / +100 % max hp, +10 / +20 armor, +100 / +200 % attack damage; the cleave of Trig_Demon_Actions is left out.
+
+# Arcfang (new heroes, batch 4)
+
+- id: forking-arc
+  source: A069
+  name: { en: Forking Arc, cs: Forking Arc }
+  description: { en: "A bolt of lightning leaps from enemy to enemy.", cs: "A bolt of lightning leaps from enemy to enemy." }
+  kind: chain
+  targeting: nearest
+  params:
+    # Chain Lightning: DataA 500-6000 a target, DataB 16 targets (the game's cap is 8), DataC -10 % a leap, range 700.
+    # The same map ability as Arc Lightning, an id of its own for this hero.
+    damage: { design: [1000, 2000, 4000, 8000, 12000] }   # DataA x 2 (the meter pass)
+    range: range
+    bounces: { design: [4, 5, 6, 7, 8] }
+    bounceRange: { design: [600, 600, 600, 600, 600] }
+
+- id: storm-canopy
+  source: A067
+  name: { en: Storm Canopy, cs: Storm Canopy }
+  description: { en: "Lightning rains on the enemies around you for a while.", cs: "Lightning rains on the enemies around you for a while." }
+  kind: ticking_area
+  targeting: around_self
+  params:
+    tickDamage: { design: [110, 340, 790, 1350, 2025] }
+    ticksPerSecond: { design: [20, 20, 20, 20, 20] }
+    radius: { design: [1400, 1400, 1400, 1400, 1400] }
+    hitRadius: { design: [400, 400, 400, 400, 400] }
+    duration: { design: [8, 8, 8, 8, 8] }
+  review:
+    jassFunctions:
+      - Trig_Lightning_Rain_Func003C
+    notes: >-
+      Trig_Lightning_Rain_Actions (war3map.j v20.83, 24212-24260) places a dummy at the hero that casts A068 (Monsoon:
+      DataA 100, 250, 600, 1200, 1800 every second within 1000 for 15 s) by the spell's level; cooldown 25. The game
+      rains 20 bursts a second within 1400 (700 after the AoE scale, past the 450 the hero keeps) for 8 s, like
+      Squall; the burst damage is the meter pass's.
+
+- id: jolt-strike
+  source: A00Q
+  name: { en: Jolt Strike, cs: Jolt Strike }
+  description: { en: "Your shots sometimes jolt: extra damage and a stun.", cs: "Your shots sometimes jolt: extra damage and a stun." }
+  kind: on_hit
+  targeting: on_attack
+  params:
+    # Bash: DataA 17.5 % chance, DataC +100-5000 damage, stun 2 s (duration; 1 s in the game). The same map ability as
+    # Skull Crack, an id of its own for this hero.
+    chance: { design: [0.175, 0.175, 0.175, 0.175, 0.175] }
+    bonusDamage: DataC
+    stunSeconds: { design: [1, 1, 1, 1, 1] }
+
+- id: storm-giant
+  source: A00R
+  name: { en: Storm Giant, cs: Storm Giant }
+  description: { en: "You swell into a storm giant for a while: more health, armor and damage.", cs: "You swell into a storm giant for a while: more health, armor and damage." }
+  kind: transform
+  targeting: self
+  params:
+    duration: { design: [30, 30] }
+    hpBonus: { design: [0.5, 1] }
+    armorBonus: { design: [10, 20] }
+    damageBonus: { design: [1, 2] }
+  review:
+    jassFunctions:
+      - Trig_Demon_Conditions
+    notes: >-
+      Avatar (the same map ability as Titan Form, an id of its own for this hero): DataA +100 / +400 armor, DataB +10000
+      / +20000 hp, DataC +3000 / +10000 damage for 60 s, cooldown 150 / 120. The game's transform as Titan Form.
+
+# Emberclaw (new heroes, batch 4)
+
+- id: lava-rush
+  source: A01S
+  name: { en: Lava Rush, cs: Lava Rush }
+  description: { en: "A trail of lava bursts ahead of you.", cs: "A trail of lava bursts ahead of you." }
+  kind: line
+  targeting: move_direction
+  params:
+    damage: { design: [520, 1040, 2080, 4160, 8320] }   # the script x 1.3 (the meter pass)
+    length: range
+    width: { design: [900, 900, 900, 900, 900] }
+    waveSpeed: { design: [1600, 1600, 1600, 1600, 1600] }
+  review:
+    jassFunctions:
+      - Trig_FireSliceMove_Func005Func001C
+    notes: >-
+      Trig_FireSlice_Actions and Trig_FireSliceMove_Actions (war3map.j v20.83, 27669-27820) hide the hero and move him
+      to the target point (range 1000) in steps of 200; each step hurts the enemies within 450 once for 400, 800,
+      1600, 3200, 6400 by level (27753-27776) and leaves a fire (h01R) for 5 s. The game sends a line 900 wide (450
+      after the AoE scale) along that range; the dash and the fires are left out.
+
+- id: magma-breath
+  source: A0AD
+  name: { en: Magma Breath, cs: Magma Breath }
+  description: { en: "You breathe a cone of molten fire at the thickest crowd.", cs: "You breathe a cone of molten fire at the thickest crowd." }
+  kind: cone
+  targeting: densest_cluster
+  params:
+    # Breath of Fire: DataA 400-2000 damage, DataC distance 800, area 500-700 the end width; the burn (DataE) is left
+    # out. The same map ability as Blade Fan, an id of its own for this hero.
+    damage: { design: [1600, 3200, 4800, 6400, 8000] }   # DataA x 4 (the meter pass)
+    length: DataC
+    endWidth: area
+    maxTargets: { design: [8, 10, 12, 14, 16] }
+
+- id: molten-growth
+  source: A05Y
+  name: { en: Molten Growth, cs: Molten Growth }
+  description: { en: "Your molten body grows: you move and attack faster.", cs: "Your molten body grows: you move and attack faster." }
+  kind: aura
+  targeting: self
+  params:
+    moveSpeedBonus: { design: [0.08, 0.12, 0.16, 0.2, 0.24] }
+    attackSpeedBonus: { design: [0.15, 0.25, 0.35, 0.45, 0.6] }
+  review:
+    jassFunctions:
+      - Trig_Grow_Up_Func003C
+    notes: >-
+      Endurance Aura on the hero only: DataA 20-60 % move speed, DataB 50-350 % attack speed; Trig_Grow_Up_Actions
+      (war3map.j v20.83, 24073-24102) adds 25, 50, 100, 200 and 20 x level Agility on learning and makes the hero
+      larger. The game keeps a permanent aura with smaller numbers (about 40 % of the move speed, 17-30 % of the attack
+      speed, like Blade Frenzy); the Agility and the size are left out. A05Y has 5 levels, so it is a spell and the
+      map's 2-level Fire Shield is the ultimate.
+
+- id: molten-shell
+  source: A0AE
+  name: { en: Molten Shell, cs: Molten Shell }
+  description: { en: "A shell of fire burns the enemies around you.", cs: "A shell of fire burns the enemies around you." }
+  kind: ticking_area
+  targeting: around_self
+  # The map's Permanent Immolation never stops (no cooldown, no mana); the game burns 6 s every 6 s (18 x 0.33).
+  cooldown: { design: [18, 18] }
+  params:
+    # Permanent Immolation: DataA 1000 / 2500 damage every second within area 350 / 450. The game burns a wide ring
+    # (radius 1200, 600 after the AoE scale) with 8 bursts a second, like Pyre Mantle, so it reaches the crowd the hero
+    # keeps at a distance; the burst damage is the meter pass's.
+    tickDamage: { design: [4000, 10000] }
+    ticksPerSecond: { design: [8, 8] }
+    radius: { design: [1200, 1200] }
+    hitRadius: { design: [400, 400] }
+    duration: { design: [6, 6] }
+
+# Galestrider (new heroes, batch 4)
+
+- id: haymaker
+  source: A091
+  name: { en: Haymaker, cs: Haymaker }
+  description: { en: "A crushing blow strikes the nearest enemy.", cs: "A crushing blow strikes the nearest enemy." }
+  kind: instant
+  targeting: nearest
+  params:
+    damage: DataA
+    range: { design: [500, 500, 500, 500, 500] }
+  review:
+    jassFunctions:
+      - Trig_Knockout_Func007C
+    notes: >-
+      Storm Bolt: DataA 400-6400 to the target, stun 3 s (duration), cooldown 5 to 3, range 128. Trig_Knockout_Actions
+      (war3map.j v20.83, 25460-25520) also knocks the target back and deals 200, 400, 800, 1600, 3200 around it. The
+      game keeps the hit on the nearest enemy within 500; the stun, the knock-back and the splash are left out.
+
+- id: quake-steps
+  source: A090
+  name: { en: Quake Steps, cs: Quake Steps }
+  description: { en: "For a while every step you take shakes the ground around you.", cs: "For a while every step you take shakes the ground around you." }
+  kind: ticking_area
+  targeting: around_self
+  params:
+    tickDamage: { design: [750, 1500, 3000, 6000, 10000] }
+    ticksPerSecond: { design: [4, 4, 4, 4, 4] }
+    radius: { design: [500, 500, 500, 500, 500] }
+    hitRadius: { design: [400, 400, 400, 400, 400] }
+    duration: { design: [8, 8, 8, 8, 8] }
+  review:
+    jassFunctions:
+      - Trig_FootClap_Func006C
+    notes: >-
+      Trig_FootClap_Actions (war3map.j v20.83, 25358-25395) lets the hero walk through units for 20 s; while it lasts,
+      Trig_FootClap_Active_Actions (25404-25416) drops a dummy thunder clap (e00K) at the hero each time he has
+      walked 250, 200, 150, 100, 50 by level since the last one; cooldown 28. The game makes it 8 s of 4 bursts a
+      second close around the hero; the burst damage is the meter pass's.
+
+- id: tireless-stride
+  source: A007
+  name: { en: Tireless Stride, cs: Tireless Stride }
+  description: { en: "You move and attack faster.", cs: "You move and attack faster." }
+  kind: aura
+  targeting: self
+  params:
+    # Endurance Aura on the hero only: DataA 10-30 % move speed, DataB 10-50 % attack speed (the same map ability as
+    # Swift Pace and Long March, an id of its own for this hero).
+    moveSpeedBonus: DataA
+    attackSpeedBonus: DataB
+
+- id: twister-rampage
+  source: A092
+  name: { en: Twister Rampage, cs: Twister Rampage }
+  description: { en: "A rampage of twisters explodes over the thickest crowd.", cs: "A rampage of twisters explodes over the thickest crowd." }
+  kind: ticking_area
+  targeting: densest_cluster
+  params:
+    # Stampede: DataA 20 / 30 beasts a second, each exploding for DataC 1000 / 2500 within DataD 275 / 350, for 10 s
+    # (duration) within area 1000 / 1500; cooldown 60 / 30. The game keeps the time and the areas and fewer, weaker
+    # bursts (the meter pass).
+    tickDamage: { design: [225, 450] }
+    ticksPerSecond: { design: [10, 15] }
+    radius: area
+    hitRadius: DataD
+    duration: duration
