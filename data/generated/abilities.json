@@ -4568,5 +4568,787 @@
         2
       ]
     }
+  },
+  {
+    "id": "rime-wave",
+    "name": {
+      "en": "Rime Wave",
+      "cs": "Rime Wave"
+    },
+    "description": {
+      "en": "A wave of frost ripples ahead of you.",
+      "cs": "A wave of frost ripples ahead of you."
+    },
+    "kind": "line",
+    "targeting": "move_direction",
+    "levels": 6,
+    "cooldown": [
+      3.96,
+      3.96,
+      3.96,
+      3.96,
+      3.96,
+      3.96
+    ],
+    "params": {
+      "damage": [
+        90,
+        120,
+        159,
+        196,
+        238,
+        312
+      ],
+      "length": [
+        800,
+        800,
+        800,
+        800,
+        800,
+        800
+      ],
+      "width": [
+        175,
+        195,
+        215,
+        235,
+        255,
+        275
+      ],
+      "waveSpeed": [
+        1600,
+        1600,
+        1600,
+        1600,
+        1600,
+        1600
+      ]
+    }
+  },
+  {
+    "id": "frost-stomp",
+    "name": {
+      "en": "Frost Stomp",
+      "cs": "Frost Stomp"
+    },
+    "description": {
+      "en": "You stomp the ground, hurting and freezing the enemies around you.",
+      "cs": "You stomp the ground, hurting and freezing the enemies around you."
+    },
+    "kind": "nova",
+    "targeting": "around_self",
+    "levels": 6,
+    "cooldown": [
+      3.63,
+      3.89,
+      3.96,
+      3.96,
+      3.96,
+      3.96
+    ],
+    "params": {
+      "damage": [
+        144,
+        192,
+        254,
+        302,
+        349,
+        455
+      ],
+      "radius": [
+        400,
+        400,
+        400,
+        400,
+        400,
+        400
+      ],
+      "stunSeconds": [
+        1,
+        1,
+        1.15,
+        1.25,
+        1.3,
+        1.5
+      ]
+    }
+  },
+  {
+    "id": "glacial-cleave",
+    "name": {
+      "en": "Glacial Cleave",
+      "cs": "Glacial Cleave"
+    },
+    "description": {
+      "en": "Your blows also cut the enemies around the target.",
+      "cs": "Your blows also cut the enemies around the target."
+    },
+    "kind": "on_hit",
+    "targeting": "on_attack",
+    "levels": 6,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "splashRadius": [
+        225,
+        225,
+        225,
+        225,
+        225,
+        225
+      ],
+      "splashPercent": [
+        0.24,
+        0.272,
+        0.304,
+        0.336,
+        0.368,
+        0.4
+      ]
+    }
+  },
+  {
+    "id": "frost-colossus",
+    "name": {
+      "en": "Frost Colossus",
+      "cs": "Frost Colossus"
+    },
+    "description": {
+      "en": "You grow into a colossus of ice for a while: more health, armor and damage.",
+      "cs": "You grow into a colossus of ice for a while: more health, armor and damage."
+    },
+    "kind": "transform",
+    "targeting": "self",
+    "levels": 3,
+    "cooldown": [
+      49.5,
+      44.55,
+      39.6
+    ],
+    "params": {
+      "duration": [
+        30,
+        30,
+        30
+      ],
+      "hpBonus": [
+        0.5,
+        0.75,
+        1
+      ],
+      "armorBonus": [
+        10,
+        15,
+        20
+      ],
+      "damageBonus": [
+        1,
+        2,
+        2
+      ]
+    }
+  },
+  {
+    "id": "forking-arc",
+    "name": {
+      "en": "Forking Arc",
+      "cs": "Forking Arc"
+    },
+    "description": {
+      "en": "A bolt of lightning leaps from enemy to enemy.",
+      "cs": "A bolt of lightning leaps from enemy to enemy."
+    },
+    "kind": "chain",
+    "targeting": "nearest",
+    "levels": 6,
+    "cooldown": [
+      3.96,
+      3.96,
+      3.96,
+      3.96,
+      3.96,
+      3.96
+    ],
+    "params": {
+      "damage": [
+        300,
+        399,
+        530,
+        700,
+        887,
+        1039
+      ],
+      "range": [
+        700,
+        700,
+        700,
+        700,
+        700,
+        700
+      ],
+      "bounces": [
+        4,
+        5,
+        6,
+        6,
+        7,
+        8
+      ],
+      "bounceRange": [
+        600,
+        600,
+        600,
+        600,
+        600,
+        600
+      ]
+    }
+  },
+  {
+    "id": "storm-canopy",
+    "name": {
+      "en": "Storm Canopy",
+      "cs": "Storm Canopy"
+    },
+    "description": {
+      "en": "Lightning rains on the enemies around you for a while.",
+      "cs": "Lightning rains on the enemies around you for a while."
+    },
+    "kind": "ticking_area",
+    "targeting": "around_self",
+    "levels": 6,
+    "cooldown": [
+      8.25,
+      8.25,
+      8.25,
+      8.25,
+      8.25,
+      8.25
+    ],
+    "params": {
+      "tickDamage": [
+        33,
+        53,
+        76,
+        99,
+        121,
+        142
+      ],
+      "ticksPerSecond": [
+        20,
+        20,
+        20,
+        20,
+        20,
+        20
+      ],
+      "radius": [
+        700,
+        700,
+        700,
+        700,
+        700,
+        700
+      ],
+      "hitRadius": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "duration": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    }
+  },
+  {
+    "id": "jolt-strike",
+    "name": {
+      "en": "Jolt Strike",
+      "cs": "Jolt Strike"
+    },
+    "description": {
+      "en": "Your shots sometimes jolt: extra damage and a stun.",
+      "cs": "Your shots sometimes jolt: extra damage and a stun."
+    },
+    "kind": "on_hit",
+    "targeting": "on_attack",
+    "levels": 6,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "chance": [
+        0.175,
+        0.175,
+        0.175,
+        0.175,
+        0.175,
+        0.175
+      ],
+      "bonusDamage": [
+        30,
+        48,
+        65,
+        82,
+        118,
+        212
+      ],
+      "stunSeconds": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  {
+    "id": "storm-giant",
+    "name": {
+      "en": "Storm Giant",
+      "cs": "Storm Giant"
+    },
+    "description": {
+      "en": "You swell into a storm giant for a while: more health, armor and damage.",
+      "cs": "You swell into a storm giant for a while: more health, armor and damage."
+    },
+    "kind": "transform",
+    "targeting": "self",
+    "levels": 3,
+    "cooldown": [
+      49.5,
+      44.55,
+      39.6
+    ],
+    "params": {
+      "duration": [
+        30,
+        30,
+        30
+      ],
+      "hpBonus": [
+        0.5,
+        0.75,
+        1
+      ],
+      "armorBonus": [
+        10,
+        15,
+        20
+      ],
+      "damageBonus": [
+        1,
+        2,
+        2
+      ]
+    }
+  },
+  {
+    "id": "lava-rush",
+    "name": {
+      "en": "Lava Rush",
+      "cs": "Lava Rush"
+    },
+    "description": {
+      "en": "A trail of lava bursts ahead of you.",
+      "cs": "A trail of lava bursts ahead of you."
+    },
+    "kind": "line",
+    "targeting": "move_direction",
+    "levels": 6,
+    "cooldown": [
+      3.96,
+      3.96,
+      3.96,
+      3.96,
+      3.96,
+      3.96
+    ],
+    "params": {
+      "damage": [
+        156,
+        208,
+        276,
+        364,
+        478,
+        624
+      ],
+      "length": [
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000
+      ],
+      "width": [
+        450,
+        450,
+        450,
+        450,
+        450,
+        450
+      ],
+      "waveSpeed": [
+        1600,
+        1600,
+        1600,
+        1600,
+        1600,
+        1600
+      ]
+    }
+  },
+  {
+    "id": "magma-breath",
+    "name": {
+      "en": "Magma Breath",
+      "cs": "Magma Breath"
+    },
+    "description": {
+      "en": "You breathe a cone of molten fire at the thickest crowd.",
+      "cs": "You breathe a cone of molten fire at the thickest crowd."
+    },
+    "kind": "cone",
+    "targeting": "densest_cluster",
+    "levels": 6,
+    "cooldown": [
+      3.3,
+      3.3,
+      3.3,
+      3.3,
+      3.3,
+      3.3
+    ],
+    "params": {
+      "damage": [
+        480,
+        639,
+        770,
+        883,
+        983,
+        1073
+      ],
+      "length": [
+        800,
+        800,
+        800,
+        800,
+        800,
+        800
+      ],
+      "endWidth": [
+        250,
+        270,
+        290,
+        310,
+        330,
+        350
+      ],
+      "maxTargets": [
+        8,
+        10,
+        11,
+        13,
+        14,
+        16
+      ]
+    }
+  },
+  {
+    "id": "molten-growth",
+    "name": {
+      "en": "Molten Growth",
+      "cs": "Molten Growth"
+    },
+    "description": {
+      "en": "Your molten body grows: you move and attack faster.",
+      "cs": "Your molten body grows: you move and attack faster."
+    },
+    "kind": "aura",
+    "targeting": "self",
+    "levels": 6,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "moveSpeedBonus": [
+        0.08,
+        0.112,
+        0.144,
+        0.176,
+        0.208,
+        0.24
+      ],
+      "attackSpeedBonus": [
+        0.15,
+        0.23,
+        0.31,
+        0.39,
+        0.48,
+        0.6
+      ]
+    }
+  },
+  {
+    "id": "molten-shell",
+    "name": {
+      "en": "Molten Shell",
+      "cs": "Molten Shell"
+    },
+    "description": {
+      "en": "A shell of fire burns the enemies around you.",
+      "cs": "A shell of fire burns the enemies around you."
+    },
+    "kind": "ticking_area",
+    "targeting": "around_self",
+    "levels": 3,
+    "cooldown": [
+      5.94,
+      5.94,
+      5.94
+    ],
+    "params": {
+      "tickDamage": [
+        1200,
+        1549,
+        1897
+      ],
+      "ticksPerSecond": [
+        8,
+        8,
+        8
+      ],
+      "radius": [
+        600,
+        600,
+        600
+      ],
+      "hitRadius": [
+        200,
+        200,
+        200
+      ],
+      "duration": [
+        6,
+        6,
+        6
+      ]
+    }
+  },
+  {
+    "id": "haymaker",
+    "name": {
+      "en": "Haymaker",
+      "cs": "Haymaker"
+    },
+    "description": {
+      "en": "A crushing blow strikes the nearest enemy.",
+      "cs": "A crushing blow strikes the nearest enemy."
+    },
+    "kind": "instant",
+    "targeting": "nearest",
+    "levels": 6,
+    "cooldown": [
+      1.65,
+      1.39,
+      1.12,
+      0.99,
+      0.99,
+      0.99
+    ],
+    "params": {
+      "damage": [
+        120,
+        160,
+        212,
+        280,
+        367,
+        480
+      ],
+      "range": [
+        500,
+        500,
+        500,
+        500,
+        500,
+        500
+      ]
+    }
+  },
+  {
+    "id": "quake-steps",
+    "name": {
+      "en": "Quake Steps",
+      "cs": "Quake Steps"
+    },
+    "description": {
+      "en": "For a while every step you take shakes the ground around you.",
+      "cs": "For a while every step you take shakes the ground around you."
+    },
+    "kind": "ticking_area",
+    "targeting": "around_self",
+    "levels": 6,
+    "cooldown": [
+      9.24,
+      9.24,
+      9.24,
+      9.24,
+      9.24,
+      9.24
+    ],
+    "params": {
+      "tickDamage": [
+        225,
+        299,
+        397,
+        524,
+        673,
+        822
+      ],
+      "ticksPerSecond": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "radius": [
+        250,
+        250,
+        250,
+        250,
+        250,
+        250
+      ],
+      "hitRadius": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "duration": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    }
+  },
+  {
+    "id": "tireless-stride",
+    "name": {
+      "en": "Tireless Stride",
+      "cs": "Tireless Stride"
+    },
+    "description": {
+      "en": "You move and attack faster.",
+      "cs": "You move and attack faster."
+    },
+    "kind": "aura",
+    "targeting": "self",
+    "levels": 6,
+    "cooldown": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "params": {
+      "moveSpeedBonus": [
+        0.1,
+        0.14,
+        0.18,
+        0.22,
+        0.26,
+        0.3
+      ],
+      "attackSpeedBonus": [
+        0.1,
+        0.18,
+        0.26,
+        0.34,
+        0.42,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "twister-rampage",
+    "name": {
+      "en": "Twister Rampage",
+      "cs": "Twister Rampage"
+    },
+    "description": {
+      "en": "A rampage of twisters explodes over the thickest crowd.",
+      "cs": "A rampage of twisters explodes over the thickest crowd."
+    },
+    "kind": "ticking_area",
+    "targeting": "densest_cluster",
+    "levels": 3,
+    "cooldown": [
+      19.8,
+      14.85,
+      9.9
+    ],
+    "params": {
+      "tickDamage": [
+        68,
+        82,
+        96
+      ],
+      "ticksPerSecond": [
+        10,
+        13,
+        15
+      ],
+      "radius": [
+        500,
+        625,
+        750
+      ],
+      "hitRadius": [
+        138,
+        157,
+        175
+      ],
+      "duration": [
+        10,
+        10,
+        10
+      ]
+    }
   }
 ]

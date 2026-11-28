@@ -520,6 +520,23 @@ abilities:
   rolling-thunder: { cast: shared-frost }
   skull-crack: { cast: stone-tap }
   titan-form: { cast: stone-quake }
+  # new heroes, batch 4 (2026-11-28): existing cues until the spell graphics and sounds task
+  rime-wave: { cast: shared-shock }
+  frost-stomp: { cast: shared-frost }
+  glacial-cleave: { cast: none }
+  frost-colossus: { cast: stone-quake }
+  forking-arc: { cast: storm-bolt }
+  storm-canopy: { cast: shared-holy }
+  jolt-strike: { cast: stone-tap }
+  storm-giant: { cast: stone-quake }
+  lava-rush: { cast: shared-shock }
+  magma-breath: { cast: shared-breath }
+  molten-growth: { cast: none }
+  molten-shell: { cast: shared-meteor }
+  haymaker: { cast: stone-tap }
+  quake-steps: { cast: stone-quake }
+  tireless-stride: { cast: none }
+  twister-rampage: { cast: moon-starfall }
   arc-lightning: { cast: shared-arc }
   smite: { cast: shared-smite }
   fire-bolt: { cast: shared-firebolt }
@@ -559,6 +576,10 @@ heroes:
   skyweaver: { attack: spark-shot }
   ironroar: { attack: cleaver-chop }
   stonebeard: { attack: stone-strike }
+  rimebreaker: { attack: stone-strike }
+  arcfang: { attack: spark-shot }
+  emberclaw: { attack: grave-bolt }
+  galestrider: { attack: cleaver-chop }
 
 enemies:
   shieldbearer: { death: human-fall }

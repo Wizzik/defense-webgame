@@ -1590,6 +1590,54 @@
     "titan-form": {
       "cast": "stone-quake"
     },
+    "rime-wave": {
+      "cast": "shared-shock"
+    },
+    "frost-stomp": {
+      "cast": "shared-frost"
+    },
+    "glacial-cleave": {
+      "cast": "none"
+    },
+    "frost-colossus": {
+      "cast": "stone-quake"
+    },
+    "forking-arc": {
+      "cast": "storm-bolt"
+    },
+    "storm-canopy": {
+      "cast": "shared-holy"
+    },
+    "jolt-strike": {
+      "cast": "stone-tap"
+    },
+    "storm-giant": {
+      "cast": "stone-quake"
+    },
+    "lava-rush": {
+      "cast": "shared-shock"
+    },
+    "magma-breath": {
+      "cast": "shared-breath"
+    },
+    "molten-growth": {
+      "cast": "none"
+    },
+    "molten-shell": {
+      "cast": "shared-meteor"
+    },
+    "haymaker": {
+      "cast": "stone-tap"
+    },
+    "quake-steps": {
+      "cast": "stone-quake"
+    },
+    "tireless-stride": {
+      "cast": "none"
+    },
+    "twister-rampage": {
+      "cast": "moon-starfall"
+    },
     "arc-lightning": {
       "cast": "shared-arc"
     },
@@ -1699,6 +1747,18 @@
     },
     "stonebeard": {
       "attack": "stone-strike"
+    },
+    "rimebreaker": {
+      "attack": "stone-strike"
+    },
+    "arcfang": {
+      "attack": "spark-shot"
+    },
+    "emberclaw": {
+      "attack": "grave-bolt"
+    },
+    "galestrider": {
+      "attack": "cleaver-chop"
     }
   },
   "enemies": {
