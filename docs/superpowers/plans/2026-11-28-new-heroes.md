@@ -73,10 +73,10 @@ Timed self buffs of the map (Berserk 12 s every 30 s, Bloodlust 60 s) become per
 | 2 | O003 (Buller) | thunderhoof | STR | melee | Shock Tauren `line`, War Stomp `nova` stun, Endurance `aura` | EarthWave `on_cast` | nova stun |
 | 2 | O01A (Kazragore) | stormseer | INT | ranged | Monsoon `ticking_area`, Feral Spirit `summon`, All Stop `nova` | Life's Ended `nova` | - |
 | 2 | O001 (Imager) | mirrorblade | AGI | melee | Critical Strike `on_hit`, Double Illusion `summon`, Mirror Image `summon` | Bladestorm `ticking_area` | - |
-| 3 | O007 (Healer) | | INT | ranged | Healing Wave `heal`, Fider Light `nova`, Inner Fire `aura` | Holy Fall `ticking_area` | - |
-| 3 | O00O (Magicer) | | INT | ranged | Storm Blast `instant`, Regen Aura `heal`, Phoenix `ticking_area` | Angel Cry `ticking_area` | - |
-| 3 | O00D (Nikoro) | | STR | melee | Thunder Impale `line`, War Stomp `nova`, Devotion Aura `aura` | Battle Roar Axe `cone` | armor aura |
-| 3 | O00A (Shorter) | | STR | melee | Shock Hammer `line`, Thunder Clap `nova`, Bash `on_hit` | Avatar `transform` | transform |
+| 3 | O007 (Healer) | lightbinder | INT | ranged | Healing Wave `heal`, Fider Light `nova`, Inner Fire `aura` | Holy Fall `ticking_area` | - |
+| 3 | O00O (Magicer) | skyweaver | INT | ranged | Storm Blast `instant`, Regen Aura `heal`, Phoenix `ticking_area` | Angel Cry `ticking_area` | - |
+| 3 | O00D (Nikoro) | ironroar | STR | melee | Thunder Impale `line`, War Stomp `nova`, Devotion Aura `aura` | Battle Roar Axe `cone` | armor aura |
+| 3 | O00A (Shorter) | stonebeard | STR | melee | Shock Hammer `line`, Thunder Clap `nova`, Bash `on_hit` | Avatar `transform` | transform |
 | 4 | O00E (Icer) | | STR | melee | Shock Wave `line`, Cleaving Attack `on_hit`, Ice Stomp `nova` | Avatar `transform` | - |
 | 4 | O00Y (Moogul the Sly) | | INT | ranged | Lightning Rain `nova`, Chain Lightning `chain`, Bash `on_hit` | Avatar `transform` | - |
 | 4 | O00W (Magma) | | AGI | ranged | Fire Slice `line`, Breath of Fire `cone`, Fire Shield `ticking_area` | Grow Up `transform` | - |
@@ -178,3 +178,25 @@ Spells (map numbers and script lines in each block's review notes):
   `mbounce` weapon). No older hero or ability uses them, so the older matrix cases stay.
 - Balance by the damage meter (Petr, 2026-11-28, for this and every later batch): spells about 10-20 %, the ultimate
   about 25 %, the base attack a little more (ranged bounce, melee cleave as in the map), then power to 1-4 wins of 20.
+
+## Batch 3 (branch `claude/new-heroes-3`)
+
+| id | name | model (KayKit adventurers) | attack clip |
+|---|---|---|---|
+| lightbinder | Lightbinder | Mage, `1H_Wand` + `Spellbook_open`, `Mage_Cape` | `Spellcasting` |
+| skyweaver | Skyweaver | Mage, `2H_Staff` + `Spellbook`, `Mage_Hat` | `Spellcast_Raise` |
+| ironroar | Ironroar | Barbarian, `1H_Axe`, `Barbarian_Hat` + `Barbarian_Cape` | `1H_Melee_Attack_Chop` |
+| stonebeard | Stonebeard | Barbarian, `1H_Axe` + `Barbarian_Round_Shield`, `Barbarian_Cape` | `1H_Melee_Attack_Chop` |
+
+- **Lightbinder** (O007): Radiant Pulse (A06A, script `Trig_Fander_Light_Actions`: the whole map -> `nova` 1400),
+  Mending Wave (A017 -> `heal`), Inner Flame (A015 Inner Fire -> `aura` damage + armor), ultimate Heaven's Rain (A018
+  Starfall -> `ticking_area`).
+- **Skyweaver** (O00O): Tempest Bolt (A03U + A03T, script `Trig_Stom_Blast_Actions` -> `area`), Seraph Hymn (A03V,
+  script `Trig_Angel_Cry_damage_Actions` -> `ticking_area`), Soothing Aura (A03W, script `Trig_Regen_Aura_Actions` ->
+  `heal`), ultimate Phoenix Flock (A03X Locust Swarm -> `ticking_area`).
+- **Ironroar** (O00D): Thunder Spikes (A014 Impale -> `line` stun), Earthhurl (A013, script `Trig_StormLand_Actions`
+  -> `nova` stun), Iron Ward (AHad Devotion -> `aura` armor), ultimate Roaring Axe (A04Q, scripts Axe / Move_down /
+  Roar -> `cone`).
+- **Stonebeard** (O00A): Hammer Wave (A00O -> `line`), Rolling Thunder (A00P Thunder Clap -> `nova` slow), Skull Crack
+  (A00Q Bash -> `on_hit`), ultimate Titan Form (A00R Avatar, script `Trig_Demon_Actions` -> `transform`).
+- New mechanics: `aura.armorBonus`, the kind `transform`. Numbers and balance: DECISIONS, New heroes, batch 3.

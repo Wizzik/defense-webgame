@@ -196,8 +196,8 @@
   role: { en: "Healer of light. Pulses that burn foes and mend friends.", cs: "Healer of light. Pulses that burn foes and mend friends." }
   signatureAbilities: [radiant-pulse, mending-wave, inner-flame]
   ultimate: heavens-rain
-  attack: { rangeScale: 2, splash: { radius: 150, share: 0.5 } }   # Petr: ranged heroes reach twice as far; the map's msplash missile (radius and share design values)
-  power: 1   # new heroes batch 3 balance pass
+  attack: { rangeScale: 2, cooldownScale: 0.35, splash: { radius: 150, share: 0.5 } }   # Petr: ranged heroes reach twice as far; the map's msplash missile (radius and share design values)
+  power: 0.3   # new heroes batch 3 balance pass (meter, then 1-4 autopilot wins of 20 with no gear)
 
 
 - id: skyweaver
@@ -207,8 +207,8 @@
   role: { en: "Storm mage. Bolts, a hymn of light and a flock of phoenixes.", cs: "Storm mage. Bolts, a hymn of light and a flock of phoenixes." }
   signatureAbilities: [tempest-bolt, seraph-hymn, soothing-aura]
   ultimate: phoenix-flock
-  attack: { rangeScale: 2, bounce: { count: 4, range: 400, falloff: 0.25 } }   # Petr: ranged heroes reach twice as far; the map's mbounce weapon leaps
-  power: 1   # new heroes batch 3 balance pass
+  attack: { rangeScale: 2, cooldownScale: 0.4, bounce: { count: 4, range: 400, falloff: 0.25 } }   # Petr: ranged heroes reach twice as far; the map's mbounce weapon leaps
+  power: 0.3   # new heroes batch 3 balance pass (meter, then 1-4 autopilot wins of 20 with no gear)
 
 
 - id: ironroar
@@ -218,9 +218,9 @@
   role: { en: "Beast warrior. Spikes, a hurling stomp and an iron ward.", cs: "Beast warrior. Spikes, a hurling stomp and an iron ward." }
   signatureAbilities: [thunder-spikes, earthhurl, iron-ward]
   ultimate: roaring-axe
-  attack: { splash: { radius: 225, share: 0.4 } }   # the map's Cleave 40% (A1C0) within 450, x0.5 like every area
+  attack: { cooldownScale: 0.35, strikes: 2, splash: { radius: 225, share: 0.4 } }   # the map's Cleave 40% (A1C0) within 450, x0.5 like every area
   damageTaken: 0.5   # melee: stands in the crowd
-  power: 1   # new heroes batch 3 balance pass
+  power: 0.15   # new heroes batch 3 balance pass (meter, then 1-4 autopilot wins of 20 with no gear)
 
 
 - id: stonebeard
@@ -230,6 +230,6 @@
   role: { en: "Mountain fighter. Hammer waves, thunder and a titan form.", cs: "Mountain fighter. Hammer waves, thunder and a titan form." }
   signatureAbilities: [hammer-wave, rolling-thunder, skull-crack]
   ultimate: titan-form
-  attack: { splash: { radius: 225, share: 0.4 } }   # the map's Cleave 40% (A1C0) within 450, x0.5 like every area
+  attack: { cooldownScale: 0.5, strikes: 2, splash: { radius: 225, share: 0.4 } }   # the map's Cleave 40% (A1C0) within 450, x0.5 like every area
   damageTaken: 0.5   # melee: stands in the crowd
-  power: 1   # new heroes batch 3 balance pass
+  power: 0.3   # new heroes batch 3 balance pass (meter, then 1-4 autopilot wins of 20 with no gear)

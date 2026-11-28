@@ -770,7 +770,7 @@
     "baseAttack": {
       "kind": "ranged",
       "range": 1200,
-      "cooldown": 0.75,
+      "cooldown": 0.26,
       "damageMin": 2,
       "damageMax": 8,
       "splash": {
@@ -784,7 +784,7 @@
       "inner-flame"
     ],
     "ultimate": "heavens-rain",
-    "power": 1
+    "power": 0.3
   },
   {
     "id": "skyweaver",
@@ -817,7 +817,7 @@
     "baseAttack": {
       "kind": "bounce",
       "range": 1300,
-      "cooldown": 0.75,
+      "cooldown": 0.3,
       "damageMin": 2,
       "damageMax": 8,
       "bounce": {
@@ -832,7 +832,7 @@
       "soothing-aura"
     ],
     "ultimate": "phoenix-flock",
-    "power": 1
+    "power": 0.3
   },
   {
     "id": "ironroar",
@@ -865,9 +865,10 @@
     "baseAttack": {
       "kind": "melee",
       "range": 128,
-      "cooldown": 0.75,
+      "cooldown": 0.26,
       "damageMin": 2,
       "damageMax": 24,
+      "strikes": 2,
       "splash": {
         "radius": 225,
         "share": 0.4
@@ -880,7 +881,7 @@
     ],
     "ultimate": "roaring-axe",
     "damageTaken": 0.5,
-    "power": 1
+    "power": 0.15
   },
   {
     "id": "stonebeard",
@@ -913,9 +914,10 @@
     "baseAttack": {
       "kind": "melee",
       "range": 128,
-      "cooldown": 0.75,
+      "cooldown": 0.38,
       "damageMin": 2,
       "damageMax": 12,
+      "strikes": 2,
       "splash": {
         "radius": 225,
         "share": 0.4
@@ -928,6 +930,6 @@
     ],
     "ultimate": "titan-form",
     "damageTaken": 0.5,
-    "power": 1
+    "power": 0.3
   }
 ]

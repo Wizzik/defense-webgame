@@ -8,6 +8,38 @@ drops and chests, elite and boss threat, phase 2b-3, visual pass A) are in `docs
 They **still apply** unless a section here overrides them. A section that code or yaml names and that is not in this
 file is there; search it (`grep -n`) before you change a rule of those areas, do not read it whole.
 
+## New heroes, batch 3 (2026-11-28; Petr: "pak pokračuj se zbylými hrdiny", the picks and numbers are Claude's)
+
+- Batch 3 of `docs/superpowers/plans/2026-11-28-new-heroes.md` (section Batch 3): **Lightbinder** (O007, INT ranged,
+  splashing shots: Radiant Pulse, Mending Wave, Inner Flame; ultimate Heaven's Rain), **Skyweaver** (O00O, INT ranged,
+  bouncing shots: Tempest Bolt, Seraph Hymn, Soothing Aura; ultimate Phoenix Flock), **Ironroar** (O00D, STR melee,
+  cleave: Thunder Spikes, Earthhurl, Iron Ward; ultimate Roaring Axe), **Stonebeard** (O00A, STR melee, cleave: Hammer
+  Wave, Rolling Thunder, Skull Crack; ultimate Titan Form). Names and texts are ours.
+- **New mechanics:** `aura.armorBonus` (flat armor; Inner Flame, Iron Ward: the map's 10-80 armor x 0.2) and the kind
+  `transform` (a timed self buff: `duration`, `hpBonus` share of max hp, `armorBonus`, `damageBonus` share of attack
+  damage; the stats refresh when it starts and ends, hp stays capped at the new max; its cooldown starts when it ends;
+  auto when novaMinEnemies enemies are within 400). Titan Form (the map's Avatar: +100/400 armor, +10000/20000 hp,
+  +3000/10000 damage for 60 s every 150/120 s) is +50/100 % hp, +10/20 armor, +100/200 % attack damage for 30 s.
+- **Attacks as in the map:** Lightbinder's `msplash` missile splashes 50 % within 150 (design numbers), Skyweaver's
+  `mbounce` bounces like the others; Ironroar and Stonebeard have the map's Cleave (A1C0). Faster attacks
+  (`cooldownScale` 0.35-0.5, melee two blows) lift the attack share.
+- **Map ultimates kept:** Skyweaver's ultimate is the map's Phoenix (A03X, level 10), not Angel Cry as the plan's
+  table had (Angel Cry is Seraph Hymn, a spell).
+- **Left out of the scripts:** the heal of allies by Fider Light, the throw of War Stomp (StormLand), the leap of
+  Battle Roar Axe, the cleave of Avatar (A04Y).
+- **Digest** `41172dce` -> `7b1568d5`: the 28 older cases are identical, four `h-<id>` cases added.
+- **Balance** (`sim:run --seeds 1-20 --gear none`, world 1 normal; meter first, then power):
+
+  | hero | power | wins | ultimate | spells | attack |
+  |---|---|---|---|---|---|
+  | Lightbinder | **0.3** | 4 | Heaven's Rain 30 % | Radiant Pulse 22 % (the heals and Inner Flame deal none) | 13 % |
+  | Skyweaver | **0.3** | 3 | Phoenix Flock 23 % | Seraph Hymn 16 %, Tempest Bolt 14 % | 11 % |
+  | Ironroar | **0.15** | 1 | Roaring Axe 24 % | Earthhurl 24 %, Thunder Spikes 22 % | 11 % |
+  | Stonebeard | **0.3** | 1 | Titan Form (in the attack) | Rolling Thunder 20 %, Hammer Wave 15 % | 23 % (with Skull Crack) |
+
+  At power 1 and the map's numbers they won 16-20 of 20, with one spell at 52-62 % (Radiant Pulse, Tempest Bolt,
+  Roaring Axe).
+
 ## Bouncing shots for the older ranged heroes and batch 1 by the damage meter (Petr, 2026-11-28: "1. Ano. 2. Ano")
 
 - **Bounce on:** the older heroes whose map weapon is `mbounce` (Nightglaive, Gravecaller, Sparkshot, Tidecaller) and

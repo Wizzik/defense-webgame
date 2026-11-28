@@ -28,6 +28,22 @@ Updated 2026-11-28 (new heroes, batch 2). Read this first when you resume work.
    `docs/superpowers/plans/2026-11-28-named-items-legendary.md`, branch `claude/named-items-legendary` (from
    `claude/peaceful-galileo-qtu26s`), DONE (below), waits for Petr's playtest.
 
+## New heroes, batch 3 (branch `claude/new-heroes-3`, DONE, waits for Petr's playtest, 2026-11-28)
+
+- **Lightbinder** (INT ranged healer: Radiant Pulse, Mending Wave, Inner Flame; ultimate Heaven's Rain),
+  **Skyweaver** (INT ranged: Tempest Bolt, Seraph Hymn, Soothing Aura; ultimate Phoenix Flock), **Ironroar** (STR
+  melee: Thunder Spikes, Earthhurl stun, Iron Ward armor; ultimate Roaring Axe), **Stonebeard** (STR melee: Hammer
+  Wave, Rolling Thunder slow, Skull Crack; ultimate Titan Form, a 30 s titan with more hp, armor and damage).
+- New mechanics: an armor aura and the timed `transform`. Balanced by the meter and to 1-4 wins of 20; table in
+  `docs/DECISIONS.md`, section New heroes, batch 3. Digest -> `7b1568d5` (older cases identical).
+- **What Petr checks** (after the merge):
+  - the menu shows 20 heroes: https://wizzik.github.io/defense-webgame/
+  - https://wizzik.github.io/defense-webgame/?debug=1&hero=lightbinder&phase=8
+  - https://wizzik.github.io/defense-webgame/?debug=1&hero=skyweaver&phase=8
+  - https://wizzik.github.io/defense-webgame/?debug=1&hero=ironroar&phase=8
+  - https://wizzik.github.io/defense-webgame/?debug=1&hero=stonebeard&phase=10 (Titan Form: the hero's hp bar grows
+    for 30 s when a crowd is near)
+
 ## New heroes, batch 2 (branch `claude/new-heroes-2`, PR #49 on top of batch 1 / PR #48, DONE, waits for Petr's playtest, 2026-11-28)
 
 - Four more heroes of the map with our names: **Ashsinger** (INT ranged, bouncing shots: Cinder Wave, a ring of fire,
@@ -125,25 +141,6 @@ Updated 2026-11-28 (new heroes, batch 2). Read this first when you resume work.
     guest's new run wears the new item (C in the run shows it);
   - 3 and 4 players without gear on normal feel about as hard as 2 players, not much harder.
 
-## Random items stage 6: item icons (straight to `main`, DONE, 2026-11-27)
-
-- Every item base (46) and named item (70) has a picture from game-icons.net (CC BY 3.0), 104 files, 180 kB in all
-  (`assets/icons/<author>-<icon>.svg`, test budget 600 kB). The mapping is `client/ui/item-icon-names.ts`;
-  `npm run assets:icons` fetches the files at the pinned commit into `assets-source/icons/` (untrusted, read as text
-  only), keeps only plain `<path>` data (a strict check, the black background square dropped), writes one path filled
-  with `currentColor` and rewrites the icon rows of `assets/LICENSES.md` with the authors.
-- The icon is a CSS mask filled with the rarity colour (the frame colour stays); a random item shows its base's
-  icon; empty slots and the slot filters keep our glyphs. Shown in the gear screen's collection and doll, the in-run
-  gear panel (C), the chest cards and the keep / take compare. Credits line in the menu (icon authors, KayKit).
-- **What Petr checks:**
-  - the gear screen with a few items: https://wizzik.github.io/defense-webgame/?debug=1 then in the console
-    `__game.debug.grantItem("skysplitter", 3); __game.debug.grantRolled("head", "mythic", 12)` and open Gear: each
-    picture readable at that size, in its rarity colour;
-  - chest cards and the compare: https://wizzik.github.io/defense-webgame/?debug=1&phase=5 then
-    `__game.debug.grantGold(2000)` and walk to a chest;
-  - any icon that fits badly: say the item and I swap the picture (one line in `client/ui/item-icon-names.ts`).
-  - the Credits line at the bottom of the menu.
-
 ## Sentry Ward, dash, blink and random items stage 5 (straight to `main`, DONE, 2026-11-27)
 
 - Sentry Ward has Serpent Totem's numbers and lives 10 s, a serpent totem 15 s; dash 3 charges from level 10, blink
@@ -196,44 +193,6 @@ batch 3. `npm run check` (1434 tests) on every commit, e2e `webgl2-fallback`, `n
     https://wizzik.github.io/defense-webgame/?debug=1&hero=serpent-shaman&phase=10
   - level at the end of a run about 60-70 (solo and in 3-player co-op), far fewer clicks;
   - 3-player co-op without gear on normal is winnable, with full gear easy.
-
-## Random items stage 4 (client) and the damage meter (branch `claude/random-items-client`, DONE, 2026-11-27)
-
-Plan `docs/superpowers/plans/2026-11-27-random-items.md`, tasks 15-17; rulings in `docs/DECISIONS.md`, sections
-Damage meter and Random items, stage 4. English only. `npm run check` passes on every commit of the branch.
-
-- **Done:**
-  - task 15: random items say "<Rarity> random item" and mark each affix row T1-T4 in tooltips, chest cards and the
-    keep / take compare;
-  - task 16: gear screen filters by role and rarity (plus slot), sort by power, at most 200 shown, **salvage** mode
-    (a random item nobody wears -> 10-150 gold into a bank of at most 500, the next solo run starts with it);
-  - task 17: `window.__game.gear[].rows`, `debug.grantRolled(slot, rarity, power)` (AGENTS.md);
-  - **damage meter** (Petr's wish mid-session): a panel of bars per source (spells, attack, item effects, thorns)
-    with damage, share, total and DPS; N toggles it; the end screen lists the top five; `window.__game.meter`;
-    `sim:run` prints a `meter` line per hero.
-  - **co-op lobby** (Petr's wish): Gear and Settings buttons; a worn random item now travels to the teammates
-    (protocol version 5), before it was left out of their windows;
-  - Digest `fa569e92` -> `f0490b01` (matrix case `loot-t3` starts with 300 gold; the meter itself changes nothing).
-- **Checks:** `npm run check` (1425 tests), e2e `webgl2-fallback` (gear, chest, random item, damage meter specs),
-  `npm run shots`.
-- **What the meter already says** (autopilot, no gear, seeds 1-3): Stonehorn rock-rupture 49 %, Nightglaive
-  falling-stars 37 %, Gravecaller grave-grasp 55 %, Serpent Shaman forked-bolt 60 %, Mistwarden soul-burst 82 %.
-- **What Petr checks** (after the merge, https://wizzik.github.io/defense-webgame/):
-  - **damage meter**: https://wizzik.github.io/defense-webgame/?debug=1&hero=tidecaller&phase=5 - the panel on
-    the right fills with bars, hover one for hits and the top hit, N hides it; at the end of a run (lost or won)
-    the five biggest sources stand on the end screen;
-  - **random item tooltips**: https://wizzik.github.io/defense-webgame/?debug=1 then in the console
-    `__game.debug.grantRolled("head", "mythic", 12)` and open Gear: the hover says "Mythic random item", the rows
-    have coloured T1-T4 marks, the effect line under them;
-  - **filters and sort**: grant a few (`grantRolled("ring1", "rare", 3)`, `grantRolled("chest", "epic", 6)`), try
-    the STR / AGI / INT / Neutral and C / R / E / L / M buttons and "Sort: power";
-  - **salvage**: click Salvage, then a random item that no hero wears: it is gone and "Bank: N gold" grows; start a
-    run: the gold counter starts with it (`debug=1` keeps nothing between pages, so try it without debug for the
-    real save);
-  - **co-op lobby**: menu Co-op -> the Gear and Settings buttons; with a friend (or two windows), wear a random
-    item in the lobby's gear screen, host and join: the teammate's window shows your item (C in the run);
-  - **chest compare with tiers**: `?debug=1&phase=12&world=3&difficulty=insane`, `__game.debug.grantGold(5000)`,
-    open chests: the cards and the compare show T marks.
 
 ## Petr's batch 2 (branch `claude/petr-batch-2`, PR #43, DONE, waits for Petr's playtest, 2026-11-27)
 
@@ -301,7 +260,7 @@ section Petr's batch 2. `npm run check` passes on every commit of the branch.
 
 ## Older entries
 
-Finished work before 2026-11-26 (and the random items stages 1-3, the solo playtest batch): `docs/archive/status-2026-11-04-to-27.md`.
+Finished work before 2026-11-26 (and the random items stages 1-4 and 6, the damage meter, the solo playtest batch): `docs/archive/status-2026-11-04-to-27.md`.
 Read it only when a task needs the history of a feature; `docs/DECISIONS.md` holds the rules that still apply.
 
 ## Open questions for Petr

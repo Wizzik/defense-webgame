@@ -1311,6 +1311,8 @@
     hitRadius: { design: [600, 600, 600] }
     duration: { design: [6, 6, 6] }
 
+# New heroes, batch 3: damage rows tuned to the damage meter like batch 2 (the map's numbers in each comment).
+
 # Lightbinder (new heroes, batch 3)
 
 - id: radiant-pulse
@@ -1320,7 +1322,7 @@
   kind: nova
   targeting: around_self
   params:
-    damage: { design: [500, 1000, 2000, 3000, 6000] }
+    damage: { design: [75, 150, 300, 450, 900] }
     radius: { design: [1400, 1400, 1400, 1400, 1400] }
   review:
     jassFunctions:
@@ -1328,7 +1330,8 @@
       - Trig_Fander_Light_Func002Func001C
     notes: >-
       Trig_Fander_Light_Actions (war3map.j v20.83, lines 16163-16191) hits every enemy on the map (range 1e9) for 500,
-      1000, 2000, 3000, 6000 by level (lines 16143, 16090, 16037, 15984, 15931) and heals the allies for 200-3000.
+      1000, 2000, 3000, 6000 by level (lines 16143, 16090, 16037, 15984, 15931) and heals the allies for 200-3000;
+      the game deals x 0.15 of it (the meter pass).
       The game strikes the enemies within 1400 (700 after the AoE scale, past the 450 a ranged hero keeps); the heal
       of allies is left out (Mending Wave heals).
 
@@ -1365,8 +1368,8 @@
   targeting: around_self
   params:
     # Starfall: DataA 1000 / 2500 every 1.5 s (DataB) within area 1000 for 10 / 15 s. The game rains bursts in that
-    # radius like Dominion; a burst deals the map's tick x 0.3.
-    tickDamage: { design: [300, 750] }
+    # radius like Dominion; a burst deals the map's tick x 1.08 (the meter pass).
+    tickDamage: { design: [1080, 2700] }
     ticksPerSecond: { design: [8, 10] }
     radius: area
     hitRadius: { design: [400, 400] }
@@ -1381,7 +1384,7 @@
   kind: area
   targeting: densest_cluster
   params:
-    damage: { design: [400, 800, 1200, 1600, 3200] }
+    damage: { design: [60, 120, 180, 240, 480] }
     radius: { design: [1000, 1000, 1000, 1000, 1000] }
     range: range
   review:
@@ -1391,7 +1394,8 @@
     notes: >-
       Trig_Stom_Blast_Actions (war3map.j v20.83, lines 18824-18832) waits 0.5 s after the storm bolt (DataA 200-1600)
       and lets a dummy cast A03T at the caster's level on every enemy within 500 of the target: A03T DataA 400, 800,
-      1200, 1600, 3200. The game strikes the crowd once with A03T's damage within 1000 (500 after the AoE scale).
+      1200, 1600, 3200. The game strikes the crowd once with x 0.15 of A03T's damage (the meter pass) within 1000
+      (500 after the AoE scale).
       A03U is also a shared spell's map ability; this is an id of its own for the hero.
 
 - id: seraph-hymn
@@ -1402,7 +1406,7 @@
   targeting: around_self
   cooldown: { design: [20, 20, 20, 20, 20] }
   params:
-    tickDamage: { design: [400, 600, 1000, 1600, 2000] }
+    tickDamage: { design: [1600, 2400, 4000, 6400, 8000] }
     ticksPerSecond: { design: [5, 5, 5, 5, 10] }
     radius: { design: [1200, 1200, 1200, 1200, 1200] }
     hitRadius: { design: [200, 200, 200, 200, 200] }
@@ -1415,7 +1419,7 @@
       Trig_Angel_Cry_Actions (war3map.j v20.83, 18841-18846) turns on Trig_Angel_Cry_damage_Actions (18973-18995): it
       hits 5 random enemies within 600 (10 at level 5) for 20, 30, 50, 80, 100 x the hero's level (18963-18863) as
       long as the hymn lasts. The game rains 5 (10) bursts a second within 1200 (600 after the AoE scale) for 6 s
-      every 20 s; a burst deals the map's hit at hero level 20.
+      every 20 s; a burst deals the map's hit at hero level 80 (x 4 by the meter pass).
 
 - id: soothing-aura
   source: A03W
@@ -1445,8 +1449,8 @@
   targeting: around_self
   params:
     # Locust Swarm: DataA 20 / 30 phoenixes for 20 s (duration) within area 1000; their hits are unit data, not in
-    # the export, so the burst damage is a design value; a burst a phoenix a second.
-    tickDamage: { design: [200, 400] }
+    # the export, so the burst damage is a design value (the meter pass); a burst a phoenix a second.
+    tickDamage: { design: [1200, 2400] }
     ticksPerSecond: { design: [20, 30] }
     radius: area
     hitRadius: { design: [200, 200] }
@@ -1476,7 +1480,7 @@
   kind: nova
   targeting: around_self
   params:
-    damage: { design: [200, 400, 800, 1600, 3200] }
+    damage: { design: [420, 840, 1680, 3360, 6720] }
     radius: { design: [800, 800, 800, 800, 800] }
     stunSeconds: { design: [1, 1.25, 1.5, 1.75, 2] }
   review:
@@ -1487,7 +1491,7 @@
       Trig_StormLand_Actions (war3map.j v20.83, 25724-25782) throws a random enemy within 300 of the hero and, where
       it lands, deals 200, 400, 800, 1600, 3200 by level within 600 (25714-25590); War Stomp's own DataA (400-6500,
       area 400, stun 3-5 s) comes on top. The game deals the script's damage within 800 (400 after the AoE scale)
-      around the hero; the throw is left out and the stun is a design value.
+      around the hero (x 2.1, the meter pass); the throw is left out and the stun is a design value.
 
 - id: iron-ward
   source: AHad
@@ -1506,7 +1510,7 @@
   kind: cone
   targeting: densest_cluster
   params:
-    damage: { design: [3000, 6000] }
+    damage: { design: [720, 1440] }
     length: range
     endWidth: { design: [800, 800] }
     maxTargets: { design: [30, 40] }
@@ -1517,8 +1521,8 @@
     notes: >-
       Trig_Axe_Actions (war3map.j v20.83, around 25839-25913) throws the hero along the line to the target (range 1500 /
       2000) and Trig_Move_down_Actions (26042) hurts what it lands on for 2 / 3 x the hero's Strength; the roar
-      (Trig_Roar, 20666) deals 5000 around. The game sends one cone along that range; damage and width are design
-      values.
+      (Trig_Roar, 20666) deals 5000 around. The game sends one cone along that range; damage (720 / 1440, the meter
+      pass) and width are design values.
 
 # Stonebeard (new heroes, batch 3)
 
@@ -1529,8 +1533,8 @@
   kind: line
   targeting: move_direction
   params:
-    # Shock Wave: DataA 300-3000, DataC distance 800, area 300 the width.
-    damage: DataA
+    # Shock Wave: DataA 300-3000 (the game x 0.7, the meter pass), DataC distance 800, area 300 the width.
+    damage: { design: [210, 420, 840, 1400, 2100] }
     length: DataC
     width: area
     waveSpeed: { design: [1600, 1600, 1600, 1600, 1600] }
@@ -1542,9 +1546,9 @@
   kind: nova
   targeting: around_self
   params:
-    # Thunder Clap: DataA 300-3500 within area 1000-3000 (the game 600-1000 before the AoE scale, a melee hero's
+    # Thunder Clap: DataA 300-3500 (the game x 0.7, the meter pass) within area 1000-3000 (the game 600-1000 before the AoE scale, a melee hero's
     # reach), DataC 50-90 % slow for 2 s (duration). A00P is also a shared spell's map ability; an id of its own.
-    damage: DataA
+    damage: { design: [210, 420, 840, 1400, 2450] }
     radius: { design: [600, 700, 800, 900, 1000] }
     slow: DataC
     slowSeconds: duration
