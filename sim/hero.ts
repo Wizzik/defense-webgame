@@ -2,7 +2,7 @@ import { chillAttackScale, updateChill } from "./chill";
 import { isChoosing } from "./player";
 import { snareSpeedScale } from "./hero-snares";
 import type { GameData } from "../data/schema";
-import { consumeEmpower, extraTargets, onHitBonus, onHitStunTicks } from "./abilities/on-hit";
+import { consumeEmpower, extraTargets, onHitBonus, onHitMultiplier, onHitStunTicks } from "./abilities/on-hit";
 import { armorReduction, damageEnemy, rollDamage, stunEnemy } from "./combat";
 import { TICKS_PER_SECOND, TICK_SECONDS } from "./constants";
 import { EventKind } from "./events";
@@ -216,9 +216,11 @@ export function updateHeroCombat(run: Run): void {
   const empower = consumeEmpower(run, e.x[best], e.y[best]);
   const bonus = onHitBonus(run, e.x[best], e.y[best]);
   const stun = onHitStunTicks;
+  // a critical strike of a learned on_hit spell (1 without one) multiplies like the gear's crit
+  const spellCrit = onHitMultiplier;
   // a crit (gear) draws from the run's generator only for a hero who has crit chance
   const crit = stats.critChance > 0 && run.rng.next() < stats.critChance ? 1 + stats.critDamage : 1;
-  const raw = (rollDamage(run.rng, stats.damageMin, stats.damageMax) * empower + bonus) * crit;
+  const raw = (rollDamage(run.rng, stats.damageMin, stats.damageMax) * empower + bonus) * crit * spellCrit;
   const amount = raw * (1 - reduction);
   if (!hero.moving && bestSq > 0) {
     const len = Math.sqrt(bestSq);
@@ -234,7 +236,7 @@ export function updateHeroCombat(run: Run): void {
   // more blows (two axes): each rolls its own damage on the same target, or on its splash ground once it fell
   const strikes = hero.def.baseAttack.strikes ?? 1;
   for (let s = 1; s < strikes; s++) {
-    const blow = (rollDamage(run.rng, stats.damageMin, stats.damageMax) + bonus) * crit;
+    const blow = (rollDamage(run.rng, stats.damageMin, stats.damageMax) + bonus) * crit * spellCrit;
     if (e.alive[best] === 1) damageEnemy(run, best, blow * (1 - reduction), 0);
     splashBlow(run, best, targetX, targetY, blow);
   }

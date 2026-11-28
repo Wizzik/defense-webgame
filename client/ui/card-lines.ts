@@ -30,7 +30,7 @@ function percent(ratio: number): string {
 /** Params whose values are ratios shown as "+50 %". */
 const PERCENT_KEYS = new Set([
   "slow", "damageBonus", "moveSpeedBonus", "attackSpeedBonus", "damageDealt", "empower",
-  "attackBonus", "spellPowerBonus", "cooldownBonus", "hpBonus", "goldBonus",
+  "attackBonus", "spellPowerBonus", "cooldownBonus", "hpBonus", "goldBonus", "splashPercent",
 ]);
 /** Params that are damage or healing and scale with spell power. */
 const POWER_KEYS = new Set(["damage", "tickDamage", "amount", "healPerHit"]);
@@ -56,7 +56,7 @@ function abilityLines(run: Run, def: Ability, fromLevel: number, toLevel: number
     const label = statLabel(key);
     if (!label) continue;
     const show = (v: number): string =>
-      key === "chance" ? `${num(v * 100)} %` : PERCENT_KEYS.has(key) ? ratio(v) : POWER_KEYS.has(key) ? whole(v * spellPower) : num(v);
+      key === "chance" ? `${num(v * 100)} %` : key === "multiplier" ? `x${Math.round(v * 100) / 100}` : PERCENT_KEYS.has(key) ? ratio(v) : POWER_KEYS.has(key) ? whole(v * spellPower) : num(v);
     lines.push({ label, from: learn ? "" : show(values[from]), to: show(values[to]) });
   }
   const hasCooldown = def.cooldown[to] > 0;

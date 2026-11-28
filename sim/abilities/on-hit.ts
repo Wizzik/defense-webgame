@@ -21,16 +21,20 @@ export function consumeEmpower(run: Run, x: number, y: number): number {
 
 /** Second result of onHitBonus: steps the attacked enemy is stunned for (0: none). */
 export let onHitStunTicks = 0;
+/** Third result of onHitBonus: the damage multiplier of the critical strikes that fired (1: none; the highest wins). */
+export let onHitMultiplier = 1;
 
 /**
  * Called by updateHeroCombat for an attack at (x, y): the flat damage the learned on_hit slots without
  * `empower` add to it. A slot with `chance` rolls first (one rng value per attack) and reports a Cast
  * when it procs; a slot without it is passive and adds its bonus to every attack. `stunSeconds` of a
- * slot that fired goes to onHitStunTicks. Heroes with no such slot draw nothing from the rng.
+ * slot that fired goes to onHitStunTicks, its `multiplier` (a critical strike) to onHitMultiplier. Heroes with no
+ * such slot draw nothing from the rng.
  */
 export function onHitBonus(run: Run, x: number, y: number): number {
   let bonus = 0;
   onHitStunTicks = 0;
+  onHitMultiplier = 1;
   for (let i = 0; i < run.abilities.length; i++) {
     const slot = run.abilities[i];
     const def = slot.def;
@@ -38,10 +42,12 @@ export function onHitBonus(run: Run, x: number, y: number): number {
     const L = slot.level - 1;
     const p = def.params;
     const amount = p.bonusDamage?.[L] ?? 0;
+    const multiplier = p.multiplier?.[L] ?? 1;
     if (p.chance !== undefined) {
       if (run.rng.next() >= p.chance[L]) continue;
-      startCast(run, i, amount, x, y, 0, 0);
+      startCast(run, i, p.multiplier !== undefined ? multiplier : amount, x, y, 0, 0);
     }
+    if (multiplier > onHitMultiplier) onHitMultiplier = multiplier;
     bonus += amount;
     const stun = Math.round((p.stunSeconds?.[L] ?? 0) * TICKS_PER_SECOND);
     if (stun > onHitStunTicks) onHitStunTicks = stun;
@@ -61,3 +67,21 @@ export function extraTargets(run: Run): number {
   }
   return most;
 }
+
+/** The cleave of the learned on_hit slots with `splashRadius` and no `chance`: the widest radius and its share. */
+export function onHitCleave(run: Run): { radius: number; share: number } {
+  cleave.radius = 0;
+  cleave.share = 0;
+  for (let i = 0; i < run.abilities.length; i++) {
+    const slot = run.abilities[i];
+    const def = slot.def;
+    if (def.kind !== "on_hit" || slot.level < 1 || def.params.chance !== undefined) continue;
+    const r = def.params.splashRadius?.[slot.level - 1] ?? 0;
+    if (r <= cleave.radius) continue;
+    cleave.radius = r;
+    cleave.share = def.params.splashPercent?.[slot.level - 1] ?? 0;
+  }
+  return cleave;
+}
+
+const cleave = { radius: 0, share: 0 };

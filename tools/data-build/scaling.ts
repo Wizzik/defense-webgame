@@ -85,9 +85,9 @@ function flattenGrowth(row: number[], exponent: number): number[] {
 /**
  * Param keys of an ability's area that `abilities.areaScale` multiplies (Petr 2026-11-27, batch 2: "AoE of every
  * spell -50 %"): the radius of novas, areas, auras and rings, the burst radius of ticking areas, and the width of
- * lines and cones. Reach (`range`, `length`, `attackRange`, `bounceRange`) stays. Applied last, on the spread rows.
+ * lines and cones, the cleave radius of an on_hit spell. Reach (`range`, `length`, `attackRange`, `bounceRange`) stays. Applied last, on the spread rows.
  */
-const AREA_PARAMS: readonly string[] = ["radius", "hitRadius", "width", "endWidth"];
+const AREA_PARAMS: readonly string[] = ["radius", "hitRadius", "width", "endWidth", "splashRadius"];
 
 function scaleArea(ability: Ability, factor: number): Ability {
   if (factor === 1) return ability;
