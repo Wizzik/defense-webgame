@@ -765,7 +765,7 @@ test("C opens the gear panel and pauses the run; C closes it; C does nothing und
 
   await page.keyboard.press("KeyC");
   await expect(page.locator("#gear-panel")).toBeVisible();
-  await expect(page.locator("#gear-panel .doll-slot")).toHaveCount(20);
+  await expect(page.locator("#gear-panel .doll-slot")).toHaveCount(16);
   await expect(page.locator("#gear-panel .doll-slot:not(.empty)")).toHaveCount(1);
   await expect(page.locator("#gear-panel .gear-title")).toHaveText("Výbava");
   const tick = await page.evaluate(() => window.__game!.tick);
