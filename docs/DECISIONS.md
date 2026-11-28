@@ -43,6 +43,27 @@ great icons should be legendary / mythic only"; "part legendary, part mythic"; "
   item's record level the same way); the bank limit 500 stays. A salvaged named item can drop again (new, level 1).
 - **Drops and chests:** `namedShare` stays (legendary 0.25, mythic 0.4); common to epic cards and drops are always
   random items.
+- **Balance check** (autopilot wins before -> after, world 1 normal unless said; `none` seeds 1-20, the gear presets
+  1-10, `mid` was rare named items before and is legendary now):
+
+  | hero | none | mid | full | rolled-full | full, world 3 hell | rolled-full, world 3 hell (after) |
+  |---|---|---|---|---|---|---|
+  | stonehorn | 4 -> 3 | 7 -> 10 | 10 -> 10 | 10 -> 10 | 0 -> 6 | 3 |
+  | nightglaive | 4 -> 5 | 6 -> 10 | 10 -> 10 | 10 -> 10 | 0 -> 7 | 1 |
+  | gravecaller | 3 -> 3 | 2 -> 10 | 10 -> 10 | 10 -> 10 | 1 -> 3 | 0 |
+  | serpent-shaman | 3 -> 2 | 9 -> 10 | 10 -> 10 | 10 -> 10 | 5 -> 8 | 9 |
+  | mistwarden | 4 -> 2 | 7 -> 10 | 10 -> 10 | 9 -> 10 | 0 -> 1 | 8 |
+  | sparkshot | 3 -> 4 | 7 -> 10 | 10 -> 10 | 9 -> 10 | 2 -> 5 | 1 |
+  | redcleaver | 5 -> 5 | 5 -> 10 | 8 -> 10 | 7 -> 10 | 0 -> 1 | 0 |
+  | tidecaller | 6 -> 3 | 1 -> 9 | 10 -> 10 | 10 -> 10 | 0 -> 2 | 1 |
+  | all | 32 -> 27 of 160 | 44 -> 79 of 80 | 78 -> 80 | 75 -> 80 | 8 -> 33 of 80 | 23 of 80 |
+
+  Without gear the runs stay near the 10-20 % target (the chests' named legendary / mythic cards are a little
+  rarer per card now that their share is the same but the item stronger; the change is within the seeds' noise).
+  `sim:chests -- --seeds 1-200` (level 25, 15 chests, no permanent gear): mean x1.25 -> x1.26. **The named full set
+  is now clearly stronger than the random mythic set** (world 3 hell: 33 vs 23 wins of 80; it was about equal before
+  with the old epics): named mythics keep 42 points and an effect in every slot, a random mythic has 34. Expected;
+  Petr decides whether a random mythic's budget goes up or the named ones stay the top.
 - **sim:run presets:** `mid` is a legendary named item of level 1 per slot (was rare); `full` the best named item per
   slot at level 5 (mythic everywhere but the second trinket). The determinism matrix case `loot-t3` wears
   `rolled-mid` (under `full` a chest offers only Level cards).
