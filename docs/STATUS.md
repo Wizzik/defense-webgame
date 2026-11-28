@@ -291,6 +291,14 @@ section Petr's batch 2. `npm run check` passes on every commit of the branch.
   - casters from phase 3 (https://wizzik.github.io/defense-webgame/?debug=1&phase=3&lang=cs, blue bolts with a
     flash; `__game.debug.spawnEach()` shows all seven human types).
 
+## CI in parallel jobs (branch `claude/ci-parallel`, 2026-11-28)
+
+- Petr: "can the CI checks be faster?". One serial job took 32 min (e2e 28.5). Now `unit` (typecheck, vitest,
+  python) and seven e2e jobs run side by side: webgl2-fallback and webgpu-swiftshader in three shards each,
+  sim-chromium, sim-firefox, sim-webkit; each installs only its browser. `playwright.config.ts` `fullyParallel: true`
+  so a shard splits by test (workers stay 1, tests still run one at a time). Local `npm run e2e` is unchanged.
+- Two shards: 12 min; three shards: 11.3 min (the first webgl2 third holds the heaviest tests). Merged as PR #50.
+
 ## Older entries
 
 Finished work before 2026-11-26 (and the random items stages 1-3, the solo playtest batch): `docs/archive/status-2026-11-04-to-27.md`.
